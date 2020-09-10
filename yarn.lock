@@ -1248,15 +1248,6 @@
   resolved "https://registry.yarnpkg.com/@quasar/fastclick/-/fastclick-1.1.4.tgz#21ed3e9a4387dcb43022a08af4ef08a5f1abf159"
   integrity sha512-i9wbyV4iT+v4KhtHJynUFhH5LiEPvAEgSnwMqPN4hf/8uRe82nDl5qP5agrp2el1h0HzyBpbvHaW7NB0BPrtvA==
 
-"@quasar/quasar-app-extension-dotenv@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@quasar/quasar-app-extension-dotenv/-/quasar-app-extension-dotenv-1.0.5.tgz#cd5a6a7f77a727ebfd85973723b11cf19b6afce4"
-  integrity sha512-Wop2iwmwLZavXCvePgcPPyPw2/+6bd0xKrX0BSLdoyHWKKuMv4y6tW3zaSq5zCjXpmUlIQx2MDQbuuoe/Pff7g==
-  dependencies:
-    dotenv "^8.2.0"
-    dotenv-parse-variables "^0.3.0"
-    fs "^0.0.2"
-
 "@scatterjs/core@2.7.51":
   version "2.7.51"
   resolved "https://registry.yarnpkg.com/@scatterjs/core/-/core-2.7.51.tgz#5e34c13931d04275e5715b5ab9c74f88cf2c73b5"
@@ -3775,13 +3766,6 @@ dot-prop@5.2.0, dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
-dotenv-parse-variables@^0.3.0:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/dotenv-parse-variables/-/dotenv-parse-variables-0.3.1.tgz#fa503e3faf8f8e5fac5949cbb83a25f0eb20e53f"
-  integrity sha512-FWFPAyTGTQeCEe8hy7/fL0YNwNkIzyoFfmX2KjQy1QBiYKU4fYFbVTjr0f7yqQuuUxY53AloLskAMbPBXqSFgw==
-  dependencies:
-    debug "^4.1.1"
-
 dotenv@^8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
@@ -4754,11 +4738,6 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
-
-fs@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/fs/-/fs-0.0.2.tgz#e1f244ef3933c1b2a64bd4799136060d0f5914f8"
-  integrity sha1-4fJE7zkzwbKmS9R5kTYGDQ9ZFPg=
 
 fsevents@^1.2.7:
   version "1.2.13"

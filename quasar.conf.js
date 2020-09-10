@@ -7,6 +7,8 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 
+require("dotenv").config();
+
 module.exports = function(/* ctx */) {
   return {
     // https://quasar.dev/quasar-cli/supporting-ts
@@ -40,6 +42,15 @@ module.exports = function(/* ctx */) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
+      env: {
+        APP_NAME: process.env.APP_NAME,
+        NETWORK_CHAIN_ID: process.env.NETWORK_CHAIN_ID,
+        NETWORK_HOST: process.env.NETWORK_HOST,
+        NETWORK_PORT: parseInt(process.env.NETWORK_PORT),
+        NETWORK_PROTOCOL: process.env.NETWORK_PROTOCOL,
+        NETWORK_EXPLORER: process.env.NETWORK_EXPLORER,
+        HYPERION_ENDPOINT: process.env.HYPERION_ENDPOINT
+      },
 
       // transpile: false,
 
@@ -94,9 +105,7 @@ module.exports = function(/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: [
-        'Notify'
-      ]
+      plugins: ["Notify"]
     },
 
     // animations: 'all', // --- includes all animations

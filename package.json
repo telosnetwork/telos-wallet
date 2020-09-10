@@ -16,6 +16,7 @@
     "axios": "^0.20.0",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
+    "dotenv": "^8.2.0",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "quasar": "^1.0.0",
@@ -26,7 +27,6 @@
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",
-    "@quasar/quasar-app-extension-dotenv": "^1.0.5",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
