@@ -1,7 +1,8 @@
 export default function() {
   return {
-    account: null,
     accountName: null,
+    hasProfile: false,
+    profiles: {},
     autoLogin: false,
     loading: {}
   };

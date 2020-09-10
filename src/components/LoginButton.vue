@@ -9,15 +9,15 @@
       />
     </div>
     <div v-if="isAuthenticated" class="q-px-md row">
-        <div @click="goToAccountPage" class="account-name q-px-md">
-            {{ accountName }}
-        </div>
-        <q-btn
-            @click="logout"
-            color="secondary"
-            text-color="black"
-            label="Logout"
-        />
+      <div @click="goToAccountPage" class="account-name q-px-md">
+        {{ accountName }}
+      </div>
+      <q-btn
+        @click="logout"
+        color="secondary"
+        text-color="black"
+        label="Logout"
+      />
     </div>
     <q-dialog v-model="showLogin">
       <q-list>
@@ -88,12 +88,12 @@ export default {
     ])
   },
   methods: {
-    ...mapActions("account", ["login"]),
+    ...mapActions("account", ["login", "logout", "autoLogin"]),
     async onLogin(idx) {
       this.error = null;
-      const error = await this.login({idx});
+      const error = await this.login({ idx });
       if (!error) {
-        this.show = false;
+        this.showLogin = false;
       } else {
         this.error = error;
       }
@@ -102,9 +102,14 @@ export default {
       window.open(url);
     },
     goToAccountPage() {
-      this.$router.push({ path: "/account" });
-    },
-    logout() {}
+      const accountPath = `/account/${this.accountName}`;
+      if (this.$router.currentRoute.path !== accountPath) {
+        this.$router.push({ path: accountPath });
+      }
+    }
+  },
+  async mounted() {
+    await this.autoLogin(this.$route.query.returnUrl);
   }
 };
 </script>

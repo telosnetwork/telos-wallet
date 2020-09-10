@@ -27,10 +27,15 @@
       content-class="bg-grey-1"
     >
       <q-list>
-        <q-item-label
-          header
-          class="text-grey-8"
-        >
+        <q-item-label header class="text-grey-8">
+          Example pages
+        </q-item-label>
+        <ExamplePage
+          v-for="link in examplePages"
+          :key="link.title"
+          v-bind="link"
+        /> 
+        <q-item-label header class="text-grey-8">
           Essential Links
         </q-item-label>
         <EssentialLink
@@ -48,50 +53,67 @@
 </template>
 
 <script>
-import EssentialLink from 'components/EssentialLink.vue'
-import LoginButton from 'components/LoginButton.vue'
+import EssentialLink from "components/EssentialLink.vue";
+import ExamplePage from "components/ExamplePage.vue";
+import LoginButton from "components/LoginButton.vue";
+
+const pagesData = [
+  {
+    title: "Account",
+    caption: "Account profile example",
+    icon: "face",
+    path: "/account/jesse.tcd"
+  },
+    {
+    title: "Transfer",
+    caption: "Transfer example",
+    icon: "send",
+    path: "/transfer"
+  }
+]
 
 const linksData = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+    title: "Docs",
+    caption: "quasar.dev",
+    icon: "school",
+    link: "https://quasar.dev"
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+    title: "Github",
+    caption: "github.com/quasarframework",
+    icon: "code",
+    link: "https://github.com/quasarframework"
   },
   {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
+    title: "Discord Chat Channel",
+    caption: "chat.quasar.dev",
+    icon: "chat",
+    link: "https://chat.quasar.dev"
   },
   {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
+    title: "Forum",
+    caption: "forum.quasar.dev",
+    icon: "record_voice_over",
+    link: "https://forum.quasar.dev"
   },
   {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+    title: "Quasar Awesome",
+    caption: "Community Quasar projects",
+    icon: "favorite",
+    link: "https://awesome.quasar.dev"
   }
 ];
 
 export default {
-  name: 'MainLayout',
-  components: { EssentialLink, LoginButton },
-  data () {
+  name: "MainLayout",
+  components: { EssentialLink, ExamplePage, LoginButton },
+  data() {
     return {
       leftDrawerOpen: false,
-      essentialLinks: linksData
-    }
+      essentialLinks: linksData,
+      examplePages: pagesData
+    };
   }
-}
+};
 </script>
