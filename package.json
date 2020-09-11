@@ -10,6 +10,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",
     "@quasar/extras": "^1.0.0",
     "@smontero/ual-sqrl": "^0.1.22",
     "@telosnetwork/ual-telos-keycat": "^1.4.0",
@@ -19,6 +20,7 @@
     "dotenv": "^8.2.0",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
+    "moment": "^2.27.0",
     "quasar": "^1.0.0",
     "ual-anchor": "^0.5.1",
     "ual-ledger": "^0.3.0",

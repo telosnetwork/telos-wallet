@@ -34,7 +34,7 @@
           v-for="link in examplePages"
           :key="link.title"
           v-bind="link"
-        /> 
+        />
         <q-item-label header class="text-grey-8">
           Essential Links
         </q-item-label>
@@ -60,17 +60,23 @@ import LoginButton from "components/LoginButton.vue";
 const pagesData = [
   {
     title: "Account",
-    caption: "Account profile example",
+    caption: "Account profile and Hyperion history query example",
     icon: "face",
-    path: "/account/jesse.tcd"
+    path: "/account/exampleuser1"
   },
-    {
+  {
     title: "Transfer",
-    caption: "Transfer example",
+    caption: "Transfer example, sending/signing actions",
     icon: "send",
     path: "/transfer"
+  },
+  {
+    title: "Streaming",
+    caption: "Hyperion event streaming example",
+    icon: "filter_alt",
+    path: "/streaming"
   }
-]
+];
 
 const linksData = [
   {

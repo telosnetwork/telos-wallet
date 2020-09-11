@@ -29,7 +29,6 @@
         v-model="memo"
         label="Memo"
         counter
-        maxlength="12"
       />
       <q-btn size="xl" round dense flat icon="send" @click="send" />
       <q-dialog v-model="showTransaction" confirm>
