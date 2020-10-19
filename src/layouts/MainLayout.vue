@@ -80,28 +80,34 @@ const pagesData = [
 
 const linksData = [
   {
-    title: "Docs",
+    title: "Telos Github",
+    caption: "github.com/telosnetwork",
+    icon: "fab fa-github",
+    link: "https://github.com/telosnetwork"
+  },
+  {
+    title: "Telos Docs",
+    caption: "docs.telos.net",
+    icon: "menu_book",
+    link: "https://docs.telos.net"
+  },
+  {
+    title: "Telos Dev Telegram",
+    caption: "t.me/dappstelos",
+    icon: "code",
+    link: "https://t.me/dappstelos"
+  },
+  {
+    title: "Telos Testnet Faucet",
+    caption: "app.telos.net/testnet/developers",
+    icon: "opacity",
+    link: "https://app.telos.net/testnet/developers"
+  },
+  {
+    title: "Quasar Docs",
     caption: "quasar.dev",
     icon: "school",
     link: "https://quasar.dev"
-  },
-  {
-    title: "Github",
-    caption: "github.com/quasarframework",
-    icon: "code",
-    link: "https://github.com/quasarframework"
-  },
-  {
-    title: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
-    icon: "chat",
-    link: "https://chat.quasar.dev"
-  },
-  {
-    title: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
-    link: "https://forum.quasar.dev"
   },
   {
     title: "Quasar Awesome",

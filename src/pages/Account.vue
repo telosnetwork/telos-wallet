@@ -3,6 +3,7 @@
     <q-input
       class="q-py-lg"
       outlined
+      autocapitalize="off"
       bottom-slots
       v-model="accountName"
       label="Account name"

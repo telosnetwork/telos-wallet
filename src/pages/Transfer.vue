@@ -4,6 +4,7 @@
     <div v-if="isAuthenticated">
       <q-input
         outlined
+        autocapitalize="off"
         bottom-slots
         v-model="to"
         label="To"
@@ -13,15 +14,13 @@
       <q-input
         outlined
         bottom-slots
+        suffix="TLOS"
         v-model="amount"
         label="Amount"
         counter
         type="number"
         maxlength="12"
       >
-        <template v-slot:append>
-          <div>TLOS</div>
-        </template>
       </q-input>
       <q-input
         outlined
@@ -90,7 +89,7 @@ export default {
           account: "eosio.token",
           name: "transfer",
           data: {
-            from: this.accountName,
+            from: this.accountName.toLowerCase(),
             to: this.to,
             quantity: `${parseFloat(this.amount).toFixed(4)} TLOS`,
             memo: this.memo
