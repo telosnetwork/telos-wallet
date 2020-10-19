@@ -90,7 +90,7 @@ export default {
           account: "eosio.token",
           name: "transfer",
           data: {
-            from: this.accountName,
+            from: this.accountName.toLowerCase(),
             to: this.to,
             quantity: `${parseFloat(this.amount).toFixed(4)} TLOS`,
             memo: this.memo
