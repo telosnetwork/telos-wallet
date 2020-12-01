@@ -80,6 +80,11 @@ const pagesData = [
 
 const linksData = [
   {
+    title: "Use this template!",
+    caption: "github.com/telosnetwork/ui-template",
+    icon: "fas fa-rocket",
+    link: "https://github.com/telosnetwork/ui-template"
+  },{
     title: "Telos Github",
     caption: "github.com/telosnetwork",
     icon: "fab fa-github",
