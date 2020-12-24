@@ -1,96 +1,26 @@
 <template>
-  <q-page
-    class="text-center items-center full-height"
-    style="display: flex; flex-flow: column;"
-  >
-    <q-input
-      class="q-py-lg"
-      outlined
-      autocapitalize="off"
-      bottom-slots
-      v-model="accountName"
-      label="Account name"
-      counter
-      maxlength="12"
-    >
-      <template v-slot:append>
-        <q-icon name="search" @click="search" />
-      </template>
-    </q-input>
-    <q-item v-if="!accountHasProfile">
-      <div class="text-h6">
-        Profile not found
-      </div>
-    </q-item>
-    <q-card
-      v-if="accountHasProfile"
-      class="row justify-center q-py-md full-width"
-    >
-      <div class="text-h6">
-        Account profile
-      </div>
-      <q-avatar size="300px">
-        <img :src="userAvatar" />
-      </q-avatar>
-      <div class="q-py-md">
-        <q-field filled label="Account name" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ profileAccountName }}
-            </div>
-          </template>
-        </q-field>
-        <q-field filled label="Display name" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ displayName }}
-            </div>
-          </template>
-        </q-field>
-        <q-field filled label="Status" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ status }}
-            </div>
-          </template>
-        </q-field>
-        <q-field filled label="Bio" stack-label>
-          <template v-slot:control>
-            <div
-              class="self-center full-width no-outline"
-              tabindex="0"
-              v-html="bio"
-            ></div>
-          </template>
-        </q-field>
-      </div>
-      <login-button />
-    </q-card>
-    <div class="q-pa-md full-width">
-      <q-table
-        class="history-table"
-        title="Account action history"
-        :data="accountHistory"
-        :columns="accountHistoryColumns"
-        row-key="name"
-        :pagination="{ rowsPerPage: 10 }"
-        flat
-        bordered
-      >
-        <template v-slot:body-cell-data="props">
-          <q-td :props="props">
-            <div v-html="props.value"></div>
-          </q-td>
-        </template>
-      </q-table>
+  <div class="q-pa-md">
+    <div>
+      Balance here
     </div>
-  </q-page>
+    <q-layout
+      view="hHh Lpr fFf"
+      container
+      style="height: 400px"
+      class="shadow-2 rounded-borders"
+    >
+      <q-page-container>
+        <q-page class="q-pa-md">
+          Balance here
+        </q-page>
+      </q-page-container>
+    </q-layout>
+  </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import LoginButton from "components/LoginButton.vue";
 
 const historyColumns = [
   {
@@ -157,7 +87,6 @@ export default {
       accountHistoryColumns: historyColumns
     };
   },
-  components: { LoginButton },
   computed: {
     ...mapGetters("account", ["isAuthenticated"]),
     userAvatar() {

@@ -3,9 +3,13 @@
     <div v-if="!isAuthenticated" class="q-px-md">
       <q-btn
         @click="showLogin = true"
-        color="secondary"
-        text-color="black"
+        color="orange"
+        text-color="white"
+        rounded
+        no-caps
         label="Login"
+        class="full-width"
+        style="max-width: 500px;"
       />
     </div>
     <div v-if="isAuthenticated" class="q-px-md row">
