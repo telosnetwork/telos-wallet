@@ -1,16 +1,17 @@
 <template>
   <q-layout view="hHh Lpr fFf">
-    <q-page-container style="min-height: inherit;">
+    <q-page-container :style="`height: ${containerHeight}px;`">
       <router-view />
     </q-page-container>
     <q-footer v-if="isAuthenticated">
       <q-tabs
         v-model="tab"
         dense
-        class="bg-grey-1 text-orange-10"
         align="justify"
         narrow-indicator
-        style="height: 50px;"
+        active-color="orange-10"
+        class="bg-grey-1 text-grey shadow-2"
+        :style="`height: ${footerHeight}px;`"
       >
         <q-route-tab
           v-for="page in pages"
@@ -30,19 +31,19 @@ import { mapGetters, mapActions } from "vuex";
 const pagesData = [
   {
     title: "Balance",
-    caption: "Account profile and Hyperion history query example",
+    caption: "Balance",
     icon: "fas fa-wallet",
     path: "/balance/exampleuser1"
   },
   {
     title: "Account",
-    caption: "Account profile and Hyperion history query example",
+    caption: "Account",
     icon: "fas fa-th-large",
     path: "/account/exampleuser1"
   },
   {
     title: "Transfer",
-    caption: "Transfer example, sending/signing actions",
+    caption: "Transfer",
     icon: "fas fa-cog",
     path: "/transfer"
   }
@@ -52,23 +53,33 @@ export default {
   name: "MainLayout",
   data() {
     return {
-      tab: "Balance",
-      pages: pagesData
+      tab: pagesData[0].title,
+      pages: pagesData,
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated"])
+    ...mapGetters("account", ["isAuthenticated"]),
+    ...mapGetters("global", ["footerHeight"]),
+    containerHeight() {
+      return window.innerHeight;
+    },
   },
   methods: {
-    ...mapActions("account", ["login", "logout", "autoLogin"])
+    ...mapActions("account", ["login", "logout", "autoLogin"]),
+    checkPath() {
+      if (!this.isAuthenticated) {
+        if (this.$route.path !== "/") window.location = "/";
+      } else if (this.$route.path === "/") {
+        window.location = "/balance/exampleuser1";
+      }
+    }
   },
   async mounted() {
     await this.autoLogin(this.$route.query.returnUrl);
-    if (!this.isAuthenticated) {
-      if (this.$route.path !== "/") window.location = "/";
-    } else if (this.$route.path === "/") {
-      window.location = "/balance/exampleuser1";
-    }
-  }
+    this.checkPath();
+  },
+  beforeUpdate() {
+    this.checkPath();
+  },
 };
 </script>

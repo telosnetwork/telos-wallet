@@ -1,8 +1,5 @@
 <template>
-  <q-page
-    class="text-center items-center full-height"
-    style="display: flex; flex-flow: column;"
-  >
+  <q-page class="main-div text-center items-center full-height">
     <q-carousel
       v-model="slide"
       transition-prev="slide-right"
@@ -11,8 +8,7 @@
       animated
       control-color="orange-6"
       navigation
-      class="full-width"
-      style="flex-grow: 1;"
+      class="full-width fit-div"
     >
       <q-carousel-slide
         name="slide1"
@@ -88,13 +84,14 @@
         </label>
       </q-carousel-slide>
     </q-carousel>
-    <div class="full-width" style="height: 80px;">
+    <div v-if="!isAuthenticated" class="full-width" style="height: 80px;">
       <login-button />
     </div>
   </q-page>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 
 export default {
@@ -104,11 +101,21 @@ export default {
       slide: "slide1"
     };
   },
+  computed: {
+    ...mapGetters("account", ["isAuthenticated"])
+  },
   components: { LoginButton }
 };
 </script>
 
 <style scoped>
+.main-div {
+  display: flex;
+  flex-flow: column;
+}
+.fit-div {
+  flex-grow: 1;
+}
 .logo {
   max-width: 400px;
 }
