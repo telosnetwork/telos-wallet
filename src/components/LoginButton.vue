@@ -3,7 +3,7 @@
     <div v-if="!isAuthenticated" class="q-px-md">
       <q-btn
         @click="showLogin = true"
-        color="orange"
+        color="deep-purple"
         text-color="white"
         rounded
         no-caps
@@ -12,6 +12,7 @@
         style="max-width: 500px;"
       />
     </div>
+
     <div v-if="isAuthenticated" class="q-px-md row">
       <div @click="goToAccountPage" class="account-name q-px-md">
         {{ accountName }}
@@ -23,6 +24,7 @@
         label="Logout"
       />
     </div>
+
     <q-dialog v-model="showLogin">
       <q-list>
         <q-item
@@ -37,9 +39,11 @@
           <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
             <img :src="wallet.getStyle().icon" width="30" />
           </q-item-section>
+
           <q-item-section class="cursor-pointer" @click="onLogin(idx)">
             {{ wallet.getStyle().text }}
           </q-item-section>
+
           <q-item-section class="flex" avatar>
             <q-spinner
               v-if="loading === wallet.getStyle().text"
@@ -62,6 +66,7 @@
             </q-btn>
           </q-item-section>
         </q-item>
+
         <q-item
           v-if="error"
           :active="!!error"
@@ -77,22 +82,22 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   data() {
     return { showLogin: false, error: null };
   },
   computed: {
-    ...mapGetters("account", [
-      "isAuthenticated",
-      "accountName",
-      "loading",
-      "isAutoLoading"
+    ...mapGetters('account', [
+      'isAuthenticated',
+      'accountName',
+      'loading',
+      'isAutoLoading',
     ])
   },
   methods: {
-    ...mapActions("account", ["login", "logout", "autoLogin"]),
+    ...mapActions('account', ['login', 'logout', 'autoLogin']),
     async onLogin(idx) {
       this.error = null;
       const error = await this.login({ idx });

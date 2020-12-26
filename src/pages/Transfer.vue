@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   data() {
@@ -71,14 +71,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"])
+    ...mapGetters('account', ['isAuthenticated', 'accountName'])
   },
   methods: {
-    ...mapActions("account", ["accountExists"]),
+    ...mapActions('account', ['accountExists']),
     async send() {
       if (!(await this.accountExists(this.to))) {
         this.$q.notify({
-          type: "negative",
+          type: 'negative',
           message: `Account ${this.to} does not exist`
         });
         return;
@@ -86,8 +86,8 @@ export default {
 
       const actions = [
         {
-          account: "eosio.token",
-          name: "transfer",
+          account: 'eosio.token',
+          name: 'transfer',
           data: {
             from: this.accountName.toLowerCase(),
             to: this.to,

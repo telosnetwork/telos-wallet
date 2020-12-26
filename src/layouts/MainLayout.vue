@@ -3,13 +3,14 @@
     <q-page-container :style="`height: ${containerHeight}px;`">
       <router-view />
     </q-page-container>
+    
     <q-footer v-if="isAuthenticated">
       <q-tabs
         v-model="tab"
         dense
         align="justify"
         narrow-indicator
-        active-color="orange-10"
+        active-color="deep-purple-10"
         class="bg-grey-1 text-grey shadow-2"
         :style="`height: ${footerHeight}px;`"
       >
@@ -26,31 +27,31 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 
 const pagesData = [
   {
-    title: "Balance",
-    caption: "Balance",
-    icon: "fas fa-wallet",
-    path: "/balance/exampleuser1"
+    title: 'Balance',
+    caption: 'Balance',
+    icon: 'fas fa-wallet',
+    path: '/balance/exampleuser1'
   },
   {
-    title: "Account",
-    caption: "Account",
-    icon: "fas fa-th-large",
-    path: "/account/exampleuser1"
+    title: 'Account',
+    caption: 'Account',
+    icon: 'fas fa-th-large',
+    path: '/account/exampleuser1'
   },
   {
-    title: "Transfer",
-    caption: "Transfer",
-    icon: "fas fa-cog",
-    path: "/transfer"
+    title: 'Transfer',
+    caption: 'Transfer',
+    icon: 'fas fa-cog',
+    path: '/transfer'
   }
 ];
 
 export default {
-  name: "MainLayout",
+  name: 'MainLayout',
   data() {
     return {
       tab: pagesData[0].title,
@@ -58,19 +59,20 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated"]),
-    ...mapGetters("global", ["footerHeight"]),
+    ...mapGetters('account', ['isAuthenticated']),
+    ...mapGetters('global', ['footerHeight']),
     containerHeight() {
       return window.innerHeight;
     },
   },
   methods: {
-    ...mapActions("account", ["login", "logout", "autoLogin"]),
+    ...mapActions('account', ['login', 'logout', 'autoLogin']),
     checkPath() {
+      return;
       if (!this.isAuthenticated) {
-        if (this.$route.path !== "/") window.location = "/";
-      } else if (this.$route.path === "/") {
-        window.location = "/balance/exampleuser1";
+        if (this.$route.path !== '/') window.location = '/';
+      } else if (this.$route.path === '/') {
+        window.location = '/balance/exampleuser1';
       }
     }
   },

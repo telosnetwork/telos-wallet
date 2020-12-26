@@ -41,9 +41,9 @@
 </template>
 
 <script>
-const moment = require("moment");
-const HyperionSocketClient = require("@eosrio/hyperion-stream-client").default;
-const fetch = require("node-fetch");
+const moment = require('moment');
+const HyperionSocketClient = require('@eosrio/hyperion-stream-client').default;
+const fetch = require('node-fetch');
 
 export default {
   data() {
@@ -63,13 +63,13 @@ export default {
 
     this.client.onConnect = () => {
       this.client.streamActions({
-        contract: "eosmechanics",
-        action: "cpu",
-        account: "eosmechanics",
+        contract: 'eosmechanics',
+        action: 'cpu',
+        account: 'eosmechanics',
         start_from: moment
           .utc()
-          .subtract(2, "minutes")
-          .format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"),
+          .subtract(2, 'minutes')
+          .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
         read_until: 0,
         filters: []
       });
@@ -82,7 +82,7 @@ export default {
     };
 
     this.client.connect(() => {
-      console.log("Connected to Hyperion Stream!");
+      console.log('Connected to Hyperion Stream!');
     });
   },
   destroyed() {

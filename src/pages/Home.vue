@@ -6,14 +6,11 @@
       transition-next="slide-left"
       swipeable
       animated
-      control-color="orange-6"
+      control-color="deep-purple-6"
       navigation
       class="full-width fit-div"
     >
-      <q-carousel-slide
-        name="slide1"
-        class="column flex-center"
-      >
+      <q-carousel-slide name="slide1" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -26,10 +23,8 @@
           crypto wallet
         </label>
       </q-carousel-slide>
-      <q-carousel-slide
-        name="slide2"
-        class="column flex-center"
-      >
+
+      <q-carousel-slide name="slide2" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -46,10 +41,8 @@
           own device
         </label>
       </q-carousel-slide>
-      <q-carousel-slide
-        name="slide3"
-        class="column flex-center"
-      >
+
+      <q-carousel-slide name="slide3" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -65,10 +58,8 @@
           collectibles and more!
         </label>
       </q-carousel-slide>
-      <q-carousel-slide
-        name="slide4"
-        class="column flex-center"
-      >
+
+      <q-carousel-slide name="slide4" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -84,6 +75,7 @@
         </label>
       </q-carousel-slide>
     </q-carousel>
+    
     <div v-if="!isAuthenticated" class="full-width" style="height: 80px;">
       <login-button />
     </div>
@@ -91,20 +83,20 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import LoginButton from "components/LoginButton.vue";
+import { mapGetters } from 'vuex';
+import LoginButton from 'components/LoginButton.vue';
 
 export default {
-  name: "Home",
+  name: 'Home',
   data() {
     return {
-      slide: "slide1"
+      slide: 'slide1'
     };
   },
+  components: { LoginButton },
   computed: {
-    ...mapGetters("account", ["isAuthenticated"])
+    ...mapGetters('account', ['isAuthenticated'])
   },
-  components: { LoginButton }
 };
 </script>
 

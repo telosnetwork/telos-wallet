@@ -1,6 +1,6 @@
 <template>
   <div class="full-height main-div">
-    <div class="flex-center bg-orange fit-div">
+    <div class="flex-center bg-deep-purple fit-div">
       <div class="text-center full-width" style="display: grid;">
         <label 
           class="text-white"
@@ -8,32 +8,33 @@
         >
           {{accountName}}
         </label>
+
         <div class="full-width items-center balance-div">
           <div class="full-width" ></div>
           <div class="full-width" >
-            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              $0.00
-            </label>
+            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">$0.00</label>
           </div>
           <div class="full-width text-right">
             <q-btn round flat icon="qr_code_scanner" size="10px" class="text-white q-mr-md" :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"/>
           </div>
         </div>
+
         <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
-          <q-toolbar class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`">
-            <q-btn stretch flat no-caps label="Send" />
+          <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`">
+            <q-btn stretch flat no-caps label="Send"/>
             <q-separator dark vertical class="main-toolbar-sperator"/>
-            <q-btn stretch flat no-caps label="Receive" />
+            <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
             <q-separator dark vertical class="main-toolbar-sperator"/>
             <q-btn stretch flat icon="qr_code_scanner" style="width: 40px;"/>
           </q-toolbar>
         </div>
       </div>
     </div>
+
     <div :style="`height: ${coinViewHeight}px;`">
-      <div class="bg-orange bar"/>
+      <div class="bg-deep-purple bar"/>
       <q-layout
-        view="hHh Lpr fFf"
+        view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
         :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto;`"
@@ -42,9 +43,9 @@
           <q-tabs
             v-model="tab"
             dense
-            align="justify"
+            align="center"
             narrow-indicator
-            active-color="orange-10"
+            active-color="deep-purple-10"
             class="bg-white text-grey shadow-2 full-height no-shadow"
             style="width: 300px;"
           >
@@ -57,30 +58,42 @@
             />
           </q-tabs>
         </q-header>
+
         <q-page-container>
-          <q-page v-touch-pan.vertical.prevent.mouse="handlePan" class="q-pa-md">
-            Balance here
+          <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
+            <q-tab-panels v-model="tab" animated>
+              <q-tab-panel name="Coins" class="no-padding">
+                <Coin />
+              </q-tab-panel>
+              <q-tab-panel name="Collectibles">
+                <Collectibles />
+              </q-tab-panel>
+            </q-tab-panels>
           </q-page>
         </q-page-container>
       </q-layout>
     </div>
+    <Receive v-model="showReceiveDlg"/>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
+import { mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
+import Coin from './components/balance/Coin';
+import Collectibles from './components/balance/Collectibles';
+import Receive from './components/balance/Receive';
 
 const tabsData = [
   {
-    title: "Coins",
-    caption: "Coins",
-    label: "Coins",
+    title: 'Coins',
+    caption: 'Coins',
+    label: 'Coins',
   },
   {
-    title: "Collectibles",
-    caption: "Collectibles",
-    label: "Collectibles",
+    title: 'Collectibles',
+    caption: 'Collectibles',
+    label: 'Collectibles',
   },
 ];
 
@@ -99,7 +112,14 @@ export default {
       coinViewHeight: 0,
       tab: tabsData[0].title,
       tabs: tabsData,
+      interval: null,
+      showReceiveDlg: false,
     };
+  },
+  components: {
+    Coin,
+    Collectibles,
+    Receive,
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated']),
@@ -107,7 +127,7 @@ export default {
     userAvatar() {
       if (this.avatar) return this.avatar;
 
-      return "https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng";
+      return 'https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng';
     },
     availableHeight() {
       return window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0);
@@ -129,7 +149,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions("account", ["getUserProfile"]),
+    ...mapActions('account', ['getUserProfile']),
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
       this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
@@ -141,9 +161,7 @@ export default {
     },
     async loadUserProfile() {
       this.loadAccountHistory();
-      if (
-        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
-      ) {
+      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
         await this.getUserProfile(this.accountName);
       }
       const accountProfile = this.$store.state.account.profiles[
@@ -164,16 +182,22 @@ export default {
       this.loadUserProfile();
     },
     async loadAccountHistory() {
-      const actionHistory = await this.$hyperion.get(
-        `/v2/history/get_actions?limit=20&account=${this.accountName}`
-      );
+      const actionHistory = await this.$hyperion.get(`/v2/history/get_actions?limit=20&account=${this.accountName}`);
       this.accountHistory = actionHistory.data.actions || [];
-    }
-  },
-  beforeMount() {
-    this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
+    },
   },
   created: async function() {
+    this.interval = setInterval(() => {    
+      if (!this.panning) {
+        if (this.coinViewHeight < this.availableHeight - (this.minSpace + this.maxSpace) * 0.5) {
+          this.coinViewHeight = this.coinViewHeight - 3;
+        } else {
+          this.coinViewHeight = this.coinViewHeight + 3;
+        }
+        this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+      }
+    }, 10);
+
     const accountName = this.$route.params.accountName;
     if (!accountName) {
       return;
@@ -183,8 +207,14 @@ export default {
 
     this.loadUserProfile();
   },
+  beforeMount() {
+    this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
+  },
+  beforeDestroy() {
+    if (this.interval) clearInterval(this.interval);
+  },
   watch: {
-    "$route.params.accountName": function(accountName) {
+    '$route.params.accountName': function(accountName) {
       if (accountName != this.profileAccountName) {
         this.accountName = accountName;
         this.loadUserProfile();
