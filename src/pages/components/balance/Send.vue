@@ -16,7 +16,7 @@
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">Receive</label>
+                <label class="text-subtitle1 text-weight-medium h-20">Send</label>
                 <label class="text-subtitle2 text-grey-4">Select a coin</label>
               </div>
             </q-toolbar-title>
@@ -63,7 +63,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showReceiveDlg', 'coins', 'selectedCoin', 'showShareAddressDlg'],
+  props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendCoinAmountDlg'],
   data() {
     return {
       searchCoinName: '',
@@ -79,16 +79,16 @@ export default {
     },
     showDlg: {
       get() {
-        return this.showReceiveDlg;
+        return this.showSendDlg;
       },
       set(value) {
-        this.$emit('update:showReceiveDlg', value);
+        this.$emit('update:showSendDlg', value);
       },
     },
   },
   methods: {
     selectCoin(coin) {
-      this.$emit(`update:showShareAddressDlg`, true);
+      this.$emit('update:showSendCoinAmountDlg', true);
       this.$emit(`update:selectedCoin`, coin);
     },
   },

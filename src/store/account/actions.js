@@ -90,7 +90,6 @@ export const getUserProfile = async function({ commit }, accountName) {
       lower_bound: accountName,
       upper_bound: accountName
     });
-
     const profile = profileResult.rows[0];
     commit("setProfile", profile);
   } catch (error) {

@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh Lpr fFf">
     <q-page-container :style="`height: ${containerHeight}px;`">
-      <router-view />
+      <router-view/>
     </q-page-container>
     
     <q-footer v-if="isAuthenticated">
@@ -34,13 +34,13 @@ const pagesData = [
     title: 'Balance',
     caption: 'Balance',
     icon: 'fas fa-wallet',
-    path: '/balance/exampleuser1'
+    path: '/balance'
   },
   {
     title: 'Account',
     caption: 'Account',
     icon: 'fas fa-th-large',
-    path: '/account/exampleuser1'
+    path: '/account'
   },
   {
     title: 'Transfer',
@@ -54,30 +54,61 @@ export default {
   name: 'MainLayout',
   data() {
     return {
+      avatar: null,
+      bio: null,
+      displayName: null,
+      status: null,
+      profileAccountName: null,
+      accountHasProfile: false,
+      accountHistory: [{}],
       tab: pagesData[0].title,
       pages: pagesData,
     };
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated']),
+    ...mapGetters('account', ['isAuthenticated', 'accountName']),
     ...mapGetters('global', ['footerHeight']),
     containerHeight() {
       return window.innerHeight;
     },
   },
   methods: {
-    ...mapActions('account', ['login', 'logout', 'autoLogin']),
+    ...mapActions('account', ['login', 'logout', 'autoLogin','getUserProfile']),
     checkPath() {
-      return;
       if (!this.isAuthenticated) {
         if (this.$route.path !== '/') window.location = '/';
       } else if (this.$route.path === '/') {
-        window.location = '/balance/exampleuser1';
+        window.location = '/balance';
       }
-    }
+    },
+    async loadUserProfile() {
+      this.loadAccountHistory();
+      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
+        await this.getUserProfile(this.accountName);
+      }
+      const accountProfile = this.$store.state.account.profiles[this.accountName];
+      if (!accountProfile) {
+        return;
+      }
+
+      this.accountHasProfile = true;
+      this.profileAccountName = this.accountName;
+      this.avatar = accountProfile.avatar;
+      this.bio = accountProfile.bio;
+      this.status = accountProfile.status;
+      this.displayName = accountProfile.display_name;
+    },
+    search() {
+      this.loadUserProfile();
+    },
+    async loadAccountHistory() {
+      const actionHistory = await this.$hyperion.get(`/v2/history/get_actions?limit=20&account=${this.accountName}`);
+      this.accountHistory = actionHistory.data.actions || [];
+    },
   },
   async mounted() {
     await this.autoLogin(this.$route.query.returnUrl);
+    this.loadUserProfile();
     this.checkPath();
   },
   beforeUpdate() {

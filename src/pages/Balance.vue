@@ -12,7 +12,7 @@
         <div class="full-width items-center balance-div">
           <div class="full-width" ></div>
           <div class="full-width" >
-            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">$0.00</label>
+            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">${{coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0)}}</label>
           </div>
           <div class="full-width text-right">
             <q-btn round flat icon="qr_code_scanner" size="10px" class="text-white q-mr-md" :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"/>
@@ -21,7 +21,7 @@
 
         <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
           <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`">
-            <q-btn stretch flat no-caps label="Send"/>
+            <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>
             <q-separator dark vertical class="main-toolbar-sperator"/>
             <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
             <q-separator dark vertical class="main-toolbar-sperator"/>
@@ -47,7 +47,7 @@
             narrow-indicator
             active-color="deep-purple-10"
             class="bg-white text-grey shadow-2 full-height no-shadow"
-            style="width: 300px;"
+            style="width: 350px;"
           >
             <q-tab
               no-caps
@@ -63,7 +63,7 @@
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
             <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Coins" class="no-padding">
-                <Coin />
+                <Coin :coins="coins"/>
               </q-tab-panel>
               <q-tab-panel name="Collectibles">
                 <Collectibles />
@@ -73,7 +73,10 @@
         </q-page-container>
       </q-layout>
     </div>
-    <Receive v-model="showReceiveDlg"/>
+    <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendCoinAmountDlg.sync="showSendCoinAmountDlg"/>
+    <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
+    <SendCoinAmount :showSendCoinAmountDlg.sync="showSendCoinAmountDlg" :selectedCoin="selectedCoin"/>
+    <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
   </div>
 </template>
 
@@ -82,7 +85,10 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import Coin from './components/balance/Coin';
 import Collectibles from './components/balance/Collectibles';
+import Send from './components/balance/Send';
+import SendCoinAmount from './components/balance/SendCoinAmount';
 import Receive from './components/balance/Receive';
+import ShareAddress from './components/balance/ShareAddress';
 
 const tabsData = [
   {
@@ -100,29 +106,30 @@ const tabsData = [
 export default {
   data() {
     return {
-      avatar: null,
-      bio: null,
-      displayName: null,
-      status: null,
-      accountName: null,
-      profileAccountName: null,
-      accountHasProfile: false,
-      accountHistory: [{}],
+      coins: [],
       panning: false,
       coinViewHeight: 0,
       tab: tabsData[0].title,
       tabs: tabsData,
       interval: null,
+      tokenInterval: null,
+      selectedCoin: { amount: 0, symbol: 'TLOS' },
+      showSendDlg: false,
+      showSendCoinAmountDlg: false,
       showReceiveDlg: false,
+      showShareAddressDlg: false,
     };
   },
   components: {
     Coin,
     Collectibles,
+    Send,
+    SendCoinAmount,
     Receive,
+    ShareAddress,
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated']),
+    ...mapGetters('account', ['isAuthenticated', 'accountName']),
     ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace']),
     userAvatar() {
       if (this.avatar) return this.avatar;
@@ -149,7 +156,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions('account', ['getUserProfile']),
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
       this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
@@ -159,68 +165,63 @@ export default {
         this.panning = false;
       }
     },
-    async loadUserProfile() {
-      this.loadAccountHistory();
-      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
-        await this.getUserProfile(this.accountName);
-      }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
-      if (!accountProfile) {
-        return;
-      }
-
-      this.accountHasProfile = true;
-      this.profileAccountName = this.accountName;
-      this.avatar = accountProfile.avatar;
-      this.bio = accountProfile.bio;
-      this.status = accountProfile.status;
-      this.displayName = accountProfile.display_name;
-    },
-    search() {
-      this.loadUserProfile();
-    },
-    async loadAccountHistory() {
-      const actionHistory = await this.$hyperion.get(`/v2/history/get_actions?limit=20&account=${this.accountName}`);
-      this.accountHistory = actionHistory.data.actions || [];
+    async loadUserTokens() {
+      const coins = await this.$hyperion.get(`/v2/state/get_tokens?limit=20&account=${this.accountName}`);
+      this.coins = [{
+        name: 'Telos',
+        symbol: 'TLOS',
+        amount: coins.data.tokens[0] ? coins.data.tokens[0].amount : 0,
+        price: 0.16,
+        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4660.png',
+        suggested: true,
+      }, {
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        amount: 0,
+        price: 25241.54,
+        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png',
+      }, {
+        name: 'Ethereum',
+        symbol: 'ETH',
+        amount: 0,
+        price: 625.32,
+        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+      }];
+      await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
+        .then(resp => resp.json())
+        .then(data => {
+          this.coins = this.coins.map(coin => ({ price: data[coin.name.toLowerCase()].usd, ...coin }));
+        });
     },
   },
   created: async function() {
-    this.interval = setInterval(() => {    
+    this.interval = setInterval(() => {
       if (!this.panning) {
-        if (this.coinViewHeight < this.availableHeight - (this.minSpace + this.maxSpace) * 0.5) {
+        if (this.coinViewHeight < this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
+          && this.coinViewHeight > this.availableHeight - this.maxSpace) {
           this.coinViewHeight = this.coinViewHeight - 3;
-        } else {
+        } else if (this.coinViewHeight >= this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
+          && this.coinViewHeight < this.availableHeight - this.minSpace){
           this.coinViewHeight = this.coinViewHeight + 3;
         }
-        this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+        const approxViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+        if (this.coinViewHeight != approxViewHeight) {
+          this.coinViewHeight = approxViewHeight;
+        }
       }
     }, 10);
-
-    const accountName = this.$route.params.accountName;
-    if (!accountName) {
-      return;
-    }
-
-    this.accountName = accountName;
-
-    this.loadUserProfile();
+    this.tokenInterval = setInterval(() => {
+      this.loadUserTokens();
+    }, 5000);
+    this.loadUserTokens();
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
   },
   beforeDestroy() {
     if (this.interval) clearInterval(this.interval);
+    if (this.tokenInterval) clearInterval(this.tokenInterval);
   },
-  watch: {
-    '$route.params.accountName': function(accountName) {
-      if (accountName != this.profileAccountName) {
-        this.accountName = accountName;
-        this.loadUserProfile();
-      }
-    }
-  }
 };
 </script>
 

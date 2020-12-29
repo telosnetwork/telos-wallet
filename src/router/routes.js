@@ -5,12 +5,12 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Home.vue") }]
   },
   {
-    path: "/balance/:accountName",
+    path: "/balance",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Balance.vue") }]
   },
   {
-    path: "/account/:accountName",
+    path: "/account",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Account.vue") }]
   },
