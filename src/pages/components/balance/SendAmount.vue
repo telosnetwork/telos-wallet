@@ -20,7 +20,7 @@
                 <label class="text-subtitle2 text-grey-4">{{`${selectedCoin.amount} ${selectedCoin.symbol} Available`}}</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
           </q-toolbar>
         </q-header>
         <q-page-container>
@@ -31,7 +31,7 @@
                 <label class="text-weight-regular text-purple-10 full-width" :style="`font-size: ${amountFontSize}px`">
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}} </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
-                  {{coinInput ? `$ ${sendAmountValue * selectedCoin.price}` : `${sendAmountValue / selectedCoin.price} ${selectedCoin.symbol}`}}
+                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 4)}` : `${getFixed(sendAmountValue / selectedCoin.price, 4)} ${selectedCoin.symbol}`}}
                 </label>
               </div>
               <div class="full-width text-right absolute">
@@ -55,6 +55,7 @@
             <q-btn class="bg-purple-10 text-grey-5 text-subtitle2 q-mx-md"
               style="height: 50px;"
               flat
+              no-caps
               label="Next"
               :disable="sendAmountValue === 0"
               @click="nextPressed()"
@@ -73,10 +74,9 @@ import moment from 'moment';
 import SendToAddress from './SendToAddress';
 
 export default {
-  props: ['showSendCoinAmountDlg', 'selectedCoin'],
+  props: ['showSendAmountDlg', 'selectedCoin'],
   data() {
     return {
-      searchCoinName: '',
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
       sendAmount: '0',
       coinInput: true,
@@ -90,17 +90,17 @@ export default {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     showDlg: {
       get() {
-        return this.showSendCoinAmountDlg;
+        return this.showSendAmountDlg;
       },
       set(value) {
-        this.$emit('update:showSendCoinAmountDlg', value);
+        this.$emit('update:showSendAmountDlg', value);
       },
     },
     cardHeight() {
        return window.innerHeight - 100;
     },
     amountFontSize() {
-      return Math.min(50, window.innerWidth / (this.sendAmount.length + 1) * 1);
+      return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     sendAmountValue() {
       return Number(this.sendAmount);
@@ -109,7 +109,7 @@ export default {
       if (this.coinInput) {
         return this.sendAmountValue;
       }
-      return this.sendAmountVale / this.selectedCoin.price;
+      return this.getFixed(this.sendAmountValue / this.selectedCoin.price, 4);
     },
   },
   methods: {
@@ -119,9 +119,9 @@ export default {
     },
     changeCoinInput() {
       if (this.coinInput) {
-        this.sendAmount = (this.sendAmountValue * this.selectedCoin.price).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue * this.selectedCoin.price, 4).toString();
       } else {
-        this.sendAmount = (this.sendAmountValue / this.selectedCoin.price).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, 4).toString();
       }
       this.coinInput = !this.coinInput;
     },
@@ -152,6 +152,19 @@ export default {
     },
     nextPressed() {
       this.showSendToAddressDlg = true;
+    },
+  },
+  mounted() {
+    this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
+      this.showSendToAddressDlg = false;
+    });
+  },
+  watch: {
+    showSendAmountDlg: function(val, oldVal) {
+      if (val) {
+        this.coinInput = true;
+        this.sendAmount = '0';
+      }
     },
   },
 };

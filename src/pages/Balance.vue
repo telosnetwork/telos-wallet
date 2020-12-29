@@ -12,7 +12,9 @@
         <div class="full-width items-center balance-div">
           <div class="full-width" ></div>
           <div class="full-width" >
-            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">${{coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0)}}</label>
+            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
+              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 4)}}
+            </label>
           </div>
           <div class="full-width text-right">
             <q-btn round flat icon="qr_code_scanner" size="10px" class="text-white q-mr-md" :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"/>
@@ -73,9 +75,9 @@
         </q-page-container>
       </q-layout>
     </div>
-    <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendCoinAmountDlg.sync="showSendCoinAmountDlg"/>
+    <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg"/>
     <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
-    <SendCoinAmount :showSendCoinAmountDlg.sync="showSendCoinAmountDlg" :selectedCoin="selectedCoin"/>
+    <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :selectedCoin="selectedCoin"/>
     <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
   </div>
 </template>
@@ -86,7 +88,7 @@ import moment from 'moment';
 import Coin from './components/balance/Coin';
 import Collectibles from './components/balance/Collectibles';
 import Send from './components/balance/Send';
-import SendCoinAmount from './components/balance/SendCoinAmount';
+import SendAmount from './components/balance/SendAmount';
 import Receive from './components/balance/Receive';
 import ShareAddress from './components/balance/ShareAddress';
 
@@ -115,7 +117,7 @@ export default {
       tokenInterval: null,
       selectedCoin: { amount: 0, symbol: 'TLOS' },
       showSendDlg: false,
-      showSendCoinAmountDlg: false,
+      showSendAmountDlg: false,
       showReceiveDlg: false,
       showShareAddressDlg: false,
     };
@@ -124,7 +126,7 @@ export default {
     Coin,
     Collectibles,
     Send,
-    SendCoinAmount,
+    SendAmount,
     Receive,
     ShareAddress,
   },
@@ -217,6 +219,12 @@ export default {
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
+  },
+  mounted() {
+    this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
+      this.showSendAmountDlg = false;
+      this.showSendDlg = false;
+    });
   },
   beforeDestroy() {
     if (this.interval) clearInterval(this.interval);

@@ -21,7 +21,7 @@
                 <label class="text-subtitle2 text-grey-4">Share your address</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup icon="west"/>
+            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
         </q-header>
         <q-page-container>

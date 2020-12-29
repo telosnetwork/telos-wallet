@@ -20,7 +20,7 @@
                 <label class="text-subtitle2 text-grey-4">Select a coin</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
           </q-toolbar>
           <q-input v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
@@ -45,8 +45,8 @@
 
                 <q-item-section side>
                   <div class="text-black text-right display-grid">
-                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${coin.amount} ${coin.symbol}`}}</label>
-                    <label class="text-caption text-grey-6">${{coin.amount * coin.price}}</label>
+                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 4)} ${coin.symbol}`}}</label>
+                    <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 4)}}</label>
                   </div>
                 </q-item-section>
               </q-item>
@@ -63,7 +63,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendCoinAmountDlg'],
+  props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendAmountDlg'],
   data() {
     return {
       searchCoinName: '',
@@ -88,8 +88,15 @@ export default {
   },
   methods: {
     selectCoin(coin) {
-      this.$emit('update:showSendCoinAmountDlg', true);
+      this.$emit('update:showSendAmountDlg', true);
       this.$emit(`update:selectedCoin`, coin);
+    },
+  },
+  watch: {
+    showSendDlg: function(val, oldVal) {
+      if (val) {
+        this.searchCoinName = '';
+      }
     },
   },
 };

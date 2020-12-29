@@ -4,6 +4,14 @@ import VueRouter from 'vue-router'
 import routes from './routes'
 
 Vue.use(VueRouter)
+Vue.mixin({
+  methods: {
+    getFixed(value, decimal ) {
+      const decimalVal = Math.pow(10, decimal);
+      return Math.round(value * decimalVal) / decimalVal;
+    },
+  },
+})
 
 /*
  * If not building with SSR mode, you can

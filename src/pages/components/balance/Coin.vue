@@ -22,8 +22,8 @@
         
         <q-item-section side>
           <div class="text-black text-right display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${coin.amount} ${coin.symbol}`}}</label>
-            <label class="text-caption text-grey-6">${{coin.amount * coin.price}}</label>
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 4)} ${coin.symbol}`}}</label>
+            <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 4)}}</label>
           </div>
         </q-item-section>
       </q-item>
