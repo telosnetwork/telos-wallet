@@ -5,8 +5,9 @@
     :maximized="true"
     transition-show="slide-up"
     transition-hide="slide-down"
+    @keydown.delete="keyPressed"
   >
-    <q-card class="bg-white full-height">
+    <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -28,7 +29,7 @@
             <q-space/>
             <div class="full-width items-center amount-div">
               <div class="full-width column">
-                <label class="text-weight-regular text-purple-10 full-width" :style="`font-size: ${amountFontSize}px`">
+                <label class="text-weight-regular full-width" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}} </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
                   {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, 8)} ${selectedCoin.symbol}`}}
@@ -48,12 +49,12 @@
                   style="width: 30%; height: 60px;"
                   flat
                   :label="key"
-                  @click="keyPressed(key)"
+                  @click="buttonClicked(key)"
                 />
               </div>
             </div>
-            <q-btn class="bg-purple-10 text-grey-5 text-subtitle2 q-mx-md"
-              style="height: 50px;"
+            <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
+              :style="`height: 50px; background: ${themeColor}`"
               flat
               no-caps
               label="Next"
@@ -125,7 +126,7 @@ export default {
       }
       this.coinInput = !this.coinInput;
     },
-    keyPressed(key) {
+    buttonClicked(key) {
       if (key === '.') {
         if (!this.sendAmount.includes('.')) {
           this.sendAmount += '.';
@@ -153,6 +154,20 @@ export default {
     nextPressed() {
       this.showSendToAddressDlg = true;
     },
+    keyPressed(e) {
+      let key = String.fromCharCode(e.keyCode);
+      if (key === '.' || ('0' <= key && key <= '9')) {
+        this.buttonClicked(key);
+      } else if (e.keyCode === 8) {
+        this.buttonClicked('←');
+      }
+    },
+  },
+  created() {
+	window.addEventListener('keypress', this.keyPressed);
+  },
+  destroyed() {
+    window.removeEventListener('keypress', this.keyPressed);
   },
   mounted() {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {

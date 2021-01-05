@@ -7,7 +7,7 @@
     transition-hide="slide-right"
   >
     <qrcode-stream @decode="onDecode"></qrcode-stream>
-    <q-card class="full-height main-card absolute transparent">
+    <q-card class="full-height main-card absolute transparent" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hHh Lpr fff"
         container

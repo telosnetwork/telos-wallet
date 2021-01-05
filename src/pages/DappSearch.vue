@@ -1,5 +1,5 @@
 <template>
-  <q-card class="bg-white full-height">
+  <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
     <q-layout
       view="hhh Lpr fFf"
       container

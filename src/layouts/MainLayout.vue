@@ -4,7 +4,7 @@
       <router-view/>
     </q-page-container>
     
-    <q-footer v-if="isAuthenticated">
+    <q-footer v-if="isAuthenticated" style="max-width: 800px; margin: auto;">
       <q-tabs
         v-model="tab"
         dense
@@ -12,7 +12,7 @@
         narrow-indicator
         active-color="deep-purple-10"
         class="bg-grey-1 text-grey shadow-2"
-        :style="`height: ${footerHeight}px;`"
+        :style="`height: ${footerHeight}px; `"
       >
         <q-route-tab
           v-for="page in pages"

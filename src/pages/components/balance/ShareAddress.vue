@@ -7,7 +7,7 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card">
+    <q-card class="full-height main-card" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hHh Lpr fff"
         container

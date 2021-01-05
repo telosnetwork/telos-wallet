@@ -1,6 +1,6 @@
 <template>
   <div class="full-height main-div">
-    <div class="flex-center bg-deep-purple fit-div">
+    <div class="flex-center fit-div" :style="`background: ${themeColor}`">
       <div class="text-center full-width" style="display: grid;">
         <label 
           class="text-white"
@@ -41,13 +41,13 @@
       </div>
     </div>
 
-    <div :style="`height: ${coinViewHeight}px;`">
-      <div class="bg-deep-purple bar"/>
+    <div :style="`height: ${coinViewHeight}px; text-align: -webkit-center;`">
+      <div class="bar" :style="`background: ${themeColor}`"/>
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
-        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto;`"
+        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`"
       >
         <q-header class="coin-header flex-center bg-white" style="display: flex;">
           <q-tabs
@@ -190,7 +190,7 @@ export default {
         symbol: 'TLOS',
         amount: coins.data.tokens[0] ? coins.data.tokens[0].amount : 0,
         price: 0.16,
-        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4660.png',
+        icon: 'https://user-images.githubusercontent.com/65044262/103604573-7c004c80-4edf-11eb-931d-58827d650c36.png',
         suggested: true,
       }, {
         name: 'Bitcoin',

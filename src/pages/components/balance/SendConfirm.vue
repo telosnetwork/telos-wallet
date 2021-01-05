@@ -6,7 +6,7 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="bg-white full-height">
+    <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -21,7 +21,7 @@
           </q-toolbar>
           <div class="column text-center" style="height: 100px;">
             <q-space/>
-            <label class="text-h5 text-purple-10" :style="`font-size: ${amountFontSize}px;`">
+            <label class="text-h5" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
               {{`${sendAmount} ${selectedCoin.symbol}`}}
             </label>
             <q-space/>
@@ -53,8 +53,8 @@
               </q-list>
             </div>
             <q-space/>
-            <q-btn class="bg-purple-10 text-grey-5 text-subtitle2 q-mx-md"
-              style="height: 50px;"
+            <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
+              :style="`height: 50px; background: ${themeColor}`"
               flat
               no-caps
               label="Confirm send"

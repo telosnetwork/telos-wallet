@@ -39,6 +39,7 @@ export default {
   props: ['coins', 'showHistoryDlg', 'selectedCoin'],
   methods: {
     selectCoin(coin) {
+      if (coin.name !== 'Telos') return;
       this.$emit('update:selectedCoin', coin);
       this.$emit('update:showHistoryDlg', true);
     },
