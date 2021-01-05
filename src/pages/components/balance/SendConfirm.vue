@@ -48,7 +48,7 @@
                 <q-item class="list-item">
                   <q-item-section side class="text-weight-bold">Total</q-item-section>
                   <q-item-section></q-item-section>
-                  <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 4)}`}}</q-item-section>
+                  <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
                 </q-item>
               </q-list>
             </div>

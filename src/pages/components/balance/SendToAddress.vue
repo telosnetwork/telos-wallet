@@ -39,7 +39,14 @@
                 />
               </q-item-section>
               <q-item-section side>
-                <q-btn round flat size="12px" class="text-grey-5 q-mr-none" icon="qr_code_scanner" />
+                <q-btn
+                  round
+                  flat
+                  size="12px"
+                  class="text-grey-5 q-mr-none"
+                  icon="qr_code_scanner"
+                  @click="showQRScanner()"
+                />
               </q-item-section>
             </q-item>
             <q-item class="list-item">
@@ -115,16 +122,23 @@ export default {
       }
       this.showSendConfirmDlg = true;
     },
+    showQRScanner() {
+      this.$root.$emit('show_qrscanner');
+    }
   },
   mounted() {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
       this.showSendConfirmDlg = false;
     });
+    this.$root.$on('qrcode_scanned', (qrcode) => {
+      this.toAddress = qrcode;
+    });
   },
   watch: {
     showSendToAddressDlg: function(val, oldVal) {
       if (val) {
-        this.toAddress = '';
+        this.toAddress = this.$root.qrcode || '';
+        this.$root.qrcode = '';
         this.notes = '';
       }
     },

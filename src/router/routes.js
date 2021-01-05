@@ -10,9 +10,9 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Balance.vue") }]
   },
   {
-    path: "/account",
+    path: "/dappsearch",
     component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("pages/Account.vue") }]
+    children: [{ path: "", component: () => import("pages/DappSearch.vue") }]
   },
   {
     path: "/transfer",

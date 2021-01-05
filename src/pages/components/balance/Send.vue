@@ -30,7 +30,7 @@
               <q-item-label v-if="index === 0 && coin.suggested" header>Suggested</q-item-label>
               <q-item-label v-if="index === searchCoins.findIndex(c => !c.suggested) && !coin.suggested" header>All coins</q-item-label>
               <q-item clickable v-ripple class="list-item" @click="selectCoin(coin)">
-                <q-item-section avatar top>
+                <q-item-section avatar>
                   <q-avatar size="45px" class="q-my-sm">
                     <img :src="coin.icon">
                   </q-avatar>
@@ -45,8 +45,8 @@
 
                 <q-item-section side>
                   <div class="text-black text-right display-grid">
-                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 4)} ${coin.symbol}`}}</label>
-                    <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 4)}}</label>
+                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
+                    <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 8)}}</label>
                   </div>
                 </q-item-section>
               </q-item>

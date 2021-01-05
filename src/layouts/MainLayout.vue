@@ -37,10 +37,10 @@ const pagesData = [
     path: '/balance'
   },
   {
-    title: 'Account',
-    caption: 'Account',
+    title: 'DappSearch',
+    caption: 'DappSearch',
     icon: 'fas fa-th-large',
-    path: '/account'
+    path: '/dappsearch'
   },
   {
     title: 'Transfer',

@@ -6,8 +6,9 @@
         clickable
         v-ripple
         class="list-item"
+        @click="selectCoin(coin)"
       >
-        <q-item-section avatar top>
+        <q-item-section avatar>
           <q-avatar size="45px" class="q-my-sm">
             <img :src="coin.icon">
           </q-avatar>
@@ -22,8 +23,8 @@
         
         <q-item-section side>
           <div class="text-black text-right display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 4)} ${coin.symbol}`}}</label>
-            <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 4)}}</label>
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
+            <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 8)}}</label>
           </div>
         </q-item-section>
       </q-item>
@@ -35,7 +36,13 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins'],
+  props: ['coins', 'showHistoryDlg', 'selectedCoin'],
+  methods: {
+    selectCoin(coin) {
+      this.$emit('update:selectedCoin', coin);
+      this.$emit('update:showHistoryDlg', true);
+    },
+  }
 };
 </script>
 

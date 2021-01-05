@@ -31,7 +31,7 @@
                 <label class="text-weight-regular text-purple-10 full-width" :style="`font-size: ${amountFontSize}px`">
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}} </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
-                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 4)}` : `${getFixed(sendAmountValue / selectedCoin.price, 4)} ${selectedCoin.symbol}`}}
+                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, 8)} ${selectedCoin.symbol}`}}
                 </label>
               </div>
               <div class="full-width text-right absolute">
@@ -109,7 +109,7 @@ export default {
       if (this.coinInput) {
         return this.sendAmountValue;
       }
-      return this.getFixed(this.sendAmountValue / this.selectedCoin.price, 4);
+      return this.getFixed(this.sendAmountValue / this.selectedCoin.price, 8);
     },
   },
   methods: {
@@ -119,9 +119,9 @@ export default {
     },
     changeCoinInput() {
       if (this.coinInput) {
-        this.sendAmount = this.getFixed(this.sendAmountValue * this.selectedCoin.price, 4).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue * this.selectedCoin.price, 8).toString();
       } else {
-        this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, 4).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, 8).toString();
       }
       this.coinInput = !this.coinInput;
     },
@@ -146,8 +146,8 @@ export default {
 
       if (this.coinInput && this.sendAmountValue > this.selectedCoin.amount) {
         this.sendAmount = this.selectedCoin.amount.toString();
-      } else if (!this.coinInput && this.sendAmountValue > this.selectedCoin.amount * this.selectCoin.price) {
-        this.sendAmount = (this.selectedCoin.amount * this.selectCoin.price).toString();
+      } else if (!this.coinInput && this.sendAmountValue > this.selectedCoin.amount * this.selectedCoin.price) {
+        this.sendAmount = (this.selectedCoin.amount * this.selectedCoin.price).toString();
       }
     },
     nextPressed() {

@@ -21,11 +21,13 @@
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "moment": "^2.27.0",
+    "qrcanvas-vue": "^2.1.0",
     "quasar": "^1.0.0",
     "ual-anchor": "^0.5.1",
     "ual-ledger": "^0.3.0",
     "ual-scatter": "^0.3.0",
-    "universal-authenticator-library": "^0.3.0"
+    "universal-authenticator-library": "^0.3.0",
+    "vue-qrcode-reader": "^2.3.16"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

@@ -13,11 +13,19 @@
           <div class="full-width" ></div>
           <div class="full-width" >
             <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 4)}}
+              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 8)}}
             </label>
           </div>
           <div class="full-width text-right">
-            <q-btn round flat icon="qr_code_scanner" size="10px" class="text-white q-mr-md" :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"/>
+            <q-btn
+              round
+              flat
+              icon="qr_code_scanner"
+              size="10px"
+              class="text-white q-mr-md"
+              :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
+              @click="showQRScannerDlg = true"
+            />
           </div>
         </div>
 
@@ -27,7 +35,7 @@
             <q-separator dark vertical class="main-toolbar-sperator"/>
             <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
             <q-separator dark vertical class="main-toolbar-sperator"/>
-            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px;"/>
+            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px;" @click="showQRScannerDlg = true"/>
           </q-toolbar>
         </div>
       </div>
@@ -65,7 +73,7 @@
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
             <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Coins" class="no-padding">
-                <Coin :coins="coins"/>
+                <Coin :coins="coins" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
               </q-tab-panel>
               <q-tab-panel name="Collectibles">
                 <Collectibles />
@@ -75,10 +83,12 @@
         </q-page-container>
       </q-layout>
     </div>
+    <History :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
     <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg"/>
     <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
     <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :selectedCoin="selectedCoin"/>
     <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
+    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg"/>
   </div>
 </template>
 
@@ -91,6 +101,8 @@ import Send from './components/balance/Send';
 import SendAmount from './components/balance/SendAmount';
 import Receive from './components/balance/Receive';
 import ShareAddress from './components/balance/ShareAddress';
+import QRScanner from './components/balance/QRScanner';
+import History from './components/balance/History';
 
 const tabsData = [
   {
@@ -120,6 +132,8 @@ export default {
       showSendAmountDlg: false,
       showReceiveDlg: false,
       showShareAddressDlg: false,
+      showQRScannerDlg: false,
+      showHistoryDlg: false,
     };
   },
   components: {
@@ -129,6 +143,8 @@ export default {
     SendAmount,
     Receive,
     ShareAddress,
+    QRScanner,
+    History,
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
@@ -224,6 +240,13 @@ export default {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
+    });
+    this.$root.$on('qrcode_scanned', (qrcode) => {
+      this.$root.qrcode = qrcode;
+      this.showSendDlg = true;
+    });
+    this.$root.$on('show_qrscanner', () => {
+      this.showQRScannerDlg = true;
     });
   },
   beforeDestroy() {
