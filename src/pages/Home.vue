@@ -6,9 +6,9 @@
       transition-next="slide-left"
       swipeable
       animated
+      control-color="primary"
       navigation
       class="full-width fit-div"
-      :style="`background: ${themeColor}`"
     >
       <q-carousel-slide name="slide1" class="column flex-center">
         <div class="full-width justify-center q-pa-md">

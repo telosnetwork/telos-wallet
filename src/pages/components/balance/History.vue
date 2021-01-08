@@ -34,9 +34,9 @@
                   </q-avatar>
                 </q-item-section>
 
-                <q-item-section>
+                <q-item-section style="justify-content: start; display: grid;">
                   <div class="text-black text-left display-grid">
-                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{historyData(history).actionName}}</label>
+                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end">{{historyData(history).actionName}}</label>
                     <label class="text-caption text-grey-5 text-weight-regular">{{historyData(history).actionDetail}}</label>
                   </div>
                 </q-item-section>

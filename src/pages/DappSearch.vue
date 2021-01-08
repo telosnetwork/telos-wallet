@@ -25,9 +25,9 @@
                 </q-avatar>
               </q-item-section>
 
-              <q-item-section>
+              <q-item-section style="justify-content: start; display: grid;">
                 <div class="text-black text-left display-grid">
-                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{dapp.name}}</label>
+                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end">{{dapp.name}}</label>
                   <label class="text-caption text-grey-5">{{dapp.teaser}}</label>
                 </div>
               </q-item-section>

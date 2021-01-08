@@ -1,8 +1,8 @@
 <template>
   <div>
     <q-list>
-      <q-item v-for="coin in coins"
-        :key="coin.name"
+      <q-item v-for="(coin, index) in coins"
+        :key="`${coin.name}_${index}`"
         clickable
         v-ripple
         class="list-item"
@@ -14,9 +14,9 @@
           </q-avatar>
         </q-item-section>
         
-        <q-item-section>
+        <q-item-section style="justify-content: start; display: grid;">
           <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{coin.name}}</label>
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end">{{coin.name}}</label>
             <label class="text-subtitle2 text-grey-5">{{coin.symbol}}</label>
           </div>
         </q-item-section>

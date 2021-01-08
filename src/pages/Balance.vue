@@ -49,7 +49,7 @@
         class="shadow-4 coinview"
         :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`"
       >
-        <q-header class="coin-header flex-center bg-white" style="display: flex;">
+        <q-header class="coin-header flex-center bg-white q-px-md">
           <q-tabs
             v-model="tab"
             dense
@@ -120,7 +120,7 @@ const tabsData = [
 export default {
   data() {
     return {
-      coins: [],
+      coins: [{ name: 'Telos' }],
       panning: false,
       coinViewHeight: 0,
       tab: tabsData[0].title,
@@ -185,30 +185,23 @@ export default {
     },
     async loadUserTokens() {
       const coins = await this.$hyperion.get(`/v2/state/get_tokens?limit=20&account=${this.accountName}`);
-      this.coins = [{
+      this.coins[0] = {
         name: 'Telos',
         symbol: 'TLOS',
         amount: coins.data.tokens[0] ? coins.data.tokens[0].amount : 0,
         price: 0.16,
-        icon: 'https://user-images.githubusercontent.com/65044262/103604573-7c004c80-4edf-11eb-931d-58827d650c36.png',
         suggested: true,
-      }, {
-        name: 'Bitcoin',
-        symbol: 'BTC',
-        amount: 0,
-        price: 25241.54,
-        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png',
-      }, {
-        name: 'Ethereum',
-        symbol: 'ETH',
-        amount: 0,
-        price: 625.32,
-        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-      }];
+        ...this.coins[0],
+      };
       await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
         .then(resp => resp.json())
         .then(data => {
-          this.coins = this.coins.map(coin => ({ price: data[coin.name.toLowerCase()].usd, ...coin }));
+          this.coins = this.coins.map((coin) => {
+            if (data[coin.name.toLowerCase()]) {
+              return { price: data[coin.name.toLowerCase()].usd, ...coin };
+            }
+            return coin;
+          });
         });
     },
   },
@@ -232,6 +225,24 @@ export default {
       this.loadUserTokens();
     }, 5000);
     this.loadUserTokens();
+
+    const response = await fetch(`https://www.api.bloks.io/telos/tokens`);
+    const json = await response.json();
+    this.coins.length = 1;
+    json.forEach((token) => {
+      if (token.metadata.name === 'Telos') {
+        this.coins[0].price = token.price.usd;
+        this.coins[0].icon = token.metadata.logo;
+      } else {
+        this.coins.push({
+          name: token.metadata.name,
+          symbol: token.symbol,
+          amount: 1,
+          price: token.price.usd,
+          icon: token.metadata.logo,
+        });
+      }
+    });
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;

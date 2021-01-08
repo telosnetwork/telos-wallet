@@ -26,7 +26,7 @@
         </q-header>
         <q-page-container>
           <q-list>
-            <div v-for="(coin, index) in searchCoins" :key="coin.name">
+            <div v-for="(coin, index) in searchCoins" :key="`${coin.name}_${index}`">
               <q-item-label v-if="index === 0 && coin.suggested" header>Suggested</q-item-label>
               <q-item-label v-if="index === searchCoins.findIndex(c => !c.suggested) && !coin.suggested" header>All coins</q-item-label>
               <q-item clickable v-ripple class="list-item" @click="selectCoin(coin)">
@@ -36,9 +36,9 @@
                   </q-avatar>
                 </q-item-section>
 
-                <q-item-section>
+                <q-item-section style="justify-content: start; display: grid;">
                   <div class="text-black text-left display-grid">
-                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{coin.name}}</label>
+                    <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end">{{coin.name}}</label>
                     <label class="text-subtitle2 text-grey-5">{{coin.symbol}}</label>
                   </div>
                 </q-item-section>
