@@ -120,7 +120,13 @@ const tabsData = [
 export default {
   data() {
     return {
-      coins: [{ name: 'Telos' }],
+      coins: [{
+        name: 'Telos',
+        symbol: 'TLOS',
+        amount: 0,
+        price: 0.0,
+        suggested: true,
+      }],
       panning: false,
       coinViewHeight: 0,
       tab: tabsData[0].title,
@@ -161,7 +167,7 @@ export default {
       return (this.availableHeight - this.coinViewHeight - this.minSpace) * 0.1;
     },
     balanceTextSize() {
-      return (this.availableHeight - this.coinViewHeight) * 0.25;
+      return Math.min(35, (this.availableHeight - this.coinViewHeight) * 0.25);
     },
     accountNameStyle() {
       return {
@@ -185,14 +191,14 @@ export default {
     },
     async loadUserTokens() {
       const coins = await this.$hyperion.get(`/v2/state/get_tokens?limit=20&account=${this.accountName}`);
-      this.coins[0] = {
-        name: 'Telos',
-        symbol: 'TLOS',
-        amount: coins.data.tokens[0] ? coins.data.tokens[0].amount : 0,
-        price: 0.16,
-        suggested: true,
-        ...this.coins[0],
-      };
+      if (coins.status === 200) {
+        coins.data.tokens.forEach((token) => {
+          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
+          if (tokenIndex >= 0) {
+            this.coins[tokenIndex].amount = token.amount || 0;
+          }
+        });
+      }
       await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
         .then(resp => resp.json())
         .then(data => {
@@ -221,10 +227,6 @@ export default {
         }
       }
     }, 10);
-    this.tokenInterval = setInterval(() => {
-      this.loadUserTokens();
-    }, 5000);
-    this.loadUserTokens();
 
     const response = await fetch(`https://www.api.bloks.io/telos/tokens`);
     const json = await response.json();
@@ -237,12 +239,17 @@ export default {
         this.coins.push({
           name: token.metadata.name,
           symbol: token.symbol,
-          amount: 1,
+          amount: 0,
           price: token.price.usd,
           icon: token.metadata.logo,
         });
       }
     });
+
+    this.tokenInterval = setInterval(() => {
+      this.loadUserTokens();
+    }, 5000);
+    this.loadUserTokens();
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
