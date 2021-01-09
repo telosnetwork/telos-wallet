@@ -8,7 +8,14 @@ Vue.mixin({
   data() {
     return {
       theme: 'indigo',
-      themes: ['indigo', 'platinum', 'midnight', 'aquamarine', 'sunray', 'coral'],
+      themes: [
+        'indigo',
+        'platinum',
+        'midnight',
+        'aquamarine',
+        'sunray',
+        'coral'
+      ],
     };
   },
   computed: {

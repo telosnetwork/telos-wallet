@@ -154,7 +154,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace']),
+    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens']),
     userAvatar() {
       if (this.avatar) return this.avatar;
 
@@ -228,23 +228,29 @@ export default {
       }
     }, 10);
 
-    const response = await fetch(`https://www.api.bloks.io/telos/tokens`);
-    const json = await response.json();
     this.coins.length = 1;
-    json.forEach((token) => {
-      if (token.metadata.name === 'Telos') {
-        this.coins[0].price = token.price.usd;
-        this.coins[0].icon = token.metadata.logo;
-      } else {
-        this.coins.push({
-          name: token.metadata.name,
-          symbol: token.symbol,
-          amount: 0,
-          price: token.price.usd,
-          icon: token.metadata.logo,
+    for (const t of this.supportTokens) {
+      await fetch(`https://www.api.bloks.io/telos/tokens/${t}`)
+        .then(response => response.json())
+        .then(json => {
+          json.forEach((token) => {
+            if (token.price.usd === 0) {
+              ;
+            } else if (token.metadata.name === 'Telos') {
+              this.coins[0].price = token.price.usd;
+              this.coins[0].icon = token.metadata.logo;
+            } else {
+              this.coins.push({
+                name: token.metadata.name,
+                symbol: token.symbol,
+                amount: 0,
+                price: token.price.usd,
+                icon: token.metadata.logo,
+              });
+            }
+          });
         });
-      }
-    });
+    }
 
     this.tokenInterval = setInterval(() => {
       this.loadUserTokens();
