@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-list>
+    <q-infinite-scroll>
       <q-item v-for="(coin, index) in coins"
         :key="`${coin.name}_${index}`"
         clickable
@@ -28,7 +28,12 @@
           </div>
         </q-item-section>
       </q-item>
-    </q-list>
+      <template v-if="!loadedAll" v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>
   </div>
 </template>
 
@@ -36,7 +41,7 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins', 'showHistoryDlg', 'selectedCoin'],
+  props: ['coins', 'loadedAll', 'showHistoryDlg', 'selectedCoin'],
   methods: {
     selectCoin(coin) {
       this.$emit('update:selectedCoin', coin);

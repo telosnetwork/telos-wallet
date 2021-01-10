@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh Lpr fFf">
     <q-page-container :style="`height: ${containerHeight}px;`">
-      <router-view/>
+      <router-view :loadedCoins.sync="coins"/>
     </q-page-container>
     
     <q-footer v-if="isAuthenticated" style="max-width: 800px; margin: auto;">
@@ -63,6 +63,7 @@ export default {
       accountHistory: [{}],
       tab: pagesData[0].title,
       pages: pagesData,
+      coins: [],
     };
   },
   computed: {

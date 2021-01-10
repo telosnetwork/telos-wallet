@@ -73,7 +73,7 @@
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
             <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Coins" class="no-padding">
-                <Coin :coins="coins" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
+                <Coin :coins="coins" :loadedAll="loadedAll" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
               </q-tab-panel>
               <q-tab-panel name="Collectibles">
                 <Collectibles />
@@ -118,6 +118,7 @@ const tabsData = [
 ];
 
 export default {
+  props: ['loadedCoins'],
   data() {
     return {
       coins: [{
@@ -129,6 +130,7 @@ export default {
         precision: 4,
         suggested: true,
       }],
+      loadedAll: false,
       panning: false,
       coinViewHeight: 0,
       tab: tabsData[0].title,
@@ -192,7 +194,7 @@ export default {
       }
     },
     async loadUserTokens() {
-      const coins = await this.$hyperion.get(`/v2/state/get_tokens?limit=20&account=${this.accountName}`);
+      const coins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
       if (coins.status === 200) {
         coins.data.tokens.forEach((token) => {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
@@ -230,6 +232,12 @@ export default {
       }
     }, 10);
 
+    if (this.loadedCoins.length > 0) {
+      this.coins = this.loadedCoins;
+      this.loadedAll = true;
+      return; 
+    }
+
     this.coins.length = 1;
     for (const t of this.supportTokens) {
       await fetch(`https://www.api.bloks.io/telos/tokens/${t}`)
@@ -252,15 +260,17 @@ export default {
                 icon: token.metadata.logo,
                 precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
               });
+              this.loadUserTokens();
+              this.$emit('update:loadedCoins', this.coins);
             }
           });
         });
     }
 
+    this.loadedAll = true;
     this.tokenInterval = setInterval(() => {
       this.loadUserTokens();
     }, 5000);
-    this.loadUserTokens();
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
