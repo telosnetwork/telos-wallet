@@ -126,6 +126,7 @@ export default {
         symbol: 'TLOS',
         amount: 0,
         price: 0.0,
+        precision: 4,
         suggested: true,
       }],
       panning: false,
@@ -241,7 +242,7 @@ export default {
               this.coins[0].price = token.price.usd;
               this.coins[0].icon = token.metadata.logo;
             } else {
-              console.log(token.price);
+              const precisionSplit = token.supply.circulating.toString().split('.');
               this.coins.push({
                 account: token.account,
                 name: token.metadata.name,
@@ -249,6 +250,7 @@ export default {
                 amount: 0,
                 price: token.price.usd,
                 icon: token.metadata.logo,
+                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
               });
             }
           });

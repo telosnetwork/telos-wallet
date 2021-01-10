@@ -93,12 +93,12 @@ export default {
     },
     async confirm() {
       const actions = [{
-        account: 'eosio.token',
+        account: this.selectedCoin.account,
         name: 'transfer',
         data: {
           from: this.accountName.toLowerCase(),
           to: this.toAddress,
-          quantity: `${parseFloat(this.sendAmount).toFixed(4)} ${this.selectedCoin.symbol}`,
+          quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
           memo: this.notes
         }
       }];
@@ -107,7 +107,7 @@ export default {
         this.showTransaction = true;
         this.$q.notify({
           type: 'primary',
-          message: `${parseFloat(this.sendAmount).toFixed(4)} ${this.selectedCoin.symbol} is sent to ${this.toAddress}`,
+          message: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol} is sent to ${this.toAddress}`,
         });
         this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
       }
