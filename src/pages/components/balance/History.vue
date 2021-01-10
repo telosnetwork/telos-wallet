@@ -25,7 +25,7 @@
           <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
         <q-page-container>
-          <q-list>
+          <q-infinite-scroll @load="loadMoreHistory" :offset="100">
             <div v-for="(history, index) in searchHistories" :key="`${history.block_num}_${index}`">
               <q-item clickable v-ripple class="list-item">
                 <q-item-section avatar>
@@ -49,7 +49,12 @@
                 </q-item-section>
               </q-item>
             </div>
-          </q-list>
+            <template v-if="!loadedAll" v-slot:loading>
+              <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+            </template>
+            </q-infinite-scroll>
         </q-page-container>
       </q-layout>
     </q-card>
@@ -66,6 +71,9 @@ export default {
     return {
       searchHistory: '',
       accountHistory: [],
+      page: 0,
+      pageLimit: 10,
+      loadedAll: false,
     };
   },
   computed: {
@@ -87,11 +95,17 @@ export default {
     },
   },
   methods: {
-    async loadAccountHistory() {
+    async loadMoreHistory(index, done) {
+      if (this.loadedAll) return;
       const actionHistory = await this.$hyperion.get(
-        `/v2/history/get_actions?limit=20&account=${this.accountName}`
+        `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`
       );
-      this.accountHistory = actionHistory.data.actions || [];
+      this.accountHistory.push(...(actionHistory.data.actions || []));
+      this.page += this.pageLimit;
+      if (actionHistory.data.actions.length === 0) {
+        this.loadedAll = true;
+      }
+      done();
     },
     historyData(history) {
       let actionName = '';
@@ -125,7 +139,9 @@ export default {
     showHistoryDlg: function(val, oldVal) {
       if (val) {
         this.searchHistoryName = '';
-        this.loadAccountHistory();
+        this.page = 0;
+        this.accountHistory = [];
+        this.loadedAll = false;
       }
     },
   },

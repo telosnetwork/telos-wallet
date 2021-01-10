@@ -40,7 +40,7 @@
               </q-item-section>
             </q-item>
           </div>
-          <template v-slot:loading>
+          <template v-if="!loadedAll" v-slot:loading>
             <div class="row justify-center q-my-md">
               <q-spinner-dots color="primary" size="40px" />
             </div>
@@ -61,6 +61,7 @@ export default {
       dapps: [],
       searchDappName: '',
       page: 1,
+      loadedAll: false,
     }
   },
   computed: {
@@ -74,11 +75,14 @@ export default {
   },
   methods: {
     async loadMoreDapps(index, done) {
-      if (this.page > 51) return;
+      if (this.loadedAll) return;
       const response = await fetch(`https://api.stateofthedapps.com/dapps?page=${this.page}&sort=rank&order=asc`);
       const json = await response.json();
       this.dapps.push(...json.items);
       this.page += 1;
+      if (json.items.length === 0) {
+        this.loadedAll = true;
+      }
       done();
     },
   },

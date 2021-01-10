@@ -57,7 +57,7 @@
             narrow-indicator
             active-color="deep-purple-10"
             class="bg-white text-grey shadow-2 full-height no-shadow"
-            style="width: 350px;"
+            style="width: 80%; min-width: 250px;"
           >
             <q-tab
               no-caps
@@ -121,6 +121,7 @@ export default {
   data() {
     return {
       coins: [{
+        account: 'eosio.token',
         name: 'Telos',
         symbol: 'TLOS',
         amount: 0,
@@ -234,13 +235,15 @@ export default {
         .then(response => response.json())
         .then(json => {
           json.forEach((token) => {
-            if (token.price.usd === 0) {
+            if (token.chain !== 'telos') {
               ;
             } else if (token.metadata.name === 'Telos') {
               this.coins[0].price = token.price.usd;
               this.coins[0].icon = token.metadata.logo;
             } else {
+              console.log(token.price);
               this.coins.push({
+                account: token.account,
                 name: token.metadata.name,
                 symbol: token.symbol,
                 amount: 0,
