@@ -7,7 +7,7 @@
     transition-hide="slide-down"
     @keydown.delete="keyPressed"
   >
-    <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
+    <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -75,7 +75,7 @@ import moment from 'moment';
 import SendToAddress from './SendToAddress';
 
 export default {
-  props: ['showSendAmountDlg', 'selectedCoin'],
+  props: ['showSendAmountDlg', 'showHistoryDlg', 'selectedCoin'],
   data() {
     return {
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
@@ -179,6 +179,8 @@ export default {
       if (val) {
         this.coinInput = true;
         this.sendAmount = '0';
+      } else if (!this.showHistoryDlg) {
+        this.$emit('update:selectedCoin', null);
       }
     },
   },

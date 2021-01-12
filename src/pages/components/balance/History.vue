@@ -3,10 +3,10 @@
     v-model="showDlg"
     persistent
     :maximized="true"
-    transition-show="slide-up"
-    transition-hide="slide-down"
+    transition-show="slide-left"
+    transition-hide="slide-right"
   >
-    <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
+    <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -15,13 +15,30 @@
         <q-header class="bg-white text-grey-8 q-pa-sm">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">Transaction History</label>
-                <label class="text-subtitle2 text-grey-4">{{selectedCoin.name}}</label>
-              </div>
+              <q-avatar size="20px">
+                <img :src="selectedCoin.icon">
+              </q-avatar>
+              <label class="text-subtitle1 text-weight-medium h-20">
+                {{selectedCoin.name}}
+              </label>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
+          <div class="text-black text-center display-grid">
+            <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 8)}}</label>
+            <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, 8)} ${selectedCoin.symbol}`}}</label>
+          </div>
+          <div class="text-center q-my-md" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
+            <q-space/>
+            <div class="display-grid">
+              <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
+            </div>
+            <q-space/>
+            <div class="display-grid">
+              <q-btn round flat dense stack size="sm" label="Receive" icon="fas fa-sign-in-alt" @click="receive"/>
+            </div>
+            <q-space/>
+          </div>
           <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
         <q-page-container>
@@ -29,7 +46,7 @@
             <div v-for="(history, index) in searchHistories" :key="`${history.block_num}_${index}`">
               <q-item clickable v-ripple class="list-item">
                 <q-item-section avatar>
-                  <q-avatar size="45px" class="q-my-none">
+                  <q-avatar size="35px" class="q-my-none">
                     <img :src="selectedCoin.icon">
                   </q-avatar>
                 </q-item-section>
@@ -66,7 +83,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showHistoryDlg', 'selectedCoin'],
+  props: ['showHistoryDlg', 'selectedCoin', 'showSendAmountDlg', 'showShareAddressDlg'],
   data() {
     return {
       searchHistory: '',
@@ -107,6 +124,12 @@ export default {
       }
       done();
     },
+    send() {
+      this.$emit('update:showSendAmountDlg', true);
+    },
+    receive() {
+      this.$emit('update:showShareAddressDlg', true);
+    },
     historyData(history) {
       let actionName = '';
       let actionDetail = '';
@@ -142,6 +165,8 @@ export default {
         this.page = 0;
         this.accountHistory = [];
         this.loadedAll = false;
+      } else {
+        this.$emit('update:selectedCoin', null);
       }
     },
   },

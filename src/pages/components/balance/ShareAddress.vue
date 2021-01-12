@@ -28,9 +28,10 @@
           <q-card class="column qr-card text-center q-mx-auto q-my-md q-pa-lg no-shadow" :style="`height: ${cardHeight}px;`">
             <q-space/>
             <div>
-              <q-r-canvas :options="{data: accountName, cellSize: 8}"/>
+              <q-r-canvas :options="{data: `${accountName}(${selectedCoin.name})`, cellSize: 8}"/>
             </div>
-            <div>{{accountName}}</div>
+            <div class="text-h6">{{accountName}}</div>
+            <div>({{selectedCoin.name}})</div>
             <q-space/>
             <q-space/>
             <div>Share address</div>

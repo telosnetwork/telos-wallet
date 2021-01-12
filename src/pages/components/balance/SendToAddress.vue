@@ -130,15 +130,24 @@ export default {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
       this.showSendConfirmDlg = false;
     });
-    this.$root.$on('qrcode_scanned', (qrcode) => {
-      this.toAddress = qrcode;
+    this.$root.$on('qrcode_scanned', ({ accountName, coinName }) => {
+      if (this.showSendToAddressDlg) {
+        if (this.selectedCoin && coinName !== this.selectedCoin.name) {
+          this.$q.notify({
+            type: 'dark',
+            message: `Please scan with correct token`,
+          });
+        } else {
+          this.toAddress = accountName;
+        }
+      }
     });
   },
   watch: {
     showSendToAddressDlg: function(val, oldVal) {
       if (val) {
-        this.toAddress = this.$root.qrcode || '';
-        this.$root.qrcode = '';
+        this.toAddress = this.$root.qrcode_accountName || '';
+        this.$root.qrcode_accountName = '';
         this.notes = '';
       }
     },

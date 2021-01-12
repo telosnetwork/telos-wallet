@@ -96,6 +96,8 @@ export default {
     showSendDlg: function(val, oldVal) {
       if (val) {
         this.searchCoinName = '';
+      } else {
+        this.$emit('update:selectedCoin', null);
       }
     },
   },

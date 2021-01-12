@@ -37,6 +37,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import { QrcodeStream } from 'vue-qrcode-reader'
+import { accountName } from '../../../store/account/getters';
 
 export default {
   props: ['showQRScannerDlg'],
@@ -61,7 +62,9 @@ export default {
     ...mapActions('account', ['accountExists']),
     async onDecode (qrcode) {
       if (qrcode) {
-        if (!(await this.accountExists(qrcode))) {
+        const accountName = qrcode.substring(0, qrcode.lastIndexOf('('));
+        const coinName = qrcode.slice(qrcode.lastIndexOf('(') + 1, -1);
+        if (!(await this.accountExists(accountName))) {
           this.$q.notify({
             type: 'negative',
             message: `Account does not exist`,
@@ -69,7 +72,7 @@ export default {
           return;
         }
         this.$emit('update:showQRScannerDlg', false);
-        this.$root.$emit('qrcode_scanned', qrcode);
+        this.$root.$emit('qrcode_scanned', { accountName, coinName });
       }
     }
   },

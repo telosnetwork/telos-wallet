@@ -2,6 +2,7 @@
   <div class="full-height main-div">
     <div class="flex-center fit-div" :style="`background: ${themeColor}`">
       <div class="text-center full-width" style="display: grid;">
+        <login-button />
         <label 
           class="text-white"
           :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
@@ -83,10 +84,10 @@
         </q-page-container>
       </q-layout>
     </div>
-    <History :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
+    <History :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg" :showShareAddressDlg.sync="showShareAddressDlg"/>
     <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg"/>
     <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
-    <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :selectedCoin="selectedCoin"/>
+    <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :showHistoryDlg="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
     <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
     <QRScanner :showQRScannerDlg.sync="showQRScannerDlg"/>
   </div>
@@ -95,6 +96,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
+import LoginButton from 'components/LoginButton.vue';
 import Coin from './components/balance/Coin';
 import Collectibles from './components/balance/Collectibles';
 import Send from './components/balance/Send';
@@ -119,6 +121,17 @@ const tabsData = [
 
 export default {
   props: ['loadedCoins'],
+  components: {
+    LoginButton,
+    Coin,
+    Collectibles,
+    Send,
+    SendAmount,
+    Receive,
+    ShareAddress,
+    QRScanner,
+    History,
+  },
   data() {
     return {
       coins: [{
@@ -137,7 +150,7 @@ export default {
       tabs: tabsData,
       interval: null,
       tokenInterval: null,
-      selectedCoin: { amount: 0, symbol: 'TLOS' },
+      selectedCoin: null,
       showSendDlg: false,
       showSendAmountDlg: false,
       showReceiveDlg: false,
@@ -145,16 +158,6 @@ export default {
       showQRScannerDlg: false,
       showHistoryDlg: false,
     };
-  },
-  components: {
-    Coin,
-    Collectibles,
-    Send,
-    SendAmount,
-    Receive,
-    ShareAddress,
-    QRScanner,
-    History,
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
@@ -280,9 +283,12 @@ export default {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
     });
-    this.$root.$on('qrcode_scanned', (qrcode) => {
-      this.$root.qrcode = qrcode;
-      this.showSendDlg = true;
+    this.$root.$on('qrcode_scanned', ({ accountName, coinName }) => {
+      if (!this.selectedCoin) {
+        this.$root.qrcode_accountName = accountName;
+        this.selectedCoin = this.coins.find(coin => coin.name === coinName);
+        this.showSendAmountDlg = true;
+      }
     });
     this.$root.$on('show_qrscanner', () => {
       this.showQRScannerDlg = true;

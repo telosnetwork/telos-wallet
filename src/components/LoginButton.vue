@@ -12,15 +12,16 @@
       />
     </div>
 
-    <div v-if="isAuthenticated" class="q-px-md row">
-      <div @click="goToAccountPage" class="account-name q-px-md">
-        {{ accountName }}
-      </div>
+    <div v-if="isAuthenticated" class="row absolute full-width">
       <q-btn
         @click="logout"
-        color="secondary"
-        text-color="black"
-        label="Logout"
+        icon="power_settings_new"
+        size="md"
+        padding="3px 3px 3px 15px"
+        no-caps
+        rounded
+        flat
+        class="q-pa-none logout-btn"
       />
     </div>
 
@@ -124,6 +125,12 @@ export default {
 
 <style lang="sass" scoped>
 .account-name
-    color: white
-    font-size: 20px
+  color: white
+  font-size: 20px
+.logout-btn
+  // margin-left: auto;
+  left: -15px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 </style>
