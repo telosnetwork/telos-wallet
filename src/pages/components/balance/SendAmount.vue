@@ -121,6 +121,9 @@ export default {
       return Number(this.sendAmount);
     },
     sendCoinAmount() {
+      if (!this.selectedCoin) {
+        return 0;
+      }
       if (this.coinInput) {
         return this.sendAmountValue;
       }
