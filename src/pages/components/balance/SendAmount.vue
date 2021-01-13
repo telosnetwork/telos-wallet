@@ -5,7 +5,6 @@
     :maximized="true"
     transition-show="slide-up"
     transition-hide="slide-down"
-    @keydown.delete="keyPressed"
   >
     <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
       <q-layout
@@ -29,7 +28,19 @@
             <q-space/>
             <div class="full-width items-center amount-div">
               <div class="full-width column">
-                <label class="text-weight-regular full-width" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
+                  {{ sendAmount }}
+                </label>
+                <div class="desktop-only flex flex-center">
+                  <label class="text-weight-regular q-mr-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                    {{coinInput ? `` : '$ '}} </label>
+                  <input type="text" :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
+                    :style="`font-size: ${amountFontSize}px; color: ${themeColor}; z-index: 1; width: ${inputWidth}px;`"
+                    v-model="sendAmount" />
+                  <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                    {{coinInput ? selectedCoin.symbol : ''}} </label>
+                </div>
+                <label class="text-weight-regular full-width mobile-only" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}} </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
                   {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, 8)} ${selectedCoin.symbol}`}}
@@ -41,7 +52,7 @@
             </div>
             <q-space/>
             <q-space/>
-            <div class="q-pa-sm full-width">
+            <div class="q-pa-sm full-width mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn v-for="key in keyboard"
                   :key="key"
@@ -73,6 +84,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import SendToAddress from './SendToAddress';
+import { setInterval } from 'timers';
+import { isNumber } from 'util';
 
 export default {
   props: ['showSendAmountDlg', 'showHistoryDlg', 'selectedCoin'],
@@ -80,8 +93,9 @@ export default {
     return {
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
       sendAmount: '0',
-      coinInput: true,
+      coinInput: '0',
       showSendToAddressDlg: false,
+      inputWidth: 50,
     }
   },
   components: {
@@ -124,7 +138,9 @@ export default {
       } else {
         this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, 8).toString();
       }
+      
       this.coinInput = !this.coinInput;
+      this.inputValue = `${!this.coinInput ? '$ ' : ''}${this.sendAmount}${this.coinInput ? ' ' + this.selectedCoin.symbol : ''}`;
     },
     buttonClicked(key) {
       if (key === '.') {
@@ -154,20 +170,6 @@ export default {
     nextPressed() {
       this.showSendToAddressDlg = true;
     },
-    keyPressed(e) {
-      let key = String.fromCharCode(e.keyCode);
-      if (key === '.' || ('0' <= key && key <= '9')) {
-        this.buttonClicked(key);
-      } else if (e.keyCode === 8) {
-        this.buttonClicked('←');
-      }
-    },
-  },
-  created() {
-	window.addEventListener('keypress', this.keyPressed);
-  },
-  destroyed() {
-    window.removeEventListener('keypress', this.keyPressed);
   },
   mounted() {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
@@ -181,6 +183,24 @@ export default {
         this.sendAmount = '0';
       } else if (!this.showHistoryDlg) {
         this.$emit('update:selectedCoin', null);
+      }
+    },
+    sendAmount: function(val, oldVal) {
+      setInterval(() => {
+        const widthElement = this.$refs.widthElement;
+        this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
+      }, 1);
+
+      if (this.sendAmount != oldVal) {
+        if (this.coinInput && this.sendAmountValue > this.selectedCoin.amount) {
+          this.sendAmount = this.selectedCoin.amount.toString();
+        } else if (!this.coinInput && this.sendAmountValue > this.selectedCoin.amount * this.selectedCoin.price) {
+          this.sendAmount = (this.selectedCoin.amount * this.selectedCoin.price).toString();
+        } else if (val.charAt(val.length-1) !== '.') {
+          const cleanStr = val.replace(/\s/g, '');
+          const num = parseFloat(cleanStr) || 0;
+          this.sendAmount = Math.max(0, num).toString();
+        }
       }
     },
   },
