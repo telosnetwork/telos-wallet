@@ -81,8 +81,8 @@ module.exports = function(/* ctx */) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
-      https: false,
-      port: 8080,
+      https: true,
+      port: 8081,
       open: true // opens browser window automatically
     },
 
@@ -122,9 +122,9 @@ module.exports = function(/* ctx */) {
       workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: `Telos Quasar Template`,
-        short_name: `Telos Quasar Template`,
-        description: `A template for using Vue+Quasar to build a Telos webapp`,
+        name: `Telos Web Wallet`,
+        short_name: `Telos Web Wallet`,
+        description: `A template for using Vue+Quasar to build a Telos Web Wallet`,
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",

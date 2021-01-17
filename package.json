@@ -1,9 +1,9 @@
 {
   "name": "telos-template",
   "version": "0.0.1",
-  "description": "A template for using Vue+Quasar to build a Telos webapp",
-  "productName": "Telos Quasar Template",
-  "author": "Jesse Schulman <jesse@caleos.io>",
+  "description": "A Web Wallet for Telos",
+  "productName": "Telos Web Wallet",
+  "author": "Ryuhei Matsuda <ryuheimat3@gmail.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
