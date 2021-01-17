@@ -20,6 +20,7 @@
           :icon="page.icon"
           :key="page.title"
           :to="page.path"
+          :disable="!page.available"
         />
       </q-tabs>
     </q-footer>
@@ -34,19 +35,22 @@ const pagesData = [
     title: 'Balance',
     caption: 'Balance',
     icon: 'fas fa-wallet',
-    path: '/balance'
+    path: '/balance',
+    available: true,
   },
   {
     title: 'DappSearch',
     caption: 'DappSearch',
     icon: 'fas fa-th-large',
-    path: '/dappsearch'
+    path: '/dappsearch',
+    available: true,
   },
   {
     title: 'Transfer',
     caption: 'Transfer',
     icon: 'fas fa-cog',
-    path: '/transfer'
+    path: '/transfer',
+    available: false,
   }
 ];
 
