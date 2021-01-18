@@ -17,25 +17,29 @@
       </q-header>
       <q-page-container>
         <q-infinite-scroll @load="loadMoreDapps" :offset="100">
-          <div v-for="dapp in searchDapps" :key="dapp.name">
-            <q-item clickable v-ripple class="list-item">
+          <div v-for="(dapp, index) in searchDapps" :key="dapp.name">
+            <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.url)">
               <q-item-section avatar>
                 <q-avatar size="45px" class="q-my-sm justify-center">
-                  <img :src="dapp.iconSmallUrl">
+                  <img :src="dapp.image">
                 </q-avatar>
               </q-item-section>
 
               <q-item-section style="justify-content: start; display: grid;">
                 <div class="text-black text-left display-grid">
                   <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end">{{dapp.name}}</label>
-                  <label class="text-caption text-grey-5">{{dapp.teaser}}</label>
+                  <label class="text-caption text-grey-5">{{dapp.country}}</label>
                 </div>
               </q-item-section>
 
               <q-item-section side>
                 <div class="text-black text-right display-grid">
-                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{dapp.platform}}</label>
-                  <label class="text-caption text-grey-6">{{dapp.categories.join(',')}}</label>
+                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">Trust score</label>
+                  <label class="text-caption text-grey-6">
+                    <q-icon v-for="i in getFullStarCount(dapp.trust_score)" :key="`${dapp.name}${index}-star-${i}`" name="star" class="text-orange" style="font-size: 1.3em;"/>
+                    <q-icon v-if="hasHalfStar(dapp.trust_score)" name="star_half" class="text-orange" style="font-size: 1.3em;"/>
+                    <q-icon v-for="i in getEmptyStarCount(dapp.trust_score)" :key="`${dapp.name}${index}-star-border-${i}`" name="star_border" class="text-orange" style="font-size: 1.3em;"/>
+                  </label>
                 </div>
               </q-item-section>
             </q-item>
@@ -76,14 +80,27 @@ export default {
   methods: {
     async loadMoreDapps(index, done) {
       if (this.loadedAll) return;
-      const response = await fetch(`https://api.stateofthedapps.com/dapps?page=${this.page}&sort=rank&order=asc`);
+      const response = await fetch(`https://api.coingecko.com/api/v3/exchanges?per_page=20&page=${this.page}`);
       const json = await response.json();
-      this.dapps.push(...json.items);
+      this.dapps.push(...json);
       this.page += 1;
-      if (json.items.length === 0) {
+      if (json.length === 0) {
         this.loadedAll = true;
       }
       done();
+    },
+    openInNewTab(url) {
+      var win = window.open(url, '_blank');
+      win.focus();
+    },
+    getFullStarCount(score) {
+      return Math.floor(score / 2);
+    },
+    getEmptyStarCount(score) {
+      return Math.floor(5 - score / 2);
+    },
+    hasHalfStar(score) {
+      return score % 2 !== 0;
     },
   },
 };
