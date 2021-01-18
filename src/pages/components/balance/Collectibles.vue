@@ -1,5 +1,5 @@
 <template>
   <div>
-    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+    Coming Soon: in the meantime check out areaxnft.com
   </div>
 </template>

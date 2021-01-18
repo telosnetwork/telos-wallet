@@ -21,6 +21,7 @@
           :key="page.title"
           :to="page.path"
           :disable="!page.available"
+          :style="`opacity: ${page.available ? 1 : 0.3} !important;`"
         />
       </q-tabs>
     </q-footer>
