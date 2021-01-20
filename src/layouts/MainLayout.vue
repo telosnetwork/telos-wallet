@@ -47,11 +47,11 @@ const pagesData = [
     available: true,
   },
   {
-    title: 'Transfer',
-    caption: 'Transfer',
+    title: 'Settings',
+    caption: 'Settings',
     icon: 'fas fa-cog',
-    path: '/transfer',
-    available: false,
+    path: '/settings',
+    available: true,
   }
 ];
 
