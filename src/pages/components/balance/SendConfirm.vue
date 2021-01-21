@@ -36,16 +36,6 @@
                   <q-item-section>{{toAddress}}</q-item-section>
                 </q-item>
                 <q-item class="list-item">
-                  <q-item-section side>Coinbase fee</q-item-section>
-                  <q-item-section></q-item-section>
-                  <q-item-section side>$0.00</q-item-section>
-                </q-item>
-                <q-item class="list-item">
-                  <q-item-section side>Network fee</q-item-section>
-                  <q-item-section></q-item-section>
-                  <q-item-section side>{{`0.00 ${selectedCoin.symbol}`}}</q-item-section>
-                </q-item>
-                <q-item class="list-item">
                   <q-item-section side class="text-weight-bold">Total</q-item-section>
                   <q-item-section></q-item-section>
                   <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
