@@ -162,11 +162,6 @@ export default {
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens']),
-    userAvatar() {
-      if (this.avatar) return this.avatar;
-
-      return 'https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng';
-    },
     availableHeight() {
       return window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0);
     },
@@ -203,6 +198,7 @@ export default {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
           if (tokenIndex >= 0) {
             this.coins[tokenIndex].amount = token.amount || 0;
+            this.coins[tokenIndex].precision = token.precision;
           }
         });
       }
@@ -216,6 +212,13 @@ export default {
             return coin;
           });
         });
+      this.coins = this.coins.sort(function (a, b) {
+        if (a.symbol === 'TLOS') return -1;
+        if (b.symbol === 'TLOS') return 1;
+        let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
+        let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
+        return bAmount - aAmount;
+      });
     },
   },
   created: async function() {
