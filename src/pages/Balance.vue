@@ -276,7 +276,7 @@ export default {
     this.loadedAll = true;
     this.tokenInterval = setInterval(() => {
       this.loadUserTokens();
-    }, 5000);
+    }, 30000);
   },
   beforeMount() {
     this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
