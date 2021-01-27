@@ -196,7 +196,7 @@ export default {
       if (coins.status === 200) {
         coins.data.tokens.forEach((token) => {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
-          if (tokenIndex >= 0) {
+          if (tokenIndex >= 0 && (token.symbol.toLowerCase() !== 'tlos' || token.contract.toLowerCase() === 'eosio.token')) {
             this.coins[tokenIndex].amount = token.amount || 0;
             this.coins[tokenIndex].precision = token.precision;
           }
