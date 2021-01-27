@@ -194,9 +194,15 @@ export default {
     async loadUserTokens() {
       const coins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
       if (coins.status === 200) {
+        const tokens = coins.data.tokens.filter((token) => {
+          if (coins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
+            return tokens.contract.toLowerCase() === 'eosio.token';
+          }
+          return true;
+        });
         coins.data.tokens.forEach((token) => {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
-          if (tokenIndex >= 0 && (token.symbol.toLowerCase() !== 'tlos' || token.contract.toLowerCase() === 'eosio.token')) {
+          if (tokenIndex >= 0) {
             this.coins[tokenIndex].amount = token.amount || 0;
             this.coins[tokenIndex].precision = token.precision;
           }
