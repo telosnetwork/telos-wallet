@@ -2,13 +2,22 @@
   <div>
     <div v-if="!isAuthenticated" class="q-px-md">
       <q-btn
-        @click="showLogin = true"
+        @click="signUp"
         text-color="white"
-        rounded
         no-caps
-        label="Login"
-        class="full-width"
-        :style="`max-width: 500px; background: ${themeColor}`"
+        label="Create a new wallet"
+        class="full-width login-btn"
+        :style="`background: ${themeColor}`"
+      />
+    </div>
+    <div v-if="!isAuthenticated" class="q-px-md q-mt-md">
+      <q-btn
+        @click="signIn"
+        no-caps
+        flat
+        label="I already have a wallet"
+        class="full-width login-btn"
+        :style="`color: ${themeColor}`"
       />
     </div>
 
@@ -82,7 +91,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
+var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
 
 export default {
   data() {
@@ -97,9 +108,39 @@ export default {
     ])
   },
   methods: {
-    ...mapActions('account', ['login', 'logout', 'autoLogin']),
+    ...mapActions('account', ['login', 'logout', 'autoLogin', 'getUserProfile']),
+    ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
+    async signUp() {
+      this.signPopup('/create');
+    },
+    async signIn() {
+      this.signPopup('/signin');
+    },
+    async signPopup(type) {
+      const keycat = this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId];
+      var url = window_1.makeWindowUrl(keycat.keycatOrigin, type, keycat.makeUrlData());
+      const users = await this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].spawnWindow(url);
+      if (users) {
+        const accountName = users.accountName;
+        const permission = users.permission;
+        const publicKey = users.publicKey;
+        const nowTimestamp = Math.floor(((new Date()).getTime()) / 1000);
+        const expiration = 604800 + nowTimestamp;
+        this.$ualUser = users;
+        this.$type = "ual";
+        this.setAccountName(accountName);
+        window.localStorage.setItem('expiration', expiration);
+        window.localStorage.setItem('accountName', accountName);
+        window.localStorage.setItem('permission', permission);
+        window.localStorage.setItem('publicKey', publicKey);
+        window.localStorage.setItem("account", accountName);
+        window.localStorage.setItem("returning", true);
+        window.localStorage.setItem("autoLogin", this.$ual.authenticators[0].constructor.name);
+        this.getUserProfile();
+        this.setLoadingWallet();
+      }
+    },
     async onLogin(idx) {
-      this.error = null;
       const error = await this.login({ idx });
       if (!error) {
         this.showLogin = false;
@@ -124,6 +165,11 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.login-btn
+  max-width: 500px
+  height: 40px
+  round: 5px
+  border-radius: 10px
 .account-name
   color: white
   font-size: 20px

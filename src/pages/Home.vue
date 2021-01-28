@@ -76,7 +76,7 @@
       </q-carousel-slide>
     </q-carousel>
     
-    <div v-if="!isAuthenticated" class="full-width" style="height: 80px;">
+    <div v-if="!isAuthenticated" class="full-width" style="height: 120px;">
       <login-button />
     </div>
   </q-page>
