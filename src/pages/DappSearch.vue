@@ -89,7 +89,7 @@ export default {
           name: app.fields.Title,
           description: app.fields.Description,
           link: app.fields.Link,
-          icon: app.fields["App Image"][0].thumbnails.small.url,
+          icon: app.fields["App Image"][0].thumbnails.large.url,
           category: app.fields.Category,
           tags: app.fields.Tags,
         };
