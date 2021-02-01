@@ -202,7 +202,10 @@ export default {
         } else if (val.charAt(val.length-1) !== '.') {
           const cleanStr = val.replace(/\s/g, '');
           const num = parseFloat(cleanStr) || 0;
-          this.sendAmount = Math.max(0, num).toString();
+          const maxValue = Math.max(0, num);
+          if (this.sendAmountValue !== maxValue) {
+            this.sendAmount = Math.max(0, num).toString();
+          }
         }
       }
     },
