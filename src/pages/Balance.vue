@@ -192,22 +192,43 @@ export default {
       }
     },
     async loadUserTokens() {
-      const coins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
-      if (coins.status === 200) {
-        const tokens = coins.data.tokens.filter((token) => {
-          if (coins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
-            return tokens.contract.toLowerCase() === 'eosio.token';
+      // const coins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
+      const chainName = this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+      const settings = {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({code: "eosio.token", account: this.accountName, symbol: "TLOS"})
+      };
+      await fetch(`https://${chainName === 'telos' ? '' : 'testnet.'}telos.caleos.io/v1/chain/get_currency_balance`, settings)
+        .then(resp => resp.json())
+        .then(data => {
+          if (data.length > 0) {
+            this.coins[0].amount = new Number(data[0].split(' TLOS')[0]);
           }
-          return true;
         });
-        coins.data.tokens.forEach((token) => {
-          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
-          if (tokenIndex >= 0) {
-            this.coins[tokenIndex].amount = token.amount || 0;
-            this.coins[tokenIndex].precision = token.precision;
+      await fetch(`https://www.api.bloks.io/telos${chainName === 'telos' ? '' : '-test'}/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`)
+        .then(resp => resp.json())
+        .then(data => {
+          const coins = { data, status: 200 };
+          if (coins.status === 200) {
+            const tokens = coins.data.tokens.filter((token) => {
+              if (coins.data.tokens.filter(t => t.symbol === (token.symbol || token.currency)).length > 1) {
+                return token.contract.toLowerCase() === 'eosio.token';
+              }
+              return true;
+            });
+            coins.data.tokens.forEach((token) => {
+              const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
+              if (tokenIndex >= 0) {
+                this.coins[tokenIndex].amount = token.amount || 0;
+                this.coins[tokenIndex].precision = token.precision;
+              }
+            });
           }
         });
-      }
       await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
         .then(resp => resp.json())
         .then(data => {
