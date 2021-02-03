@@ -35,4 +35,7 @@ export default () => ({
     'btcp',
     'ecoin',
   ],
+  pTokens: [
+    'pbtc',
+  ],
 });

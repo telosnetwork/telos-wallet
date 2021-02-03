@@ -89,7 +89,7 @@
     <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
     <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :showHistoryDlg="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
     <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
-    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg"/>
+    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins"/>
   </div>
 </template>
 
@@ -148,6 +148,7 @@ export default {
       coinViewHeight: 0,
       tab: tabsData[0].title,
       tabs: tabsData,
+      userTokens: {},
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
@@ -180,6 +181,9 @@ export default {
     qrcodeOpacity() {
       return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
     },
+    chainName() {
+      return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+    },
   },
   methods: {
     handlePan({ evt, ...info }) {
@@ -191,9 +195,15 @@ export default {
         this.panning = false;
       }
     },
+    async getUserTokens() {
+      await fetch(`https://www.api.bloks.io/telos${this.chainName === 'telos' ? '' : '-test'}/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`)
+        .then(resp => resp.json())
+        .then(data => {
+          this.userTokens = { data, status: 200 };
+        });
+    },
     async loadUserTokens() {
-      // const coins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
-      const chainName = this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+      // const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
       const settings = {
         method: 'POST',
         headers: {
@@ -202,33 +212,31 @@ export default {
         },
         body: JSON.stringify({code: "eosio.token", account: this.accountName, symbol: "TLOS"})
       };
-      await fetch(`https://${chainName === 'telos' ? '' : 'testnet.'}telos.caleos.io/v1/chain/get_currency_balance`, settings)
+      await fetch(`https://${this.chainName === 'telos' ? '' : 'testnet.'}telos.caleos.io/v1/chain/get_currency_balance`, settings)
         .then(resp => resp.json())
         .then(data => {
           if (data.length > 0) {
             this.coins[0].amount = new Number(data[0].split(' TLOS')[0]);
           }
         });
-      await fetch(`https://www.api.bloks.io/telos${chainName === 'telos' ? '' : '-test'}/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`)
-        .then(resp => resp.json())
-        .then(data => {
-          const coins = { data, status: 200 };
-          if (coins.status === 200) {
-            const tokens = coins.data.tokens.filter((token) => {
-              if (coins.data.tokens.filter(t => t.symbol === (token.symbol || token.currency)).length > 1) {
-                return token.contract.toLowerCase() === 'eosio.token';
-              }
-              return true;
-            });
-            coins.data.tokens.forEach((token) => {
-              const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
-              if (tokenIndex >= 0) {
-                this.coins[tokenIndex].amount = token.amount || 0;
-                this.coins[tokenIndex].precision = token.precision;
-              }
-            });
+
+      const coins = this.userTokens;
+      if (coins.status === 200) {
+        const tokens = coins.data.tokens.filter((token) => {
+          if (coins.data.tokens.filter(t => t.symbol === (token.symbol || token.currency)).length > 1) {
+            return token.contract.toLowerCase() === 'eosio.token';
+          }
+          return true;
+        });
+        coins.data.tokens.forEach((token) => {
+          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
+          if (tokenIndex >= 0) {
+            this.coins[tokenIndex].amount = token.amount || 0;
+            this.coins[tokenIndex].precision = token.decimals;
           }
         });
+      }
+
       await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
         .then(resp => resp.json())
         .then(data => {
@@ -293,7 +301,7 @@ export default {
                 icon: token.metadata.logo,
                 precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
               });
-              this.loadUserTokens();
+              this.getUserTokens().then(this.loadUserTokens());
               this.$emit('update:loadedCoins', this.coins);
             }
           });
@@ -302,7 +310,7 @@ export default {
 
     this.loadedAll = true;
     this.tokenInterval = setInterval(() => {
-      this.loadUserTokens();
+      this.getUserTokens().then(this.loadUserTokens());
     }, 30000);
   },
   beforeMount() {
@@ -313,9 +321,10 @@ export default {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
     });
-    this.$root.$on('qrcode_scanned', ({ accountName, coinName }) => {
+    this.$root.$on('qrcode_scanned', ({ accountName, coinName, networkType }) => {
       if (!this.selectedCoin) {
         this.$root.qrcode_accountName = accountName;
+        this.$root.qrcode_networkType = networkType;
         this.selectedCoin = this.coins.find(coin => coin.name === coinName);
         this.showSendAmountDlg = true;
       }

@@ -40,12 +40,13 @@ import { QrcodeStream } from 'vue-qrcode-reader'
 import { accountName } from '../../../store/account/getters';
 
 export default {
-  props: ['showQRScannerDlg'],
+  props: ['showQRScannerDlg', 'coins'],
   components: {
     QrcodeStream,
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters('global', ['pTokens']),
     showDlg: {
       get() {
         return this.showQRScannerDlg;
@@ -64,15 +65,32 @@ export default {
       if (qrcode) {
         const accountName = qrcode.substring(0, qrcode.lastIndexOf('('));
         const coinName = qrcode.slice(qrcode.lastIndexOf('(') + 1, -1);
-        if (!(await this.accountExists(accountName))) {
+        const coin = this.coins.find(coin => coin.name === coinName);
+        let networkType = 'telos';
+
+        if (coin && this.pTokens.includes(coin.symbol.toLowerCase()) && accountName.length > 12) {
+          if (coinName === 'pTokens BTC') {
+            const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${accountName}`)
+              .then(resp => resp.json());
+            if (!data.success) {
+              this.$q.notify({
+                type: 'negative',
+                message: `Address ${accountName} does not exist`,
+              });
+              return;
+            }
+          }
+          networkType = 'ptoken';
+        } else if (!(await this.accountExists(accountName))) {
           this.$q.notify({
             type: 'negative',
-            message: `Account does not exist`,
+            message: `Account ${accountName} does not exist`,
           });
           return;
         }
+
         this.$emit('update:showQRScannerDlg', false);
-        this.$root.$emit('qrcode_scanned', { accountName, coinName });
+        this.$root.$emit('qrcode_scanned', { accountName, coinName, networkType});
       }
     }
   },

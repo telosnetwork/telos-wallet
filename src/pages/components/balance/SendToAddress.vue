@@ -49,11 +49,12 @@
                 />
               </q-item-section>
             </q-item>
-            <q-item class="list-item">
+            <q-item class="list-item" :disable="networkType !== 'telos'">
               <q-item-section side>Notes:</q-item-section>
               <q-item-section>
                 <q-input
                   v-model="notes"
+                  :disable="networkType !== 'telos'"
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
@@ -61,7 +62,34 @@
                 />
               </q-item-section>
             </q-item>
-            <q-item-label header class="text-center">Show results from your contacts</q-item-label>
+            
+            <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
+              <label class="text-center full-width">To Network</label>
+            </q-item>
+            <q-item v-if="isPToken" class="list-item -center">
+              <q-btn-group class="full-width justify-center" push unelevated>
+                <q-btn 
+                  class="q-px-md"
+                  push no-caps
+                  label="Telos"
+                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  @click="networkType = 'telos'"
+                />
+                <q-btn
+                  class="q-px-md"
+                  push no-caps
+                  label="Bitcoin"
+                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  @click="networkType = 'ptoken'"
+                />
+              </q-btn-group>
+            </q-item>
+            <q-item>
+              <div v-if="checking" class="q-pt-md text-center full-width">
+                <q-spinner class="q-my-md" color="primary" size="2em" :thickness="5" /><br/>
+                Checking {{networkType === 'telos' ? 'Account' : 'Address'}}
+              </div>
+            </q-item>
           </q-list>
         </q-header>
         <q-page-container>
@@ -71,7 +99,14 @@
         </q-page-container>
       </q-layout>
     </q-card>
-    <SendConfirm :showSendConfirmDlg.sync="showSendConfirmDlg" :selectedCoin="selectedCoin" :sendAmount="sendAmount" :toAddress="toAddress" :notes="notes"/>
+    <SendConfirm
+      :showSendConfirmDlg.sync="showSendConfirmDlg"
+      :selectedCoin="selectedCoin"
+      :sendAmount="sendAmount"
+      :toAddress="toAddress"
+      :notes="notes"
+      :networkType="networkType"
+    />
   </q-dialog>
 </template>
 
@@ -87,6 +122,8 @@ export default {
       toAddress: '',
       notes: '',
       showSendConfirmDlg: false,
+      networkType: 'telos',
+      checking: false,
     }
   },
   components: {
@@ -94,6 +131,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters('global', ['pTokens']),
     showDlg: {
       get() {
         return this.showSendToAddressDlg;
@@ -101,6 +139,12 @@ export default {
       set(value) {
         this.$emit('update:showSendToAddressDlg', value);
       },
+    },
+    isPToken() {
+      if (!this.selectedCoin) {
+        return false;
+      }
+      return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
     },
   },
   methods: {
@@ -113,13 +157,33 @@ export default {
         });
         return;
       }
-      if (!(await this.accountExists(this.toAddress))) {
-        this.$q.notify({
-          type: 'negative',
-          message: `Account ${this.toAddress} does not exist`,
-        });
-        return;
+
+      this.checking = true;
+      if (this.networkType === 'ptoken') {
+        if (this.selectedCoin.name === 'pTokens BTC') {
+          const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`)
+            .then(resp => resp.json());
+          if (!data.success) {
+            this.$q.notify({
+              type: 'negative',
+              message: `Address ${this.toAddress} does not exist`,
+            });
+            this.checking = false;
+            return;
+          }
+        }
+      } else {
+        if (!(await this.accountExists(this.toAddress))) {
+          this.$q.notify({
+            type: 'negative',
+            message: `Account ${this.toAddress} does not exist`,
+          });
+          this.checking = false;
+          return;
+        }
       }
+
+      this.checking = false;
       this.showSendConfirmDlg = true;
     },
     showQRScanner() {
@@ -130,7 +194,7 @@ export default {
     this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
       this.showSendConfirmDlg = false;
     });
-    this.$root.$on('qrcode_scanned', ({ accountName, coinName }) => {
+    this.$root.$on('qrcode_scanned', ({ accountName, coinName, networkType }) => {
       if (this.showSendToAddressDlg) {
         if (this.selectedCoin && coinName !== this.selectedCoin.name) {
           this.$q.notify({
@@ -139,6 +203,7 @@ export default {
           });
         } else {
           this.toAddress = accountName;
+          this.networkType = networkType;
         }
       }
     });
@@ -147,8 +212,10 @@ export default {
     showSendToAddressDlg: function(val, oldVal) {
       if (val) {
         this.toAddress = this.$root.qrcode_accountName || '';
+        this.networkType = this.$root.qrcode_networkType || 'telos';
         this.$root.qrcode_accountName = '';
         this.notes = '';
+        this.checking = false;
       }
     },
   },

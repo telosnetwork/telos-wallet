@@ -33,7 +33,13 @@
               <q-list>
                 <q-item class="list-item">
                   <q-item-section side>To</q-item-section>
-                  <q-item-section>{{toAddress}}</q-item-section>
+                  <q-item-section class="to-address">{{toAddress}}</q-item-section>
+                </q-item>
+                <q-item v-if="networkType !== 'telos'"
+                  class="list-item">
+                  <q-item-section side class="text-weight-bold">Network Fee</q-item-section>
+                  <q-item-section></q-item-section>
+                  <q-item-section side>{{`$ 0.00`}}</q-item-section>
                 </q-item>
                 <q-item class="list-item">
                   <q-item-section side class="text-weight-bold">Total</q-item-section>
@@ -60,9 +66,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
+import { networkInterfaces } from 'os';
 
 export default {
-  props: ['showSendConfirmDlg', 'selectedCoin', 'sendAmount', 'toAddress', 'notes'],
+  props: ['showSendConfirmDlg', 'selectedCoin', 'sendAmount', 'toAddress', 'notes', 'networkType'],
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     showDlg: {
@@ -82,16 +89,30 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      const actions = [{
-        account: this.selectedCoin.account,
-        name: 'transfer',
-        data: {
-          from: this.accountName.toLowerCase(),
-          to: this.toAddress,
-          quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
-          memo: this.notes
-        }
-      }];
+      let actions = [];
+      console.log(this.networkType);
+      if (this.networkType === 'telos') {
+        actions.push({
+          account: this.selectedCoin.account,
+          name: 'transfer',
+          data: {
+            from: this.accountName.toLowerCase(),
+            to: this.toAddress,
+            quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
+            memo: this.notes
+          }
+        });
+      } else {
+        actions.push({
+          account: this.selectedCoin.account,
+          name: 'redeem',
+          data: {
+            from: this.accountName.toLowerCase(),
+            memo: this.toAddress,
+            quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
+          }
+        });
+      }
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
         this.showTransaction = true;
@@ -121,5 +142,13 @@ export default {
 }
 .h-20 {
   height: 20px;
+}
+.to-address {
+  width: 0px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  padding-top: inherit;
+  padding-bottom: inherit;
 }
 </style>
