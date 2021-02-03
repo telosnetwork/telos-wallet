@@ -218,6 +218,17 @@ export default {
         this.checking = false;
       }
     },
+    toAddress: function(val, oldVal) {
+      if (isPToken) {
+        if (this.selectedCoin.name === 'pTokens BTC' && this.toAddress.length >= 26) {
+          this.networkType = 'ptoken';
+        } else if (this.toAddress.length <= 12) {
+          this.networkType = 'telos';
+        }
+      } else {
+        this.networkType = 'telos';
+      }
+    },
   },
 };
 </script>

@@ -107,7 +107,7 @@ export default {
           account: this.selectedCoin.account,
           name: 'redeem',
           data: {
-            from: this.accountName.toLowerCase(),
+            sender: this.accountName.toLowerCase(),
             memo: this.toAddress,
             quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
           }
