@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-infinite-scroll>
-      <q-item v-for="(coin, index) in coins"
+      <q-item v-for="(coin, index) in availbleCoins"
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
@@ -42,6 +42,11 @@ import { mapGetters, mapActions } from 'vuex';
 
 export default {
   props: ['coins', 'loadedAll', 'showHistoryDlg', 'selectedCoin'],
+  computed: {
+    availbleCoins() {
+      return this.coins.filter(coin => coin.amount > 0);
+    },
+  },
   methods: {
     selectCoin(coin) {
       this.$emit('update:selectedCoin', coin);
