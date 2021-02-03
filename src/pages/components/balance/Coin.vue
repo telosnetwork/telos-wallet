@@ -16,8 +16,8 @@
         
         <q-item-section style="justify-content: start; display: grid;">
           <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end">{{coin.name}}</label>
-            <label class="text-subtitle2 text-grey-5">{{coin.symbol}}</label>
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{coin.name}}</label>
+            <label class="text-subtitle2 text-grey-5 wraplabel">{{coin.symbol}}</label>
           </div>
         </q-item-section>
         
@@ -62,5 +62,10 @@ export default {
 }
 .h-20 {
   height: 20px;
+}
+.wraplabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

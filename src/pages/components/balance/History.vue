@@ -53,8 +53,8 @@
 
                 <q-item-section style="justify-content: start; display: grid;">
                   <div class="text-black text-left display-grid">
-                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end">{{historyData(history).actionName}}</label>
-                    <label class="text-caption text-grey-5 text-weight-regular">{{historyData(history).actionDetail}}</label>
+                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{historyData(history).actionName}}</label>
+                    <label class="text-caption text-grey-5 text-weight-regular wraplabel">{{historyData(history).actionDetail}}</label>
                   </div>
                 </q-item-section>
 
@@ -117,6 +117,7 @@ export default {
       const actionHistory = await this.$hyperion.get(
         `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`
       );
+      console.log(actionHistory);
       this.accountHistory.push(...(actionHistory.data.actions || []));
       this.page += this.pageLimit;
       if (actionHistory.data.actions.length === 0) {
@@ -135,6 +136,7 @@ export default {
       let actionDetail = '';
       let coinAmount = 0;
       let usdAmount = 0;
+
       if (history.act.name === 'transfer') {
         if (history.act.data.from === this.accountName) {
           actionName = `Sent ${this.selectedCoin.name}`;
@@ -144,6 +146,10 @@ export default {
           actionDetail = `From ${history.act.data.from}`;
         }
         coinAmount = history.act.data.amount;
+      } else if (history.act.name === 'redeem') {
+        actionName = `Withdraw ${this.selectedCoin.name}`;
+        actionDetail = `To ${history.act.data.memo}`;
+        coinAmount = Number(history.act.data.quantity.split(this.selectedCoin.symbol)[0]);
       } else if (history.act.name === 'sellram') {
         actionName = 'Sold Ram';
         actionDetail = `${history.act.data.bytes} bytes`;
@@ -188,5 +194,10 @@ export default {
 }
 .h-20 {
   height: 20px;
+}
+.wraplabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
