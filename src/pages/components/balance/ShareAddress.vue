@@ -167,7 +167,7 @@ export default {
           message: 'New Deposit Address is generated successfully',
         });
 
-        depositAddress.waitForDeposit()
+        newAddress.waitForDeposit()
           .once('nativeTxBroadcasted', tx => {} )
           .once('nativeTxConfirmed', tx => {})
           .once('nodeReceivedTx', tx => {})
