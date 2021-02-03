@@ -166,6 +166,20 @@ export default {
           type: 'primary',
           message: 'New Deposit Address is generated successfully',
         });
+
+        depositAddress.waitForDeposit()
+          .once('nativeTxBroadcasted', tx => {} )
+          .once('nativeTxConfirmed', tx => {})
+          .once('nodeReceivedTx', tx => {})
+          .once('nodeBroadcastedTx', tx => {})
+          .once('hostTxConfirmed', tx => {})
+          .then(res => {
+            this.$q.notify({
+              type: 'primary',
+              message: 'New Deposit is confirmed successfully',
+            });
+            this.awaiting = false;
+          });
       }
     },
   },
@@ -175,9 +189,6 @@ export default {
         this.networkType = 'telos';
         this.metaData = JSON.parse(window.localStorage.getItem('metaData')) || {};
         this.depositAddress = this.metaData[this.selectedCoin.symbol] || '';
-        if (this.depositAddress.length > 0) {
-          this.awaiting = true;
-        }
       }
     },
   },
