@@ -93,7 +93,7 @@ export default {
     return {
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
       sendAmount: '0',
-      coinInput: '0',
+      coinInput: true,
       showSendToAddressDlg: false,
       inputWidth: 50,
     }

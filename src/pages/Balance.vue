@@ -84,12 +84,43 @@
         </q-page-container>
       </q-layout>
     </div>
-    <History :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg" :showShareAddressDlg.sync="showShareAddressDlg"/>
-    <Send :showSendDlg.sync="showSendDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showSendAmountDlg.sync="showSendAmountDlg"/>
-    <Receive :showReceiveDlg.sync="showReceiveDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :showShareAddressDlg.sync="showShareAddressDlg"/>
-    <SendAmount :showSendAmountDlg.sync="showSendAmountDlg" :showHistoryDlg="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
-    <ShareAddress :showShareAddressDlg.sync="showShareAddressDlg" :selectedCoin="selectedCoin"/>
-    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins"/>
+    <History
+      :showHistoryDlg.sync="showHistoryDlg"
+      :selectedCoin.sync="selectedCoin"
+      :showSendAmountDlg.sync="showSendAmountDlg"
+      :showShareAddressDlg.sync="showShareAddressDlg"
+      :showBuyAmountDlg.sync="showBuyAmountDlg"
+    />
+    <Send
+      :showSendDlg.sync="showSendDlg"
+      :coins="coins"
+      :selectedCoin.sync="selectedCoin"
+      :showSendAmountDlg.sync="showSendAmountDlg"
+    />
+    <Receive
+      :showReceiveDlg.sync="showReceiveDlg"
+      :coins="coins"
+      :selectedCoin.sync="selectedCoin"
+      :showShareAddressDlg.sync="showShareAddressDlg"
+    />
+    <SendAmount
+      :showSendAmountDlg.sync="showSendAmountDlg"
+      :showHistoryDlg="showHistoryDlg"
+      :selectedCoin.sync="selectedCoin"
+    />
+    <BuyAmount
+      :showBuyAmountDlg.sync="showBuyAmountDlg"
+      :showHistoryDlg="showHistoryDlg"
+      :selectedCoin.sync="selectedCoin"
+    />
+    <ShareAddress
+      :showShareAddressDlg.sync="showShareAddressDlg"
+      :selectedCoin="selectedCoin"
+    />
+    <QRScanner
+      :showQRScannerDlg.sync="showQRScannerDlg"
+      :coins="coins"
+    />
   </div>
 </template>
 
@@ -102,6 +133,7 @@ import Collectibles from './components/balance/Collectibles';
 import Send from './components/balance/Send';
 import SendAmount from './components/balance/SendAmount';
 import Receive from './components/balance/Receive';
+import BuyAmount from './components/balance/BuyAmount';
 import ShareAddress from './components/balance/ShareAddress';
 import QRScanner from './components/balance/QRScanner';
 import History from './components/balance/History';
@@ -128,6 +160,7 @@ export default {
     Send,
     SendAmount,
     Receive,
+    BuyAmount,
     ShareAddress,
     QRScanner,
     History,
@@ -156,6 +189,7 @@ export default {
       showSendAmountDlg: false,
       showReceiveDlg: false,
       showShareAddressDlg: false,
+      showBuyAmountDlg: false,
       showQRScannerDlg: false,
       showHistoryDlg: false,
     };

@@ -1,5 +1,5 @@
 <template>
-  <q-card class="column full-height q-mx-md" style="max-width: 800px; margin: auto;">
+  <div class="column q-mx-md" :style="`max-width: 800px; margin: auto; overflow: auto; height: ${availableHeight}px !important;`">
     <q-list class="q-py-md">
       <q-item class="justify-center">
         <q-avatar size="110px" font-size="52px" color="white" text-color="white">
@@ -40,7 +40,7 @@
         />
       </q-item>
     </q-list>
-  </q-card>
+  </div>
 </template>
 
 <script>
@@ -61,6 +61,10 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters('global', ['footerHeight']),
+    availableHeight() {
+      return window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0);
+    },
     userAvatar() {
       if (this.avatar) return this.avatar;
 

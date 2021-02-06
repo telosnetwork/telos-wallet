@@ -27,7 +27,7 @@
 
               <q-item-section style="justify-content: start; display: grid;">
                 <div class="text-black text-left display-grid">
-                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end">{{dapp.name}}</label>
+                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{dapp.name}}</label>
                   <label class="text-caption text-grey-5">{{ }}</label>
                 </div>
               </q-item-section>
@@ -35,7 +35,7 @@
               <q-item-section side>
                 <div class="text-black text-right display-grid">
                   <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{dapp.category}}</label>
-                  <label class="text-caption text-grey-6">{{dapp.tags.slice(0, 2).join(', ')}}</label>
+                  <label class="text-caption text-grey-6 wraplabel">{{dapp.tags.slice(0, 2).join(', ')}}</label>
                 </div>
               </q-item-section>
             </q-item>
@@ -130,5 +130,10 @@ export default {
 }
 .display-grid {
   display: grid;
+}
+.wraplabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

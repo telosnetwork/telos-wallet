@@ -30,12 +30,27 @@
           </div>
           <div class="text-center q-my-md" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
             <q-space/>
-            <div class="display-grid">
+            <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
             </div>
             <q-space/>
-            <div class="display-grid">
+            <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Receive" icon="fas fa-sign-in-alt" @click="receive"/>
+            </div>
+            <q-space/>
+          </div>
+          <div
+            v-if="selectedCoin.symbol === 'TLOS'"
+            class="text-center q-my-sm"
+            :style="`color: ${themeColor}; display: flex; opacity: 0.8;`"
+          >
+            <q-space/>
+            <div class="display-grid" style="width: 60px">
+              <q-btn round flat dense stack size="md" label="Buy" @click="buy"/>
+            </div>
+            <q-space/>
+            <div class="display-grid" style="width: 60px">
+              <q-btn round flat dense stack size="md" label="Sell" @click="sell"/>
             </div>
             <q-space/>
           </div>
@@ -83,7 +98,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showHistoryDlg', 'selectedCoin', 'showSendAmountDlg', 'showShareAddressDlg'],
+  props: ['showHistoryDlg', 'selectedCoin', 'showSendAmountDlg', 'showBuyAmountDlg', 'showShareAddressDlg'],
   data() {
     return {
       searchHistory: '',
@@ -130,6 +145,12 @@ export default {
     },
     receive() {
       this.$emit('update:showShareAddressDlg', true);
+    },
+    buy() {
+      this.$emit('update:showBuyAmountDlg', true);
+    },
+    sell() {
+      // this.$emit('update:showShareAddressDlg', true);
     },
     historyData(history) {
       let actionName = '';
