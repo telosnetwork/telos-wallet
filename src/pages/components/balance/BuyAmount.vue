@@ -223,7 +223,7 @@ export default {
   watch: {
     showBuyAmountDlg: function(val, oldVal) {
       if (val) {
-        this.coinInput = true;
+        this.coinInput = false;
         this.buyAmount = '0';
       } else if (!this.showHistoryDlg) {
         this.$emit('update:selectedCoin', null);
@@ -247,9 +247,14 @@ export default {
           }
         }
 
-        if (!this.coinInput && this.buyAmountValue >= 20) {
-          this.calculating += 1;
-          this.getMoonpayQuote();
+        if (!this.coinInput) {
+          if (this.buyAmountValue >= 20) {
+            this.calculating += 1;
+            this.getMoonpayQuote();
+          } else {
+            this.exchangeRate = 0;
+            this.getAmount = 0;
+          }
         }
       }
     },
