@@ -1,6 +1,12 @@
-# Telos Quasar Template (telos-template)
+# Telos web wallet
 
-A template for using Vue+Quasar to build a Telos webapp
+Running at:
+
+https://wallet.telos.net (mainnet)
+https://wallet-dev.telos.net (testnet)
+
+## CI/CD NOTE
+Push to `developer` branch always first, this will auto-deploy wallet-dev.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
 
 ## Install the dependencies
 ```bash
