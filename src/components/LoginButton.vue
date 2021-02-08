@@ -58,11 +58,11 @@
             color: wallet.getStyle().textColor
           }"
         >
-          <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
+          <q-item-section class="cursor-pointer" avatar @click="onLogin(idx + 1)">
             <img :src="wallet.getStyle().icon" width="30" />
           </q-item-section>
 
-          <q-item-section class="cursor-pointer" @click="onLogin(idx)">
+          <q-item-section class="cursor-pointer" @click="onLogin(idx + 1)">
             {{ wallet.getStyle().text }}
           </q-item-section>
 
