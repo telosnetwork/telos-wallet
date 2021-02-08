@@ -90,7 +90,6 @@ export default {
     },
     async confirm() {
       let actions = [];
-      console.log(this.networkType);
       if (this.networkType === 'telos') {
         actions.push({
           account: this.selectedCoin.account,

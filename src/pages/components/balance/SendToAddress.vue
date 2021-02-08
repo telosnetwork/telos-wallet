@@ -32,6 +32,7 @@
               <q-item-section>
                 <q-input
                   v-model="toAddress"
+                  :value="toAddress.toLowerCase()"
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
@@ -219,14 +220,13 @@ export default {
       }
     },
     toAddress: function(val, oldVal) {
-      if (isPToken) {
-        if (this.selectedCoin.name === 'pTokens BTC' && this.toAddress.length >= 26) {
-          this.networkType = 'ptoken';
-        } else if (this.toAddress.length <= 12) {
-          this.networkType = 'telos';
-        }
-      } else {
-        this.networkType = 'telos';
+      if (this.networkType === 'telos') {
+        this.toAddress = this.toAddress.toLowerCase();
+      }
+    },
+    networkType: function(val, oldVal) {
+      if (val === 'telos') {
+        this.toAddress = this.toAddress.toLowerCase();
       }
     },
   },
