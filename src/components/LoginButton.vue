@@ -1,24 +1,37 @@
 <template>
   <div>
     <div v-if="!isAuthenticated" class="q-px-md">
-      <q-btn
-        @click="signUp"
-        text-color="white"
-        no-caps
-        label="Create a new wallet"
-        class="full-width login-btn"
-        :style="`background: ${themeColor}`"
-      />
-    </div>
-    <div v-if="!isAuthenticated" class="q-px-md q-mt-md">
-      <q-btn
-        @click="signIn"
-        no-caps
-        flat
-        label="I already have a wallet"
-        class="full-width login-btn"
-        :style="`color: ${themeColor}`"
-      />
+      <div>
+        <q-btn
+          @click="signIn"
+          text-color="white"
+          no-caps
+          label="Sign In"
+          class="full-width login-btn"
+          :style="`background: ${themeColor}`"
+        />
+      </div>
+      <div class="q-mt-md q-mb-sm">
+        <q-btn
+          @click="showLogin = true"
+          no-caps
+          outline
+          label="Connect Account"
+          class="full-width login-btn"
+          :style="`color: ${themeColor}`"
+        />
+      </div>
+      <q-separator v-if="!isAuthenticated" class="q-mt-md q-mx-auto" style="max-width: 500px;"/>
+      <div class="q-mt-md">
+        <q-btn
+          @click="signUp"
+          text-color="white"
+          no-caps
+          label="Create New Account"
+          class="login-btn"
+          :style="`background: #2cb678`"
+        />
+      </div>
     </div>
 
     <div v-if="isAuthenticated" class="row absolute full-width">
@@ -37,7 +50,7 @@
     <q-dialog v-model="showLogin">
       <q-list>
         <q-item
-          v-for="(wallet, idx) in $ual.authenticators"
+          v-for="(wallet, idx) in $ual.authenticators.slice(1)"
           :key="wallet.getStyle().text"
           v-ripple
           :style="{
