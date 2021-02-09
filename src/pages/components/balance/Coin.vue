@@ -44,7 +44,7 @@ export default {
   props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'selectedCoin'],
   computed: {
     availbleCoins() {
-      return this.coins.filter(coin => coin.amount > 0);
+      return this.coins.filter(coin => coin.amount > 0 || coin.symbol === 'TLOS' || coin.symbol === 'PBTC');
     },
   },
   methods: {
