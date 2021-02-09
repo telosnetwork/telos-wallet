@@ -28,7 +28,7 @@
           </div>
         </q-item-section>
       </q-item>
-      <template v-if="!loadedAll" v-slot:loading>
+      <template v-if="!coinLoadedAll" v-slot:loading>
         <div class="row justify-center q-my-md">
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -41,7 +41,7 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins', 'loadedAll', 'showHistoryDlg', 'selectedCoin'],
+  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'selectedCoin'],
   computed: {
     availbleCoins() {
       return this.coins.filter(coin => coin.amount > 0);

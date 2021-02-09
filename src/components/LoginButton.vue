@@ -16,7 +16,7 @@
           @click="showLogin = true"
           no-caps
           outline
-          label="Connect Account"
+          label="Connect Wallet"
           class="full-width login-btn"
           :style="`color: ${themeColor}`"
         />

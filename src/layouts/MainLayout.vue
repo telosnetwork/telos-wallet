@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh Lpr fFf">
     <q-page-container :style="`height: ${containerHeight}px;`">
-      <router-view :loadedCoins.sync="coins"/>
+      <router-view :loadedCoins.sync="coins" :loadedNftTokens.sync="nftTokens"/>
     </q-page-container>
     
     <q-footer v-if="isAuthenticated" style="max-width: 800px; margin: auto;">
@@ -69,6 +69,7 @@ export default {
       tab: pagesData[0].title,
       pages: pagesData,
       coins: [],
+      nftTokens: [],
     };
   },
   computed: {

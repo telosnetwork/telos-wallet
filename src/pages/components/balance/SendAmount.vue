@@ -34,9 +34,14 @@
                 <div class="desktop-only flex flex-center">
                   <label class="text-weight-regular q-mr-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                     {{coinInput ? `` : '$ '}} </label>
-                  <input type="text" :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
+                  <input 
+                    type="text"
+                    :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
                     :style="`font-size: ${amountFontSize}px; color: ${themeColor}; z-index: 1; width: ${inputWidth}px;`"
-                    v-model="sendAmount" />
+                    v-model="sendAmount"
+                    @focus="sendAmount = (sendAmount === '0' ? '' : sendAmount)"
+                    @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString()"
+                  />
                   <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                     {{coinInput ? selectedCoin.symbol : ''}} </label>
                 </div>

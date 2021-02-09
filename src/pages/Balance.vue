@@ -74,10 +74,10 @@
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
             <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Coins" class="no-padding">
-                <Coin :coins="coins" :loadedAll="loadedAll" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
+                <Coin :coins="coins" :coinLoadedAll="coinLoadedAll" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
               </q-tab-panel>
               <q-tab-panel name="Collectibles">
-                <Collectibles />
+                <Collectibles :nftTokenTags="nftTokenTags" :nftTokenLoadedAll="nftTokenLoadedAll" :coinViewHeight="coinViewHeight" :loadNftTokenTags="loadNftTokenTags"/>
               </q-tab-panel>
             </q-tab-panels>
           </q-page>
@@ -152,7 +152,7 @@ const tabsData = [
 ];
 
 export default {
-  props: ['loadedCoins'],
+  props: ['loadedCoins', 'loadedNftTokens'],
   components: {
     LoginButton,
     Coin,
@@ -176,7 +176,18 @@ export default {
         precision: 4,
         suggested: true,
       }],
-      loadedAll: false,
+      nftTokenItems: {},
+      nftTokenTags: [],
+      nftAccounts: [
+        'tlos.tbond',
+        'marble.code',
+      ],
+      nftScopes: [
+        0,
+        0,
+      ],
+      coinLoadedAll: false,
+      nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
       tab: tabsData[0].title,
@@ -289,6 +300,85 @@ export default {
         return bAmount - aAmount;
       });
     },
+    async loadNftTokenItems() {
+      for (const account of this.nftAccounts) {
+        await this.loadNftTokenItemssPerAccount(account);
+      }
+    },
+    async loadNftTokenItemssPerAccount(nftAccount) {
+      const tagData = await this.$store.$api.getTableRows({
+        code: nftAccount,
+        index_position: 1,
+        json: true,
+        key_type: "",
+        limit: "1000",
+        lower_bound: null,
+        reverse: false,
+        scope: nftAccount,
+        show_payer: false,
+        table: "items",
+        table_key: "",
+        upper_bound: null
+      });
+      this.nftTokenItems[nftAccount] = tagData.rows;
+    },
+    async loadNftTokenTags() {
+      for (const account of this.nftAccounts) {
+        if (this.nftTokenItems[account]) {
+          await this.loadNftTokenTagsPerAccount(account);
+        }
+      }
+    },
+    async loadNftTokenTagsPerAccount(nftAccount) {
+      const index = this.nftAccounts.findIndex(account => account === nftAccount);
+      let foundFirstData = false;
+      let count = 10;
+
+      while(count > 0) {
+        if (this.nftScopes[index] >= this.nftTokenItems[nftAccount].length) {
+          break;
+        }
+        const tagData = await this.$store.$api.getTableRows({
+          code: nftAccount,
+          index_position: 1,
+          json: true,
+          key_type: "",
+          limit: "100",
+          lower_bound: null,
+          reverse: false,
+          scope: `${this.nftTokenItems[nftAccount][this.nftScopes[index]].serial}`,
+          show_payer: false,
+          table: "tags",
+          table_key: "",
+          upper_bound: null
+        });
+        if (tagData.rows.length == 0) {
+          if (foundFirstData) {
+            break;
+          }
+          this.nftScopes[index] += 1;
+        } else {
+          if (nftAccount === 'tlos.tbond') {
+            const title = tagData.rows.find(row => row.tag_name === 'title').content;
+            const image = tagData.rows.find(row => row.tag_name === 'image').content;
+            this.nftTokenTags.push({
+              title: title,
+              image: image,
+            });
+          } else if (nftAccount === 'marble.code') {
+            const data = JSON.parse(tagData.rows.find(row => row.tag_name === 'data').content);
+            this.nftTokenTags.push({
+              title: data.ti,
+              image: data.dt,
+            });
+          }
+          this.$emit('update:loadedNftTokens', this.nftTokenTags);
+          foundFirstData = true;
+          this.nftScopes[index] += 1;
+          count -= 1;
+        }
+      }
+    },
   },
   created: async function() {
     this.interval = setInterval(() => {
@@ -309,40 +399,42 @@ export default {
 
     if (this.loadedCoins.length > 0) {
       this.coins = this.loadedCoins;
-      this.loadedAll = true;
-      return; 
-    }
-
-    this.coins.length = 1;
-    for (const t of this.supportTokens) {
-      await fetch(`https://www.api.bloks.io/telos/tokens/${t}`)
-        .then(response => response.json())
-        .then(json => {
-          json.forEach((token) => {
-            if (token.chain !== 'telos') {
-              ;
-            } else if (token.metadata.name === 'Telos') {
-              this.coins[0].price = token.price.usd;
-              this.coins[0].icon = token.metadata.logo;
-            } else {
-              const precisionSplit = token.supply.circulating.toString().split('.');
-              this.coins.push({
-                account: token.account,
-                name: token.metadata.name,
-                symbol: token.symbol,
-                amount: 0,
-                price: token.price.usd,
-                icon: token.metadata.logo,
-                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
-              });
-              this.getUserTokens().then(this.loadUserTokens());
-              this.$emit('update:loadedCoins', this.coins);
-            }
+      this.coinLoadedAll = true;
+    } else {
+      this.coins.length = 1;
+      for (const t of this.supportTokens) {
+        await fetch(`https://www.api.bloks.io/telos/tokens/${t}`)
+          .then(response => response.json())
+          .then(json => {
+            json.forEach((token) => {
+              if (token.chain !== 'telos') {
+                ;
+              } else if (token.metadata.name === 'Telos') {
+                this.coins[0].price = token.price.usd;
+                this.coins[0].icon = token.metadata.logo;
+              } else {
+                const precisionSplit = token.supply.circulating.toString().split('.');
+                this.coins.push({
+                  account: token.account,
+                  name: token.metadata.name,
+                  symbol: token.symbol,
+                  amount: 0,
+                  price: token.price.usd,
+                  icon: token.metadata.logo,
+                  precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+                });
+                this.getUserTokens().then(this.loadUserTokens());
+                this.$emit('update:loadedCoins', this.coins);
+              }
+            });
           });
-        });
+      }
     }
 
-    this.loadedAll = true;
+    await this.loadNftTokenItems();
+    this.loadNftTokenTags();
+
+    this.coinLoadedAll = true;
     this.tokenInterval = setInterval(() => {
       this.getUserTokens().then(this.loadUserTokens());
     }, 5000);
