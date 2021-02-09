@@ -35,7 +35,10 @@
                     {{coinInput ? `` : '$ '}} </label>
                   <input type="text" :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
                     :style="`font-size: ${amountFontSize}px; color: ${themeColor}; z-index: 1; width: ${inputWidth}px;`"
-                    v-model="buyAmount" />
+                    v-model="buyAmount"
+                    @focus="buyAmount = (buyAmount === '0' ? '' : buyAmount)"
+                    @blur="buyAmount = Number(buyAmount === '' ? '0' : buyAmount).toString()"
+                  />
                   <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                     {{coinInput ? selectedCoin.symbol : ''}} </label>
                 </div>
