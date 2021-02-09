@@ -19,7 +19,7 @@
           />
         </div>
         <label class="description font-size-3-5vw">
-           Send, Buy, Collect Crypto Made Easy
+           Send, Buy, Collect. It's Crypto Made Easy
         </label>
       </q-carousel-slide>
 
