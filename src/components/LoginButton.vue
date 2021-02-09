@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="!isAuthenticated" class="q-px-md">
-      <div>
+      <!-- <div>
         <q-btn
           @click="signIn"
           text-color="white"
@@ -10,7 +10,7 @@
           class="full-width login-btn"
           :style="`background: ${themeColor}`"
         />
-      </div>
+      </div> -->
       <div class="q-mt-md q-mb-sm">
         <q-btn
           @click="showLogin = true"
@@ -50,7 +50,7 @@
     <q-dialog v-model="showLogin">
       <q-list>
         <q-item
-          v-for="(wallet, idx) in $ual.authenticators.slice(1)"
+          v-for="(wallet, idx) in $ual.authenticators"
           :key="wallet.getStyle().text"
           v-ripple
           :style="{
@@ -58,11 +58,11 @@
             color: wallet.getStyle().textColor
           }"
         >
-          <q-item-section class="cursor-pointer" avatar @click="onLogin(idx + 1)">
+          <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
             <img :src="wallet.getStyle().icon" width="30" />
           </q-item-section>
 
-          <q-item-section class="cursor-pointer" @click="onLogin(idx + 1)">
+          <q-item-section class="cursor-pointer" @click="onLogin(idx)">
             {{ wallet.getStyle().text }}
           </q-item-section>
 
