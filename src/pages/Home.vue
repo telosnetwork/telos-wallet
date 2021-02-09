@@ -7,7 +7,7 @@
       swipeable
       animated
       control-color="primary"
-      navigation
+      :navigation="false"
       class="full-width fit-div"
     >
       <q-carousel-slide name="slide1" class="column flex-center">
@@ -23,7 +23,7 @@
         </label>
       </q-carousel-slide>
 
-      <q-carousel-slide name="slide2" class="column flex-center">
+      <!--<q-carousel-slide name="slide2" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -72,7 +72,7 @@
         <label class="description font-size-3-0vw">
           Pay anyone in the world with just their Telos Wallet username
         </label>
-      </q-carousel-slide>
+      </q-carousel-slide>-->
     </q-carousel>
     
     <div v-if="!isAuthenticated" class="full-width" style="height: 210px;">
