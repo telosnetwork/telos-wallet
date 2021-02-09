@@ -19,8 +19,7 @@
           />
         </div>
         <label class="description font-size-3-5vw">
-          The easiest and most secure<br />
-          crypto wallet
+           Send, Buy, Collect Crypto Made Easy
         </label>
       </q-carousel-slide>
 
