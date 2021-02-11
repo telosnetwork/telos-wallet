@@ -320,7 +320,7 @@ export default {
         table_key: "",
         upper_bound: null
       });
-      this.nftTokenItems[nftAccount] = tagData.rows;
+      this.nftTokenItems[nftAccount] = tagData.rows.filter(row => row.owner === this.accountName);
     },
     async loadNftTokenTags() {
       for (const account of this.nftAccounts) {
