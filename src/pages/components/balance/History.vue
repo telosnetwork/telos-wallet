@@ -34,23 +34,16 @@
               <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
             </div>
             <q-space/>
+            <q-separator vertical/>
+            <q-space/>
             <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Receive" icon="fas fa-sign-in-alt" @click="receive"/>
             </div>
             <q-space/>
-          </div>
-          <div
-            v-if="selectedCoin.symbol === 'TLOS'"
-            class="text-center q-my-sm"
-            :style="`color: ${themeColor}; display: flex; opacity: 0.8;`"
-          >
+            <q-separator vertical/>
             <q-space/>
             <div class="display-grid" style="width: 60px">
-              <q-btn round flat dense stack size="md" label="Buy" @click="buy"/>
-            </div>
-            <q-space/>
-            <div class="display-grid" style="width: 60px">
-              <q-btn round flat dense stack size="md" label="Sell" @click="sell"/>
+              <q-btn round flat dense stack size="sm" label="Buy" icon="far fa-credit-card" @click="buy"/>
             </div>
             <q-space/>
           </div>
