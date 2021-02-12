@@ -28,7 +28,7 @@
             <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 8)}}</label>
             <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, 8)} ${selectedCoin.symbol}`}}</label>
           </div>
-          <div class="text-center q-my-md" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
+          <div class="text-center q-my-md q-mx-xl" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
             <q-space/>
             <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
