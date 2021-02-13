@@ -25,7 +25,7 @@
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
           <div class="text-black text-center display-grid">
-            <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 8)}}</label>
+            <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
             <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, 8)} ${selectedCoin.symbol}`}}</label>
           </div>
           <div class="text-center q-my-md q-mx-xl" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
@@ -168,7 +168,7 @@ export default {
         actionName = 'Sold Ram';
         actionDetail = `${history.act.data.bytes} bytes`;
       }
-      usdAmount = this.getFixed(coinAmount * this.selectedCoin.price, 8);
+      usdAmount = this.getFixed(coinAmount * this.selectedCoin.price, 2);
 
       return {
         actionName,

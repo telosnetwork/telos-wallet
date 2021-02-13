@@ -14,7 +14,7 @@
           <div class="full-width" ></div>
           <div class="full-width" >
             <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 8)}}
+              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 2)}}
             </label>
           </div>
           <div class="full-width text-right">
