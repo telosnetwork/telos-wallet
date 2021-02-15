@@ -412,7 +412,7 @@ export default {
               } else if (token.metadata.name === 'Telos') {
                 this.coins[0].price = token.price.usd;
                 this.coins[0].icon = token.metadata.logo;
-              } else {
+              } else if (token.symbol !== 'TLOS') {
                 const precisionSplit = token.supply.circulating.toString().split('.');
                 this.coins.push({
                   account: token.account,
