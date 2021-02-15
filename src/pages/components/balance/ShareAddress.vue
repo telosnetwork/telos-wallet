@@ -27,7 +27,7 @@
         <q-page-container>
           <q-card class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow" :style="`height: ${cardHeight}px;`">
             <div v-if="isPToken" class="list-item q-pb-sm">
-              <label class="text-center full-width">To Network</label>
+              <label class="text-center full-width">From Network</label>
             </div>
             <div v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
