@@ -27,6 +27,28 @@
             />
           </q-toolbar>
           <q-list>
+            <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
+              <label class="text-center full-width">To Network</label>
+            </q-item>
+            <q-item v-if="isPToken" class="list-item -center">
+              <q-btn-group class="full-width justify-center" push unelevated>
+                <q-btn 
+                  class="q-px-md"
+                  push no-caps
+                  label="Telos"
+                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  @click="networkType = 'telos'"
+                />
+                <q-btn
+                  class="q-px-md"
+                  push no-caps
+                  label="Bitcoin"
+                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  @click="networkType = 'ptoken'"
+                />
+              </q-btn-group>
+            </q-item>
+            <q-item />
             <q-item class="list-item">
               <q-item-section side>To:</q-item-section>
               <q-item-section>
@@ -62,28 +84,6 @@
                   label="notes"
                 />
               </q-item-section>
-            </q-item>
-            
-            <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
-              <label class="text-center full-width">To Network</label>
-            </q-item>
-            <q-item v-if="isPToken" class="list-item -center">
-              <q-btn-group class="full-width justify-center" push unelevated>
-                <q-btn 
-                  class="q-px-md"
-                  push no-caps
-                  label="Telos"
-                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'telos'"
-                />
-                <q-btn
-                  class="q-px-md"
-                  push no-caps
-                  label="Bitcoin"
-                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'ptoken'"
-                />
-              </q-btn-group>
             </q-item>
             <q-item>
               <div v-if="checking" class="q-pt-md text-center full-width">
