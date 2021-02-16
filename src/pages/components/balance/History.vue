@@ -40,12 +40,12 @@
               <q-btn round flat dense stack size="sm" label="Receive" icon="fas fa-sign-in-alt" @click="receive"/>
             </div>
             <q-space/>
-            <q-separator vertical/>
-            <q-space/>
-            <div class="display-grid" style="width: 60px">
+            <q-separator v-if="selectedCoin.symbol === 'TLOS'" vertical/>
+            <q-space v-if="selectedCoin.symbol === 'TLOS'"/>
+            <div v-if="selectedCoin.symbol === 'TLOS'" class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Buy" icon="far fa-credit-card" @click="buy"/>
             </div>
-            <q-space/>
+            <q-space v-if="selectedCoin.symbol === 'TLOS'"/>
           </div>
           <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
