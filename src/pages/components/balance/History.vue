@@ -46,6 +46,12 @@
               <q-btn round flat dense stack size="sm" label="Buy" icon="far fa-credit-card" @click="buy"/>
             </div>
             <q-space v-if="selectedCoin.symbol === 'TLOS'"/>
+            <q-separator v-if="convertEnabled" vertical/>
+            <q-space v-if="convertEnabled"/>
+            <div v-if="convertEnabled" class="display-grid" style="width: 60px">
+              <q-btn round flat dense stack size="sm" label="Convert" icon="fas fa-sync" @click="convert"/>
+            </div>
+            <q-space v-if="convertEnabled"/>
           </div>
           <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
@@ -79,7 +85,7 @@
                 <q-spinner-dots color="primary" size="40px" />
               </div>
             </template>
-            </q-infinite-scroll>
+          </q-infinite-scroll>
         </q-page-container>
       </q-layout>
     </q-card>
@@ -91,7 +97,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showHistoryDlg', 'selectedCoin', 'showSendAmountDlg', 'showBuyAmountDlg', 'showShareAddressDlg'],
+  props: ['showHistoryDlg', 'selectedCoin', 'showSendAmountDlg', 'showBuyAmountDlg', 'showShareAddressDlg', 'showExchangeDlg'],
   data() {
     return {
       searchHistory: '',
@@ -118,6 +124,9 @@ export default {
             || historyData.actionDetail.toLowerCase().includes(this.searchHistory.toLowerCase());
       });
     },
+    convertEnabled() {
+      return true;
+    },
   },
   methods: {
     async loadMoreHistory(index, done) {
@@ -141,6 +150,9 @@ export default {
     },
     buy() {
       this.$emit('update:showBuyAmountDlg', true);
+    },
+    convert() {
+      this.$emit('update:showExchangeDlg', true);
     },
     sell() {
       // this.$emit('update:showShareAddressDlg', true);

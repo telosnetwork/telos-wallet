@@ -1,6 +1,46 @@
 <template>
   <div>
     <q-infinite-scroll>
+      <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label>
+      <q-item
+        clickable
+        v-ripple
+        class="list-item"
+        @click="clickPurchase()"
+      >
+        <q-item-section avatar>
+          <q-avatar size="45px" class="q-my-sm">
+            <img src="~assets/telos-buy.png">
+          </q-avatar>
+        </q-item-section>
+        
+        <q-item-section style="justify-content: start; display: grid;">
+          <div class="text-black text-left display-grid">
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Purchase crypto</label>
+            <label class="text-subtitle2 text-grey-5 wraplabel">Purchase TLOS</label>
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item
+        clickable
+        v-ripple
+        class="list-item"
+        @click="clickExchange()"
+      >
+        <q-item-section avatar>
+          <q-avatar size="45px" class="q-my-sm">
+            <img src="~assets/telos-swap.png">
+          </q-avatar>
+        </q-item-section>
+        
+        <q-item-section style="justify-content: start; display: grid;">
+          <div class="text-black text-left display-grid">
+            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Convert</label>
+            <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label>
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label>
       <q-item v-for="(coin, index) in availbleCoins"
         :key="`${coin.name}_${index}`"
         clickable
@@ -41,13 +81,20 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'selectedCoin'],
+  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'selectedCoin'],
   computed: {
     availbleCoins() {
       return this.coins.filter(coin => coin.amount > 0 || coin.symbol === 'TLOS' || coin.symbol === 'PBTC');
     },
   },
   methods: {
+    clickPurchase() {
+      this.$emit('update:selectedCoin', this.coins[0]);
+      this.$emit('update:showBuyAmountDlg', true);
+    },
+    clickExchange() {
+      this.$emit('update:showExchangeDlg', true);
+    },
     selectCoin(coin) {
       this.$emit('update:selectedCoin', coin);
       this.$emit('update:showHistoryDlg', true);

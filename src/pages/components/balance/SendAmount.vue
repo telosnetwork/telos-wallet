@@ -33,7 +33,8 @@
                 </label>
                 <div class="desktop-only flex flex-center">
                   <label class="text-weight-regular q-mr-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
-                    {{coinInput ? `` : '$ '}} </label>
+                    {{coinInput ? `` : '$ '}}
+                  </label>
                   <input 
                     type="text"
                     :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
@@ -43,10 +44,12 @@
                     @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString()"
                   />
                   <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
-                    {{coinInput ? selectedCoin.symbol : ''}} </label>
+                    {{coinInput ? selectedCoin.symbol : ''}}
+                  </label>
                 </div>
                 <label class="text-weight-regular full-width mobile-only" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
-                  {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}} </label>
+                  {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}}
+                </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
                   {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, 8)} ${selectedCoin.symbol}`}}
                 </label>

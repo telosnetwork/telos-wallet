@@ -74,10 +74,22 @@
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
             <q-tab-panels v-model="tab" animated>
               <q-tab-panel name="Coins" class="no-padding">
-                <Coin :coins="coins" :coinLoadedAll="coinLoadedAll" :showHistoryDlg.sync="showHistoryDlg" :selectedCoin.sync="selectedCoin"/>
+                <Coin
+                  :coins="coins"
+                  :coinLoadedAll="coinLoadedAll"
+                  :showHistoryDlg.sync="showHistoryDlg"
+                  :showExchangeDlg.sync="showExchangeDlg"
+                  :showBuyAmountDlg.sync="showBuyAmountDlg"
+                  :selectedCoin.sync="selectedCoin"
+                />
               </q-tab-panel>
               <q-tab-panel name="Collectibles">
-                <Collectibles :nftTokenTags="nftTokenTags" :nftTokenLoadedAll="nftTokenLoadedAll" :coinViewHeight="coinViewHeight" :loadNftTokenTags="loadNftTokenTags"/>
+                <Collectibles
+                  :nftTokenTags="nftTokenTags"
+                  :nftTokenLoadedAll="nftTokenLoadedAll"
+                  :coinViewHeight="coinViewHeight"
+                  :loadNftTokenTags="loadNftTokenTags"
+                />
               </q-tab-panel>
             </q-tab-panels>
           </q-page>
@@ -90,6 +102,11 @@
       :showSendAmountDlg.sync="showSendAmountDlg"
       :showShareAddressDlg.sync="showShareAddressDlg"
       :showBuyAmountDlg.sync="showBuyAmountDlg"
+      :showExchangeDlg.sync="showExchangeDlg"
+    />
+    <Exchange
+      :showExchangeDlg.sync="showExchangeDlg"
+      :coins="coins"
     />
     <Send
       :showSendDlg.sync="showSendDlg"
@@ -137,6 +154,7 @@ import BuyAmount from './components/balance/BuyAmount';
 import ShareAddress from './components/balance/ShareAddress';
 import QRScanner from './components/balance/QRScanner';
 import History from './components/balance/History';
+import Exchange from './components/balance/Exchange';
 
 const tabsData = [
   {
@@ -164,6 +182,7 @@ export default {
     ShareAddress,
     QRScanner,
     History,
+    Exchange,
   },
   data() {
     return {
@@ -203,6 +222,7 @@ export default {
       showBuyAmountDlg: false,
       showQRScannerDlg: false,
       showHistoryDlg: false,
+      showExchangeDlg: false,
     };
   },
   computed: {

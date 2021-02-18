@@ -50,7 +50,7 @@
                 </div>
                 <div v-else>
                   <label class="text-subtitle1 text-weight-medium text-grey-8">
-                    Rate: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `${exchangeRate} ${selectedCoin.symbol}`}}
+                    Rate: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `$${exchangeRate} USD/${selectedCoin.symbol}`}}
                   </label><br/>
                   <label class="text-subtitle1 text-weight-medium text-grey-8">
                     Total: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `${getAmount} ${selectedCoin.symbol}`}}
@@ -59,6 +59,9 @@
               </div>
             </div>
             <q-space/>
+            <div class="q-mx-lg text-grey-7">
+              By Clicking 'Next' you will be  using Moonpay to purchase 'EOS' which will be sent to a cross chain contract for exchange to TLOS on the Telos Network at the estimated rate. Do not alter the 'TO' or 'MEMO' field or risk losing your funds.
+            </div>
             <q-space/>
             <div class="q-pa-sm full-width mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
