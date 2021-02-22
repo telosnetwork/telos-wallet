@@ -83,8 +83,8 @@
                   :selectedCoin.sync="selectedCoin"
                 />
               </q-tab-panel>
-              <q-tab-panel name="Collectibles">
-                <Collectibles
+              <q-tab-panel name="Collectables">
+                <Collectables
                   :nftTokenTags="nftTokenTags"
                   :nftTokenLoadedAll="nftTokenLoadedAll"
                   :coinViewHeight="coinViewHeight"
@@ -146,7 +146,7 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import LoginButton from 'components/LoginButton.vue';
 import Coin from './components/balance/Coin';
-import Collectibles from './components/balance/Collectibles';
+import Collectables from './components/balance/Collectables';
 import Send from './components/balance/Send';
 import SendAmount from './components/balance/SendAmount';
 import Receive from './components/balance/Receive';
@@ -163,9 +163,9 @@ const tabsData = [
     label: 'Coins',
   },
   {
-    title: 'Collectibles',
-    caption: 'Collectibles',
-    label: 'Collectibles',
+    title: 'Collectables',
+    caption: 'Collectables',
+    label: 'Collectables',
   },
 ];
 
@@ -174,7 +174,7 @@ export default {
   components: {
     LoginButton,
     Coin,
-    Collectibles,
+    Collectables,
     Send,
     SendAmount,
     Receive,
