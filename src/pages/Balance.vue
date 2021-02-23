@@ -205,6 +205,7 @@ export default {
         0,
         0,
       ],
+      nftTagLoading: false,
       coinLoadedAll: false,
       nftTokenLoadedAll: false,
       panning: false,
@@ -350,6 +351,10 @@ export default {
       }
     },
     async loadNftTokenTagsPerAccount(nftAccount) {
+      if (this.nftTagLoading) {
+        return;
+      }
+      this.nftTagLoading = true;
       const index = this.nftAccounts.findIndex(account => account === nftAccount);
       let foundFirstData = false;
       let count = 10;
@@ -398,6 +403,7 @@ export default {
           count -= 1;
         }
       }
+      this.nftTagLoading = false;
     },
   },
   created: async function() {
