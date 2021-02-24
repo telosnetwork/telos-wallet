@@ -423,8 +423,10 @@ export default {
       }
     }, 10);
 
-    await this.loadNftTokenItems();
-    this.loadNftTokenTags();
+    if (this.chainName === 'telos') {
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
+    }
 
     if (this.loadedCoins.length > 0) {
       this.coins = this.loadedCoins;
