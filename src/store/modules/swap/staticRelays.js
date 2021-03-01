@@ -1,10 +1,8 @@
 import { Sym } from "eos-common";
-
 const tlosToken = {
     contract: "eosio.token",
     symbol: "4,TLOS"
 };
-
 const oldRelays = [
     {
         contract: "tlosdx.swaps",
@@ -287,4 +285,3 @@ export const getHardCodedRelays = () => oldRelays.map(relay => (
         }))
     })
 );
-//# sourceMappingURL=staticRelays.js.map

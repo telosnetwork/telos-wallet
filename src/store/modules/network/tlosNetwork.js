@@ -12,7 +12,6 @@ const pickBalanceReturn = (data) => {
     const res = _.pick(data, requiredProps);
     if (!res.contract || !res.symbol)
         throw new Error("Failed to parse contract or symbol in pickBalanceReturn");
-    // @ts-ignore
     return res;
 };
 const tokenBalanceToTokenBalanceReturn = (token) => (Object.assign(Object.assign({}, token), { balance: token.amount }));
@@ -34,7 +33,6 @@ export class TlosNetworkModule extends VuexModule.With({ namespaced: "tlosNetwor
         };
     }
     get isAuthenticated() {
-        // @ts-ignore
         return this.$store.rootGetters["tlosWallet/isAuthenticated"];
     }
     get networkId() {
@@ -71,7 +69,6 @@ export class TlosNetworkModule extends VuexModule.With({ namespaced: "tlosNetwor
     }
     transfer({ to, amount, id, memo }) {
         return __awaiter(this, void 0, void 0, function* () {
-            //    console.log("telosNetwork.transfer", to, amount, id, memo);
             if (!this.isAuthenticated)
                 throw new Error("Not authenticated!");
             const symbol = id;
@@ -96,22 +93,17 @@ export class TlosNetworkModule extends VuexModule.With({ namespaced: "tlosNetwor
     }
     xtransfer({ to, amount, id, memo }) {
         return __awaiter(this, void 0, void 0, function* () {
-            // This routing handles Telos->EOS and EOS->Telos movements.
-            //    console.log("telosNetwork.xtransfer", to, amount, id, memo);
             if (!this.isAuthenticated)
                 throw new Error("Not authenticated!");
             const symbol = id;
             const tokens = vxm.xchainBancor.tokens;
-            //    console.log("xtransfer.tokens", symbol, tokens);
             const token = tokens.find(x => compareString(x.symbol.toString(), symbol));
             if (!token)
                 throw new Error("Failed finding token");
-            //    console.log("xtransfer.token", token);
             const contract = token.contract;
             const precision = token.precision;
             const asset = number_to_asset(amount, new Sym(symbol, precision));
             const new_memo = to.toString() + ((vxm.tlosWallet.chain == Chain.telos) ? "@eos" : "@telos") + (memo === "" ? "" : "|" + memo);
-            //    console.log("telosNetwork.xtransfer", new_memo);
             const bridge_account = "telosd.io";
             const actions = yield multiContract.tokenTransfer(contract, {
                 to: bridge_account,

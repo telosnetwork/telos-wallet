@@ -106,6 +106,7 @@
     />
     <Exchange
       :showExchangeDlg.sync="showExchangeDlg"
+      :selectedConvertCoin.sync="selectedCoin"
       :coins="coins"
     />
     <Send

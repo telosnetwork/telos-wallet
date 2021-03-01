@@ -10,11 +10,9 @@ export class WalletModule extends VuexModule.With({ namespaced: "wallet/" }) {
         return vxm.bancor.wallet;
     }
     get currentNetwork() {
-        // @ts-ignore
         return store.state.routeModule.params.service;
     }
     get isAuthenticated() {
-        // @ts-ignore
         return vxm[`${vxm.bancor.wallet}Wallet`].isAuthenticated;
     }
     dispatcher(methodName, params = null) {
@@ -52,4 +50,3 @@ __decorate([
 __decorate([
     action
 ], WalletModule.prototype, "logout", null);
-//# sourceMappingURL=index.js.map

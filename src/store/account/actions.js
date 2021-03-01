@@ -1,3 +1,7 @@
+import { JsonRpc } from "eosjs";
+import keycat from "eos-transit-keycat-provider";
+import { vxm } from "../../store";
+
 export const login = async function(
   { commit, dispatch },
   { idx, account, returnUrl }
@@ -25,6 +29,20 @@ export const login = async function(
       localStorage.setItem("account", accountName);
       localStorage.setItem("returning", true);
       dispatch("getAccountProfile");
+      var eosjs_1 = require("eosjs");
+      const rpc = new JsonRpc("https://telos.caleos.io");
+      var eosApi = new eosjs_1.Api({
+          rpc,
+          chainId: '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11',
+          signatureProvider: keycat(),
+      });
+      vxm.tlosWallet.wallet = {
+        auth: {
+          accountName: accountName,
+          permission: true,
+        },
+        eosApi,
+      };
     }
   } catch (e) {
     const error =

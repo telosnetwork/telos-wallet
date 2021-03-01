@@ -30,7 +30,6 @@ export default {
         })
       };
 
-      //    console.log({ service, feature, query, initParams, paramsSatisfied });
       try {
         await vxm.bancor.init(initParams);
         this.loading = false;

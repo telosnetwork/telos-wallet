@@ -45,7 +45,7 @@ class MultiContractTx {
             name: "transfer",
             data: {
                 from: this.getAuth()[0].actor,
-                to: process.env.VUE_APP_NETWORKCONTRACT,
+                to: 'eosio.token',
                 quantity: amount.to_string(),
                 memo
             }
@@ -96,10 +96,7 @@ class MultiContractTx {
             }
         ]);
     }
-    // Creates a relay, adds liquidity and immediately
-    // hits enableconvrt action regardless of whether or not it should run
-    // purely to put it in 'launched' mode to ensure further liquidity is
-    // correctly imbursed
+
     kickStartRelay(symbolCode, reserves, initialSupply, fee) {
         if (reserves.length !== 2)
             throw new Error("Reserves of two is only supported with this method");
@@ -152,7 +149,6 @@ class MultiContractTx {
             data: {
                 from: this.getAuth()[0].actor,
                 to: this.contractName,
-                // @ts-ignore
                 quantity: token.amount.to_string(),
                 memo: `fund;${symbolCode}`
             }
@@ -191,9 +187,7 @@ const getAuth = () => {
     const wallet = vxm.tlosWallet.wallet;
     return [
         {
-            // @ts-ignore
             actor: wallet.auth.accountName,
-            // @ts-ignore
             permission: wallet.auth.permission
         }
     ];

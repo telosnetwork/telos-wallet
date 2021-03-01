@@ -1,5 +1,4 @@
 import { __awaiter } from "tslib";
-import axios from "axios";
 import { vxm } from "../store";
 import { Asset, asset_to_number, number_to_asset, Sym } from "eos-common";
 import { rpc } from "./rpc";
@@ -66,7 +65,6 @@ export const fetchUsdPriceOfTlos = () => __awaiter(void 0, void 0, void 0, funct
     const usdPriceOfTlosString = res.rows[0].current_tlos_per_usd;
     const usdPriceOfTlosAsset = new Asset(usdPriceOfTlosString);
     const usdPriceOfTlos = 1 / asset_to_number(usdPriceOfTlosAsset);
-    console.log("fetchUsdPriceOfTlos", res, usdPriceOfTlosString, usdPriceOfTlosAsset, usdPriceOfTlos);
     return usdPriceOfTlos;
 });
 export const updateArray = (arr, conditioner, updater) => arr.map(element => (conditioner(element) ? updater(element) : element));
@@ -113,8 +111,6 @@ export const getBalance = (contract, symbolName, precision) => __awaiter(void 0,
             return number_to_asset(0, new Sym(symbolName, precision)).to_string();
         }
         else {
-            // const symbol = await fetchTokenSymbol(contract, symbolName);
-            // TODO this is a hack because number_to_asset cannot just receive a symbol, precision is essential
             return number_to_asset(0, new Sym(symbolName, 4)).to_string();
         }
     }
@@ -199,9 +195,11 @@ export const fetchMultiRelays = () => __awaiter(void 0, void 0, void 0, function
 export const fetchMultiRelay = (smartTokenSymbol) => __awaiter(void 0, void 0, void 0, function* () {
     const relays = yield fetchMultiRelays();
     const relay = findOrThrow(relays, relay => compareString(relay.smartToken.symbol, smartTokenSymbol), `failed to find multi relay with smart token symbol of ${smartTokenSymbol}`);
-    return Object.assign(Object.assign({}, relay), { reserves: sortByNetworkTokens(relay.reserves, reserve => reserve.symbol, [
+    return Object.assign(Object.assign({}, relay), {
+        reserves: sortByNetworkTokens(relay.reserves, reserve => reserve.symbol, [
             "TLOS"
-        ]) });
+        ])
+    });
 });
 
 export const getTokenMeta = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -217,18 +215,11 @@ export const fetchTradeData = () => __awaiter(void 0, void 0, void 0, function* 
         scope: "data.tbn",
         limit: 100
     });
-    //  console.log("fetchTradeData:1");
     const dataExists = rawTradeData.rows.length > 0;
     if (!dataExists)
         throw new Error("Trade data not found");
     const parsedTradeData = rawTradeData.rows;
-    //  console.log("fetchTradeData:2");
     let usdPriceOfTlos = yield vxm.bancor.fetchusdPriceOfTlos();
-    // TODO read usdTlos24hPriceMove from CMC, use as follows
-    // hardcoded for now
-    //  let usdTlos24hPriceMove = -4.44 / 100.0;
-    // let usdTlos24hPriceMove = 0.0 / 100.0;
-    //  console.log("fetchTradeData:3");
     let usdTlos24hPriceMove = yield vxm.bancor.fetchUsd24hPriceMove();
     let newTlosObj = {};
     newTlosObj.id = 1;
@@ -237,7 +228,6 @@ export const fetchTradeData = () => __awaiter(void 0, void 0, void 0, function* 
     newTlosObj.primaryCommunityImageName = newTlosObj.code;
     newTlosObj.liquidityDepth = 0.0;
     newTlosObj.price = usdPriceOfTlos;
-    //  newTlosObj.priceTlos = 1;
     newTlosObj.change24h = 100.0 * usdTlos24hPriceMove;
     let volume24h = {};
     volume24h.USD = 0.0;
@@ -246,29 +236,23 @@ export const fetchTradeData = () => __awaiter(void 0, void 0, void 0, function* 
     newTlosObj.smartPriceApr = 0.0;
     let newArr = [];
     let i = 2;
-    //  console.log("fetchTradeData:4");
     parsedTradeData.forEach(function (itemObject) {
-        //try {
         let newObj = {};
         newObj.id = i;
-        //    console.log("fetchTradeData:5",newObj.id,newObj);
         let tokenCode = itemObject.liquidity_depth.find((token) => !compareString(token.key, "TLOS")).key;
-        //    console.log("fetchTradeData:6",tokenCode,itemObject.liquidity_depth);
         newObj.code = tokenCode;
         newObj.name = tokenCode;
         newObj.primaryCommunityImageName = newObj.code;
-        // Skip rows which don't include TLOS
         if (itemObject.liquidity_depth.find((token) => compareString(token.key, "TLOS"))) {
             newObj.liquidityDepth =
                 itemObject.liquidity_depth
                     .find((token) => compareString(token.key, "TLOS"))
                     .value.split(" ")[0] *
-                    usdPriceOfTlos *
-                    2.0;
+                usdPriceOfTlos *
+                2.0;
             newObj.price =
                 itemObject.price.find((token) => compareString(token.key, "TLOS"))
                     .value * usdPriceOfTlos;
-            // This is to convert from % change in TLOS to USD
             let raw24hChange = itemObject.price_change_24h.find((token) => compareString(token.key, "TLOS")).value * usdPriceOfTlos;
             let a = 1.0 / (1.0 + usdTlos24hPriceMove);
             newObj.change24h =
@@ -279,28 +263,20 @@ export const fetchTradeData = () => __awaiter(void 0, void 0, void 0, function* 
                     .find((token) => compareString(token.key, "TLOS"))
                     .value.split(" ")[0] * usdPriceOfTlos;
             newObj.volume24h = volume24h;
-            // TODO smart token APR needs to be incuded in "pools" tab, calculations follow, APR in TLOS
             let smartPrice = itemObject.smart_price
                 .find((token) => compareString(token.key, "TLOS"))
                 .value.split(" ")[0];
             let smartPriceApr = itemObject.smart_price_change_30d
                 .find((token) => compareString(token.key, "TLOS"))
                 .value.split(" ")[0];
-            smartPriceApr = (smartPriceApr / (smartPrice - smartPriceApr)) * 100; // * 12;
             newObj.smartPrice = smartPrice;
             newObj.smartPriceApr = smartPriceApr;
-            // TODO need to add USD price changes into trade data from Delphi Oracle
-            // prices will then be where symbol = USD, not TLOS
             newTlosObj.liquidityDepth += newObj.liquidityDepth;
             newTlosObj.volume24h.USD += newObj.volume24h.USD;
             newArr.push(newObj);
         }
-        //} catch (e) {
-        //  console.error(e);
-        //}
         i++;
     });
     newArr.push(newTlosObj);
     return newArr;
 });
-//# sourceMappingURL=helpers.js.map

@@ -48,8 +48,8 @@ export function concatAffiliate(memo, affiliateAccount, percentNumber) {
 export function composeMemo(converters, minReturn, destAccount, version = 1, feeAccount, feePercent) {
     const receiver = converters
         .map(({ account, symbol, multiContractSymbol }) => {
-        return `${account}${multiContractSymbol ? `:${multiContractSymbol}` : ""} ${symbol}`;
-    })
+            return `${account}${multiContractSymbol ? `:${multiContractSymbol}` : ""} ${symbol}`;
+        })
         .join(" ");
     const base = `${version},${receiver},${minReturn},${destAccount}`;
     if (feeAccount && feePercent) {
@@ -60,20 +60,20 @@ export function composeMemo(converters, minReturn, destAccount, version = 1, fee
 export function relaysToConvertPaths(from, relays) {
     return relays
         .map(relay => relay.reserves.map(token => {
-        const base = {
-            account: relay.contract,
-            symbol: token.symbol.code().to_string()
-        };
-        return relay.isMultiContract
-            ? Object.assign(Object.assign({}, base), { multiContractSymbol: relay.smartToken.symbol.code().to_string() }) : base;
-    }))
+            const base = {
+                account: relay.contract,
+                symbol: token.symbol.code().to_string()
+            };
+            return relay.isMultiContract
+                ? Object.assign(Object.assign({}, base), { multiContractSymbol: relay.smartToken.symbol.code().to_string() }) : base;
+        }))
         .reduce((prev, curr) => prev.concat(curr))
         .filter(converter => converter.symbol !== from.code().to_string())
         .reduce((accum, item) => {
-        return accum.find((converter) => converter.symbol == item.symbol)
-            ? accum
-            : [...accum, item];
-    }, []);
+            return accum.find((converter) => converter.symbol == item.symbol)
+                ? accum
+                : [...accum, item];
+        }, []);
 }
 const tokenToSymbolName = (token) => token.symbol.code().to_string();
 const symbolToSymbolName = (symbol) => symbol.code().to_string();

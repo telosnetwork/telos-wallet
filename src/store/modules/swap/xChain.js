@@ -29,15 +29,7 @@ const environmentCanBeTrusted = () => {
     return baseString == testAsset.contract.to_string();
 };
 const trusted = environmentCanBeTrusted();
-const contractDb = [
-//  { contract: "btc.ptokens", symbol: "PBTC" }
-//  { contract: "tokens.swaps", symbol: "BTC" },
-//  { contract: "tokens.swaps", symbol: "EOS" },
-//  { contract: "tokens.swaps", symbol: "BNT" },
-//  { contract: "tokens.swaps", symbol: "USDT" },
-//  { contract: "tokens.swaps", symbol: "VIGOR" },
-//  { contract: "tokens.swaps", symbol: "EOSDT" }
-];
+const contractDb = [];
 const symbolNameToContract = (symbolName) => findOrThrow(contractDb, token => compareString(token.symbol, symbolName), "failed to find hardcoded contract").contract;
 const tokenToId = (token) => {
     const symbolName = token.sym.code().to_string();
@@ -61,10 +53,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
         this.xChainContracts = ["telosd.io"];
         this.xchainStats = [];
         this.lastLoaded = 0;
-        //  @action async switchChain(chain: Chain) {
-        //    console.log("xChain.switchChain", chain);
-        //    this.updateStats();
-        //  }
     }
     get wallet() {
         return "tlos";
@@ -90,29 +78,30 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
         }
         return this.newTokens
             .map(token => {
-            let name, logo;
-            const { contract, symbol } = token;
-            try {
-                const eosModuleBorrowed = vxm.tlosBancor.tokenMeta.find(tokenMeta => tokenMeta.symbol == token.symbol);
-                if (!eosModuleBorrowed)
-                    throw new Error("Failed to find token");
-                name = eosModuleBorrowed.name;
-                logo = eosModuleBorrowed.logo;
-            }
-            catch (e) {
-                console.warn("Failed to find name", token.symbol);
-                name = token.symbol;
-                logo =
-                    "https://raw.githubusercontent.com/Telos-Swaps/TLOSD/master/icons/placeholder.jpg";
-            }
-            const baseToken = {
-                contract,
-                symbol
-            };
-            const tokenBalance = vxm.tlosNetwork.balance(baseToken);
-            return Object.assign(Object.assign({}, token), { id: buildTokenId(baseToken), name,
-                logo, balance: tokenBalance && tokenBalance.balance });
-        })
+                let name, logo;
+                const { contract, symbol } = token;
+                try {
+                    const eosModuleBorrowed = vxm.tlosBancor.tokenMeta.find(tokenMeta => tokenMeta.symbol == token.symbol);
+                    if (!eosModuleBorrowed)
+                        throw new Error("Failed to find token");
+                    name = eosModuleBorrowed.name;
+                    logo = eosModuleBorrowed.logo;
+                }
+                catch (e) {
+                    console.warn("Failed to find name", token.symbol);
+                    name = token.symbol;
+                    logo = "https://raw.githubusercontent.com/Telos-Swaps/TLOSD/master/icons/placeholder.jpg";
+                }
+                const baseToken = {
+                    contract,
+                    symbol
+                };
+                const tokenBalance = vxm.tlosNetwork.balance(baseToken);
+                return Object.assign(Object.assign({}, token), {
+                    id: buildTokenId(baseToken), name,
+                    logo, balance: tokenBalance && tokenBalance.balance
+                });
+            })
             .sort((a, b) => b.liqDepth - a.liqDepth);
     }
     get token() {
@@ -135,7 +124,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
                 retryPromise(() => get_volume(rpc, contract, 1), 4, 500),
                 retryPromise(() => get_settings(rpc, contract), 4, 500)
             ]);
-            //    console.log("xChain.fetchContract", tokens);
             return { tokens, volume, settings, contract };
         });
     }
@@ -151,7 +139,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
     }
     checkPrices(contracts) {
         return __awaiter(this, void 0, void 0, function* () {
-            //    console.log(contracts);
             const prices = yield Promise.all(contracts.map((contract) => __awaiter(this, void 0, void 0, function* () {
                 const res = yield rpc.get_table_rows({
                     code: contract,
@@ -166,7 +153,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
     }
     refresh() {
         return __awaiter(this, void 0, void 0, function* () {
-            //    console.log("refresh called on xchain, doing nothing");
             const registryData = yield getSxContracts();
             if (this.isAuthenticated) {
                 vxm.tlosNetwork.getBalances({
@@ -177,19 +163,15 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
             const contracts = registryData.map(x => x.contract);
             this.checkPrices(contracts);
             this.setContracts(contracts);
-            //    console.log(">>refresh");
             const allTokens = yield Promise.all(contracts.map(this.fetchContract));
-            //    this.setStats(allTokens);
             retryPromise(() => this.updateStats(), 4, 1000);
             const all = yield Promise.all(allTokens.flatMap(token => this.buildTokens({
                 tokens: token.tokens,
                 volume: token.volume[0],
                 settings: token.settings
             })));
-            //    setInterval(() => this.checkRefresh(), 20000);
             const allWithId = all.flatMap(x => x.map(token => (Object.assign(Object.assign({}, token), { id: buildTokenId(token) }))));
             const uniqTokens = _.uniqBy(allWithId, "id").map(x => x.id);
-            //    console.log("xChain.init.uniqTokens", uniqTokens);
             const newTokens = uniqTokens.map((id) => {
                 const allTokensOfId = allWithId.filter(token => compareString(id, token.id));
                 const { precision, contract, symbol } = allTokensOfId[0];
@@ -212,7 +194,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
                     volume24h: volumeInPrice
                 };
             });
-            //    console.log("xChain.init.newTokens", newTokens);
             this.setNewTokens(newTokens);
             yield wait(10);
         });
@@ -234,7 +215,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
             const contracts = registryData.map(x => x.contract);
             this.checkPrices(contracts);
             this.setContracts(contracts);
-            //    console.log(">>init");
             const allTokens = yield Promise.all(contracts.map(this.fetchContract));
             this.setStats(allTokens);
             retryPromise(() => this.updateStats(), 4, 1000);
@@ -243,12 +223,9 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
                 volume: token.volume[0],
                 settings: token.settings
             })));
-            //    const allXchainTokens = await Promise.all(this.xChainContracts.map(this.fetchXchainContract));
-            //    console.log("xChain.init.allXchainTokens", allXchainTokens);
             setInterval(() => this.checkRefresh(), 20000);
             const allWithId = all.flatMap(x => x.map(token => (Object.assign(Object.assign({}, token), { id: buildTokenId(token) }))));
             const uniqTokens = _.uniqBy(allWithId, "id").map(x => x.id);
-            //    console.log("xChain.init.uniqTokens", uniqTokens);
             const newTokens = uniqTokens.map((id) => {
                 const allTokensOfId = allWithId.filter(token => compareString(id, token.id));
                 const { precision, contract, symbol } = allTokensOfId[0];
@@ -271,7 +248,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
                     volume24h: volumeInPrice
                 };
             });
-            //    console.log("xChain.init.newTokens", newTokens);
             this.setNewTokens(newTokens);
             this.moduleInitiated();
             yield wait(10);
@@ -340,7 +316,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
         return __awaiter(this, void 0, void 0, function* () { });
     }
     get isAuthenticated() {
-        // @ts-ignore
         return this.$store.rootGetters[`${this.wallet}Wallet/isAuthenticated`];
     }
     convert(propose) {
@@ -380,7 +355,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
     }
     triggerTx(actions) {
         return __awaiter(this, void 0, void 0, function* () {
-            // @ts-ignore
             return this.$store.dispatch("tlosWallet/tx", actions, { root: true });
         });
     }
@@ -495,7 +469,6 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
         return __awaiter(this, void 0, void 0, function* () {
             this.resetTimer();
             const contracts = this.contracts;
-            //    console.log(">>updateStats");
             const allTokens = yield Promise.all(contracts.map(this.fetchContract));
             this.setStats(allTokens);
         });
@@ -586,4 +559,3 @@ __decorate([
 __decorate([
     mutation
 ], xChainModule.prototype, "setStats", null);
-//# sourceMappingURL=xChain.js.map

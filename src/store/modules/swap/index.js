@@ -36,15 +36,10 @@ export class BancorModule extends VuexModule.With({
         }));
     }
     get currentNetwork() {
-        // @ts-ignore
         if (
-        // @ts-ignore
-        store.state.routeModule &&
-            // @ts-ignore
+            store.state.routeModule &&
             store.state.routeModule.params &&
-            // @ts-ignore
             store.state.routeModule.params.service) {
-            // @ts-ignore
             return store.state.routeModule.params.service;
         }
         else {
@@ -52,51 +47,39 @@ export class BancorModule extends VuexModule.With({
         }
     }
     get tokens() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["tokens"];
     }
     get supportedFeatures() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["supportedFeatures"];
     }
     get token() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["token"];
     }
     get relays() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["relays"];
     }
     get convertibleTokens() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["convertibleTokens"];
     }
     get moreTokensAvailable() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["moreTokensAvailable"];
     }
     get newPoolTokenChoices() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["newPoolTokenChoices"];
     }
     get newNetworkTokenChoices() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["newNetworkTokenChoices"];
     }
     get relay() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["relay"];
     }
     get morePoolsAvailable() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["morePoolsAvailable"];
     }
     get loadingPools() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["loadingPools"];
     }
     get wallet() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Bancor`]["wallet"];
     }
     updateModule({ id, updater }) {
@@ -145,8 +128,8 @@ export class BancorModule extends VuexModule.With({
                 try {
                     this.$store
                         .dispatch(`${moduleId}Bancor/init`, params || null, {
-                        root: true
-                    })
+                            root: true
+                        })
                         .then(() => this.moduleInitialised(moduleId));
                 }
                 catch (e) {
@@ -399,4 +382,3 @@ __decorate([
 __decorate([
     action
 ], BancorModule.prototype, "refreshBalances", null);
-//# sourceMappingURL=index.js.map

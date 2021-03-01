@@ -149,7 +149,6 @@ const buildTwoFeedsFromRelay = (relay, knownPrices) => {
         const token = relay.reserves.find(reserve => compareString(reserve.symbol, price.symbol));
         return {
             costByNetworkUsd: price.unitPrice,
-            //      costByNetworkTlos: price.unitPrice,
             liqDepth: calculateLiquidtyDepth(relay, knownPrices),
             smartTokenId: buildTokenId({
                 contract: relay.smartToken.contract,
@@ -274,7 +273,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
         };
     }
     get isAuthenticated() {
-        // @ts-ignore
         return this.$store.rootGetters[`${this.wallet}Wallet/isAuthenticated`];
     }
     get wallet() {
@@ -282,7 +280,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     }
     get balance() {
         return (token) => {
-            // @ts-ignore
             return this.$store.rootGetters[`${this.wallet}Network/balance`](token);
         };
     }
@@ -290,68 +287,58 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
         return (networkToken) => {
             return this.tokenMeta
                 .map(tokenMeta => {
-                const { symbol, account: contract } = tokenMeta;
-                const balance = this.balance({
-                    contract,
-                    symbol
-                });
-                return {
-                    id: buildTokenId({ contract, symbol }),
-                    symbol,
-                    contract,
-                    balance: balance && balance.balance,
-                    img: tokenMeta.logo
-                };
-            })
+                    const { symbol, account: contract } = tokenMeta;
+                    const balance = this.balance({
+                        contract,
+                        symbol
+                    });
+                    return {
+                        id: buildTokenId({ contract, symbol }),
+                        symbol,
+                        contract,
+                        balance: balance && balance.balance,
+                        img: tokenMeta.logo
+                    };
+                })
                 .filter((value, index, array) => array.findIndex(token => value.symbol == token.symbol) == index)
                 .filter(tokenMeta => {
-                // currently been asked to allow new relays of the same reserve.
-                return true;
-                // const suggestedReserves = [tokenMeta.id, networkToken];
-                // const existingReserveExists = this.relays.some(relay =>
-                // relay.reserves.every(existingReserve =>
-                // suggestedReserves.some(suggestedReserve =>
-                // compareString(existingReserve.id, suggestedReserve)
-                // )
-                // )
-                // );
-                // return !existingReserveExists;
-            })
+                    return true;
+                })
                 .filter(token => !mandatoryNetworkTokens.some(networkToken => token.symbol == networkToken.symbol))
                 .sort((a, b) => {
-                const second = isNaN(b.balance) ? 0 : Number(b.balance);
-                const first = isNaN(a.balance) ? 0 : Number(a.balance);
-                return second - first;
-            });
+                    const second = isNaN(b.balance) ? 0 : Number(b.balance);
+                    const first = isNaN(a.balance) ? 0 : Number(a.balance);
+                    return second - first;
+                });
         };
     }
     get newNetworkTokenChoices() {
         const tlos = {
             symbol: "TLOS",
             contract: "eosio.token"
-          };
-      
-          const tlosd = {
+        };
+
+        const tlosd = {
             symbol: "TLOSD",
             contract: "tokens.swaps"
-          };
-      
-          return [
+        };
+
+        return [
             {
-              ...tlos,
-              id: buildTokenId(tlos),
-              usdValue: this.usdPriceOfTlos
+                ...tlos,
+                id: buildTokenId(tlos),
+                usdValue: this.usdPriceOfTlos
             },
             {
-              ...tlosd,
-              id: buildTokenId(tlosd),
-              usdValue: 1
+                ...tlosd,
+                id: buildTokenId(tlosd),
+                usdValue: 1
             }
-          ].map(choice => ({
+        ].map(choice => ({
             ...choice,
             balance: this.balance(choice) ? this.balance(choice).balance : null,
             img: this.tokenMetaObj(choice.id).logo
-          }));
+        }));
     }
     get currentUserBalances() {
         return vxm.tlosNetwork.balances;
@@ -424,63 +411,63 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     get relaysWithFeeds() {
         return this.relaysList
             .filter(relayIncludesBothTokens(mandatoryNetworkTokens, this.tokenMeta.map(token => ({
-            contract: token.account,
-            symbol: token.symbol
-        }))))
+                contract: token.account,
+                symbol: token.symbol
+            }))))
             .filter(relay => relay.reserves.every(reserve => {
-            const relayId = buildTokenId({
-                contract: relay.smartToken.contract,
-                symbol: relay.smartToken.symbol
-            });
-            const reserveId = buildTokenId({
-                contract: reserve.contract,
-                symbol: reserve.symbol
-            });
-            const feed = this.relayFeed.find(feed => compareString(feed.smartTokenId, relayId) &&
-                compareString(feed.tokenId, reserveId));
-            return feed;
-        }));
+                const relayId = buildTokenId({
+                    contract: relay.smartToken.contract,
+                    symbol: relay.smartToken.symbol
+                });
+                const reserveId = buildTokenId({
+                    contract: reserve.contract,
+                    symbol: reserve.symbol
+                });
+                const feed = this.relayFeed.find(feed => compareString(feed.smartTokenId, relayId) &&
+                    compareString(feed.tokenId, reserveId));
+                return feed;
+            }));
     }
     get tokens() {
         return this.relaysWithFeeds
             .flatMap(relay => relay.reserves.map(reserve => {
-            const reserveTokenId = buildTokenId({
-                contract: reserve.contract,
-                symbol: reserve.symbol
-            });
-            const feed = findOrThrow(this.relayFeed, (feed) => compareString(feed.smartTokenId, relay.id) &&
-                compareString(feed.tokenId, reserveTokenId), `failed finding relay feed for ${relay.id} ${reserveTokenId}`);
-            return {
-                id: reserveTokenId,
-                symbol: reserve.symbol,
-                price: feed.costByNetworkUsd,
-                change24h: feed.change24H,
-                liqDepth: feed.liqDepth,
-                volume24h: feed.volume24H,
-                contract: reserve.contract,
-                precision: reserve.precision
-            };
-        }))
+                const reserveTokenId = buildTokenId({
+                    contract: reserve.contract,
+                    symbol: reserve.symbol
+                });
+                const feed = findOrThrow(this.relayFeed, (feed) => compareString(feed.smartTokenId, relay.id) &&
+                    compareString(feed.tokenId, reserveTokenId), `failed finding relay feed for ${relay.id} ${reserveTokenId}`);
+                return {
+                    id: reserveTokenId,
+                    symbol: reserve.symbol,
+                    price: feed.costByNetworkUsd,
+                    change24h: feed.change24H,
+                    liqDepth: feed.liqDepth,
+                    volume24h: feed.volume24H,
+                    contract: reserve.contract,
+                    precision: reserve.precision
+                };
+            }))
             .sort((a, b) => b.liqDepth - a.liqDepth)
             .reduce((acc, item) => {
-            const existingToken = acc.find(token => compareString(token.id, item.id));
-            return existingToken
-                ? updateArray(acc, token => compareString(token.id, item.id), token => (Object.assign(Object.assign(Object.assign(Object.assign({}, token), { liqDepth: existingToken.liqDepth + item.liqDepth }), (!existingToken.change24h &&
-                    item.change24h && { change24h: item.change24h })), (!existingToken.volume24h &&
-                    item.volume24h && { volume24h: item.volume24h }))))
-                : [...acc, item];
-        }, [])
+                const existingToken = acc.find(token => compareString(token.id, item.id));
+                return existingToken
+                    ? updateArray(acc, token => compareString(token.id, item.id), token => (Object.assign(Object.assign(Object.assign(Object.assign({}, token), { liqDepth: existingToken.liqDepth + item.liqDepth }), (!existingToken.change24h &&
+                        item.change24h && { change24h: item.change24h })), (!existingToken.volume24h &&
+                            item.volume24h && { volume24h: item.volume24h }))))
+                    : [...acc, item];
+            }, [])
             .map(token => {
-            const id = token.id;
-            const contract = token.contract;
-            const symbol = token.symbol;
-            const tokenMeta = findOrThrow(this.tokenMeta, token => compareString(token.id, id));
-            const tokenBalance = vxm.tlosNetwork.balance({
-                contract,
-                symbol
+                const id = token.id;
+                const contract = token.contract;
+                const symbol = token.symbol;
+                const tokenMeta = findOrThrow(this.tokenMeta, token => compareString(token.id, id));
+                const tokenBalance = vxm.tlosNetwork.balance({
+                    contract,
+                    symbol
+                });
+                return Object.assign(Object.assign({}, token), { name: tokenMeta.name, balance: tokenBalance && Number(tokenBalance.balance), logo: tokenMeta.logo });
             });
-            return Object.assign(Object.assign({}, token), { name: tokenMeta.name, balance: tokenBalance && Number(tokenBalance.balance), logo: tokenMeta.logo });
-        });
     }
     get token() {
         return (id) => {
@@ -501,37 +488,37 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
         };
     }
     get relays() {
-        // @ts-ignore
         return this.relaysList
             .filter(relayIncludesBothTokens(mandatoryNetworkTokens, this.tokenMeta.map(token => ({
-            contract: token.account,
-            symbol: token.symbol
-        }))))
+                contract: token.account,
+                symbol: token.symbol
+            }))))
             .filter(reservesIncludeTokenMeta(this.tokenMeta))
             .map(relay => {
-            const relayFeed = this.relayFeed.find(feed => compareString(feed.smartTokenId, buildTokenId({
-                contract: relay.smartToken.contract,
-                symbol: relay.smartToken.symbol
-            })));
-            const sortedReserves = sortByNetworkTokens(relay.reserves, reserve => reserve.symbol);
-            return Object.assign(Object.assign({}, relay), { id: buildTokenId({
+                const relayFeed = this.relayFeed.find(feed => compareString(feed.smartTokenId, buildTokenId({
                     contract: relay.smartToken.contract,
                     symbol: relay.smartToken.symbol
-                }), symbol: sortedReserves[1].symbol, smartTokenSymbol: relay.smartToken.symbol, apr: relayFeed && relayFeed.smartPriceApr, liqDepth: relayFeed && relayFeed.liqDepth, 
-                //          addLiquiditySupported: relay.isMultiContract,
-                addLiquiditySupported: true, removeLiquiditySupported: true, focusAvailable: false, reserves: sortedReserves.map((reserve) => (Object.assign(Object.assign(Object.assign({}, reserve), { reserveId: relay.smartToken.symbol + reserve.symbol, logo: [this.token(reserve.id).logo] }), (reserve.amount && { balance: reserve.amount })))) });
-        });
+                })));
+                const sortedReserves = sortByNetworkTokens(relay.reserves, reserve => reserve.symbol);
+                return Object.assign(Object.assign({}, relay), {
+                    id: buildTokenId({
+                        contract: relay.smartToken.contract,
+                        symbol: relay.smartToken.symbol
+                    }), symbol: sortedReserves[1].symbol, smartTokenSymbol: relay.smartToken.symbol, apr: relayFeed && relayFeed.smartPriceApr, liqDepth: relayFeed && relayFeed.liqDepth,
+                    addLiquiditySupported: true, removeLiquiditySupported: true, focusAvailable: false, reserves: sortedReserves.map((reserve) => (Object.assign(Object.assign(Object.assign({}, reserve), { reserveId: relay.smartToken.symbol + reserve.symbol, logo: [this.token(reserve.id).logo] }), (reserve.amount && { balance: reserve.amount }))))
+                });
+            });
     }
     get convertableRelays() {
         return this.relaysWithFeeds
             .map(relay => {
-            const relayId = buildTokenId({
-                contract: relay.smartToken.contract,
-                symbol: relay.smartToken.symbol
-            });
-            const feed = this.relayFeed.find(feed => compareString(feed.smartTokenId, relayId));
-            return Object.assign(Object.assign({}, relay), { liqDepth: feed.liqDepth });
-        })
+                const relayId = buildTokenId({
+                    contract: relay.smartToken.contract,
+                    symbol: relay.smartToken.symbol
+                });
+                const feed = this.relayFeed.find(feed => compareString(feed.smartTokenId, relayId));
+                return Object.assign(Object.assign({}, relay), { liqDepth: feed.liqDepth });
+            })
             .sort((a, b) => b.liqDepth - a.liqDepth)
             .filter((value, index, arr) => arr.findIndex(x => x.reserves.every(reserve => value.reserves.some(y => reserve.symbol == y.symbol && reserve.contract == y.contract))) == index);
     }
@@ -600,9 +587,9 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
             const tokens = relays
                 .flatMap(relay => relay.reserves)
                 .map(reserve => ({
-                contract: reserve.contract,
-                symbol: reserve.symbol.code().to_string()
-            }));
+                    contract: reserve.contract,
+                    symbol: reserve.symbol.code().to_string()
+                }));
             const uniqueTokens = _.uniqWith(tokens, (a, b) => compareString(a.symbol, b.symbol) &&
                 compareString(a.contract, b.contract));
             return vxm.tlosNetwork.getBalances({
@@ -660,7 +647,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                 ]);
                 this.setTokenMeta(tokenMeta);
                 this.setTlosPrice(usdPriceOfTlos);
-                //      this.setTlos24hPriceMove(-4.44);
                 this.setTlos24hPriceMove(0.0);
                 const v1Relays = getHardCodedRelays();
                 const allDry = [...v1Relays, ...v2Relays.map(multiToDry)].filter(noBlackListedReservesDry(blackListedTokens));
@@ -711,20 +697,13 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     buildPossibleRelayFeedsFromBancorApi({ relays }) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Pull token prices from chain
-                //      console.log("buildPossibleRelayFeedsFromBancorApi:1");
                 const [tokenPrices] = yield Promise.all([fetchTradeData()]);
-                //      console.log("buildPossibleRelayFeedsFromBancorApi:2");
                 const tlosToken = findOrThrow(tokenPrices, token => compareString(token.code, "TLOS"));
-                //      console.log("buildPossibleRelayFeedsFromBancorApi:3");
                 const relayFeeds = relays.flatMap(relay => {
                     const [secondaryReserve, primaryReserve] = sortByNetworkTokens(relay.reserves, reserve => reserve.symbol.code().to_string());
                     const token = findOrThrow(tokenPrices, price => compareString(price.code, primaryReserve.symbol.code().to_string()), "failed to find token in possible relayfeeds from bancor API");
                     const includeTLOS = compareString(secondaryReserve.symbol.code().to_string(), "TLOS");
-                    // const liqDepth = token.liquidityDepth * usdPriceOfEth * 2;
-                    // should use USD price of TLOS
                     const liqDepth = token.liquidityDepth;
-                    //        console.log("buildPossibleRelayFeedsFromBancorApi:6");
                     const secondary = {
                         tokenId: buildTokenId({
                             contract: secondaryReserve.contract,
@@ -735,7 +714,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                             symbol: relay.smartToken.symbol.code().to_string()
                         })
                     };
-                    //        console.log("buildPossibleRelayFeedsFromBancorApi:7");
                     return [
                         {
                             change24H: token.change24h,
@@ -805,10 +783,12 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                         network: "tlos",
                         symbol: smartTokenSymbol
                     },
-                    reserves: mergedBalances.map(reserve => (Object.assign(Object.assign({}, reserve), { id: buildTokenId({
+                    reserves: mergedBalances.map(reserve => (Object.assign(Object.assign({}, reserve), {
+                        id: buildTokenId({
                             contract: reserve.contract,
                             symbol: assetToSymbolName(reserve.amount)
-                        }), network: "tlos", precision: reserve.amount.symbol.precision(), contract: reserve.contract, symbol: assetToSymbolName(reserve.amount), amount: asset_to_number(reserve.amount) }))),
+                        }), network: "tlos", precision: reserve.amount.symbol.precision(), contract: reserve.contract, symbol: assetToSymbolName(reserve.amount), amount: asset_to_number(reserve.amount)
+                    }))),
                     apr: apr
                 };
             })));
@@ -829,12 +809,10 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
         return __awaiter(this, void 0, void 0, function* () {
             const relay = yield this.relayById(relayId);
             const tokenAmounts = yield this.viewAmountToTokenAmounts(reserves);
-            // TODO figure out why smart token precision is wrong
             const relaySymbol = new Symbol(relay.smartToken.symbol, relay.smartToken.precision);
             const relaySymbolCode = relaySymbol.code().to_string();
             if (tokenAmounts.length !== 2)
                 throw new Error("Was expecting 2 reserve assets");
-            // TODO handle tokenAmounts as array
             const action1 = hydrateAction(tokenAmounts[0].amount, tokenAmounts[0].contract, number_to_asset(0, relaySymbol), relay.contract, this.isAuthenticated);
             const action2 = hydrateAction(tokenAmounts[1].amount, tokenAmounts[1].contract, number_to_asset(0, relaySymbol), relay.contract, this.isAuthenticated);
             let depositActions = [action1, action2];
@@ -901,9 +879,9 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
             const steps = Array(suggestTxs)
                 .fill(null)
                 .map((_, i) => ({
-                name: `Withdraw${i}`,
-                description: `Withdrawing Liquidity stage ${i + 1}`
-            }));
+                    name: `Withdraw${i}`,
+                    description: `Withdrawing Liquidity stage ${i + 1}`
+                }));
             let lastTxId = "";
             for (let i = 0; i < suggestTxs; i++) {
                 onUpdate(i, steps);
@@ -920,7 +898,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     waitAndUpdate(time = 4000) {
         return __awaiter(this, void 0, void 0, function* () {
             yield wait(time);
-            // @ts-ignore
             return this.init();
         });
     }
@@ -1052,7 +1029,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
             const [sameReserve, opposingReserve] = sortByNetworkTokens(reserves.map(reserve => reserve.amount), assetToSymbolName, [assetToSymbolName(sameAmountAsset)]);
             const reserveBalance = asset_to_number(sameReserve);
             const percent = Number(tokenAmount) / reserveBalance;
-            // Added this to correct error where withdrawal was 2x what was requested
             const smartTokenAmount = (percent * smartSupply) / 2.0;
             const opposingAmountNumber = percent * asset_to_number(opposingReserve);
             const opposingAsset = number_to_asset(opposingAmountNumber, opposingReserve.symbol);
@@ -1259,7 +1235,6 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     }
     triggerTx(actions) {
         return __awaiter(this, void 0, void 0, function* () {
-            // @ts-ignore
             return this.$store.dispatch("tlosWallet/tx", actions, { root: true });
         });
     }
@@ -1441,4 +1416,3 @@ __decorate([
 __decorate([
     mutation
 ], TlosBancorModule.prototype, "setTokenMeta", null);
-//# sourceMappingURL=tlosBancor.js.map

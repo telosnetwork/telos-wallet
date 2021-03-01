@@ -7,6 +7,8 @@ import global from "./global";
 import { GeneralModule } from "./modules/general";
 import { EosTransitModule } from "./modules/wallet/tlosWallet";
 import { TlosBancorModule } from "./modules/swap/tlosBancor";
+import { UsdBancorModule } from "./modules/swap/usdSx";
+import { xChainModule } from "./modules/swap/xChain";
 import { BancorModule } from "./modules/swap/index";
 import { WalletModule } from "./modules/wallet/index";
 import { NetworkModule } from "./modules/network/index";
@@ -15,7 +17,7 @@ import { createProxy, extractVuexModule } from "vuex-class-component";
 
 Vue.use(Vuex);
 
-export default function() {
+export default function () {
   const Store = new Vuex.Store({
     modules: {
       general,
@@ -30,8 +32,8 @@ export default function() {
 }
 
 export const store = new Vuex.Store({
-    modules: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, extractVuexModule(TlosBancorModule)), extractVuexModule(GeneralModule)), extractVuexModule(EosTransitModule)), extractVuexModule(BancorModule)), extractVuexModule(WalletModule)), extractVuexModule(NetworkModule)), extractVuexModule(TlosNetworkModule)),
-    strict: process.env.DEV
+  modules: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, extractVuexModule(UsdBancorModule)), extractVuexModule(xChainModule)), extractVuexModule(TlosBancorModule)), extractVuexModule(GeneralModule)), extractVuexModule(EosTransitModule)), extractVuexModule(BancorModule)), extractVuexModule(WalletModule)), extractVuexModule(NetworkModule)), extractVuexModule(TlosNetworkModule)),
+  strict: process.env.DEV
 });
 
 export const vxm = {
@@ -39,6 +41,8 @@ export const vxm = {
   wallet: createProxy(store, WalletModule),
   tlosWallet: createProxy(store, EosTransitModule),
   tlosBancor: createProxy(store, TlosBancorModule),
+  usdsBancor: createProxy(store, UsdBancorModule),
+  xchainBancor: createProxy(store, xChainModule),
   bancor: createProxy(store, BancorModule),
   tlosNetwork: createProxy(store, TlosNetworkModule),
   network: createProxy(store, NetworkModule)

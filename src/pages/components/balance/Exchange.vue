@@ -38,7 +38,7 @@
           </q-toolbar>
         </q-header>
         <q-page-container>
-          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-my-xl shadow-4 convert-card" style="height: 200px;">
+          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px;">
             <q-space/>
             <q-item class="list-item full-width">
               <div class="text-black display-grid full-width">
@@ -113,7 +113,7 @@
             </q-item>
             <q-space/>
           </q-card>
-          <q-card v-else class="column q-mx-lg q-my-xl shadow-4 convert-card" style="height: 200px;">
+          <q-card v-else class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px;">
             <q-space/>
             <q-item class="list-item full-width q-pb-none" style="min-height: 28px;">
               <q-item-section>
@@ -218,7 +218,32 @@
             </q-item>
             <q-space/>
           </q-card>
-          <div class="q-px-lg full-width">
+          <div v-if="convertCoin && toCoin && convertAmountValue && toAmountValue"
+            class="q-mt-md text-subtitle2 text-weight-bold text-center"
+            :style="`color: ${themeColor};`"
+          >
+            <span>
+              {{ unitReward }}
+            </span>
+            <div>
+              {{
+                `1 ${convertCoin.symbol} = $${(
+                  this.toCoin.price * this.reward
+                ).toFixed(4)} USD`
+              }}
+            </div>
+            <div v-if="fee !== null">
+              Fee: {{ fee }}
+            </div>
+            <div
+              v-if="slippage !== null"
+              :class="slippageHigh ? 'text-warning' : ''"
+              :style="slippageHigh ? '' : 'color: ${themeColor};'"
+            >
+              {{ displayedSlippage }}
+            </div>
+          </div>
+          <div class="q-mt-lg q-px-lg full-width">
             <q-btn
               class="text-grey-5 text-subtitle2 q-mx-md full-width"
               :style="`height: 50px; background: ${themeColor}; font-size: 20px;`"
@@ -226,7 +251,7 @@
               no-caps
               label="Convert"
               :disable="!convertButtonEnabled"
-              @click="nextPressed()"
+              @click="convertPressed()"
             />
           </div>
         </q-page-container>
@@ -239,12 +264,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
+import numeral from "numeral";
 import SelectCoin from './SelectCoin';
 import { vxm } from "../../../store";
 import { createProxy, extractVuexModule } from "vuex-class-component";
 
 export default {
-  props: ['showExchangeDlg', 'coins'],
+  props: ['showExchangeDlg', 'selectedConvertCoin', 'coins'],
   components: {
     SelectCoin,
   },
@@ -254,9 +280,13 @@ export default {
       dollarsAmount: '0',
       convertAmount: '0',
       toAmount: '0',
+      slippage: 0,
+      fee: 0,
+      reward: 0,
       convertCoin: null,
       toCoin: null,
       selectedCoin: null,
+      convertible: false,
       showSelectCoinDlg: false,
       dlgType: 'convert',
       inputWidth: 50,
@@ -282,8 +312,20 @@ export default {
     toAmountValue() {
       return Number(this.toAmount.replace(/\s/g, ''));
     },
+    unitReward() {
+      return `1 ${this.convertCoin.symbol} = ${this.reward.toFixed(this.toCoin.precision > 6 ? 6 : this.toCoin.precision)} ${this.toCoin.symbol}`;
+    },
+    displayedSlippage() {
+      return `Slippage: ${numeral(this.slippage).format("0.00%")}`;
+    },
+    slippageHigh() {
+      return Number(this.slippage) > 0.2;
+    },
     convertButtonEnabled() {
       if (!this.convertCoin || !this.toCoin) {
+        return false;
+      }
+      if (!this.convertible) {
         return false;
       }
       if (this.exchangeType === 'dollars' && this.dollarsAmountValue === 0) {
@@ -294,9 +336,6 @@ export default {
       }
       return true;
     }
-  },
-  created() {
-    console.log(this.bancorModule.convertibleTokens);
   },
   methods: {
     async validateDollarAmount(val) {
@@ -310,6 +349,9 @@ export default {
           this.dollarsAmount = Math.max(0, num).toString();
         }
       }
+      if (this.convertCoin && this.toCoin) {
+        this.validateConvertAmount((this.dollarsAmountValue / this.convertCoin.price).toString());
+      }
     },
     async validateConvertAmount(val) {
       if (this.convertCoin && this.convertAmountValue > this.convertCoin.amount * this.convertCoin.price) {
@@ -322,54 +364,94 @@ export default {
           this.convertAmount = Math.max(0, num).toString();
         }
       }
-      if (!this.convertCoin || !this.toCoin) {
-        return;
-      }
-      try {
-        const reward = await this.bancorModule.getReturn({
-          from: {
-            id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
-            amount: this.convertAmount
-          },
-          toId: `${this.toCoin.account}-${this.toCoin.symbol}`
-        });
-        this.toAmount = reward.amount;
-      } catch (e) {
-        this.$q.notify({
-          type: 'primary',
-          message: e.message,
-        });
+      if (this.convertCoin && this.toCoin) {
+        try {
+          const reward = await this.bancorModule.getReturn({
+            from: {
+              id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+              amount: this.convertAmount
+            },
+            toId: `${this.toCoin.account}-${this.toCoin.symbol}`
+          });
+          if (reward.slippage) {
+            this.slippage = reward.slippage;
+          }
+          if (reward.fee) {
+            this.fee = reward.fee;
+          }
+          this.toAmount = reward.amount;
+          this.reward = this.toAmountValue / this.convertAmountValue;
+          this.convertible = true;
+        } catch (e) {
+          this.$q.notify({
+            type: 'dark',
+            message: e.message,
+          });
+          this.convertible = false;
+        }
       }
     },
     async validateToAmount(val) {
-      if (this.convertCoin && this.toCoin && this.toAmountValue * this.toCoin.price > this.convertCoin.amount * this.convertCoin.price) {
-        this.toAmount = (this.convertCoin.amount * this.convertCoin.price / this.toCoin.price).toString().substring(0, 8);
-      } else if (val.charAt(val.length-1) !== '.') {
+      if (val.charAt(val.length-1) !== '.') {
         const cleanStr = val.replace(/\s/g, '');
         const num = parseFloat(cleanStr) || 0;
         const maxValue = Math.max(0, num);
-        if (this.convertAmountValue !== maxValue) {
-          this.convertAmount = Math.max(0, num).toString();
+        if (this.toAmountValue !== maxValue) {
+          this.toAmount = Math.max(0, num).toString();
         }
       }
-      if (!this.convertCoin || !this.toCoin) {
-        return;
+      if (this.convertCoin && this.toCoin) {
+        try {
+          const reward = await this.bancorModule.getCost({
+            fromId: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+            to: {
+              id: `${this.toCoin.account}-${this.toCoin.symbol}`,
+              amount: this.toAmount
+            }
+          });
+          if (reward.slippage) {
+            this.slippage = reward.slippage;
+          }
+          if (reward.fee) {
+            this.fee = reward.fee;
+          }
+          this.convertAmount = Math.min(this.convertCoin.amount, reward.amount).toString();
+          this.reward = this.toAmountValue / this.convertAmountValue;
+          this.convertible = true;
+        } catch (e) {
+          this.$q.notify({
+            type: 'dark',
+            message: e.message,
+          });
+          this.convertible = false;
+        }
       }
+    },
+    onUpdate(stepIndex, steps) {
+      console.log(stepIndex, steps);
+    },
+    async convertPressed() {
       try {
-        const reward = await this.bancorModule.getReturn({
-          fromId: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+        const result = await this.bancorModule.convert({
+          from: {
+            id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+            amount: this.convertAmount,
+          },
           to: {
             id: `${this.toCoin.account}-${this.toCoin.symbol}`,
-            amount: this.toAmount
-          }
+            amount: this.toAmount,
+          },
+          onUpdate: this.onUpdate
         });
-        this.toAmount = reward.amount;
-        if (this.convertCoin && this.toCoin) {
-          this.convertAmount = (this.toAmountValue * this.toCoin.price / this.convertCoin.price).toString().substring(0, 8);
-        }
-      } catch (e) {
+
         this.$q.notify({
           type: 'primary',
+          message: result,
+        });
+        this.showDlg = false;
+      } catch (e) {
+        this.$q.notify({
+          type: 'negative',
           message: e.message,
         });
       }
@@ -384,7 +466,7 @@ export default {
         this.toAmount = '0';
         this.showSelectCoinDlg = false;
         this.dlgType = 'convert';
-        this.convertCoin = null;
+        this.convertCoin = this.selectedConvertCoin;
         this.toCoin = null;
       }
     },

@@ -8,27 +8,21 @@ const VuexModule = createModule({
 export class NetworkModule extends VuexModule.With({ namespaced: "network/" }) {
     constructor() {
         super(...arguments);
-        //  chains = ["eos", "eth", "usds"];
         this.chains = ["tlos", "usds", "xchain"];
     }
     get currentNetwork() {
-        // @ts-ignore
         return store.state.routeModule.params.service;
     }
     get balances() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Network`]["balances"];
     }
     get balance() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Network`]["balance"];
     }
     get networkId() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Network`]["networkId"];
     }
     get protocol() {
-        // @ts-ignore
         return vxm[`${this.currentNetwork}Network`]["protocol"];
     }
     transfer(params) {

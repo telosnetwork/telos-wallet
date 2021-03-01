@@ -21,14 +21,6 @@ const getInverseRate = (asset, sym, tokens, settings) => {
 };
 const shortAssetString = (asset) => `${asset_to_number(asset)} ${asset.symbol.code().to_string()}`;
 const addNumbers = (acc, num) => acc + num;
-//const accumulateLiq = (acc: SxToken, token: SxToken) => ({
-//  ...acc,
-//  liqDepth: acc.liqDepth + token.liqDepth
-//});
-//const accumulateVolume = (acc: SxToken, token: SxToken) => ({
-//  ...acc,
-//  volume24h: acc.volume24h + token.volume24h
-//});
 const tokensToArray = (tokens) => Object.keys(tokens).map(key => tokens[key]);
 const environmentCanBeTrusted = () => {
     const baseString = "eosio.token";
@@ -96,29 +88,31 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
         }
         return this.newTokens
             .map(token => {
-            let name, logo;
-            const { contract, symbol } = token;
-            try {
-                const eosModuleBorrowed = vxm.tlosBancor.tokenMeta.find(tokenMeta => tokenMeta.symbol == token.symbol);
-                if (!eosModuleBorrowed)
-                    throw new Error("Failed to find token");
-                name = eosModuleBorrowed.name;
-                logo = eosModuleBorrowed.logo;
-            }
-            catch (e) {
-                console.warn("Failed to find name", token.symbol);
-                name = token.symbol;
-                logo =
-                    "https://raw.githubusercontent.com/Telos-Swaps/TLOSD/master/icons/placeholder.jpg";
-            }
-            const baseToken = {
-                contract,
-                symbol
-            };
-            const tokenBalance = vxm.tlosNetwork.balance(baseToken);
-            return Object.assign(Object.assign({}, token), { id: buildTokenId(baseToken), name,
-                logo, balance: tokenBalance && tokenBalance.balance });
-        })
+                let name, logo;
+                const { contract, symbol } = token;
+                try {
+                    const eosModuleBorrowed = vxm.tlosBancor.tokenMeta.find(tokenMeta => tokenMeta.symbol == token.symbol);
+                    if (!eosModuleBorrowed)
+                        throw new Error("Failed to find token");
+                    name = eosModuleBorrowed.name;
+                    logo = eosModuleBorrowed.logo;
+                }
+                catch (e) {
+                    console.warn("Failed to find name", token.symbol);
+                    name = token.symbol;
+                    logo =
+                        "https://raw.githubusercontent.com/Telos-Swaps/TLOSD/master/icons/placeholder.jpg";
+                }
+                const baseToken = {
+                    contract,
+                    symbol
+                };
+                const tokenBalance = vxm.tlosNetwork.balance(baseToken);
+                return Object.assign(Object.assign({}, token), {
+                    id: buildTokenId(baseToken), name,
+                    logo, balance: tokenBalance && tokenBalance.balance
+                });
+            })
             .sort((a, b) => b.liqDepth - a.liqDepth);
     }
     get token() {
@@ -139,13 +133,11 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
                 retryPromise(() => get_volume(rpc, contract, 1), 4, 500),
                 retryPromise(() => get_settings(rpc, contract), 4, 500)
             ]);
-            //    console.log("fetchContract", tokens, volume, settings);
             return { tokens, volume, settings, contract };
         });
     }
     checkPrices(contracts) {
         return __awaiter(this, void 0, void 0, function* () {
-            //    console.log("checkPrices", contracts);
             const prices = yield Promise.all(contracts.map((contract) => __awaiter(this, void 0, void 0, function* () {
                 const res = yield rpc.get_table_rows({
                     code: contract,
@@ -155,12 +147,10 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
                 const data = res.rows[0];
                 return Object.assign({ contract }, data);
             })));
-            //    console.log("checkPrices.usdsPrices", prices);
         });
     }
     refresh() {
         return __awaiter(this, void 0, void 0, function* () {
-            //    console.log("USD Stable swaps : refresh called");
             retryPromise(() => this.updateStats(), 4, 1000);
             yield wait(10);
         });
@@ -173,7 +163,6 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
             console.time("sx");
             vxm.tlosBancor.init();
             setInterval(() => this.checkRefresh(), 60000);
-            //    this.updateStats();
             yield retryPromise(() => this.updateStats(), 4, 1000);
             this.moduleInitiated();
             yield wait(10);
@@ -193,12 +182,10 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
                 const symbolName = token.sym.code().to_string();
                 const precision = token.sym.precision();
                 const contract = trusted ? token.contract.to_string() : symbolNameToContract(symbolName);
-                //        console.log("buildTokens", token.token_type.to_string());
                 if (token.token_type.to_string() == "connector") {
                     const volume24h = connector.volume_24h;
                     const price = connector.price;
                     const liqDepth = connector.tlosd_liquidity_depth;
-                    //          console.log("buildTokens.connector", symbol, volume24h, price, liqDepth);
                     return {
                         id: buildTokenId({ contract, symbol: symbolName }),
                         symbol: symbolName,
@@ -213,7 +200,6 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
                     const volume24h = token.volume24h || 0;
                     const rate = yield get_spot_price("USDT", token.sym.code(), tokens, settings);
                     const price = compareString(symbolName, "USDT") ? 1 : rate;
-                    //          console.log("buildTokens", symbol, volume24h, price);
                     return {
                         id: buildTokenId({ contract, symbol: symbolName }),
                         symbol: symbolName,
@@ -259,7 +245,6 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
         return __awaiter(this, void 0, void 0, function* () { });
     }
     get isAuthenticated() {
-        // @ts-ignore
         return this.$store.rootGetters[`${this.wallet}Wallet/isAuthenticated`];
     }
     convert(propose) {
@@ -281,50 +266,25 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
             let memo = "";
             if (connectors.indexOf(fromToken.symbol) >= 0 &&
                 connectors.indexOf(toToken.symbol) >= 0) {
-                // Case TLOS<->TLOSD, use V1 converter
                 converter = "bancor.tbn";
                 memo = "1,tlosdx.swaps " + toToken.symbol + ",0.0," + accountName;
             }
             else if (fromToken.symbol == "TLOS") {
-                // Case from=TLOS, to<>TLOSD
-                // 1,tlosdx.swaps TLOSD telosd.swaps USDT,0.0,qwertyqwerty
                 converter = "bancor.tbn";
                 memo =
                     "1,tlosdx.swaps TLOSD telosd.swaps " +
-                        toToken.symbol +
-                        ",0.0," +
-                        accountName;
+                    toToken.symbol +
+                    ",0.0," +
+                    accountName;
             }
             else if (toToken.symbol == "TLOS") {
-                // Case from<>TLOSD, to=TLOS
-                // 1,telosd.swaps TLOSD tlosdx.swaps TLOS,0.0,qwertyqwerty
                 converter = "bancor.tbn";
                 memo = "1,telosd.swaps TLOSD tlosdx.swaps TLOS,0.0," + accountName;
             }
             else {
-                // Case not involving TLOS
                 converter = poolReward.id;
                 memo = toToken.symbol;
             }
-            //    console.log("data :",'["', accountName, '", "', converter, '", "', amountAsset.to_string(), '", "', memo, '"]');
-            //    console.log("memo :", memo);
-            // 1,tlosdx.swaps TLOSD,0.9890,qwertyqwerty
-            // 1,tlosdx.swaps TLOSD,0.0,   qwertyqwerty
-            // USDT
-            // TLOSD@bancor.tbn|1,tlosdx.swaps TLOS,0.0,admin.swaps;USDT->TLOSD->TLOS
-            // 1,tlosdx.swaps TLOSD,0.0,telosd.swaps;USDT@qwertyqwerty
-            // TLOS@bancor.tbn|1,tlosdx.swaps TLOSD,0.0,qwertyqwerty
-            // TLOSD@bancor.tbn|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // TLOSD@qwertyqwerty|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // TLOSD@qwertyqwerty|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // 1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // TLOSD@bancor.tbn|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // Try switch off mine.reward
-            // TLOSD@bancor.tbn|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // TLOSD@bancor.tbn|1,tlosdx.swaps TLOS,0.0,qwertyqwerty;USDT->TLOSD->TLOS
-            // 1,tlosdx.swaps TLOSD,0.0,telosd.swaps;USDT@qwertyqwerty
-            // 1,tlosdx.swaps TLOSD telosd.swaps USDT,0.0,qwertyqwerty
-            // 1,telosd.swaps TLOSD tlosdx.swaps TLOS,0.0,qwertyqwerty
             const [txRes, originalBalances] = yield Promise.all([
                 this.triggerTx([
                     {
@@ -348,7 +308,6 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
     }
     triggerTx(actions) {
         return __awaiter(this, void 0, void 0, function* () {
-            // @ts-ignore
             return this.$store.dispatch("tlosWallet/tx", actions, { root: true });
         });
     }
@@ -429,48 +388,31 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
             if (compareString(propose.from.id, propose.toId))
                 throw new Error("Cannot convert a token to itself.");
             yield this.checkRefresh();
-            //    console.log("getReturn.connector", this.connector);
-            //    console.log("getReturn.propose", propose, propose.from.id, propose.toId, propose.from.amount);
-            // Hack to handle TLOS<->TLOSD
-            // From : "eosio.token-TLOS" -> "tokens.swaps-TLOSD"
-            //        {id: "eosio.token-TLOS", amount: "1"}
-            // To   : "tokens.swaps-TLOSD" -> "eosio.token-TLOS"
             let additional_fee = 0.0;
             let factor = 1.0;
             if (propose.from.id == "eosio.token-TLOS") {
                 propose.from.id = "tokens.swaps-TLOSD";
-                // propose.from.amount = (Number(propose.from.amount) * Number(this.connector[2])).toString();
-                // 0: 154200.619, 1: 2121.502, 2: 0.01375806409700599, 3: "2.3043"
                 const base_reserve = Number(this.connector.tlos_liquidity_depth);
                 const quote_reserve = Number(this.connector.tlosd_liquidity_depth);
                 const quantity = Number(propose.from.amount);
-                // Hardcoded (1 - fee) * bancor return
                 propose.from.amount = (0.9925 * get_bancor_output(base_reserve, quote_reserve, quantity)).toString();
                 additional_fee = 0.0027 * Number(propose.from.amount) / 0.9925;
             }
             if (propose.toId == "eosio.token-TLOS") {
                 propose.toId = "tokens.swaps-TLOSD";
-                // propose.from.amount = (Number(propose.from.amount) / Number(this.connector[2])).toString();
                 const base_reserve = Number(this.connector.tlosd_liquidity_depth);
                 const quote_reserve = Number(this.connector.tlos_liquidity_depth);
                 const quantity = Number(propose.from.amount);
-                // Hardcoded (1 - fee) * bancor return
                 propose.from.amount = (0.9925 * get_bancor_output(base_reserve, quote_reserve, quantity)).toString();
                 additional_fee = 0.0027 * Number(propose.from.amount) / 0.9925;
                 factor = base_reserve / quote_reserve;
             }
-            //    console.log("getReturn.propose", propose, propose.from.id, propose.toId, propose.from.amount);
             const bestReturn = yield this.bestFromReturn(propose);
-            // Need to update fee and slippage too
-            // TODO fee specified in "to" token units
             let total_fee = number_to_asset((asset_to_number(bestReturn.amount.fee) + additional_fee) * factor, bestReturn.amount.fee.symbol).to_string();
             let slippage = bestReturn.amount.slippage * factor;
-            //    console.log("getReturn.bestReturn", bestReturn.amount.fee.to_string(), additional_fee, slippage, factor);
             return {
                 amount: String(asset_to_number(bestReturn.amount.rate)),
-                //      fee: shortAssetString(bestReturn.amount.fee),
                 fee: total_fee,
-                //      slippage: bestReturn.amount.slippage
                 slippage: slippage
             };
         });
@@ -503,14 +445,10 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
             }
             const contracts = registryData.map(x => x.contract);
             yield this.checkPrices(contracts);
-            //    console.log("updateStats.checkPrices", this.checkPrices);
             this.setContracts(contracts);
-            //    console.log(">>updateStats");
             const allTokens = yield Promise.all(contracts.map(this.fetchContract));
-            //    console.log("updateStats.allTokens", allTokens);
             this.setStats(allTokens);
             this.connector = yield retryPromise(() => get_connector(rpc), 4, 500);
-            //    console.log("updateStats.connector", this.connector);
             const all = yield Promise.all(allTokens.flatMap(token => this.buildTokens({
                 tokens: token.tokens,
                 volume: token.volume[0],
@@ -627,4 +565,3 @@ __decorate([
 __decorate([
     mutation
 ], UsdBancorModule.prototype, "setStats", null);
-//# sourceMappingURL=usdSx.js.map

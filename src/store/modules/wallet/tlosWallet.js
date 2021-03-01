@@ -3,14 +3,8 @@ import { createModule, mutation, action } from "vuex-class-component";
 import { initAccessContext } from "eos-transit";
 import anchor from "eos-transit-anchorlink-provider";
 import scatter from "eos-transit-scatter-provider";
-//import lynx from "eos-transit-lynx-provider";
 import ledger from "eos-transit-ledger-provider";
-//import tp from "eos-transit-tokenpocket-provider";
-//import meetone from "eos-transit-meetone-provider";
-//import whalevault from "eos-transit-whalevault-provider";
-//import keycat from "eos-transit-keycat-provider";
 import { vxm } from "../../../store";
-//const appName = "TLOSD";
 export var Chain;
 (function (Chain) {
     Chain[Chain["telos"] = 0] = "telos";
@@ -20,12 +14,9 @@ const telos_chain_options = {
     appName: "TLOSD.Telos",
     network: {
         host: "telos.caleos.io",
-        // host: "telos.caleos.io",
-        // host: "testnet.telos.africa",
         port: 443,
         protocol: "https",
         chainId: "4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11"
-        // chainId: "1eaa0824707c8c16bd25145493bf062aecddfeb56c736f6ba6397f3195f33c9f"
     },
     walletProviders: [anchor("TLOSD.Telos"), scatter(), ledger()]
 };
@@ -72,7 +63,6 @@ export class EosTransitModule extends VuexModule.With({
             return login;
     }
     get isAuthenticated() {
-        // @ts-ignore
         return this.wallet && this.wallet.auth && this.wallet.auth.accountName;
     }
     checkDevice() {
@@ -89,16 +79,15 @@ export class EosTransitModule extends VuexModule.With({
             const authIncluded = actions.every((action) => action.authorization);
             const builtActions = authIncluded
                 ? actions
-                : actions.map((action) => (Object.assign(Object.assign({}, action), { authorization: [
+                : actions.map((action) => (Object.assign(Object.assign({}, action), {
+                    authorization: [
                         {
-                            // @ts-ignore
                             actor: this.wallet.auth.accountName,
-                            // @ts-ignore
                             permission: this.wallet.auth.permission
                         }
-                    ] })));
+                    ]
+                })));
             try {
-                // @ts-ignore
                 return yield this.wallet.eosApi.transact({
                     actions: builtActions
                 }, {
@@ -109,7 +98,6 @@ export class EosTransitModule extends VuexModule.With({
             }
             catch (e) {
                 if (e.message == "Unexpected end of JSON input")
-                    // @ts-ignore
                     return yield this.wallet.eosApi.transact({
                         actions: builtActions
                     }, {
@@ -168,21 +156,16 @@ export class EosTransitModule extends VuexModule.With({
         this.walletState = state;
     }
     setAccessContext(chain) {
-        // TODO figure out how to re-login
         console.log("setAccessContext.chain", chain);
         vxm.tlosWallet.logout();
-        //    vxm.tlosWallet.setProvider();
         switch (chain) {
             case 0:
-                // Telos
                 this.accessContext = initAccessContext(telos_chain_options);
                 break;
             case 1:
-                // EOS
                 this.accessContext = initAccessContext(eos_chain_options);
                 break;
             default:
-                // Telos
                 this.accessContext = initAccessContext(telos_chain_options);
         }
         this.chain = chain;
@@ -220,4 +203,3 @@ __decorate([
 __decorate([
     mutation
 ], EosTransitModule.prototype, "setAccessContext", null);
-//# sourceMappingURL=tlosWallet.js.map

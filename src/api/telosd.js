@@ -1,16 +1,3 @@
-/*
-  Brief  : Extend sxjs to support telosd extensions
-  GitHib : https://github.com/stableex/sx.js
-
-  Changes required
-
-  1. Extend Token to include { maker_pool, token_type, enabled }
-     Original - https://github.com/stableex/sx.js/blob/04c035b09d9b8caf321a3a9c7bb293d434daf2ef/src/interfaces.ts#L16-L22
-     Telos$   - https://telos.bloks.io/account/telosd.swaps?loadContract=true&tab=Tables&account=telosd.swaps&scope=telosd.swaps&table=tokens
-
-  2. Modify get_spot_price() to handle liquidity token
-
- */
 import { __awaiter } from "tslib";
 import { asset, check, symbol_code, number_to_asset, SymbolCode, asset_to_number, Asset, Sym, Name } from "eos-common";
 import { compareString } from "./helpers";
@@ -114,12 +101,10 @@ export function get_connector(rpc) {
         const tlos_liquidity_depth = result.rows[0].liquidity_depth
             .find((token) => compareString(token.key, "TLOS"))
             .value.split(" ")[0] * 2.0;
-        // mid market price = TLOSD liquidity / TLOS liquidity
         const price = tlosd_liquidity_depth / tlos_liquidity_depth;
         const volume_24h = result.rows[0].volume_24h
             .find((token) => compareString(token.key, "TLOS"))
             .value.split(" ")[0];
-        //  console.log("get_connector.liquidity_depth, price, volume_24h", tlosd_liquidity_depth, price, volume_24h);
         return { tlos_liquidity_depth, tlosd_liquidity_depth, price, volume_24h };
     });
 }
@@ -137,7 +122,6 @@ export function get_settings(rpc, code) {
         });
         if (!results.rows.length)
             throw new Error("contract is unavailable or currently disabled for maintenance");
-        //  console.log(results.rows[0]);
         return {
             fee: results.rows[0].fee,
             amplifier: results.rows[0].amplifier,
@@ -163,7 +147,7 @@ export function get_pool_balance(tokens, settings) {
         if (!is_maker_token(tokens[token].sym.code(), tokens)) {
             a +=
                 asset_to_number(tokens[token].maker_pool) *
-                    get_spot_price(proxy_token, tokens[token].sym.code(), tokens, settings);
+                get_spot_price(proxy_token, tokens[token].sym.code(), tokens, settings);
         }
     }
     return a;
@@ -181,17 +165,12 @@ export function get_maker_spot_price(base, tokens, settings) {
     const proxy_spot_price = get_spot_price(base, settings.proxy_token.code().to_string(), tokens, settings);
     const pool_balance = get_pool_balance(tokens, settings);
     const maker_balance = get_maker_balance(tokens, settings);
-    //  const maker_spot_price =
-    //    maker_balance > 0 ? (proxy_spot_price * pool_balance) / maker_balance : 1.0;
     return (proxy_spot_price * pool_balance) / maker_balance;
 }
 export function get_spot_price(base, quote, tokens, settings
-//  connector?: Connector | {tlos_liquidity_depth: number, tlosd_liquidity_depth: number}
 ) {
     if (is_maker_token(new SymbolCode(quote), tokens))
         return get_maker_spot_price(new SymbolCode(base), tokens, settings);
-    //  if (is_connector_token(new SymbolCode(quote), tokens))
-    //    return (connector) ? connector.tlosd_liquidity_depth / connector.tlos_liquidity_depth : 0.25;
     const [base_upper, quote_upper] = get_uppers(new SymbolCode(base), new SymbolCode(quote), tokens, settings);
     return base_upper / quote_upper;
 }
@@ -209,7 +188,6 @@ export function get_tokens(rpc, code, limit = 50) {
             limit
         });
         for (const row of results.rows) {
-            //    console.log("get_tokens",row);
             const [precision, symcode] = row.sym.split(",");
             tokens[symcode] = {
                 sym: new Sym(symcode, precision),
@@ -221,8 +199,6 @@ export function get_tokens(rpc, code, limit = 50) {
                 token_type: new Name(row.token_type)
             };
         }
-        //  const [liquidity_depth, price, volume_24h] = await retryPromise(() => get_connector(rpc), 4, 500);
-        //  console.log("get_connector.liquidity_depth, price, volume_24h", liquidity_depth, price, volume_24h);
         // TODO force add TLOS here
         tokens["TLOS"] = {
             sym: new Sym("TLOS", 4),
@@ -233,7 +209,6 @@ export function get_tokens(rpc, code, limit = 50) {
             maker_pool: new Asset("0.0000 TLOS"),
             token_type: new Name("connector")
         };
-        //  console.log("get_tokens",tokens);
         return tokens;
     });
 }
@@ -290,30 +265,4 @@ export function get_volume(rpc, code, limit = 1) {
         return volume;
     });
 }
-/*
-const tlosToken = {
-  contract: "eosio.token",
-  symbol: "4,TLOS"
-};
-
-const connector = [
-  {
-    contract: "tlosdx.swaps",
-    smartToken: {
-      contract: "relays.swaps",
-      symbol: "8,TLOSDX"
-    },
-    reserves: [
-      {
-        contract: "tokens.swaps",
-        symbol: "4,TLOSD"
-      },
-      {
-        contract: "eosio.token",
-        symbol: "4,TLOS"
-      }
-    ]
-  },
- */
 export const VERSION = 2.0;
-//# sourceMappingURL=telosd.js.map
