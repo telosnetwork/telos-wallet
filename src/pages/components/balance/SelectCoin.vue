@@ -65,6 +65,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { vxm } from "../../../store";
 import moment from 'moment';
 
 export default {
@@ -72,6 +73,7 @@ export default {
   data() {
     return {
       searchCoinName: '',
+      bancorModule: vxm.bancor,
     }
   },
   computed: {
@@ -83,10 +85,11 @@ export default {
       });
     },
     availbleCoins() {
+      const { convertibleTokens } = this.bancorModule;
       if (this.type === 'convert') {
-        return this.coins.filter(coin => coin.amount > 0);
+        return this.coins.filter(coin => coin.amount > 0).filter(coin => convertibleTokens.findIndex(token => token.symbol === coin.symbol) >= 0);
       }
-      return this.coins;
+      return this.coins.filter(coin => convertibleTokens.findIndex(token => token.symbol === coin.symbol) >= 0);
     },
     showDlg: {
       get() {

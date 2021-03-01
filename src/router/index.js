@@ -73,3 +73,10 @@ export default function (/* { store, ssrContext } */) {
 
   return Router
 }
+
+export const defaultModule = "tlos";
+const PREFERRED_SERVICE = "preferredService";
+
+const setPreferredService = (service) => {
+    localStorage.setItem(PREFERRED_SERVICE, service);
+};
