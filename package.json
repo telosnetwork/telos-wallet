@@ -20,7 +20,7 @@
     "decimal.js": "^8.0.0",
     "dns": "^0.2.2",
     "dotenv": "^8.2.0",
-    "eos-common": "^0.8.0",
+    "eos-common": "^0.6.0",
     "eos-transit-keycat-provider": "^3.1.4",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
