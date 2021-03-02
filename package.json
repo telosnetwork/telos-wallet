@@ -15,7 +15,7 @@
     "@quasar/extras": "^1.0.0",
     "@smontero/ual-sqrl": "^0.1.22",
     "@telosnetwork/ual-telos-keycat": "1.10.3",
-    "axios": "^0.21.1",
+    "axios": "^0.20.0",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
     "decimal.js": "^8.0.0",
