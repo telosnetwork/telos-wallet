@@ -35,9 +35,9 @@
     "ual-ledger": "^0.3.0",
     "ual-scatter": "^0.3.0",
     "universal-authenticator-library": "^0.3.0",
-    "vue-property-decorator": "^8.2.2",
+    "vue-property-decorator": "^2.0.0",
     "vue-qrcode-reader": "^2.3.16",
-    "vuex-class-component": "^2.3.3",
+    "vuex-class-component": "^2.0.0",
     "waait": "^1.0.5"
   },
   "devDependencies": {
