@@ -17,7 +17,7 @@
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
-    "decimal.js": "^4.0.0",
+    "decimal.js": "^8.0.0",
     "dns": "^0.2.2",
     "dotenv": "^8.2.0",
     "eos-common": "^0.8.0",
