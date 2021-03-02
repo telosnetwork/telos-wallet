@@ -6,6 +6,5 @@ const VuexModule = createModule({
 export class GeneralModule extends VuexModule.With({ namespaced: "general/" }) {
     constructor() {
         super(...arguments);
-        this.language = "en";
     }
 }
