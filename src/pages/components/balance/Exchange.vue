@@ -264,7 +264,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
-import numeral from "numeral";
 import SelectCoin from './SelectCoin';
 import { vxm } from "../../../store";
 import { createProxy, extractVuexModule } from "vuex-class-component";
@@ -316,7 +315,7 @@ export default {
       return `1 ${this.convertCoin.symbol} = ${this.reward.toFixed(this.toCoin.precision > 6 ? 6 : this.toCoin.precision)} ${this.toCoin.symbol}`;
     },
     displayedSlippage() {
-      return `Slippage: ${numeral(this.slippage).format("0.00%")}`;
+      return `Slippage: ${this.getFixed(this.slippage, 2)}%`;
     },
     slippageHigh() {
       return Number(this.slippage) > 0.2;
