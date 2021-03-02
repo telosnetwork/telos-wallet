@@ -1,9 +1,6 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, mutation, action } from "vuex-class-component";
 import { initAccessContext } from "eos-transit";
-import anchor from "eos-transit-anchorlink-provider";
-import scatter from "eos-transit-scatter-provider";
-import ledger from "eos-transit-ledger-provider";
 import { vxm } from "../../../store";
 export var Chain;
 (function (Chain) {
@@ -18,7 +15,7 @@ const telos_chain_options = {
         protocol: "https",
         chainId: "4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11"
     },
-    walletProviders: [anchor("TLOSD.Telos"), scatter(), ledger()]
+    walletProviders: []
 };
 const eos_chain_options = {
     appName: "TLOSD.EOS",
@@ -28,7 +25,7 @@ const eos_chain_options = {
         protocol: "https",
         chainId: "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
     },
-    walletProviders: [anchor("TLOSD.Telos"), scatter(), ledger()]
+    walletProviders: []
 };
 const VuexModule = createModule({
     strict: false
