@@ -5,7 +5,6 @@
 </template>
 <script>
 
-import { Component, Vue } from "vue-property-decorator";
 import { vxm } from "./store/index.js";
 
 export default {
