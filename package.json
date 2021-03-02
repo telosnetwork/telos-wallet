@@ -21,8 +21,8 @@
     "dns": "^0.2.2",
     "dotenv": "^8.2.0",
     "eos-common": "^0.8.0",
-    "eos-transit": "^4.0.7",
-    "eos-transit-keycat-provider": "^4.0.1",
+    "eos-transit": "^1.0.0",
+    "eos-transit-keycat-provider": "^3.1.4",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "http2": "^3.3.7",
@@ -47,8 +47,7 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-loader": "^3.0.3",
-    "eslint-plugin-vue": "^6.1.2",
-    "strip-ansi": "=3.0.1"
+    "eslint-plugin-vue": "^6.1.2"
   },
   "browserslist": [
     "last 10 Chrome versions",
