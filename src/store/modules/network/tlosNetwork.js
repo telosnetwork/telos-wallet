@@ -4,7 +4,6 @@ import { getBalance, getTokenBalances, compareString, compareToken } from "../..
 import { vxm } from "../../../store";
 import _ from "lodash";
 import { multiContract } from "../../../api/multiContractTx";
-import wait from "waait";
 import { Asset, asset_to_number, number_to_asset, Sym } from "eos-common";
 import { Chain } from "../../../store/modules/wallet/tlosWallet";
 const requiredProps = ["balance", "contract", "symbol"];
@@ -60,7 +59,7 @@ export class TlosNetworkModule extends VuexModule.With({ namespaced: "tlosNetwor
                         break;
                     }
                     else {
-                        yield wait(interval);
+                        yield new Promise(res => setTimeout(res, interval));
                     }
                 }
                 resolve();

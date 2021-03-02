@@ -7,7 +7,6 @@
 
 import { Component, Vue } from "vue-property-decorator";
 import { vxm } from "./store/index.js";
-import wait from "waait";
 
 export default {
   name: 'App',
@@ -34,7 +33,7 @@ export default {
         await vxm.bancor.init(initParams);
         this.loading = false;
       } catch (e) {
-        await wait(1000);
+        await new Promise(res => setTimeout(res, 1000));
         try {
           await vxm.bancor.init(initParams);
         } catch (e) {

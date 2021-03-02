@@ -7,7 +7,6 @@ import { vxm } from "../../../store";
 import { rpc } from "../../../api/rpc";
 import { calculateFundReturn, composeMemo, findCost, findNewPath, findReturn, relaysToConvertPaths } from "../../../api/eosBancorCalc";
 import _ from "lodash";
-import wait from "waait";
 import { getHardCodedRelays } from "./staticRelays";
 import { sortByNetworkTokens } from "../../../api/sortByNetworkTokens";
 import { liquidateAction, hydrateAction } from "../../../api/singleContractTx";
@@ -545,7 +544,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                 existingFeeds: bancorApiFeeds
             });
             for (const chunk in remainingChunks) {
-                yield wait(waitTime);
+                yield new Promise(res => setTimeout(res, waitTime));
                 let relays = yield this.hydrateOldRelays(remainingChunks[chunk]);
                 this.buildManuallyIfNotIncludedInExistingFeeds({
                     relays,
@@ -897,7 +896,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     }
     waitAndUpdate(time = 4000) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield wait(time);
+            yield new Promise(res => setTimeout(res, time));
             return this.init();
         });
     }
@@ -916,7 +915,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                     })));
                     return;
                 }
-                yield wait(waitPeriod);
+                yield new Promise(res => setTimeout(res, waitPeriod));
             }
         });
     }

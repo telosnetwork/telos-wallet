@@ -6,7 +6,6 @@ import { rpc } from "../../../api/rpc";
 import { asset_to_number, number_to_asset, symbol, Sym, extended_asset, asset, name } from "eos-common";
 import { compareString, retryPromise, findOrThrow, getSxContracts, buildTokenId } from "../../../api/helpers";
 import _ from "lodash";
-import wait from "waait";
 const getRate = (asset, sym, tokens, settings) => {
     const rate = get_rate(asset, sym.code(), tokens, settings);
     const slippage = get_slippage(asset, sym.code(), tokens, settings);
@@ -152,7 +151,7 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
     refresh() {
         return __awaiter(this, void 0, void 0, function* () {
             retryPromise(() => this.updateStats(), 4, 1000);
-            yield wait(10);
+            yield new Promise(res => setTimeout(res, 10));
         });
     }
     init(params) {
@@ -165,7 +164,7 @@ export class UsdBancorModule extends VuexModule.With({ namespaced: "usdsBancor/"
             setInterval(() => this.checkRefresh(), 60000);
             yield retryPromise(() => this.updateStats(), 4, 1000);
             this.moduleInitiated();
-            yield wait(10);
+            yield new Promise(res => setTimeout(res, 10));
             console.timeEnd("sx");
         });
     }

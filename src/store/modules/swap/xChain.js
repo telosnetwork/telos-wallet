@@ -6,7 +6,6 @@ import { rpc } from "../../../api/rpc";
 import { asset, asset_to_number, extended_asset, name, number_to_asset, Sym, symbol } from "eos-common";
 import { buildTokenId, compareString, findOrThrow, getSxContracts, retryPromise } from "../../../api/helpers";
 import _ from "lodash";
-import wait from "waait";
 import { Chain } from "../../../store/modules/wallet/tlosWallet";
 const getRate = (asset, sym, tokens, settings) => {
     const rate = get_rate(asset, sym.code(), tokens, settings);
@@ -195,7 +194,7 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
                 };
             });
             this.setNewTokens(newTokens);
-            yield wait(10);
+            yield new Promise(res => setTimeout(res, 10));
         });
     }
     init(params) {
@@ -250,7 +249,7 @@ export class xChainModule extends VuexModule.With({ namespaced: "xchainBancor/" 
             });
             this.setNewTokens(newTokens);
             this.moduleInitiated();
-            yield wait(10);
+            yield new Promise(res => setTimeout(res, 10));
             console.timeEnd("xchain");
         });
     }

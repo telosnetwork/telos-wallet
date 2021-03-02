@@ -36,8 +36,7 @@
     "universal-authenticator-library": "^0.3.0",
     "vue-property-decorator": "^2.0.0",
     "vue-qrcode-reader": "^2.3.16",
-    "vuex-class-component": "^2.0.0",
-    "waait": "^1.0.5"
+    "vuex-class-component": "^2.0.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

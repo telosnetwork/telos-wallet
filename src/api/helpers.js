@@ -2,7 +2,6 @@ import { __awaiter } from "tslib";
 import { vxm } from "../store";
 import { Asset, asset_to_number, number_to_asset, Sym } from "eos-common";
 import { rpc } from "./rpc";
-import wait from "waait";
 import { sortByNetworkTokens } from "./sortByNetworkTokens";
 export const networkTokens = ["TLOS"];
 export const isOdd = (num) => num % 2 == 1;
@@ -139,7 +138,7 @@ export const retryPromise = (promise, maxAttempts = 10, interval = 1000) => __aw
                 return resolve(yield promise());
             }
             catch (e) {
-                yield wait(interval);
+                yield new Promise(res => setTimeout(res, interval));
                 if (i == maxAttempts)
                     reject(e);
             }
