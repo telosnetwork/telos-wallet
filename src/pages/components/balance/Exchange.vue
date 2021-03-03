@@ -266,7 +266,6 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import SelectCoin from './SelectCoin';
 import { vxm } from "../../../store";
-import { createProxy, extractVuexModule } from "vuex-class-component";
 
 export default {
   props: ['showExchangeDlg', 'selectedConvertCoin', 'coins'],
