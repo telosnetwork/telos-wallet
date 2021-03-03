@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",
-    "@quasar/extras": "^1.0.0",
+    "@quasar/extras": "^1.9.18",
     "@smontero/ual-sqrl": "^0.1.22",
     "@telosnetwork/ual-telos-keycat": "1.10.3",
     "axios": "^0.20.0",
@@ -30,7 +30,7 @@
     "moment": "^2.27.0",
     "ptokens": "^0.8.0",
     "qrcanvas-vue": "^2.1.0",
-    "quasar": "^1.0.0",
+    "quasar": "^1.15.4",
     "ual-anchor": "^0.5.1",
     "ual-ledger": "^0.3.0",
     "ual-scatter": "^0.3.0",
@@ -39,7 +39,7 @@
     "vuex-class-component": "^2.0.0"
   },
   "devDependencies": {
-    "@quasar/app": "^2.0.0",
+    "@quasar/app": "^2.1.15",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
