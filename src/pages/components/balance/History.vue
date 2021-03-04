@@ -74,8 +74,8 @@
 
                 <q-item-section side>
                   <div class="text-black text-right display-grid">
-                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{`${historyData(history).coinAmount} ${selectedCoin.symbol}`}}</label>
-                    <label class="text-caption text-grey-6">${{historyData(history).usdAmount}}</label>
+                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(historyData(history).coinAmount, 4)} ${selectedCoin.symbol}`}}</label>
+                    <label class="text-caption text-grey-6">${{getFixed(historyData(history).usdAmount, 4)}}</label>
                   </div>
                 </q-item-section>
               </q-item>
