@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import BigNumber from 'bignumber.js';
 import routes from './routes'
 
 Vue.use(VueRouter)
@@ -41,7 +41,7 @@ Vue.mixin({
   methods: {
     getFixed(value, decimal) {
       const decimalVal = Math.pow(10, decimal);
-      return (Math.round(value * decimalVal) / decimalVal).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+      return BigNumber((Math.round(value * decimalVal) / decimalVal).toString()).toFormat();
     },
     changeTheme() {
       const index = (this.themes.findIndex(theme => theme === this.theme.toLowerCase()) + 1) % this.themes.length;
