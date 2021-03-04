@@ -106,6 +106,7 @@
     />
     <Exchange
       :showExchangeDlg.sync="showExchangeDlg"
+      :selectedConvertCoin.sync="selectedCoin"
       :coins="coins"
     />
     <Send
@@ -423,6 +424,11 @@ export default {
       }
     }, 10);
 
+    if (this.chainName === 'telos') {
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
+    }
+
     if (this.loadedCoins.length > 0) {
       this.coins = this.loadedCoins;
       this.coinLoadedAll = true;
@@ -456,9 +462,6 @@ export default {
           });
       }
     }
-
-    await this.loadNftTokenItems();
-    this.loadNftTokenTags();
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(() => {

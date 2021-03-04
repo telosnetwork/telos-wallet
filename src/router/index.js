@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import BigNumber from 'bignumber.js';
 import routes from './routes'
 
 Vue.use(VueRouter)
@@ -20,7 +20,7 @@ Vue.mixin({
   },
   computed: {
     themeColor() {
-      switch(this.theme.toLowerCase()) {
+      switch (this.theme.toLowerCase()) {
         case 'indigo':
           return '#571AFF';
         case 'platinum':
@@ -39,9 +39,9 @@ Vue.mixin({
     }
   },
   methods: {
-    getFixed(value, decimal ) {
+    getFixed(value, decimal) {
       const decimalVal = Math.pow(10, decimal);
-      return Math.round(value * decimalVal) / decimalVal;
+      return BigNumber((Math.round(value * decimalVal) / decimalVal).toString()).toFormat();
     },
     changeTheme() {
       const index = (this.themes.findIndex(theme => theme === this.theme.toLowerCase()) + 1) % this.themes.length;
@@ -50,26 +50,21 @@ Vue.mixin({
   },
 })
 
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Router instance.
- */
-
 export default function (/* { store, ssrContext } */) {
   const Router = new VueRouter({
     scrollBehavior: () => ({ x: 0, y: 0 }),
     routes,
 
-    // Leave these as they are and change in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
     mode: process.env.VUE_ROUTER_MODE,
     base: process.env.VUE_ROUTER_BASE
   })
 
   return Router
 }
+
+export const defaultModule = "tlos";
+const PREFERRED_SERVICE = "preferredService";
+
+const setPreferredService = (service) => {
+  localStorage.setItem(PREFERRED_SERVICE, service);
+};

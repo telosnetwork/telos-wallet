@@ -1,0 +1,27 @@
+{
+  "status": true,
+  "tokens": [
+    {
+      "tokenId": 1,
+      "name": "Telos",
+      "symbol": "TLOS",
+      "img": "tlos.png",
+      "priceChange24": "0.01023798",
+      "volumeUsd24": "0.000000000",
+      "volumeBaseToken24": "0.000000000",
+      "priceUsd": "0.01841",
+      "liquidity": "2370.333800000"
+    },
+    {
+      "tokenId": 2,
+      "name": "eZAR",
+      "symbol": "EZAR",
+      "img": "ezar.png",
+      "priceChange24": "0.01023798",
+      "volumeUsd24": "0.000000000",
+      "volumeBaseToken24": "0.000000000",
+      "priceUsd": "0.060826429",
+      "liquidity": "3331.800000000"
+    }
+  ]
+}

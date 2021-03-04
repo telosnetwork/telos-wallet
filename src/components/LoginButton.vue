@@ -188,8 +188,8 @@ export default {
   font-size: 20px
 .logout-btn
   // margin-left: auto;
-  left: -15px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  left: -15px
+  color: rgba(255, 255, 255, 0.8)
+  background: rgba(0, 0, 0, 0.3)
+  border: 1px solid rgba(255, 255, 255, 0.3)
 </style>
