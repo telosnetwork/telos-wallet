@@ -226,14 +226,10 @@
               {{ unitReward }}
             </span>
             <div>
-              {{
-                `1 ${convertCoin.symbol} = $${(
-                  this.toCoin.price * this.reward
-                ).toFixed(4)} USD`
-              }}
+              {{ `1 ${convertCoin.symbol} = $${getFixed(this.toCoin.price * this.reward, 4)} USD` }}
             </div>
             <div v-if="fee !== null">
-              Fee: {{ fee }}
+              Fee: {{ getFixed(fee, 4) }}
             </div>
             <div
               v-if="slippage !== null"
@@ -311,7 +307,7 @@ export default {
       return Number(this.toAmount.replace(/\s/g, ''));
     },
     unitReward() {
-      return `1 ${this.convertCoin.symbol} = ${this.reward.toFixed(this.toCoin.precision > 6 ? 6 : this.toCoin.precision)} ${this.toCoin.symbol}`;
+      return `1 ${this.convertCoin.symbol} = ${this.getFixed(this.reward, this.toCoin.precision > 6 ? 6 : this.toCoin.precision)} ${this.toCoin.symbol}`;
     },
     displayedSlippage() {
       return `Slippage: ${this.getFixed(this.slippage, 2)}%`;
