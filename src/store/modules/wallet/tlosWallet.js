@@ -62,7 +62,7 @@ export class EosTransitModule extends VuexModule.With({
                     ]
                 })));
             try {
-                return yield this.wallet.eosApi.transact({
+                return yield vxm.tlosWallet.wallet.eosApi.signTransaction({
                     actions: builtActions
                 }, {
                     broadcast: true,
@@ -72,7 +72,7 @@ export class EosTransitModule extends VuexModule.With({
             }
             catch (e) {
                 if (e.message == "Unexpected end of JSON input")
-                    return yield this.wallet.eosApi.transact({
+                    return yield vxm.tlosWallet.wallet.eosApi.signTransaction({
                         actions: builtActions
                     }, {
                         broadcast: true,

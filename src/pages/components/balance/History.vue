@@ -134,7 +134,6 @@ export default {
       const actionHistory = await this.$hyperion.get(
         `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`
       );
-      console.log(actionHistory);
       this.accountHistory.push(...(actionHistory.data.actions || []));
       this.page += this.pageLimit;
       if (actionHistory.data.actions.length === 0) {

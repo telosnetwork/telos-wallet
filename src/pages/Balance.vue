@@ -14,7 +14,7 @@
           <div class="full-width" ></div>
           <div class="full-width" >
             <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{getFixed(coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0), 2)}}
+              ${{displayAmount.toFixed(2)}}
             </label>
           </div>
           <div class="full-width text-right">
@@ -206,6 +206,7 @@ export default {
         0,
         0,
       ],
+      displayAmount: 0,
       nftTagLoading: false,
       coinLoadedAll: false,
       nftTokenLoadedAll: false,
@@ -230,6 +231,9 @@ export default {
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens']),
+    totalAmount() {
+      return this.coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0);
+    },
     availableHeight() {
       return window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0);
     },
@@ -304,16 +308,23 @@ export default {
         });
       }
 
-      await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${this.coins.map(coin => coin.name).join('%2C')}&vs_currencies=usd`)
-        .then(resp => resp.json())
-        .then(data => {
-          this.coins = this.coins.map((coin) => {
-            if (data[coin.name.toLowerCase()]) {
-              return { price: data[coin.name.toLowerCase()].usd, ...coin };
+      await fetch(`https://www.api.bloks.io/telos/tokens`)
+        .then(response => response.json())
+        .then(json => {
+          json.forEach((token) => {
+            if (token.chain !== 'telos') {
+              ;
+            } else if (token.metadata.name === 'Telos') {
+              this.coins[0].price = token.price.usd;
+            } else if (token.symbol !== 'TLOS') {
+              const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
+              if (coinIndex >= 0) {
+                this.coins[coinIndex].price = token.price.usd;
+              }
             }
-            return coin;
           });
         });
+
       this.coins = this.coins.sort(function (a, b) {
         if (a.symbol === 'TLOS') return -1;
         if (b.symbol === 'TLOS') return 1;
@@ -321,6 +332,7 @@ export default {
         let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
         return bAmount - aAmount;
       });
+      this.$emit('update:loadedCoins', this.coins);
     },
     async loadNftTokenItems() {
       for (const account of this.nftAccounts) {
@@ -422,6 +434,7 @@ export default {
           this.coinViewHeight = approxViewHeight;
         }
       }
+      this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
     }, 10);
 
     if (this.chainName === 'telos') {
@@ -434,33 +447,30 @@ export default {
       this.coinLoadedAll = true;
     } else {
       this.coins.length = 1;
-      for (const t of this.supportTokens) {
-        await fetch(`https://www.api.bloks.io/telos/tokens/${t}`)
-          .then(response => response.json())
-          .then(json => {
-            json.forEach((token) => {
-              if (token.chain !== 'telos') {
-                ;
-              } else if (token.metadata.name === 'Telos') {
-                this.coins[0].price = token.price.usd;
-                this.coins[0].icon = token.metadata.logo;
-              } else if (token.symbol !== 'TLOS') {
-                const precisionSplit = token.supply.circulating.toString().split('.');
-                this.coins.push({
-                  account: token.account,
-                  name: token.metadata.name,
-                  symbol: token.symbol,
-                  amount: 0,
-                  price: token.price.usd,
-                  icon: token.metadata.logo,
-                  precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
-                });
-                this.getUserTokens().then(this.loadUserTokens());
-                this.$emit('update:loadedCoins', this.coins);
-              }
-            });
+      await fetch(`https://www.api.bloks.io/telos/tokens`)
+        .then(response => response.json())
+        .then(json => {
+          json.forEach((token) => {
+            if (token.chain !== 'telos') {
+              ;
+            } else if (token.metadata.name === 'Telos') {
+              this.coins[0].price = token.price.usd;
+              this.coins[0].icon = token.metadata.logo;
+            } else if (token.symbol !== 'TLOS') {
+              const precisionSplit = token.supply.circulating.toString().split('.');
+              this.coins.push({
+                account: token.account,
+                name: token.metadata.name,
+                symbol: token.symbol,
+                amount: 0,
+                price: token.price.usd,
+                icon: token.metadata.logo,
+                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+              });
+            }
           });
-      }
+        });
+      this.getUserTokens().then(this.loadUserTokens());
     }
 
     this.coinLoadedAll = true;

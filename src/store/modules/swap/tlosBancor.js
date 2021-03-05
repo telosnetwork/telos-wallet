@@ -1123,11 +1123,12 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
                 });
                 convertActions = [...openActions, ...convertActions];
             }
-            const txRes = yield this.triggerTxAndWatchBalances({
-                actions: convertActions,
-                tokenIds: [from.id, to.id]
-            });
-            this.refresh();
+            // const txRes = yield this.triggerTxAndWatchBalances({
+            //     actions: convertActions,
+            //     tokenIds: [from.id, to.id]
+            // });
+            // this.refresh();
+            const txRes = yield this.triggerTx(convertActions);
             return txRes.transaction_id;
         });
     }
