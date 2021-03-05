@@ -348,8 +348,8 @@ export default {
       }
     },
     async validateConvertAmount(val) {
-      if (this.convertCoin && this.convertAmountValue > this.convertCoin.amount * this.convertCoin.price) {
-        this.convertAmount = (this.convertCoin.amount * this.convertCoin.price).toString().substring(0, 8);
+      if (this.convertCoin && this.convertAmountValue > this.convertCoin.amount) {
+        this.convertAmount = (this.convertCoin.amount).toString().substring(0, 8);
       } else if (val.charAt(val.length-1) !== '.') {
         const cleanStr = val.replace(/\s/g, '');
         const num = parseFloat(cleanStr) || 0;
