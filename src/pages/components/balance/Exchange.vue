@@ -440,7 +440,7 @@ export default {
 
         this.$q.notify({
           type: 'primary',
-          message: result,
+          message: `${this.convertCoin.symbol} is converted to ${this.toCoin.symbol}`,
         });
         this.showDlg = false;
       } catch (e) {
