@@ -45,12 +45,11 @@ class MultiContractTx {
             name: "transfer",
             data: {
                 from: this.getAuth()[0].actor,
-                to: 'eosio.token',
+                to: 'bancor.tbn',
                 quantity: amount.to_string(),
                 memo
             }
         };
-        console.log(action, "is the action...");
         return this.tx([action]);
     }
     nukeRelayAction(symbolName, reserves) {
