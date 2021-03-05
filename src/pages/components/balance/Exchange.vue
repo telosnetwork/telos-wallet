@@ -464,6 +464,11 @@ export default {
         this.toCoin = null;
       }
     },
+    exchangeType: function (val, oldVal) {
+      if (val === 'dollars' && this.convertCoin) {
+        this.dollarsAmount = this.getFixed(this.convertAmount * this.convertCoin.price, 2);
+      }
+    },
     dollarsAmount: async function(val, oldVal) {
       setInterval(() => {
         const widthElement = this.$refs.widthElement;
@@ -494,11 +499,18 @@ export default {
       if (val) {
         if (this.dlgType === 'convert') {
           this.convertCoin = val;
-          await this.validateDollarAmount(this.dollarsAmount);
-          await this.validateConvertAmount(this.convertAmount);
+          if (this.exchangeType === 'dollars') {
+            await this.validateDollarAmount(this.dollarsAmount);
+          } else {
+            await this.validateConvertAmount(this.convertAmount);
+          }
         } else {
           this.toCoin = val;
-          await this.validateToAmount(this.toAmount);
+          if (this.exchangeType === 'dollars') {
+            await this.validateDollarAmount(this.dollarsAmount);
+          } else {
+            await this.validateToAmount(this.toAmount);
+          }
         }
       }
     },
