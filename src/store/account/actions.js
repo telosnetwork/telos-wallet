@@ -30,7 +30,7 @@ export const login = async function(
       vxm.tlosWallet.wallet = {
         auth: {
           accountName: accountName,
-          permission: true,
+          permission: "active",
         },
         eosApi: this.$ualUser,
       };
