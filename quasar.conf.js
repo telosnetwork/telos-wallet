@@ -49,7 +49,8 @@ module.exports = function(/* ctx */) {
         NETWORK_PORT: parseInt(process.env.NETWORK_PORT),
         NETWORK_PROTOCOL: process.env.NETWORK_PROTOCOL,
         NETWORK_EXPLORER: process.env.NETWORK_EXPLORER,
-        HYPERION_ENDPOINT: process.env.HYPERION_ENDPOINT
+        HYPERION_ENDPOINT: process.env.HYPERION_ENDPOINT,
+        EVM_CONTRACT: process.env.EVM_CONTRACT
       },
 
       // transpile: false,
