@@ -5,6 +5,7 @@ export default () => ({
   supportTokens: [
     'tlos',
     'pbtc',
+    'peth',
     'seeds',
     'qbe',
     'teach',
@@ -37,5 +38,17 @@ export default () => ({
   ],
   pTokens: [
     'pbtc',
+    'tlos',
   ],
+  pTokenNetworks: {
+    'pbtc': {
+      'telos': 'Telos',
+      'ptoken': 'Bitcoin'
+    },
+    'tlos': {
+      'telos': 'Telos',
+      'tevm': 'tEVM',
+      'ptoken': 'Ethereum'
+    },
+  },
 });

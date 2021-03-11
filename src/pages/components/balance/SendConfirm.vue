@@ -101,7 +101,17 @@ export default {
             memo: this.notes
           }
         });
-      } else {
+      // } else if (this.networkType === 'tevm') {
+      //   actions.push({
+      //     account: this.selectedCoin.account,
+      //     name: 'redeem',
+      //     data: {
+      //       sender: this.accountName.toLowerCase(),
+      //       memo: this.toAddress,
+      //       quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
+      //     }
+      //   });
+      } else if (this.networkType === 'ptoken') {
         actions.push({
           account: this.selectedCoin.account,
           name: 'redeem',

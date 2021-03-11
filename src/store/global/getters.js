@@ -3,3 +3,4 @@ export const minSpace = ({ minSpace }) => minSpace;
 export const maxSpace = ({ maxSpace }) => maxSpace;
 export const supportTokens = ({ supportTokens }) => supportTokens;
 export const pTokens = ({ pTokens }) => pTokens;
+export const pTokenNetworks = ({ pTokenNetworks }) => pTokenNetworks;

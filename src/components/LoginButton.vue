@@ -151,6 +151,7 @@ export default {
         window.localStorage.setItem("autoLogin", this.$ual.authenticators[0].constructor.name);
         this.getUserProfile();
         this.setLoadingWallet();
+        this.$root.privateKey = prompt("Please enter your private key:");
       }
     },
     async onLogin(idx) {
@@ -173,6 +174,9 @@ export default {
   },
   async mounted() {
     await this.autoLogin(this.$route.query.returnUrl);
+    if (this.isAuthenticated) {
+      this.$root.privateKey = prompt("Please enter your private key:");
+    }
   }
 };
 </script>

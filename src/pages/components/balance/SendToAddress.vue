@@ -32,19 +32,14 @@
             </q-item>
             <q-item v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
-                <q-btn 
-                  class="q-px-md"
-                  push no-caps
-                  label="Telos"
-                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'telos'"
-                />
                 <q-btn
+                  v-for="(pTokenNetwork, key) of pTokenNetworks[selectedCoin.symbol.toLowerCase()]"
+                  :key="pTokenNetwork"
                   class="q-px-md"
                   push no-caps
-                  label="Bitcoin"
-                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'ptoken'"
+                  :label="pTokenNetwork"
+                  :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  @click="networkType = key"
                 />
               </q-btn-group>
             </q-item>
@@ -107,6 +102,8 @@
       :toAddress="toAddress"
       :notes="notes"
       :networkType="networkType"
+      :tEVMApi="tEVMApi"
+      :tEVMAccount="tEVMAccount"
     />
   </q-dialog>
 </template>
@@ -115,6 +112,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import SendConfirm from './SendConfirm';
+import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 
 export default {
   props: ['showSendToAddressDlg', 'selectedCoin', 'sendAmount'],
@@ -125,6 +123,8 @@ export default {
       showSendConfirmDlg: false,
       networkType: 'telos',
       checking: false,
+      tEVMApi: null,
+      tEVMAccount: null,
     }
   },
   components: {
@@ -132,7 +132,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['pTokens']),
+    ...mapGetters('global', ['pTokens', 'pTokenNetworks']),
     showDlg: {
       get() {
         return this.showSendToAddressDlg;
@@ -160,8 +160,26 @@ export default {
       }
 
       this.checking = true;
-      if (this.networkType === 'ptoken') {
-        if (this.selectedCoin.name === 'pTokens BTC') {
+      if (this.networkType === 'tevm') {
+        if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
+          this.$q.notify({
+            type: 'negative',
+            message: `Address ${this.toAddress} does not exist`,
+          });
+          this.checking = false;
+          return;
+        }
+      } else if (this.networkType === 'ptoken') {
+        if (this.selectedCoin.name === 'pTokens ETH') {
+          if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
+            this.$q.notify({
+              type: 'negative',
+              message: `Address ${this.toAddress} does not exist`,
+            });
+            this.checking = false;
+            return;
+          }
+        } else if (this.selectedCoin.name === 'pTokens BTC') {
           const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`)
             .then(resp => resp.json());
           if (!data.success) {
@@ -210,13 +228,25 @@ export default {
     });
   },
   watch: {
-    showSendToAddressDlg: function(val, oldVal) {
+    showSendToAddressDlg: async function(val, oldVal) {
       if (val) {
         this.toAddress = this.$root.qrcode_accountName || '';
         this.networkType = this.$root.qrcode_networkType || 'telos';
         this.$root.qrcode_accountName = '';
         this.notes = '';
         this.checking = false;
+        this.tEVMApi = new TelosEvmApi({
+          endpoint: process.env.HYPERION_ENDPOINT,
+          chainId: 41,
+          ethPrivateKeys: [],
+          telosContract: process.env.EVM_CONTRACT,
+          telosPrivateKeys: [this.$root.privateKey],
+        })
+        try {
+          this.tEVMAccount = await this.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        } catch {
+          this.tEVMAccount = null;
+        }
       }
     },
     toAddress: function(val, oldVal) {

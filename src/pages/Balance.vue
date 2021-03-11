@@ -287,18 +287,12 @@ export default {
         .then(resp => resp.json())
         .then(data => {
           if (data.length > 0) {
-            this.coins[0].amount = new Number(data[0].split(' TLOS')[0]);
+            this.coins[0].amount = parseFloat(data[0].split(' TLOS')[0]);
           }
         });
 
       const coins = this.userTokens;
       if (coins.status === 200) {
-        const tokens = coins.data.tokens.filter((token) => {
-          if (coins.data.tokens.filter(t => t.symbol === (token.symbol || token.currency)).length > 1) {
-            return token.contract.toLowerCase() === 'eosio.token';
-          }
-          return true;
-        });
         coins.data.tokens.forEach((token) => {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
           if (tokenIndex >= 0) {
@@ -313,7 +307,6 @@ export default {
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              ;
             } else if (token.metadata.name === 'Telos') {
               this.coins[0].price = token.price.usd;
             } else if (token.symbol !== 'TLOS') {
@@ -452,7 +445,6 @@ export default {
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              ;
             } else if (token.metadata.name === 'Telos') {
               this.coins[0].price = token.price.usd;
               this.coins[0].icon = token.metadata.logo;
