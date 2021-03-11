@@ -42,12 +42,12 @@
                 />
               </q-btn-group>
               <q-btn
-                v-if="networkType === 'ptoken'"
+                v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
                 class="q-mt-sm text-weight-medium text-caption"
                 push no-caps
                 :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
                 :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
-                @click="networkType === 'ptoken' ? generateDepositAddress() : null"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
               />
             </div>
             <q-space/>
@@ -169,6 +169,31 @@ export default {
     },
   },
   methods: {
+    async generateEVMAddress() {
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: 'create',
+        data: {
+          account: this.accountName,
+          data: 'test',
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(actions);
+      if (transaction) {
+        this.$q.notify({
+          type: 'primary',
+          message: `A new address is successfully created`,
+        });
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        this.networkType = 'tevm';
+      } else {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to create an address`,
+        });
+      }
+    },
     async generateDepositAddress() {
       this.awaiting = false;
       let ptoken = new pTokens({

@@ -540,8 +540,11 @@ export default {
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
       this.getUserTokens().then(this.loadUserTokens());
-      this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-      this.tEVMBalance = this.getCurrenttEVMBalance();
+      try {
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        this.tEVMBalance = this.getCurrenttEVMBalance();
+      } catch {
+      }
     }, 5000);
   },
   beforeMount() {
