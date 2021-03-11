@@ -39,6 +39,7 @@
                   push no-caps
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :disable="key === 'tevm' && !$root.tEVMAccount"
                   @click="networkType = key"
                 />
               </q-btn-group>
@@ -72,7 +73,7 @@
               <q-item-section>
                 <q-input
                   v-model="notes"
-                  :disable="networkType !== 'telos'"
+                  :disable="networkType === 'ptoken'"
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
@@ -240,6 +241,13 @@ export default {
     networkType: function(val, oldVal) {
       if (val === 'telos') {
         this.toAddress = this.toAddress.toLowerCase();
+      } else if (val === 'tevm') {
+        if (!this.$root.tEVMAccount) {
+          this.$q.notify({
+            type: 'dark',
+            message: `Please generate your tEVM address`,
+          });
+        }
       }
     },
   },

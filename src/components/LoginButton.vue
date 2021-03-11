@@ -182,7 +182,11 @@ export default {
           telosContract: process.env.EVM_CONTRACT,
           telosPrivateKeys: [],
         })
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        try {
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        } catch {
+          this.$root.tEVMAccount = null;
+        }
       } catch {
       }
     }
