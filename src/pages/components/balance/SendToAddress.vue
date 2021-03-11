@@ -67,7 +67,7 @@
                 />
               </q-item-section>
             </q-item>
-            <q-item class="list-item" :disable="networkType !== 'telos'">
+            <q-item class="list-item" :disable="networkType === 'ptoken'">
               <q-item-section side>Notes:</q-item-section>
               <q-item-section>
                 <q-input

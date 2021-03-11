@@ -98,7 +98,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      this.sending = true;
+      // this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`;
       if (this.networkType === 'telos') {
@@ -114,21 +114,42 @@ export default {
         });
       } else if (this.networkType === 'tevm') {
         try {
-          await this.$root.tEVMApi.telos.deposit({ from: this.accountName, quantity: quantityStr });
-          await this.$root.tEVMApi.transfer({ account: this.accountName, sender: this.$root.tEVMAccount.address, to: this.toAddress, quantity: quantityStr });
-          this.$q.notify({
-            type: 'primary',
-            message: `${quantityStr} is sent to ${this.toAddress}`,
+          actions.push({
+            account: this.selectedCoin.account,
+            name: 'transfer',
+            data: {
+              from: this.accountName.toLowerCase(),
+              to: process.env.EVM_CONTRACT,
+              amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
+              quantity: quantityStr,
+              symbol: this.selectedCoin.symbol,
+              memo: this.notes
+            }
           });
-          this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+          const rawTrx = await this.$root.tEVMApi.transfer({
+            account: this.accountName,
+            sender: this.$root.tEVMAccount.address,
+            to: this.toAddress,
+            quantity: quantityStr,
+            returnRaw: true,
+          });
+          actions.push({
+            account: process.env.EVM_CONTRACT,
+            name: 'raw',
+            data: {
+              ram_payer: this.accountName.toLowerCase(),
+              tx: rawTrx,
+              sender: this.$root.tEVMAccount.address.substring(2),
+            }
+          });
         } catch {
           this.$q.notify({
             type: 'negative',
             message: `Failed to send ${quantityStr} to ${this.toAddress}`,
           });
+          this.sending = false;
+          return;
         }
-        this.sending = false;
-        return;
       } else if (this.networkType === 'ptoken') {
         actions.push({
           account: this.selectedCoin.account,

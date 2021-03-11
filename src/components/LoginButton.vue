@@ -173,7 +173,6 @@ export default {
       }
     },
     async createEvmApi() {
-      this.$root.privateKey = prompt("Please enter your private key:");
       this.$root.oldtEVMBalance = 0;
       try {
         this.$root.tEVMApi = new TelosEvmApi({
@@ -181,7 +180,7 @@ export default {
           chainId: 41,
           ethPrivateKeys: [],
           telosContract: process.env.EVM_CONTRACT,
-          telosPrivateKeys: [this.$root.privateKey],
+          telosPrivateKeys: [],
         })
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
       } catch {

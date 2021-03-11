@@ -457,16 +457,25 @@ export default {
       return 0;
     },
     async withdrawEVM() {
-      this.tEVMWithdrawing = true;
+      // this.tEVMWithdrawing = true;
       const quantityStr = `${this.getCurrenttEVMBalance().toFixed(4)} ${'TLOS'}`;
-      try {
-        await this.$root.tEVMApi.telos.withdraw({ account: this.accountName, quantity: quantityStr });
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: 'withdraw',
+        data: {
+          to: this.accountName.toLowerCase(),
+          quantity: quantityStr,
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(actions);
+      if (transaction) {
         this.$q.notify({
           type: 'primary',
           message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
         });
         this.oldtEVMBalance = this.getCurrenttEVMBalance();
-      } catch {
+      } else {
         this.$q.notify({
           type: 'negative',
           message: `Failed to withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`,
