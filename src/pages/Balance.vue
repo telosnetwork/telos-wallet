@@ -142,7 +142,7 @@
     <q-banner
       v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
       inline-actions
-      rounded
+      dense
       class="q-pr-none text-white absolute full-width"
       :style="`bottom: ${footerHeight}px; background: ${themeColor}`"
     >
@@ -153,8 +153,8 @@
       </div>
       <template v-slot:action>
         <q-btn
-          class="bg-white text-weight-bolder"
-          :style="`color: ${themeColor}`"
+          class="bg-white"
+          :style="`color: ${themeColor};`"
           no-caps
           size="12px"
           label="Withdraw Now"
