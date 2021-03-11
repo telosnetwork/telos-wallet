@@ -186,7 +186,7 @@ export default {
           this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
         } catch {
         }
-        if (!this.$root.tEVMAccount) {
+        if (!this.$root.tEVMAccount || !this.$root.tEVMAccount.address) {
           await this.$root.tEVMApi.telos.create({ account: this.accountName, data: 'test' });
           this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
         }
