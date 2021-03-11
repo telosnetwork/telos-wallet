@@ -54,7 +54,7 @@
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
-                  :label="`username or ${selectedCoin.name} address`"
+                  :label="toPlaceHolder"
                 />
               </q-item-section>
               <q-item-section side>
@@ -143,6 +143,12 @@ export default {
       }
       return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
     },
+    toPlaceHolder() {
+      if (this.networkType === 'telos') {
+        return 'Username or Telos address';
+      }
+      return `${this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][this.networkType]} address`;
+    }
   },
   methods: {
     ...mapActions('account', ['accountExists']),
@@ -150,13 +156,22 @@ export default {
       if (this.toAddress.length === 0) {
         this.$q.notify({
           type: 'dark',
-          message: `Please fill the username or ${this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][this.networkType]} address`,
+          message: `Please fill the ${this.toPlaceHolder}`,
         });
         return;
       }
 
       this.checking = true;
-      if (this.networkType === 'tevm' || this.networkType === 'ethereum') {
+      if (this.networkType === 'telos') {
+        if (!(await this.accountExists(this.toAddress))) {
+          this.$q.notify({
+            type: 'negative',
+            message: `Account ${this.toAddress} does not exist`,
+          });
+          this.checking = false;
+          return;
+        }
+      } else if (this.networkType === 'tevm' || this.networkType === 'ethereum') {
         if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
           this.$q.notify({
             type: 'negative',
@@ -186,15 +201,6 @@ export default {
             this.checking = false;
             return;
           }
-        }
-      } else {
-        if (!(await this.accountExists(this.toAddress))) {
-          this.$q.notify({
-            type: 'negative',
-            message: `Account ${this.toAddress} does not exist`,
-          });
-          this.checking = false;
-          return;
         }
       }
 
