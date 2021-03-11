@@ -29,25 +29,23 @@
         </q-header>
         <q-page-container>
           <div class="column" :style="`height: ${cardHeight}px;`">
-            <div>
-              <q-list>
-                <q-item class="list-item">
-                  <q-item-section side>To</q-item-section>
-                  <q-item-section class="to-address">{{toAddress}}</q-item-section>
-                </q-item>
-                <q-item v-if="networkType !== 'telos'"
-                  class="list-item">
-                  <q-item-section side class="text-weight-bold">Network Fee</q-item-section>
-                  <q-item-section></q-item-section>
-                  <q-item-section side>{{`$ 0.00`}}</q-item-section>
-                </q-item>
-                <q-item class="list-item">
-                  <q-item-section side class="text-weight-bold">Total</q-item-section>
-                  <q-item-section></q-item-section>
-                  <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
-                </q-item>
-              </q-list>
-            </div>
+            <q-list>
+              <q-item class="list-item">
+                <q-item-section side>To</q-item-section>
+                <q-item-section class="to-address">{{toAddress}}</q-item-section>
+              </q-item>
+              <q-item v-if="networkType !== 'telos'"
+                class="list-item">
+                <q-item-section side class="text-weight-bold">Network Fee</q-item-section>
+                <q-item-section></q-item-section>
+                <q-item-section side>{{`$ 0.00`}}</q-item-section>
+              </q-item>
+              <q-item class="list-item">
+                <q-item-section side class="text-weight-bold">Total</q-item-section>
+                <q-item-section></q-item-section>
+                <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
+              </q-item>
+            </q-list>
             <q-space/>
             <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
               :style="`height: 50px; background: ${themeColor}`"
@@ -60,6 +58,12 @@
         </q-page-container>
       </q-layout>
     </q-card>
+    <div v-if="sending"
+      class="justify-center absolute flex"
+      style="background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </q-dialog>
 </template>
 
@@ -70,6 +74,11 @@ import { networkInterfaces } from 'os';
 
 export default {
   props: ['showSendConfirmDlg', 'selectedCoin', 'sendAmount', 'toAddress', 'notes', 'networkType'],
+  data() {
+    return {
+      sending: false,
+    };
+  },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     showDlg: {
@@ -89,7 +98,9 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
+      this.sending = true;
       let actions = [];
+      const quantityStr = `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`;
       if (this.networkType === 'telos') {
         actions.push({
           account: this.selectedCoin.account,
@@ -97,20 +108,27 @@ export default {
           data: {
             from: this.accountName.toLowerCase(),
             to: this.toAddress,
-            quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
+            quantity: quantityStr,
             memo: this.notes
           }
         });
-      // } else if (this.networkType === 'tevm') {
-      //   actions.push({
-      //     account: this.selectedCoin.account,
-      //     name: 'redeem',
-      //     data: {
-      //       sender: this.accountName.toLowerCase(),
-      //       memo: this.toAddress,
-      //       quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
-      //     }
-      //   });
+      } else if (this.networkType === 'tevm') {
+        try {
+          await this.$root.tEVMApi.telos.deposit({ from: this.accountName, quantity: quantityStr });
+          await this.$root.tEVMApi.transfer({ account: this.accountName, sender: this.$root.tEVMAccount.address, to: this.toAddress, quantity: quantityStr });
+          this.$q.notify({
+            type: 'primary',
+            message: `${quantityStr} is sent to ${this.toAddress}`,
+          });
+          this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+        } catch {
+          this.$q.notify({
+            type: 'negative',
+            message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+          });
+        }
+        this.sending = false;
+        return;
       } else if (this.networkType === 'ptoken') {
         actions.push({
           account: this.selectedCoin.account,
@@ -118,19 +136,24 @@ export default {
           data: {
             sender: this.accountName.toLowerCase(),
             memo: this.toAddress,
-            quantity: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`,
+            quantity: quantityStr,
           }
         });
       }
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
-        this.showTransaction = true;
         this.$q.notify({
           type: 'primary',
-          message: `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol} is sent to ${this.toAddress}`,
+          message: `${quantityStr} is sent to ${this.toAddress}`,
         });
         this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+      } else {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+        });
       }
+      this.sending = false;
     }
   },
 };

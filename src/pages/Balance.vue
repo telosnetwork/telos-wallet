@@ -139,6 +139,41 @@
       :showQRScannerDlg.sync="showQRScannerDlg"
       :coins="coins"
     />
+    <q-banner
+      v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
+      inline-actions
+      rounded
+      class="q-pr-none text-white absolute full-width"
+      :style="`bottom: ${footerHeight}px; background: ${themeColor}`"
+    >
+      <div :style="`font-size:16px;`">
+        <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
+          {{tEVMBalance}} TLOS recieved from tEVM!
+        </marquee>
+      </div>
+      <template v-slot:action>
+        <q-btn
+          class="bg-white text-weight-bolder"
+          :style="`color: ${themeColor}`"
+          no-caps
+          size="12px"
+          label="Withdraw Now"
+          @click="withdrawEVM"
+        />
+        <q-btn
+          round flat dense
+          size="12px"
+          icon="close"
+          @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
+        />
+      </template>
+    </q-banner>
+    <div v-if="tEVMWithdrawing"
+      class="justify-center absolute flex full-width full-height"
+      style="background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </div>
 </template>
 
@@ -226,6 +261,8 @@ export default {
       showQRScannerDlg: false,
       showHistoryDlg: false,
       showExchangeDlg: false,
+      tEVMBalance: 0,
+      tEVMWithdrawing: false,
     };
   },
   computed: {
@@ -411,6 +448,32 @@ export default {
       }
       this.nftTagLoading = false;
     },
+    getCurrenttEVMBalance() {
+      if (this.$root.tEVMAccount) {
+        const balanceStr = this.$root.tEVMAccount.balance.toString();
+        const strLength = balanceStr.length;
+        return parseFloat(`${balanceStr.substring(0, strLength - 18)}.${balanceStr.substring(strLength - 18, strLength)}`) || 0;
+      }
+      return 0;
+    },
+    async withdrawEVM() {
+      this.tEVMWithdrawing = true;
+      const quantityStr = `${this.getCurrenttEVMBalance().toFixed(4)} ${'TLOS'}`;
+      try {
+        await this.$root.tEVMApi.telos.withdraw({ account: this.accountName, quantity: quantityStr });
+        this.$q.notify({
+          type: 'primary',
+          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+        });
+        this.oldtEVMBalance = this.getCurrenttEVMBalance();
+      } catch {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+        });
+      }
+      this.tEVMWithdrawing = false;
+    }
   },
   created: async function() {
     this.interval = setInterval(() => {
@@ -466,8 +529,10 @@ export default {
     }
 
     this.coinLoadedAll = true;
-    this.tokenInterval = setInterval(() => {
+    this.tokenInterval = setInterval(async () => {
       this.getUserTokens().then(this.loadUserTokens());
+      this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+      this.tEVMBalance = this.getCurrenttEVMBalance();
     }, 5000);
   },
   beforeMount() {

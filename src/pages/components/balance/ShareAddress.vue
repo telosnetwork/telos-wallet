@@ -42,12 +42,12 @@
                 />
               </q-btn-group>
               <q-btn
-                v-if="networkType === 'ptoken' || (networkType === 'tevm' && !tEVMAccount)"
+                v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
                 class="q-mt-sm text-weight-medium text-caption"
                 push no-caps
                 :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
                 :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
-                @click="networkType === 'ptoken' ? generateDepositAddress() : getEVMInfo()"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
               />
             </div>
             <q-space/>
@@ -70,8 +70,7 @@
             </div>
             <q-space/>
             <div v-if="networkType === 'tevm'" class="text-caption text-grey-8">
-              Any ETH deposit sent to this address will mint an equal number of
-              tEVM tokens on the TELOS address: {{accountName}}
+              Alert will display on balance screen when TLOS is recieved in your account
             </div>
             <div v-else-if="networkType === 'ptoken'" class="text-caption text-grey-8">
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
@@ -91,7 +90,6 @@ import moment from 'moment';
 import { QRCanvas } from 'qrcanvas-vue';
 import { pERC20 } from 'ptokens-perc20'
 import pTokens from 'ptokens';
-import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 
 export default {
   props: ['showShareAddressDlg', 'selectedCoin'],
@@ -102,8 +100,6 @@ export default {
       depositAddress: '',
       metaData: {},
       awaiting: false,
-      tEVMApi: null,
-      tEVMAccount: null,
     }
   },
   components: {
@@ -133,7 +129,7 @@ export default {
       if (this.networkType === 'telos') {
         return `${this.accountName}(${this.selectedCoin.name})`;
       } else if (this.networkType === 'tevm') {
-        return `${this.tEVMAccount.address}(${this.selectedCoin.name})`;
+        return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
       } else if (this.networkType === 'ptoken') {
         return `${this.depositAddress}(${this.selectedCoin.name})`;
       }
@@ -143,8 +139,8 @@ export default {
       if (this.networkType === 'telos') {
         return this.accountName;
       } else if (this.networkType === 'tevm') {
-        if (this.tEVMAccount) {
-          return this.tEVMAccount.address;
+        if (this.$root.tEVMAccount) {
+          return this.$root.tEVMAccount.address;
         } else {
           return 'Please Generate New Address';
         }
@@ -158,7 +154,7 @@ export default {
       return '';
     },
     isAddressAvailable() {
-      if (this.networkType === 'tevm' && this.tEVMAccount) {
+      if (this.networkType === 'tevm' && this.$root.tEVMAccount) {
         return true;
       } else if (this.networkType === 'ptoken' && this.depositAddress.length > 0) {
         return true;
@@ -173,16 +169,12 @@ export default {
     },
   },
   methods: {
-    async getEVMInfo() {
-      let sender;
+    async generateEVMAddress() {
       try {
-        this.tEVMAccount = await this.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        await this.$root.tEVMApi.telos.create({ account: this.accountName, data: 'test' });
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
       } catch {
-        await this.tEVMApi.telos.create({ account: this.accountName, data: 'test' });
-        this.tEVMAccount = await this.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
       }
-      // console.log(`${sender.address} (${this.accountName}) Balance:`, sender.balance)
-      // console.log(`${sender.address} (${this.accountName}) Nonce:`, sender.nonce)
     },
     async generateDepositAddress() {
       this.awaiting = false;
@@ -239,22 +231,6 @@ export default {
         this.networkType = 'telos';
         this.metaData = JSON.parse(window.localStorage.getItem('metaData')) || {};
         this.depositAddress = this.metaData[this.selectedCoin.symbol] || '';
-        this.tEVMApi = new TelosEvmApi({
-          endpoint: process.env.HYPERION_ENDPOINT,
-          chainId: 41,
-          ethPrivateKeys: [],
-          telosContract: process.env.EVM_CONTRACT,
-          telosPrivateKeys: [this.$root.privateKey],
-        })
-        try {
-          this.tEVMAccount = await this.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-          // await this.tEVMApi.telos.deposit({ from: this.accountName, quantity: `0.0002 TLOS` });
-          // await this.tEVMApi.setEthereumContract(this.tEVMAccount.address);
-          // const balance = await this.tEVMApi.eth.balanceOf(this.accountName);
-          console.log(this.tEVMAccount.balance.toString());
-        } catch {
-          this.tEVMAccount = null;
-        }
       }
     },
   },

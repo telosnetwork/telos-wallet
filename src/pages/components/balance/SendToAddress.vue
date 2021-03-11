@@ -102,8 +102,6 @@
       :toAddress="toAddress"
       :notes="notes"
       :networkType="networkType"
-      :tEVMApi="tEVMApi"
-      :tEVMAccount="tEVMAccount"
     />
   </q-dialog>
 </template>
@@ -112,7 +110,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import SendConfirm from './SendConfirm';
-import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 
 export default {
   props: ['showSendToAddressDlg', 'selectedCoin', 'sendAmount'],
@@ -123,8 +120,6 @@ export default {
       showSendConfirmDlg: false,
       networkType: 'telos',
       checking: false,
-      tEVMApi: null,
-      tEVMAccount: null,
     }
   },
   components: {
@@ -235,18 +230,6 @@ export default {
         this.$root.qrcode_accountName = '';
         this.notes = '';
         this.checking = false;
-        this.tEVMApi = new TelosEvmApi({
-          endpoint: process.env.HYPERION_ENDPOINT,
-          chainId: 41,
-          ethPrivateKeys: [],
-          telosContract: process.env.EVM_CONTRACT,
-          telosPrivateKeys: [this.$root.privateKey],
-        })
-        try {
-          this.tEVMAccount = await this.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-        } catch {
-          this.tEVMAccount = null;
-        }
       }
     },
     toAddress: function(val, oldVal) {
