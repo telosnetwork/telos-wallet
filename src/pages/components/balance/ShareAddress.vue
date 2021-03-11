@@ -38,7 +38,7 @@
                   push no-caps
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  :disable="key === 'tevm'"
+                  :disable="key === 'tevm' && chainName === 'telos'"
                   @click="networkType = key"
                 />
               </q-btn-group>
@@ -171,6 +171,9 @@ export default {
         return false;
       }
       return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
+    },
+    chainName() {
+      return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
     },
   },
   methods: {
