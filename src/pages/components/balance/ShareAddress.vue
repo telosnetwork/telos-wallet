@@ -52,11 +52,11 @@
               />
             </div>
             <q-space/>
-            <div v-if="networkType === 'telos' || isAddressAvailable">
+            <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable">
               <q-r-canvas :options="{data: qrcodeData, cellSize: 10}" style="width: 120px"/>
             </div>
             <div
-              :class="networkType === 'telos' || !isAddressAvailable ?
+              :class="networkType === 'telos' || networkType === 'ethereum' || !isAddressAvailable ?
                 'text-h6' :
                 'text-caption'"
               style="word-break: break-word;"
@@ -131,6 +131,8 @@ export default {
         return `${this.accountName}(${this.selectedCoin.name})`;
       } else if (this.networkType === 'tevm') {
         return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
+      } else if (this.networkType === 'ethereum') {
+        return `${this.accountName}(${this.selectedCoin.name})`;
       } else if (this.networkType === 'ptoken') {
         return `${this.depositAddress}(${this.selectedCoin.name})`;
       }
@@ -138,6 +140,8 @@ export default {
     },
     displayAccountName() {
       if (this.networkType === 'telos') {
+        return this.accountName;
+      } else if (this.networkType === 'ethereum') {
         return this.accountName;
       } else if (this.networkType === 'tevm') {
         if (this.$root.tEVMAccount) {
