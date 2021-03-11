@@ -39,7 +39,7 @@
                   push no-caps
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  :disable="key === 'tevm' && !$root.tEVMAccount"
+                  :disable="key === 'tevm'"
                   @click="networkType = key"
                 />
               </q-btn-group>
@@ -73,7 +73,7 @@
               <q-item-section>
                 <q-input
                   v-model="notes"
-                  :disable="networkType === 'ptoken'"
+                  :disable="networkType === 'ptoken' || networkType === 'ethereum'"
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
@@ -150,17 +150,17 @@ export default {
       if (this.toAddress.length === 0) {
         this.$q.notify({
           type: 'dark',
-          message: `Please fill the username or ${this.selectedCoin.name} address`,
+          message: `Please fill the username or ${this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][this.networkType]} address`,
         });
         return;
       }
 
       this.checking = true;
-      if (this.networkType === 'tevm') {
+      if (this.networkType === 'tevm' || this.networkType === 'ethereum') {
         if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
           this.$q.notify({
             type: 'negative',
-            message: `Address ${this.toAddress} does not exist`,
+            message: `Address ${this.toAddress} is not valid`,
           });
           this.checking = false;
           return;
@@ -170,7 +170,7 @@ export default {
           if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
             this.$q.notify({
               type: 'negative',
-              message: `Address ${this.toAddress} does not exist`,
+              message: `Address ${this.toAddress} is not valid`,
             });
             this.checking = false;
             return;
@@ -181,7 +181,7 @@ export default {
           if (!data.success) {
             this.$q.notify({
               type: 'negative',
-              message: `Address ${this.toAddress} does not exist`,
+              message: `Address ${this.toAddress} is not valid`,
             });
             this.checking = false;
             return;

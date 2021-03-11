@@ -150,6 +150,17 @@ export default {
           this.sending = false;
           return;
         }
+      } else if (this.networkType === 'ethereum') {
+        actions.push({
+          account: 'eosio.token',
+          name: 'transfer',
+          data: {
+            from: this.accountName.toLowerCase(),
+            to: 'xeth.ptokens',
+            quantity: quantityStr,
+            memo: this.toAddress
+          }
+        });
       } else if (this.networkType === 'ptoken') {
         actions.push({
           account: this.selectedCoin.account,

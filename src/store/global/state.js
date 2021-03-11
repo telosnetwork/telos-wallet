@@ -48,7 +48,7 @@ export default () => ({
     'tlos': {
       'telos': 'Telos',
       'tevm': 'tEVM',
-      'ptoken': 'Ethereum'
+      'ethereum': 'Ethereum'
     },
   },
 });

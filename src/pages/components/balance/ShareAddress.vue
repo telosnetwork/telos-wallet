@@ -38,6 +38,7 @@
                   push no-caps
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :disable="key === 'tevm'"
                   @click="networkType = key"
                 />
               </q-btn-group>
