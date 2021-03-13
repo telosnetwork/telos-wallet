@@ -139,6 +139,41 @@
       :showQRScannerDlg.sync="showQRScannerDlg"
       :coins="coins"
     />
+    <q-banner
+      v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
+      inline-actions
+      dense
+      class="q-pr-none text-white absolute full-width"
+      :style="`bottom: ${footerHeight}px; background: ${themeColor}`"
+    >
+      <div :style="`font-size:16px;`">
+        <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
+          {{tEVMBalance}} TLOS recieved from tEVM!
+        </marquee>
+      </div>
+      <template v-slot:action>
+        <q-btn
+          class="bg-white"
+          :style="`color: ${themeColor};`"
+          no-caps
+          size="12px"
+          label="Withdraw Now"
+          @click="withdrawEVM"
+        />
+        <q-btn
+          round flat dense
+          size="12px"
+          icon="close"
+          @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
+        />
+      </template>
+    </q-banner>
+    <div v-if="tEVMWithdrawing"
+      class="justify-center absolute flex full-width full-height"
+      style="background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </div>
 </template>
 
@@ -226,6 +261,8 @@ export default {
       showQRScannerDlg: false,
       showHistoryDlg: false,
       showExchangeDlg: false,
+      tEVMBalance: 0,
+      tEVMWithdrawing: false,
     };
   },
   computed: {
@@ -287,18 +324,12 @@ export default {
         .then(resp => resp.json())
         .then(data => {
           if (data.length > 0) {
-            this.coins[0].amount = new Number(data[0].split(' TLOS')[0]);
+            this.coins[0].amount = parseFloat(data[0].split(' TLOS')[0]);
           }
         });
 
       const coins = this.userTokens;
       if (coins.status === 200) {
-        const tokens = coins.data.tokens.filter((token) => {
-          if (coins.data.tokens.filter(t => t.symbol === (token.symbol || token.currency)).length > 1) {
-            return token.contract.toLowerCase() === 'eosio.token';
-          }
-          return true;
-        });
         coins.data.tokens.forEach((token) => {
           const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
           if (tokenIndex >= 0) {
@@ -313,7 +344,6 @@ export default {
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              ;
             } else if (token.metadata.name === 'Telos') {
               this.coins[0].price = token.price.usd;
             } else if (token.symbol !== 'TLOS') {
@@ -418,6 +448,41 @@ export default {
       }
       this.nftTagLoading = false;
     },
+    getCurrenttEVMBalance() {
+      if (this.$root.tEVMAccount) {
+        const balanceStr = this.$root.tEVMAccount.balance.toString();
+        const strLength = balanceStr.length;
+        return parseFloat(`${balanceStr.substring(0, strLength - 18)}.${balanceStr.substring(strLength - 18, strLength)}`) || 0;
+      }
+      return 0;
+    },
+    async withdrawEVM() {
+      // this.tEVMWithdrawing = true;
+      const quantityStr = `${this.getCurrenttEVMBalance().toFixed(4)} ${'TLOS'}`;
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: 'withdraw',
+        data: {
+          to: this.accountName.toLowerCase(),
+          quantity: quantityStr,
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(actions);
+      if (transaction) {
+        this.$q.notify({
+          type: 'primary',
+          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+        });
+        this.oldtEVMBalance = this.getCurrenttEVMBalance();
+      } else {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+        });
+      }
+      this.tEVMWithdrawing = false;
+    }
   },
   created: async function() {
     this.interval = setInterval(() => {
@@ -452,7 +517,6 @@ export default {
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              ;
             } else if (token.metadata.name === 'Telos') {
               this.coins[0].price = token.price.usd;
               this.coins[0].icon = token.metadata.logo;
@@ -474,8 +538,13 @@ export default {
     }
 
     this.coinLoadedAll = true;
-    this.tokenInterval = setInterval(() => {
+    this.tokenInterval = setInterval(async () => {
       this.getUserTokens().then(this.loadUserTokens());
+      try {
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        this.tEVMBalance = this.getCurrenttEVMBalance();
+      } catch {
+      }
     }, 5000);
   },
   beforeMount() {

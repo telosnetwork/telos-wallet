@@ -32,47 +32,36 @@
             <div v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
                 <q-btn 
+                  v-for="(pTokenNetwork, key) of pTokenNetworks[selectedCoin.symbol.toLowerCase()]"
+                  :key="pTokenNetwork"
                   class="q-px-md"
                   push no-caps
-                  label="Telos"
-                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'telos'"
-                />
-                <q-btn
-                  class="q-px-md"
-                  push no-caps
-                  label="Bitcoin"
-                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'ptoken'"
+                  :label="pTokenNetwork"
+                  :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :disable="key === 'tevm' && chainName === 'telos'"
+                  @click="networkType = key"
                 />
               </q-btn-group>
               <q-btn
+                v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
                 class="q-mt-sm text-weight-medium text-caption"
                 push no-caps
-                label="Generate New Deposit Address"
+                :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
                 :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
-                @click="networkType === 'ptoken' ? generateDepositAddress() : null"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
               />
             </div>
             <q-space/>
-            <div v-if="networkType === 'telos' || depositAddress.length > 0">
+            <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable">
               <q-r-canvas :options="{data: qrcodeData, cellSize: 10}" style="width: 120px"/>
             </div>
             <div
-              :class="networkType === 'telos' || depositAddress.length === 0 ?
+              :class="networkType === 'telos' || networkType === 'ethereum' || !isAddressAvailable ?
                 'text-h6' :
                 'text-caption'"
               style="word-break: break-word;"
             >
-              {{
-                networkType === 'telos' ?
-                accountName :
-                  (
-                    depositAddress.length > 0 ?
-                    depositAddress :
-                    'Please Generate New Deposit Address'
-                  )
-              }}
+              {{ displayAccountName }}
             </div>
             <div>({{selectedCoin.name}})</div>
             <div class="text-grey">Share address</div>
@@ -81,8 +70,12 @@
               Awaiting New Deposits...
             </div>
             <q-space/>
-            <div v-if="isPToken" class="text-caption text-grey-8">
-              Any BTC deposit sent to this address will mint an equal number of pBTC tokens on the TELOS address: {{accountName}}
+            <div v-if="networkType === 'tevm'" class="text-caption text-grey-8">
+              Alert will display on balance screen when TLOS is recieved in your account
+            </div>
+            <div v-else-if="networkType === 'ptoken'" class="text-caption text-grey-8">
+              Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
+              p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
           </q-card>
         </q-page-container>
@@ -96,6 +89,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import { QRCanvas } from 'qrcanvas-vue';
+import { pERC20 } from 'ptokens-perc20'
+import pTokens from 'ptokens';
 
 export default {
   props: ['showShareAddressDlg', 'selectedCoin'],
@@ -113,7 +108,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['pTokens']),
+    ...mapGetters('global', ['pTokens', 'pTokenNetworks']),
     searchCoins() {
       return this.coins.filter((coin) => {
         return coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase())
@@ -134,8 +129,42 @@ export default {
     qrcodeData() {
       if (this.networkType === 'telos') {
         return `${this.accountName}(${this.selectedCoin.name})`;
+      } else if (this.networkType === 'tevm') {
+        return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
+      } else if (this.networkType === 'ethereum') {
+        return `${this.accountName}(${this.selectedCoin.name})`;
+      } else if (this.networkType === 'ptoken') {
+        return `${this.depositAddress}(${this.selectedCoin.name})`;
       }
-      return `${this.depositAddress}(${this.selectedCoin.name})`;
+      return '';
+    },
+    displayAccountName() {
+      if (this.networkType === 'telos') {
+        return this.accountName;
+      } else if (this.networkType === 'ethereum') {
+        return this.accountName;
+      } else if (this.networkType === 'tevm') {
+        if (this.$root.tEVMAccount) {
+          return this.$root.tEVMAccount.address;
+        } else {
+          return 'Please Generate New Address';
+        }
+      } else if (this.networkType === 'ptoken') {
+        if (this.depositAddress.length > 0) {
+          return this.depositAddress;
+        } else {
+          return 'Please Generate New Deposit Address';
+        }
+      }
+      return '';
+    },
+    isAddressAvailable() {
+      if (this.networkType === 'tevm' && this.$root.tEVMAccount) {
+        return true;
+      } else if (this.networkType === 'ptoken' && this.depositAddress.length > 0) {
+        return true;
+      }
+      return false;
     },
     isPToken() {
       if (!this.selectedCoin) {
@@ -143,19 +172,58 @@ export default {
       }
       return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
     },
+    chainName() {
+      return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+    },
   },
   methods: {
+    async generateEVMAddress() {
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: 'create',
+        data: {
+          account: this.accountName,
+          data: 'test',
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(actions);
+      if (transaction) {
+        this.$q.notify({
+          type: 'primary',
+          message: `A new address is successfully created`,
+        });
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        this.networkType = 'tevm';
+      } else {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to create an address`,
+        });
+      }
+    },
     async generateDepositAddress() {
       this.awaiting = false;
-      let ptokens = require("ptokens");
-      let pBtcToken = new ptokens({
+      let ptoken = new pTokens({
         pbtc: {
-          blockchain: "Telos",
-          network: "mainnet",
+          blockchain: 'Telos',
+          network: 'mainnet',
+        },
+        perc20: {
+          blockchain: 'Telos',
+          network: 'mainnet',
+          pToken: 'pETH',
         },
       });
 
-      let newAddress = await pBtcToken.pbtc.getDepositAddress(this.accountName);
+      let newAddress = null;
+      if (this.selectedCoin.symbol.toLowerCase() === 'pbtc') {
+        newAddress = await ptoken.pbtc.getDepositAddress(this.accountName);
+      } else if (this.selectedCoin.symbol.toLowerCase() === 'tlos') {
+        newAddress = await ptoken.peth.issue(10, this.accountName);
+      } else {
+
+      }
 
       if (newAddress.value) {
         this.awaiting = true;

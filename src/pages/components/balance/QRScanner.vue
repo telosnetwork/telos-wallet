@@ -69,7 +69,16 @@ export default {
         let networkType = 'telos';
 
         if (coin && this.pTokens.includes(coin.symbol.toLowerCase()) && accountName.length > 12) {
-          if (coinName === 'pTokens BTC') {
+           if (coinName === 'Telos') {
+            if (accountName.length !== 42 || !accountName.startsWith('0x')) {
+              this.$q.notify({
+                type: 'negative',
+                message: `Address ${accountName} does not exist`,
+              });
+              return;
+            }
+            networkType = 'tevm';
+          } else if (coinName === 'pTokens BTC') {
             const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${accountName}`)
               .then(resp => resp.json());
             if (!data.success) {
@@ -79,8 +88,17 @@ export default {
               });
               return;
             }
+            networkType = 'ptoken';
+          } else if (coinName === 'pTokens ETH') {
+            if (accountName.length !== 42 || !accountName.startsWith('0x')) {
+              this.$q.notify({
+                type: 'negative',
+                message: `Address ${accountName} does not exist`,
+              });
+              return;
+            }
+            networkType = 'ptoken';
           }
-          networkType = 'ptoken';
         } else if (!(await this.accountExists(accountName))) {
           this.$q.notify({
             type: 'negative',

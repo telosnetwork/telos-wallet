@@ -105,6 +105,7 @@
 
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
 var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
 
@@ -151,6 +152,7 @@ export default {
         window.localStorage.setItem("autoLogin", this.$ual.authenticators[0].constructor.name);
         this.getUserProfile();
         this.setLoadingWallet();
+        await this.createEvmApi();
       }
     },
     async onLogin(idx) {
@@ -169,10 +171,31 @@ export default {
       if (this.$router.currentRoute.path !== accountPath) {
         this.$router.push({ path: accountPath });
       }
+    },
+    async createEvmApi() {
+      this.$root.oldtEVMBalance = 0;
+      try {
+        this.$root.tEVMApi = new TelosEvmApi({
+          endpoint: process.env.HYPERION_ENDPOINT,
+          chainId: 41,
+          ethPrivateKeys: [],
+          telosContract: process.env.EVM_CONTRACT,
+          telosPrivateKeys: [],
+        })
+        try {
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        } catch {
+          this.$root.tEVMAccount = null;
+        }
+      } catch {
+      }
     }
   },
   async mounted() {
     await this.autoLogin(this.$route.query.returnUrl);
+    if (this.isAuthenticated) {
+      await this.createEvmApi();
+    }
   }
 };
 </script>

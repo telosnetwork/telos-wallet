@@ -32,19 +32,15 @@
             </q-item>
             <q-item v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
-                <q-btn 
-                  class="q-px-md"
-                  push no-caps
-                  label="Telos"
-                  :style="`background: ${networkType === 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'telos'"
-                />
                 <q-btn
+                  v-for="(pTokenNetwork, key) of pTokenNetworks[selectedCoin.symbol.toLowerCase()]"
+                  :key="pTokenNetwork"
                   class="q-px-md"
                   push no-caps
-                  label="Bitcoin"
-                  :style="`background: ${networkType !== 'telos' ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  @click="networkType = 'ptoken'"
+                  :label="pTokenNetwork"
+                  :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :disable="key === 'tevm' && chainName === 'telos'"
+                  @click="networkType = key"
                 />
               </q-btn-group>
             </q-item>
@@ -58,7 +54,7 @@
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
-                  :label="`username or ${selectedCoin.name} address`"
+                  :label="toPlaceHolder"
                 />
               </q-item-section>
               <q-item-section side>
@@ -72,12 +68,12 @@
                 />
               </q-item-section>
             </q-item>
-            <q-item class="list-item" :disable="networkType !== 'telos'">
+            <q-item class="list-item" :disable="networkType === 'ptoken'">
               <q-item-section side>Notes:</q-item-section>
               <q-item-section>
                 <q-input
                   v-model="notes"
-                  :disable="networkType !== 'telos'"
+                  :disable="networkType === 'ptoken' || networkType === 'ethereum'"
                   dense
                   borderless
                   class="bg-grey-1 round-sm q-pl-sm"
@@ -132,7 +128,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['pTokens']),
+    ...mapGetters('global', ['pTokens', 'pTokenNetworks']),
     showDlg: {
       get() {
         return this.showSendToAddressDlg;
@@ -147,6 +143,15 @@ export default {
       }
       return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
     },
+    toPlaceHolder() {
+      if (this.networkType === 'telos') {
+        return 'Username or Telos address';
+      }
+      return `${this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][this.networkType]} address`;
+    },
+    chainName() {
+      return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+    },
   },
   methods: {
     ...mapActions('account', ['accountExists']),
@@ -154,26 +159,13 @@ export default {
       if (this.toAddress.length === 0) {
         this.$q.notify({
           type: 'dark',
-          message: `Please fill the username or ${this.selectedCoin.name} address`,
+          message: `Please fill the ${this.toPlaceHolder}`,
         });
         return;
       }
 
       this.checking = true;
-      if (this.networkType === 'ptoken') {
-        if (this.selectedCoin.name === 'pTokens BTC') {
-          const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`)
-            .then(resp => resp.json());
-          if (!data.success) {
-            this.$q.notify({
-              type: 'negative',
-              message: `Address ${this.toAddress} does not exist`,
-            });
-            this.checking = false;
-            return;
-          }
-        }
-      } else {
+      if (this.networkType === 'telos') {
         if (!(await this.accountExists(this.toAddress))) {
           this.$q.notify({
             type: 'negative',
@@ -181,6 +173,37 @@ export default {
           });
           this.checking = false;
           return;
+        }
+      } else if (this.networkType === 'tevm' || this.networkType === 'ethereum') {
+        if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
+          this.$q.notify({
+            type: 'negative',
+            message: `Address ${this.toAddress} is not valid`,
+          });
+          this.checking = false;
+          return;
+        }
+      } else if (this.networkType === 'ptoken') {
+        if (this.selectedCoin.name === 'pTokens ETH') {
+          if (this.toAddress.length !== 42 || !this.toAddress.startsWith('0x')) {
+            this.$q.notify({
+              type: 'negative',
+              message: `Address ${this.toAddress} is not valid`,
+            });
+            this.checking = false;
+            return;
+          }
+        } else if (this.selectedCoin.name === 'pTokens BTC') {
+          const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`)
+            .then(resp => resp.json());
+          if (!data.success) {
+            this.$q.notify({
+              type: 'negative',
+              message: `Address ${this.toAddress} is not valid`,
+            });
+            this.checking = false;
+            return;
+          }
         }
       }
 
@@ -210,7 +233,7 @@ export default {
     });
   },
   watch: {
-    showSendToAddressDlg: function(val, oldVal) {
+    showSendToAddressDlg: async function(val, oldVal) {
       if (val) {
         this.toAddress = this.$root.qrcode_accountName || '';
         this.networkType = this.$root.qrcode_networkType || 'telos';
@@ -227,6 +250,13 @@ export default {
     networkType: function(val, oldVal) {
       if (val === 'telos') {
         this.toAddress = this.toAddress.toLowerCase();
+      } else if (val === 'tevm') {
+        if (!this.$root.tEVMAccount) {
+          this.$q.notify({
+            type: 'dark',
+            message: `Please generate your tEVM address`,
+          });
+        }
       }
     },
   },

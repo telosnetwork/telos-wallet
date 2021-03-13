@@ -31,7 +31,7 @@ export default {
       try {
         await vxm.bancor.init(initParams);
         this.loading = false;
-      } catch (e) {
+      } catch {
         await new Promise(res => setTimeout(res, 1000));
         try {
           await vxm.bancor.init(initParams);
