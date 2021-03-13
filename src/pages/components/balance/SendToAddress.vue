@@ -140,7 +140,10 @@ export default {
       if (!this.selectedCoin) {
         return false;
       }
-      return this.pTokens.includes(this.selectedCoin.symbol.toLowerCase());
+      if (!this.pTokens.includes(this.selectedCoin.symbol.toLowerCase())) {
+        return false;
+      }
+      return Object.keys(this.coinpTokenNetworks).length > 1;
     },
     toPlaceHolder() {
       if (this.networkType === 'telos') {
