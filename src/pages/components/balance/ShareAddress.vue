@@ -172,7 +172,7 @@ export default {
       if (!this.pTokens.includes(this.selectedCoin.symbol.toLowerCase())) {
         return false;
       }
-      return this.coinpTokenNetworks.length > 1;
+      return Object.keys(this.coinpTokenNetworks).length > 1;
     },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
