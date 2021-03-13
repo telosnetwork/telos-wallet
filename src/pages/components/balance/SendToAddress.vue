@@ -33,13 +33,12 @@
             <q-item v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
                 <q-btn
-                  v-for="(pTokenNetwork, key) of pTokenNetworks[selectedCoin.symbol.toLowerCase()]"
+                  v-for="(pTokenNetwork, key) of coinpTokenNetworks"
                   :key="pTokenNetwork"
                   class="q-px-md"
                   push no-caps
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
-                  :disable="key === 'tevm' && chainName === 'telos'"
                   @click="networkType = key"
                 />
               </q-btn-group>
@@ -152,6 +151,15 @@ export default {
     chainName() {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
     },
+    coinpTokenNetworks() {
+      const networks = {};
+      for (const key in this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()]) {
+        if (key !== 'tevm' || this.chainName !== 'telos') {
+          networks[key] = this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][key];
+        }
+      }
+      return networks;
+    }
   },
   methods: {
     ...mapActions('account', ['accountExists']),
