@@ -160,7 +160,7 @@ export default {
     isAddressAvailable() {
       if (this.networkType === 'tevm' && this.$root.tEVMAccount) {
         return true;
-      } 
+      }
       if (this.networkType === 'ptoken' && this.depositAddress.length > 0) {
         return true;
       }
