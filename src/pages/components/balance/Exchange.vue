@@ -64,7 +64,7 @@
             <q-space/>
             <q-item class="row list-item full-width q-px-none">
               <div class="col q-mx-lg">
-                <q-item-section>
+                <q-item-section style="display: block;">
                   <div class="text-black display-grid">
                     <label class="text-subtitle1 text-weight-medium text-blue-grey-4">Convert</label>
                     <label
@@ -88,7 +88,7 @@
               </div>
               <q-separator vertical class="q-my-auto" style="width: 3px; height: 80%;"/>
               <div class="col q-mx-lg">
-                <q-item-section>
+                <q-item-section style="display: block;">
                   <div class="text-black display-grid">
                     <label class="text-subtitle1 text-weight-medium text-blue-grey-4">To</label>
                     <label
