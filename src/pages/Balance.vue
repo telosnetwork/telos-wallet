@@ -50,7 +50,7 @@
         class="shadow-4 coinview"
         :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`"
       >
-        <q-header class="coin-header flex-center bg-white q-px-md">
+        <q-header class="coin-header flex-center q-px-md transparent">
           <q-tabs
             v-model="tab"
             dense

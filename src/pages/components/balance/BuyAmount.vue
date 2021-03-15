@@ -23,8 +23,7 @@
           </q-toolbar>
         </q-header>
         <q-page-container>
-          <div class="column text-center" :style="`height: ${cardHeight}px;`">
-            <q-space/>
+          <div class="column text-center" :style="`height: ${cardHeight}px; display: grid;`">
             <div class="full-width items-center amount-div">
               <div class="full-width column">
                 <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
@@ -63,12 +62,14 @@
               By Clicking 'Next' you will be  using Moonpay to purchase 'EOS' which will be sent to a cross chain contract for exchange to TLOS on the Telos Network at the estimated rate. Do not alter the 'TO' or 'MEMO' field or risk losing your funds.
             </div>
             <q-space/>
+            <q-space/>
+            <q-space/>
             <div class="q-pa-sm full-width mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn v-for="key in keyboard"
                   :key="key"
                   class="bg-white text-grey-8 q-mx-auto q-my-auto text-h5"
-                  style="width: 30%; height: 60px;"
+                  style="width: 30%; height: 45px;"
                   flat
                   :label="key"
                   @click="buttonClicked(key)"
@@ -120,7 +121,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 100;
+       return window.innerHeight - 70;
     },
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.buyAmount.length + 1));
