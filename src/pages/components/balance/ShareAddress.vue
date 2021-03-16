@@ -76,6 +76,9 @@
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
               p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
+            <div v-if="selectedCoin.symbol === 'TLOS'" class="text-caption text-grey-8">
+              Ethereum Wallet users: to view TLOS balance in wallet, add TLOS with contract address: 0x7825e833D495F3d1c28872415a4aee339D26AC88
+            </div>
           </q-card>
         </q-page-container>
         <div class="text-center text-grey-6">Transactions may take a few minutes to complete</div>
