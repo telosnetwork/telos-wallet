@@ -51,8 +51,14 @@
               />
             </div>
             <q-space/>
-            <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable">
-              <q-r-canvas :options="{data: qrcodeData, cellSize: 10}" style="width: 120px"/>
+            <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable"
+              class="cursor-pointer"
+              @click="copyToClipboard(qrcodeData)"
+            >
+              <q-r-canvas
+                :options="{data: qrcodeData, cellSize: 10}"
+                style="width: 120px"
+              />
             </div>
             <div
               :class="networkType === 'telos' || networkType === 'ethereum' || !isAddressAvailable ?
@@ -76,7 +82,10 @@
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
               p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
-            <div v-if="selectedCoin.symbol === 'TLOS'" class="text-caption text-grey-8">
+            <div v-if="selectedCoin.symbol === 'TLOS'"
+              class="text-caption text-grey-8 cursor-pointer"
+              @click="copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')"
+            >
               Ethereum Wallet users: to view TLOS balance in wallet, add TLOS with contract address: 0x7825e833D495F3d1c28872415a4aee339D26AC88
             </div>
           </q-card>
@@ -264,6 +273,22 @@ export default {
             this.awaiting = false;
           });
       }
+    },
+    copyToClipboard(str) {
+      const accountName = str.substring(0, str.lastIndexOf('('));
+      var el = document.createElement('textarea');
+      el.value = accountName;
+      el.setAttribute('readonly', '');
+      el.style = {display: 'none'};
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      this.$q.notify({
+        type: 'primary',
+        message: 'Copied it to the clipboard successfully',
+      });
     },
   },
   watch: {

@@ -68,7 +68,7 @@
                   <div class="text-black display-grid">
                     <label class="text-subtitle1 text-weight-medium text-blue-grey-4">Convert</label>
                     <label
-                      class="text-subtitle1 text-weight-medium wraplabel"
+                      class="text-subtitle1 text-weight-medium wraplabel cursor-pointer"
                       :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                       @click="showSelectCoinDlg = true; dlgType = 'convert';"
                     >
@@ -92,7 +92,7 @@
                   <div class="text-black display-grid">
                     <label class="text-subtitle1 text-weight-medium text-blue-grey-4">To</label>
                     <label
-                      class="text-subtitle1 text-weight-medium wraplabel"
+                      class="text-subtitle1 text-weight-medium wraplabel cursor-pointer"
                       :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                       @click="showSelectCoinDlg = true; dlgType = 'to';"
                     >
@@ -140,7 +140,7 @@
               <q-item-section>
                 <div class="text-black display-grid" style="width: 200px;">
                   <label
-                    class="text-subtitle1 text-weight-medium"
+                    class="text-subtitle1 text-weight-medium cursor-pointer"
                     :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                     @click="showSelectCoinDlg = true; dlgType = 'convert';"
                   >
@@ -192,7 +192,7 @@
               <q-item-section>
                 <div class="text-black display-grid" style="width: 200px;">
                   <label
-                    class="text-subtitle1 text-weight-medium"
+                    class="text-subtitle1 text-weight-medium cursor-pointer"
                     :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                     @click="showSelectCoinDlg = true; dlgType = 'to';"
                   >
