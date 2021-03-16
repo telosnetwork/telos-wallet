@@ -17,7 +17,7 @@
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-20">Send</label>
-                <label class="text-subtitle2 text-grey-4">{{`${selectedCoin.amount} ${selectedCoin.symbol} Available`}}</label>
+                <label class="text-subtitle2 text-grey-4">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label>
               </div>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
@@ -51,7 +51,7 @@
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}}
                 </label>
                 <label class="text-subtitle1 text-weight-medium text-grey-8">
-                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, 8)} ${selectedCoin.symbol}`}}
+                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, selectedCoin.precision)} ${selectedCoin.symbol}`}}
                 </label>
               </div>
               <div class="full-width text-right absolute">
@@ -126,7 +126,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     sendAmountValue() {
-      return Number(this.sendAmount);
+      return Number(this.sendAmount.replace(',', ''));
     },
     sendCoinAmount() {
       if (!this.selectedCoin) {
@@ -135,7 +135,7 @@ export default {
       if (this.coinInput) {
         return this.sendAmountValue;
       }
-      return this.getFixed(this.sendAmountValue / this.selectedCoin.price, 8);
+      return this.getFixed(this.sendAmountValue / this.selectedCoin.price, this.selectedCoin.precision).replace(',', '');
     },
   },
   methods: {
@@ -145,9 +145,9 @@ export default {
     },
     changeCoinInput() {
       if (this.coinInput) {
-        this.sendAmount = this.getFixed(this.sendAmountValue * this.selectedCoin.price, 8).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue * this.selectedCoin.price, 8).replace(',', '');
       } else {
-        this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, 8).toString();
+        this.sendAmount = this.getFixed(this.sendAmountValue / this.selectedCoin.price, this.selectedCoin.precision).replace(',', '');
       }
       
       this.coinInput = !this.coinInput;

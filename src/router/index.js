@@ -42,7 +42,7 @@ Vue.mixin({
   methods: {
     getFixed(value, decimal) {
       const decimalVal = Math.pow(10, decimal);
-      return BigNumber((Math.round(value * decimalVal) / decimalVal).toString()).toFormat();
+      return BigNumber((Math.floor(value * decimalVal) / decimalVal).toString()).toFormat();
     },
     changeTheme() {
       const index = (this.themes.findIndex(theme => theme === this.theme.toLowerCase()) + 1) % this.themes.length;

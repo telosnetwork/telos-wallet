@@ -22,7 +22,7 @@
           <div class="column text-center" style="height: 100px;">
             <q-space/>
             <label class="text-h5" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
-              {{`${sendAmount} ${selectedCoin.symbol}`}}
+              {{`${getFixed(sendAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}
             </label>
             <q-space/>
           </div>

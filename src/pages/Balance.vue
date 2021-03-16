@@ -14,7 +14,7 @@
           <div class="full-width" ></div>
           <div class="full-width" >
             <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{displayAmount.toFixed(2)}}
+              ${{getFixed(parseInt(displayAmount), 0)}}.{{displayAmount.toFixed(2).slice(-2)}}
             </label>
           </div>
           <div class="full-width text-right">
@@ -148,7 +148,7 @@
     >
       <div :style="`font-size:16px;`">
         <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
-          {{tEVMBalance}} TLOS recieved from tEVM!
+          {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
         </marquee>
       </div>
       <template v-slot:action>
@@ -458,7 +458,7 @@ export default {
     },
     async withdrawEVM() {
       // this.tEVMWithdrawing = true;
-      const quantityStr = `${this.getCurrenttEVMBalance().toFixed(4)} ${'TLOS'}`;
+      const quantityStr = `${this.getFixed(this.getCurrenttEVMBalance(), 4).replace(',', '')} ${'TLOS'}`;
       let actions = [];
       actions.push({
         account: process.env.EVM_CONTRACT,
