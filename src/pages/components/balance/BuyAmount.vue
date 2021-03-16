@@ -49,10 +49,10 @@
                 </div>
                 <div v-else>
                   <label class="text-subtitle1 text-weight-medium text-grey-8">
-                    Rate: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `$${exchangeRate} USD/${selectedCoin.symbol}`}}
+                    Rate: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `$${getFixed(exchangeRate, 4)} USD/${selectedCoin.symbol}`}}
                   </label><br/>
                   <label class="text-subtitle1 text-weight-medium text-grey-8">
-                    Total: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `${getAmount} ${selectedCoin.symbol}`}}
+                    Total: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `${getFixed(getAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}
                   </label>
                 </div>
               </div>

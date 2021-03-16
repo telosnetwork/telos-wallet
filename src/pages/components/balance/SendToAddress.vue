@@ -15,7 +15,7 @@
         <q-header class="bg-white text-grey-8 q-pa-sm">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
-              <label class="text-subtitle1 text-weight-medium h-20">{{`${sendAmount} ${selectedCoin.symbol}`}}</label>
+              <label class="text-subtitle1 text-weight-medium h-20">{{`${getFixed(sendAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
             <q-btn

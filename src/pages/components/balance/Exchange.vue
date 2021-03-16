@@ -355,7 +355,7 @@ export default {
         const num = parseFloat(cleanStr) || 0;
         const maxValue = Math.max(0, num);
         if (this.convertAmountValue !== maxValue) {
-          this.convertAmount = Math.max(0, num).toString();
+          this.convertAmount = this.getFixed(Math.max(0, num), this.convertCoin.precision).replace(',', '');
         }
       }
       if (this.convertCoin && this.toCoin) {
@@ -373,7 +373,7 @@ export default {
           if (reward.fee) {
             this.fee = reward.fee;
           }
-          this.toAmount = reward.amount;
+          this.toAmount = this.getFixed(Number(reward.amount), this.toCoin.precision).replace(',', '');
           this.reward = this.toAmountValue / this.convertAmountValue;
           this.convertible = true;
         } catch (e) {
@@ -391,7 +391,7 @@ export default {
         const num = parseFloat(cleanStr) || 0;
         const maxValue = Math.max(0, num);
         if (this.toAmountValue !== maxValue) {
-          this.toAmount = Math.max(0, num).toString();
+          this.toAmount = this.getFixed(Math.max(0, num), this.toCoin.precision).replace(',', '');
         }
       }
       if (this.convertCoin && this.toCoin) {
@@ -409,7 +409,7 @@ export default {
           if (reward.fee) {
             this.fee = reward.fee;
           }
-          this.convertAmount = Math.min(this.convertCoin.amount, reward.amount).toString();
+          this.convertAmount = this.getFixed(Math.min(this.convertCoin.amount, reward.amount), this.convertCoin.precision).replace(',', '');
           this.reward = this.toAmountValue / this.convertAmountValue;
           this.convertible = true;
         } catch (e) {

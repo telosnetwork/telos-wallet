@@ -26,7 +26,7 @@
           </q-toolbar>
           <div class="text-black text-center display-grid">
             <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
-            <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, 8)} ${selectedCoin.symbol}`}}</label>
+            <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
           </div>
           <div class="text-center q-my-md q-mx-xl" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
             <q-space/>
