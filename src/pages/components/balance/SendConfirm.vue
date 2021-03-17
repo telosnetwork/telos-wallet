@@ -46,6 +46,12 @@
                 <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
               </q-item>
             </q-list>
+            <div v-if="selectedCoin.symbol === 'TLOS' && networkType === 'ethereum'"
+              class="text-caption text-grey-8 cursor-pointer text-center q-mt-xl"
+              @click="copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')"
+            >
+              Ethereum Wallet users: to view TLOS balance in wallet, add TLOS with contract address: 0x7825e833D495F3d1c28872415a4aee339D26AC88
+            </div>
             <q-space/>
             <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
               :style="`height: 50px; background: ${themeColor}`"
@@ -186,7 +192,22 @@ export default {
         });
       }
       this.sending = false;
-    }
+    },
+    copyToClipboard(str) {
+      var el = document.createElement('textarea');
+      el.value = str;
+      el.setAttribute('readonly', '');
+      el.style = {display: 'none'};
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      this.$q.notify({
+        type: 'primary',
+        message: 'Copied it to the clipboard successfully',
+      });
+    },
   },
 };
 </script>
