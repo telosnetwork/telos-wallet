@@ -24,7 +24,7 @@
               class="q-ml-auto q-mr-sm text-grey-6"
               label="Next"
               :disable="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100"
-              @click="nextPressed()"
+              @click="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100 ? null : nextPressed()"
             />
           </q-toolbar>
           <q-list>
