@@ -23,6 +23,7 @@
               dense
               class="q-ml-auto q-mr-sm text-grey-6"
               label="Next"
+              :disable="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100"
               @click="nextPressed()"
             />
           </q-toolbar>
@@ -79,6 +80,11 @@
                   label="notes"
                 />
               </q-item-section>
+            </q-item>
+            <q-item v-if="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100"
+              class="list-item items-center justify-center text-grey-6"
+            >
+              <label>You can't send TLOS to Ethereum less than $100</label>
             </q-item>
             <q-item>
               <div v-if="checking" class="q-pt-md text-center full-width">
