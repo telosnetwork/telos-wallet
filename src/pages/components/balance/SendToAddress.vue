@@ -82,7 +82,7 @@
               </q-item-section>
             </q-item>
             <q-item v-if="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100"
-              class="list-item items-center justify-center text-grey-6"
+              class="list-item items-center justify-center text-red-5 text-weight-bold"
             >
               <label>You can't send TLOS to Ethereum less than $100</label>
             </q-item>
