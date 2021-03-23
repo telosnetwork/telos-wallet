@@ -2,7 +2,7 @@
   <div class="full-height main-div">
     <div class="flex-center fit-div" :style="`background: ${themeColor}`">
       <div class="text-center full-width" style="display: grid;">
-        <login-button />
+        <login-button v-if="isAuthenticated"/>
         <label 
           class="text-white"
           :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
@@ -58,7 +58,7 @@
             narrow-indicator
             active-color="deep-purple-10"
             class="bg-white text-grey shadow-2 full-height no-shadow"
-            style="width: 80%; min-width: 250px;"
+            style="min-width: 250px;"
           >
             <q-tab
               no-caps
