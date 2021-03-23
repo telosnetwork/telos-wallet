@@ -95,6 +95,44 @@
           </q-page>
         </q-page-container>
       </q-layout>
+      <div class="q-pr-none text-white absolute full-width"
+        :style="`bottom: ${footerHeight}px;`"
+      >
+        <q-banner
+          v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
+          inline-actions
+          dense
+          :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
+        >
+          <div :style="`font-size:16px;`">
+            <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
+              {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
+            </marquee>
+          </div>
+          <template v-slot:action>
+            <q-btn
+              class="bg-white"
+              :style="`color: ${themeColor};`"
+              no-caps
+              size="12px"
+              label="Withdraw Now"
+              @click="withdrawEVM"
+            />
+            <q-btn
+              round flat dense
+              size="12px"
+              icon="close"
+              @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
+            />
+          </template>
+        </q-banner>
+      </div>
+      <div v-if="tEVMWithdrawing"
+        class="justify-center absolute flex full-width full-height"
+        style="background: rgba(0, 0, 0, 0.4);"
+      >
+        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+      </div>
     </div>
     <History
       :showHistoryDlg.sync="showHistoryDlg"
@@ -139,41 +177,6 @@
       :showQRScannerDlg.sync="showQRScannerDlg"
       :coins="coins"
     />
-    <q-banner
-      v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
-      inline-actions
-      dense
-      class="q-pr-none text-white absolute full-width"
-      :style="`bottom: ${footerHeight}px; background: ${themeColor}`"
-    >
-      <div :style="`font-size:16px;`">
-        <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
-          {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
-        </marquee>
-      </div>
-      <template v-slot:action>
-        <q-btn
-          class="bg-white"
-          :style="`color: ${themeColor};`"
-          no-caps
-          size="12px"
-          label="Withdraw Now"
-          @click="withdrawEVM"
-        />
-        <q-btn
-          round flat dense
-          size="12px"
-          icon="close"
-          @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
-        />
-      </template>
-    </q-banner>
-    <div v-if="tEVMWithdrawing"
-      class="justify-center absolute flex full-width full-height"
-      style="background: rgba(0, 0, 0, 0.4);"
-    >
-      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-    </div>
   </div>
 </template>
 
