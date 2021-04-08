@@ -270,7 +270,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens']),
+    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens']),
     totalAmount() {
       return this.coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0);
     },
@@ -358,13 +358,18 @@ export default {
           });
         });
 
-      this.coins = this.coins.sort(function (a, b) {
-        if (a.symbol === 'TLOS') return -1;
-        if (b.symbol === 'TLOS') return 1;
-        let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
-        let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
-        return bAmount - aAmount;
-      });
+      const sortCoin = function (suggestTokens) {
+        return function (a, b) {
+          if (!suggestTokens.includes(a.symbol.toLowerCase()) || !suggestTokens.includes(b.symbol.toLowerCase())) {
+            if (suggestTokens.includes(a.symbol.toLowerCase())) return -1;
+            if (suggestTokens.includes(b.symbol.toLowerCase())) return 1;
+          }
+          let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
+          let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
+          return bAmount - aAmount;
+        }
+      }
+      this.coins = this.coins.sort(sortCoin(this.suggestTokens));
       this.$emit('update:loadedCoins', this.coins);
     },
     async loadNftTokenItems() {
