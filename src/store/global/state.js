@@ -2,6 +2,14 @@ export default () => ({
   footerHeight: 50,
   minSpace: 60,
   maxSpace: 140,
+  suggestTokens: [
+    'tlos',
+    'pbtc',
+    'peth',
+    'plink',
+    'pusdc',
+    'pnt',
+  ],
   supportTokens: [
     'tlos',
     'pbtc',
