@@ -8,6 +8,7 @@ export default () => ({
     'peth',
     'plink',
     'pusdc',
+    'pusdt',
     'pnt',
   ],
   supportTokens: [
@@ -16,6 +17,7 @@ export default () => ({
     'peth',
     'plink',
     'pusdc',
+    'pusdt',
     'pnt',
     'seeds',
     'qbe',

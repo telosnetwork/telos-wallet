@@ -81,11 +81,10 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'selectedCoin'],
+  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'selectedCoin', 'suggestTokens'],
   computed: {
     availbleCoins() {
-      return this.coins.filter(coin => coin.amount > 0
-      || coin.symbol === 'TLOS' || coin.symbol === 'PBTC' || coin.symbol === 'PETH' || coin.symbol === 'PLINK' || coin.symbol === 'PNT' || coin.symbol === 'PUSDC');
+      return this.coins.filter(coin => coin.amount > 0 || this.suggestTokens.includes(coin.symbol.toLowerCase()));
     },
   },
   methods: {
