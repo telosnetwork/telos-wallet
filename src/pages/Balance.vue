@@ -81,6 +81,7 @@
                   :showExchangeDlg.sync="showExchangeDlg"
                   :showBuyAmountDlg.sync="showBuyAmountDlg"
                   :selectedCoin.sync="selectedCoin"
+                  :suggestTokens="suggestTokens"
                 />
               </q-tab-panel>
               <q-tab-panel name="Collectables">
@@ -537,7 +538,7 @@ export default {
             } else if (token.symbol !== 'TLOS') {
               const precisionSplit = token.supply.circulating.toString().split('.');
               this.coins.push({
-                account: token.account,
+                account: token.account.toLowerCase(),
                 name: token.metadata.name,
                 symbol: token.symbol,
                 amount: 0,
