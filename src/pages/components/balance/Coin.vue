@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     clickPurchase() {
-      this.$emit('update:selectedCoin', this.coins[0]);
+      this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
       this.$emit('update:showBuyAmountDlg', true);
     },
     clickExchange() {
