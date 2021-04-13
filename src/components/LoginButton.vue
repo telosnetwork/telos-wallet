@@ -106,8 +106,8 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { TelosEvmApi } from '@telosnetwork/telosevm-js';
-var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
-var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
+var window_1 = require("../utils/telos-keycatjs/utils/window");
+var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
 
 export default {
   data() {
