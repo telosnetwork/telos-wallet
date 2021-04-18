@@ -350,7 +350,7 @@ export default {
             if (token.chain !== 'telos') {
               if (token.chain === 'eos') {
                 const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-                if (coinIndex >= 0 && this.coins[coinIndex].price === 0) {
+                if (coinIndex >= 0 && token.key.includes('ptokens')) {
                   this.coins[coinIndex].price = token.price.usd;
                 }
               }
@@ -358,7 +358,7 @@ export default {
               this.coins[0].price = token.price.usd;
             } else if (token.symbol !== 'TLOS') {
               const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-              if (coinIndex >= 0 && token.price.usd !== 0) {
+              if (coinIndex >= 0 && !token.key.includes('ptokens')) {
                 this.coins[coinIndex].price = token.price.usd;
               }
             }
