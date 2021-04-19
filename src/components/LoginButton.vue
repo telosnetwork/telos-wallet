@@ -167,7 +167,7 @@ export default {
       }
     },
     async onLogin(idx) {
-      if (this.$ual.authenticators[idx].constructor.name === 'KeycatAuthenticator') {
+      if (idx === 0) {
         this.showAuth = true;
       } else {
         const error = await this.login({ idx });
