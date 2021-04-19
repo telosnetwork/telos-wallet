@@ -24,9 +24,9 @@ export default async ({ Vue, store }) => {
   ];
 
   const config = {
-    name: "telos",
+    name: process.env.NETWORK_CHAIN_ID === '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11' ? 'telos' : 'telos-testnet',
     nodes: [
-      `${process.env.HYPERION_ENDPOINT}:443`
+      `${process.env.HYPERION_ENDPOINT}:${process.env.NETWORK_PORT}`
     ],
     plugin: "eos",
   };
