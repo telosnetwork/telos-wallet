@@ -100,18 +100,26 @@
         </q-item>
       </q-list>
     </q-dialog>
+    <q-dialog v-model="showAuth">
+      <Authenticate :showAuth.sync="showAuth"/>
+    </q-dialog>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { TelosEvmApi } from '@telosnetwork/telosevm-js';
+import Authenticate from '../pages/components/auth/Authenticate';
 var window_1 = require("../utils/telos-keycatjs/utils/window");
 var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
 
 export default {
   data() {
-    return { showLogin: false, error: null };
+    return {
+      showLogin: false,
+      showAuth: false,
+      error: null,
+    };
   },
   computed: {
     ...mapGetters('account', [
@@ -120,6 +128,9 @@ export default {
       'loading',
       'isAutoLoading',
     ])
+  },
+  components: {
+    Authenticate
   },
   methods: {
     ...mapActions('account', ['login', 'logout', 'autoLogin', 'getUserProfile']),
@@ -156,11 +167,15 @@ export default {
       }
     },
     async onLogin(idx) {
-      const error = await this.login({ idx });
-      if (!error) {
-        this.showLogin = false;
+      if (this.$ual.authenticators[idx].constructor.name === 'KeycatAuthenticator') {
+        this.showAuth = true;
       } else {
-        this.error = error;
+        const error = await this.login({ idx });
+        if (!error) {
+          this.showLogin = false;
+        } else {
+          this.error = error;
+        }
       }
     },
     openUrl(url) {

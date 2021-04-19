@@ -23,6 +23,22 @@ export default async ({ Vue, store }) => {
     new Scatter([chain], { appName: process.env.APP_NAME })
   ];
 
+  const config = {
+    name: "telos",
+    nodes: [
+      `${process.env.HYPERION_ENDPOINT}:443`
+    ],
+    plugin: "eos",
+  };
+  const injectConfig = module => {
+    const Plugin = module.default;
+    return new Plugin(config);
+  };
+  const loader = import('../utils/telos-keycat/plugins/EosPlugin').then(injectConfig);
+  const blockchain = await loader;
+  store["$blockchain"] = blockchain;
+  Vue.prototype.$blockchain = blockchain;
+
   const ual = new UAL([chain], "ual", authenticators);
   store["$ual"] = ual;
   Vue.prototype.$ual = ual;
