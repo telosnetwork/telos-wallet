@@ -45,7 +45,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import imgur from 'imgur';
 
 export default {
   data() {
