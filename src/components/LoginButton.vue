@@ -101,7 +101,7 @@
       </q-list>
     </q-dialog>
     <q-dialog v-model="showAuth">
-      <Authenticate :showAuth.sync="showAuth"/>
+      <Authenticate :showAuth.sync="showAuth" :type.sync="authType"/>
     </q-dialog>
   </div>
 </template>
@@ -118,6 +118,7 @@ export default {
     return {
       showLogin: false,
       showAuth: false,
+      authType: 'signin',
       error: null,
     };
   },
@@ -136,7 +137,9 @@ export default {
     ...mapActions('account', ['login', 'logout', 'autoLogin', 'getUserProfile']),
     ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
     async signUp() {
-      this.signPopup('/create');
+      this.showAuth = true;
+      this.authType = 'signup';
+      // this.signPopup('/create');
     },
     async signIn() {
       this.signPopup('/signin');
@@ -169,6 +172,7 @@ export default {
     async onLogin(idx) {
       if (idx === 0) {
         this.showAuth = true;
+        this.authType = 'signin';
       } else {
         const error = await this.login({ idx });
         if (!error) {
