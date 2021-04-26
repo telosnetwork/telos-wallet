@@ -71,7 +71,7 @@
       <q-item class="text-center items-end q-pb-none item-min-height">
         <b>Private Key:</b>
       </q-item>
-      <q-item class="text-center items-center q-py-none item-min-height q-pl-lg" style="overflow-wrap: anywhere;">
+      <q-item class="text-center items-center q-py-none item-min-height q-pl-lg" style="word-break: break-all;">
         {{ privateKey }} <q-btn flat round dense size="sm" :style="`color: ${themeColor};`" icon="far fa-copy" @click="copyToClipboard(privateKey)"/>
       </q-item>
       <q-item class="q-mt-md">
