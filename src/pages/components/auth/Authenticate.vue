@@ -20,7 +20,7 @@
       </q-item>
       <q-item class="q-mt-lg">
         <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: auto;`"
-          label="Login" @click="Login" :disable="account.length < 12 || privateKey.length === 0" />
+          label="Login" @click="login" :disable="account.length < 12 || privateKey.length === 0" />
         <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
           label="Close" @click="() => this.$emit('update:showAuth', false)" />
       </q-item>
@@ -46,8 +46,9 @@
           @verify="(value) => onChangeRecaptcha(value)" />
       </q-item>
       <q-item class="q-mt-lg">
-        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: auto;`"
-          label="Create" @click="Create" :disable="account.length < 12" />
+        <div style="margin-left: auto;" id="google-signin-button"></div>
+        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
+          label="Create" @click="create" :disable="account.length < 12" />
         <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
           label="Close" @click="() => this.$emit('update:showAuth', false)" />
       </q-item>
@@ -108,6 +109,7 @@ export default {
   components: { VueRecaptcha },
   data() {
     return {
+      googleProfile: null,
       account: '',
       privateKey: '',
       confirmAccount: '',
@@ -126,9 +128,26 @@ export default {
     },
   },
   methods: {
-    ...mapActions('account', ['accountExists', 'getUserProfile']),
+    ...mapActions('account', ['accountExists', 'getUserProfile', 'accountExists']),
     ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
-    async Login() {
+    async onGoogleSignIn (user) {
+      this.googleProfile = user.getBasicProfile();
+      const givenName = this.googleProfile.getGivenName().toLowerCase().substring(0, 8);
+      const pow = Math.pow(10, 11 - givenName.length);
+      while (true) {
+        if (this.account.length < 12) {
+          this.account = `${givenName}${pow + Math.floor(Math.random() * 9 * pow)}`;
+        }
+        const accountExists = await this.accountExists(this.account);
+        if (!accountExists) {
+          break;
+        }
+        this.account = '';
+      }
+
+      this.create();
+    },
+    async login() {
       let users = null;
       try {
         users = await this.$blockchain.signin({
@@ -171,7 +190,16 @@ export default {
     onChangeRecaptcha (value){
       this.recaptchaValue = value;
     },
-    async Create() {
+    async create() {
+      const accountExists = await this.accountExists(this.account);
+      if (accountExists) {
+        this.$q.notify({
+          type: 'negative',
+          message: `Account ${this.account} already exists`,
+        });
+        this.creating = false;
+        return;
+      }
       const name = this.$blockchain.config.name;
       let url;
       if (name === 'telos') {
@@ -204,6 +232,36 @@ export default {
           return;
         }
         this.privateKey = newKeys.privateKey;
+        var fileContent = JSON.stringify({
+          account: this.account,
+          privateKey: this.privateKey,
+        }); // As a sample, upload a text file.
+        var file = new Blob([fileContent], {type: 'text/plain'});
+        var metadata = {
+            'name': 'Telos Web Wallet', // Filename at Google Drive
+            'mimeType': 'text/plain', // mimeType at Google Drive
+        };
+
+        var accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token; // Here gapi is used for retrieving the access token.
+        var form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+
+        const showError = function (p , val) {
+          if (val.message) {
+            p.$q.notify({
+              type: 'negative',
+              message: val.message,
+            });
+          }
+        }
+        fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+            method: 'POST',
+            headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+            body: form,
+        }).then((res) => {
+            return res.json();
+        }).then(val => showError(this, val));
         this.signUpStep = 1;
       } catch (error) {
         this.$q.notify({
@@ -232,8 +290,16 @@ export default {
       this.$emit('update:type', 'signin');
     },
   },
+  async mounted() {
+    gapi.signin2.render('google-signin-button', {
+      'height': 35,
+      scope: 'profile email https://www.googleapis.com/auth/drive',
+      onsuccess: this.onGoogleSignIn
+    });
+  },
   watch: {
     type: function (val, oldVal) {
+      this.googleProfile = null;
       this.account = '';
       this.privateKey = '';
       this.confirmAccount = '';

@@ -315,7 +315,23 @@ export default {
         });
     },
     async loadUserTokens() {
-      // const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
+      const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
+      if (userCoins.status === 200) {
+        const tokens = userCoins.data.tokens.filter((token) => {
+          if (userCoins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
+            return token.contract.toLowerCase() === 'eosio.token';
+          }
+          return true;
+        });
+        userCoins.data.tokens.forEach((token) => {
+          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
+          if (tokenIndex >= 0) {
+            this.coins[tokenIndex].amount = token.amount || 0;
+            this.coins[tokenIndex].precision = token.precision || 4;
+          }
+        });
+      }
+      /*
       const settings = {
         method: 'POST',
         headers: {
@@ -342,6 +358,7 @@ export default {
           }
         });
       }
+      */
 
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
