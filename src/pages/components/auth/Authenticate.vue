@@ -19,7 +19,8 @@
           class="round-sm full-width" label="Private Key" />
       </q-item>
       <q-item class="q-mt-lg">
-        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: auto;`"
+        <div style="margin-left: auto;" id="google-signin-button"></div>
+        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
           label="Login" @click="login" :disable="account.length < 12 || privateKey.length === 0" />
         <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
           label="Close" @click="() => this.$emit('update:showAuth', false)" />
@@ -132,20 +133,40 @@ export default {
     ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
     async onGoogleSignIn (user) {
       this.googleProfile = user.getBasicProfile();
-      const givenName = this.googleProfile.getGivenName().toLowerCase().substring(0, 8);
-      const pow = Math.pow(10, 11 - givenName.length);
-      while (true) {
-        if (this.account.length < 12) {
-          this.account = `${givenName}${pow + Math.floor(Math.random() * 9 * pow)}`;
+      const driveData = await this.loadFromGoogleDrive();
+      if (this.type === 'signin') {
+        if (driveData) {
+          this.account = driveData.account;
+          this.privateKey = driveData.privateKey;
+          await this.login();
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: `This Google Account isn't used for any account`,
+          });
         }
-        const accountExists = await this.accountExists(this.account);
-        if (!accountExists) {
-          break;
+      } else if (this.type === 'signup') {
+        const givenName = this.googleProfile.getGivenName().toLowerCase().substring(0, 8);
+        const pow = Math.pow(10, 11 - givenName.length);
+        while (true) {
+          if (this.account.length < 12) {
+            this.account = `${givenName}${pow + Math.floor(Math.random() * 9 * pow)}`;
+          }
+          const accountExists = await this.accountExists(this.account);
+          if (!accountExists) {
+            break;
+          }
+          this.account = '';
         }
-        this.account = '';
+        if (!driveData) {
+          this.create();
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: `This Google Account is already used for ${driveData.account}`,
+          });
+        }
       }
-
-      this.create();
     },
     async login() {
       let users = null;
@@ -232,36 +253,9 @@ export default {
           return;
         }
         this.privateKey = newKeys.privateKey;
-        var fileContent = JSON.stringify({
-          account: this.account,
-          privateKey: this.privateKey,
-        }); // As a sample, upload a text file.
-        var file = new Blob([fileContent], {type: 'text/plain'});
-        var metadata = {
-            'name': 'Telos Web Wallet', // Filename at Google Drive
-            'mimeType': 'text/plain', // mimeType at Google Drive
-        };
-
-        var accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token; // Here gapi is used for retrieving the access token.
-        var form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', file);
-
-        const showError = function (p , val) {
-          if (val.message) {
-            p.$q.notify({
-              type: 'negative',
-              message: val.message,
-            });
-          }
+        if (this.googleProfile) {
+          await this.saveToGoogleDrive(this.account, newKeys);
         }
-        fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-            method: 'POST',
-            headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-            body: form,
-        }).then((res) => {
-            return res.json();
-        }).then(val => showError(this, val));
         this.signUpStep = 1;
       } catch (error) {
         this.$q.notify({
@@ -285,6 +279,75 @@ export default {
         type: 'primary',
         message: 'Copied it to the clipboard successfully',
       });
+    },
+    async loadFromGoogleDrive() {
+      let result = null;
+      let callbacked = false;
+      await gapi.client.load('drive', 'v2');
+      var request = gapi.client.drive.files.list({
+        q: "title = 'Telos Web Wallet' and explicitlyTrashed = false",
+        space: 'drive',
+      });
+      await request.execute(async function(resp) {
+        if (resp && resp.items.length > 0) {
+          var file = gapi.client.drive.files.get({
+            fileId: resp.items[0].id,
+            alt: 'media'
+          })
+          file.then(function(response) {
+            result = JSON.parse(response.body);
+            callbacked = true;
+          }, function (error){
+            callbacked = true;
+          })
+        } else {
+          callbacked = true;
+        }
+      }, function (error) {
+        callbacked = true;
+      });
+      let timeoutCnt = 100;
+      while (!callbacked) {
+        await new Promise(res => setTimeout(res, 100));
+        timeoutCnt--;
+        if (timeoutCnt === 0) {
+          break;
+        }
+      }
+      return result;
+    },
+    async saveToGoogleDrive(account = null, keys = null) {
+      var fileContent = JSON.stringify({
+        account: account ? account : this.account,
+        privateKey: keys ? keys.privateKey : this.privateKey,
+        publicKey: keys ? keys.publicKey : null,
+      }); // As a sample, upload a text file.
+      var file = new Blob([fileContent], {type: 'text/plain'});
+      var metadata = {
+          'name': 'Telos Web Wallet', // Filename at Google Drive
+          'mimeType': 'text/plain', // mimeType at Google Drive
+      };
+
+      var accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token; // Here gapi is used for retrieving the access token.
+      var form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      const showError = function (p , val) {
+        if (val.message) {
+          p.$q.notify({
+            type: 'negative',
+            message: val.message,
+          });
+        }
+      }
+      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+          method: 'POST',
+          headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+          body: form,
+      }).then((res) => {
+          return res.json();
+      }).then(val => showError(this, val));
     },
     save() {
       this.$emit('update:type', 'signin');
