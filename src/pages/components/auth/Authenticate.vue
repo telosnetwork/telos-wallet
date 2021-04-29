@@ -146,16 +146,24 @@ export default {
           });
         }
       } else if (this.type === 'signup') {
-        const givenName = this.googleProfile.getGivenName().toLowerCase().substring(0, 8);
-        const pow = Math.pow(10, 11 - givenName.length);
+        let name = this.googleProfile.getName().replace(' ', '').toLowerCase().substring(0, 12);
+        if (this.account.length < 12) {
+          this.account = name;
+        }
+        const rndStr = 'abcdefghijklmnopqrstuvwxyz';
         while (true) {
           if (this.account.length < 12) {
-            this.account = `${givenName}${pow + Math.floor(Math.random() * 9 * pow)}`;
+            const rndLength = 12 - name.length;
+            for (let i = 0; i < rndLength; i++) {
+              name += rndStr[Math.floor(Math.random() * 26)];
+            }
+            this.account = name;
           }
           const accountExists = await this.accountExists(this.account);
           if (!accountExists) {
             break;
           }
+          name = name.substring(0, 8);
           this.account = '';
         }
         if (!driveData) {
