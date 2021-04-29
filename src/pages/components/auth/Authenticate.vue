@@ -258,6 +258,7 @@ export default {
         }
         this.signUpStep = 1;
       } catch (error) {
+        console.log(error)
         this.$q.notify({
           type: 'negative',
           message: "Sorry, we can't create an account now",
