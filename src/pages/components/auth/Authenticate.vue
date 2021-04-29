@@ -262,7 +262,12 @@ export default {
         }
         this.privateKey = newKeys.privateKey;
         if (this.googleProfile) {
-          await this.saveToGoogleDrive(this.account, newKeys);
+          try {
+            await this.saveToGoogleDrive(this.account, newKeys);
+            this.$emit('update:type', 'signin');
+          } catch {
+            this.signUpStep = 1;
+          }
         }
         this.signUpStep = 1;
       } catch (error) {
