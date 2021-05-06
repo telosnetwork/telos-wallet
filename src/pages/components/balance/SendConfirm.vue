@@ -104,7 +104,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      // this.sending = true;
+      this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`;
       if (this.networkType === 'telos') {
@@ -180,11 +180,18 @@ export default {
       }
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `${quantityStr} is sent to ${this.toAddress}`,
-        });
-        this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else {
+          this.$q.notify({
+            type: 'primary',
+            message: `${quantityStr} is sent to ${this.toAddress}`,
+          });
+          this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+        }
       } else {
         this.$q.notify({
           type: 'negative',

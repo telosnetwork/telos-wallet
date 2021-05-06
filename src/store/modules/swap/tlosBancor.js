@@ -1129,7 +1129,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
             // });
             // this.refresh();
             const txRes = yield this.triggerTx(convertActions);
-            return txRes.transaction_id;
+            return txRes;
         });
     }
     generateOpenActions({ contract, symbol }) {

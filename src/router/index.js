@@ -16,7 +16,6 @@ Vue.mixin({
         'sunray',
         'coral'
       ],
-      privateKey: null,
     };
   },
   computed: {

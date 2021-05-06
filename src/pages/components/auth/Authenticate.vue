@@ -1,5 +1,5 @@
 <template>
-  <div class="column bg-white full-width" :style="`max-width: 500px; margin: auto; overflow: auto;`">
+  <div class="column bg-white full-width q-ma-auto" :style="`max-width: 500px; overflow: auto;`">
     <q-list v-if="type === 'signin'" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img
@@ -19,13 +19,41 @@
           class="round-sm full-width" label="Private Key" />
       </q-item>
       <q-item class="q-mt-lg">
-        <div style="margin-left: auto;" id="google-signin-button"></div>
+        <div class="q-ml-auto" id="google-signin-button"></div>
         <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
           label="Login" @click="login" :disable="account.length < 12 || privateKey.length === 0" />
         <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
           label="Close" @click="() => this.$emit('update:showAuth', false)" />
       </q-item>
     </q-list>
+
+    <q-list v-else-if="type === 'auth'" class="q-py-md">
+      <q-item class="items-center justify-center text-center column">
+        <q-img
+          width="120px"
+          alt="Telos Sign"
+          src="~assets/telos-sign.png"
+        />
+        <label style="font-size: 20px;">Authentication</label>
+      </q-item>
+      <q-item>
+        <q-input dense borderless filled
+          class="round-sm full-width" maxlength="12" counter label="Account" :value="this.accountName"
+          :rules="[val => !!val || 'This field is required']" disable/> 
+      </q-item>
+      <q-item>
+        <q-input v-model="privateKey" type="password" dense borderless filled
+          class="round-sm full-width" label="Private Key" />
+      </q-item>
+      <q-item class="q-mt-lg">
+        <div class="q-ml-auto" id="google-signin-button"></div>
+        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
+          label="Authenticate" @click="() => {this.account = this.accountName; this.authenticate();}" :disable="privateKey.length === 0" />
+        <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
+          label="Close" @click="() => this.$emit('update:showAuth', false)" />
+      </q-item>
+    </q-list>
+
     <q-list v-else-if="type === 'signup' && signUpStep === 0" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img
@@ -47,7 +75,7 @@
           @verify="(value) => onChangeRecaptcha(value)" />
       </q-item>
       <q-item class="q-mt-lg">
-        <div style="margin-left: auto;" id="google-signin-button"></div>
+        <div class="q-ml-auto" id="google-signin-button"></div>
         <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
           label="Create" @click="create" :disable="account.length < 12" />
         <q-btn no-caps :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
@@ -60,6 +88,7 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </q-list>
+
     <q-list v-else-if="type === 'signup' && signUpStep === 1" class="q-py-md">
       <q-item class="justify-center text-center">
         The following is your critical Telos info, please copy and paste these values into the fields below, and store them in a safe place:
@@ -116,6 +145,7 @@ export default {
       confirmAccount: '',
       confirmPrivateKey: '',
       confirm: false,
+      driveData: null,
       recaptchaValue: '',
       signUpStep: 0,
       creating: false,
@@ -129,16 +159,27 @@ export default {
     },
   },
   methods: {
-    ...mapActions('account', ['accountExists', 'getUserProfile', 'accountExists']),
+    ...mapActions('account', ['accountExists', 'getUserProfile']),
     ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
     async onGoogleSignIn (user) {
       this.googleProfile = user.getBasicProfile();
-      const driveData = await this.loadFromGoogleDrive();
+      this.driveData = await this.loadFromGoogleDrive();
       if (this.type === 'signin') {
-        if (driveData) {
-          this.account = driveData.account;
-          this.privateKey = driveData.privateKey;
+        if (this.driveData && this.driveData.account && this.driveData.privateKey) {
+          this.account = this.driveData.account;
+          this.privateKey = this.driveData.privateKey;
           await this.login();
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: `This Google Account isn't used for any account`,
+          });
+        }
+      } if (this.type === 'auth') {
+        if (this.driveData && this.driveData.account && this.driveData.privateKey) {
+          this.account = this.driveData.account;
+          this.privateKey = this.driveData.privateKey;
+          await this.authenticate();
         } else {
           this.$q.notify({
             type: 'negative',
@@ -166,12 +207,12 @@ export default {
           name = name.substring(0, 8);
           this.account = '';
         }
-        if (!driveData) {
+        if (!this.driveData) {
           this.create();
         } else {
           this.$q.notify({
             type: 'negative',
-            message: `This Google Account is already used for ${driveData.account}`,
+            message: `This Google Account is already used for ${this.driveData.account}`,
           });
         }
       }
@@ -183,6 +224,8 @@ export default {
           account: this.account,
           password: this.privateKey,
         });
+        this.$store.$account.account = this.account;
+        this.$store.$account.privateKey = this.privateKey;
       } catch (e) {
         this.$q.notify({
           type: 'negative',
@@ -215,6 +258,32 @@ export default {
           message: `Invalid account or private key`,
         });
       }
+    },
+    async authenticate() {
+      let users = null;
+      try {
+        if (this.accountName !== this.account) {
+          this.$q.notify({
+            type: 'negative',
+            message: `Invalid account or private key`,
+          });
+        } else {
+          this.creating = true;
+          users = await this.$blockchain.signin({
+            account: this.account,
+            password: this.privateKey,
+          });
+          this.$store.$account.account = this.account;
+          this.$store.$account.privateKey = this.privateKey;
+          this.$emit('update:showAuth', false);
+        }
+      } catch (e) {
+        this.$q.notify({
+          type: 'negative',
+          message: `Invalid account or private key`,
+        });
+      }
+      this.creating = false;
     },
     onChangeRecaptcha (value){
       this.recaptchaValue = value;
@@ -331,6 +400,9 @@ export default {
       return result;
     },
     async saveToGoogleDrive(account = null, keys = null) {
+      if (!keys && !this.privateKey) {
+        return;
+      }
       var fileContent = JSON.stringify({
         account: account ? account : this.account,
         privateKey: keys ? keys.privateKey : this.privateKey,
@@ -382,6 +454,7 @@ export default {
       this.confirmAccount = '';
       this.confirmPrivateKey = '';
       this.confirm = false;
+      this.driveData = false;
       this.signUpStep = 0;
       this.creating = false;
     },

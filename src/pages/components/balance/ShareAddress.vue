@@ -207,12 +207,19 @@ export default {
       });
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `A new address is successfully created`,
-        });
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-        this.networkType = 'tevm';
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else {
+          this.$q.notify({
+            type: 'primary',
+            message: `A new address is successfully created`,
+          });
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+          this.networkType = 'tevm';
+        }
       } else {
         this.$q.notify({
           type: 'negative',

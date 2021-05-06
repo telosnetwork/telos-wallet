@@ -14,15 +14,36 @@ const signTransaction = async function(actions) {
   let transaction = null;
   try {
     if (this.$type === "ual") {
-      transaction = await this.$ualUser.signTransaction(
-        {
-          actions
-        },
-        {
-          blocksBehind: 3,
-          expireSeconds: 30
+      if (this.$ualUser.constructor.name === 'KeycatUser') {
+        if (!this.$account.privateKey) {
+          this.$account.needAuth = true;
+          return 'needAuth';
         }
-      );
+        transaction = await this.$blockchain.transact({
+          account: this.$account.account,
+          password: this.$account.privateKey,
+          params: [
+            {
+              actions
+            },
+            {
+              blocksBehind: 3,
+              broadcast: true,
+              expireSeconds: 30
+            }
+          ]
+        })
+      } else {
+        transaction = await this.$ualUser.signTransaction(
+          {
+            actions
+          },
+          {
+            blocksBehind: 3,
+            expireSeconds: 30
+          }
+        );
+      }
     }
   } catch (e) {
     console.log(actions, e.cause.message);
@@ -52,6 +73,9 @@ export default ({ store }) => {
   const rpc = new JsonRpc(
     `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`
   );
+  
+  store["$account"] = {};
+
   store["$defaultApi"] = new Api({
     rpc,
     textDecoder: new TextDecoder(),
@@ -64,4 +88,5 @@ export default ({ store }) => {
     getAccount: getAccount.bind(store),
     getRpc: getRpc.bind(store)
   };
+  window.$api = store["$api"];
 };

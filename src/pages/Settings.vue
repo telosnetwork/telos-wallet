@@ -1,5 +1,6 @@
 <template>
   <div class="column q-mx-md" :style="`max-width: 800px; margin: auto; overflow: auto; height: ${availableHeight}px !important;`">
+    <login-button v-if="isAuthenticated" style="display: none"/>
     <q-list class="q-py-md">
       <q-item class="justify-center">
         <q-avatar size="110px" font-size="52px" color="white" text-color="white">
@@ -7,46 +8,52 @@
         </q-avatar>
       </q-item>
       <q-item class="justify-center">
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          label="UPLOAD IMAGE"  @click="onPickFile"
-        />
-        <input type="file" ref="fileInput" accept="image/*"
-          style="display: none" @change="onFilePicked"
-        />
+        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`" label="UPLOAD IMAGE"  @click="onPickFile" />
+        <input type="file" ref="fileInput" accept="image/*" style="display: none" @change="onFilePicked"/>
       </q-item>
       <q-item>
-        <q-input v-model="avatar" dense borderless filled disable
-          class="round-sm full-width" maxlength="128" counter label="Avatar URL"
-        />
+        <q-input v-model="avatar" dense borderless filled disable class="round-sm full-width" maxlength="128" counter label="Avatar URL" />
       </q-item>
       <q-item>
         <q-input v-model="display_name" dense borderless filled
           class="round-sm full-width" maxlength="16" counter label="Name"
-          :rules="[val => !!val || 'This field is required']"
-        /> 
+          :rules="[val => !!val || 'This field is required']"/> 
       </q-item>
       <q-item>
-        <q-input v-model="status" dense borderless filled
-          class="round-sm full-width" maxlength="16" counter label="Status"
-        />
+        <q-input v-model="status" dense borderless filled class="round-sm full-width" maxlength="16" counter label="Status" />
       </q-item>
       <q-item class="column">
         <label class="q-mr-auto">Bio</label>
         <q-editor v-model="bio" min-height="5rem" />
       </q-item>
       <q-item>
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          label="SAVE" @click="save" :disable="display_name.length === 0"
-        />
+        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`" label="SAVE" @click="save" :disable="display_name.length === 0" />
+      </q-item>
+      <q-item>
+        <label class="flex items-center text-weight-medium" :style="'color: grey'">Connect Google Account:</label>
+        <q-btn v-if="!privateKey" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
+          no-caps label="Authenticate" @click="onGoogleSignIn(null)"/>
+        <div class="q-ml-sm" id="google-authentication-button" :style="`display: ${privateKey && !connected ? 'unset' : 'none'}`"></div>
+        <label v-if="connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Connected</label>
       </q-item>
     </q-list>
+    <div v-if="saving"
+      class="justify-center absolute flex full-width full-height"
+      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import LoginButton from 'components/LoginButton.vue';
 
 export default {
+  components: {
+    LoginButton,
+  },
   data() {
     return {
       accountHasProfile: false,
@@ -56,6 +63,11 @@ export default {
       status: '',
       bio: '',
       is_verified: 0,
+      saving: false,
+      account: null,
+      privateKey: null,
+      checkInterval: null,
+      connected: false,
     };
   },
   computed: {
@@ -68,7 +80,7 @@ export default {
       if (this.avatar) return this.avatar;
 
       return 'https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng';
-    }
+    },
   },
   methods: {
     ...mapActions('account', ['accountExists', 'getUserProfile']),
@@ -167,12 +179,20 @@ export default {
         }
       }
       if (actions.length > 0) {
+        this.saving = true;
         const transaction = await this.$store.$api.signTransaction(actions);
         if (transaction) {
-          this.$q.notify({
-            type: 'primary',
-            message: `${!accountProfile ? 'New profile is created successfully' : 'Profile is updated successfully'}`,
-          });
+          if (transaction === 'needAuth') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Authentication is required`,
+            });
+          } else {
+            this.$q.notify({
+              type: 'primary',
+              message: `${!accountProfile ? 'New profile is created successfully' : 'Profile is updated successfully'}`,
+            });
+          }
         }
       } else {
         this.$q.notify({
@@ -180,10 +200,111 @@ export default {
           message: `No change to save`,
         });
       }
+      this.saving = false;
+    },
+    async onGoogleSignIn(user) {
+      if (!user && !this.privateKey) {
+        this.$store.$account.needAuth = true;
+        return;
+      }
+      this.googleProfile = user.getBasicProfile();
+      const driveData = await this.loadFromGoogleDrive();
+      if (!driveData) {
+        this.saveToGoogleDrive();
+      } else if (driveData.privateKey) {
+        this.connected = true;
+      }
+    },
+    async loadFromGoogleDrive() {
+      let result = null;
+      let callbacked = false;
+      await gapi.client.load('drive', 'v2');
+      var request = gapi.client.drive.files.list({
+        q: "title = 'Telos Web Wallet' and explicitlyTrashed = false",
+        space: 'drive',
+      });
+      await request.execute(async function(resp) {
+        if (resp && resp.items.length > 0) {
+          var file = gapi.client.drive.files.get({
+            fileId: resp.items[0].id,
+            alt: 'media'
+          })
+          file.then(function(response) {
+            result = JSON.parse(response.body);
+            callbacked = true;
+          }, function (error){
+            callbacked = true;
+          })
+        } else {
+          callbacked = true;
+        }
+      }, function (error) {
+        callbacked = true;
+      });
+      let timeoutCnt = 100;
+      while (!callbacked) {
+        await new Promise(res => setTimeout(res, 100));
+        timeoutCnt--;
+        if (timeoutCnt === 0) {
+          break;
+        }
+      }
+      return result;
+    },
+    async saveToGoogleDrive(account = null, keys = null) {
+      if (!keys && !this.privateKey) {
+        return;
+      }
+      var fileContent = JSON.stringify({
+        account: account ? account : this.account,
+        privateKey: keys ? keys.privateKey : this.privateKey,
+        publicKey: keys ? keys.publicKey : null,
+      }); // As a sample, upload a text file.
+      var file = new Blob([fileContent], {type: 'text/plain'});
+      var metadata = {
+          'name': 'Telos Web Wallet', // Filename at Google Drive
+          'mimeType': 'text/plain', // mimeType at Google Drive
+      };
+
+      var accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token; // Here gapi is used for retrieving the access token.
+      var form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      const showError = function (p , val) {
+        if (val.message) {
+          p.$q.notify({
+            type: 'negative',
+            message: val.message,
+          });
+        }
+      }
+      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+        method: 'POST',
+        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+        body: form,
+      }).then((res) => {
+        this.connected = true;
+        return res.json();
+      }).then(val => showError(this, val));
     },
   },
   created: async function() {
     this.loadUserProfile();
+  },
+  async mounted() {
+    gapi.signin2.render('google-authentication-button', {
+      'height': 35,
+      scope: 'profile email https://www.googleapis.com/auth/drive',
+      onsuccess: this.onGoogleSignIn
+    });
+    this.checkInterval = setInterval(async () => {
+      this.account = this.$store.$account.account;
+      this.privateKey = this.$store.$account.privateKey;
+    }, 50);
+  },
+  async beforeDestroy() {
+    if (this.checkInterval) clearInterval(this.checkInterval);
   }
 };
 </script>

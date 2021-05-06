@@ -254,6 +254,12 @@
       </q-layout>
     </q-card>
     <SelectCoin :showSelectCoinDlg.sync="showSelectCoinDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :type="dlgType" />
+    <div v-if="converting"
+      class="justify-center absolute flex full-width full-height"
+      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </q-dialog>
 </template>
 
@@ -285,6 +291,7 @@ export default {
       dlgType: 'convert',
       inputWidth: 30,
       bancorModule: vxm.bancor,
+      converting: false,
     };
   },
   computed: {
@@ -425,6 +432,7 @@ export default {
       console.log(stepIndex, steps);
     },
     async convertPressed() {
+      this.converting = true;
       try {
         const result = await this.bancorModule.convert({
           from: {
@@ -437,18 +445,32 @@ export default {
           },
           onUpdate: this.onUpdate
         });
-
-        this.$q.notify({
-          type: 'primary',
-          message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
-        });
-        this.showDlg = false;
+        if (result) {
+          if (result === 'needAuth') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Authentication is required`,
+            });
+          } else {
+            this.$q.notify({
+              type: 'primary',
+              message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
+            });
+            this.showDlg = false;
+          }
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: `${this.convertCoin.symbol} is not converted into ${this.toCoin.symbol}`,
+          });
+        }
       } catch (e) {
         this.$q.notify({
           type: 'negative',
           message: e.message,
         });
       }
+      this.converting = false;
     },
   },
   watch: {
@@ -462,6 +484,7 @@ export default {
         this.dlgType = 'convert';
         this.convertCoin = this.selectedConvertCoin;
         this.toCoin = null;
+        this.converting = false;
       }
     },
     exchangeType: function (val, oldVal) {

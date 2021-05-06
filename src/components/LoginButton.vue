@@ -36,7 +36,7 @@
 
     <div v-if="isAuthenticated" class="row absolute full-width">
       <q-btn
-        @click="logout"
+        @click="signOut"
         icon="power_settings_new"
         size="md"
         padding="3px 3px 3px 15px"
@@ -120,6 +120,7 @@ export default {
       showAuth: false,
       authType: 'signin',
       error: null,
+      authInterval: null,
     };
   },
   computed: {
@@ -143,6 +144,15 @@ export default {
     },
     async signIn() {
       this.signPopup('/signin');
+    },
+    async signOut() {
+      if (gapi) {
+        const auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+          console.log('User signed out.');
+        });
+      }
+      this.logout();
     },
     async signPopup(type) {
       const keycat = this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId];
@@ -215,7 +225,17 @@ export default {
     if (this.isAuthenticated) {
       await this.createEvmApi();
     }
-  }
+    this.authInterval = setInterval(() => {
+      if (this.$store.$account.needAuth) {
+        this.$store.$account.needAuth = false;
+        this.authType = 'auth';
+        this.showAuth = true;
+      }
+    }, 500);
+  },
+  beforeDestroy() {
+    if (this.authInterval) clearInterval(this.authInterval);
+  },
 };
 </script>
 

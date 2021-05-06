@@ -50,37 +50,7 @@ export class EosTransitModule extends VuexModule.With({
     }
     tx(actions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const authIncluded = actions.every((action) => action.authorization);
-            const builtActions = authIncluded
-                ? actions
-                : actions.map((action) => (Object.assign(Object.assign({}, action), {
-                    authorization: [
-                        {
-                            actor: this.wallet.auth.accountName,
-                            permission: this.wallet.auth.permission
-                        }
-                    ]
-                })));
-            try {
-                return yield vxm.tlosWallet.wallet.eosApi.signTransaction({
-                    actions: builtActions
-                }, {
-                    broadcast: true,
-                    blocksBehind: 3,
-                    expireSeconds: 60
-                });
-            }
-            catch (e) {
-                if (e.message == "Unexpected end of JSON input")
-                    return yield vxm.tlosWallet.wallet.eosApi.signTransaction({
-                        actions: builtActions
-                    }, {
-                        broadcast: true,
-                        blocksBehind: 3,
-                        expireSeconds: 60
-                    });
-                throw new Error(e.message);
-            }
+            return yield window.$api.signTransaction(actions);
         });
     }
     setProvider(provider) {

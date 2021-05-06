@@ -502,11 +502,18 @@ export default {
       });
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
-        });
-        this.oldtEVMBalance = this.getCurrenttEVMBalance();
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else {
+          this.$q.notify({
+            type: 'primary',
+            message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+          });
+          this.oldtEVMBalance = this.getCurrenttEVMBalance();
+        }
       } else {
         this.$q.notify({
           type: 'negative',
