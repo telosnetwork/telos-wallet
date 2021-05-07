@@ -33,8 +33,8 @@
         <label class="flex items-center text-weight-medium" :style="'color: grey'">Connect Google Account:</label>
         <q-btn v-if="!privateKey" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
           no-caps label="Authenticate" @click="onGoogleSignIn(null)"/>
-        <div class="q-ml-sm" id="google-authentication-button" :style="`display: ${privateKey && !connected ? 'unset' : 'none'}`"></div>
-        <label v-if="connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Connected</label>
+        <div class="q-ml-sm" id="google-authentication-button" :style="`display: ${(privateKey && !connected) ? 'unset' : 'none'}`"></div>
+        <label v-if="privateKey && connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Connected</label>
       </q-item>
     </q-list>
     <div v-if="saving"
