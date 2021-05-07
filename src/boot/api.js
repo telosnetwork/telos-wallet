@@ -14,7 +14,7 @@ const signTransaction = async function(actions) {
   let transaction = null;
   try {
     if (this.$type === "ual") {
-      if (this.$ualUser.constructor.name === 'KeycatUser') {
+      if (this.$idx === 0) {
         if (!this.$account.privateKey) {
           this.$account.needAuth = true;
           return 'needAuth';

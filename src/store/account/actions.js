@@ -22,6 +22,7 @@ export const login = async function(
       const accountName = await account.getAccountName();
       this.$ualUser = account;
       this.$type = "ual";
+      this.$idx = idx;
       commit("setAccountName", accountName);
       localStorage.setItem("autoLogin", authenticator.constructor.name);
       localStorage.setItem("account", accountName);
@@ -56,6 +57,7 @@ export const autoLogin = async function ({ dispatch, commit }, returnUrl) {
       returnUrl,
       account: localStorage.getItem("account")
     });
+    this.$idx = idx;
     commit("setAutoLogin", false);
   }
 };
