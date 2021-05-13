@@ -100,7 +100,7 @@
         </q-item>
       </q-list>
     </q-dialog>
-    <q-dialog v-model="showAuth">
+    <q-dialog v-model="showAuth" persistent>
       <Authenticate :showAuth.sync="showAuth" :type.sync="authType"/>
     </q-dialog>
   </div>
@@ -231,6 +231,10 @@ export default {
       if (this.$store.$account.needAuth) {
         this.$store.$account.needAuth = false;
         this.authType = 'auth';
+        this.showAuth = true;
+      } else if (this.$store.$account.needConfirm) {
+        this.$store.$account.needConfirm = false;
+        this.authType = 'confirm';
         this.showAuth = true;
       }
     }, 500);

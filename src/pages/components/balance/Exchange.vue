@@ -435,15 +435,18 @@ export default {
       this.converting = true;
       try {
         const result = await this.bancorModule.convert({
-          from: {
-            id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
-            amount: this.convertAmount,
+          tx: {
+            from: {
+              id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+              amount: this.convertAmount,
+            },
+            to: {
+              id: `${this.toCoin.account}-${this.toCoin.symbol}`,
+              amount: this.toAmount,
+            },
+            onUpdate: this.onUpdate
           },
-          to: {
-            id: `${this.toCoin.account}-${this.toCoin.symbol}`,
-            amount: this.toAmount,
-          },
-          onUpdate: this.onUpdate
+          detail: `Convert ${this.convertAmount} ${this.convertCoin.symbol} into ${this.toAmount} ${this.toCoin.symbol}`
         });
         if (result) {
           if (result === 'needAuth') {
@@ -451,7 +454,7 @@ export default {
               type: 'negative',
               message: `Authentication is required`,
             });
-          } else {
+          } else if (result !== 'cancelled') {
             this.$q.notify({
               type: 'primary',
               message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,

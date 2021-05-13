@@ -180,14 +180,14 @@ export default {
       }
       if (actions.length > 0) {
         this.saving = true;
-        const transaction = await this.$store.$api.signTransaction(actions);
+        const transaction = await this.$store.$api.signTransaction(actions, `${!accountProfile ? 'Created new profile' : 'Updated profile'}`);
         if (transaction) {
           if (transaction === 'needAuth') {
             this.$q.notify({
               type: 'negative',
               message: `Authentication is required`,
             });
-          } else {
+          } else if (transaction !== 'cancelled') {
             this.$q.notify({
               type: 'primary',
               message: `${!accountProfile ? 'New profile is created successfully' : 'Profile is updated successfully'}`,

@@ -205,14 +205,14 @@ export default {
           data: 'test',
         }
       });
-      const transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(actions, `Create a new EVM address`);
       if (transaction) {
         if (transaction === 'needAuth') {
           this.$q.notify({
             type: 'negative',
             message: `Authentication is required`,
           });
-        } else {
+        } else if (transaction !== 'cancelled') {
           this.$q.notify({
             type: 'primary',
             message: `A new address is successfully created`,

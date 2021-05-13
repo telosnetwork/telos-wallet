@@ -1,6 +1,6 @@
 import { Api, JsonRpc } from "eosjs";
 
-const signTransaction = async function(actions) {
+const signTransaction = async function(actions, detail = null) {
   actions.forEach(action => {
     if (!action.authorization || !action.authorization.length) {
       action.authorization = [
@@ -18,6 +18,22 @@ const signTransaction = async function(actions) {
         if (!this.$account.privateKey) {
           this.$account.needAuth = true;
           return 'needAuth';
+        }
+        if (!this.$account.confirmed || this.$account.confirmed <= 0) {
+          this.$account.needConfirm = true;
+          this.$account.actions = actions;
+          this.$account.detail = detail;
+        }
+        for (;;) {
+          if (this.$account.confirmed === 2) {
+            this.$account.confirmed = 0;
+            break;
+          }
+          if (this.$account.confirmed === -1) {
+            this.$account.confirmed = 0;
+            return 'cancelled'
+          }
+          await new Promise(res => setTimeout(res, 100));
         }
         transaction = await this.$blockchain.transact({
           account: this.$account.account,

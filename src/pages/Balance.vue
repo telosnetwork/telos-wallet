@@ -500,14 +500,14 @@ export default {
           quantity: quantityStr,
         }
       });
-      const transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(actions, `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`);
       if (transaction) {
         if (transaction === 'needAuth') {
           this.$q.notify({
             type: 'negative',
             message: `Authentication is required`,
           });
-        } else {
+        } else if (transaction !== 'cancelled') {
           this.$q.notify({
             type: 'primary',
             message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,

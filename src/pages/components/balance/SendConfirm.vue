@@ -178,14 +178,14 @@ export default {
           }
         });
       }
-      const transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(actions, `Send ${quantityStr} to ${this.toAddress}`);
       if (transaction) {
         if (transaction === 'needAuth') {
           this.$q.notify({
             type: 'negative',
             message: `Authentication is required`,
           });
-        } else {
+        } else if (transaction !== 'cancelled') {
           this.$q.notify({
             type: 'primary',
             message: `${quantityStr} is sent to ${this.toAddress}`,

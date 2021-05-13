@@ -50,7 +50,7 @@ export class EosTransitModule extends VuexModule.With({
     }
     tx(actions) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield window.$api.signTransaction(actions);
+            return yield window.$api.signTransaction(actions.actions ? actions.actions : actions, actions.detail);
         });
     }
     setProvider(provider) {

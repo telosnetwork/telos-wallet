@@ -1087,7 +1087,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
     }
     convert(proposal) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { from, to } = proposal;
+            const { from, to } = proposal.tx;
             if (compareString(from.id, to.id))
                 throw new Error("Cannot convert a token to itself.");
             const fromAmount = from.amount;
@@ -1128,7 +1128,7 @@ export class TlosBancorModule extends VuexModule.With({ namespaced: "tlosBancor/
             //     tokenIds: [from.id, to.id]
             // });
             // this.refresh();
-            const txRes = yield this.triggerTx(convertActions);
+            const txRes = yield this.triggerTx({ actions: convertActions, detail: proposal.detail });
             return txRes;
         });
     }

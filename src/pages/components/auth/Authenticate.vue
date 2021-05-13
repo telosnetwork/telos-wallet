@@ -54,6 +54,48 @@
       </q-item>
     </q-list>
 
+    <q-list v-else-if="type === 'confirm'" class="q-py-md">
+      <q-item class="items-center justify-center text-center column">
+        <q-img width="120px" alt="Telos Sign" src="~assets/telos-sign.png" />
+        <label style="font-size: 20px;">Transaction Request</label>
+      </q-item>
+      <q-item class="flex items-center justify-center text-weight-medium">
+        <label>{{this.$store.$account.detail}}</label>
+      </q-item>
+      <q-item class="flex items-center justify-center">
+        <label class="q-px-sm cursor-pointer" style="border-bottom: 1px dotted;" @click="() => { this.showDetail = !this.showDetail }">
+          {{showDetail ? 'Hide Details' : 'Show Details'}}
+        </label>
+      </q-item>
+      <q-item v-if="showDetail"
+        class="flex text-weight-medium overflow-auto q-mx-md q-pa-sm bg-grey-2"
+        style="flex-flow: column; grid-gap: 1rem; max-height: 200px"
+      >
+        <div v-for="(action, index) in this.$store.$account.actions" :key="`action${index}`"
+          class="flex" :style="`flex-flow: row; grid-gap: 5%; border-left: 3px solid ${themeColor}`">
+          <div class="flex q-pl-xs text-subtitle2 text-capitalize	" style="width: 25%">
+            <label>{{action.name}}</label>
+          </div>
+          <div class="flex column" style="width: 70%">
+            <label class="text-body1 text-weight-medium">{{action.account}}</label>
+            <div>
+              <div v-for="(key, i) in Object.keys(action.data)" :key="`${action.account}${key}${i}`"
+                class="flex" style="flex-flow: column;">
+                <label class="text-weight-regular text-grey">- {{key}}</label>
+                <label class="q-ml-sm">{{action.data[key]}}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-item>
+      <q-item class="q-mt-md q-px-xl justify-center column" style="grid-gap: 1rem">
+        <q-btn no-caps text-color="white" :style="`height: 35px; background: ${themeColor};`"
+          label="Approve" @click="() => {this.$store.$account.confirmed = 2; this.$emit('update:showAuth', false)}" />
+        <q-btn no-caps :style="`height: 35px; color: ${themeColor};`"
+          label="Deny" @click="() => {this.$store.$account.confirmed = -1; this.$emit('update:showAuth', false)}" />
+      </q-item>
+    </q-list>
+
     <q-list v-else-if="type === 'signup' && signUpStep === 0" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img
@@ -145,10 +187,12 @@ export default {
       confirmAccount: '',
       confirmPrivateKey: '',
       confirm: false,
+      showDetail: false,
       driveData: null,
       recaptchaValue: '',
       signUpStep: 0,
       creating: false,
+      authInterval: null,
     };
   },
   computed: {
@@ -440,11 +484,16 @@ export default {
     },
   },
   async mounted() {
-    gapi.signin2.render('google-signin-button', {
-      'height': 35,
-      scope: 'profile email https://www.googleapis.com/auth/drive',
-      onsuccess: this.onGoogleSignIn
-    });
+    if (this.type !== 'confirm') {
+      gapi.signin2.render('google-signin-button', {
+        'height': 35,
+        scope: 'profile email https://www.googleapis.com/auth/drive',
+        onsuccess: this.onGoogleSignIn
+      });
+    }
+  },
+  beforeDestroy() {
+    if (this.authInterval) clearInterval(this.authInterval);
   },
   watch: {
     type: function (val, oldVal) {
@@ -454,6 +503,7 @@ export default {
       this.confirmAccount = '';
       this.confirmPrivateKey = '';
       this.confirm = false;
+      this.showDetail = false;
       this.driveData = false;
       this.signUpStep = 0;
       this.creating = false;
