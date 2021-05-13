@@ -86,7 +86,12 @@
                   </div>
                 </q-item-section>
               </div>
-              <q-separator vertical class="q-my-auto" style="width: 3px; height: 80%;"/>
+              <div class="flex q-my-auto justify-center items-center bg-grey-4" style="width: 3px; height: 80%;">
+                <q-btn round flat icon="swap_horiz" size="20px"
+                  class="flex q-pa-none justify-center items-center"
+                  :style="`width: 20px; color: ${themeColor}`"
+                  @click="changeCoins"/>
+              </div>
               <div class="col q-mx-lg">
                 <q-item-section style="display: block;">
                   <div class="text-black display-grid">
@@ -165,7 +170,14 @@
               </q-item-section>
             </q-item>
             <q-space/>
-            <q-separator style="height: 2px;"/>
+            <div class="flex column justify-center items-center bg-grey-4" style="height: 2px;">
+              <div class="bg-grey-4" style="width: 30px; height: 30px; border-radius: 20px;">
+                <q-btn round flat icon="swap_vert" size="18px"
+                  class="justify-center items-center cursor-pointer overflow-hidden"
+                  :style="`width: 30px; height: 30px; color: ${themeColor}; z-index: 10;`"
+                  @click="changeCoins"/>
+              </div>
+            </div>
             <q-space/>
             <q-item class="list-item full-width q-pb-none" style="min-height: 28px;">
               <q-item-section>
@@ -475,6 +487,12 @@ export default {
       }
       this.converting = false;
     },
+    changeCoins() {
+      const val = this.toCoin;
+      this.toCoin = this.convertCoin;
+      this.dlgType = 'convert';
+      this.selectedCoin = val;
+    }
   },
   watch: {
     showExchangeDlg: function(val, oldVal) {
