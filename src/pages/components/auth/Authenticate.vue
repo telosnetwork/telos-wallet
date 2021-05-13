@@ -60,7 +60,7 @@
         <label style="font-size: 20px;">Transaction Request</label>
       </q-item>
       <q-item class="flex items-center justify-center text-weight-medium">
-        <label>{{this.$store.$account.detail}}</label>
+        <label class="text-center">{{this.$store.$account.detail}}</label>
       </q-item>
       <q-item class="flex items-center justify-center">
         <label class="q-px-sm cursor-pointer" style="border-bottom: 1px dotted;" @click="() => { this.showDetail = !this.showDetail }">
