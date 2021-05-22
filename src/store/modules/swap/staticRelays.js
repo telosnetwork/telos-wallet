@@ -271,8 +271,8 @@ const oldRelays = [
         ]
     }
 ];
-export const getHardCodedRelays = () => oldRelays.map(relay => (
-    {
+export const getHardCodedRelays = () =>
+    oldRelays.map(relay => ({
         ...relay,
         isMultiContract: false,
         smartToken: {
@@ -283,5 +283,4 @@ export const getHardCodedRelays = () => oldRelays.map(relay => (
             ...reserve,
             symbol: new Sym(reserve.symbol)
         }))
-    })
-);
+    }));

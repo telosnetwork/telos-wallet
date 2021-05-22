@@ -1,6 +1,6 @@
 import { Api, JsonRpc } from "eosjs";
 
-const signTransaction = async function(actions, detail = null) {
+const signTransaction = async function (actions, detail = null) {
   actions.forEach(action => {
     if (!action.authorization || !action.authorization.length) {
       action.authorization = [
@@ -17,21 +17,21 @@ const signTransaction = async function(actions, detail = null) {
       if (this.$idx === 0) {
         if (!this.$account.privateKey) {
           this.$account.needAuth = true;
-          return 'needAuth';
+          return "needAuth";
         }
         if (!this.$account.confirmed || this.$account.confirmed <= 0) {
           this.$account.needConfirm = true;
           this.$account.actions = actions;
           this.$account.detail = detail;
         }
-        for (;;) {
+        for (; ;) {
           if (this.$account.confirmed === 2) {
             this.$account.confirmed = 0;
             break;
           }
           if (this.$account.confirmed === -1) {
             this.$account.confirmed = 0;
-            return 'cancelled'
+            return "cancelled";
           }
           await new Promise(res => setTimeout(res, 100));
         }
@@ -48,7 +48,7 @@ const signTransaction = async function(actions, detail = null) {
               expireSeconds: 30
             }
           ]
-        })
+        });
       } else {
         transaction = await this.$ualUser.signTransaction(
           {
@@ -70,9 +70,9 @@ const signTransaction = async function(actions, detail = null) {
 
 const getRpc = function () {
   return this.$type === "ual" ? this.$ualUser.rpc : this.$defaultApi.rpc;
-}
+};
 
-const getTableRows = async function(options) {
+const getTableRows = async function (options) {
   const rpc = this.$api.getRpc();
   return await rpc.get_table_rows({
     json: true,
@@ -83,13 +83,13 @@ const getTableRows = async function(options) {
 const getAccount = async function (accountName) {
   const rpc = this.$api.getRpc();
   return await rpc.get_account(accountName);
-}
+};
 
 export default ({ store }) => {
   const rpc = new JsonRpc(
     `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`
   );
-  
+
   store["$account"] = {};
 
   store["$defaultApi"] = new Api({

@@ -331,34 +331,6 @@ export default {
           }
         });
       }
-      /*
-      const settings = {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({code: "eosio.token", account: this.accountName, symbol: "TLOS"})
-      };
-      await fetch(`https://${this.chainName === 'telos' ? '' : 'testnet.'}telos.caleos.io/v1/chain/get_currency_balance`, settings)
-        .then(resp => resp.json())
-        .then(data => {
-          if (data.length > 0) {
-            this.coins[0].amount = parseFloat(data[0].split(' TLOS')[0]);
-          }
-        });
-
-      const coins = this.userTokens;
-      if (coins.status === 200) {
-        coins.data.tokens.forEach((token) => {
-          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
-          if (tokenIndex >= 0) {
-            this.coins[tokenIndex].amount = token.amount || 0;
-            this.coins[tokenIndex].precision = token.decimals;
-          }
-        });
-      }
-      */
 
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
@@ -384,9 +356,15 @@ export default {
 
       const sortCoin = function (suggestTokens) {
         return function (a, b) {
-          if (!suggestTokens.includes(a.symbol.toLowerCase()) || !suggestTokens.includes(b.symbol.toLowerCase())) {
-            if (suggestTokens.includes(a.symbol.toLowerCase())) return -1;
-            if (suggestTokens.includes(b.symbol.toLowerCase())) return 1;
+          const aSymbol = a.symbol.toLowerCase();
+          const bSymbol = b.symbol.toLowerCase();
+          if (!suggestTokens.includes(aSymbol) || !suggestTokens.includes(bSymbol)) {
+            if (suggestTokens.includes(aSymbol)) {
+              return -1;
+            }
+            if (suggestTokens.includes(bSymbol)) {
+              return 1;
+            }
           }
           let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
           let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
@@ -500,7 +478,9 @@ export default {
           quantity: quantityStr,
         }
       });
+
       const transaction = await this.$store.$api.signTransaction(actions, `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`);
+      
       if (transaction) {
         if (transaction === 'needAuth') {
           this.$q.notify({
@@ -539,6 +519,9 @@ export default {
         }
       }
       this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
+      if (window.time && Date.now() / 1000 - window.time > 10 * 60) {
+        location.reload();
+      }
     }, 10);
 
     if (this.chainName === 'telos') {
@@ -584,6 +567,9 @@ export default {
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {
       }
+      window.time = Date.now() / 1000;
+      console.clear();
+      console.log("Don't try to use Inspector!");
     }, 5000);
   },
   beforeMount() {
@@ -607,8 +593,12 @@ export default {
     });
   },
   beforeDestroy() {
-    if (this.interval) clearInterval(this.interval);
-    if (this.tokenInterval) clearInterval(this.tokenInterval);
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    if (this.tokenInterval) {
+      clearInterval(this.tokenInterval);
+    }
   },
 };
 </script>

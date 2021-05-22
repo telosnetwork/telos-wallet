@@ -121,7 +121,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 70;
+      return window.innerHeight - 70;
     },
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.buyAmount.length + 1));
@@ -201,8 +201,9 @@ export default {
         .then((data) => {
           var asks = data.data.asks;
           asks.sort((a, b) => {
-            if (a[0] < b[0])
+            if (a[0] < b[0]) {
               return -1;
+            }
 
             return 1;
           });
@@ -215,11 +216,13 @@ export default {
             var toSpend = eosLeft < eosSpendable ? eosLeft : eosSpendable;
             tlosTotal += (toSpend / eosPrice);
             eosLeft -= toSpend;
-            if (eosLeft < 0)
+            if (eosLeft < 0) {
               throw new Error("Overspend!!!");
+            }
 
-            if (eosLeft == 0)
+            if (eosLeft == 0) {
               break;
+            }
           }
           this.getAmount = tlosTotal.toFixed(4);
           this.exchangeRate = (parseFloat(this.buyAmountValue) / tlosTotal).toFixed(4);

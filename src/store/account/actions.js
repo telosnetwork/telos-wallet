@@ -1,6 +1,6 @@
 import { vxm } from "../../store";
 
-export const login = async function(
+export const login = async function (
   { commit, dispatch },
   { idx, account, returnUrl }
 ) {
@@ -31,9 +31,9 @@ export const login = async function(
       vxm.tlosWallet.wallet = {
         auth: {
           accountName: accountName,
-          permission: "active",
+          permission: "active"
         },
-        eosApi: this.$ualUser,
+        eosApi: this.$ualUser
       };
     }
   } catch (e) {
@@ -114,10 +114,7 @@ export const getAccountProfile = async function ({ commit, dispatch }) {
     return;
   }
 
-  dispatch(
-    "getUserProfile",
-    this.state.account.accountName
-  );
+  dispatch("getUserProfile", this.state.account.accountName);
 };
 
 export const accountExists = async function ({ commit, dispatch }, accountName) {
@@ -127,4 +124,4 @@ export const accountExists = async function ({ commit, dispatch }, accountName) 
   } catch (e) {
     return false;
   }
-}
+};

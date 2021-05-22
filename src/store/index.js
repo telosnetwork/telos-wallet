@@ -20,7 +20,7 @@ export default function () {
     modules: {
       general,
       account,
-      global,
+      global
     },
 
     strict: process.env.DEV
@@ -30,7 +30,25 @@ export default function () {
 }
 
 export const store = new Vuex.Store({
-  modules: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, extractVuexModule(TlosBancorModule)), extractVuexModule(GeneralModule)), extractVuexModule(EosTransitModule)), extractVuexModule(BancorModule)), extractVuexModule(WalletModule)), extractVuexModule(NetworkModule)), extractVuexModule(TlosNetworkModule)),
+  modules: Object.assign(
+    Object.assign(
+      Object.assign(
+        Object.assign(
+          Object.assign(
+            Object.assign(
+              Object.assign({}, extractVuexModule(TlosBancorModule)),
+              extractVuexModule(GeneralModule)
+            ),
+            extractVuexModule(EosTransitModule)
+          ),
+          extractVuexModule(BancorModule)
+        ),
+        extractVuexModule(WalletModule)
+      ),
+      extractVuexModule(NetworkModule)
+    ),
+    extractVuexModule(TlosNetworkModule)
+  ),
   strict: process.env.DEV
 });
 

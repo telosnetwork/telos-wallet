@@ -120,7 +120,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 100;
+      return window.innerHeight - 100;
     },
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));

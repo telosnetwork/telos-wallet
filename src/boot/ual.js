@@ -24,17 +24,21 @@ export default async ({ Vue, store }) => {
   ];
 
   const config = {
-    name: process.env.NETWORK_CHAIN_ID === '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11' ? 'telos' : 'telos-testnet',
-    nodes: [
-      `${process.env.HYPERION_ENDPOINT}:${process.env.NETWORK_PORT}`
-    ],
-    plugin: "eos",
+    name:
+      process.env.NETWORK_CHAIN_ID ===
+      "4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11"
+        ? "telos"
+        : "telos-testnet",
+    nodes: [`${process.env.HYPERION_ENDPOINT}:${process.env.NETWORK_PORT}`],
+    plugin: "eos"
   };
   const injectConfig = module => {
     const Plugin = module.default;
     return new Plugin(config);
   };
-  const loader = import('../utils/telos-keycat/plugins/EosPlugin').then(injectConfig);
+  const loader = import("../utils/telos-keycat/plugins/EosPlugin").then(
+    injectConfig
+  );
   const blockchain = await loader;
   store["$blockchain"] = blockchain;
   Vue.prototype.$blockchain = blockchain;

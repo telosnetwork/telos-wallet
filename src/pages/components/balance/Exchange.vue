@@ -234,15 +234,9 @@
             class="q-mt-md text-subtitle2 text-weight-bold text-center"
             :style="`color: ${themeColor};`"
           >
-            <span>
-              {{ unitReward }}
-            </span>
-            <div>
-              {{ `1 ${convertCoin.symbol} = $${getFixed(this.toCoin.price * this.reward, 4)} USD` }}
-            </div>
-            <div v-if="fee !== null">
-              Fee: {{ getFixed(fee, 4) }}
-            </div>
+            <span> {{ unitReward }} </span>
+            <div> {{ `1 ${convertCoin.symbol} = $${getFixed(this.toCoin.price * this.reward, 4)} USD` }} </div>
+            <div v-if="fee !== null"> Fee: {{ getFixed(fee, 4) }} </div>
             <div
               v-if="slippage !== null"
               :class="slippageHigh ? 'text-warning' : ''"

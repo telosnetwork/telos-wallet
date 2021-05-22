@@ -96,7 +96,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 200;
+      return window.innerHeight - 200;
     },
   },
   methods: {

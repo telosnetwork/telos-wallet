@@ -72,12 +72,12 @@ export default {
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     searchCoins() {
-      return this.availbleCoins.filter((coin) => {
+      return this.availableCoins.filter((coin) => {
         return coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase())
             || coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase());
       });
     },
-    availbleCoins() {
+    availableCoins() {
       return this.coins.filter(coin => coin.amount > 0);
     },
     showDlg: {

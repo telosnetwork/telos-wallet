@@ -56,7 +56,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 100;
+      return window.innerHeight - 100;
     },
   },
   methods: {
@@ -69,7 +69,7 @@ export default {
         let networkType = 'telos';
 
         if (coin && this.pTokens.includes(coin.symbol.toLowerCase()) && accountName.length > 12) {
-           if (coinName === 'Telos') {
+          if (coinName === 'Telos') {
             if (accountName.length !== 42 || !accountName.startsWith('0x')) {
               this.$q.notify({
                 type: 'negative',

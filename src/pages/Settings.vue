@@ -30,13 +30,48 @@
         <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`" label="SAVE" @click="save" :disable="display_name.length === 0" />
       </q-item>
       <q-item>
-        <label class="flex items-center text-weight-medium" :style="'color: grey'">Connect Google Account:</label>
+        <label v-if="privateKey && connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Google Account is Connected:</label>
+        <label v-else class="flex items-center text-weight-medium" :style="'color: grey'">Connect Google Account:</label>
         <q-btn v-if="!privateKey" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
           no-caps label="Authenticate" @click="onGoogleSignIn(null)"/>
         <div class="q-ml-sm" id="google-authentication-button" :style="`display: ${(privateKey && !connected) ? 'unset' : 'none'}`"></div>
-        <label v-if="privateKey && connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Connected</label>
+        <q-btn v-if="privateKey && connected" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
+          no-caps label="View Private Key" @click="confirm = true"/>
       </q-item>
     </q-list>
+
+    <q-dialog v-model="confirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <span class="q-mx-auto text-h5">Warning!</span>
+          <span class="q-mx-auto text-center">
+            Are you sure you want to show your Telos private keys?
+            Be sure you are in a private location and no one can see your screen.
+            Anyone viewing your private keys can steal your funds.
+          </span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Yes, I'm sure" color="primary" @click="confirm = false; keyView = true;" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="keyView">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Private Key</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none text-center" style="word-break: break-all;">
+          {{privateKey}}
+          <q-btn flat dense size="sm" icon="far fa-copy" @click="copyToClipboard(privateKey)"/>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <div v-if="saving"
       class="justify-center absolute flex full-width full-height"
       style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
@@ -68,6 +103,8 @@ export default {
       privateKey: null,
       checkInterval: null,
       connected: false,
+      confirm: false,
+      keyView: false,
     };
   },
   computed: {
@@ -205,10 +242,18 @@ export default {
     async onGoogleSignIn(user) {
       if (!user && !this.privateKey) {
         this.$store.$account.needAuth = true;
-        return;
       }
-      this.googleProfile = user.getBasicProfile();
-      const driveData = await this.loadFromGoogleDrive();
+      while(!this.privateKey) {
+        await new Promise(res => setTimeout(res, 10));
+      }
+      let driveData = null;
+      const { result } = await this.loadFromGoogleDrive();
+      if (result) {
+        const accounts = Object.keys(result);
+        if (accounts.length > 0) {
+          driveData = result[accounts[0]];
+        }
+      }
       if (!driveData) {
         this.saveToGoogleDrive();
       } else if (driveData.privateKey) {
@@ -217,14 +262,17 @@ export default {
     },
     async loadFromGoogleDrive() {
       let result = null;
+      let fileId = null;
       let callbacked = false;
+      const network = this.$blockchain.config.name === 'telos-testnet' ? '(testnet)' : '(mainnet)';
       await gapi.client.load('drive', 'v2');
       var request = gapi.client.drive.files.list({
-        q: "title = 'Telos Web Wallet' and explicitlyTrashed = false",
+        q: `title = 'Telos Web Wallet${network}' and explicitlyTrashed = false`,
         space: 'drive',
       });
       await request.execute(async function(resp) {
         if (resp && resp.items.length > 0) {
+          fileId = resp.items[0].id;
           var file = gapi.client.drive.files.get({
             fileId: resp.items[0].id,
             alt: 'media'
@@ -249,20 +297,29 @@ export default {
           break;
         }
       }
-      return result;
+      if (result) {
+        delete result.account;
+        delete result.privateKey;
+        delete result.publicKey;
+      }
+      return { result, fileId };
     },
     async saveToGoogleDrive(account = null, keys = null) {
       if (!keys && !this.privateKey) {
         return;
       }
-      var fileContent = JSON.stringify({
-        account: account ? account : this.account,
-        privateKey: keys ? keys.privateKey : this.privateKey,
-        publicKey: keys ? keys.publicKey : null,
-      }); // As a sample, upload a text file.
+      let { result, fileId } = await this.loadFromGoogleDrive();
+      result = result || {};
+      result[account ? account : this.account] = {
+          account: account ? account : this.account,
+          privateKey: keys ? this.encrypt(keys.privateKey) : this.encrypt(this.privateKey),
+          publicKey: keys ? keys.publicKey : null,
+      }
+      var fileContent = JSON.stringify(result); // As a sample, upload a text file.
       var file = new Blob([fileContent], {type: 'text/plain'});
+      const network = this.$blockchain.config.name === 'telos-testnet' ? '(testnet)' : '(mainnet)';
       var metadata = {
-          'name': 'Telos Web Wallet', // Filename at Google Drive
+          'name': `Telos Web Wallet${network}`, // Filename at Google Drive
           'mimeType': 'text/plain', // mimeType at Google Drive
       };
 
@@ -279,14 +336,29 @@ export default {
           });
         }
       }
-      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-        method: 'POST',
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files${fileId ? '/' + fileId : ''}?uploadType=multipart&fields=id`, {
+        method: fileId ? 'PATCH' : 'POST',
         headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
         body: form,
       }).then((res) => {
         this.connected = true;
         return res.json();
       }).then(val => showError(this, val));
+    },
+    copyToClipboard(str) {
+      var el = document.createElement('textarea');
+      el.value = str;
+      el.setAttribute('readonly', '');
+      el.style = {display: 'none'};
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      this.$q.notify({
+        type: 'primary',
+        message: 'Copied it to the clipboard successfully',
+      });
     },
   },
   created: async function() {

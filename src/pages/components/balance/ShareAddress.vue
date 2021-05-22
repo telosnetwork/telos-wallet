@@ -121,7 +121,7 @@ export default {
       });
     },
     cardHeight() {
-       return window.innerHeight - 150;
+      return window.innerHeight - 150;
     },
     showDlg: {
       get() {
@@ -246,8 +246,6 @@ export default {
         newAddress = await ptoken.pbtc.getDepositAddress(this.accountName);
       } else if (this.selectedCoin.symbol.toLowerCase() === 'tlos') {
         newAddress = await ptoken.peth.issue(10, this.accountName);
-      } else {
-
       }
 
       if (newAddress.value) {

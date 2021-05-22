@@ -79,12 +79,12 @@ export default {
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     searchCoins() {
-      return this.availbleCoins.filter((coin) => {
+      return this.availableCoins.filter((coin) => {
         return coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase())
             || coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase());
       });
     },
-    availbleCoins() {
+    availableCoins() {
       const { convertibleTokens } = this.bancorModule;
       if (this.type === 'convert') {
         return this.coins.filter(coin => coin.amount > 0).filter(coin => convertibleTokens.findIndex(token => token.symbol === coin.symbol) >= 0);
