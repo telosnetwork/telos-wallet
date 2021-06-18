@@ -568,8 +568,8 @@ export default {
       } catch {
       }
       window.time = Date.now() / 1000;
-      // console.clear();
-      // console.log("Don't try to use Inspector!");
+      console.clear();
+      console.log("Don't try to use Inspector!");
     }, 5000);
   },
   beforeMount() {
