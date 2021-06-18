@@ -368,6 +368,11 @@ export default {
             type: 'negative',
             message: val.message,
           });
+        } else {
+          this.$q.notify({
+            type: 'primary',
+            message: "Account is saved on your google drive",
+          });
         }
       }
       await fetch(`https://www.googleapis.com/upload/drive/v3/files${fileId ? '/' + fileId : ''}?uploadType=multipart&fields=id`, {
