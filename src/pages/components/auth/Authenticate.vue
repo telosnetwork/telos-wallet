@@ -523,7 +523,7 @@ export default {
             message: val.message,
           });
         } else {
-          this.$q.notify({
+          p.$q.notify({
             type: 'primary',
             message: "Account is saved on your google drive. Please login with your Google Account",
           });

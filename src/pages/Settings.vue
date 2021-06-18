@@ -72,25 +72,6 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="selecting">
-      <q-card style="width: 300px;">
-        <q-card-section>
-          <div class="text-h6 text-center">Your Accounts</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none text-center" style="word-break: break-all;">
-          <q-btn v-for="acc in Object.keys(accounts)" :key="acc"
-            @click="selecting = false; selectedAccount = acc;"
-            class="full-width q-mt-sm text-white" :style="`background: ${themeColor};`"
-          >
-            {{ acc }}
-          </q-btn>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <div v-if="saving"
       class="justify-center absolute flex full-width full-height"
       style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
@@ -124,10 +105,6 @@ export default {
       connected: false,
       confirm: false,
       keyView: false,
-      driveData: null,
-      accounts: [],
-      selecting: false,
-      selectedAccount: null,
     };
   },
   computed: {
@@ -273,25 +250,14 @@ export default {
       const { result } = await this.loadFromGoogleDrive();
       if (result) {
         const accounts = Object.keys(result);
-        if (accounts.length === 1) {
-          driveData = result[accounts[0]];
-        } else if (accounts.length > 1) {
-          this.accounts = result;
-          this.selecting = true;
-          this.selectedAccount = null;
-          while (this.selecting) {
-              await new Promise(res => setTimeout(res, 10));
-          }
-          if (!this.selectedAccount) {
-            return;
-          }
-          this.driveData = result[this.selectedAccount];
+        if (accounts.length > 0) {
+          driveData = result;
         }
       }
-      if (!driveData) {
-        this.saveToGoogleDrive();
-      } else if (driveData.privateKey) {
+      if (driveData && Object.keys(driveData).findIndex(acc => driveData[acc].privateKey === this.privateKey) >= 0) {
         this.connected = true;
+      } else {
+        this.saveToGoogleDrive();
       }
     },
     async loadFromGoogleDrive() {
@@ -369,7 +335,7 @@ export default {
             message: val.message,
           });
         } else {
-          this.$q.notify({
+          p.$q.notify({
             type: 'primary',
             message: "Account is saved on your google drive",
           });
@@ -404,7 +370,6 @@ export default {
     this.loadUserProfile();
   },
   async mounted() {
-    this.driveData = null;
     gapi.signin2.render('google-authentication-button', {
       'height': 35,
       scope: 'profile email https://www.googleapis.com/auth/drive',
