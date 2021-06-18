@@ -73,12 +73,17 @@
     </q-dialog>
 
     <q-dialog v-model="selecting">
-      <q-card>
+      <q-card style="width: 300px;">
         <q-card-section>
-          <div class="text-h6">Connected Accounts</div>
+          <div class="text-h6 text-center">Your Accounts</div>
         </q-card-section>
         <q-card-section class="q-pt-none text-center" style="word-break: break-all;">
-          <q-btn v-for="acc in Object.keys(accounts)" :key="acc" @click="selecting = false; selectedAccount = acc;">{{ acc }}</q-btn>
+          <q-btn v-for="acc in Object.keys(accounts)" :key="acc"
+            @click="selecting = false; selectedAccount = acc;"
+            class="full-width q-mt-sm text-white" :style="`background: ${themeColor};`"
+          >
+            {{ acc }}
+          </q-btn>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Close" color="primary" v-close-popup />
