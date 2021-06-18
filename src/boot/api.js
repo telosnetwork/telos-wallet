@@ -62,8 +62,8 @@ const signTransaction = async function (actions, detail = null) {
       }
     }
   } catch (e) {
-    console.log(actions, e.cause.message);
-    throw e.cause.message;
+    console.log(actions, e.message);
+    return "error";
   }
   return transaction;
 };

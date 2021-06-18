@@ -185,6 +185,11 @@ export default {
             type: 'negative',
             message: `Authentication is required`,
           });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Transaction failed. Make sure authentication is done correctly.`,
+          });
         } else if (transaction !== 'cancelled') {
           this.$q.notify({
             type: 'primary',
