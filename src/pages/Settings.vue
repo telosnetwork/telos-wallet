@@ -102,6 +102,7 @@ export default {
       account: null,
       privateKey: null,
       checkInterval: null,
+      clearInterval: null,
       connected: false,
       confirm: false,
       keyView: false,
@@ -379,9 +380,14 @@ export default {
       this.account = this.$store.$account.account;
       this.privateKey = this.$store.$account.privateKey;
     }, 50);
+    this.clearInterval = setInterval(async () => {
+      console.clear();
+      console.log("Don't try to use Inspector!");
+    }, 5000);
   },
   async beforeDestroy() {
     if (this.checkInterval) clearInterval(this.checkInterval);
+    if (this.clearInterval) clearInterval(this.clearInterval);
   }
 };
 </script>
