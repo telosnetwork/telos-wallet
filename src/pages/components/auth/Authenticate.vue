@@ -459,7 +459,7 @@ export default {
         space: 'drive',
       });
       await request.execute(async function(resp) {
-        if (resp && resp.items.length > 0) {
+        if (resp && resp.items && resp.items.length > 0) {
           fileId = resp.items[0].id;
           var file = gapi.client.drive.files.get({
             fileId: resp.items[0].id,
