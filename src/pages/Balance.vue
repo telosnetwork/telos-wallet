@@ -182,6 +182,7 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import LoginButton from 'components/LoginButton.vue';
@@ -234,6 +235,15 @@ export default {
         price: 0.0,
         precision: 4,
         suggested: true,
+      }, {
+        account: 'eosio.token',
+        name: 'Telos',
+        symbol: 'TLOS',
+        amount: 0,
+        price: 0.0,
+        precision: 4,
+        suggested: true,
+        network: 'tevm',
       }],
       nftTokenItems: {},
       nftTokenTags: [],
@@ -271,7 +281,7 @@ export default {
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens']),
+    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens', 'pTokenNetworks']),
     totalAmount() {
       return this.coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0);
     },
@@ -324,31 +334,48 @@ export default {
           return true;
         });
         userCoins.data.tokens.forEach((token) => {
-          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === token.symbol.toLowerCase());
-          if (tokenIndex >= 0) {
-            this.coins[tokenIndex].amount = token.amount || 0;
-            this.coins[tokenIndex].precision = token.precision || 4;
-          }
+          this.coins.forEach((coin) => {
+            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase()) {
+              coin.amount = token.amount || 0;
+              coin.precision = token.precision || 4;
+            }
+          });
         });
       }
+
+      this.coins.forEach(async (coin) => {
+        if (coin.network === 'tevm') {
+          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+          coin.amount = BigNumber(evmAccount.balance.toString()).div(1e18).toFixed(4);
+        }
+      })
 
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              if (token.chain === 'eos') {
-                const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-                if (coinIndex >= 0 && token.key.includes('ptokens')) {
-                  this.coins[coinIndex].price = token.price.usd;
-                }
+              if (token.chain === 'eos' && token.key.includes('ptokens')) {
+                this.coins.forEach((coin) => {
+                  if (coin.symbol === token.symbol) {
+                    coin.price = token.price.usd;
+                  }
+                });
               }
             } else if (token.metadata.name === 'Telos') {
+              this.coins.forEach((coin) => {
+                  if (coin.symbol === 'TLOS') {
+                    coin.price = token.price.usd;
+                  }
+              });
               this.coins[0].price = token.price.usd;
             } else if (token.symbol !== 'TLOS') {
-              const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-              if (coinIndex >= 0 && !token.key.includes('ptokens')) {
-                this.coins[coinIndex].price = token.price.usd;
+              if (!token.key.includes('ptokens')) {
+                this.coins.forEach((coin) => {
+                  if (coin.symbol === token.symbol) {
+                    coin.price = token.price.usd;
+                  }
+                });
               }
             }
           });
@@ -358,6 +385,21 @@ export default {
         return function (a, b) {
           const aSymbol = a.symbol.toLowerCase();
           const bSymbol = b.symbol.toLowerCase();
+
+          if (aSymbol === bSymbol) {
+            if (a.network) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+
+          if (aSymbol === 'tlos') {
+            return -1;
+          } else if (bSymbol === 'tlos') {
+            return 1;
+          }
+
           if (!suggestTokens.includes(aSymbol) || !suggestTokens.includes(bSymbol)) {
             if (suggestTokens.includes(aSymbol)) {
               return -1;
@@ -461,8 +503,7 @@ export default {
     getCurrenttEVMBalance() {
       if (this.$root.tEVMAccount) {
         const balanceStr = this.$root.tEVMAccount.balance.toString();
-        const strLength = balanceStr.length;
-        return parseFloat(`${balanceStr.substring(0, strLength - 18)}.${balanceStr.substring(strLength - 18, strLength)}`) || 0;
+        return parseFloat(BigNumber(balanceStr).div(1e18).toFixed(4)) || 0;
       }
       return 0;
     },
@@ -486,6 +527,11 @@ export default {
           this.$q.notify({
             type: 'negative',
             message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Withdraw failed. Make sure authentication is done correctly.`,
           });
         } else if (transaction !== 'cancelled') {
           this.$q.notify({
@@ -533,15 +579,19 @@ export default {
       this.coins = this.loadedCoins;
       this.coinLoadedAll = true;
     } else {
-      this.coins.length = 1;
+      this.coins.length = 2;
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
             } else if (token.metadata.name === 'Telos') {
-              this.coins[0].price = token.price.usd;
-              this.coins[0].icon = token.metadata.logo;
+              this.coins.forEach((coin) => {
+                if (coin.symbol === 'TLOS') {
+                  coin.price = token.price.usd;
+                  coin.icon = token.metadata.logo;
+                }
+              })
             } else if (token.symbol !== 'TLOS') {
               const precisionSplit = token.supply.circulating.toString().split('.');
               this.coins.push({
@@ -549,10 +599,23 @@ export default {
                 name: token.metadata.name,
                 symbol: token.symbol,
                 amount: 0,
-                price: token.price.usd,
+                price: 0,
                 icon: token.metadata.logo,
                 precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
               });
+              const tSymbol = token.symbol.toLowerCase();
+              if (this.pTokenNetworks[tSymbol] && this.pTokenNetworks[tSymbol].tevm) {
+                this.coins.push({
+                account: token.account.toLowerCase(),
+                name: token.metadata.name,
+                symbol: token.symbol,
+                amount: 0,
+                price: 0,
+                icon: token.metadata.logo,
+                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+                network: 'tevm'
+              });
+              }
             }
           });
         });
@@ -568,8 +631,10 @@ export default {
       } catch {
       }
       window.time = Date.now() / 1000;
-      console.clear();
-      console.log("Don't try to use Inspector!");
+      if (!window.location.href.includes('localhost')) {
+        console.clear();
+        console.log("Don't try to use Inspector!");
+      }
     }, 5000);
   },
   beforeMount() {

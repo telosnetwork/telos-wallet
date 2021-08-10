@@ -460,6 +460,11 @@ export default {
               type: 'negative',
               message: `Authentication is required`,
             });
+          } else if (result === 'error') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Conversion failed. Make sure authentication is done correctly.`,
+            });
           } else if (result !== 'cancelled') {
             this.$q.notify({
               type: 'primary',

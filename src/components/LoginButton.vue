@@ -215,10 +215,12 @@ export default {
         })
         try {
           this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-        } catch {
+        } catch (e) {
+          console.log(e);
           this.$root.tEVMAccount = null;
         }
-      } catch {
+      } catch (e) {
+        console.log(e)
       }
     }
   },

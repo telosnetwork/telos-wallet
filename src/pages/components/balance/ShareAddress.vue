@@ -172,12 +172,18 @@ export default {
       }
       return false;
     },
+    tSymbol() {
+      return this.selectedCoin.symbol.toLowerCase();
+    },
     isPToken() {
       if (!this.selectedCoin) {
         return false;
       }
-      if (!this.pTokens.includes(this.selectedCoin.symbol.toLowerCase())) {
+      if (!this.pTokens.includes(this.tSymbol)) {
         return false;
+      }
+      if (this.selectedCoin.network) {
+        return true;
       }
       return Object.keys(this.coinpTokenNetworks).length > 1;
     },
@@ -185,10 +191,16 @@ export default {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
     },
     coinpTokenNetworks() {
+      if (this.selectedCoin.network) {
+        return {
+          [this.selectedCoin.network]: this.pTokenNetworks[this.tSymbol][this.selectedCoin.network]
+        }
+      }
       const networks = {};
-      for (const key in this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()]) {
-        if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
-          networks[key] = this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][key];
+      for (const key in this.pTokenNetworks[this.tSymbol]) {
+        // if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
+        if (key !== 'ethereum' || this.chainName !== 'telos') {
+          networks[key] = this.pTokenNetworks[this.tSymbol][key];
         }
       }
       return networks;
@@ -211,6 +223,11 @@ export default {
           this.$q.notify({
             type: 'negative',
             message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Creation failed. Make sure authentication is done correctly.`,
           });
         } else if (transaction !== 'cancelled') {
           this.$q.notify({
@@ -294,6 +311,9 @@ export default {
     showShareAddressDlg: async function(val, oldVal) {
       if (val) {
         this.networkType = 'telos';
+        if (this.selectedCoin && this.selectedCoin.network) {
+          this.networkType = this.selectedCoin.network;
+        }
         this.metaData = JSON.parse(window.localStorage.getItem('metaData')) || {};
         this.depositAddress = this.metaData[this.selectedCoin.symbol] || '';
       }

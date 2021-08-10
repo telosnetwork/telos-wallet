@@ -80,7 +80,7 @@
             <label class="text-body1 text-weight-medium">{{action.account}}</label>
             <div>
               <div v-for="(key, i) in Object.keys(action.data)" :key="`${action.account}${key}${i}`"
-                class="flex" style="flex-flow: column;">
+                class="flex" style="flex-flow: column; word-break: break-all;">
                 <label class="text-weight-regular text-grey">- {{key}}</label>
                 <label class="q-ml-sm">{{action.data[key]}}</label>
               </div>

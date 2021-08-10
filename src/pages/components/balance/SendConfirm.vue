@@ -126,9 +126,9 @@ export default {
             data: {
               from: this.accountName.toLowerCase(),
               to: process.env.EVM_CONTRACT,
-              amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
+              // amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
               quantity: quantityStr,
-              symbol: this.selectedCoin.symbol,
+              // symbol: this.selectedCoin.symbol,
               memo: this.notes
             }
           });
@@ -145,6 +145,7 @@ export default {
             data: {
               ram_payer: this.accountName.toLowerCase(),
               tx: rawTrx,
+              estimate_gas: false,
               sender: this.$root.tEVMAccount.address.substring(2),
             }
           });

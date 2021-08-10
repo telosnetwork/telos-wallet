@@ -225,6 +225,11 @@ export default {
               type: 'negative',
               message: `Authentication is required`,
             });
+          } else if (transaction === 'error') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Action failed. Make sure authentication is done correctly.`,
+            });
           } else if (transaction !== 'cancelled') {
             this.$q.notify({
               type: 'primary',
@@ -380,10 +385,12 @@ export default {
       this.account = this.$store.$account.account;
       this.privateKey = this.$store.$account.privateKey;
     }, 50);
-    this.clearInterval = setInterval(async () => {
-      console.clear();
-      console.log("Don't try to use Inspector!");
-    }, 5000);
+    if (!window.location.href.includes('localhost')) {
+      this.clearInterval = setInterval(async () => {
+        console.clear();
+        console.log("Don't try to use Inspector!");
+      }, 5000);
+    }
   },
   async beforeDestroy() {
     if (this.checkInterval) clearInterval(this.checkInterval);
