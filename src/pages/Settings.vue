@@ -34,7 +34,7 @@
 
         <!-- Avatar Name -->
         <q-item>
-          <img class="profileImg" src="~assets/avatarImg.png">
+          <img class="profileImg" src="~assets/avatarImg.svg">
           <q-input v-model="avatar" 
             class="round-sm full-width" label="Avatar URL"
           />
@@ -51,7 +51,7 @@
 
         <!-- Status -->
         <q-item>
-           <img class="profileImg" src="~assets/statusImg.png">
+           <img class="profileImg" src="~assets/statusImg.svg">
           <q-input v-model="status" dense border 
             class="round-sm full-width" label="Status"
           />
@@ -59,7 +59,7 @@
 
         <!-- Bio -->
         <q-item>
-            <img class="profileImg" src="~assets/bioImg.png">
+            <img class="profileImg" src="~assets/bioImg.svg">
           <q-input v-model="bio" dense border
             class="round-sm full-width text-white" label="Bio"
           />

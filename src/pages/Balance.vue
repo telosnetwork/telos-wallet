@@ -47,6 +47,16 @@
           <!-- </q-toolbar> -->
         </div>
 
+        <!-- Purchase Button -->
+         <div :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
+           <!-- < class="flex" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`"> -->
+          <div class="convertBtns">
+            <q-btn stretch flat no-caps @click="clickExchange = true"/>  
+          </div>
+          <div class="purchaseBtns">
+            <q-btn stretch flat no-caps @click="clickPurchase = true"/>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -645,6 +655,41 @@ export default {
   margin-right: 1rem;
   margin-left: 1rem;
   margin-top: 0.5rem;
-  
+  width: 8rem;
+  height: 2.5rem;
+  text-align: center;
+}
+
+.purchaseBtns{
+  background-image: url("~assets/Purchase.svg");
+  height: 200px;
+  width: 10rem;
+  border: none;
+  border-radius: 0%;
+  padding: 0px;
+  text-align: center;
+  display: inline-block;
+  outline:none;
+  border: 0;
+  background-repeat: no-repeat;
+  margin-left: 5rem;
+  margin-top: 1rem;
+}
+
+.convertBtns{
+  display: flex;
+  background-image: url("~assets/Convert.svg");
+  height: 200px;
+  width: 10rem;
+  border: none;
+  border-radius: 0%;
+  padding: 0px;
+  text-align: center;
+  display: inline-block;
+  outline:none;
+  border: 0;
+  background-repeat: no-repeat;
+  margin-left: 3rem;
+  margin-top: 1rem;
 }
 </style>

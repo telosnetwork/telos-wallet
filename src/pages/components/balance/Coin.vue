@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="background: linear-gradient(to bottom, #130C3F, #8946DF -20%)">
     <q-infinite-scroll>
       <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label>
       <q-item
