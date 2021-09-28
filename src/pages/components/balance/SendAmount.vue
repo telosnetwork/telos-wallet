@@ -31,7 +31,7 @@
                 <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
                   {{ sendAmount }}
                 </label>
-                <div class="desktop-only flex flex-center">
+                <div class="desktop-only flex flex-center" >
                   <label class="text-weight-regular q-mr-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                     {{coinInput ? `` : '$ '}}
                   </label>

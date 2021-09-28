@@ -1511,6 +1511,20 @@
   dependencies:
     query-string "^6.5.0"
 
+"@telosnetwork/telosevm-js@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.0.7.tgz#fa8761c0be5ab99cb5aa6d9e0ef8b80530ea42ae"
+  integrity sha512-Cfq+YPDNtMFYItycisj0cGUNXoon1PkB2Dpvt7hesDHOKDmX64DhrBCvwOKBzN5rb3L4PjZV8v0Ntuim0XTzhA==
+  dependencies:
+    bn.js "^5.1.1"
+    eosjs "^21.0.3"
+    ethereumjs-abi "^0.6.8"
+    ethereumjs-common "^1.5.0"
+    ethereumjs-tx "^2.1.2"
+    ethereumjs-util "^6.2.0"
+    node-fetch "^2.6.0"
+    text-encoding "^0.7.0"
+
 "@telosnetwork/ual-telos-keycat@1.10.3":
   version "1.10.3"
   resolved "https://registry.yarnpkg.com/@telosnetwork/ual-telos-keycat/-/ual-telos-keycat-1.10.3.tgz#8c6eb2977ce725728a4a098073c3a4cfe27dda69"
@@ -1742,6 +1756,11 @@
   integrity sha512-KswB5C7Kwduwjj04Ykz+AjvPcfgv/37Za24O2EDzYNbwyzOo8+ydtvzUfZ5UMguiVu29Gx44l1A6VsPPcmYu9w==
   dependencies:
     source-map "^0.6.1"
+
+"@types/uuid@^7.0.3":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-7.0.5.tgz#b1d2f772142a301538fae9bdf9cf15b9f2573a29"
+  integrity sha512-hKB88y3YHL8oPOs/CNlaXtjWn93+Bs48sDQR37ZUqG2tLeCS7EA1cmnkKsuQsub9OKEB/y/Rw9zqJqqNSbqVlQ==
 
 "@types/webpack-bundle-analyzer@3.8.0":
   version "3.8.0"
@@ -2380,12 +2399,12 @@ axios@^0.19.0, axios@^0.19.2:
   dependencies:
     follow-redirects "1.5.10"
 
-axios@^0.20.0:
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.20.0.tgz#057ba30f04884694993a8cd07fa394cff11c50bd"
-  integrity sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==
+axios@^0.21.1:
+  version "0.21.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
+  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
   dependencies:
-    follow-redirects "^1.10.0"
+    follow-redirects "^1.14.0"
 
 babel-eslint@^10.0.1:
   version "10.1.0"
@@ -2515,6 +2534,11 @@ bfj@^6.1.1:
     hoopy "^0.1.4"
     tryer "^1.0.1"
 
+big-integer@^1.6.48:
+  version "1.6.48"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.48.tgz#8fd88bd1632cba4a1c8c3e3d7159f08bb95b4b9e"
+  integrity sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w==
+
 big.js@^5.2.2:
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-5.2.2.tgz#65f0af382f578bcdc742bd9c281e9cb2d7768328"
@@ -2525,7 +2549,7 @@ bigi@1.4.2, bigi@^1.1.0, bigi@^1.4.2:
   resolved "https://registry.yarnpkg.com/bigi/-/bigi-1.4.2.tgz#9c665a95f88b8b08fc05cfd731f561859d725825"
   integrity sha1-nGZalfiLiwj8Bc/XMfVhhZ1yWCU=
 
-bignumber.js@^9.0.0:
+bignumber.js@^9.0.0, bignumber.js@^9.0.1:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.1.tgz#8d7ba124c882bfd8e43260c67475518d0689e4e5"
   integrity sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA==
@@ -2647,6 +2671,11 @@ bn.js@4.11.6:
   version "4.11.6"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.6.tgz#53344adb14617a13f6e8dd2ce28905d1c0ba3215"
   integrity sha1-UzRK2xRhehP26N0s4okF0cC6MhU=
+
+bn.js@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.2.0.tgz#358860674396c6997771a9d051fcc1b57d4ae002"
+  integrity sha512-D7iWRBvnZE8ecXiLj/9wbxH7Tk79fAh8IHaTNq1RWRixsS02W+5qS+iE9yq6RYl0asXx5tw0bLhmT5pIfbSquw==
 
 bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.11.0, bn.js@^4.11.1, bn.js@^4.11.6, bn.js@^4.11.8, bn.js@^4.11.9, bn.js@^4.4.0:
   version "4.11.9"
@@ -3997,6 +4026,11 @@ decamelize@^1.1.2, decamelize@^1.2.0:
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
   integrity sha1-9lNNFRSCabIDUue+4m9QH5oZEpA=
 
+decimal.js@^10.2.1:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.3.1.tgz#d8c3a444a9c6774ba60ca6ad7261c3a94fd5e783"
+  integrity sha512-V0pfhfr8suzyPGOx3nmq4aHqabehUZn6Ch9kyFpV79TGDTWFmHqUqXdabR7QHqxzrYolF4+tVmJhUG4OURg5dQ==
+
 decode-uri-component@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
@@ -4381,7 +4415,7 @@ elliptic@6.5.3, elliptic@^6.5.3:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-elliptic@^6.4.0, elliptic@^6.5.2:
+elliptic@6.5.4, elliptic@^6.4.0, elliptic@^6.5.2:
   version "6.5.4"
   resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.4.tgz#da37cebd31e79a1367e941b592ed1fbebd58abbb"
   integrity sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==
@@ -4473,6 +4507,13 @@ env-paths@^2.2.0:
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.0.tgz#cdca557dc009152917d6166e2febe1f039685e43"
   integrity sha512-6u0VYSCo/OW6IoD5WCLLy9JUGARbamfSavcNXry/eu8aHVFei6CD3Sw+VGX5alea1i9pgPHW0mbu6Xj0uBh7gA==
 
+eos-common@^0.8.0:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/eos-common/-/eos-common-0.8.1.tgz#c92e7dcc58581e654a8f1583295910442ac00555"
+  integrity sha512-Lw1Ua/kBbUjaoT0Py+mMwWiVYr3WmCONdmaDeKclJZwAfLebypGmtAmiYI1+zA/zMDuijm6XjhcyUDz4ENM89w==
+  dependencies:
+    big-integer "^1.6.48"
+
 eos-cosigner-lib@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/eos-cosigner-lib/-/eos-cosigner-lib-1.0.1.tgz#f759e38f90977f53dd0c6f848c602e692fdd8a38"
@@ -4480,6 +4521,24 @@ eos-cosigner-lib@^1.0.1:
   dependencies:
     "@types/node" "^13.1.4"
     eosjs "^20.0.0"
+
+eos-transit-keycat-provider@^4.0.1:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/eos-transit-keycat-provider/-/eos-transit-keycat-provider-4.0.7.tgz#fea440dd979809f07d71a2a475b10ae2c2cb36b3"
+  integrity sha512-M89WhyZLzLhlz+4mvJuXgiuHEqvSfLQYIdWPokVY9KIMZKnJ3RnhjbzWMkur3qMBQckE9falmFZNZWB2vHrcYg==
+  dependencies:
+    eos-transit "^4.0.7"
+    eosjs "^20.0.0"
+    keycatjs "^0.6.2"
+
+eos-transit@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/eos-transit/-/eos-transit-4.0.7.tgz#ae1478b25629af1fd1f2f57cbc52a79bfa3dc47d"
+  integrity sha512-QQukVxonq9Jw2WRFejXG0YeHhPg/gIOn3wNT74qXNtrkO01Ml96bCOq2P2cPd/O1y7pXwUxFSBmtSFyYtqWXdw==
+  dependencies:
+    "@types/uuid" "^7.0.3"
+    eosjs "^20.0.0"
+    uuid "^3.3.2"
 
 eosio-signing-request@^1.2.0:
   version "1.2.0"
@@ -4561,6 +4620,16 @@ eosjs@21.0.1-rc1:
     babel-runtime "6.26.0"
     elliptic "6.5.0"
     text-encoding "0.7.0"
+
+eosjs@^21.0.0:
+  version "21.0.4"
+  resolved "https://registry.yarnpkg.com/eosjs/-/eosjs-21.0.4.tgz#67794a9fbc3c7659de19a7926c2c13cce4515571"
+  integrity sha512-XbuIoidplA1hHIejy7VQ+hmBfC6T28kYFaQMsn6G1DMTg1CFwUzxwzUvZg/dGNPuf7hgPxOpaQvAUsdidTgGhQ==
+  dependencies:
+    bn.js "5.2.0"
+    elliptic "6.5.4"
+    hash.js "1.1.7"
+    pako "2.0.3"
 
 eosjs@^21.0.3:
   version "21.0.3"
@@ -4897,12 +4966,20 @@ ethereum-cryptography@^0.1.3:
     secp256k1 "^4.0.1"
     setimmediate "^1.0.5"
 
+ethereumjs-abi@^0.6.8:
+  version "0.6.8"
+  resolved "https://registry.yarnpkg.com/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz#71bc152db099f70e62f108b7cdfca1b362c6fcae"
+  integrity sha512-Tx0r/iXI6r+lRsdvkFDlut0N08jWMnKRZ6Gkq+Nmw75lZe4e6o3EkSnkaBP5NF6+m5PTGAr9JP43N3LyeoglsA==
+  dependencies:
+    bn.js "^4.11.8"
+    ethereumjs-util "^6.0.0"
+
 ethereumjs-common@^1.3.2, ethereumjs-common@^1.5.0:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/ethereumjs-common/-/ethereumjs-common-1.5.2.tgz#2065dbe9214e850f2e955a80e650cb6999066979"
   integrity sha512-hTfZjwGX52GS2jcVO6E2sx4YuFnf0Fhp5ylo4pEPhEffNln7vS59Hr5sLnp3/QCazFLluuBZ+FZ6J5HTp0EqCA==
 
-ethereumjs-tx@^2.1.1:
+ethereumjs-tx@^2.1.1, ethereumjs-tx@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ethereumjs-tx/-/ethereumjs-tx-2.1.2.tgz#5dfe7688bf177b45c9a23f86cf9104d47ea35fed"
   integrity sha512-zZEK1onCeiORb0wyCXUvg94Ve5It/K6GD1K+26KfFKodiBiS6d9lfCXlUKGBBdQ+bv7Day+JK0tj1K+BeNFRAw==
@@ -4910,7 +4987,7 @@ ethereumjs-tx@^2.1.1:
     ethereumjs-common "^1.5.0"
     ethereumjs-util "^6.0.0"
 
-ethereumjs-util@^6.0.0:
+ethereumjs-util@^6.0.0, ethereumjs-util@^6.2.0:
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-6.2.1.tgz#fcb4e4dd5ceacb9d2305426ab1a5cd93e3163b69"
   integrity sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw==
@@ -5313,10 +5390,15 @@ follow-redirects@1.5.10:
   dependencies:
     debug "=3.1.0"
 
-follow-redirects@^1.0.0, follow-redirects@^1.10.0:
+follow-redirects@^1.0.0:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.0.tgz#b42e8d93a2a7eea5ed88633676d6597bc8e384db"
   integrity sha512-aq6gF1BEKje4a9i9+5jimNFIpq4Q1WiwBToeRK5NvZBd/TRsmW8BsJfOEGkr76TbOyPVD3OVDN910EcUNtRYEA==
+
+follow-redirects@^1.14.0:
+  version "1.14.4"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.4.tgz#838fdf48a8bbdd79e52ee51fb1c94e3ed98b9379"
+  integrity sha512-zwGkiSXC1MUJG/qmeIFH2HBJx9u0V46QGUe3YR1fXG8bXQxq7fLj0RjLZQ5nubr9qNJUZrH+xUcwXEoXNpfS+g==
 
 for-in@^1.0.2:
   version "1.0.2"
@@ -6822,6 +6904,13 @@ keccak@^3.0.0:
     node-addon-api "^2.0.0"
     node-gyp-build "^4.2.0"
 
+keycatjs@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/keycatjs/-/keycatjs-0.6.2.tgz#6a7a3442173337ed1c1068f0c4f2994ec61615bf"
+  integrity sha512-fdWrkE6Vcj14Ux+k0CUHFFvMpYaCJDTdnrz00CdiWnqBISCpKHK0OZAlHQEIsXvtEngIAaO9DcUisI/JojQCuw==
+  dependencies:
+    query-string "^6.5.0"
+
 keyv@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/keyv/-/keyv-3.1.0.tgz#ecc228486f69991e49e9476485a5be1e8fc5c4d9"
@@ -7640,6 +7729,11 @@ node-addon-api@^2.0.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
   integrity sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA==
 
+node-fetch@^2.6.0:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.2.tgz#986996818b73785e47b1965cc34eb093a1d464d0"
+  integrity sha512-aLoxToI6RfZ+0NOjmWAgn9+LEd30YCkJKFSyWacNZdEKTit/ZMcKjGkTRo8uWEsnIb/hfKecNPEbln02PdWbcA==
+
 node-fetch@~2.6.0:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
@@ -7841,6 +7935,11 @@ number-to-bn@1.7.0:
   dependencies:
     bn.js "4.11.6"
     strip-hex-prefix "1.0.0"
+
+numeral@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/numeral/-/numeral-2.0.6.tgz#4ad080936d443c2561aed9f2197efffe25f4e506"
+  integrity sha1-StCAk21EPCVhrtnyGX7//iX05QY=
 
 oauth-sign@~0.9.0:
   version "0.9.0"
@@ -8142,6 +8241,11 @@ pako@1.0.11, pako@^1.0.10, pako@~1.0.5:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
+
+pako@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-2.0.3.tgz#cdf475e31b678565251406de9e759196a0ea7a43"
+  integrity sha512-WjR1hOeg+kki3ZIOjaf4b5WVcay1jaliKSYiEaB1XzwhMQZJxRdQRv0V31EKBYlxb4T7SK3hjfc/jxyU64BoSw==
 
 parallel-transform@^1.1.0:
   version "1.2.0"
@@ -8851,10 +8955,10 @@ psl@^1.1.28:
   resolved "https://registry.yarnpkg.com/psl/-/psl-1.8.0.tgz#9326f8bcfb013adcc005fdff056acce020e51c24"
   integrity sha512-RIdOzyoavK+hA18OGGWDqUTsCLhtA7IcZ/6NCs4fFJaHBDab+pDDmDIByWFRQJq2Cd7r1OoQxBGKOaztq+hjIQ==
 
-ptokens-deposit-address@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-deposit-address/-/ptokens-deposit-address-0.8.0.tgz#8d06616212e5a3b87072472e06c39dca5ae814bf"
-  integrity sha512-SlhZNBge4oc2yt5ednEb8uq64YGeg0qdhhspfy4x9mS0+l86o2fF39hN6omqab+21qtkA9L4k9ixYAwN1+YUfA==
+ptokens-deposit-address@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-deposit-address/-/ptokens-deposit-address-0.9.0.tgz#bfc98b6609a3133e9ac021bb08d8e680e19fc0cc"
+  integrity sha512-t1oowTCXNeReh2dkhhHkw0Fwt5O/MzWKtEWCabPWKNsJ2TgLGTAPAvs9+EWp8hvIS6jP8DYZ+4fBPDLhbtQ67g==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
@@ -8862,28 +8966,28 @@ ptokens-deposit-address@^0.8.0:
     bitcoinjs-lib "^5.1.6"
     chai "^4.2.0"
     eosjs "^20.0.3"
-    ptokens-node "^0.8.0"
-    ptokens-providers "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-node "^0.9.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
     web3 "^1.2.2"
 
-ptokens-node-selector@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-node-selector/-/ptokens-node-selector-0.8.0.tgz#38afd7259d9b604caff81cb615a3dfc0661cafb0"
-  integrity sha512-asdiTwrUHoXHqp7pFPPpUza3KEY7VCBPPOlg4FEjB8xxVV1biH8aTrPfIBi6mRAF4PIh0dq1zmrhSf5aJy5acg==
+ptokens-node-selector@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-node-selector/-/ptokens-node-selector-0.9.0.tgz#cdb024d813c69ba76ba0385dc381083acdd06cd3"
+  integrity sha512-YVj3JeqymsSdYZlFkjNPl4q0AWk6sp5tSlc/k1wr7PDGY9mfq1OKSp+Mo5uNqpuq0leu2+tQyUk/SVtE37ibdw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
     axios "^0.19.0"
     chai "^4.2.0"
-    ptokens-node "^0.8.0"
-    ptokens-providers "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-node "^0.9.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
 
-ptokens-node@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-node/-/ptokens-node-0.8.0.tgz#55167e61b7ea926fefdfc0a519420891ed6464bd"
-  integrity sha512-Jl3KbT2dhxq6JCkPePHX0tBi33pYY8z5d782vgIFEk85qLrgadGQHQTs49rQd6u2CN60ZIhpq9ZrMe/+rXMq7A==
+ptokens-node@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-node/-/ptokens-node-0.9.0.tgz#70c84987f790274ab59931933a7bf66ab261e0f9"
+  integrity sha512-I8F5P1vSH7ZOdpwPf0Nz4aRbUQQfo4i1+WcUQVNntrEXgOR/xHVcsTaxBIBz/5p3DhgCkQUfBmXeQkInmfcBzw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
@@ -8892,15 +8996,15 @@ ptokens-node@^0.8.0:
     eventemitter3 "^4.0.0"
     jsonrpc-lite "^2.2.0"
     light-async-polling "^1.0.2"
-    ptokens-providers "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
     uuid "^8.3.1"
     web3-core-promievent "^1.2.5-rc.0"
 
-ptokens-pbtc@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-pbtc/-/ptokens-pbtc-0.8.0.tgz#99e381f9417a87852880eb03b0b5eac06550130e"
-  integrity sha512-OvEHJendhkCRySmqNwsycxoSRrCgtNlckmeFVS7z0nZR2R9rQ8nwBbaGq5QdDvJkAYtJ4Mcsf3D4JM9l6ns19A==
+ptokens-pbtc@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-pbtc/-/ptokens-pbtc-0.9.0.tgz#2cb8510ffe6c0a37ff57f73c24179b86b65ae34d"
+  integrity sha512-b4imdNlVscrJSn5Cl20melv8E1lpplVz2Xxs/ECGXNfLeR//xIqs07ilVUhnA6maUROWeePjto0vTs06p9asQw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
@@ -8909,36 +9013,73 @@ ptokens-pbtc@^0.8.0:
     bitcoinjs-lib "^5.1.6"
     chai "^4.2.0"
     eosjs "^20.0.0"
-    ptokens-deposit-address "^0.8.0"
-    ptokens-node "^0.8.0"
-    ptokens-node-selector "^0.8.0"
-    ptokens-providers "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-deposit-address "^0.9.0"
+    ptokens-node "^0.9.0"
+    ptokens-node-selector "^0.9.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
     web3 "^1.2.2"
     web3-core-promievent "^1.2.1"
     web3-utils "^1.2.4"
 
-ptokens-perc20@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-perc20/-/ptokens-perc20-0.8.0.tgz#7f55556b021f443745617fd18bc74cd87a42470c"
-  integrity sha512-PLKZuiRAnGKDrAIRICOWIR/PlllJ6O2Z6IwiURCSUyM4Lo10omEbdfeQ12cOZ0uI6Jyrvx57on+N8r6hUwYYxQ==
+ptokens-pdoge@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-pdoge/-/ptokens-pdoge-0.9.0.tgz#eb8d6380e7be49575fa7f912840816a093d16c07"
+  integrity sha512-e2L3kqFg/Mz0vu+xhhG8uzgpgMYzc0xJMv0+YluFAbXU0mQyyotCAyJnzet1LyrXVuQshT4/kwng6yY9A3sjYA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    "@types/node" "^12.6.1"
+    bignumber.js "^9.0.0"
+    chai "^4.2.0"
+    ptokens-deposit-address "^0.9.0"
+    ptokens-node "^0.9.0"
+    ptokens-node-selector "^0.9.0"
+    ptokens-utils "^0.9.0"
+    web3 "^1.2.2"
+    web3-core-promievent "^1.2.1"
+    web3-utils "^1.2.4"
+
+ptokens-peosio-token@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-peosio-token/-/ptokens-peosio-token-0.9.0.tgz#46dad9343dc28897bfbdcc069a4720d2741e86cf"
+  integrity sha512-2mj7ATCgY/cmlhL2hZR73/CmFStpdWlk8Cs2yt854/51GzHldFAgv3sbac0Ti9aPkE486dXOP6e6yK6gKRCwuA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    "@types/node" "^12.6.1"
+    axios "^0.19.0"
+    bignumber.js "^9.0.0"
+    bitcoinjs-lib "^5.1.6"
+    chai "^4.2.0"
+    eosjs "^21.0.0"
+    ptokens-node "^0.9.0"
+    ptokens-node-selector "^0.9.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
+    web3 "^1.2.2"
+    web3-core-promievent "^1.2.1"
+    web3-utils "^1.2.4"
+
+ptokens-perc20@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-perc20/-/ptokens-perc20-0.9.0.tgz#cffebed09b45efb7b893f9b7c71054652ddf961b"
+  integrity sha512-sOL2VS0dQtbLK68wwNwmBVGLN2w6fl5dnaM6QHeK8SIv9KwXLTsRGSJdsOol1GiNGyaIPbmBvj/t0cD0s6KHUQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
     bignumber.js "^9.0.0"
     chai "^4.2.0"
     eosjs "^20.0.0"
-    ptokens-node "^0.8.0"
-    ptokens-node-selector "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-node "^0.9.0"
+    ptokens-node-selector "^0.9.0"
+    ptokens-utils "^0.9.0"
     web3 "^1.2.2"
     web3-core-promievent "^1.2.1"
     web3-utils "^1.2.4"
 
-ptokens-pltc@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-pltc/-/ptokens-pltc-0.8.0.tgz#679c218345367b6655c90d3088f8280fe200b62a"
-  integrity sha512-bir67K/Se4Vjiv9u+mDRpdxn2k3vM910POUIS7MJZ7PVbkq4AwwWgA2MLqEGM6e5arPWSO6pnlg9h4yXfp2jJA==
+ptokens-pltc@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-pltc/-/ptokens-pltc-0.9.0.tgz#a163cd94e63039064d73b963a7d13fad00bbec4f"
+  integrity sha512-exnNS/Tbeod2bxbP7aBpcQEDN/cQQ++YJ3/DNa1UZlE7iv6QwE6vGTXNONJOMWROk7oitW6qBm1sQazCyb2ixw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
@@ -8947,28 +9088,28 @@ ptokens-pltc@^0.8.0:
     bitcoinjs-lib "^5.1.6"
     chai "^4.2.0"
     eosjs "^20.0.0"
-    ptokens-deposit-address "^0.8.0"
-    ptokens-node "^0.8.0"
-    ptokens-node-selector "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-deposit-address "^0.9.0"
+    ptokens-node "^0.9.0"
+    ptokens-node-selector "^0.9.0"
+    ptokens-utils "^0.9.0"
     web3 "^1.2.2"
     web3-core-promievent "^1.2.1"
     web3-utils "^1.2.4"
 
-ptokens-providers@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-providers/-/ptokens-providers-0.8.0.tgz#51b3f19c3d52952f1b181b45ad3706c44f8413fb"
-  integrity sha512-TNMLcxDPkL1R3bz2lIs2LdVzZ05JP7KabT3S1eh1eiUBBPD5hh2wFm6LZL5jUpi/H+PGljA1ktrPE4+mFaSB3Q==
+ptokens-providers@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-providers/-/ptokens-providers-0.9.0.tgz#7534a01078034993bb7eb062e740a59de9af6ae3"
+  integrity sha512-yAECBQzIJ9nOmdidQyh48X8EvvupLpDbs3hHAhAlDmsi4J/s8bMo5xT5MplsFknRknfW71Px2TpqgUNoETqsMQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
     axios "^0.19.0"
     chai "^4.2.0"
 
-ptokens-utils@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens-utils/-/ptokens-utils-0.8.0.tgz#93a7f2b452f47f334ec367f356358ae061ebc940"
-  integrity sha512-aTvM6S/X/327ImLLaP5lmBh2Upf5T9jKhsVAF6vXBXpU2Z3aa37y1X1SpSrMIpd31zHEQXEohdRiGYAxmUnKmA==
+ptokens-utils@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens-utils/-/ptokens-utils-0.9.0.tgz#83babf0de5d90ef4b73c4f4d2e2e935d1c20a543"
+  integrity sha512-YtxyUoNySQ9geZvLtCM0EOXnyXKGdiHI0BbkUPUXuq6/EVR0rAx3TiQxja8KcN468koFhZwBvbi4ZAqLW66zNQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
@@ -8983,20 +9124,22 @@ ptokens-utils@^0.8.0:
     text-encoding "^0.7.0"
     web3 "^1.2.2"
 
-ptokens@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/ptokens/-/ptokens-0.8.0.tgz#5021db2f64bed30c988d717e3b53755ea0e04fea"
-  integrity sha512-36/SdZqobkpxX3+5xHVORMdJa4OfBuGgxR+FrpjUr2tkeAw3k8QiV/spYNH0plH9gEF7FSXdoZwOQRdZfss8pg==
+ptokens@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/ptokens/-/ptokens-0.9.0.tgz#ff8d145b52dc3f7e9b172b2c8d4c34527023a8bd"
+  integrity sha512-KXu7bHuqcw+9e9p8vcxcbJNOqpCu+sxR2F1oT+0uBD8m2CDifAhqV46NtaTLDHxUlocaZtluHczt7x1ZM4W4GQ==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/node" "^12.6.1"
     chai "^4.2.0"
-    ptokens-deposit-address "^0.8.0"
-    ptokens-pbtc "^0.8.0"
-    ptokens-perc20 "^0.8.0"
-    ptokens-pltc "^0.8.0"
-    ptokens-providers "^0.8.0"
-    ptokens-utils "^0.8.0"
+    ptokens-deposit-address "^0.9.0"
+    ptokens-pbtc "^0.9.0"
+    ptokens-pdoge "^0.9.0"
+    ptokens-peosio-token "^0.9.0"
+    ptokens-perc20 "^0.9.0"
+    ptokens-pltc "^0.9.0"
+    ptokens-providers "^0.9.0"
+    ptokens-utils "^0.9.0"
 
 public-encrypt@^4.0.0:
   version "4.0.3"
@@ -11333,6 +11476,14 @@ vue@2.6.12, vue@^2.6.11:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.12.tgz#f5ebd4fa6bd2869403e29a896aed4904456c9123"
   integrity sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg==
+
+vuex-class-component@^2.3.3:
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/vuex-class-component/-/vuex-class-component-2.3.5.tgz#90d3fd777815fd1beaefe47b46402cb41545cc97"
+  integrity sha512-e7BhLrh5jZNHoeUajfQ5NFwA9gnVj69HKxBGRiw6FRZVpXTGewPo23S1//lb5Ed1RucIfQlqfwVpC/2mtej6bw==
+  dependencies:
+    object.getownpropertydescriptors "^2.0.3"
+    rimraf "^2.6.3"
 
 vuex@3.5.1:
   version "3.5.1"

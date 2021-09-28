@@ -7,14 +7,15 @@ Vue.use(VueRouter)
 Vue.mixin({
   data() {
     return {
-      theme: 'indigo',
+      theme: 'gradientblue',
       themes: [
         'indigo',
         'platinum',
         'midnight',
         'aquamarine',
         'sunray',
-        'coral'
+        'coral',
+        'gradientblue'
       ],
       privateKey: null,
     };
@@ -34,8 +35,16 @@ Vue.mixin({
           return '#FFD75E';
         case 'coral':
           return '#FF422A';
+        case 'gradientblue':
+          return '#1AD6FF';
+        case 'saveBtn':
+          return '#5a2fa0';
+        case 'blackDark':
+          return '#130C3F';
+        case 'purple':
+          return '#8946DF';
         default:
-          return '#571AFF';
+          return '#571AFF';    
       }
     }
   },

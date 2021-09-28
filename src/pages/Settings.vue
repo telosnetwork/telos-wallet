@@ -1,45 +1,79 @@
 <template>
-  <div class="column q-mx-md" :style="`max-width: 800px; margin: auto; overflow: auto; height: ${availableHeight}px !important;`">
-    <q-list class="q-py-md">
-      <q-item class="justify-center">
-        <q-avatar size="110px" font-size="52px" color="white" text-color="white">
-          <img :src="userAvatar" style="border: 1px solid purple"/>
-        </q-avatar>
-      </q-item>
-      <q-item class="justify-center">
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          label="UPLOAD IMAGE"  @click="onPickFile"
-        />
-        <input type="file" ref="fileInput" accept="image/*"
-          style="display: none" @change="onFilePicked"
-        />
-      </q-item>
-      <q-item>
-        <q-input v-model="avatar" dense borderless filled disable
-          class="round-sm full-width" maxlength="128" counter label="Avatar URL"
-        />
-      </q-item>
-      <q-item>
-        <q-input v-model="display_name" dense borderless filled
-          class="round-sm full-width" maxlength="16" counter label="Name"
-          :rules="[val => !!val || 'This field is required']"
-        /> 
-      </q-item>
-      <q-item>
-        <q-input v-model="status" dense borderless filled
-          class="round-sm full-width" maxlength="16" counter label="Status"
-        />
-      </q-item>
-      <q-item class="column">
-        <label class="q-mr-auto">Bio</label>
-        <q-editor v-model="bio" min-height="5rem" />
-      </q-item>
-      <q-item>
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          label="SAVE" @click="save" :disable="display_name.length === 0"
-        />
-      </q-item>
-    </q-list>
+  <div class="container" :style="`max-width: auto; margin: 0%; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+    <div>
+
+      <div class="profile text-white">
+      <label>Profile</label>
+      </div>
+
+      <q-list class="q-py-md">
+
+        <!-- Save Button -->
+        <q-item class= "saveBtn text-white"  >
+          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f ;  border-radius: 5rem; text-decoration-color: white;`"
+            label="SAVE" @click="save" :disable="display_name.length === 0"
+          />
+        </q-item>
+
+        <!-- User Avatar -->
+        <q-item class="justify-center userAvatar">
+          <q-avatar size="110px" font-size="52px" color="white" text-color="white">
+            <img :src="userAvatar" style="border: 1px solid purple"/>
+          </q-avatar>
+        </q-item>
+
+        <!-- Upload Image Button -->
+        <q-item class="justify-center uploadImage">
+          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f; border-radius: 10rem;`"
+          @click="onPickFile"
+          />
+          <input type="file" ref="fileInput" accept="image/*"
+            style="display: none" @change="onFilePicked"
+          />
+        </q-item>
+
+        <!-- Avatar Name -->
+        <q-item>
+          <img class="profileImg" src="~assets/avatarImg.png">
+          <q-input v-model="avatar" 
+            class="round-sm full-width" label="Avatar URL"
+          />
+        </q-item>
+
+        <!-- Name -->
+        <q-item>
+          <img class="profileImg" src="~assets/nameImg.svg">
+          <q-input v-model="display_name" 
+            class="round-sm full-width" label="Name"
+            :rules="[val => !!val || 'This field is required']"
+          /> 
+        </q-item>
+
+        <!-- Status -->
+        <q-item>
+           <img class="profileImg" src="~assets/statusImg.png">
+          <q-input v-model="status" dense border 
+            class="round-sm full-width" label="Status"
+          />
+        </q-item>
+
+        <!-- Bio -->
+        <q-item>
+            <img class="profileImg" src="~assets/bioImg.png">
+          <q-input v-model="bio" dense border
+            class="round-sm full-width text-white" label="Bio"
+          />
+        </q-item>
+
+        <!-- Google label -->
+        <label class="googleAccount text-white">Google account is connected | Private Key</label>
+
+        <!-- <q-item class="column">
+          <label class="q-mr-auto information" >Bio</label>
+          <q-input v-model="bio" />
+        </q-item> -->
+      </q-list>
+    </div>
   </div>
 </template>
 
@@ -188,3 +222,68 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.container {
+    /* display: flex; */
+    place-content: center;
+}
+
+.saveBtn{
+  float: right;
+  border-radius: 6rem;
+  opacity: 100%;
+  /* margin-left: -3rem; */
+  }
+
+.profile{
+  display: flex;
+  margin-top: 2rem;
+  margin-left: 8rem;
+  position: center;
+  font-weight:normal;
+  font-size:large;
+}
+.uploadImage{
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
+  margin-top: -2.5rem;
+  margin-left: 1rem;
+}
+
+.userAvatar{
+
+}
+.clientInformationBlocks{
+  display: flex;
+}
+
+.settingImg{
+  background-color: white;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
+  margin-top: -2.5rem;
+  margin-left: 1rem;
+}
+
+.profileImg{
+  margin: 1rem 1.5rem 1rem;
+}
+
+.nameImg{
+  margin: 1rem 1.5rem 1rem;
+}
+
+.googleAccount{
+  text-decoration-color: white;
+}
+
+@media only screen and (min-width: 1000px) {
+ 
+}
+
+</style>

@@ -1,54 +1,56 @@
 <template>
-  <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
-    <q-layout
-      view="hhh Lpr fFf"
-      container
-      class="shadow-4 coinview"
-    >
-      <q-header class="bg-white text-grey-8 q-pa-sm">
-        <q-toolbar class="no-padding">
-          <q-toolbar-title class="absolute full-width no-padding text-center">
-            <div class="display-grid">
-              <label class="text-subtitle1 text-weight-medium">dApps</label>
-            </div>
-          </q-toolbar-title>
-        </q-toolbar>
-        <q-input v-model="searchDappName" label="Search dApp" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
-      </q-header>
-      <q-page-container>
-        <q-infinite-scroll @load="loadMoreDapps" :offset="100">
-          <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
-            <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.link)">
-              <q-item-section avatar>
-                <q-avatar size="45px" class="q-my-sm justify-center">
-                  <img :src="dapp.icon">
-                </q-avatar>
-              </q-item-section>
+    <q-card class="bg-white full-height" style="max-width: 800px; display: flex; margin: auto;">
+      <q-layout
+        view="hhh Lpr fFf"
+        container
+        class="shadow-4 coinview"
+        style="background: linear-gradient(to bottom, #130C3F, #8946DF)"
+      >
+        <q-header class="bg-white text-grey-8 q-pa-sm">
+          <q-toolbar class="no-padding" >
+            <q-toolbar-title class="absolute full-width no-padding text-center">
+              <div class="display-grid">
+                <label class="text-subtitle1 text-weight-medium">dApps</label>
+              </div>
+            </q-toolbar-title>
+          </q-toolbar>
+          <q-input v-model="searchDappName" label="Search dApp" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
+        </q-header>
+        <q-page-container>
+          <q-infinite-scroll @load="loadMoreDapps" :offset="100">
+            <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
+              <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.link)">
+                <q-item-section avatar>
+                  <q-avatar size="45px" class="q-my-sm justify-center">
+                    <img :src="dapp.icon">
+                  </q-avatar>
+                </q-item-section>
 
-              <q-item-section style="justify-content: start; display: grid;">
-                <div class="text-black text-left display-grid">
-                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{dapp.name}}</label>
-                  <label class="text-caption text-grey-5">{{ }}</label>
-                </div>
-              </q-item-section>
+                <q-item-section style="justify-content: start; display: grid;">
+                  <div class="text-black text-left display-grid">
+                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{dapp.name}}</label>
+                    <label class="text-caption text-grey-5">{{ }}</label>
+                  </div>
+                </q-item-section>
 
-              <q-item-section side>
-                <div class="text-black text-right display-grid">
-                  <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{dapp.category}}</label>
-                  <label class="text-caption text-grey-6 wraplabel">{{dapp.tags.slice(0, 2).join(', ')}}</label>
-                </div>
-              </q-item-section>
-            </q-item>
-          </div>
-          <template v-if="!loadedAll" v-slot:loading>
-            <div class="row justify-center q-my-md">
-              <q-spinner-dots color="primary" size="40px" />
+                <q-item-section side>
+                  <div class="text-black text-right display-grid">
+                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{dapp.category}}</label>
+                    <label class="text-caption text-grey-6 wraplabel">{{dapp.tags.slice(0, 2).join(', ')}}</label>
+                  </div>
+                </q-item-section>
+              </q-item>
             </div>
-          </template>
-        </q-infinite-scroll>
-      </q-page-container>
-    </q-layout>
-  </q-card>
+            <template v-if="!loadedAll" v-slot:loading>
+              <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+            </template>
+          </q-infinite-scroll>
+        </q-page-container>
+      </q-layout>
+    </q-card>
+
 </template>
 
 <script>
@@ -136,4 +138,5 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 </style>

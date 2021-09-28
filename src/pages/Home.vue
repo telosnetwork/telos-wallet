@@ -18,7 +18,7 @@
             src="~assets/telos-wallet-logo-full.png"
           />
         </div>
-        <label class="description font-size-3-5vw">
+        <label class="description font-size-3-5vw" style="blue">
            Send, Buy, Collect. It's Crypto Made Easy
         </label>
       </q-carousel-slide>

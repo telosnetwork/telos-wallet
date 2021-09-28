@@ -1,7 +1,7 @@
 <template>
-  <div class="full-height main-div">
-    <div class="flex-center fit-div" :style="`background: ${themeColor}`">
-      <div class="text-center full-width" style="display: grid;">
+  <div class="full-height main-div" :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+    <div class="flex-center fit-div">
+      <div class="text-center full-width" style="display: grid; ">
         <login-button v-if="isAuthenticated"/>
         <label 
           class="text-white"
@@ -30,27 +30,34 @@
           </div>
         </div>
 
+        <!-- Action Buttons -->
         <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
-          <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`">
-            <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>
-            <q-separator dark vertical class="main-toolbar-sperator"/>
+          <div class="balanceBtn">
+            <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>  
+          </div>
+          <div class="qrCodeBtn">
+            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px; color: #FFFFFF; margin-bottom: 1rem; margin-top: 0.5rem;" @click="showQRScannerDlg = true"/>
+          </div>
+          <div class="balanceBtn">
             <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
-            <q-separator dark vertical class="main-toolbar-sperator"/>
-            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px;" @click="showQRScannerDlg = true"/>
-          </q-toolbar>
+          </div>
+          <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+          <!-- </q-toolbar> -->
         </div>
+
       </div>
     </div>
 
     <div :style="`height: ${coinViewHeight}px; text-align: -webkit-center;`">
-      <div class="bar" :style="`background: ${themeColor}`"/>
+      <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
-        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`"
-      >
-        <q-header class="coin-header flex-center q-px-md transparent">
+        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`">
+        <q-header class="coin-header flex-center q-px-md transparent" >
           <q-tabs
             v-model="tab"
             dense
@@ -105,7 +112,7 @@
           dense
           :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
         >
-          <div :style="`font-size:16px;`">
+          <div :style="`font-size:16px; `">
             <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
               {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
             </marquee>
@@ -628,5 +635,16 @@ export default {
 }
 .coin-header {
   height: 40px;
+}
+
+.balanceBtn{
+  color: #FFFFFF;
+  background: linear-gradient(120deg, #42b883, #8946DF);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+  
 }
 </style>

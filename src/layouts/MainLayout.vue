@@ -4,7 +4,7 @@
       <router-view :loadedCoins.sync="coins" :loadedNftTokens.sync="nftTokens"/>
     </q-page-container>
     
-    <q-footer v-if="isAuthenticated" style="max-width: 800px; margin: auto;">
+    <q-footer v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
       <q-tabs
         v-model="tab"
         dense
@@ -13,8 +13,9 @@
         active-color="deep-purple-10"
         class="bg-grey-1 text-grey shadow-2"
         :style="`height: ${footerHeight}px; `"
+                
       >
-        <q-route-tab
+        <q-route-tab style=""
           v-for="page in pages"
           :name="page.title"
           :icon="page.icon"
@@ -123,3 +124,4 @@ export default {
   },
 };
 </script>
+
