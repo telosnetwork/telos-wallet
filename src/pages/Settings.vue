@@ -2,7 +2,7 @@
   <div class="container" :style="`max-width: auto; margin: 0%; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
     <div>
 
-      <div class="profile text-white">
+      <div class="profile text-white flex-center">
       <label>Profile</label>
       </div>
 
@@ -10,7 +10,7 @@
 
         <!-- Save Button -->
         <q-item class= "saveBtn text-white"  >
-          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f ;  border-radius: 5rem; text-decoration-color: white;`"
+          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 5rem; text-decoration-color: white;`"
             label="SAVE" @click="save" :disable="display_name.length === 0"
           />
         </q-item>
@@ -23,9 +23,10 @@
         </q-item>
 
         <!-- Upload Image Button -->
-        <q-item class="justify-center uploadImage">
-          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f; border-radius: 10rem;`"
+        <q-item class="justify-center uploadImage" >
+          <q-btn src="~assets/avatarImg.svg" :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
           @click="onPickFile"
+          
           />
           <input type="file" ref="fileInput" accept="image/*"
             style="display: none" @change="onFilePicked"
@@ -66,8 +67,12 @@
         </q-item>
 
         <!-- Google label -->
-        <label class="googleAccount text-white">Google account is connected | Private Key</label>
-
+        <div class="container">
+          <label class="googleAccount text-white">Google account is connected | Private Key</label>
+          <img class="container" src="~assets/googleBlock.svg">
+          
+        </div>
+        
         <!-- <q-item class="column">
           <label class="q-mr-auto information" >Bio</label>
           <q-input v-model="bio" />
@@ -239,18 +244,20 @@ export default {
 .profile{
   display: flex;
   margin-top: 2rem;
-  margin-left: 8rem;
+  margin-left: -6rem;
   position: center;
   font-weight:normal;
   font-size:large;
 }
 .uploadImage{
+  /* background-image: url("~assets/camera.svg"); */
+  background-repeat: no-repeat;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
-  margin-top: -2.5rem;
-  margin-left: 1rem;
+  margin-top: -3rem;
+  margin-left: 0.1rem;
 }
 
 .userAvatar{
@@ -278,8 +285,33 @@ export default {
   margin: 1rem 1.5rem 1rem;
 }
 
+.container{
+  position: relative;
+  justify-content: center;
+  align-content: center;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  max-width: auto;
+}
 .googleAccount{
+  position:absolute;
+  display: flex;
   text-decoration-color: white;
+  height: auto;
+  width: auto;
+}
+
+.googleBlock{
+  justify-content: center;
+  align-content: center;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  max-width: auto;
+
 }
 
 @media only screen and (min-width: 1000px) {

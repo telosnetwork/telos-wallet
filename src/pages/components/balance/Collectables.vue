@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white" :style="`max-width: 800px; margin: auto; height: ${coinViewHeight - footerHeight - 30}px;`">
-      <q-infinite-scroll @load="loadMoreNftTokens" :offset="20" 
+  <div :style="`max-width: 800px; margin: auto auto; height: ${coinViewHeight - footerHeight - 30}px;`">
+      <q-scroll @load="loadMoreNftTokens" :offset="20" 
           style="display: grid; grid-template-columns: auto auto;">
         <q-item v-for="(token, index) in availableTokenTags"
           :key="`${token.name}_${index}`"
@@ -24,7 +24,7 @@
             <q-spinner-dots color="primary" size="40px" />
           </div>
         </template>
-      </q-infinite-scroll>
+      </q-scroll>
   </div>
 </template>
 

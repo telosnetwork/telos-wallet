@@ -11,18 +11,19 @@
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
+        :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`"
       >
         <q-header class="bg-white text-grey-8 q-pa-sm">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">Send</label>
-                <label class="text-subtitle2 text-grey-4">Select a coin</label>
+          <q-toolbar class="no-padding" :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+            <q-toolbar-title class="absolute full-width no-padding text-center backgroundGradien">
+              <div class="display-grid ">
+                <label class="text-subtitle1 text-weight-medium h-20 text-white">Send</label>
+                <label class="text-subtitle2 text-white">Select a coin</label>
               </div>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
           </q-toolbar>
-          <q-input v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
+          <q-input :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`" v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
         <q-page-container>
           <q-list>
@@ -128,4 +129,5 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 </style>

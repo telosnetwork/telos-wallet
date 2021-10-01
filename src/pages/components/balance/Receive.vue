@@ -11,6 +11,7 @@
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
+        :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`"
       >
         <q-header class="bg-white text-grey-8 q-pa-sm">
           <q-toolbar class="no-padding">

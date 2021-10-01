@@ -1,19 +1,34 @@
 <template>
-  <div class="full-height main-div" :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+  <div class="full-height main-div" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF 200%)'">
     <div class="flex-center fit-div">
-      <div class="text-center full-width" style="display: grid; ">
-        <login-button v-if="isAuthenticated"/>
+      <div class="text-center full-width" style="display: grid; grid-gap: 1rem">
+        <login-button v-if="isAuthenticated" style="display:none"/>
+
+<!-- Profile Image top left -->
+        <div>
+          <q-item class="userAvatar">
+            <q-avatar class="profileImg  userAvatar" >
+            <img url="~assets/camera.png">
+          </q-avatar>
+          <input type="file" ref="fileInput" accept="image/*"
+            style="display: none" @change="onFilePicked"
+          />
+        </q-item>
+
+<!-- Account Name -->
         <label 
           class="text-white"
           :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
         >
           {{accountName}}
         </label>
+        </div>
 
+<!-- Account Amount -->
         <div class="full-width items-center balance-div">
           <div class="full-width" ></div>
           <div class="full-width" >
-            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
+            <label class="text-weight-small text-white" :style="`font-size: ${balanceTextSize}px;`">
               ${{getFixed(parseInt(displayAmount), 0)}}.{{displayAmount.toFixed(2).slice(-2)}}
             </label>
           </div>
@@ -30,13 +45,13 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
+<!-- Action Buttons -->
+        <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 0.5}px;`">
           <div class="balanceBtn">
             <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>  
           </div>
           <div class="qrCodeBtn">
-            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px; color: #FFFFFF; margin-bottom: 1rem; margin-top: 0.5rem;" @click="showQRScannerDlg = true"/>
+            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px; color: #FFFFFF; margin-bottom: 1rem; margin-top: 1rem;" @click="showQRScannerDlg = true"/>
           </div>
           <div class="balanceBtn">
             <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
@@ -47,35 +62,70 @@
           <!-- </q-toolbar> -->
         </div>
 
-        <!-- Purchase Button -->
-         <div :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
-           <!-- < class="flex" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`"> -->
-          <div class="convertBtns">
-            <q-btn stretch flat no-caps @click="clickExchange = true"/>  
+<!-- Convert Coins -->
+    <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 3}px;`">
+        <q-item
+        clickable
+        v-ripple
+        class="convertBtns"
+        @click="clickExchange()"
+      >
+        <q-item-section avatar>
+          <q-avatar size="45px" class="q-my-sm">
+            <!-- <img src="~assets/telos-swap.png"> -->
+          </q-avatar>
+        </q-item-section>
+        
+        <q-item-section >
+          <div class="text-white text-left">
+            <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
+            <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
           </div>
-          <div class="purchaseBtns">
-            <q-btn stretch flat no-caps @click="clickPurchase = true"/>
+        </q-item-section>
+      </q-item>
+
+<!-- Purchase Coins -->
+      <q-item
+        clickable
+        v-ripple
+        class="purchaseBtns"
+        @click="clickPurchase()"
+      >
+        <q-item-section avatar>
+          <q-avatar size="45px" class="q-my-sm">
+            <!-- <img src="~assets/telos-buy.png"> -->
+          </q-avatar>
+        </q-item-section>
+        
+        <q-item-section >
+          <div class="text-black text-left ">
+            <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
+            <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
           </div>
-        </div>
+        </q-item-section>
+      </q-item>
+    </div>
+        
       </div>
     </div>
 
+<!-- Coin Header -->
     <div :style="`height: ${coinViewHeight}px; text-align: -webkit-center;`">
       <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
-        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`">
-        <q-header class="coin-header flex-center q-px-md transparent" >
+        :style="`width: auto; max-width: auto;`">
+        <q-header class="coin-header flex-center" >
           <q-tabs
             v-model="tab"
             dense
             align="center"
-            narrow-indicator
-            active-color="deep-purple-10"
-            class="bg-white text-grey shadow-2 full-height no-shadow"
-            style="min-width: 250px;"
+            wide-indicator
+            active-color="white"
+            class=" text-white shadow-2 full-height no-shadow"
+            style="min-width: 250px; background: #39276A"
           >
             <q-tab
               no-caps
@@ -89,8 +139,8 @@
 
         <q-page-container>
           <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
-            <q-tab-panels v-model="tab" animated>
-              <q-tab-panel name="Coins" class="no-padding">
+            <q-tab-panels v-model="tab" animated class="coinviewGrid">
+              <q-tab-panel name="Coins" class="no-padding" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
                 <Coin
                   :coins="coins"
                   :coinLoadedAll="coinLoadedAll"
@@ -101,7 +151,7 @@
                   :suggestTokens="suggestTokens"
                 />
               </q-tab-panel>
-              <q-tab-panel name="Collectables">
+              <q-tab-panel name="Collectables" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
                 <Collectables
                   :nftTokenTags="nftTokenTags"
                   :nftTokenLoadedAll="nftTokenLoadedAll"
@@ -113,6 +163,7 @@
           </q-page>
         </q-page-container>
       </q-layout>
+      
       <div class="q-pr-none text-white absolute full-width"
         :style="`bottom: ${footerHeight}px;`"
       >
@@ -129,7 +180,7 @@
           </div>
           <template v-slot:action>
             <q-btn
-              class="bg-white"
+              class=""
               :style="`color: ${themeColor};`"
               no-caps
               size="12px"
@@ -608,14 +659,17 @@ export default {
 
 <style scoped>
 .main-div {
+  background-color: #00000000;
   display: flex;
-  flex-flow: column;
+  flex-flow: column;  
 }
 .fit-div {
+  background-color: #00000000;
   flex-grow: 1;
   display: flex;
 }
 .balance-div {
+  background-color: #00000000;
   display: inline-flex;
   justify-content: space-between;
 }
@@ -627,23 +681,30 @@ export default {
   min-block-size: auto;
 }
 .main-toolbar-sperator {
+  background-color: #00000000;
   width: 2px;
   height: 20px;
   margin: auto;
 }
 .bar {  
+  background-color: #00000000;
   width: 100%;
   height: 50px;
   position: absolute;
 }
 .coinview {
-  background-color: white;
+  background-color: #00000000;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 }
+
+.coinviewGrid{
+  background-color: #00000000;
+}
 .coin-header {
+  background-color: #13090900;
   height: 40px;
 }
 
@@ -651,45 +712,68 @@ export default {
   color: #FFFFFF;
   background: linear-gradient(120deg, #42b883, #8946DF);
   border-radius: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   margin-right: 1rem;
   margin-left: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 2rem;
   width: 8rem;
-  height: 2.5rem;
+  height: 3rem;
   text-align: center;
+  justify-content: center;
+  align-content: center;
+}
+
+.backgroundGradient{
+background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
 }
 
 .purchaseBtns{
   background-image: url("~assets/Purchase.svg");
-  height: 200px;
-  width: 10rem;
+  height: 1rem;
+  width: 8rem;
   border: none;
   border-radius: 0%;
   padding: 0px;
   text-align: center;
-  display: inline-block;
+  display: flex;
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 5rem;
-  margin-top: 1rem;
+  margin-left: 10rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  
 }
 
 .convertBtns{
   display: flex;
   background-image: url("~assets/Convert.svg");
-  height: 200px;
-  width: 10rem;
+  height: 2rem;
+  width: 8rem;
   border: none;
   border-radius: 0%;
   padding: 0px;
-  text-align: center;
-  display: inline-block;
+  display: flex;
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 3rem;
-  margin-top: 1rem;
+  margin-left: 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.profileImg{
+  background-image: url("~assets/camera.svg");
+  text-align: center;
+  display: inline-block;
+  background-repeat: no-repeat;
+  height: 3rem; 
+  width: 3rem; 
+  border-radius: 10rem;
+  margin-top: 1rem; 
+  margin-bottom:-1rem;
+  margin-left: 2rem;
+
 }
 </style>

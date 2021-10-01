@@ -1,7 +1,8 @@
 <template>
-  <div style="background: linear-gradient(to bottom, #130C3F, #8946DF -20%)">
-    <q-infinite-scroll>
-      <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label>
+  <div>
+    <q-infinite-scroll
+    style="display: grid; grid-template-rows: auto auto; margin">
+      <!-- <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label> -->
       <q-item
         clickable
         v-ripple
@@ -14,13 +15,14 @@
           </q-avatar>
         </q-item-section>
         
-        <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Purchase crypto</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">Purchase TLOS</label>
+        <q-item-section style="justify-content:start; display:grid">
+          <div class="text-black text-left display-grid ">
+            <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label>
+            <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label>
           </div>
         </q-item-section>
       </q-item>
+
       <q-item
         clickable
         v-ripple
@@ -34,13 +36,13 @@
         </q-item-section>
         
         <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Convert</label>
+          <div class="text-white text-left display-grid">
+            <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label>
             <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label>
           </div>
         </q-item-section>
       </q-item>
-      <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label>
+      <!-- <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label> -->
       <q-item v-for="(coin, index) in availbleCoins"
         :key="`${coin.name}_${index}`"
         clickable
@@ -55,20 +57,20 @@
         </q-item-section>
         
         <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{coin.name}}</label>
+          <div class="text-white text-left display-grid">
+            <label class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel">{{coin.name}}</label>
             <label class="text-subtitle2 text-grey-5 wraplabel">{{coin.symbol}}</label>
           </div>
         </q-item-section>
         
         <q-item-section side>
-          <div class="text-black text-right display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
+          <div class="text-white text-right display-grid">
+            <label class="text-subtitle1 text-weight-small text-white h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
             <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 2)}}</label>
           </div>
         </q-item-section>
       </q-item>
-      <template v-if="!coinLoadedAll" v-slot:loading>
+      <template v-if="!coinLoadedAll" v-slot:loading >
         <div class="row justify-center q-my-md">
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -105,7 +107,7 @@ export default {
 
 <style scoped>
 .list-item {
-  border: 1px solid #fafafa;
+  border: 1px solid #fafafa00;
   border-left: none;
   border-right: none;
 }
@@ -119,5 +121,6 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: ;
 }
 </style>
