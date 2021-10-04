@@ -10,9 +10,9 @@
             <q-avatar class="profileImg  userAvatar" >
             <img url="~assets/camera.png">
           </q-avatar>
-          <input type="file" ref="fileInput" accept="image/*"
+          <!-- <input type="file" ref="fileInput" accept="image/*"
             style="display: none" @change="onFilePicked"
-          />
+          /> -->
         </q-item>
 
 <!-- Account Name -->

@@ -6,22 +6,25 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
+<!-- Body -->
+    <q-card v-if="selectedCoin" class="full-height" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+<!-- Header-->
+        <q-header class="text-white q-pa-sm" style="background: #39276A">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-25">Buy {{selectedCoin.symbol}}</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white" icon="close"/>
           </q-toolbar>
         </q-header>
+        
         <q-page-container>
           <div class="column text-center" :style="`height: ${cardHeight}px; display: grid;`">
             <div class="full-width items-center amount-div">
@@ -48,17 +51,17 @@
                   <q-spinner color="primary" size="3em" :thickness="5" />
                 </div>
                 <div v-else>
-                  <label class="text-subtitle1 text-weight-medium text-grey-8">
+                  <label class="text-subtitle1 text-weight-medium text-white">
                     Rate: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `$${getFixed(exchangeRate, 4)} USD/${selectedCoin.symbol}`}}
                   </label><br/>
-                  <label class="text-subtitle1 text-weight-medium text-grey-8">
+                  <label class="text-subtitle1 text-weight-medium text-white">
                     Total: {{coinInput ? `$ ${getFixed(buyAmountValue * selectedCoin.price, 8)}` : `${getFixed(getAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}
                   </label>
                 </div>
               </div>
             </div>
             <q-space/>
-            <div class="q-mx-lg text-grey-7">
+            <div class="q-mx-lg text-white">
               By Clicking 'Next' you will be  using Moonpay to purchase 'EOS' which will be sent to a cross chain contract for exchange to TLOS on the Telos Network at the estimated rate. Do not alter the 'TO' or 'MEMO' field or risk losing your funds.
             </div>
             <q-space/>
@@ -76,8 +79,9 @@
                 />
               </div>
             </div>
-            <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
-              :style="`height: 50px; background: ${themeColor}`"
+<!-- Next Button -->
+            <q-btn class="text-white text-subtitle2 q-mx-md nextButton"
+              :style="`height: 50px;`"
               flat
               no-caps
               label="Next"
@@ -288,5 +292,9 @@ export default {
 }
 .h-25 {
   height: 25px;
+}
+
+.nextButton{
+  background: linear-gradient(120deg, #42b883, #8946DF)
 }
 </style>
