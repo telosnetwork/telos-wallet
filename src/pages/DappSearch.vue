@@ -1,12 +1,12 @@
 <template>
-    <q-card class="full-height" style="max-width: 800px; display: flex; margin: auto;">
+    <q-card class="bg-white full-height" style="max-width: 800px; display: flex; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
         style="background: linear-gradient(to bottom, #130C3F, #8946DF)"
       >
-        <q-header class="text-grey-8 q-pa-sm">
+        <q-header class="bg-white text-grey-8 q-pa-sm" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF)'">
           <q-toolbar class="no-padding" >
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">

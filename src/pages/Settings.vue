@@ -1,11 +1,9 @@
 <template>
   <div class="container" :style="`max-width: auto; margin: 0%; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
     <div>
-
       <div class="profile text-white flex-center">
       <label>Profile</label>
       </div>
-
       <q-list class="q-py-md">
 
         <!-- Save Button -->
@@ -16,23 +14,33 @@
         </q-item>
 
         <!-- User Avatar -->
-        <q-item class="justify-center userAvatar">
-          <q-avatar size="110px" font-size="52px" color="white" text-color="white">
-            <img :src="userAvatar" style="border: 1px solid purple"/>
+        <div style="position: relative; left: 0; top: 0; align-content: center;"  >
+          <img class="avatarVideoBack" src="~assets/avatarVideoBack.svg">
+          <img class="avatarBackground" src="~assets/avatarBackground.svg">
+          <q-item class="justify-center userAvatar">
+            <q-avatar size="110px" font-size="52px" color="white" text-color="white">
+              <img :src="userAvatar" style="border: 1px solid purple"/>
           </q-avatar>
         </q-item>
+        </div>
 
         <!-- Upload Image Button -->
         <q-item class="justify-center uploadImage" >
-          <q-btn src="~assets/avatarImg.svg" :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
-          @click="onPickFile"
-          
-          />
+          <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
+            @click="onPickFile">
+            <q-icon name="add_a_photo" color="white" />
+          </q-btn>
+          <!-- <q-btn round class="q-icon material-icons"
+            < q-icon name="mail" />
+            :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
+            @click="onPickFile"
+          /> -->
           <input type="file" ref="fileInput" accept="image/*"
             style="display: none" @change="onFilePicked"
           />
         </q-item>
 
+    <div class="profileInformation">
         <!-- Avatar Name -->
         <q-item>
           <img class="profileImg" src="~assets/avatarImg.svg">
@@ -65,6 +73,7 @@
             class="round-sm full-width text-white" label="Bio"
           />
         </q-item>
+    </div>
 
         <!-- Google label -->
         <div class="container">
@@ -244,7 +253,7 @@ export default {
 .profile{
   display: flex;
   margin-top: 2rem;
-  margin-left: -6rem;
+  margin-bottom: 2rem;
   position: center;
   font-weight:normal;
   font-size:large;
@@ -261,7 +270,29 @@ export default {
 }
 
 .userAvatar{
+  display: flex;
+  position:absolute;
+  top: 0.5rem;
+  left: 0.1rem;
+}
 
+.avatarBackground{
+  display: flex;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+.avatarVideoBack{
+  display: flex;
+  align-content: center;
+  position:absolute;
+  top: -2.8rem;
+  left: -3rem;
+}
+
+profileInformation{
+  margin-top: 4rem;
 }
 .clientInformationBlocks{
   display: flex;

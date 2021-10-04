@@ -1,5 +1,5 @@
 <template>
-  <div id="q-app">
+  <div id="q-app" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF 200%)'">
     <router-view />
   </div>
 </template>
