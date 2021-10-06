@@ -6,13 +6,13 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
+    <q-card v-if="selectedCoin" class="full-height" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+        <q-header class="text-white q-pa-sm" :style="'background: #261659'">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <q-avatar size="20px">
@@ -22,11 +22,11 @@
                 {{selectedCoin.name}}
               </label>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
+            <q-btn round flat dense v-close-popup class="text-white" icon="west"/>
           </q-toolbar>
-          <div class="text-black text-center display-grid">
-            <label class="text-h5 text-weight-medium text-blue-grey-10">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
-            <label class="text-caption text-grey-8">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
+          <div class="text-white text-center display-grid">
+            <label class="text-h5 text-weight-medium text-whhite">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
+            <label class="text-caption text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
           </div>
           <div class="text-center q-my-md q-mx-xl" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
             <q-space/>

@@ -6,15 +6,15 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="bg-white full-height" style="max-width: 800px; margin: auto;">
+    <q-card class="full-height" style="max-width: 800px; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
         :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
-          <q-toolbar class="no-padding" :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+        <q-header class="text-grey-8 q-pa-sm" :style="`background: #180F46`">
+          <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center backgroundGradien">
               <div class="display-grid ">
                 <label class="text-subtitle1 text-weight-medium h-20 text-white">Send</label>

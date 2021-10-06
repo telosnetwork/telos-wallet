@@ -1,22 +1,22 @@
 <template>
-  <div class="container" :style="`max-width: auto; margin: 0%; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+  <div class="profile flex-center" :style="`max-width: auto; margin: 0%; display:flex; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
     <div>
       <div class="profile text-white flex-center">
       <label>Profile</label>
       </div>
       <q-list class="q-py-md">
 
-        <!-- Save Button -->
+<!-- Save Button -->
         <q-item class= "saveBtn text-white"  >
           <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 5rem; text-decoration-color: white;`"
             label="SAVE" @click="save" :disable="display_name.length === 0"
           />
         </q-item>
 
-        <!-- User Avatar -->
-        <div style="position: relative; left: 0; top: 0; align-content: center;"  >
-          <img class="avatarVideoBack" src="~assets/avatarVideoBack.svg">
-          <img class="avatarBackground" src="~assets/avatarBackground.svg">
+<!-- User Avatar -->
+        <div class="flex-center" style="position: relative; display:flex; left: 0; top: 0; align-content: center;"  >
+          <img class="avatarVideoBack flex-center" src="~assets/avatarVideoBack.svg" >
+          <img class="avatarBackground flex-center" src="~assets/avatarBackground.svg">
           <q-item class="justify-center userAvatar">
             <q-avatar size="110px" font-size="52px" color="white" text-color="white">
               <img :src="userAvatar" style="border: 1px solid purple"/>
@@ -24,7 +24,7 @@
         </q-item>
         </div>
 
-        <!-- Upload Image Button -->
+<!-- Upload Image Button -->
         <q-item class="justify-center uploadImage" >
           <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
             @click="onPickFile">
@@ -41,7 +41,7 @@
         </q-item>
 
     <div class="profileInformation">
-        <!-- Avatar Name -->
+<!-- Avatar Name -->
         <q-item>
           <img class="profileImg" src="~assets/avatarImg.svg">
           <q-input v-model="avatar" 
@@ -49,37 +49,35 @@
           />
         </q-item>
 
-        <!-- Name -->
-        <q-item>
-          <img class="profileImg" src="~assets/nameImg.svg">
-          <q-input v-model="display_name" 
-            class="round-sm full-width" label="Name"
-            :rules="[val => !!val || 'This field is required']"
-          /> 
-        </q-item>
+<!-- Name -->
+          <q-item>
+            <img class="profileImg" src="~assets/nameImg.svg">
+            <q-input v-model="display_name" 
+              class="round-sm full-width" label="Name"
+              :rules="[val => !!val || 'This field is required']"
+            /> 
+          </q-item>
 
-        <!-- Status -->
-        <q-item>
-           <img class="profileImg" src="~assets/statusImg.svg">
-          <q-input v-model="status" dense border 
-            class="round-sm full-width" label="Status"
-          />
-        </q-item>
+<!-- Status -->
+          <q-item>
+            <img class="profileImg" src="~assets/statusImg.svg">
+            <q-input v-model="status" dense border 
+              class="round-sm full-width" label="Status"
+            />
+          </q-item>
 
-        <!-- Bio -->
-        <q-item>
-            <img class="profileImg" src="~assets/bioImg.svg">
-          <q-input v-model="bio" dense border
-            class="round-sm full-width text-white" label="Bio"
-          />
-        </q-item>
-    </div>
-
-        <!-- Google label -->
-        <div class="container">
+<!-- Bio -->
+          <q-item>
+              <img class="profileImg" src="~assets/bioImg.svg">
+            <q-input v-model="bio" dense border
+              class="round-sm full-width text-white" label="Bio"
+            />
+          </q-item>
+      </div>
+<!-- Google label -->
+        <div class="flex-center" style="position: relative; display:flex; left: 2rem; top: 1rem; bottom: 0rem" >
           <label class="googleAccount text-white">Google account is connected | Private Key</label>
-          <img class="container" src="~assets/googleBlock.svg">
-          
+          <img src="~assets/googleBlock.svg">
         </div>
         
         <!-- <q-item class="column">
@@ -239,22 +237,25 @@ export default {
 
 <style scoped>
 .container {
-    /* display: flex; */
-    place-content: center;
+    display: block;
+    block-size: auto;
+    align-self: center;
+    
 }
 
 .saveBtn{
   float: right;
   border-radius: 6rem;
   opacity: 100%;
+  top: -3rem;
+  right:5rem;
   /* margin-left: -3rem; */
   }
 
 .profile{
   display: flex;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  position: center;
+  margin-top: -1rem;
+  margin-bottom: 4rem;
   font-weight:normal;
   font-size:large;
 }
@@ -265,37 +266,39 @@ export default {
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
-  margin-top: -3rem;
-  margin-left: 0.1rem;
+  margin-top: -10rem;
+  margin-left: 4rem;
 }
 
 .userAvatar{
   display: flex;
   position:absolute;
-  top: 0.5rem;
-  left: 0.1rem;
+  top: -1.5rem;
+  left: auto;
+  margin-left: 4rem;
 }
 
 .avatarBackground{
   display: flex;
   position: relative;
-  top: 0;
-  left: 0;
+  left: center;
+  margin-bottom: 6rem;
+  margin-left: 4rem;
+  top: -2rem;
 }
 
 .avatarVideoBack{
-  display: flex;
-  align-content: center;
+  display: block;
   position:absolute;
-  top: -2.8rem;
-  left: -3rem;
+  top: -4.5rem;
+  left: center;
+  margin-left: 4rem;
+  width: 14rem;
+  
 }
 
-profileInformation{
-  margin-top: 4rem;
-}
-.clientInformationBlocks{
-  display: flex;
+.profileInformation{
+  width: 30rem;
 }
 
 .settingImg{
@@ -316,37 +319,18 @@ profileInformation{
   margin: 1rem 1.5rem 1rem;
 }
 
-.container{
-  position: relative;
-  justify-content: center;
-  align-content: center;
-  display: flex;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 2rem;
-  max-width: auto;
-}
 .googleAccount{
   position:absolute;
-  display: flex;
+  margin-top: 2rem;
+  display: block;
   text-decoration-color: white;
-  height: auto;
-  width: auto;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  
 }
 
 .googleBlock{
-  justify-content: center;
-  align-content: center;
-  display: flex;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 2rem;
-  max-width: auto;
-
 }
 
-@media only screen and (min-width: 1000px) {
- 
-}
 
 </style>

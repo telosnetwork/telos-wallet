@@ -126,7 +126,7 @@ export default {
   text-align: center;
 }
 .list-item {
-  border: 1px solid #fafafa;
+  /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
 }

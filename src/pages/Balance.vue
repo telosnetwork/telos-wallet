@@ -278,7 +278,7 @@ const tabsData = [
 ];
 
 export default {
-  props: ['loadedCoins', 'loadedNftTokens'],
+  props: ['loadedCoins', 'loadedNftTokens', 'suggestTokens'],
   components: {
     LoginButton,
     Coin,
@@ -366,6 +366,17 @@ export default {
     },
   },
   methods: {
+    clickPurchase() {
+      // this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
+      this.selectedCoin = this.coins.find(coin => coin.symbol === 'TLOS');
+      // this.$emit('update:showBuyAmountDlg', true);
+      this.showBuyAmountDlg = true;
+    },
+    clickExchange() {
+      console.log('Pina Colladas!!!', 'Clicked me!!!!!')
+      // this.$emit('update:showExchangeDlg', true); // not working anymore
+      this.showExchangeDlg = true;
+    },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
       this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
@@ -653,7 +664,7 @@ export default {
   beforeDestroy() {
     if (this.interval) clearInterval(this.interval);
     if (this.tokenInterval) clearInterval(this.tokenInterval);
-  },
+  }
 };
 </script>
 
@@ -710,7 +721,7 @@ export default {
 
 .balanceBtn{
   color: #FFFFFF;
-  background: linear-gradient(120deg, #42b883, #8946DF);
+  background: linear-gradient(120deg, #1DD1FE, #8946DF);
   border-radius: 1rem;
   margin-bottom: 2rem;
   margin-right: 1rem;

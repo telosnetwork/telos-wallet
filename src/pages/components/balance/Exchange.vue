@@ -6,13 +6,14 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="max-width: 800px; margin: auto;">
+    <q-card class="full-height main-card" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+<!-- Top Dollar/Crypto buttons -->
+        <q-header class="text-grey-8 q-pa-sm" style="background: #180F46">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <q-btn-group class="full-width justify-center" push unelevated>
@@ -20,16 +21,16 @@
                   class="q-px-md"
                   push no-caps
                   label="Dollars"
-                  :style="`background: ${exchangeType === 'dollars' ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 240)'};
-                          color: ${exchangeType === 'dollars' ? 'black' : 'lightgrey'};`"
+                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
                   @click="exchangeType = 'dollars'"
                 />
                 <q-btn
                   class="q-px-md"
                   push no-caps
                   label="Crypto"
-                  :style="`background: ${exchangeType !== 'dollars' ? 'rgb(250, 250, 250)' : 'rgb(240, 240, 240)'};
-                          color: ${exchangeType !== 'dollars' ? 'black' : 'lightgrey'};`"
+                  :style="`background: ${exchangeType !== 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType !== 'dollars' ? 'white' : 'grey'};`"
                   @click="exchangeType = 'crypto'"
                 />
               </q-btn-group>
@@ -37,10 +38,35 @@
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
         </q-header>
-        <q-page-container class="q-mx-auto q-py-sm" style="max-width: 600px;">
-          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px;">
-            <q-space/>
-            <q-item class="list-item full-width">
+
+<!-- Equal Amount-->
+        <q-item class="list-item full-width equalAmount">
+              <div class="text-black display-grid full-width">
+                <label ref="widthElement" style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;">
+                  {{ dollarsAmount }}
+                </label>
+                <div class="flex flex-center full-width">
+                  <label class="text-weight-regular text-white q-mr-none" style="font-size: 1.4rem;">
+                    $
+                  </label>
+                  <input
+                    type="text" maxlength="8"
+                    class="text-weight-regular text-white text-center no-border q-pa-none no-outline transparent"
+                    :style="`font-size: 45px; width: ${inputWidth}px;`"
+                    v-model="dollarsAmount"
+                    @focus="dollarsAmount = (dollarsAmount === '0' ? '' : dollarsAmount)"
+                    @blur="dollarsAmount = Number(dollarsAmount === '' ? '0' : dollarsAmount).toString()"
+                  />
+                </div>
+                <label class="text-subtitle1 text-center text-white">Equivalent to</label>
+              </div>
+            </q-item>
+
+<!-- Dollar currency converter -->
+        <q-page-container class="q-mx-auto q-py-sm" style="max-width: 600px">
+          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px; background: #fafafa15">
+            <!-- <q-space/> -->
+            <!-- <q-item class="list-item full-width">
               <div class="text-black display-grid full-width">
                 <label ref="widthElement" style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;">
                   {{ dollarsAmount }}
@@ -60,8 +86,8 @@
                 </div>
                 <label class="text-subtitle1 text-center text-grey-6">Equivalent to ...</label>
               </div>
-            </q-item>
-            <q-space/>
+            </q-item> -->
+            <!-- <q-space/> -->
             <q-item class="row list-item full-width q-px-none">
               <div class="col q-mx-lg">
                 <q-item-section style="display: block;">
@@ -113,7 +139,9 @@
             </q-item>
             <q-space/>
           </q-card>
-          <q-card v-else class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px;">
+
+<!-- Crypto Amount Converter -->
+          <q-card v-else class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px; background: #fafafa15">
             <q-space/>
             <q-item class="list-item full-width q-pb-none" style="min-height: 28px;">
               <q-item-section>
@@ -239,10 +267,12 @@
               {{ displayedSlippage }}
             </div>
           </div>
-          <div class="q-mt-lg q-px-xl full-width">
+
+<!-- Convert Button -->
+          <div class="q-mt-lg q-px-xl full-width convertBtn">
             <q-btn
-              class="text-grey-5 text-subtitle2 full-width"
-              :style="`height: 50px; background: ${themeColor}; font-size: 20px;`"
+              class="text-white text-subtitle2 full-width"
+              :style="`height: auto; background: linear-gradient(120deg, #1DD1FE, #8946DF); font-size: 20px;`"
               flat
               no-caps
               label="Convert"
@@ -544,5 +574,14 @@ export default {
 }
 .convert-card {
   border-radius: 25px;
+}
+
+.equalAmount{
+  margin-top: 5rem;
+  margin-bottom: -5rem;
+}
+
+.convertBtn{
+  position:relative;
 }
 </style>

@@ -14,7 +14,7 @@
         class="shadow-4 coinview"
       >
 <!-- Header-->
-        <q-header class="text-white q-pa-sm" style="background: #39276A">
+        <q-header class="text-white q-pa-sm" style="background: #180F46">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
@@ -24,19 +24,42 @@
             <q-btn round flat dense v-close-popup class="text-white" icon="close"/>
           </q-toolbar>
         </q-header>
-        
-        <q-page-container>
+
+<!-- Body Information -->
+        <q-page-container class="flex-center">
+          
+          <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+            <q-item-section avatar class="cryptoImg">
+              <q-avatar size="6rem">
+                <img :src="selectedCoin.icon">
+                <!-- <img :src="coin.icon"> -->
+              </q-avatar>
+            </q-item-section>
+            <img class="avatarBackground" src="~assets/avatarBackground.svg">
+          </div>
+            
+            <!-- <div style="position: relative; left: 0; top: 0; align-content: center;" >
+              <q-item-section avatar class="cryptoImg">
+                <q-avatar size="45px" class="q-my-sm">
+                  <img src="coin.icon"> -->
+                  <!-- <img :src="coin.icon"> -->
+                <!-- </q-avatar>
+              </q-item-section>
+              <img class="cryptoImg" src="~assets/avatarBackground.svg">
+              <img class="cryptoImg" src="~assets/avatarBackground.svg">
+            </div> -->
           <div class="column text-center" :style="`height: ${cardHeight}px; display: grid;`">
             <div class="full-width items-center amount-div">
               <div class="full-width column">
+                <label class="amount">Amount</label>
                 <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
                   {{ buyAmount }}
                 </label>
                 <div class="desktop-only flex flex-center">
-                  <label class="text-weight-regular q-mr-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                  <label class="text-weight-small q-mr-sm" :style="`font-size: 1.4rem; color: white;`">
                     {{coinInput ? `` : '$ '}} </label>
                   <input type="text" :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
-                    :style="`font-size: ${amountFontSize}px; color: ${themeColor}; z-index: 1; width: ${inputWidth}px;`"
+                    :style="`font-size: 3rem; color: white; z-index: 1; width: ${inputWidth}px;`"
                     v-model="buyAmount"
                     @focus="buyAmount = (buyAmount === '0' ? '' : buyAmount)"
                     @blur="buyAmount = Number(buyAmount === '' ? '0' : buyAmount).toString()"
@@ -44,6 +67,7 @@
                   <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                     {{coinInput ? selectedCoin.symbol : ''}} </label>
                 </div>
+                <br>
                 <label class="text-weight-regular full-width mobile-only" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                   {{coinInput ? `${buyAmount} ${selectedCoin.symbol}` : `$${buyAmount}`}}
                 </label>
@@ -60,25 +84,30 @@
                 </div>
               </div>
             </div>
-            <q-space/>
-            <div class="q-mx-lg text-white">
+
+<!-- Information -->
+          <div>
+            <div class="q-mx-lg text-white position: absolute; eosNextInf" style="left: 50%; margin-left:-8rem;">
+              <img class="infoIcon" src="~assets/c-info 1.svg">
               By Clicking 'Next' you will be  using Moonpay to purchase 'EOS' which will be sent to a cross chain contract for exchange to TLOS on the Telos Network at the estimated rate. Do not alter the 'TO' or 'MEMO' field or risk losing your funds.
+              <!-- <img class="infoTextBlock" src="~assets/Subtract.svg"> -->
             </div>
-            <q-space/>
-            <q-space/>
-            <q-space/>
+            <img class="infoTextBlock" style="left: 50%; margin-left:-11rem; margin-top: -10rem" src="~assets/Subtract.svg" >
+
+<!-- Keyboard -->
             <div class="q-pa-sm full-width mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn v-for="key in keyboard"
                   :key="key"
                   class="bg-white text-grey-8 q-mx-auto q-my-auto text-h5"
-                  style="width: 30%; height: 45px;"
+                  style="width: 30%; height: auto;"
                   flat
                   :label="key"
                   @click="buttonClicked(key)"
                 />
               </div>
             </div>
+           </div> 
 <!-- Next Button -->
             <q-btn class="text-white text-subtitle2 q-mx-md nextButton"
               :style="`height: 50px;`"
@@ -102,7 +131,7 @@ import { setInterval } from 'timers';
 import { isNumber } from 'util';
 
 export default {
-  props: ['showBuyAmountDlg', 'showHistoryDlg', 'selectedCoin'],
+  props: ['showBuyAmountDlg', 'showHistoryDlg', 'selectedCoin', 'coins',],
   data() {
     return {
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
@@ -133,10 +162,15 @@ export default {
     buyAmountValue() {
       return Number(this.buyAmount);
     },
+    availbleCoins() {
+      return this.coins.filter(coin => coin.amount > 0 || this.suggestTokens.includes(coin.symbol.toLowerCase()));
+    },
   },
   methods: {
     selectCoin(coin) {
       this.selectedCoin = coin;
+      this.$emit('update:selectedCoin', coin);
+      this.$emit('update:showHistoryDlg', true);
     },
     buttonClicked(key) {
       if (key === '.') {
@@ -279,11 +313,12 @@ export default {
   text-align: center;
 }
 .amount-div {
-  display: inline-flex;
-  justify-content: space-between;
+  display: flex;
+  margin-top: 8rem;
+  /* justify-content: space-between; */
 }
 .list-item {
-  border: 1px solid #fafafa;
+  /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
 }
@@ -295,6 +330,65 @@ export default {
 }
 
 .nextButton{
-  background: linear-gradient(120deg, #42b883, #8946DF)
+  position:relative;
+  left:0%;
+  right:50%;
+  bottom:5%;
+  top:40%;
+  background: linear-gradient(120deg, #1DD1FE, #8946DF);
+  height: 3rem;
+  text-align: center;
 }
+.cryptoImg{
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  margin-top: 1.5rem;
+}
+
+.avatarBackground{
+  display: flex;
+  position: relative;
+  left: 50%; 
+  margin-left:-4rem;
+  /* margin-bottom: -1rem; */
+}
+
+.eosNextInf{
+  display: flex;
+  position: relative;
+  left: 4rem;
+  right: 3rem;
+  margin-top: 3rem;
+  margin-left: 4rem;
+  text-align: justify;
+  width: 20rem;
+  height: auto;
+  
+  /* font-family: 'Silka'; */
+  /* margin-bottom: 6rem; */
+}
+
+.infoTextBlock{
+  display: flex;
+  position: absolute;
+  width: 24rem;
+  height: auto;
+}
+
+.infoIcon{
+ margin-left: -2.5rem;
+ margin-right: 1rem;
+ margin-top: -5rem;
+ transform: translate(-50%, 50);
+}
+
+.amount{
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  color: white
+}
+
+
 </style>

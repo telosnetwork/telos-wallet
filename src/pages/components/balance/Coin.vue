@@ -3,7 +3,7 @@
     <q-infinite-scroll
     style="display: grid; grid-template-rows: auto auto; margin">
       <!-- <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label> -->
-      <q-item
+      <!-- <q-item
         clickable
         v-ripple
         class="list-item"
@@ -21,9 +21,9 @@
             <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label>
           </div>
         </q-item-section>
-      </q-item>
+      </q-item> -->
 
-      <q-item
+      <!-- <q-item
         clickable
         v-ripple
         class="list-item"
@@ -41,7 +41,7 @@
             <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label>
           </div>
         </q-item-section>
-      </q-item>
+      </q-item> -->
       <!-- <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label> -->
       <q-item v-for="(coin, index) in availbleCoins"
         :key="`${coin.name}_${index}`"
@@ -121,6 +121,5 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: ;
 }
 </style>
