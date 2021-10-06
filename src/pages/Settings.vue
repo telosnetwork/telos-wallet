@@ -1,14 +1,25 @@
 <template>
-  <div class="profile flex-center" :style="`max-width: auto; margin: 0%; display:flex; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+  <div class="profile flex-center" :style="`width: auto; margin: 0%; display:flex; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
     <div>
       <div class="profile text-white flex-center">
       <label>Profile</label>
       </div>
       <q-list class="q-py-md">
 
+<!-- Black Button -->
+        <q-item class="justify-center backBtn" >
+          <q-btn :style="`height: 2rem; width: 2rem; border-radius: 10rem; left: 1rem; border: 0.010rem solid white;`"
+            @click="onPickFile">
+            <q-icon name="chevron_left" color="white" style=" bottom: 0.2rem; right: 0.1rem" />
+          </q-btn>
+          <input type="file" ref="fileInput" accept="image/*"
+            style="display: none" @change="onFilePicked"
+          />
+        </q-item>
+
 <!-- Save Button -->
         <q-item class= "saveBtn text-white"  >
-          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 5rem; text-decoration-color: white;`"
+          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
             label="SAVE" @click="save" :disable="display_name.length === 0"
           />
         </q-item>
@@ -26,7 +37,7 @@
 
 <!-- Upload Image Button -->
         <q-item class="justify-center uploadImage" >
-          <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
+          <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
             @click="onPickFile">
             <q-icon name="add_a_photo" color="white" />
           </q-btn>
@@ -75,8 +86,8 @@
           </q-item>
       </div>
 <!-- Google label -->
-        <div class="flex-center" style="position: relative; display:flex; left: 2rem; top: 1rem; bottom: 0rem" >
-          <label class="googleAccount text-white">Google account is connected | Private Key</label>
+        <div class="flex-center" style="position: relative; display:flex; left: 1rem; top: 1rem; bottom: 0rem" >
+          <p class="googleAccount text-white">Google account is connected | <b> Private Key</b></p>
           <img src="~assets/googleBlock.svg">
         </div>
         
@@ -237,7 +248,7 @@ export default {
 
 <style scoped>
 .container {
-    display: block;
+    display: flex;
     block-size: auto;
     align-self: center;
     
@@ -248,7 +259,7 @@ export default {
   border-radius: 6rem;
   opacity: 100%;
   top: -3rem;
-  right:5rem;
+  right: 5rem;
   /* margin-left: -3rem; */
   }
 
@@ -258,6 +269,8 @@ export default {
   margin-bottom: 4rem;
   font-weight:normal;
   font-size:large;
+  margin-left: 0;
+  margin-right: 0;
 }
 .uploadImage{
   /* background-image: url("~assets/camera.svg"); */
@@ -320,11 +333,11 @@ export default {
 }
 
 .googleAccount{
-  position:absolute;
+  position: absolute;
   margin-top: 2rem;
   display: block;
   text-decoration-color: white;
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin-bottom: 2rem;
   
 }
@@ -332,5 +345,12 @@ export default {
 .googleBlock{
 }
 
+.backBtn{
+float: left;
+text-align: center;
+margin-top: -5rem;
+height: 4rem; 
+width: 4rem;
+}
 
 </style>

@@ -1,6 +1,28 @@
 <template>
   <div class="full-height main-div" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF 200%)'">
     <div class="flex-center fit-div">
+
+      <!-- Left Naviggation Bar -->
+    <div class="leftNavBar">
+        <div class="left-col">
+            <nav>
+              <img src="~assets/telosLogo.svg" class="telosLogo">
+                <ul>
+                    <li>
+                      <a href="#" class="active wallet"> 
+                        <img src="~assets/wallet.svg" class="menuIcon">Wallert</a>
+                    </li>
+                    <li><a href="#">
+                      <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
+                    <li><a href="#">
+                      <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
+                    <li><a href="#">
+                      <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
+                </ul>
+            </nav>
+        </div>
+      </div>
+
       <div class="text-center full-width" style="display: grid; grid-gap: 1rem">
         <login-button v-if="isAuthenticated" style="display:none"/>
 
@@ -125,7 +147,7 @@
             wide-indicator
             active-color="white"
             class=" text-white shadow-2 full-height no-shadow"
-            style="min-width: 250px; background: #39276A"
+            style="width: auto; background: #39276A"
           >
             <q-tab
               no-caps
@@ -785,6 +807,67 @@ background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
   margin-top: 1rem; 
   margin-bottom:-1rem;
   margin-left: 2rem;
+}
 
+
+nav{
+position: fixed;
+z-index: 1;
+background: linear-gradient(to bottom, #130C3F, #8946DF 200%);
+left: 0;
+top:0;
+height: 100vh;
+max-width: 300px;
+transform: translateX(-100%);
+transition: transform .3s;
+
+}
+
+.telosLogo{
+  padding: 2em 5em .875em 4em
+}
+.menuIcon{
+  width: 1.5rem;
+  margin-left: 0.003rem;
+  margin-right: 1rem;
+}
+
+nav ul{
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+nav ul li{
+  width: 100%;
+}
+
+nav ul li a{
+  text-decoration: none;
+  color: white;
+  display: block;
+  padding: .875em 6em 3em 6em;
+  
+}
+
+nav ul li a:hover{
+  background: #413e47;
+}
+
+.active{
+  background: purple;
+}
+
+.active:hover{
+  background: 4497FF ;
+}
+
+@media only screen and (min-width: 1000px) {
+    nav {
+        position: unset;
+        transform: translateX(0) !important;
+        border-radius: unset;
+        height: 100vh;
+    }
 }
 </style>

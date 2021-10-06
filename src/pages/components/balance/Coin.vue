@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-infinite-scroll
-    style="display: grid; grid-template-rows: auto auto; margin">
+    style="display: grid; grid-template-rows: auto auto; margin:auto">
       <!-- <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label> -->
       <!-- <q-item
         clickable
