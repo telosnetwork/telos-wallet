@@ -897,10 +897,6 @@ nav ul li a:hover{
     transition: transform .3s;
 }
 
-.profileImg {
-  float: right;
-}
-
 .coinHeader{
   margin-left: 50%;
   transform: translate(-250px) !important;

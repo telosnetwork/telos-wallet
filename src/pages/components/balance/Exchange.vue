@@ -64,7 +64,7 @@
 
 <!-- Dollar currency converter -->
         <q-page-container class="q-mx-auto q-py-sm" style="max-width: 600px">
-          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px; background: #fafafa15">
+          <q-card v-if="exchangeType === 'dollars'" class="column q-mx-lg q-mt-xl shadow-4 convert-card" style="height: 200px; background: none">
             <!-- <q-space/> -->
             <!-- <q-item class="list-item full-width">
               <div class="text-black display-grid full-width">
@@ -267,9 +267,45 @@
               {{ displayedSlippage }}
             </div>
           </div>
+        </q-page-container>
+
+
+  <q-page-container class="relative">
+      <div class="flex-center relative" style="display:flex">
+        <div class="relative">
+          <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline">
+          <img class="dollarBgimg2 flex-center" src="~assets/dollarBgImg.svg" style="display: inline">
+        </div>
+        
+      </div>
+
+      <div class="flex-center relative cryptoContainer" style="display:flex">
+          <div class="relative cryptoContainer">
+            <q-item-section avatar class="cryptoImg">
+              <q-avatar size="6rem">
+                <img class="cryptoImg1" src="'~assets/avatarBackground.svg'">
+                <img class="cryptoImg2" src="'~assets/avatarBackground.svg'">
+                <!-- <img :src="selectedCoin.icon"> -->
+                <!-- <img :src="coin.icon"> -->
+              </q-avatar>
+            </q-item-section>
+                
+          </div>
+          <div class="relative cryptoContainer">
+            <img class="avatarBackground1" src="~assets/dollarRectBg.svg">
+            <img class="avatarBackground2" src="~assets/dollarRectBg.svg">
+          </div>
+      </div>
+  </q-page-container>
+  
+
+
+
+
+
 
 <!-- Convert Button -->
-          <div class="q-mt-lg q-px-xl full-width convertBtn">
+        <div class="q-mt-lg q-px-xl full-width convertBtn">
             <q-btn
               class="text-white text-subtitle2 full-width"
               :style="`height: auto; background: linear-gradient(120deg, #1DD1FE, #8946DF); font-size: 20px;`"
@@ -280,7 +316,6 @@
               @click="convertPressed()"
             />
           </div>
-        </q-page-container>
       </q-layout>
     </q-card>
     <SelectCoin :showSelectCoinDlg.sync="showSelectCoinDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :type="dlgType" />
@@ -583,5 +618,51 @@ export default {
 
 .convertBtn{
   position:relative;
+}
+
+.dollarBgimg1{
+  align-content: center;
+  width: 12rem;
+  height: auto;
+  margin-right: 0.3rem;
+  align-content: center;
+  align-self: center;
+}
+
+.dollarBgimg2{
+  align-content: center;
+  width: 12rem;
+  height: auto;
+  align-content: center;
+  align-self: center;
+}
+
+.cryptoContainer{
+ 
+}
+
+.cryptoImg1{
+  position: relative;
+  width: 4rem;
+  height: 2rem;
+}
+.cryptoImg2{
+  position: relative;
+  width: 4rem;
+  height: 4rem; 
+  
+}
+
+.avatarBackground1{
+  position: relative;
+  width: 4rem;
+  height: 4rem; 
+  /* margin-bottom: -1rem; */
+}
+.avatarBackground2{
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  /* margin-bottom: -1rem; */
 }
 </style>

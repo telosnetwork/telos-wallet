@@ -1,5 +1,7 @@
 <template>
+  
   <div>
+<!-- Login Button -->
     <div v-if="!isAuthenticated" class="q-px-md">
       <!-- <div>
         <q-btn
@@ -21,6 +23,8 @@
           :style="`color: ${themeColor}`"
         />
       </div>
+
+<!-- Signup Button -->
       <q-separator v-if="!isAuthenticated" class="q-mt-md q-mx-auto" style="max-width: 500px;"/>
       <div class="q-mt-md">
         <q-btn
@@ -34,6 +38,7 @@
       </div>
     </div>
 
+<!-- Logout -->
     <div v-if="isAuthenticated" class="row absolute full-width">
       <q-btn
         @click="logout"
@@ -47,21 +52,24 @@
       />
     </div>
 
+<!-- Show Login -->
     <q-dialog v-model="showLogin">
-      <q-list>
-        <q-item
+      
+      <q-list class="showLoginPopup" :style="'background: #000000aa'">
+        <br>
+        <label class="connectWallet">Connect Wallet</label>
+        <div class="showLoginPopupStyle">
+        
+        <q-item 
+          class="itemStyling"  
           v-for="(wallet, idx) in $ual.authenticators"
           :key="wallet.getStyle().text"
           v-ripple
-          :style="{
-            background: wallet.getStyle().background,
-            color: wallet.getStyle().textColor
-          }"
         >
           <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
             <img :src="wallet.getStyle().icon" width="30" />
           </q-item-section>
-
+          
           <q-item-section class="cursor-pointer" @click="onLogin(idx)">
             {{ wallet.getStyle().text }}
           </q-item-section>
@@ -72,7 +80,7 @@
               :color="wallet.getStyle().textColor"
               size="2em"
             />
-            <q-btn
+            <!-- <q-btn
               v-else
               :color="wallet.getStyle().textColor"
               icon="get_app"
@@ -85,9 +93,25 @@
               <q-tooltip>
                 Get app
               </q-tooltip>
-            </q-btn>
+            </q-btn> -->
           </q-item-section>
         </q-item>
+        <br>
+        <!-- <q-separator  class="q-mt-md q-mx-auto" style="max-width: 20rem; height: 1px; border-color:black"/> -->
+
+<!-- Close Button -->
+        <q-btn v-close-popup
+        @click="close"
+        size="md"
+        padding="3px 3px 3px 3px"
+        no-caps
+        rounded
+        flat
+        class="closeBtn flex-center"
+        label="Close"
+        :style="`display:flex;`"
+      />
+      </div>
 
         <q-item
           v-if="error"
@@ -200,19 +224,55 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped>
-.login-btn
-  max-width: 500px
-  height: 40px
-  round: 5px
-  border-radius: 10px
-.account-name
-  color: white
-  font-size: 20px
-.logout-btn
-  // margin-left: auto;
-  left: -15px
-  color: rgba(255, 255, 255, 0.8)
-  background: rgba(0, 0, 0, 0.3)
-  border: 1px solid rgba(255, 255, 255, 0.3)
+<style>
+.login-btn{
+  max-width: 500px;
+  height: 40px;
+  round: 5px;
+  border-radius: 10px;
+  }
+.account-name{
+  color: white;
+  font-size: 20px;
+  }
+.logout-btn{
+  /* // margin-left: auto; */
+  left: -15px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.connectWallet{
+  margin-top: 4rem;
+  margin-left: 4rem;
+  margin-bottom: 3rem;
+  color: white;
+  font-size: 17px;
+}
+.showLoginPopup{
+  width: 30rem;
+  height: auto;
+  margin-bottom: 5rem;
+
+  }
+
+.showLoginPopupStyle{
+  width: 20rem;
+  height: 18rem;
+}
+
+.itemStyling{
+  color: white;
+  padding-left: 4rem;
+  padding-top: 0.5rem;
+}
+
+.closeBtn{
+  display: flex;
+  width: 7rem;
+  color: white;
+  left: 55%
+}
+
 </style>

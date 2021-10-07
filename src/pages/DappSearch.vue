@@ -1,12 +1,12 @@
 <template>
-    <q-card class="bg-white full-height" style="max-width: 800px; display: flex; margin: auto;">
+  <div>
+    <q-card class="bg-transparent" style="max-width: 800px; display: flex; margin: auto; height: 100vh;">
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
-        style="background: linear-gradient(to bottom, #130C3F, #8946DF)"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF)'">
+        <q-header class="bg-transparent text-grey-8 q-pa-sm">
           <q-toolbar class="no-padding" >
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
@@ -16,7 +16,7 @@
           </q-toolbar>
           <q-input v-model="searchDappName" label="Search dApp" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
-        <q-page-container>
+        <q-page-container style="height: 100vh;">
           <q-infinite-scroll @load="loadMoreDapps" :offset="100">
             <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
               <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.link)">
@@ -50,12 +50,12 @@
         </q-page-container>
       </q-layout>
     </q-card>
-
+  </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
+// import moment from 'moment';
 
 export default {
   data() {
@@ -126,7 +126,7 @@ export default {
   text-align: center;
 }
 .list-item {
-  /* border: 1px solid #fafafa; */
+  border: 1px solid #fafafa;
   border-left: none;
   border-right: none;
 }
@@ -137,6 +137,10 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.bg-transparent {
+  background: #00000000
 }
 
 </style>
