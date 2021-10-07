@@ -3,16 +3,16 @@
     <div class="flex-center fit-div">
 
       <!-- Left Naviggation Bar -->
-    <div class="leftNavBar">
-        <div class="left-col">
+      <div >
+          <div class="left-col leftNavBar">
             <nav>
               <img src="~assets/telosLogo.svg" class="telosLogo">
                 <ul>
                     <li>
                       <a href="#" class="active wallet"> 
-                        <img src="~assets/wallet.svg" class="menuIcon">Wallert</a>
+                        <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
                     </li>
-                    <li><a href="#">
+                    <li><a @click="$router.replace('/dappsearch')">
                       <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
                     <li><a href="#">
                       <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
@@ -29,12 +29,9 @@
 <!-- Profile Image top left -->
         <div>
           <q-item class="userAvatar">
-            <q-avatar class="profileImg  userAvatar" >
-            <img url="~assets/camera.png">
+            <q-avatar class="profileImg  userAvatar" @click="$router.replace('/settings')" >
+            <img url="~assets/avatarImg.svg">
           </q-avatar>
-          <!-- <input type="file" ref="fileInput" accept="image/*"
-            style="display: none" @change="onFilePicked"
-          /> -->
         </q-item>
 
 <!-- Account Name -->
@@ -127,104 +124,105 @@
         </q-item-section>
       </q-item>
     </div>
-        
-      </div>
-    </div>
 
 <!-- Coin Header -->
-    <div :style="`height: ${coinViewHeight}px; text-align: -webkit-center;`">
-      <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview"
-        :style="`width: auto; max-width: auto;`">
-        <q-header class="coin-header flex-center" >
-          <q-tabs
-            v-model="tab"
-            dense
-            align="center"
-            wide-indicator
-            active-color="white"
-            class=" text-white shadow-2 full-height no-shadow"
-            style="width: auto; background: #39276A"
-          >
-            <q-tab
-              no-caps
-              v-for="tab in tabs"
-              :name="tab.title"
-              :label="tab.label"
-              :key="tab.title"
-            />
-          </q-tabs>
-        </q-header>
+      <div class="coinHeader"
+      :style="`height: ${coinViewHeight}px; text-align: webkit-center;`">
+        <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
+        <q-layout
+          view="hhh Lpr fFf"
+          container
+          class="shadow-4 coinview flex-center"
+          :style="`width: 500px; display:flex; `">
+          <q-header class="coin-header flex-center" >
+            <q-tabs
+              v-model="tab"
+              dense
+              align="center"
+              wide-indicator
+              active-color="white"
+              class=" text-white shadow-2 full-height no-shadow"
+              style="width: auto; background: #39276A"
+            >
+              <q-tab
+                no-caps
+                v-for="tab in tabs"
+                :name="tab.title"
+                :label="tab.label"
+                :key="tab.title"
+              />
+            </q-tabs>
+          </q-header>
 
-        <q-page-container>
-          <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
-            <q-tab-panels v-model="tab" animated class="coinviewGrid">
-              <q-tab-panel name="Coins" class="no-padding" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
-                <Coin
-                  :coins="coins"
-                  :coinLoadedAll="coinLoadedAll"
-                  :showHistoryDlg.sync="showHistoryDlg"
-                  :showExchangeDlg.sync="showExchangeDlg"
-                  :showBuyAmountDlg.sync="showBuyAmountDlg"
-                  :selectedCoin.sync="selectedCoin"
-                  :suggestTokens="suggestTokens"
-                />
-              </q-tab-panel>
-              <q-tab-panel name="Collectables" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
-                <Collectables
-                  :nftTokenTags="nftTokenTags"
-                  :nftTokenLoadedAll="nftTokenLoadedAll"
-                  :coinViewHeight="coinViewHeight"
-                  :loadNftTokenTags="loadNftTokenTags"
-                />
-              </q-tab-panel>
-            </q-tab-panels>
-          </q-page>
-        </q-page-container>
-      </q-layout>
-      
-      <div class="q-pr-none text-white absolute full-width"
-        :style="`bottom: ${footerHeight}px;`"
-      >
-        <q-banner
-          v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
-          inline-actions
-          dense
-          :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
+          <q-page-container>
+            <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
+              <q-tab-panels v-model="tab" animated class="coinviewGrid">
+                <q-tab-panel name="Coins" class="no-padding" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
+                  <Coin
+                    :coins="coins"
+                    :coinLoadedAll="coinLoadedAll"
+                    :showHistoryDlg.sync="showHistoryDlg"
+                    :showExchangeDlg.sync="showExchangeDlg"
+                    :showBuyAmountDlg.sync="showBuyAmountDlg"
+                    :selectedCoin.sync="selectedCoin"
+                    :suggestTokens="suggestTokens"
+                  />
+                </q-tab-panel>
+                <q-tab-panel name="Collectables" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
+                  <Collectables
+                    :nftTokenTags="nftTokenTags"
+                    :nftTokenLoadedAll="nftTokenLoadedAll"
+                    :coinViewHeight="coinViewHeight"
+                    :loadNftTokenTags="loadNftTokenTags"
+                  />
+                </q-tab-panel>
+              </q-tab-panels>
+            </q-page>
+          </q-page-container>
+        </q-layout>
+        
+        <div class="q-pr-none text-white absolute full-width"
+          :style="`bottom: ${footerHeight}px;`"
         >
-          <div :style="`font-size:16px; `">
-            <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
-              {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
-            </marquee>
-          </div>
-          <template v-slot:action>
-            <q-btn
-              class=""
-              :style="`color: ${themeColor};`"
-              no-caps
-              size="12px"
-              label="Withdraw Now"
-              @click="withdrawEVM"
-            />
-            <q-btn
-              round flat dense
-              size="12px"
-              icon="close"
-              @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
-            />
-          </template>
-        </q-banner>
+          <q-banner
+            v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
+            inline-actions
+            dense
+            :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
+          >
+            <div :style="`font-size:16px; `">
+              <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
+                {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
+              </marquee>
+            </div>
+            <template v-slot:action>
+              <q-btn
+                class=""
+                :style="`color: ${themeColor};`"
+                no-caps
+                size="12px"
+                label="Withdraw Now"
+                @click="withdrawEVM"
+              />
+              <q-btn
+                round flat dense
+                size="12px"
+                icon="close"
+                @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
+              />
+            </template>
+          </q-banner>
+        </div>
+        <div v-if="tEVMWithdrawing"
+          class="justify-center absolute flex full-width full-height"
+          style="background: rgba(0, 0, 0, 0.4);"
+        >
+          <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+        </div>
       </div>
-      <div v-if="tEVMWithdrawing"
-        class="justify-center absolute flex full-width full-height"
-        style="background: rgba(0, 0, 0, 0.4);"
-      >
-        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-      </div>
+      </div>   
     </div>
+  
     <History
       :showHistoryDlg.sync="showHistoryDlg"
       :selectedCoin.sync="selectedCoin"
@@ -268,6 +266,23 @@
       :showQRScannerDlg.sync="showQRScannerDlg"
       :coins="coins"
     />
+    <!-- Bottom Naviggation Bar -->
+    <div class="left-col bottomNavBar">
+        <nav>
+            <ul>
+                <li>
+                  <a href="#" class="active wallet"> 
+                    <img src="~assets/wallet.svg" class="menuIcon"></a>
+                </li>
+                <li><a href="#">
+                  <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
+                <li><a href="#">
+                  <img src="~assets/coin.svg" class="menuIcon"></a></li>
+                <li><a href="#">
+                  <img src="~assets/nft.svg" class="menuIcon"></a></li>
+            </ul>
+        </nav>
+    </div>
   </div>
 </template>
 
@@ -725,16 +740,22 @@ export default {
   height: 50px;
   position: absolute;
 }
+
+.coinHeader{
+  margin-left: 50%;
+  transform: translate(-250px);
+}
 .coinview {
   background-color: #00000000;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 }
 
 .coinviewGrid{
   background-color: #00000000;
+  
 }
 .coin-header {
   background-color: #13090900;
@@ -809,22 +830,110 @@ background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
   margin-left: 2rem;
 }
 
-
-nav{
+.bottomNavBar nav{
 position: fixed;
 z-index: 1;
-background: linear-gradient(to bottom, #130C3F, #8946DF 200%);
+background: linear-gradient(to bottom, #00000000, #00000000);
 left: 0;
-top:0;
-height: 100vh;
-max-width: 300px;
-transform: translateX(-100%);
+bottom:0;
+height: auto;
+width: 100%;
 transition: transform .3s;
+}
 
+.bottomNavBar nav ul{
+  list-style: none;
+  padding: 0;
+  display: flex;
+  width: 100%;
+  margin-left: 12.5%;
+}
+
+.bottomNavBar nav ul li{
+  display: inline;
+  width: 100%;
+}
+
+.bottomNavBar nav ul li a{
+  text-decoration: none;
+  color: white;
+  display: inline;
+  width: 100%;
+  height: 10em;
+  visibility: visible;
+  transform: translateX(-100%);
+  transition: transform .3s;
+}
+
+nav ul li a:hover{
+  background: #00000011;
+  opacity: 100%;
+}
+
+.leftNavBar nav {
+    visibility: hidden;
+}
+
+/* .active{
+  background: lightgrey;
+} */
+
+.active:hover{
+  background: 4497FF ;
+}
+
+
+@media only screen and (min-width: 1000px) {
+.leftNavBar nav {
+    position: unset;
+    transform: translateX(0) !important;
+    border-radius: unset;
+    height: 100vh;
+}
+
+.bottomNavBar nav {
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform .3s;
+}
+
+.profileImg {
+  float: right;
+}
+
+.coinHeader{
+  margin-left: 50%;
+  transform: translate(-250px) !important;
+  /* transform: translate(-250px) !important; */
+}
+.profileImg{
+  
+  background-image: url("~assets/camera.svg");
+  display: inline-block;
+  background-repeat: no-repeat;
+  height: 3rem; 
+  width: 3rem; 
+  border-radius: 10rem;
+  margin-top: 1rem; 
+  margin-bottom:-1rem;
+  left: 80%;
+}
+
+.leftNavBar nav{
+  position: fixed;
+  z-index: 1;
+  background: linear-gradient(to bottom, #130C3F, #8946DF 200%);
+  left: 0;
+  top:0;
+  height: 100vh;
+  width: 300px;
+  transform: translateX(-100%);
+  transition: transform .3s;
+  visibility: visible;
 }
 
 .telosLogo{
-  padding: 2em 5em .875em 4em
+  padding: 2.5em 5em .875em 4em
 }
 .menuIcon{
   width: 1.5rem;
@@ -832,17 +941,18 @@ transition: transform .3s;
   margin-right: 1rem;
 }
 
-nav ul{
+.leftNavBar nav ul{
   list-style: none;
   padding: 0;
   width: 100%;
+  margin-bottom: 0%;
 }
 
-nav ul li{
+.leftNavBar nav ul li{
   width: 100%;
 }
 
-nav ul li a{
+.leftNavBar nav ul li a{
   text-decoration: none;
   color: white;
   display: block;
@@ -850,24 +960,5 @@ nav ul li a{
   
 }
 
-nav ul li a:hover{
-  background: #413e47;
-}
-
-.active{
-  background: purple;
-}
-
-.active:hover{
-  background: 4497FF ;
-}
-
-@media only screen and (min-width: 1000px) {
-    nav {
-        position: unset;
-        transform: translateX(0) !important;
-        border-radius: unset;
-        height: 100vh;
-    }
 }
 </style>

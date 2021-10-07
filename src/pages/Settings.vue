@@ -6,15 +6,11 @@
       </div>
       <q-list class="q-py-md">
 
-<!-- Black Button -->
+<!-- Back Button -->
         <q-item class="justify-center backBtn" >
-          <q-btn :style="`height: 2rem; width: 2rem; border-radius: 10rem; left: 1rem; border: 0.010rem solid white;`"
-            @click="onPickFile">
+          <q-btn round flat @click="$router.replace('/balance')">
             <q-icon name="chevron_left" color="white" style=" bottom: 0.2rem; right: 0.1rem" />
           </q-btn>
-          <input type="file" ref="fileInput" accept="image/*"
-            style="display: none" @change="onFilePicked"
-          />
         </q-item>
 
 <!-- Save Button -->

@@ -1,10 +1,10 @@
 <template>
-  <q-layout view="hHh Lpr fFf">
+  <q-layout view="hHh Lpr fFf" >
     <q-page-container  :style="`height: auto;`">
       <router-view :loadedCoins.sync="coins" :loadedNftTokens.sync="nftTokens"/>
     </q-page-container>
     
-    <q-footer class="footerStyle" v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
+    <!-- <q-footer class="footerStyle" v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
       <q-tabs 
         v-model="tab"
         dense
@@ -24,7 +24,7 @@
           :style="`opacity: ${page.available ? 1 : 0.3} !important; background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%)`"
         />
       </q-tabs>
-    </q-footer>
+    </q-footer> -->
   </q-layout>
 </template>
 
@@ -126,7 +126,7 @@ export default {
 
 <style>
 .footerStyle{
-  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%)
+  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
 }
 
 </style>
