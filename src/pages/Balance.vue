@@ -3,13 +3,13 @@
     <div class="flex-center fit-div">
 
       <!-- Left Naviggation Bar -->
-      <div >
+      <div>
           <div class="left-col leftNavBar">
             <nav>
               <img src="~assets/telosLogo.svg" class="telosLogo">
                 <ul>
                     <li>
-                      <a href="#" class="active wallet"> 
+                      <a @click="$router.replace('/balance')" class="active wallet"> 
                         <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
                     </li>
                     <li><a @click="$router.replace('/dappsearch')">
@@ -188,7 +188,7 @@
             v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
             inline-actions
             dense
-            :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
+            :style="`background: ${themeColor}; max-width: 600px; margin: auto;`"
           >
             <div :style="`font-size:16px; `">
               <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
@@ -271,10 +271,10 @@
         <nav>
             <ul>
                 <li>
-                  <a href="#" class="active wallet"> 
+                  <a @click="$router.replace('/balance')" class="active wallet"> 
                     <img src="~assets/wallet.svg" class="menuIcon"></a>
                 </li>
-                <li><a href="#">
+                <li><a @click="$router.replace('/dappsearch')">
                   <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
                 <li><a href="#">
                   <img src="~assets/coin.svg" class="menuIcon"></a></li>
@@ -922,7 +922,7 @@ nav ul li a:hover{
   left: 0;
   top:0;
   height: 100vh;
-  width: 300px;
+  width: 250px;
   transform: translateX(-100%);
   transition: transform .3s;
   visibility: visible;
