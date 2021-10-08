@@ -8,8 +8,7 @@
     transition-hide="slide-down"
   >
     <q-card class="bg-white" style="max-width: 800px; height:25%; margin: auto; padding-top: .75rem;
-    border-radius: 5px !important;
-}">
+    border-radius: 5px !important;">
       <q-layout
         view="hhh Lpr fFf"
         container
