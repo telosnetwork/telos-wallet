@@ -13,9 +13,9 @@
                     </li>
                     <li><a @click="$router.replace('/dappsearch')">
                       <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
-                    <li><a href="#">
+                    <li><a @click="tab = 'Coins'">
                       <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
-                    <li><a href="#">
+                    <li><a @click="tab = 'Collectables'">
                       <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
                 </ul>
             </nav>
@@ -275,9 +275,9 @@
           </li>
           <li><a @click="$router.replace('/dappsearch')">
             <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
-          <li><a href="#">
+          <li><a @click="tab = 'Coins'">
             <img src="~assets/coin.svg" class="menuIcon"></a></li>
-          <li><a @click="selectedTab = 'tab-2'">
+          <li><a @click="tab = 'Collectables'">
             <img src="~assets/nft.svg" class="menuIcon"></a></li>
         </ul>
       </nav>
