@@ -29,7 +29,7 @@
                    label="Deposit amount"
                    placeholder="0.0000"
                    :hint="`Max: ${nativeTLOSBalance}`"
-                   :dense="dense" />
+                   />
           <q-btn stretch flat no-caps label="Deposit" @click="deposit"/>
         </q-page-container>
       </q-layout>
@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       amount: '',
-      depsoitAmount: ''
+      depositAmount: ''
     }
   },
   computed: {
@@ -64,21 +64,26 @@ export default {
     }
   },
   methods: {
-    deposit() {
-      let amount = parseFloat(this.amount);
-      if (amount > 1)
-        debugger;
-      let quantityStr = ''
+    async deposit() {
+      debugger;
+      let amount = parseFloat(this.depositAmount);
+      if (amount > parseFloat(this.nativeTLOSBalance)) {
+        this.$q.notify({
+          type: 'negative',
+          message: `Cannot deposit more than native TLOS balance: ${this.nativeTLOSBalance}`,
+        });
+        return;
+      }
+
+      let quantityStr = `${amount.toFixed(4)} TLOS`;
       let actions = [];
       if (!this.haveEVMAccount) {
         actions.push({
           account: 'eosio.evm',
           name: 'create',
           data: {
-            from: this.accountName.toLowerCase(),
-            to: this.toAddress,
-            quantity: quantityStr,
-            memo: this.notes
+            account: this.accountName.toLowerCase(),
+            data: 'create'
           }
         })
       }
@@ -89,11 +94,36 @@ export default {
         data: {
           from: this.accountName.toLowerCase(),
           to: 'eosio.evm',
-          quantity: amountStr,
+          quantity: quantityStr,
           memo: ''
         }
       })
 
+      const transaction = await this.$store.$api.signTransaction(actions, `Deposit ${quantityStr} to the EVM`);
+      if (transaction) {
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Transaction failed. Make sure authentication is done correctly.`,
+          });
+        } else if (transaction !== 'cancelled') {
+          this.$q.notify({
+            type: 'primary',
+            message: `${quantityStr} is deposited to the EVM`,
+          });
+          this.$root.$emit('successfully_deposited', quantityStr);
+        }
+      } else {
+        this.$q.notify({
+          type: 'negative',
+          message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+        });
+      }
 
     }
   },
