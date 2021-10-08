@@ -1,7 +1,6 @@
 <template>
-  <div class="full-height main-div" :style="'background: linear-gradient(to bottom, #130C3F, #8946DF 200%)'">
+  <div class="full-height main-div" :style="'background: #00000000'">
     <div class="flex-center fit-div">
-
       <!-- Left Naviggation Bar -->
       <div>
           <div class="left-col leftNavBar">
@@ -37,7 +36,7 @@
 <!-- Account Name -->
         <label 
           class="text-white"
-          :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
+          :style="`opacity: ${accountNameStyle.opacity};`"
         >
           {{accountName}}
         </label>
@@ -65,12 +64,12 @@
         </div>
 
 <!-- Action Buttons -->
-        <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 0.5}px;`">
+        <div class="flex-center" :style="`display:flex; height: 10%`">
           <div class="balanceBtn">
             <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>  
           </div>
           <div class="qrCodeBtn">
-            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px; color: #FFFFFF; margin-bottom: 1rem; margin-top: 1rem;" @click="showQRScannerDlg = true"/>
+            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px; color: #FFFFFF; " @click="showQRScannerDlg = true"/>
           </div>
           <div class="balanceBtn">
             <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
@@ -82,67 +81,69 @@
         </div>
 
 <!-- Convert Coins -->
-    <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 3}px;`">
-        <q-item
-        clickable
-        v-ripple
-        class="convertBtns"
-        @click="clickExchange()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <!-- <img src="~assets/telos-swap.png"> -->
-          </q-avatar>
-        </q-item-section>
-        
-        <q-item-section >
-          <div class="text-white text-left">
-            <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
-            <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
-          </div>
-        </q-item-section>
-      </q-item>
+        <div class="flex-center" :style="`display:flex; height: 0%`">
+            <q-item
+            clickable
+            v-ripple
+            class="convertBtns"
+            @click="clickExchange()"
+          >
+            <q-item-section avatar>
+              <q-avatar size="45px" class="q-my-sm">
+                <!-- <img src="~assets/telos-swap.png"> -->
+              </q-avatar>
+            </q-item-section>
+            
+            <q-item-section >
+              <div class="text-white text-left">
+                <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
+                <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
+              </div>
+            </q-item-section>
+          </q-item>
 
 <!-- Purchase Coins -->
-      <q-item
-        clickable
-        v-ripple
-        class="purchaseBtns"
-        @click="clickPurchase()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <!-- <img src="~assets/telos-buy.png"> -->
-          </q-avatar>
-        </q-item-section>
-        
-        <q-item-section >
-          <div class="text-black text-left ">
-            <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
-            <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
-          </div>
-        </q-item-section>
-      </q-item>
-    </div>
+          <q-item
+            clickable
+            v-ripple
+            class="purchaseBtns"
+            @click="clickPurchase()"
+          >
+            <q-item-section avatar>
+              <q-avatar size="45px" class="q-my-sm">
+                <!-- <img src="~assets/telos-buy.png"> -->
+              </q-avatar>
+            </q-item-section>
+            
+            <q-item-section >
+              <div class="text-black text-left ">
+                <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
+                <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
+              </div>
+            </q-item-section>
+          </q-item>
+        </div>
 
+      </div>   
+      
+    </div>
+  
 <!-- Coin Header -->
-      <div class="coinHeader"
-      :style="`height: ${coinViewHeight}px; text-align: webkit-center;`">
+    <div class="coinHeader ">
         <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
+        <!-- view="hhh Lpr fFf" -->
         <q-layout
-          view="hhh Lpr fFf"
-          container
-          class="shadow-4 coinview flex-center"
-          :style="`width: 500px; display:flex; `">
-          <q-header class="coin-header flex-center" >
+          view="hHh LpR lFr"
+          
+          class="coinview flex-center"
+          :style="`max-height: 100%; max-width: 800px; min-width: 300px; display:flex; width:100%`">
+          <q-header class="coin-header flex-center" style="width:100%" >
             <q-tabs
               v-model="tab"
-              dense
-              align="center"
               wide-indicator
               active-color="white"
               class=" text-white shadow-2 full-height no-shadow"
-              style="width: auto; background: #39276A"
+              style="width: 100%; background: #00000000"
             >
               <q-tab
                 no-caps
@@ -150,15 +151,16 @@
                 :name="tab.title"
                 :label="tab.label"
                 :key="tab.title"
+                style="width: 50%; background: #00000000; visibility: hidden;"
               />
             </q-tabs>
           </q-header>
 
-          <q-page-container>
-            <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
-              <q-tab-panels v-model="tab" animated class="coinviewGrid">
-                <q-tab-panel name="Coins" class="no-padding" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
-                  <Coin
+          <q-page-container style="width: 100%;">
+            <q-page flat v-touch-pan.vertical.prevent.mouse="handlePan">
+              <q-tab-panels flat v-model="tab"  class="coinviewGrid">
+                <q-tab-panel flat name="Coins" class="no-padding" :style="'background: #00000000; border:0px;'">
+                  <Coin flat
                     :coins="coins"
                     :coinLoadedAll="coinLoadedAll"
                     :showHistoryDlg.sync="showHistoryDlg"
@@ -168,7 +170,7 @@
                     :suggestTokens="suggestTokens"
                   />
                 </q-tab-panel>
-                <q-tab-panel name="Collectables" :style="'background: linear-gradient(to bottom, #6D659F55 -20%, #FFFFFF11 0%)'">
+                <q-tab-panel name="Collectables" :style="'background:  #00000000'">
                   <Collectables
                     :nftTokenTags="nftTokenTags"
                     :nftTokenLoadedAll="nftTokenLoadedAll"
@@ -188,7 +190,7 @@
             v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
             inline-actions
             dense
-            :style="`background: ${themeColor}; max-width: 600px; margin: auto;`"
+            :style="`background: ${themeColor}; max-width: 600px; min-width: 300px; margin: auto;`"
           >
             <div :style="`font-size:16px; `">
               <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
@@ -219,10 +221,7 @@
         >
           <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
         </div>
-      </div>
-      </div>   
     </div>
-  
     <History
       :showHistoryDlg.sync="showHistoryDlg"
       :selectedCoin.sync="selectedCoin"
@@ -268,21 +267,22 @@
     />
     <!-- Bottom Naviggation Bar -->
     <div class="left-col bottomNavBar">
-        <nav>
-            <ul>
-                <li>
-                  <a @click="$router.replace('/balance')" class="active wallet"> 
-                    <img src="~assets/wallet.svg" class="menuIcon"></a>
-                </li>
-                <li><a @click="$router.replace('/dappsearch')">
-                  <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
-                <li><a href="#">
-                  <img src="~assets/coin.svg" class="menuIcon"></a></li>
-                <li><a href="#">
-                  <img src="~assets/nft.svg" class="menuIcon"></a></li>
-            </ul>
-        </nav>
+      <nav>
+        <ul>
+          <li>
+            <a @click="$router.replace('/balance')" class="active wallet"> 
+              <img src="~assets/wallet.svg" class="menuIcon"></a>
+          </li>
+          <li><a @click="$router.replace('/dappsearch')">
+            <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
+          <li><a href="#">
+            <img src="~assets/coin.svg" class="menuIcon"></a></li>
+          <li><a @click="selectedTab = 'tab-2'">
+            <img src="~assets/nft.svg" class="menuIcon"></a></li>
+        </ul>
+      </nav>
     </div>
+    <!-- <img src="~assets/bottomBg.svg" class=""> -->
   </div>
 </template>
 
@@ -416,7 +416,7 @@ export default {
     },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
-      this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+      // this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
       if (info.isFirst) {
         this.panning = true;
       } else if (info.isFinal) {
@@ -620,14 +620,14 @@ export default {
       if (!this.panning) {
         if (this.coinViewHeight < this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
           && this.coinViewHeight > this.availableHeight - this.maxSpace) {
-          this.coinViewHeight = this.coinViewHeight - 3;
+          // this.coinViewHeight = this.coinViewHeight - 3;
         } else if (this.coinViewHeight >= this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
           && this.coinViewHeight < this.availableHeight - this.minSpace){
-          this.coinViewHeight = this.coinViewHeight + 3;
+          // this.coinViewHeight = this.coinViewHeight + 3;
         }
         const approxViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
         if (this.coinViewHeight != approxViewHeight) {
-          this.coinViewHeight = approxViewHeight;
+          // this.coinViewHeight = approxViewHeight;
         }
       }
       this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
@@ -706,6 +706,8 @@ export default {
 </script>
 
 <style scoped>
+
+
 .main-div {
   background-color: #00000000;
   display: flex;
@@ -742,23 +744,25 @@ export default {
 }
 
 .coinHeader{
+  width: 80%;
+  margin-top: -3rem;
   margin-left: 50%;
-  transform: translate(-250px);
+  transform: translate(-45%);
+  height: calc(100vh - 250px - 100px);
 }
 .coinview {
   background-color: #00000000;
-  border-top-left-radius: 30px;
-  border-top-right-radius: 30px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 }
 
 .coinviewGrid{
   background-color: #00000000;
-  
 }
 .coin-header {
-  background-color: #13090900;
+  background-color: #130C3F00;
   height: 40px;
 }
 
@@ -770,6 +774,7 @@ export default {
   margin-right: 1rem;
   margin-left: 1rem;
   margin-top: 2rem;
+  padding-top: 0.4rem;
   width: 8rem;
   height: 3rem;
   text-align: center;
@@ -794,15 +799,13 @@ background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
   border: 0;
   background-repeat: no-repeat;
   margin-left: 10rem;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  
+  margin-top: -8rem;
 }
 
 .convertBtns{
   display: flex;
   background-image: url("~assets/Convert.svg");
-  height: 2rem;
+  height: 1rem;
   width: 8rem;
   border: none;
   border-radius: 0%;
@@ -811,22 +814,18 @@ background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 2rem;
-  margin-top: 2rem;
+  margin-left: 1rem;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-top: -8rem;
 }
 
 .profileImg{
   background-image: url("~assets/camera.svg");
   text-align: center;
-  display: inline-block;
-  background-repeat: no-repeat;
   height: 3rem; 
   width: 3rem; 
-  border-radius: 10rem;
-  margin-top: 1rem; 
-  margin-bottom:-1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
   margin-left: 2rem;
 }
 
@@ -836,7 +835,7 @@ z-index: 1;
 background: linear-gradient(to bottom, #00000000, #00000000);
 left: 0;
 bottom:0;
-height: auto;
+height: 65px;
 width: 100%;
 transition: transform .3s;
 }
@@ -882,6 +881,26 @@ nav ul li a:hover{
   background: 4497FF ;
 }
 
+.coinHeader {
+  overflow: auto;
+}
+
+.coinHeader::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+.coinHeader::-webkit-scrollbar {
+  width: 1px;
+  background-color: #02020233;
+}
+
+.coinHeader::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+}
 
 @media only screen and (min-width: 1000px) {
 .leftNavBar nav {
@@ -899,19 +918,17 @@ nav ul li a:hover{
 
 .coinHeader{
   margin-left: 50%;
-  transform: translate(-250px) !important;
+  width: 60%;
+  transform: translate(-45%);
   /* transform: translate(-250px) !important; */
 }
+
 .profileImg{
-  
   background-image: url("~assets/camera.svg");
-  display: inline-block;
-  background-repeat: no-repeat;
   height: 3rem; 
   width: 3rem; 
-  border-radius: 10rem;
-  margin-top: 1rem; 
-  margin-bottom:-1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
   left: 80%;
 }
 
@@ -955,6 +972,49 @@ nav ul li a:hover{
   padding: .875em 6em 3em 6em;
   
 }
+
+.coinHeader {
+  overflow: auto;
+}
+
+.coinHeader::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+.coinHeader::-webkit-scrollbar {
+  width: 1px;
+  background-color: #00000000;
+}
+
+.coinHeader::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0);
+  background-color: rgba(0, 0, 0, 0.199);
+}
+
+.container {
+  overflow: auto;
+}
+
+.container::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+.container:-webkit-scrollbar {
+  width: 1px;
+  background-color: #0f0f0f3a;
+}
+
+.container::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0);
+  background-color: rgba(0, 0, 0, 0);
+}
+
 
 }
 </style>

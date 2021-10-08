@@ -21,7 +21,7 @@
                 <label class="text-subtitle1 text-weight-medium h-25">Buy {{selectedCoin.symbol}}</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
           </q-toolbar>
         </q-header>
 
@@ -388,6 +388,9 @@ export default {
   font-size: 1.2rem;
   margin-top: 1rem;
   color: white
+}
+.closebBtn{
+  border: 2px solid white;
 }
 
 

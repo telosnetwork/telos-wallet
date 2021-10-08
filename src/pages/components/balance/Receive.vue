@@ -21,7 +21,7 @@
                 <label class="text-subtitle2 text-grey-4">Select a coin</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
           </q-toolbar>
           <q-input v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
@@ -125,5 +125,9 @@ export default {
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 
+}
+
+.closebBtn{
+  border: 2px solid white;
 }
 </style>

@@ -7,27 +7,28 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="max-width: 800px; margin: auto;">
+    <q-card class="full-height main-card" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hHh Lpr fff"
         container
         class="shadow-4 coinview"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+        <q-header class="text-grey-8 q-pa-sm" style="background: #1A1048 ">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">{{`Receive ${selectedCoin.symbol}`}}</label>
-                <label class="text-subtitle2 text-grey-4">Share your address</label>
+                <!-- <label class="text-subtitle1 text-weight-medium h-20">{{`Receive ${selectedCoin.symbol}`}}</label> -->
+                <label class="text-subtitle2 text-grey-4">From Network</label>
+                <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
               </div>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
         </q-header>
         <q-page-container>
-          <q-card class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow" :style="`height: ${cardHeight}px;`">
-            <div v-if="isPToken" class="list-item q-pb-sm">
-              <label class="text-center full-width">From Network</label>
+           
+            <div v-if="isPToken" class="list-item q-pb-sm column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow">
+              <!-- <label class="text-center full-width">From Network</label> -->
             </div>
             <div v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
@@ -82,7 +83,6 @@
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
               p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
-          </q-card>
         </q-page-container>
         <div class="text-center text-grey-6">Transactions may take a few minutes to complete</div>
       </q-layout>

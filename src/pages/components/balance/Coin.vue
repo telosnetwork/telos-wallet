@@ -43,14 +43,14 @@
         </q-item-section>
       </q-item> -->
       <!-- <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label> -->
-      <q-item v-for="(coin, index) in availbleCoins"
+      <q-item flat v-for="(coin, index) in availbleCoins"
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
         class="list-item"
         @click="selectCoin(coin)"
       >
-        <q-item-section avatar>
+        <q-item-section flat avatar>
           <q-avatar size="45px" class="q-my-sm">
             <img :src="coin.icon">
           </q-avatar>
@@ -122,4 +122,26 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+div.scroll {
+  overflow: auto;
+}
+
+div.scroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(184, 18, 18, 0.3);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+div.scroll:-webkit-scrollbar {
+  width: 1px;
+  background-color: #7802ff;
+}
+
+div.scroll::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0.3);
+  background-color: rgb(223, 0, 0);
+}
+
 </style>

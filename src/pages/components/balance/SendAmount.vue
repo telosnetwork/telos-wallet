@@ -6,28 +6,46 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card v-if="selectedCoin" class="bg-white full-height" style="max-width: 800px; margin: auto;">
+    <q-card v-if="selectedCoin" class=" full-height" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%">
+      <!-- background: linear-gradient(to bottom, #130C3F, #8946DF 200% -->
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+        <q-header class=" text-white q-pa-sm" style="background: #190F47">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-20">Send</label>
-                <label class="text-subtitle2 text-grey-4">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label>
+                <!-- <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white" icon="close"/>
           </q-toolbar>
         </q-header>
+
+<!-- Body Information -->
         <q-page-container>
+<!-- Coin Image -->
+           <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+            <q-item-section avatar class="cryptoImg">
+              <q-avatar size="6rem">
+                <img :src="selectedCoin.icon">
+                <!-- <img :src="coin.icon"> -->
+              </q-avatar>
+            </q-item-section>
+            <img class="avatarBackground" src="~assets/avatarBackground.svg">
+          </div>
+
+
           <div class="column text-center" :style="`height: ${cardHeight}px;`">
             <q-space/>
+
+<!-- Amount Shown -->
             <div class="full-width items-center amount-div">
               <div class="full-width column">
+                <label class="amount">Amount</label>
                 <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
                   {{ sendAmount }}
                 </label>
@@ -38,25 +56,25 @@
                   <input 
                     type="text"
                     :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
-                    :style="`font-size: ${amountFontSize}px; color: ${themeColor}; z-index: 1; width: ${inputWidth}px;`"
+                    :style="`font-size: ${amountFontSize}px; color: white; z-index: 1; width: ${inputWidth}px;`"
                     v-model="sendAmount"
                     @focus="sendAmount = (sendAmount === '0' ? '' : sendAmount)"
                     @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString()"
                   />
-                  <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                  <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: white`">
                     {{coinInput ? selectedCoin.symbol : ''}}
                   </label>
                 </div>
                 <label class="text-weight-regular full-width mobile-only" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
                   {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}}
                 </label>
-                <label class="text-subtitle1 text-weight-medium text-grey-8">
+                <label class="text-subtitle1 text-weight-large text-white">
                   {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, selectedCoin.precision)} ${selectedCoin.symbol}`}}
                 </label>
               </div>
-              <div class="full-width text-right absolute">
-                <q-btn round flat icon="fas fa-sync" size="12px" class="text-grey-4 q-mr-sm" @click="changeCoinInput()"/>
-              </div>
+              <!-- <div class="full-width text-right absolute"> -->
+                <!-- <q-btn round flat icon="fas fa-sync" size="12px" class="text-grey-4 q-mr-sm" @click="changeCoinInput()" style="background: linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem"/> -->
+              <!-- </div> -->
             </div>
             <q-space/>
             <q-space/>
@@ -64,7 +82,7 @@
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn v-for="key in keyboard"
                   :key="key"
-                  class="bg-white text-grey-8 q-mx-auto q-my-auto text-h5"
+                  class="bg-white text-white q-mx-auto q-my-auto text-h5"
                   style="width: 30%; height: 60px;"
                   flat
                   :label="key"
@@ -72,8 +90,14 @@
                 />
               </div>
             </div>
-            <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
-              :style="`height: 50px; background: ${themeColor}`"
+<!-- Crypto Available -->
+            <div class="display-grid cryptoAvailable">
+                <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label>
+            </div>
+
+<!-- Next Button -->
+            <q-btn class="text-white text-subtitle2 q-mx-md"
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem`"
               flat
               no-caps
               label="Next"
@@ -240,5 +264,31 @@ export default {
 }
 .h-20 {
   height: 20px;
+}
+.amount{
+  color: #fafafa;
+  margin-top: 7rem;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+.cryptoImg{
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  margin-top: 2rem;
+}
+
+.avatarBackground{
+  display: flex;
+  position: relative;
+  left: 50%; 
+  margin-left:-4rem;
+  margin-top: 0.5rem;
+  /* margin-bottom: -1rem; */
+}
+
+.cryptoAvailable{
+  margin-bottom: 3rem;
+  font-size: 2rem;
 }
 </style>

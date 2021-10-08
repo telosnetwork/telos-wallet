@@ -22,7 +22,10 @@
 
 <!-- User Avatar -->
         <div class="flex-center" style="position: relative; display:flex; left: 0; top: 0; align-content: center;"  >
-          <img class="avatarVideoBack flex-center" src="~assets/avatarVideoBack.svg" >
+          <video>
+            <!-- <source   class="avatarVideoBack flex-center" src="~assets/movingVideo.mp4" type="video/mp4" > -->
+          </video>
+          <!-- <img  class="avatarVideoBack flex-center" src="~assets/movingVideo.mp4" type="video/mp4" > -->
           <img class="avatarBackground flex-center" src="~assets/avatarBackground.svg">
           <q-item class="justify-center userAvatar">
             <q-avatar size="110px" font-size="52px" color="white" text-color="white">

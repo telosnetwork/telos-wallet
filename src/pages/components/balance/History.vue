@@ -15,20 +15,30 @@
         <q-header class="text-white q-pa-sm" :style="'background: #261659'">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
-              <q-avatar size="20px">
-                <img :src="selectedCoin.icon">
-              </q-avatar>
+<!-- Crypto Name -->
               <label class="text-subtitle1 text-weight-medium h-20">
                 {{selectedCoin.name}}
               </label>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white" icon="west"/>
+<!-- Close Button -->
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           </q-toolbar>
           <div class="text-white text-center display-grid">
-            <label class="text-h5 text-weight-medium text-whhite">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
+<!-- Crypto Image -->
+          <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+            <q-item-section avatar class="cryptoImg">
+              <q-avatar size="6rem">
+                <img :src="selectedCoin.icon">
+              </q-avatar>
+            </q-item-section>
+            <img class="avatarBackground" src="~assets/avatarBackground.svg">
+          </div>
+
+<!-- Crypto Amount -->
+            <label class="cryptoAmount text-h5 text-weight-small text-whhite">${{getFixed(selectedCoin.amount * selectedCoin.price, 2)}}</label>
             <label class="text-caption text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
           </div>
-          <div class="text-center q-my-md q-mx-xl" :style="`color: ${themeColor}; display: flex; opacity: 0.8;`">
+          <div class="text-center q-my-md q-mx-xl" :style="`color: #3FA6F5; display: flex; opacity: 0.8;`">
             <q-space/>
             <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
@@ -53,10 +63,12 @@
             </div>
             <q-space v-if="convertEnabled"/>
           </div>
-          <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
+          <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class=" q-pl-sm searchBar text-white"/>
         </q-header>
+
+<!-- Crypto History Container -->
         <q-page-container>
-          <q-infinite-scroll @load="loadMoreHistory" :offset="100">
+          <q-infinite-scroll @load="loadMoreHistory" :offset="100" >
             <div v-for="(history, index) in searchHistories" :key="`${history.block_num}_${index}`">
               <q-item clickable v-ripple class="list-item">
                 <q-item-section avatar>
@@ -66,16 +78,16 @@
                 </q-item-section>
 
                 <q-item-section style="justify-content: start; display: grid;">
-                  <div class="text-black text-left display-grid">
-                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{historyData(history).actionName}}</label>
-                    <label class="text-caption text-grey-5 text-weight-regular wraplabel">{{historyData(history).actionDetail}}</label>
+                  <div class="text-white text-left display-grid">
+                    <label class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel">{{historyData(history).actionName}}</label>
+                    <label class="text-caption text-white text-weight-regular wraplabel">{{historyData(history).actionDetail}}</label>
                   </div>
                 </q-item-section>
 
                 <q-item-section side>
-                  <div class="text-black text-right display-grid">
-                    <label class="text-subtitle2 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(historyData(history).coinAmount, 4)} ${selectedCoin.symbol}`}}</label>
-                    <label class="text-caption text-grey-6">${{getFixed(historyData(history).usdAmount, 4)}}</label>
+                  <div class="text-white text-right display-grid">
+                    <label class="text-subtitle2 text-weight-medium text-white h-20">{{`${getFixed(historyData(history).coinAmount, 4)} ${selectedCoin.symbol}`}}</label>
+                    <label class="text-caption text-white">${{getFixed(historyData(history).usdAmount, 4)}}</label>
                   </div>
                 </q-item-section>
               </q-item>
@@ -210,9 +222,13 @@ export default {
   text-align: center;
 }
 .list-item {
-  border: 1px solid #fafafa;
+  /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
 }
 .display-grid {
   display: grid;
@@ -225,4 +241,44 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.cryptoImg{
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  margin-top: 2rem;
+}
+
+.avatarBackground{
+  display: flex;
+  position: relative;
+  left: 50%; 
+  margin-left:-4rem;
+  margin-top: 0.5rem;
+  /* margin-bottom: -1rem; */
+}
+
+.cryptoAmount{
+  margin-top: 10rem;
+}
+
+.searchBar{
+  width: auto;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  background-color: #462584;
+  text-decoration-color: white;
+}
+
+.cryptoInfo{
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
+}
+
+.closebBtn{
+  border: 2px solid white;
+}
+
 </style>
