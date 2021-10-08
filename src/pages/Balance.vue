@@ -130,11 +130,11 @@
     />
     <DepositEVM
       :showDepositEVMDlg.sync="showDepositEVMDlg"
-      :nativeTLOSBalance.sync="coins[1].amount"
+      :nativeTLOSBalance.sync="coins[0].amount"
     />
     <WithdrawEVM
       :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-      :evmTLOSBalance.sync="coins[0].amount"
+      :evmTLOSBalance.sync="coins[1].amount"
     />
     <Receive
       :showReceiveDlg.sync="showReceiveDlg"

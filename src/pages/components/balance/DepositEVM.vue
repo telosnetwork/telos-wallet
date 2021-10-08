@@ -69,7 +69,6 @@ export default {
   },
   methods: {
     async deposit() {
-      debugger;
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
         this.$q.notify({
