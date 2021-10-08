@@ -34,6 +34,7 @@
           <div style="text-align:center; margin-top:.25rem; color: rgba(0, 0, 0, 0.54);">Max: {{nativeTLOSBalance}}</div>
           <q-btn  style="display:block; margin: 2rem auto auto auto;" color="primary" no-caps label="Deposit" @click="deposit"/>
         </q-page-container>
+        <div v-if="!haveEVMAccount" style="text-align:center; margin-top:1rem;">NOTE: This is your first deposit so an additional “create” action will be included</div>
       </q-layout>
     </q-card>
   </q-dialog>
