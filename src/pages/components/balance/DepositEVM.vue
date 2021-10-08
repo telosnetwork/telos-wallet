@@ -3,6 +3,7 @@
     v-model="showDlg"
     persistent
     :maximized="true"
+    :full-height="false"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
@@ -17,20 +18,21 @@
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-20">EVM Deposit</label>
-                <label class="text-subtitle2 text-grey-4">Deposit your TLOS into the EVM, fast, free and instant.</label>
+                <label style="margin-top:.25rem;" class="text-subtitle2 text-grey-4">Deposit your TLOS into the EVM, fast, free and instant.</label>
               </div>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
           </q-toolbar>
         </q-header>
-        <q-page-container>
+        <q-page-container style="width:25%; margin:auto;">
           <q-input outlined
                    v-model="depositAmount"
                    label="Deposit amount"
                    placeholder="0.0000"
-                   :hint="`Max: ${nativeTLOSBalance}`"
-                   :dense="dense" />
-          <q-btn stretch flat no-caps label="Deposit" @click="deposit"/>
+                   :dense="dense">
+          </q-input>
+          <div style="text-align:center; margin-top:.25rem; color: rgba(0, 0, 0, 0.54);">Max: {{nativeTLOSBalance}}</div>
+          <q-btn  style="display:block; margin: 2rem auto auto auto;" color="primary" no-caps label="Deposit" @click="deposit"/>
         </q-page-container>
       </q-layout>
     </q-card>
