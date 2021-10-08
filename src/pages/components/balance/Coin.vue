@@ -13,7 +13,7 @@
             <img src="~assets/telos-buy.png">
           </q-avatar>
         </q-item-section>
-        
+
         <q-item-section style="justify-content: start; display: grid;">
           <div class="text-black text-left display-grid">
             <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Purchase crypto</label>
@@ -32,7 +32,7 @@
             <img src="~assets/telos-swap.png">
           </q-avatar>
         </q-item-section>
-        
+
         <q-item-section style="justify-content: start; display: grid;">
           <div class="text-black text-left display-grid">
             <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Convert</label>
@@ -61,15 +61,21 @@
             </div>
           </q-avatar>
         </q-item-section>
-        
-        <q-item-section style="justify-content: start; display: grid;">
+
+        <q-item-section class="col" style="justify-content: start; display: grid;">
           <div class="text-black text-left display-grid">
             <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{coin.name}}</label>
             <label class="text-subtitle2 text-grey-5 wraplabel">{{coin.symbol}}</label>
           </div>
         </q-item-section>
-        
-        <q-item-section side>
+        <q-item-section class="col-6" style="justify-content: start; display: grid;">
+          <div class="q-py-lg text-black text-left display-grid">
+            <q-btn color="primary" style="width: 12rem" v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'" @click.stop="withdrawEvm">Withdraw from EVM</q-btn>
+            <q-btn color="primary" style="width: 12rem" v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'" @click.stop="depositEvm">Deposit to EVM</q-btn>
+          </div>
+        </q-item-section>
+
+        <q-item-section class="col" side>
           <div class="text-black text-right display-grid">
             <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, coin.precision)} ${coin.symbol}`}}</label>
             <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 2)}}</label>
@@ -89,7 +95,7 @@
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'selectedCoin', 'suggestTokens'],
+  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'showDepositEVMDlg', 'showWithdrawEVMDlg', 'selectedCoin', 'suggestTokens'],
   computed: {
     availableCoins() {
       return this.coins.filter(coin => coin.amount > 0 || this.suggestTokens.includes(coin.symbol.toLowerCase()));
@@ -107,6 +113,12 @@ export default {
       this.$emit('update:selectedCoin', coin);
       this.$emit('update:showHistoryDlg', true);
     },
+    depositEvm() {
+      this.$emit('update:showDepositEVMDlg', true);
+    },
+    withdrawEvm() {
+      this.$emit('update:showWithdrawEVMDlg', true);
+    }
   }
 };
 </script>
