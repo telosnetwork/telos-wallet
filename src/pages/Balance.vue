@@ -131,6 +131,7 @@
     <DepositEVM
       :showDepositEVMDlg.sync="showDepositEVMDlg"
       :nativeTLOSBalance.sync="coins[0].amount"
+      :haveEVMAccount.sync="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
     />
     <WithdrawEVM
       :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
@@ -223,7 +224,7 @@ export default {
         suggested: true,
       }, {
         account: 'eosio.token',
-        name: 'Telos',
+        name: 'Telos EVM',
         symbol: 'TLOS',
         amount: 0,
         price: 0.0,
@@ -323,7 +324,7 @@ export default {
         });
         userCoins.data.tokens.forEach((token) => {
           this.coins.forEach((coin) => {
-            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase()) {
+            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase() && coin.account === token.contract) {
               coin.amount = token.amount || 0;
               coin.precision = token.precision || 4;
             }

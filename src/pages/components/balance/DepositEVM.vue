@@ -30,7 +30,7 @@
                    v-model="depositAmount"
                    label="Deposit amount"
                    placeholder="0.0000"
-                   :dense="dense">
+                   >
           </q-input>
           <div style="text-align:center; margin-top:.25rem; color: rgba(0, 0, 0, 0.54);">Max: {{nativeTLOSBalance}}</div>
           <q-btn  style="display:block; margin: 2rem auto auto auto;" color="primary" no-caps label="Deposit" @click="deposit"/>
@@ -46,11 +46,11 @@ import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 
 export default {
-  props: ['showDepositEVMDlg', 'nativeTLOSBalance'],
+  props: ['showDepositEVMDlg', 'nativeTLOSBalance', 'haveEVMAccount'],
   data() {
     return {
       amount: '',
-      depositAmount: ''
+      depositAmount: '',
     }
   },
   computed: {
@@ -63,9 +63,6 @@ export default {
         this.$emit('update:showDepositEVMDlg', value);
       },
     },
-    haveEVMAccount() {
-      return this.$root.tEVMAccount && this.$root.tEVMAccount.address;
-    }
   },
   methods: {
     async deposit() {
@@ -124,7 +121,7 @@ export default {
       } else {
         this.$q.notify({
           type: 'negative',
-          message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+          message: `Failed to deposit ${quantityStr} to EVM`,
         });
       }
 

@@ -29,10 +29,10 @@
                    v-model="withdrawAmount"
                    label="Withdraw amount"
                    placeholder="0.0000"
-                   :dense="dense">
+                   >
           </q-input>
           <div style="text-align:center; margin-top:.25rem; color: rgba(0, 0, 0, 0.54);">Max: {{evmTLOSBalance}}</div>
-          <q-btn  style="display:block; margin: 2rem auto auto auto;" color="primary" no-caps label="Deposit" @click="withdraw"/>
+          <q-btn  style="display:block; margin: 2rem auto auto auto;" color="primary" no-caps label="Withdraw" @click="withdraw"/>
         </q-page-container>
       </q-layout>
     </q-card>
@@ -63,13 +63,11 @@ export default {
   },
   methods: {
     async withdraw() {
-      debugger;
-      return;
       let amount = parseFloat(this.withdrawAmount);
       if (amount > parseFloat(this.evmTLOSBalance)) {
         this.$q.notify({
           type: 'negative',
-          message: `Cannot deposit more than native TLOS balance: ${this.nativeTLOSBalance}`,
+          message: `Cannot withdraw more than EVM TLOS balance: ${this.evmTLOSBalance}`,
         });
         return;
       }
@@ -78,13 +76,11 @@ export default {
       let actions = [];
 
       actions.push({
-        account: 'eosio.token',
-        name: 'transfer',
+        account: 'eosio.evm',
+        name: 'withdraw',
         data: {
-          from: this.accountName.toLowerCase(),
-          to: 'eosio.evm',
+          to: this.accountName.toLowerCase(),
           quantity: quantityStr,
-          memo: ''
         }
       })
 
@@ -103,14 +99,14 @@ export default {
         } else if (transaction !== 'cancelled') {
           this.$q.notify({
             type: 'primary',
-            message: `${quantityStr} is deposited to the EVM`,
+            message: `${quantityStr} is withdrawn from the EVM`,
           });
-          this.$root.$emit('successfully_deposited', quantityStr);
+          this.$root.$emit('successfully_withdrew', quantityStr);
         }
       } else {
         this.$q.notify({
           type: 'negative',
-          message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+          message: `Failed to withdraw ${quantityStr} from EVM`,
         });
       }
     }
