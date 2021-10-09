@@ -6,7 +6,7 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card v-if="selectedCoin" class="full-height" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
+    <q-card v-if="selectedCoin" class="full-height" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container

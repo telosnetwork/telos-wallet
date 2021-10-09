@@ -6,7 +6,7 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card v-if="selectedCoin" class=" full-height" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%">
+    <q-card v-if="selectedCoin" class=" full-height" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%">
       <!-- background: linear-gradient(to bottom, #130C3F, #8946DF 200% -->
       <q-layout
         view="hhh Lpr fFf"
@@ -21,7 +21,7 @@
                 <!-- <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
           </q-toolbar>
         </q-header>
 
@@ -255,7 +255,7 @@ export default {
   justify-content: space-between;
 }
 .list-item {
-  border: 1px solid #fafafa;
+  /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
 }
@@ -290,6 +290,9 @@ export default {
 .cryptoAvailable{
   margin-bottom: 3rem;
   font-size: 2rem;
+}
+.closebBtn{
+  border: 2px solid white;
 }
 
 @media only screen and (min-width: 1000px) {

@@ -6,7 +6,7 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="full-height" style="max-width: 800px; margin: auto;">
+    <q-card class="full-height" style="max-width: auto; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -21,7 +21,7 @@
                 <label class="text-subtitle2 text-white">Select a coin</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
           </q-toolbar>
           <q-input :style="`background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`" v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
         </q-header>
@@ -130,4 +130,7 @@ export default {
   text-overflow: ellipsis;
 }
 
+.closebBtn{
+  border: 2px solid white;
+}
 </style>
