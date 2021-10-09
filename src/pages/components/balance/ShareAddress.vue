@@ -7,12 +7,13 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="max-width: 800px; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
+    <q-card class="full-height main-card" style="width: 100vw; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
       <q-layout
         view="hHh Lpr fff"
-        container
         class="shadow-4 coinview"
       >
+
+<!-- Header -->
         <q-header class="text-grey-8 q-pa-sm" style="background: #1A1048 ">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
@@ -22,15 +23,68 @@
                 <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           </q-toolbar>
         </q-header>
-        <q-page-container>
-           
-            <div v-if="isPToken" class="list-item q-pb-sm column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow">
-              <!-- <label class="text-center full-width">From Network</label> -->
+      
+
+<!-- Coin Image 1 -->
+          <div class="row">
+            <div class="absolute" style=" left: 55%;">
+              <q-item-section avatar class="cryptoImg1">
+                <q-avatar size="6rem">
+                  <img :src="selectedCoin.icon">
+                </q-avatar>
+              </q-item-section>
+              <img class="avatarBackground" src="~assets/avatarBackground.svg" style=" left: 50%;">
             </div>
-            <div v-if="isPToken" class="list-item -center">
+  <!-- Coin Image 2 -->
+            <div class="absolute" style=" left: 45%;">
+              <q-item-section avatar class="cryptoImg2">
+                <q-avatar size="6rem">
+                  <img :src="selectedCoin.icon">
+                </q-avatar>
+              </q-item-section>
+              <img class="avatarBackground2" src="~assets/avatarBackground.svg" style=" left: 45%;">
+            </div>
+          </div>
+
+         <div class="row" style="margin-top: 100px">
+          <div class="full-width items-center amount-div">
+              <div class="full-width column text-center">
+                <label class="amount">Amount</label>
+                <label ref="widthElement" :style="`display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`">
+                  {{ sendAmount }}
+                </label>
+                <div class="text-center row flex-center">
+                  <input 
+                    type="number"
+                    :class="`text-weight-regular ${coinInput ? 'text-center' : 'text-center'} no-border no-outline transparent`"
+                    :style="`font-size: 2rem; color: white; width: auto;`"
+                    v-model="sendAmount"
+                    @focus="sendAmount = (sendAmount === '0' ? '' : sendAmount)"
+                    @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString()"
+                  />
+                  <label class="text-weight-regular q-ml-sm" :style="`font-size: 3rem; color: white`">
+                    {{coinInput ? selectedCoin.symbol : ''}}
+                  </label>
+                </div>
+                <label class="text-weight-regular full-width mobile-only" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
+                  {{coinInput ? `${sendAmount} ${selectedCoin.symbol}` : `$${sendAmount}`}}
+                </label>
+                <label class="text-subtitle1 text-weight-large text-white">
+                  {{coinInput ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}` : `${getFixed(sendAmountValue / selectedCoin.price, selectedCoin.precision)} ${selectedCoin.symbol}`}}
+                </label>
+              </div>
+              <!-- <div class="full-width text-right absolute"> -->
+                <!-- <q-btn round flat icon="fas fa-sync" size="12px" class="text-grey-4 q-mr-sm" @click="changeCoinInput()" style="background: linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem"/> -->
+              <!-- </div> -->
+            </div>
+            </div>
+            <!-- <div v-if="isPToken" class="list-item q-pb-sm column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow">  -->
+              <!-- <label class="text-center full-width">From Network</label> -->
+            <!-- </div> -->
+            <!-- <div v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
                 <q-btn 
                   v-for="(pTokenNetwork, key) of coinpTokenNetworks"
@@ -50,41 +104,98 @@
                 :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
                 @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
               />
-            </div>
+            </div> -->
             <q-space/>
-            <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable"
-              class="cursor-pointer"
-              @click="copyToClipboard(qrcodeData)"
-            >
-              <q-r-canvas
-                :options="{data: qrcodeData, cellSize: 10}"
-                style="width: 120px"
-              />
-            </div>
-            <div
+            
+            <!-- <div
               :class="networkType === 'telos' || networkType === 'ethereum' || !isAddressAvailable ?
                 'text-h6' :
                 'text-caption'"
               style="word-break: break-word;"
             >
               {{ displayAccountName }}
-            </div>
-            <div>({{selectedCoin.name}})</div>
-            <div class="text-grey">Share address</div>
-            <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
+            </div> -->
+            <!-- <div>({{selectedCoin.name}})</div> -->
+            <!-- <div class="text-grey">Share address</div> -->
+            <!-- <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
               <q-spinner color="primary" size="2em" :thickness="5" />
               Awaiting New Deposits...
-            </div>
-            <q-space/>
-            <div v-if="networkType === 'tevm'" class="text-caption text-grey-8">
+            </div> -->
+            <!-- <q-space/> -->
+            <!-- <div v-if="networkType === 'tevm'" class="text-caption text-grey-8">
               Alert will display on balance screen when TLOS is recieved in your account
+            </div> -->
+
+<!-- Crypto Buttons -->
+            <div v-if="isPToken" class="list-item -center">
+              <q-btn-group class="full-width justify-center cryptoBtn" push unelevated>
+                <q-btn 
+                  v-for="(pTokenNetwork, key) of coinpTokenNetworks"
+                  :key="pTokenNetwork"
+                  class="q-px-md"
+                  push no-caps
+                  :label="pTokenNetwork"
+                  :style="`background: ${networkType === key ? '#FFFFFF22' : '#FFFFFF22'}; 
+                          color: ${networkType === 'dollars' ? 'white' : 'grey'};`"
+                  @click="networkType = key"
+                />
+              </q-btn-group>
+              <q-btn
+                v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
+                class="q-mt-sm text-weight-medium text-caption"
+                push no-caps
+                :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
+                :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
+              />
             </div>
+
             <div v-else-if="networkType === 'ptoken'" class="text-caption text-grey-8">
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
               p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
-        </q-page-container>
-        <div class="text-center text-grey-6">Transactions may take a few minutes to complete</div>
+            
+        <div class="networkinfo flex-center" style="display:block;">
+
+<!-- QRCode -->
+          <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable"
+              class="cursor-pointer qrCode"
+              @click="copyToClipboard(qrcodeData)"
+            >
+              <q-r-canvas
+                :options="{data: qrcodeData, cellSize: 10}"
+                style="width: 20px"
+              />
+          </div>
+
+<!-- Username -->
+            <q-item>
+              <q-input
+                style=" width: auto;" 
+                class="round-sm full-width networkinfo" label="Username or Tellos address"
+              /> 
+            </q-item>
+
+<!-- Notes -->
+            <q-item>
+                <q-input  
+                class="round-sm full-width text-white networkinfo" label="Notes"
+              /> 
+            </q-item>
+        </div>
+
+<!-- Next Button -->
+        <div class="networkinfo flex-center" style="display:flex;">
+            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn"
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF);`"
+              flat
+              no-caps
+              label="Next"
+              :disable="sendAmountValue === 0"
+              @click="nextPressed()"
+            />
+          </div>
+        <!-- <div class="text-center text-grey-6">Transactions may take a few minutes to complete</div> -->
       </q-layout>
     </q-card>
   </q-dialog>
@@ -311,8 +422,104 @@ export default {
 .main-card {
   background-image: linear-gradient(white, #f0f0f0);
 }
-.qr-card {
+/* .qr-card {
   width: 95%;
   border-radius: 20px;
+} */
+
+.closebBtn{
+  border: 2px solid white;
+}
+
+.cryptoImg1{
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  margin-top: 6rem;
+  margin-left: 1rem;
+  width: 6rem;
+  height: 6rem;
+}
+.cryptoImg2{
+  position: absolute;
+  width: 0.5rem;
+  height:0.5rem;
+  margin-top: 8rem;
+  margin-right: 3rem;
+  margin-left: -5rem;
+  
+  }
+  
+
+.avatarBackground{
+  display: flex;
+  position: relative;
+  left: 30%; 
+  margin-left: -3.4rem;
+  margin-top: 4.5rem;
+  /* margin-bottom: -1rem; */
+}
+
+.avatarBackground2{
+  display: flex;
+  position: relative;
+  left: -1rem; 
+  margin-left:-6.6rem;
+  margin-top: 4.3rem;
+  width: 8rem;
+  height: 8rem;
+  /* margin-bottom: -1rem; */
+}
+
+.cryptoBtn{
+  margin-top: 1rem;
+}
+
+.networkinfo{
+  display:block;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-top: 1rem;
+}
+
+.nextBtn{
+  margin-top: 0.5rem;
+  width: 600px;
+  margin-bottom: 1rem;
+
+}
+
+.qrCode{
+  float: right;
+}
+
+.amount-div {
+  display: inline-flex;
+  justify-content: space-between;
+}
+
+.amount{
+  color: #fafafa;
+  margin-top: 7rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+ 
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+@media only screen and (min-width: 1000px) {
+.networkinfo{
+  display:block;
+  margin-left: 10rem;
+  margin-right: 10rem;
+  margin-top: 1rem;
+}
 }
 </style>

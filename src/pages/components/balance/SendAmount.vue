@@ -291,4 +291,8 @@ export default {
   margin-bottom: 3rem;
   font-size: 2rem;
 }
+
+@media only screen and (min-width: 1000px) {
+
+}
 </style>
