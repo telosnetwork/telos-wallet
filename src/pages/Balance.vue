@@ -3,7 +3,7 @@
     <div class="flex-center fit-div" :style="`background: ${themeColor}`">
       <div class="text-center full-width" style="display: grid;">
         <login-button v-if="isAuthenticated"/>
-        <label 
+        <label
           class="text-white"
           :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
         >
@@ -78,6 +78,8 @@
                   :coins="coins"
                   :coinLoadedAll="coinLoadedAll"
                   :showHistoryDlg.sync="showHistoryDlg"
+                  :showDepositEVMDlg.sync="showDepositEVMDlg"
+                  :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
                   :showExchangeDlg.sync="showExchangeDlg"
                   :showBuyAmountDlg.sync="showBuyAmountDlg"
                   :selectedCoin.sync="selectedCoin"
@@ -99,34 +101,6 @@
       <div class="q-pr-none text-white absolute full-width"
         :style="`bottom: ${footerHeight}px;`"
       >
-        <q-banner
-          v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
-          inline-actions
-          dense
-          :style="`background: ${themeColor}; max-width: 800px; margin: auto;`"
-        >
-          <div :style="`font-size:16px;`">
-            <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
-              {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
-            </marquee>
-          </div>
-          <template v-slot:action>
-            <q-btn
-              class="bg-white"
-              :style="`color: ${themeColor};`"
-              no-caps
-              size="12px"
-              label="Withdraw Now"
-              @click="withdrawEVM"
-            />
-            <q-btn
-              round flat dense
-              size="12px"
-              icon="close"
-              @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
-            />
-          </template>
-        </q-banner>
       </div>
       <div v-if="tEVMWithdrawing"
         class="justify-center absolute flex full-width full-height"
@@ -153,6 +127,15 @@
       :coins="coins"
       :selectedCoin.sync="selectedCoin"
       :showSendAmountDlg.sync="showSendAmountDlg"
+    />
+    <DepositEVM
+      :showDepositEVMDlg.sync="showDepositEVMDlg"
+      :nativeTLOSBalance.sync="coins[0].amount"
+      :haveEVMAccount.sync="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
+    />
+    <WithdrawEVM
+      :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
+      :evmTLOSBalance.sync="coins[1].amount"
     />
     <Receive
       :showReceiveDlg.sync="showReceiveDlg"
@@ -196,6 +179,8 @@ import ShareAddress from './components/balance/ShareAddress';
 import QRScanner from './components/balance/QRScanner';
 import History from './components/balance/History';
 import Exchange from './components/balance/Exchange';
+import DepositEVM from './components/balance/DepositEVM';
+import WithdrawEVM from './components/balance/WithdrawEVM';
 
 const tabsData = [
   {
@@ -224,6 +209,8 @@ export default {
     QRScanner,
     History,
     Exchange,
+    DepositEVM,
+    WithdrawEVM,
   },
   data() {
     return {
@@ -237,7 +224,7 @@ export default {
         suggested: true,
       }, {
         account: 'eosio.token',
-        name: 'Telos',
+        name: 'Telos EVM',
         symbol: 'TLOS',
         amount: 0,
         price: 0.0,
@@ -275,6 +262,8 @@ export default {
       showQRScannerDlg: false,
       showHistoryDlg: false,
       showExchangeDlg: false,
+      showDepositEVMDlg: false,
+      showWithdrawEVMDlg: false,
       tEVMBalance: 0,
       tEVMWithdrawing: false,
     };
@@ -335,7 +324,7 @@ export default {
         });
         userCoins.data.tokens.forEach((token) => {
           this.coins.forEach((coin) => {
-            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase()) {
+            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase() && coin.account === token.contract) {
               coin.amount = token.amount || 0;
               coin.precision = token.precision || 4;
             }
@@ -521,7 +510,7 @@ export default {
       });
 
       const transaction = await this.$store.$api.signTransaction(actions, `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`);
-      
+
       if (transaction) {
         if (transaction === 'needAuth') {
           this.$q.notify({
@@ -693,7 +682,7 @@ export default {
   height: 20px;
   margin: auto;
 }
-.bar {  
+.bar {
   width: 100%;
   height: 50px;
   position: absolute;
