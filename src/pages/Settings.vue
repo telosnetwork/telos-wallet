@@ -1,89 +1,89 @@
 <template>
-  <div class="profile flex-center" :style="`width: auto; margin: 0%; display:flex; overflow: auto; height: ${availableHeight}px !important; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)`">
+  <div class="profile flex-center" :style="` display:flex; overflow: auto; height: 100vh !important; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)`">
     <div>
       <div class="profile text-white flex-center">
-      <label>Profile</label>
+      <label style="height: 70px; margin-bottom: 80px">Profile</label>
       </div>
       <q-list class="q-py-md">
 
 <!-- Back Button -->
-        <q-item class="justify-center backBtn" >
+        <q-item class="backBtn" >
           <q-btn round flat @click="$router.replace('/balance')">
-            <q-icon name="chevron_left" color="white" style=" bottom: 0.2rem; right: 0.1rem" />
+            <q-icon name="chevron_left" color="white" />
           </q-btn>
         </q-item>
 
-<!-- Save Button -->
-        <q-item class= "saveBtn text-white"  >
-          <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
-            label="SAVE" @click="save" :disable="display_name.length === 0"
-          />
-        </q-item>
+
 
 <!-- User Avatar -->
-        <div class="flex-center" style="position: relative; display:flex; left: 0; top: 0; align-content: center;"  >
-          <video>
-            <!-- <source   class="avatarVideoBack flex-center" src="~assets/movingVideo.mp4" type="video/mp4" > -->
+        <div class="flex-center relative" style="display:flex;"  >
+          <video autoplay loop class="userAvatar" style="width: 300px; background: #00000000">
+            <source   class="flex-center" src="~assets/test.webm" type="video/webm" style="width: 300px; background: #00000000" >
           </video>
-          <!-- <img  class="avatarVideoBack flex-center" src="~assets/movingVideo.mp4" type="video/mp4" > -->
-          <img class="avatarBackground flex-center" src="~assets/avatarBackground.svg">
+          <!-- Save Button -->
+          <q-item class= "saveBtn text-white userAvatar">
+            <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
+              label="SAVE" @click="save" :disable="display_name.length === 0"
+            />
+          </q-item>
+
           <q-item class="justify-center userAvatar">
-            <q-avatar size="110px" font-size="52px" color="white" text-color="white">
+            <q-avatar size="100px" font-size="52px" color="white" text-color="white">
               <img :src="userAvatar" style="border: 1px solid purple"/>
-          </q-avatar>
-        </q-item>
+            </q-avatar>
+          </q-item>
+          
+          <!-- </q-container> -->
+          <q-item class="justify-center uploadImage" >
+            <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
+              @click="onPickFile">
+              <q-icon name="add_a_photo" color="white" />
+            </q-btn>
+            <input type="file" ref="fileInput" accept="image/*" 
+              style="display: none" @change="onFilePicked"
+            />
+          </q-item>
+          
         </div>
 
 <!-- Upload Image Button -->
-        <q-item class="justify-center uploadImage" >
-          <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
-            @click="onPickFile">
-            <q-icon name="add_a_photo" color="white" />
-          </q-btn>
-          <!-- <q-btn round class="q-icon material-icons"
-            < q-icon name="mail" />
-            :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem;`"
-            @click="onPickFile"
-          /> -->
-          <input type="file" ref="fileInput" accept="image/*"
-            style="display: none" @change="onFilePicked"
-          />
-        </q-item>
+        
 
     <div class="profileInformation">
 <!-- Avatar Name -->
-        <q-item>
-          <img class="profileImg" src="~assets/avatarImg.svg">
-          <q-input v-model="avatar" 
+        <q-item style="height: 70px;">
+          <img class="profileImg" src="~assets/avatarImg.svg" style="margin-top: 10px;">
+          <q-input v-model="avatar" dense border  standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled 
             class="round-sm full-width" label="Avatar URL"
           />
         </q-item>
 
 <!-- Name -->
-          <q-item>
-            <img class="profileImg" src="~assets/nameImg.svg">
-            <q-input v-model="display_name" 
+          <q-item style="height: 70px; margin-top: 18.4px">
+            <img class="profileImg" src="~assets/nameImg.svg" style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px">
+            <q-input v-model="display_name" dense border  standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
               class="round-sm full-width" label="Name"
               :rules="[val => !!val || 'This field is required']"
             /> 
           </q-item>
 
 <!-- Status -->
-          <q-item>
+          <q-item style="height: 70px;">
             <img class="profileImg" src="~assets/statusImg.svg">
-            <q-input v-model="status" dense border 
+            <q-input v-model="status" dense border standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
               class="round-sm full-width" label="Status"
             />
           </q-item>
 
 <!-- Bio -->
-          <q-item>
-              <img class="profileImg" src="~assets/bioImg.svg">
-            <q-input v-model="bio" dense border
-              class="round-sm full-width text-white" label="Bio"
+          <q-item style="height: 70px;">
+            <img class="profileImg" src="~assets/bioImg.svg">
+            <q-input v-model="bio" dense border standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
+              class="round-sm full-width" label="Bio"
             />
           </q-item>
       </div>
+
 <!-- Google label -->
         <div class="flex-center" style="position: relative; display:flex; left: 1rem; top: 1rem; bottom: 0rem" >
           <p class="googleAccount text-white">Google account is connected | <b> Private Key</b></p>
@@ -254,22 +254,13 @@ export default {
 }
 
 .saveBtn{
-  float: right;
   border-radius: 6rem;
-  opacity: 100%;
-  top: -3rem;
-  right: 5rem;
-  /* margin-left: -3rem; */
-  }
+}
 
 .profile{
   display: flex;
-  margin-top: -1rem;
-  margin-bottom: 4rem;
   font-weight:normal;
   font-size:large;
-  margin-left: 0;
-  margin-right: 0;
 }
 .uploadImage{
   /* background-image: url("~assets/camera.svg"); */
@@ -278,16 +269,13 @@ export default {
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
-  margin-top: -10rem;
-  margin-left: 4rem;
+  margin-left: 5rem;
+  margin-top: 5rem;
+  position:absolute;
 }
 
 .userAvatar{
-  display: flex;
   position:absolute;
-  top: -1.5rem;
-  left: auto;
-  margin-left: 4rem;
 }
 
 .avatarBackground{
@@ -299,18 +287,10 @@ export default {
   top: -2rem;
 }
 
-.avatarVideoBack{
-  display: block;
-  position:absolute;
-  top: -4.5rem;
-  left: center;
-  margin-left: 4rem;
-  width: 14rem;
-  
-}
-
 .profileInformation{
-  width: 30rem;
+  margin-top: 100px;
+  /* width: auto; */
+  /*left: 50%; */
 }
 
 .settingImg{
@@ -345,11 +325,13 @@ export default {
 }
 
 .backBtn{
-float: left;
-text-align: center;
-margin-top: -5rem;
-height: 4rem; 
-width: 4rem;
+  text-align: center;
+  left: 30%;
+  top: 0;
+  height: 4rem; 
+  width: 4rem;
+  position: absolute;
 }
+
 
 </style>

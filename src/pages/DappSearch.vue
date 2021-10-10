@@ -21,28 +21,27 @@
         </nav>
       </div>
 
-      <q-card class="bg-transparent dappsHead slim-scrollbar" style="max-width: 550px; min-width: 300px; margin: auto; height: 100vh;">
+      <q-card class="bg-transparent dappsHead " style="max-width: 800px; min-width: 300px; margin: auto; height: 100vh; ">
         <q-layout
           view="hhh Lpr fFf"
           container
-          class="shadow-4 coinview"
+          class="coinview"
         >
-          <q-header class="dapp-header bg-transparent slim-scrollbar text-white q-pa-sm">
+          <q-header class="dapp-header text-white q-pa-sm">
             <q-toolbar class="no-padding" >
-              <q-toolbar-title class="absolute full-width no-padding text-center">
+              <q-toolbar-title class="text-white absolute full-width no-padding text-center">
                 <div class="display-grid">
-                  <label class="text-subtitle1 text-weight-medium" style="color: white">dApps</label>
+                  <label class="text-white text-subtitle1 text-weight-medium" style="color: white">dApps</label>
                 </div>
               </q-toolbar-title>
             </q-toolbar>
             <div class="row">
-              <q-input v-model="searchDappName" label="Search dApp" dense borderless filled  class="col-12 round-sm q-pl-sm searchBar" />
-              <q-icon class="col" name="search"/>
+              <q-input v-model="searchDappName" standout="text-white" label-color="white"  color="white" label="Search dApp" dense borderless filled input-class="text-white"  class="searchBar text-white"/>
+              <!-- <q-icon class="col" name="search"/> -->
             </div>
-            
           </q-header>
-          <q-page-container class="bg-transparent slim-scrollbar" style="height: 100vh;">
-            <q-infinite-scroll class="slim-scrollbar" @load="loadMoreDapps" :offset="100">
+          <q-page-container class="bg-transparent " style="height: 100vh; padding-top: 100px">
+            <q-infinite-scroll class="" @load="loadMoreDapps" :offset="100">
               <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
                 <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.link)">
                   <q-item-section avatar>
@@ -65,6 +64,7 @@
                     </div>
                   </q-item-section>
                 </q-item>
+                <!-- <q-separator style="height: 1px;" color="white"/> -->
               </div>
               <template v-if="!loadedAll" v-slot:loading>
                 <div class="row justify-center q-my-md">
@@ -170,7 +170,7 @@ div {
 }
 
 div::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
   border-radius: 10px;
   background-color: #00000000;
 }
@@ -182,7 +182,7 @@ div::-webkit-scrollbar {
 
 div::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
   background-color: #555;
 }
 
@@ -214,7 +214,7 @@ div::-webkit-scrollbar-thumb {
 }
 
 .dapp-header {
-  background: #1E124E;
+  background: #020039;
 }
 
 .bottomNavBar nav{
@@ -273,9 +273,9 @@ nav ul li a:hover{
 }
 
 .searchBar{
-  width: 85%;
+  width: 100%;
   margin-left: 1rem;
-  margin-right: 2rem;
+  margin-right: 1rem;
 }
 
 .dappsHead{
@@ -286,6 +286,24 @@ nav ul li a:hover{
   background: #00000000;
 }
 
+.card{
+  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
+}
+
+.q-card{
+  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
+}
+
+@media only screen and (max-width: 1000px) {
+.dappsHead{
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
+  background: #00000000;
+  padding-bottom: 65px
+}
+}
 
 @media only screen and (min-width: 1000px) {
 .leftNavBar nav {
@@ -354,22 +372,54 @@ div {
 }
 
 div::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
   border-radius: 10px;
-  background-color: #000000;
+  background-color: #0f0f0f3a;
 }
 
 div::-webkit-scrollbar {
   width: 1px;
-  background-color: #000000;
+  background-color: #0f0f0f3a;
 }
 
 div::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0.3);
-  background-color: #555;
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+  background-color: #0f0f0f3a;
+}
+
+q-layout {
+  overflow: auto;
+}
+
+q-layout::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+q-layout:-webkit-scrollbar {
+  width: 1px;
+  background-color: #0f0f0f3a;
+}
+
+q-layout::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0);
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.card{
+  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
+}
+
+.q-card{
+  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
 }
 
 }
+
+
+
 
 </style>

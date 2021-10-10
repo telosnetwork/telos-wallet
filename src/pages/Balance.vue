@@ -783,7 +783,7 @@ export default {
 }
 
 .backgroundGradient{
-background: linear-gradient(to bottom, #130C3F, #8946DF 200%)
+background: linear-gradient(to bottom, #130C3F, #473283 200%)
 }
 
 .purchaseBtns{
@@ -935,7 +935,7 @@ nav ul li a:hover{
 .leftNavBar nav{
   position: fixed;
   z-index: 1;
-  background: linear-gradient(to bottom, #130C3F, #8946DF 200%);
+  background: linear-gradient(to bottom, #130C3F, #473283 200%);
   left: 0;
   top:0;
   height: 100vh;

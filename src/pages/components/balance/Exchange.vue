@@ -6,7 +6,7 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
+    <q-card class="full-height main-card" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -153,7 +153,7 @@
 
 <!-- Crypto Amount Converter -->
           
-          <q-card v-else class="column q-mx-lg q-mt-xl convert-card" style="height: 200px; background: #fafafa00">
+          <q-card v-else class="column q-mx-lg q-mt-xl convert-card" style="height: 200px; background: #fafafa00;">
             <q-space/>
             <q-item class="list-item full-width q-pb-none" style="min-height: 28px;">
               <q-item-section>
@@ -264,7 +264,7 @@
 
           <div v-if="convertCoin && toCoin && convertAmountValue && toAmountValue"
             class="q-mt-md text-subtitle2 text-weight-bold text-center"
-            :style="`color: white`"
+            :style="`color: white; margin-top: 50px`"
           >
             <span>
               {{ unitReward }}
