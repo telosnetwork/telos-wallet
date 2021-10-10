@@ -29,7 +29,7 @@
         <div>
           <q-item class="userAvatar">
             <q-avatar class="profileImg  userAvatar" @click="$router.replace('/settings')" >
-            <img url="~assets/avatarImg.svg">
+            <img src="~assets/default_avatar.svg">
           </q-avatar>
         </q-item>
 
@@ -820,13 +820,15 @@ background: linear-gradient(to bottom, #130C3F, #473283 200%)
 }
 
 .profileImg{
-  background-image: url("~assets/camera.svg");
+  /* background-image: url("~assets/camera.svg"); */
   text-align: center;
   height: 3rem; 
   width: 3rem; 
   border-radius: 1rem;
   margin-top: 1rem;
   margin-left: 2rem;
+  cursor: pointer;
+  background: no-repeat;
 }
 
 .bottomNavBar nav{
@@ -924,12 +926,14 @@ nav ul li a:hover{
 }
 
 .profileImg{
-  background-image: url("~assets/camera.svg");
-  height: 3rem; 
-  width: 3rem; 
+  /* background-image: url("~assets/camera.svg"); */
+  height: 4rem; 
+  width: 4rem; 
   border-radius: 1rem;
   margin-top: 1rem;
-  left: 80%;
+  left: 70%;
+  cursor: pointer;
+  background: no-repeat;
 }
 
 .leftNavBar nav{

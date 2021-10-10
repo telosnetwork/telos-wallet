@@ -54,7 +54,7 @@ export default {
 
 .main-background {
   /* background:  linear-gradient(to bottom, #1c0c3e, #2a3f7e 200%); */
-  background:  linear-gradient(to bottom, #020039, #2a3f7e 200%);
+  background:  linear-gradient(to bottom, #020039, #2a3f7e 150%);
   
   /* background: radial-gradient( at top left, #ff0c3e, #2a3f7e 100%) top left,
               radial-gradient( at top right, #00fc3e, #2a3f7e 20%) top right,

@@ -17,19 +17,22 @@
 
 <!-- User Avatar -->
         <div class="flex-center relative" style="display:flex;"  >
-          <video autoplay loop class="userAvatar" style="width: 300px; background: #00000000">
+          
+          <video autoplay loop class="userAvatar" style="width: 400px; background: #00000000">
             <source   class="flex-center" src="~assets/test.webm" type="video/webm" style="width: 300px; background: #00000000" >
           </video>
+          <div class="overlay" style="width: 100%; height: 100%;"></div>
           <!-- Save Button -->
           <q-item class= "saveBtn text-white userAvatar">
             <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
               label="SAVE" @click="save" :disable="display_name.length === 0"
             />
           </q-item>
-
+        
           <q-item class="justify-center userAvatar">
-            <q-avatar size="100px" font-size="52px" color="white" text-color="white">
-              <img :src="userAvatar" style="border: 1px solid purple"/>
+            <q-avatar size="100px" font-size="52px" color="transparent" text-color="white">
+              <!-- <img :src="userAvatar" style="border: 1px solid purple"/> -->
+              <img style="border: 1px solid purple" src="~assets/default_avatar.svg"/>
             </q-avatar>
           </q-item>
           
@@ -305,6 +308,7 @@ export default {
 
 .profileImg{
   margin: 1rem 1.5rem 1rem;
+   z-index: 5;
 }
 
 .nameImg{
@@ -333,5 +337,18 @@ export default {
   position: absolute;
 }
 
+.overlay {
+  position: absolute; 
+  /* display: none; Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #020039aa; /* Black background with opacity */
+  z-index: 0; /* Specify a stack order in case you're using a different order for other elements */
+  /* cursor: pointer; */
+}
 
 </style>
