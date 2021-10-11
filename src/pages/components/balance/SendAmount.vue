@@ -1,19 +1,19 @@
 <template>
   <q-dialog
+    class="main-background"
     v-model="showDlg"
     persistent
     :maximized="true"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card v-if="selectedCoin" class=" full-height" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%">
-      <!-- background: linear-gradient(to bottom, #130C3F, #8946DF 200% -->
+    <q-card v-if="selectedCoin" class=" full-height main-background" style="max-width: auto; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
-        class="shadow-4 coinview"
+        class="shadow-4 coinview main-background-overlay"
       >
-        <q-header class=" text-white q-pa-sm" style="background: #190F47">
+        <q-header class=" text-white q-pa-sm" style="background: #00000000">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
@@ -293,6 +293,16 @@ export default {
 }
 .closebBtn{
   border: 2px solid white;
+}
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 
 @media only screen and (min-width: 1000px) {

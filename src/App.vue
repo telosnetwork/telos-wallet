@@ -1,7 +1,8 @@
 <template>
-  <!-- <div id="q-app" :style="'background: linear-gradient(to bottom, #1c0c3e, #2a3f7e 200%)'"> -->
   <div id="q-app" class="main-background">
-    <router-view />
+    <div class="main-background-overlay">
+      <router-view />
+    </div>
   </div>
 </template>
 <script>
@@ -53,14 +54,13 @@ export default {
 <style scoped>
 
 .main-background {
-  /* background:  linear-gradient(to bottom, #1c0c3e, #2a3f7e 200%); */
-  background:  linear-gradient(to bottom, #020039, #2a3f7e 150%);
-  
-  /* background: radial-gradient( at top left, #ff0c3e, #2a3f7e 100%) top left,
-              radial-gradient( at top right, #00fc3e, #2a3f7e 20%) top right,
-              radial-gradient( at top right, #0ddc3e, #2aaa7e 20%) bottom right,
-              radial-gradient( at top right, #00fc3e, #ff3f7e 20%) bottom left; */
+  background: #020039;
+}
 
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 
 </style>

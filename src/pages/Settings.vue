@@ -1,18 +1,26 @@
 <template>
-  <div class="profile flex-center" :style="` display:flex; overflow: auto; height: 100vh !important; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)`">
+  <div class="profile flex-center main-background-overlay" :style="` display:flex; overflow: auto; height: 100vh !important;`">
     <div>
       <div class="profile text-white flex-center">
       <label style="height: 70px; margin-bottom: 80px">Profile</label>
+       <!-- Save Button -->
+          <q-item class= "saveBtn text-white userAvatar">
+            <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
+              label="SAVE" @click="save" :disable="display_name.length === 0"
+            />
+          </q-item>
       </div>
-      <q-list class="q-py-md">
-
+      
 <!-- Back Button -->
-        <q-item class="backBtn" >
-          <q-btn round flat @click="$router.replace('/balance')">
+        <q-item class="backBtn " >
+          <q-btn style="height: 70px; margin-bottom: 80px" round flat dense @click="$router.replace('/balance')">
             <q-icon name="chevron_left" color="white" />
           </q-btn>
         </q-item>
 
+     
+        
+      <q-list class="q-py-md">
 
 
 <!-- User Avatar -->
@@ -22,21 +30,15 @@
             <source   class="flex-center" src="~assets/test.webm" type="video/webm" style="width: 300px; background: #00000000" >
           </video>
           <div class="overlay" style="width: 100%; height: 100%;"></div>
-          <!-- Save Button -->
-          <q-item class= "saveBtn text-white userAvatar">
-            <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
-              label="SAVE" @click="save" :disable="display_name.length === 0"
-            />
-          </q-item>
-        
+
           <q-item class="justify-center userAvatar">
             <q-avatar size="100px" font-size="52px" color="transparent" text-color="white">
               <!-- <img :src="userAvatar" style="border: 1px solid purple"/> -->
-              <img style="border: 1px solid purple" src="~assets/default_avatar.svg"/>
+              <img style="" src="~assets/default_avatar.svg"/>
             </q-avatar>
           </q-item>
           
-          <!-- </q-container> -->
+<!-- </q-container> -->
           <q-item class="justify-center uploadImage" >
             <q-btn :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
               @click="onPickFile">
@@ -51,8 +53,8 @@
 
 <!-- Upload Image Button -->
         
-
     <div class="profileInformation">
+
 <!-- Avatar Name -->
         <q-item style="height: 70px;">
           <img class="profileImg" src="~assets/avatarImg.svg" style="margin-top: 10px;">
@@ -258,12 +260,18 @@ export default {
 
 .saveBtn{
   border-radius: 6rem;
+  top: 1rem;
+  right: 3rem;
+  top:4% ;
+  z-index: 1;
 }
 
 .profile{
   display: flex;
   font-weight:normal;
   font-size:large;
+  top:10% ;
+  z-index: 1;
 }
 .uploadImage{
   /* background-image: url("~assets/camera.svg"); */
@@ -292,8 +300,7 @@ export default {
 
 .profileInformation{
   margin-top: 100px;
-  /* width: auto; */
-  /*left: 50%; */
+  width: auto;
 }
 
 .settingImg{
@@ -330,25 +337,34 @@ export default {
 
 .backBtn{
   text-align: center;
-  left: 30%;
-  top: 0;
-  height: 4rem; 
-  width: 4rem;
+  top: 0.5rem;
   position: absolute;
+  /* border: 1px solid white; */
+  z-index: 5;
+  float: left;
+  
 }
 
-.overlay {
+/* .overlay {
   position: absolute; 
-  /* display: none; Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
+  width: 100%;
+  height: 100%;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #020039aa; /* Black background with opacity */
-  z-index: 0; /* Specify a stack order in case you're using a different order for other elements */
-  /* cursor: pointer; */
+  background-color: #020039; 
+  z-index: 0;
+} */
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 
 </style>

@@ -8,7 +8,7 @@
               <img src="~assets/telosLogo.svg" class="telosLogo">
                 <ul>
                     <li>
-                      <a @click="$router.replace('/balance')" class="active wallet"> 
+                      <a @click="$router.replace('/balance')" class=" wallet"> 
                         <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
                     </li>
                     <li><a @click="$router.replace('/dappsearch')">
@@ -782,10 +782,6 @@ export default {
   align-content: center;
 }
 
-.backgroundGradient{
-background: linear-gradient(to bottom, #130C3F, #473283 200%)
-}
-
 .purchaseBtns{
   background-image: url("~assets/Purchase.svg");
   height: 1rem;
@@ -820,7 +816,6 @@ background: linear-gradient(to bottom, #130C3F, #473283 200%)
 }
 
 .profileImg{
-  /* background-image: url("~assets/camera.svg"); */
   text-align: center;
   height: 3rem; 
   width: 3rem; 
@@ -840,6 +835,7 @@ bottom:0;
 height: 65px;
 width: 100%;
 transition: transform .3s;
+cursor: pointer;
 }
 
 .bottomNavBar nav ul{
@@ -848,11 +844,13 @@ transition: transform .3s;
   display: flex;
   width: 100%;
   margin-left: 12.5%;
+  cursor: pointer;
 }
 
 .bottomNavBar nav ul li{
   display: inline;
   width: 100%;
+  cursor: pointer;
 }
 
 .bottomNavBar nav ul li a{
@@ -864,6 +862,7 @@ transition: transform .3s;
   visibility: visible;
   transform: translateX(-100%);
   transition: transform .3s;
+  cursor: pointer;
 }
 
 nav ul li a:hover{
@@ -873,6 +872,7 @@ nav ul li a:hover{
 
 .leftNavBar nav {
     visibility: hidden;
+    cursor: pointer;
 }
 
 /* .active{
@@ -881,6 +881,7 @@ nav ul li a:hover{
 
 .active:hover{
   background: 4497FF ;
+  cursor: none;
 }
 
 .coinHeader {
@@ -910,12 +911,14 @@ nav ul li a:hover{
     transform: translateX(0) !important;
     border-radius: unset;
     height: 100vh;
+    cursor: pointer;
 }
 
 .bottomNavBar nav {
     visibility: hidden;
     transform: translateX(-100%);
     transition: transform .3s;
+    cursor: pointer;
 }
 
 .coinHeader{
@@ -939,7 +942,10 @@ nav ul li a:hover{
 .leftNavBar nav{
   position: fixed;
   z-index: 1;
-  background: linear-gradient(to bottom, #130C3F, #473283 200%);
+  /* background: linear-gradient(to bottom, #130C3F, #473283 200%); */
+  /* background: linear-gradient(to bottom, #130C3F, #00000000 100%); */
+  background: linear-gradient(to bottom, #291A4C, #00000000 80%);
+  /* background: linear-gradient(to bottom, #473283, #00000000 100%); */
   left: 0;
   top:0;
   height: 100vh;
@@ -947,6 +953,7 @@ nav ul li a:hover{
   transform: translateX(-100%);
   transition: transform .3s;
   visibility: visible;
+  cursor: pointer;
 }
 
 .telosLogo{
@@ -963,10 +970,12 @@ nav ul li a:hover{
   padding: 0;
   width: 100%;
   margin-bottom: 0%;
+  cursor: pointer;
 }
 
 .leftNavBar nav ul li{
   width: 100%;
+  cursor: pointer;
 }
 
 .leftNavBar nav ul li a{
@@ -974,7 +983,7 @@ nav ul li a:hover{
   color: white;
   display: block;
   padding: .875em 6em 3em 6em;
-  
+  cursor: pointer;
 }
 
 .coinHeader {

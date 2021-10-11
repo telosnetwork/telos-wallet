@@ -192,7 +192,7 @@ div::-webkit-scrollbar-thumb {
   
 }
 .list-item {
-  /* border: 1px solid #fafafa; */
+  border: 1px solid #020036;
   border-left: none;
   border-right: none;
 }
@@ -226,6 +226,7 @@ bottom:0;
 height: auto;
 width: 100%;
 transition: transform .3s;
+cursor: pointer;
 }
 
 .bottomNavBar nav ul{
@@ -234,11 +235,13 @@ transition: transform .3s;
   display: flex;
   width: 100%;
   margin-left: 12.5%;
+  cursor: pointer;
 }
 
 .bottomNavBar nav ul li{
   display: inline;
   width: 100%;
+  cursor: pointer;
 }
 
 .bottomNavBar nav ul li a{
@@ -250,11 +253,13 @@ transition: transform .3s;
   visibility: visible;
   transform: translateX(-100%);
   transition: transform .3s;
+  cursor: pointer;
 }
 
 nav ul li a:hover{
   background: #00000011;
   opacity: 100%;
+  cursor: pointer;
 }
 
 .leftNavBar nav {
@@ -262,6 +267,7 @@ nav ul li a:hover{
   transform: translateX(-100%);
   transition: transform .3s;
   height: 0px;
+  cursor: pointer;
 }
 
 /* .active{
@@ -309,14 +315,16 @@ nav ul li a:hover{
 .leftNavBar nav {
     position: unset;
     transform: translateX(0) !important;
-    border-radius: 15px;
+    border-radius: 0px;
     height: 100vh;
+    cursor: pointer;
 }
 
 .bottomNavBar nav {
     visibility: hidden;
     transform: translateX(-100%);
     transition: transform .3s;
+    cursor: pointer;
 }
 
 .coinHeader{
@@ -329,7 +337,7 @@ nav ul li a:hover{
 .leftNavBar nav{
   position: fixed;
   z-index: 1;
-  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
+  background: linear-gradient(to bottom, #291A4C, #00000000 80%);
   left: 0;
   top:0;
   height: 100vh;
@@ -337,6 +345,7 @@ nav ul li a:hover{
   transform: translateX(-100%);
   transition: transform .3s;
   visibility: visible;
+  cursor: pointer;
 }
 
 .telosLogo{
@@ -353,6 +362,7 @@ nav ul li a:hover{
   padding: 0;
   width: 100%;
   margin-bottom: 0%;
+  cursor: pointer;
 }
 
 .leftNavBar nav ul li{

@@ -1,19 +1,20 @@
 <template>
   <q-dialog
+    class="main-background"
     v-model="showDlg"
     persistent
     :maximized="true"
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)">
+    <q-card class="full-height main-card main-background" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)">
       <q-layout
         view="hhh Lpr fFf"
         container
-        class="shadow-4 coinview"
+        class="shadow-4 coinview main-background-overlay"
       >
 <!-- Top Dollar/Crypto buttons -->
-        <q-header class="text-white q-pa-sm" style="background: #180F46">
+        <q-header class="text-white q-pa-sm" style="background: #00000000">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <q-btn-group class=" full-width justify-center" push unelevated>
@@ -666,5 +667,15 @@ export default {
 
 .closebBtn{
   border: 2px solid white;
+}
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 </style>
