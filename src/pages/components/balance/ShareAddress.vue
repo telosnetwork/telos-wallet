@@ -175,8 +175,9 @@
 <!-- Username -->
             <q-item>
               <q-input
+                v-model="username"
                 class="round-sm full-width networkinfo" 
-                label="Username or Tellos address"
+                label="Username or Telos address"
                 dense 
                 standout="bg-transparent text-white" 
                 label-color="white" 
@@ -187,7 +188,8 @@
 
 <!-- Notes -->
             <q-item>
-                <q-input  
+                <q-input
+                v-model="notes"
                 class="round-sm full-width text-white networkinfo" 
                 label="Notes"
                 dense
@@ -232,6 +234,8 @@ export default {
       depositAddress: '',
       metaData: {},
       awaiting: false,
+      username: '',
+      notes: ""
     }
   },
   components: {
@@ -533,8 +537,8 @@ input[type="number"] {
   background:linear-gradient(120deg, #1DD1FE, #8946DF) ;
   color: white;
   margin-top: 2rem;
-  left: 45%;
-
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .main-background {

@@ -709,6 +709,12 @@ export default {
 
 <style scoped>
 
+@font-face {
+  font-family: silka-regular;
+  font-style: normal;
+  font-weight: normal;
+  src: url("../css/fonts/silka-regularitalic-webfont.woff");
+}
 
 .main-div {
   background-color: #00000000;
@@ -771,11 +777,11 @@ export default {
 .balanceBtn{
   color: #FFFFFF;
   background: linear-gradient(120deg, #1DD1FE, #8946DF);
-  border-radius: 1rem;
+  border-radius: 2rem;
   margin-bottom: 2rem;
   margin-right: 1rem;
   margin-left: 1rem;
-  margin-top: 2rem;
+  margin-top: 3rem;
   padding-top: 0.4rem;
   width: 8rem;
   height: 3rem;
@@ -796,7 +802,7 @@ export default {
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 10rem;
+  margin-left: 5.5rem;
   margin-top: -8rem;
 }
 
@@ -812,9 +818,12 @@ export default {
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
   text-align: center;
   margin-top: -8rem;
+}
+
+.convertBtns:hover {  
 }
 
 .profileImg{
@@ -831,13 +840,12 @@ export default {
 .bottomNavBar nav{
 position: fixed;
 z-index: 1;
-background: linear-gradient(to bottom, #00000000, #00000000);
+background: #00000000;
 left: 0;
 bottom:0;
 height: 65px;
 width: 100%;
 transition: transform .3s;
-cursor: pointer;
 }
 
 .bottomNavBar nav ul{
@@ -846,13 +854,11 @@ cursor: pointer;
   display: flex;
   width: 100%;
   margin-left: 12.5%;
-  cursor: pointer;
 }
 
 .bottomNavBar nav ul li{
   display: inline;
   width: 100%;
-  cursor: pointer;
 }
 
 .bottomNavBar nav ul li a{

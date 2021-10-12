@@ -129,5 +129,12 @@ export default {
   background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
 }
 
+@font-face {
+  font-family: silka-regular;
+  font-style: normal;
+  font-weight: normal;
+  src: url("../css/fonts/silka-regularitalic-webfont.woff");
+}
+
 </style>
 

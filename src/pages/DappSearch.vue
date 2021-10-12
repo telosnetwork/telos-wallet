@@ -1,6 +1,6 @@
 <template>
   <div class="full-height main-div">
-    <div class="flex-center full-height" style="position: relative">
+    <div class="flex-center full-height">
 
       <!-- Left Naviggation Bar -->
       <div class=" leftNavBar">
@@ -46,10 +46,9 @@
             
           </q-header>
           
-      <q-card class="bg-transparent dappsHead " style="max-width: 800px; min-width: 300px; margin: auto; height: 80vh; position: relative">
+      <q-card class="bg-transparent" style="max-width: 800px; min-width: 300px; margin: auto; height: 80vh; position: relative">
         <q-layout
           view="hhh Lpr fFf"
-          container
           class="coinview"
         >
 
@@ -89,24 +88,25 @@
           </q-page-container>
         </q-layout>
       </q-card>
-    <!-- Bottom Naviggation Bar -->
-      <div class="left-col bottomNavBar" style="position: absolute;">
-          <nav>
-            <ul>
-                <li>
-                  <a @click="$router.replace('/balance')" class="active wallet"> 
-                    <img src="~assets/wallet.svg" class="menuIcon"></a>
-                </li>
-                <li><a @click="$router.replace('/dappsearch')">
-                  <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
-                <li><a href="#">
-                  <img src="~assets/coin.svg" class="menuIcon"></a></li>
-                <li><a href="#">
-                  <img src="~assets/nft.svg" class="menuIcon"></a></li>
-            </ul>
-          </nav>
-       </div>
+   
     </div>
+     <!-- Bottom Naviggation Bar -->
+    <div class="left-col bottomNavBar">
+        <nav>
+          <ul>
+              <li>
+                <a @click="$router.replace('/balance')" class="active wallet"> 
+                  <img src="~assets/wallet.svg" class="menuIcon"></a>
+              </li>
+              <li><a @click="$router.replace('/dappsearch')">
+                <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
+              <li><a href="#">
+                <img src="~assets/coin.svg" class="menuIcon"></a></li>
+              <li><a href="#">
+                <img src="~assets/nft.svg" class="menuIcon"></a></li>
+          </ul>
+        </nav>
+      </div>
   </div>
 </template>
 
@@ -200,6 +200,8 @@ div::-webkit-scrollbar-thumb {
   background-color: #555;
 }
 
+
+
 /* .toolbar-title {
   position: absolute;
   text-align: center;
@@ -237,7 +239,7 @@ z-index: 2;
 background: #00000000;
 left: 0;
 bottom:0;
-height: auto;
+height: 60px;
 width: 100%;
 transition: transform .3s;
 }
@@ -432,6 +434,14 @@ q-layout::-webkit-scrollbar-thumb {
   box-shadow:  0 0px 0px rgb(0 0 0 / 0);
 }
 
+}
+
+
+@font-face {
+  font-family: silka-regularitalic-webfont;
+  font-style: normal;
+  font-weight: normal;
+  src: url("../css/fonts/silka-regularitalic-webfont.woff");
 }
 
 
