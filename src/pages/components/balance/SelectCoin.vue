@@ -1,18 +1,19 @@
 <template>
   <q-dialog
+    class="main-background"
     v-model="showDlg"
     persistent
     :maximized="true"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class=" full-height" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
+    <q-card class=" full-height main-background" style="max-width: auto; margin: auto; ">
       <q-layout
         view="hhh Lpr fFf"
         container
-        class="shadow-4 coinview"
+        class="shadow-4 coinview main-background-overlay"
       >
-        <q-header class=" text-white q-pa-sm" style="background: #130C3F">
+        <q-header class=" text-white q-pa-sm" style="background: #00000000">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
@@ -27,7 +28,14 @@
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           </q-toolbar>
-          <q-input v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
+          <q-input v-model="searchCoinName" 
+          label="Search coin" 
+          dense 
+          class="round-sm q-pl-sm" 
+          standout="bg-transparent text-white" 
+          label-color="white" 
+          color="white" 
+          input-class="text-white"/>
         </q-header>
         <q-page-container>
           <q-list>
@@ -142,5 +150,15 @@ export default {
 
 .closebBtn{
   border: 2px solid white;
+}
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 </style>

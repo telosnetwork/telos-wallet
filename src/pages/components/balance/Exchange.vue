@@ -7,7 +7,7 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card main-background" style="max-width: auto; margin: auto; background: linear-gradient(to bottom, #020039, #2a3f7e 200%)">
+    <q-card class="full-height main-card main-background" style="max-width: auto; margin: auto; ">
       <q-layout
         view="hhh Lpr fFf"
         container
@@ -22,16 +22,16 @@
                   class="q-px-md"
                   push no-caps
                   label="Dollars"
-                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
+                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${exchangeType === 'dollars' ? 'white' : 'white'};`"
                   @click="exchangeType = 'dollars'"
                 />
                 <q-btn
                   class="q-px-md"
                   push no-caps
                   label="Crypto"
-                  :style="`background: ${exchangeType !== 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType !== 'dollars' ? 'white' : 'grey'};`"
+                  :style="`background: ${exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${exchangeType !== 'dollars' ? 'white' : 'white'};`"
                   @click="exchangeType = 'crypto'"
                 />
               </q-btn-group>

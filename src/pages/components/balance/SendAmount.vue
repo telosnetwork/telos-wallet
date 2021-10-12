@@ -58,8 +58,9 @@
                     :class="`text-weight-regular ${coinInput ? 'text-right' : 'text-left'} no-border no-outline transparent`"
                     :style="`font-size: ${amountFontSize}px; color: white; z-index: 1; width: ${inputWidth}px;`"
                     v-model="sendAmount"
-                    @focus="sendAmount = (sendAmount === '0' ? '' : sendAmount)"
-                    @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString()"
+                    @focus="sendAmount = (sendAmount === '0' ? '' : sendAmount);"
+                    @blur="sendAmount = Number(sendAmount === '' ? '0' : sendAmount).toString();"
+                    @change=" sendPercentage = 0;"
                   />
                   <label class="text-weight-regular q-ml-sm" :style="`font-size: ${amountFontSize}px; color: white`">
                     {{coinInput ? selectedCoin.symbol : ''}}
@@ -83,33 +84,33 @@
                   class="q-px-md"
                   push no-caps
                   label="25%"
-                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
-                  @click="exchangeType = '25%'"
+                  :style="`background: ${sendPercentage === 25 ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${sendPercentage === 25 ? 'white' : 'grey'};`"
+                  @click="sendPercentage === 25 ? sendPercentage = 0 : sendPercentage = 25; sendAmount = Number(sendPercentage === 0 ? '' : selectedCoin.amount/4).toString();"
                 />
                 <q-btn 
                   class="q-px-md"
                   push no-caps
                   label="50%"
-                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
-                  @click="exchangeType = '50%'"
+                  :style="`background: ${sendPercentage === 50 ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${sendPercentage === 50 ? 'white' : 'grey'};`"
+                  @click="sendPercentage === 50 ? sendPercentage = 0 : sendPercentage = 50; sendAmount = Number(sendPercentage === 0 ? '' : selectedCoin.amount/2).toString();"
                 />
                 <q-btn 
                   class="q-px-md"
                   push no-caps
                   label="75%"
-                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
-                  @click="exchangeType = '75%'"
+                  :style="`background: ${sendPercentage === 75 ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${sendPercentage === 75 ? 'white' : 'grey'};`"
+                  @click="sendPercentage === 75 ? sendPercentage = 0 : sendPercentage = 75; sendAmount = Number(sendPercentage === 0 ? '' : selectedCoin.amount*0.75).toString();"
                 />
                 <q-btn
                   class="q-px-md"
                   push no-caps
                   label="100%"
-                  :style="`background: ${exchangeType !== 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
-                          color: ${exchangeType !== 'dollars' ? 'white' : 'grey'};`"
-                  @click="exchangeType = '100%'"
+                  :style="`background: ${sendPercentage === 100 ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${sendPercentage === 100 ? 'white' : 'grey'};`"
+                  @click="sendPercentage === 100 ? sendPercentage = 0 : sendPercentage = 100; sendAmount = Number(sendPercentage === 0 ? '' : selectedCoin.amount).toString();"
                 />
               </q-btn-group>
 
@@ -164,6 +165,7 @@ export default {
     return {
       keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
       sendAmount: '0',
+      sendPercentage: 0,
       coinInput: true,
       showSendToAddressDlg: false,
       inputWidth: 50,

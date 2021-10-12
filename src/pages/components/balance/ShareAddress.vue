@@ -1,5 +1,6 @@
 <template>
   <q-dialog
+    class="main-background"
     v-if="selectedCoin"
     v-model="showDlg"
     persistent
@@ -7,14 +8,14 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="full-height main-card" style="width: 100vw; margin: auto; background: linear-gradient(to bottom, #130C3F, #8946DF 200%)">
+    <q-card class="full-height main-card main-background" style="width: 100vw; margin: auto;">
       <q-layout
         view="hHh Lpr fff"
-        class="shadow-4 coinview"
+        class="shadow-4 coinview main-background-overlay"
       >
 
 <!-- Header -->
-        <q-header class="text-white q-pa-sm" style="background: #1A1048 ">
+        <q-header class="text-white q-pa-sm" style="background: #00000000 ">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
@@ -133,13 +134,16 @@
                   v-for="(pTokenNetwork, key) of coinpTokenNetworks"
                   :key="pTokenNetwork"
                   class="q-px-md"
-                  push no-caps
+                  push 
+                  no-caps
                   :label="pTokenNetwork"
-                  :style="`background: ${networkType === key ? '#FFFFFF22' : '#FFFFFF22'}; 
-                          color: ${networkType === 'dollars' ? 'white' : 'grey'};`"
+                  :style="`background: ${networkType === key ? '#FFFFFF55' : '#FFFFFF22'}; 
+                          color: ${networkType === 'key' ? 'grey' : 'white'};`"
                   @click="networkType = key"
                 />
               </q-btn-group>
+
+<!-- Generate New Address -->
               <q-btn
                 v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
                 class="q-mt-sm text-weight-medium text-caption generateBtn flex-center"
@@ -531,6 +535,16 @@ input[type="number"] {
   margin-top: 2rem;
   left: 45%;
 
+}
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
 }
 
 @media only screen and (min-width: 1000px) {
