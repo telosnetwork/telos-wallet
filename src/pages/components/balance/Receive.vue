@@ -27,9 +27,8 @@
           v-model="searchCoinName" 
           label="Search coin" 
           dense 
-          borderless 
           class="round-sm q-pl-sm" 
-          standout="text-white" 
+          standout="bg-transparent text-white" 
           label-color="white" 
           color="white" 
           input-class="text-white"/>

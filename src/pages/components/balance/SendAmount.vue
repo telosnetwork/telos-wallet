@@ -133,14 +133,16 @@
             </div>
 
 <!-- Next Button -->
-            <q-btn class="text-white text-subtitle2 q-mx-md"
-              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem`"
+          <div class="networkinfo flex-center" style="display:flex;">
+            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
               flat
               no-caps
               label="Next"
               :disable="sendAmountValue === 0"
               @click="nextPressed()"
             />
+            </div>
           </div>
         </q-page-container>
       </q-layout>
@@ -340,6 +342,13 @@ export default {
    background:  url("~assets/MainBG.svg");
    background-repeat: no-repeat;
    background-size: cover;
+}
+
+.nextBtn{
+  margin-top: 0.5rem;
+  width: 600px;
+  margin-bottom: 1rem;
+
 }
 
 @media only screen and (min-width: 1000px) {

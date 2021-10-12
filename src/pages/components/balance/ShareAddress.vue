@@ -14,12 +14,12 @@
       >
 
 <!-- Header -->
-        <q-header class="text-grey-8 q-pa-sm" style="background: #1A1048 ">
+        <q-header class="text-white q-pa-sm" style="background: #1A1048 ">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <!-- <label class="text-subtitle1 text-weight-medium h-20">{{`Receive ${selectedCoin.symbol}`}}</label> -->
-                <label class="text-subtitle2 text-grey-4">From Network</label>
+                <label class="text-subtitle2 text-white">From Network</label>
                 <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
               </div>
             </q-toolbar-title>
@@ -142,15 +142,15 @@
               </q-btn-group>
               <q-btn
                 v-if="networkType === 'ptoken' || (networkType === 'tevm' && !$root.tEVMAccount)"
-                class="q-mt-sm text-weight-medium text-caption"
+                class="q-mt-sm text-weight-medium text-caption generateBtn flex-center"
                 push no-caps
                 :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
-                :style="`background: white; visibility: ${networkType === 'telos' ? 'hidden' : ''}`"
+                :style="`visibility: ${networkType === 'telos' ? 'hidden' : ''}; display:flex;`"
                 @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
               />
             </div>
 
-            <div v-else-if="networkType === 'ptoken'" class="text-caption text-grey-8">
+            <div v-else-if="networkType === 'ptoken'" class="text-caption text-white">
               Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this address will mint an equal number of
               p{{ selectedCoin.symbol.slice(1) }} tokens on the TELOS address: {{accountName}}
             </div>
@@ -164,19 +164,17 @@
             >
               <q-r-canvas
                 :options="{data: qrcodeData, cellSize: 10}"
-                style="width: 20px"
+                style="width: 100px"
               />
           </div>
 
 <!-- Username -->
             <q-item>
               <q-input
-                style=" width: auto;" 
                 class="round-sm full-width networkinfo" 
                 label="Username or Tellos address"
                 dense 
-                borderless  
-                standout="text-white" 
+                standout="bg-transparent text-white" 
                 label-color="white" 
                 color="white" 
                 input-class="text-white"
@@ -188,9 +186,8 @@
                 <q-input  
                 class="round-sm full-width text-white networkinfo" 
                 label="Notes"
-                dense 
-                borderless 
-                standout="text-white" 
+                dense
+                standout="bg-transparent text-white" 
                 label-color="white" 
                 color="white" 
                 input-class="text-white"
@@ -201,7 +198,7 @@
 <!-- Next Button -->
         <div class="networkinfo flex-center" style="display:flex;">
             <q-btn class="text-white text-subtitle2 q-mx-md nextBtn"
-              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF);`"
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); display:flex;`"
               flat
               no-caps
               label="Next"
@@ -528,12 +525,21 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
+.generateBtn{
+  background:linear-gradient(120deg, #1DD1FE, #8946DF) ;
+  color: white;
+  margin-top: 2rem;
+  left: 45%;
+
+}
+
 @media only screen and (min-width: 1000px) {
 .networkinfo{
   display:block;
   margin-left: 10rem;
   margin-right: 10rem;
   margin-top: 1rem;
+  
 }
 }
 </style>

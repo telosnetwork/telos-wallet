@@ -110,14 +110,16 @@
             </div>
            </div> 
 <!-- Next Button -->
-            <q-btn class="text-white text-subtitle2 q-mx-md nextButton"
-              :style="`height: 50px;`"
-              flat
-              no-caps
-              label="Next"
-              :disable="buyAmountValue === 0"
-              @click="buyPressed()"
-            />
+            <div class="networkinfo flex-center" style="display:flex;">
+              <q-btn class="text-white text-subtitle2 q-mx-md nextButton nextBtn"
+                :style="`height: 50px;`"
+                flat
+                no-caps
+                label="Next"
+                :disable="buyAmountValue === 0"
+                @click="buyPressed()"
+              />
+            </div>
           </div>
         </q-page-container>
       </q-layout>
@@ -335,7 +337,7 @@ export default {
   left:0%;
   right:50%;
   bottom:5%;
-  top:40%;
+  top:20%;
   background: linear-gradient(120deg, #1DD1FE, #8946DF);
   height: 3rem;
   text-align: center;
@@ -405,5 +407,10 @@ export default {
    background-size: cover;
 }
 
+.nextBtn{
+  margin-top: 0.5rem;
+  width: 600px;
+  margin-bottom: 1rem;
+}
 
 </style>
