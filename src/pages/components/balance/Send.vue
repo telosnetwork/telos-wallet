@@ -23,10 +23,18 @@
             </q-toolbar-title>
 
 <!-- Back Button -->
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           
           </q-toolbar>
-          <q-input v-model="searchCoinName" label="Search coin" dense borderless class="round-sm q-pl-sm" standout="text-white" label-color="white" color="white" input-class="text-white"/>
+          <q-input 
+          v-model="searchCoinName" 
+          label="Search coin" 
+          dense
+          class="round-sm q-pl-sm" 
+          standout="bg-transparent text-white" 
+          label-color="white" S
+          color="white" 
+          input-class="text-white"/>
         </q-header>
         <q-page-container>
           <q-list>

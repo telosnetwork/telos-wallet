@@ -1,9 +1,9 @@
 <template>
   <div class="full-height main-div">
-    <div class="flex-center fit-div">
+    <div class="flex-center full-height" style="position: relative">
 
       <!-- Left Naviggation Bar -->
-      <div class="left-col leftNavBar">
+      <div class=" leftNavBar">
         <nav>
           <img src="~assets/telosLogo.svg" class="telosLogo">
           <ul>
@@ -21,26 +21,40 @@
         </nav>
       </div>
 
-      <q-card class="bg-transparent dappsHead " style="max-width: 800px; min-width: 300px; margin: auto; height: 100vh; ">
+<!-- Toolbar -->
+          <q-header class="dapp-header text-white">
+            <q-toolbar>
+              <q-toolbar-title class="text-white full-width text-center">
+                <div class="display-grid">
+                  <label class="text-white text-subtitle1 text-weight-medium;" style="color: white; margin-top: 15px">dApps</label>
+                  <q-input v-model="searchDappName" 
+                    standout="bg-transparent text-white" 
+                    label-color="white"  
+                    color="white" 
+                    label="Search dApp" 
+                    dense
+                    input-style="color: white"
+                    input-class="text-white"  
+                    class="searchBar text-white"
+                    style="padding-left: 10px;"/>
+                </div>
+              
+              <!-- <q-icon class="col" name="search"/> -->
+              </q-toolbar-title>
+              
+            </q-toolbar>
+            
+          </q-header>
+          
+      <q-card class="bg-transparent dappsHead " style="max-width: 800px; min-width: 300px; margin: auto; height: 80vh; position: relative">
         <q-layout
           view="hhh Lpr fFf"
           container
           class="coinview"
         >
-          <q-header class="dapp-header text-white q-pa-sm">
-            <q-toolbar class="no-padding" >
-              <q-toolbar-title class="text-white absolute full-width no-padding text-center">
-                <div class="display-grid">
-                  <label class="text-white text-subtitle1 text-weight-medium" style="color: white">dApps</label>
-                </div>
-              </q-toolbar-title>
-            </q-toolbar>
-            <div class="row">
-              <q-input v-model="searchDappName" standout="text-white" label-color="white"  color="white" label="Search dApp" dense borderless filled input-class="text-white"  class="searchBar text-white"/>
-              <!-- <q-icon class="col" name="search"/> -->
-            </div>
-          </q-header>
-          <q-page-container class="bg-transparent " style="height: 100vh; padding-top: 100px">
+
+<!-- Dapp Container -->
+          <q-page-container style="height: 80vh;">
             <q-infinite-scroll class="" @load="loadMoreDapps" :offset="100">
               <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
                 <q-item clickable v-ripple class="list-item" @click="openInNewTab(dapp.link)">
@@ -76,7 +90,7 @@
         </q-layout>
       </q-card>
     <!-- Bottom Naviggation Bar -->
-      <div class="left-col bottomNavBar">
+      <div class="left-col bottomNavBar" style="position: absolute;">
           <nav>
             <ul>
                 <li>
@@ -186,13 +200,13 @@ div::-webkit-scrollbar-thumb {
   background-color: #555;
 }
 
-.toolbar-title {
+/* .toolbar-title {
   position: absolute;
   text-align: center;
   
-}
+} */
 .list-item {
-  border: 1px solid #020036;
+  /* border: 1px solid #020036; */
   border-left: none;
   border-right: none;
 }
@@ -214,19 +228,18 @@ div::-webkit-scrollbar-thumb {
 }
 
 .dapp-header {
-  background: #020039;
+  background: #00000000;
 }
 
 .bottomNavBar nav{
 position: fixed;
-z-index: 1;
-background: linear-gradient(to bottom, #00000000, #00000000);
+z-index: 2;
+background: #00000000;
 left: 0;
 bottom:0;
 height: auto;
 width: 100%;
 transition: transform .3s;
-cursor: pointer;
 }
 
 .bottomNavBar nav ul{
@@ -235,13 +248,11 @@ cursor: pointer;
   display: flex;
   width: 100%;
   margin-left: 12.5%;
-  cursor: pointer;
 }
 
 .bottomNavBar nav ul li{
   display: inline;
   width: 100%;
-  cursor: pointer;
 }
 
 .bottomNavBar nav ul li a{
@@ -259,7 +270,7 @@ cursor: pointer;
 nav ul li a:hover{
   background: #00000011;
   opacity: 100%;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 .leftNavBar nav {
@@ -267,7 +278,6 @@ nav ul li a:hover{
   transform: translateX(-100%);
   transition: transform .3s;
   height: 0px;
-  cursor: pointer;
 }
 
 /* .active{
@@ -279,9 +289,8 @@ nav ul li a:hover{
 }
 
 .searchBar{
-  width: 100%;
-  margin-left: 1rem;
-  margin-right: 1rem;
+  width: 50%;
+  margin-left: 25%;
 }
 
 .dappsHead{
@@ -317,14 +326,12 @@ nav ul li a:hover{
     transform: translateX(0) !important;
     border-radius: 0px;
     height: 100vh;
-    cursor: pointer;
 }
 
 .bottomNavBar nav {
     visibility: hidden;
     transform: translateX(-100%);
     transition: transform .3s;
-    cursor: pointer;
 }
 
 .coinHeader{
@@ -345,7 +352,6 @@ nav ul li a:hover{
   transform: translateX(-100%);
   transition: transform .3s;
   visibility: visible;
-  cursor: pointer;
 }
 
 .telosLogo{
@@ -362,7 +368,6 @@ nav ul li a:hover{
   padding: 0;
   width: 100%;
   margin-bottom: 0%;
-  cursor: pointer;
 }
 
 .leftNavBar nav ul li{
@@ -374,7 +379,7 @@ nav ul li a:hover{
   color: white;
   display: block;
   padding: .875em 6em 3em 6em;
-  
+  cursor: pointer;
 }
 
 div {
@@ -428,8 +433,6 @@ q-layout::-webkit-scrollbar-thumb {
 }
 
 }
-
-
 
 
 </style>

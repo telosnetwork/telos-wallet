@@ -21,7 +21,7 @@
                 <!-- <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           </q-toolbar>
         </q-header>
 
@@ -76,6 +76,43 @@
                 <!-- <q-btn round flat icon="fas fa-sync" size="12px" class="text-grey-4 q-mr-sm" @click="changeCoinInput()" style="background: linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem"/> -->
               <!-- </div> -->
             </div>
+
+<!-- Exchange persentage -->
+            <q-btn-group class=" full-width justify-center" push unelevated style="margin-top: 2rem">
+                <q-btn 
+                  class="q-px-md"
+                  push no-caps
+                  label="25%"
+                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
+                  @click="exchangeType = '25%'"
+                />
+                <q-btn 
+                  class="q-px-md"
+                  push no-caps
+                  label="50%"
+                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
+                  @click="exchangeType = '50%'"
+                />
+                <q-btn 
+                  class="q-px-md"
+                  push no-caps
+                  label="75%"
+                  :style="`background: ${exchangeType === 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType === 'dollars' ? 'white' : 'grey'};`"
+                  @click="exchangeType = '75%'"
+                />
+                <q-btn
+                  class="q-px-md"
+                  push no-caps
+                  label="100%"
+                  :style="`background: ${exchangeType !== 'dollars' ? '#FFFFFF22' : '#FFFFFF22'};
+                          color: ${exchangeType !== 'dollars' ? 'white' : 'grey'};`"
+                  @click="exchangeType = '100%'"
+                />
+              </q-btn-group>
+
             <q-space/>
             <q-space/>
             <div class="q-pa-sm full-width mobile-only">

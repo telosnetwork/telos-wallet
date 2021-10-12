@@ -17,6 +17,8 @@
                       <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
                     <li><a @click="tab = 'Collectables'">
                       <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
+                    <li><a @click="$router.replace('/dappsearch')">
+                    <img icon="logout">Logout</a></li>
                 </ul>
             </nav>
         </div>
@@ -881,7 +883,7 @@ nav ul li a:hover{
 
 .active:hover{
   background: 4497FF ;
-  cursor: none;
+  cursor: pointer;
 }
 
 .coinHeader {
@@ -946,7 +948,7 @@ nav ul li a:hover{
   /* background: linear-gradient(to bottom, #130C3F, #00000000 100%); */
   background: linear-gradient(to bottom, #291A4C, #00000000 80%);
   /* background: linear-gradient(to bottom, #473283, #00000000 100%); */
-  left: 0;
+  ma: 0;
   top:0;
   height: 100vh;
   width: 250px;

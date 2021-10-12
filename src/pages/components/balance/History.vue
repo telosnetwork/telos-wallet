@@ -64,7 +64,16 @@
             </div>
             <q-space v-if="convertEnabled"/>
           </div>
-          <q-input v-model="searchHistory" label="Search Transaction History" dense borderless class=" q-pl-sm searchBar text-white"/>
+          <q-input 
+          v-model="searchHistory" 
+          label="Search Transaction History" 
+          dense 
+          borderless 
+          class="round-sm q-pl-sm" 
+          standout="text-white" 
+          label-color="white" 
+          color="white" 
+          input-class="text-white"/>
         </q-header>
 
 <!-- Crypto History Container -->

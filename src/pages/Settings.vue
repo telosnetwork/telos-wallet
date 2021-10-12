@@ -1,25 +1,21 @@
 <template>
   <div class="profile flex-center main-background-overlay" :style="` display:flex; overflow: auto; height: 100vh !important;`">
     <div>
+      
+      
       <div class="profile text-white flex-center">
       <label style="height: 70px; margin-bottom: 80px">Profile</label>
+      
        <!-- Save Button -->
           <q-item class= "saveBtn text-white userAvatar">
             <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
               label="SAVE" @click="save" :disable="display_name.length === 0"
             />
+            <!-- Back Button -->
+       
+          
           </q-item>
-      </div>
-      
-<!-- Back Button -->
-        <q-item class="backBtn " >
-          <q-btn style="height: 70px; margin-bottom: 80px" round flat dense @click="$router.replace('/balance')">
-            <q-icon name="chevron_left" color="white" />
-          </q-btn>
-        </q-item>
-
-     
-        
+      </div>     
       <q-list class="q-py-md">
 
 
@@ -27,7 +23,7 @@
         <div class="flex-center relative" style="display:flex;"  >
           
           <video autoplay loop class="userAvatar" style="width: 400px; background: #00000000">
-            <source   class="flex-center" src="~assets/test.webm" type="video/webm" style="width: 300px; background: #00000000" >
+            <source   class="flex-center" src="~assets/Telos-template.mp4" type="video/mp4" style="width: 300px; background: #00000000" >
           </video>
           <div class="overlay" style="width: 100%; height: 100%;"></div>
 
@@ -58,33 +54,56 @@
 <!-- Avatar Name -->
         <q-item style="height: 70px;">
           <img class="profileImg" src="~assets/avatarImg.svg" style="margin-top: 10px;">
-          <q-input v-model="avatar" dense border  standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled 
-            class="round-sm full-width" label="Avatar URL"
+          <q-input v-model="avatar" 
+          dense  
+          standout="bg-transparent text-white" 
+          label-color="white"  
+          color="white" 
+          input-class="text-white" 
+          class="round-sm full-width" 
+          label="Avatar URL"
           />
         </q-item>
 
 <!-- Name -->
           <q-item style="height: 70px; margin-top: 18.4px">
             <img class="profileImg" src="~assets/nameImg.svg" style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px">
-            <q-input v-model="display_name" dense border  standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
-              class="round-sm full-width" label="Name"
-              :rules="[val => !!val || 'This field is required']"
+            <q-input v-model="display_name" 
+            dense
+            standout="bg-transparent text-white" 
+            label-color="white" 
+            color="white" 
+            input-class="text-white" 
+            class="round-sm full-width" label="Name"
+            :rules="[val => !!val || 'This field is required']"
             /> 
           </q-item>
 
 <!-- Status -->
           <q-item style="height: 70px;">
             <img class="profileImg" src="~assets/statusImg.svg">
-            <q-input v-model="status" dense border standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
-              class="round-sm full-width" label="Status"
+            <q-input v-model="status" 
+            dense
+            standout="bg-transparent text-white" 
+            label-color="white"  
+            color="white" 
+            input-class="text-white" 
+            class="round-sm full-width" 
+            label="Status"
             />
           </q-item>
 
 <!-- Bio -->
           <q-item style="height: 70px;">
             <img class="profileImg" src="~assets/bioImg.svg">
-            <q-input v-model="bio" dense border standout="text-white" label-color="white"  color="white" input-class="text-white" borderless filled
-              class="round-sm full-width" label="Bio"
+            <q-input v-model="bio" 
+            dense
+            standout="bg-transparent text-white" 
+            label-color="white"  
+            color="white" 
+            input-class="text-white" 
+            class="round-sm full-width" 
+            label="Bio"
             />
           </q-item>
       </div>
@@ -270,8 +289,8 @@ export default {
   display: flex;
   font-weight:normal;
   font-size:large;
-  top:10% ;
-  z-index: 1;
+  top: 2rem ;
+  z-indremex: 1;
 }
 .uploadImage{
   /* background-image: url("~assets/camera.svg"); */
@@ -336,11 +355,10 @@ export default {
 }
 
 .backBtn{
-  text-align: center;
-  top: 0.5rem;
+  top:0rem;
   position: absolute;
   /* border: 1px solid white; */
-  z-index: 5;
+  z-index: 10;
   float: left;
   
 }

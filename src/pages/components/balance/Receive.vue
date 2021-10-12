@@ -21,9 +21,18 @@
                 <label class="text-subtitle2 text-grey-4">Select a coin</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="close"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
           </q-toolbar>
-          <q-input v-model="searchCoinName" label="Search coin" dense borderless class="bg-grey-2 round-sm q-pl-sm"/>
+          <q-input 
+          v-model="searchCoinName" 
+          label="Search coin" 
+          dense 
+          borderless 
+          class="round-sm q-pl-sm" 
+          standout="text-white" 
+          label-color="white" 
+          color="white" 
+          input-class="text-white"/>
         </q-header>
         <q-page-container>
           <q-list>

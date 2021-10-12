@@ -172,14 +172,28 @@
             <q-item>
               <q-input
                 style=" width: auto;" 
-                class="round-sm full-width networkinfo" label="Username or Tellos address"
+                class="round-sm full-width networkinfo" 
+                label="Username or Tellos address"
+                dense 
+                borderless  
+                standout="text-white" 
+                label-color="white" 
+                color="white" 
+                input-class="text-white"
               /> 
             </q-item>
 
 <!-- Notes -->
             <q-item>
                 <q-input  
-                class="round-sm full-width text-white networkinfo" label="Notes"
+                class="round-sm full-width text-white networkinfo" 
+                label="Notes"
+                dense 
+                borderless 
+                standout="text-white" 
+                label-color="white" 
+                color="white" 
+                input-class="text-white"
               /> 
             </q-item>
         </div>
