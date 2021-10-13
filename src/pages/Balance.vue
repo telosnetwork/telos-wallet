@@ -19,6 +19,10 @@
                       <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
                     <li><a @click="$router.replace('/dappsearch')">
                     <img icon="logout">Logout</a></li>
+                    <li>
+                      <a @click="$router.replace('/resources')" class=" wallet"> 
+                        <img src="fas fa-cogs" class="menuIcon">Resources</a>
+                    </li>
                 </ul>
             </nav>
         </div>

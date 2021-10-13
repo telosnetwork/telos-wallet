@@ -15,6 +15,11 @@ const routes = [
     children: [{ path: "", component: () => import("pages/DappSearch.vue") }]
   },
   {
+    path: "/resources",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Resources.vue") }]
+  },
+  {
     path: "/settings",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Settings.vue") }]

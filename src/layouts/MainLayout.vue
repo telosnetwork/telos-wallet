@@ -52,7 +52,14 @@ const pagesData = [
     icon: 'fas fa-cog',
     path: '/settings',
     available: true,
-  }
+  },
+  {
+    title: 'Resources',
+    caption: 'Resources',
+    icon: 'fas fa-cogs',
+    path: '/resources',
+    available: true,
+  },
 ];
 
 export default {
