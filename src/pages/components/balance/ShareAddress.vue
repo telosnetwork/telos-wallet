@@ -24,7 +24,7 @@
                 <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west" @click="selectedDestCoin = ''"/>
           </q-toolbar>
         </q-header>
       
@@ -34,7 +34,8 @@
             <div class="absolute" style=" left: 55%;">
               <q-item-section avatar class="cryptoImg1">
                 <q-avatar size="6rem">
-                  <img :src="selectedCoin.icon">
+                  <!-- <img src="~assets/ethereumLogo.svg"> -->
+                  <img :src="selectedDestCoin === '' ? selectedCoin.icon : selectedDestCoin" class="coin_icon">
                 </q-avatar>
               </q-item-section>
               <img class="avatarBackground" src="~assets/avatarBackground.svg" style=" left: 50%;">
@@ -140,7 +141,7 @@
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? '#FFFFFF55' : '#FFFFFF22'}; 
                           color: ${networkType === 'key' ? 'grey' : 'white'};`"
-                  @click="networkType = key"
+                  @click="networkType = key;  selectedDestCoin = (networkType === 'telos' || networkType === 'tevm'  ? selectedCoin.icon : getImgUrl(/*'ethereumLogo.svg'*/));"
                 />
               </q-btn-group>
 
@@ -151,7 +152,7 @@
                 push no-caps
                 :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
                 :style="`visibility: ${networkType === 'telos' ? 'hidden' : ''}; display:flex;`"
-                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress();"
               />
             </div>
 
@@ -236,7 +237,8 @@ export default {
       metaData: {},
       awaiting: false,
       username: '',
-      notes: ""
+      notes: "",
+      selectedDestCoin: ""
     }
   },
   components: {
@@ -350,6 +352,9 @@ export default {
           message: `Failed to create an address`,
         });
       }
+    },
+    getImgUrl(pic) {
+      return require('src/assets/ethereumLogo.svg') //+pic);
     },
     async generateDepositAddress() {
       this.awaiting = false;
@@ -549,7 +554,7 @@ input[type="number"] {
 }
 
 .main-background-overlay {
-   background:  url("~assets/MainBG.svg");
+   background:  url("~assets/MainBG.png");
    background-repeat: no-repeat;
    background-size: cover;
 }
@@ -571,6 +576,10 @@ input[type="number"] {
   margin-right: 10rem;
   margin-top: 1rem;
   
+}
+
+.coin_icon {
+  background: '~assets/ethereumLogo.svg';
 }
 }
 </style>

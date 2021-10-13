@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <div class="text-center full-width" style="display: grid; grid-gap: 1rem">
+      <div class="text-center full-width" style="display: grid; grid-gap: 1.2rem">
         <login-button v-if="isAuthenticated" style="display:none"/>
 
 <!-- Profile Image top left -->
@@ -755,7 +755,7 @@ export default {
   width: 80%;
   margin-top: -3rem;
   margin-left: 50%;
-  transform: translate(-45%);
+  transform: translate(-50%);
   height: calc(100vh - 250px - 100px);
 }
 .coinview {
@@ -813,12 +813,11 @@ export default {
   width: 8rem;
   border: none;
   border-radius: 0%;
-  padding: 0px;
-  display: flex;
+    padding: 0px;
+    display: flex;
   outline:none;
   border: 0;
   background-repeat: no-repeat;
-  margin-left: 1.5rem;
   text-align: center;
   margin-top: -8rem;
 }
@@ -832,7 +831,7 @@ export default {
   width: 3rem; 
   border-radius: 1rem;
   margin-top: 1rem;
-  margin-left: 2rem;
+  margin-left: 1rem;
   cursor: pointer;
   background: no-repeat;
 }
@@ -879,9 +878,13 @@ nav ul li a:hover{
 }
 
 .leftNavBar nav {
-    visibility: hidden;
-    cursor: pointer;
+    visibility: collapse;
+    transform: translate(-100%, -100%);
+    height: 0px;
+    width: 0px;
+    position: absolute;
 }
+
 
 /* .active{
   background: lightgrey;
@@ -1034,6 +1037,23 @@ nav ul li a:hover{
   border-radius: 1px;
   -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0);
   background-color: rgba(0, 0, 0, 0);
+}
+
+.convertBtns{
+  display: flex;
+  background-image: url("~assets/Convert.svg");
+  height: 1rem;
+  width: 8rem;
+  border: none;
+  border-radius: 0%;
+  padding: 0px;
+  display: flex;
+  outline:none;
+  border: 0;
+  background-repeat: no-repeat;
+  margin-left: 1.5rem;
+  text-align: center;
+  margin-top: -8rem;
 }
 
 
