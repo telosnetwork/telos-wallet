@@ -1,37 +1,66 @@
 <template>
   <q-dialog
+    class="main-background"
     v-model="showDlg"
     persistent
     :maximized="true"
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="bg-white full-height" style="max-width: auto; margin: auto;">
+    <q-card class="full-height main-background" style="max-width: auto; margin: auto;">
       <q-layout
         view="hhh Lpr fFf"
         container
-        class="shadow-4 coinview"
+        class="shadow-4 coinview main-background-overlay"
       >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
+        <q-header class=" text-white q-pa-sm" style="background: #00000000">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <label class="text-subtitle1 text-weight-medium h-20">{{`${getFixed(sendAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}</label>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
+
+<!-- Close Button -->
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
+<!-- Next Button -->
             <q-btn
               flat
               dense
-              class="q-ml-auto q-mr-sm text-grey-6"
+              class="q-ml-auto q-mr-sm text-white"
               label="Next"
               :disable="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100"
               @click="networkType === 'ethereum' && (sendAmount * selectedCoin.price) < 100 ? null : nextPressed()"
             />
           </q-toolbar>
-          <q-list>
-            <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
-              <label class="text-center full-width">To Network</label>
+         
+          <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
+              <label class="text-center full-width text-white">To Network</label>
             </q-item>
-            <q-item v-if="isPToken" class="list-item -center">
+
+        </q-header>
+
+        <!-- Coin Image 1 -->
+          <div class="row">
+            <div class="absolute" style=" left: 55%;">
+              <q-item-section avatar class="cryptoImg1">
+                <q-avatar size="6rem">
+                  <img :src="selectedCoin.icon">
+                </q-avatar>
+              </q-item-section>
+              <img class="avatarBackground" src="~assets/avatarBackground.svg" style=" left: 50%;">
+            </div>
+  <!-- Coin Image 2 -->
+            <div class="absolute" style=" left: 45%;">
+              <q-item-section avatar class="cryptoImg2">
+                <q-avatar size="6rem">
+                  <img :src="selectedCoin.icon">
+                </q-avatar>
+              </q-item-section>
+              <img class="avatarBackground2" src="~assets/avatarBackground.svg" style=" left: 45%;">
+            </div>
+          </div>
+
+<!-- Crypto Buttons -->
+          <q-item v-if="isPToken" class="list-item -center cryptoButtons">
               <q-btn-group class="full-width justify-center" push unelevated>
                 <q-btn
                   v-for="(pTokenNetwork, key) of coinpTokenNetworks"
@@ -39,21 +68,29 @@
                   class="q-px-md"
                   push no-caps
                   :label="pTokenNetwork"
-                  :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :style="`background: ${networkType === key ? '#FFFFFF55' : '#FFFFFF22'};
+                  color: ${networkType === 'key' ? 'grey' : 'white'};`"
                   @click="networkType = key"
                 />
               </q-btn-group>
             </q-item>
+
+<!-- To network -->
+          <q-list>
+            
             <q-item />
-            <q-item class="list-item">
-              <q-item-section side>To:</q-item-section>
+            <q-item class="list-item listItemTo">
+              <q-item-section text-white side>To:</q-item-section>
               <q-item-section>
                 <q-input
                   v-model="toAddress"
                   :value="toAddress.toLowerCase()"
                   dense
-                  borderless
-                  class="bg-grey-1 round-sm q-pl-sm"
+                  standout="bg-transparent text-white" 
+                  label-color="white"  
+                  color="white" 
+                  input-class="text-white" 
+                  class="round-sm full-width"
                   :label="toPlaceHolder"
                 />
               </q-item-section>
@@ -62,21 +99,24 @@
                   round
                   flat
                   size="12px"
-                  class="text-grey-5 q-mr-none"
+                  class="text-white q-mr-none"
                   icon="qr_code_scanner"
                   @click="showQRScanner()"
                 />
               </q-item-section>
             </q-item>
-            <q-item class="list-item" :disable="networkType === 'ptoken'">
-              <q-item-section side>Notes:</q-item-section>
+            <q-item class="list-item listItemNotes" :disable="networkType === 'ptoken'">
+              <q-item-section text-white side>Notes:</q-item-section>
               <q-item-section>
                 <q-input
                   v-model="notes"
                   :disable="networkType === 'ptoken' || networkType === 'ethereum'"
                   dense
-                  borderless
-                  class="bg-grey-1 round-sm q-pl-sm"
+                  standout="bg-transparent text-white" 
+                  label-color="white"  
+                  color="white" 
+                  input-class="text-white" 
+                  class="round-sm full-width" 
                   label="notes"
                 />
               </q-item-section>
@@ -93,7 +133,7 @@
               </div>
             </q-item>
           </q-list>
-        </q-header>
+
         <q-page-container>
           <q-list>
             <q-item-label header class="text-center"> </q-item-label>
@@ -286,7 +326,7 @@ export default {
   text-align: center;
 }
 .list-item {
-  border: 1px solid #fafafa;
+  /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
 }
@@ -296,4 +336,62 @@ export default {
 .h-20 {
   height: 20px;
 }
+
+.main-background {
+  background: #020039;
+}
+
+.main-background-overlay {
+   background:  url("~assets/MainBG.svg");
+   background-repeat: no-repeat;
+   background-size: cover;
+}
+
+.cryptoImg1{
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  margin-top: 9rem;
+  margin-left: 1rem;
+  width: 6rem;
+  height: 6rem;
+}
+.cryptoImg2{
+  position: absolute;
+  width: 0.5rem;
+  height:0.5rem;
+  margin-top: 11rem;
+  margin-right: 3rem;
+  margin-left: -5rem;
+  
+  }
+  
+
+.avatarBackground{
+  display: flex;
+  position: relative;
+  left: 30%; 
+  margin-left: -3.4rem;
+  margin-top: 7.5rem;
+  /* margin-bottom: -1rem; */
+}
+
+.avatarBackground2{
+  display: flex;
+  position: relative;
+  left: -1rem; 
+  margin-left:-6.6rem;
+  margin-top: 7.3rem;
+  width: 8rem;
+  height: 8rem;
+  /* margin-bottom: -1rem; */
+}
+.closebBtn{
+  border: 2px solid white;
+}
+
+.cryptoButtons{
+  margin-top: 40vh;
+}
+
 </style>

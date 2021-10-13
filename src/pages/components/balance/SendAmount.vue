@@ -14,7 +14,7 @@
         class="shadow-4 coinview main-background-overlay"
       >
         <q-header class=" text-white q-pa-sm" style="background: #00000000">
-          <q-toolbar class="no-padding">
+          <q-toolbar class="no-padding" style="background: #00000000">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-20">Send</label>

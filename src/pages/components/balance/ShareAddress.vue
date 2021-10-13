@@ -49,7 +49,8 @@
               <img class="avatarBackground2" src="~assets/avatarBackground.svg" style=" left: 45%;">
             </div>
           </div>
-
+          
+<!-- Amount -->
          <div class="row" style="margin-top: 100px">
           <div class="full-width items-center amount-div">
               <div class="full-width column text-center">
@@ -163,17 +164,17 @@
 
 <!-- QRCode -->
           <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable"
-              class="cursor-pointer qrCode"
+              class="cursor-pointer qrCode flex-center"
               @click="copyToClipboard(qrcodeData)"
             >
               <q-r-canvas
                 :options="{data: qrcodeData, cellSize: 10}"
-                style="width: 100px"
+                style="width: 100px; display:center"
               />
           </div>
 
 <!-- Username -->
-            <q-item>
+            <q-item class="username">
               <q-input
                 v-model="username"
                 class="round-sm full-width networkinfo" 
@@ -187,7 +188,7 @@
             </q-item>
 
 <!-- Notes -->
-            <q-item>
+            <q-item class="notes">
                 <q-input
                 v-model="notes"
                 class="round-sm full-width text-white networkinfo" 
@@ -509,7 +510,9 @@ export default {
 }
 
 .qrCode{
-  float: right;
+  margin-left: 50%;
+  transform: translateX(-10%);
+  
 }
 
 .amount-div {
@@ -551,6 +554,16 @@ input[type="number"] {
    background-size: cover;
 }
 
+.username{
+  width: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.notes{
+  width: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
 @media only screen and (min-width: 1000px) {
 .networkinfo{
   display:block;

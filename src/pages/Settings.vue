@@ -6,17 +6,15 @@
       <div class="profile text-white flex-center">
       <label style="height: 70px; margin-bottom: 80px">Profile</label>
       
-       <!-- Save Button -->
+<!-- Save Button -->
           <q-item class= "saveBtn text-white userAvatar">
             <q-btn text-color="white" :style="`height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`"
               label="SAVE" @click="save" :disable="display_name.length === 0"
             />
-            <!-- Back Button -->
-       
-          
+<!-- Back Button -->
           </q-item>
       </div>     
-      <q-list class="q-py-md">
+      <q-list round flat dense class="text-white closebBtn" icon="west">
 
 
 <!-- User Avatar -->
@@ -383,6 +381,13 @@ export default {
    background:  url("~assets/MainBG.svg");
    background-repeat: no-repeat;
    background-size: cover;
+}
+
+.closebBtn{
+  border-radius: 2px solid white;
+  margin-left: 2rem;
+  margin-top: 4rem;
+  z-index: 99;
 }
 
 </style>
