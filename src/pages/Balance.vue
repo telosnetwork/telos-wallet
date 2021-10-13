@@ -820,6 +820,7 @@ export default {
   background-repeat: no-repeat;
   text-align: center;
   margin-top: -8rem;
+  margin-left: 1.5rem;
 }
 
 .convertBtns:hover {  
