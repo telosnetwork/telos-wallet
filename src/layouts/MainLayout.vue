@@ -1,9 +1,52 @@
 <template>
   <q-layout view="hHh Lpr fFf" >
+      <!-- Left Naviggation Bar -->
+      <div class="left-col leftNavBar">
+        <nav>
+          <img src="~assets/telosLogo.svg" class="telosLogo">
+            <ul>
+                <li>
+                  <a @click="$router.replace('/balance')" class=" wallet"> 
+                    <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
+                </li>
+                <li><a @click="$router.replace('/dappsearch')">
+                  <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
+                <li><a @click="tab = 'Coins'">
+                  <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
+                <li><a @click="tab = 'Collectables'">
+                  <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
+                <li><a @click="$router.replace('/dappsearch')">
+                <img icon="logout">Logout</a></li>
+                <li>
+                  <a @click="$router.replace('/resources')" class=" wallet"> 
+                    <q-icon class="menuIcon fas fa-cogs" />
+                    Resources</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
     <q-page-container  :style="`height: auto;`">
       <router-view :loadedCoins.sync="coins" :loadedNftTokens.sync="nftTokens"/>
     </q-page-container>
-    
+        <!-- Bottom Naviggation Bar -->
+    <div class="left-col bottomNavBar">
+      <nav>
+        <ul>
+          <li>
+            <a @click="$router.replace('/balance')" class="active wallet"> 
+              <img src="~assets/wallet.svg" class="menuIcon"></a>
+          </li>
+          <li><a @click="$router.replace('/dappsearch')">
+            <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
+          <li><a @click="tab = 'Coins'">
+            <img src="~assets/coin.svg" class="menuIcon"></a></li>
+          <li><a @click="tab = 'Collectables'">
+            <img src="~assets/nft.svg" class="menuIcon"></a></li>
+        </ul>
+      </nav>
+    </div>
+    <!-- <img src="~assets/bottomBg.svg" class=""> -->
+
     <!-- <q-footer class="footerStyle" v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
       <q-tabs 
         v-model="tab"
@@ -132,16 +175,5 @@ export default {
 </script>
 
 <style>
-.footerStyle{
-  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
-}
-
-@font-face {
-  font-family: silka-regular;
-  font-style: normal;
-  font-weight: normal;
-  src: url("../css/fonts/silka-regularitalic-webfont.woff");
-}
-
 </style>
 
