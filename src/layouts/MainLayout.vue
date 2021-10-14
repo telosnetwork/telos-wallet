@@ -20,8 +20,8 @@
                 </li>
                 <li>
                   <a @click="$router.replace('/resources')" class=" wallet"> 
-                    <q-icon class="menuIcon fas fa-cogs" />
                     Resources</a>
+                    <!-- <q-icon class="menuIcon fas fa-cogs" /> -->
                 </li>
             </ul>
         </nav>
