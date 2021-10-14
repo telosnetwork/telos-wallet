@@ -44,26 +44,46 @@
     <q-card v-if="buyorsell === 'sell'">
       <div>Amount of RAM to Sell</div>
       <q-input v-model="input" outlined />
-      <q-btn color="primary" outline label="25%" @click="input=(ramAvail*0.25).toFixed(0)" />
-      <q-btn color="primary" outline label="50%" @click="input=(ramAvail*0.5).toFixed(0)" />
-      <q-btn color="primary" outline label="75%" @click="input=(ramAvail*0.75).toFixed(0)" />
-      <q-btn color="primary" outline label="100%" @click="input=(ramAvail*1).toFixed(0)" />
+      <q-btn
+        color="primary"
+        outline
+        label="25%"
+        @click="input = (ramAvail * 0.25).toFixed(0)"
+      />
+      <q-btn
+        color="primary"
+        outline
+        label="50%"
+        @click="input = (ramAvail * 0.5).toFixed(0)"
+      />
+      <q-btn
+        color="primary"
+        outline
+        label="75%"
+        @click="input = (ramAvail * 0.75).toFixed(0)"
+      />
+      <q-btn
+        color="primary"
+        outline
+        label="100%"
+        @click="input = (ramAvail * 1).toFixed(0)"
+      />
 
-      <div>Selling {{input}} Bytes for {{(input*ramPrice).toFixed(4)}} TLOS</div>
+      <div>
+        Selling {{ input }} Bytes for {{ (input * ramPrice).toFixed(4) }} TLOS
+      </div>
 
       <q-btn label="Sell RAM" no-caps @click="trySellRAM()" />
     </q-card>
 
-     <q-dialog v-model="ramLow">
+    <q-dialog v-model="ramLow">
       <q-card style="max-width: 400px">
         <q-card-section class="row items-center">
           <div class="col text-h6">Your RAM is low</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <p>
-            We recommend you buy {{ ramThres }} Bytes additional RAM.
-          </p>
+          <p>We recommend you buy {{ ramThres }} Bytes additional RAM.</p>
         </q-card-section>
 
         <div align="center">Proceed?</div>
@@ -82,8 +102,12 @@
             label="Approve"
             color="primary"
             class="hover-accent"
-            @click="inputType = 'bytes'; input = ramThres; tryBuyRAM()"
-          />          
+            @click="
+              inputType = 'bytes';
+              input = ramThres;
+              tryBuyRAM();
+            "
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -103,10 +127,10 @@ export default {
       fractionToSell: 0,
       ramPrice: 0,
       ramAvail: 0,
-      ramLow: true,
+      ramLow: false,
       ramThres: 1000,
       polling: false,
-      nativeTokenBalance: 0,
+      nativeTokenBalance: 0
     };
   },
 
@@ -116,7 +140,7 @@ export default {
       if (this.inputType === "asset" && this.input) {
         return ((this.input / this.ramPrice) * 0.995).toFixed(0);
       } else if (this.inputType === "bytes" && this.input) {
-        return this.input.toFixed(0);
+        return parseFloat(this.input).toFixed(0);
       } else {
         return 0;
       }
@@ -147,17 +171,20 @@ export default {
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(actions);
-      if (transaction) {
+      let transaction = false;
+      try {
+        transaction = await this.$store.$api.signTransaction(actions);
         this.$q.notify({
           type: "positive",
           message: `RAM bought`
         });
         this.$root.$emit("bought_ram");
-      } else {
+      } catch (error) {
         this.$q.notify({
-          type: "negative",
-          message: `Failed to buy RAM`
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: `${error}`
         });
       }
       if (transaction) this.ramLow = false;
@@ -174,17 +201,20 @@ export default {
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(actions);
-      if (transaction) {
+      let transaction = false;
+      try {
+        transaction = await this.$store.$api.signTransaction(actions);
         this.$q.notify({
           type: "positive",
-          message: `RAM sold`
+          message: `RAM Sold`
         });
         this.$root.$emit("sold_ram");
-      } else {
+      } catch (error) {
         this.$q.notify({
-          type: "negative",
-          message: `Failed to sell RAM`
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: `${error}`
         });
       }
     },
@@ -217,10 +247,11 @@ export default {
           sym: "TLOS",
           accountName: this.accountName
         };
-        this.nativeTokenBalance = parseFloat((await this.getBalanceFromChain(payload)).split(" ")[0])
+        this.nativeTokenBalance = parseFloat(
+          (await this.getBalanceFromChain(payload)).split(" ")[0]
+        );
       }
-    },
-
+    }
   },
 
   async mounted() {
