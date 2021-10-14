@@ -77,17 +77,20 @@ export default {
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(actions);
-      if (transaction) {
+      let transaction = false;
+      try {
+        transaction = await this.$store.$api.signTransaction(actions);
         this.$q.notify({
           type: "positive",
           message: `Staked resources`
         });
-        this.$root.$emit("staked");
-      } else {
+        this.$root.$emit("staked_resources");
+      } catch (error) {
         this.$q.notify({
-          type: "negative",
-          message: `Failed to stake`
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: `${error}`
         });
       }
     },
@@ -105,17 +108,20 @@ export default {
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(actions);
-      if (transaction) {
+      let transaction = false;
+      try {
+        transaction = await this.$store.$api.signTransaction(actions);
         this.$q.notify({
           type: "positive",
           message: `Unstaked resources`
         });
-        this.$root.$emit("unstaked");
-      } else {
+        this.$root.$emit("bought_ram");
+      } catch (error) {
         this.$q.notify({
-          type: "negative",
-          message: `Failed to unstake`
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: `${error}`
         });
       }
     },
