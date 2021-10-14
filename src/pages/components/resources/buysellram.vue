@@ -53,6 +53,40 @@
 
       <q-btn label="Sell RAM" no-caps @click="trySellRAM()" />
     </q-card>
+
+     <q-dialog v-model="ramLow">
+      <q-card style="max-width: 400px">
+        <q-card-section class="row items-center">
+          <div class="col text-h6">Your RAM is low</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <p>
+            We recommend you buy {{ ramThres }} Bytes additional RAM.
+          </p>
+        </q-card-section>
+
+        <div align="center">Proceed?</div>
+        <q-card-actions class="q-pt-none" align="center">
+          <q-btn
+            outline
+            no-caps
+            class="hover-accent"
+            label="Deny"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            outline
+            no-caps
+            label="Approve"
+            color="primary"
+            class="hover-accent"
+            @click="inputType = 'bytes'; input = ramThres; tryBuyRAM()"
+          />          
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -69,9 +103,10 @@ export default {
       fractionToSell: 0,
       ramPrice: 0,
       ramAvail: 0,
-      ramLow: false,
+      ramLow: true,
       ramThres: 1000,
-      polling: false
+      polling: false,
+      nativeTokenBalance: 0,
     };
   },
 
@@ -92,10 +127,14 @@ export default {
       } else {
         return 0;
       }
+    },
+    canPayForRAM() {
+      return this.nativeTokenBalance > this.ramPrice * this.ramThres;
     }
   },
 
   methods: {
+    ...mapActions("resources", ["getBalanceFromChain"]),
     async tryBuyRAM() {
       let actions = [];
       actions.push({
@@ -111,7 +150,7 @@ export default {
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
         this.$q.notify({
-          type: "primary",
+          type: "positive",
           message: `RAM bought`
         });
         this.$root.$emit("bought_ram");
@@ -121,6 +160,7 @@ export default {
           message: `Failed to buy RAM`
         });
       }
+      if (transaction) this.ramLow = false;
     },
 
     async trySellRAM() {
@@ -137,7 +177,7 @@ export default {
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
         this.$q.notify({
-          type: "primary",
+          type: "positive",
           message: `RAM sold`
         });
         this.$root.$emit("sold_ram");
@@ -168,13 +208,27 @@ export default {
       this.ramPrice =
         ramInfo.quote.balance.split(" ")[0] /
         ramInfo.base.balance.split(" ")[0];
-    }
+    },
+
+    async getNativeTokenBalance() {
+      if (this.isAuthenticated) {
+        let payload = {
+          address: "eosio.token",
+          sym: "TLOS",
+          accountName: this.accountName
+        };
+        this.nativeTokenBalance = parseFloat((await this.getBalanceFromChain(payload)).split(" ")[0])
+      }
+    },
+
   },
 
   async mounted() {
+    await this.getNativeTokenBalance();
     await this.checkResources();
 
     this.polling = setInterval(async () => {
+      await this.getNativeTokenBalance();
       await this.checkResources();
     }, 10000);
   },

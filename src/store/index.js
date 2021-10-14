@@ -4,6 +4,7 @@ import Vuex from "vuex";
 import account from "./account";
 import general from "./general";
 import global from "./global";
+import resources from "./resources";
 import { GeneralModule } from "./modules/general";
 import { EosTransitModule } from "./modules/wallet/tlosWallet";
 import { TlosBancorModule } from "./modules/swap/tlosBancor";
@@ -21,6 +22,7 @@ export default function () {
       general,
       account,
       global,
+      resources,
     },
 
     strict: process.env.DEV

@@ -80,7 +80,7 @@ export default {
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
         this.$q.notify({
-          type: "primary",
+          type: "positive",
           message: `Staked resources`
         });
         this.$root.$emit("staked");
@@ -108,7 +108,7 @@ export default {
       const transaction = await this.$store.$api.signTransaction(actions);
       if (transaction) {
         this.$q.notify({
-          type: "primary",
+          type: "positive",
           message: `Unstaked resources`
         });
         this.$root.$emit("unstaked");
