@@ -402,7 +402,7 @@ export default {
 }
 
 .main-background-overlay {
-   background:  url("~assets/MainBG.svg");
+   background:  url("~assets/MainBG.png");
    background-repeat: no-repeat;
    background-size: cover;
 }

@@ -24,7 +24,7 @@
                 <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
+            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west" @click="selectedDestCoin = ''"/>
           </q-toolbar>
         </q-header>
       
@@ -34,7 +34,8 @@
             <div class="absolute" style=" left: 55%;">
               <q-item-section avatar class="cryptoImg1">
                 <q-avatar size="6rem">
-                  <img :src="selectedCoin.icon">
+                  <!-- <img src="~assets/ethereumLogo.svg"> -->
+                  <img :src="selectedDestCoin === '' ? selectedCoin.icon : selectedDestCoin" class="coin_icon">
                 </q-avatar>
               </q-item-section>
               <img class="avatarBackground" src="~assets/avatarBackground.svg" style=" left: 50%;">
@@ -49,7 +50,8 @@
               <img class="avatarBackground2" src="~assets/avatarBackground.svg" style=" left: 45%;">
             </div>
           </div>
-
+          
+<!-- Amount -->
          <div class="row" style="margin-top: 100px">
           <div class="full-width items-center amount-div">
               <div class="full-width column text-center">
@@ -139,7 +141,7 @@
                   :label="pTokenNetwork"
                   :style="`background: ${networkType === key ? '#FFFFFF55' : '#FFFFFF22'}; 
                           color: ${networkType === 'key' ? 'grey' : 'white'};`"
-                  @click="networkType = key"
+                  @click="networkType = key;  selectedDestCoin = (networkType === 'telos' || networkType === 'tevm'  ? selectedCoin.icon : getImgUrl(/*'ethereumLogo.svg'*/));"
                 />
               </q-btn-group>
 
@@ -150,7 +152,7 @@
                 push no-caps
                 :label="networkType === 'ptoken' ? 'Generate New Deposit Address' : 'Generate New Address'"
                 :style="`visibility: ${networkType === 'telos' ? 'hidden' : ''}; display:flex;`"
-                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress()"
+                @click="networkType === 'ptoken' ? generateDepositAddress() : generateEVMAddress();"
               />
             </div>
 
@@ -163,17 +165,17 @@
 
 <!-- QRCode -->
           <div v-if="networkType === 'telos' || networkType === 'ethereum' || isAddressAvailable"
-              class="cursor-pointer qrCode"
+              class="cursor-pointer qrCode flex-center"
               @click="copyToClipboard(qrcodeData)"
             >
               <q-r-canvas
                 :options="{data: qrcodeData, cellSize: 10}"
-                style="width: 100px"
+                style="width: 100px; display:center"
               />
           </div>
 
 <!-- Username -->
-            <q-item>
+            <q-item class="username">
               <q-input
                 v-model="username"
                 class="round-sm full-width networkinfo" 
@@ -187,7 +189,7 @@
             </q-item>
 
 <!-- Notes -->
-            <q-item>
+            <q-item class="notes">
                 <q-input
                 v-model="notes"
                 class="round-sm full-width text-white networkinfo" 
@@ -235,7 +237,8 @@ export default {
       metaData: {},
       awaiting: false,
       username: '',
-      notes: ""
+      notes: "",
+      selectedDestCoin: ""
     }
   },
   components: {
@@ -349,6 +352,9 @@ export default {
           message: `Failed to create an address`,
         });
       }
+    },
+    getImgUrl(pic) {
+      return require('src/assets/ethereumLogo.svg') //+pic);
     },
     async generateDepositAddress() {
       this.awaiting = false;
@@ -509,7 +515,9 @@ export default {
 }
 
 .qrCode{
-  float: right;
+  margin-left: 50%;
+  transform: translateX(-10%);
+  
 }
 
 .amount-div {
@@ -546,11 +554,21 @@ input[type="number"] {
 }
 
 .main-background-overlay {
-   background:  url("~assets/MainBG.svg");
+   background:  url("~assets/MainBG.png");
    background-repeat: no-repeat;
    background-size: cover;
 }
 
+.username{
+  width: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.notes{
+  width: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
 @media only screen and (min-width: 1000px) {
 .networkinfo{
   display:block;
@@ -558,6 +576,10 @@ input[type="number"] {
   margin-right: 10rem;
   margin-top: 1rem;
   
+}
+
+.coin_icon {
+  background: '~assets/ethereumLogo.svg';
 }
 }
 </style>
