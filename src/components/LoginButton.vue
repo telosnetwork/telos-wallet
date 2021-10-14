@@ -135,7 +135,7 @@ var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
 
 export default {
   data() {
-    return { showLogin: false, error: null };
+    return { showLogin: false, error: null, close: false };
   },
   computed: {
     ...mapGetters('account', [

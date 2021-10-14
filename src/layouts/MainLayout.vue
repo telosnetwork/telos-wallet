@@ -15,8 +15,9 @@
                   <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
                 <li><a @click="tab = 'Collectables'">
                   <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
-                <li><a @click="$router.replace('/dappsearch')">
-                <img icon="logout">Logout</a></li>
+                <li><a @click="logout()">
+                <img icon="logout">Logout</a>
+                </li>
                 <li>
                   <a @click="$router.replace('/resources')" class=" wallet"> 
                     <q-icon class="menuIcon fas fa-cogs" />
