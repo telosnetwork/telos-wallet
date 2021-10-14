@@ -4,6 +4,8 @@
     <q-btn-toggle
       v-model="buyorsell"
       toggle-color="primary"
+      rounded
+      no-caps
       :options="[
         { label: 'Buy RAM', value: 'buy' },
         { label: 'Sell RAM', value: 'sell' }
