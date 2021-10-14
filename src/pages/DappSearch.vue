@@ -2,57 +2,38 @@
   <div class="full-height main-div">
     <div class="flex-center full-height">
 
-      <!-- Left Naviggation Bar -->
-      <div class=" leftNavBar">
-        <nav>
-          <img src="~assets/telosLogo.svg" class="telosLogo">
-          <ul>
-              <li>
-                <a @click="$router.replace('/balance')" class="active wallet"> 
-                <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
-              </li>
-              <li><a @click="$router.replace('/dappsearch')">
-                <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
-              <li><a href="#">
-                <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
-              <li><a href="#">
-                <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
-          </ul>
-        </nav>
-      </div>
-
 <!-- Toolbar -->
-          <q-header class="dapp-header text-white">
-            <q-toolbar>
-              <q-toolbar-title class="text-white full-width text-center">
-                <div class="display-grid">
-                  <label class="text-white text-subtitle1 text-weight-medium;" style="color: white; margin-top: 15px">dApps</label>
-                  <q-input v-model="searchDappName" 
-                    standout="bg-transparent text-white" 
-                    label-color="white"  
-                    color="white" 
-                    label="Search dApp" 
-                    dense
-                    input-style="color: white"
-                    input-class="text-white"  
-                    class="searchBar text-white"
-                    style="padding-left: 10px;"/>
-                </div>
-              
-              <!-- <q-icon class="col" name="search"/> -->
-              </q-toolbar-title>
-              
-            </q-toolbar>
-            
-          </q-header>
+      <q-header class="dapp-header text-white">
+        <q-toolbar>
+          <q-toolbar-title class="text-white full-width text-center">
+            <div class="display-grid">
+              <label class="text-white text-subtitle1 text-weight-medium;" style="color: white; margin-top: 15px">dApps</label>
+              <q-input v-model="searchDappName" 
+                standout="bg-transparent text-white" 
+                label-color="white"  
+                color="white" 
+                label="Search dApp" 
+                dense
+                input-style="color: white"
+                input-class="text-white"  
+                class="searchBar text-white"
+                style="padding-left: 10px;"/>
+            </div>
           
+          <!-- <q-icon class="col" name="search"/> -->
+          </q-toolbar-title>
+          
+        </q-toolbar>
+        
+      </q-header>
+      
       <q-card class="bg-transparent" style="max-width: 800px; min-width: 300px; margin: auto; height: 80vh; position: relative">
         <q-layout
           view="hhh Lpr fFf"
           class="coinview"
         >
 
-<!-- Dapp Container -->
+          <!-- Dapp Container -->
           <q-page-container style="height: 80vh;">
             <q-infinite-scroll class="" @load="loadMoreDapps" :offset="100">
               <div v-for="(dapp, index) in searchDapps" :key="`${dapp.name}-${index}`">
@@ -90,23 +71,6 @@
       </q-card>
    
     </div>
-     <!-- Bottom Naviggation Bar -->
-    <div class="left-col bottomNavBar">
-        <nav>
-          <ul>
-              <li>
-                <a @click="$router.replace('/balance')" class="active wallet"> 
-                  <img src="~assets/wallet.svg" class="menuIcon"></a>
-              </li>
-              <li><a @click="$router.replace('/dappsearch')">
-                <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
-              <li><a href="#">
-                <img src="~assets/coin.svg" class="menuIcon"></a></li>
-              <li><a href="#">
-                <img src="~assets/nft.svg" class="menuIcon"></a></li>
-          </ul>
-        </nav>
-      </div>
   </div>
 </template>
 
@@ -200,13 +164,6 @@ div::-webkit-scrollbar-thumb {
   background-color: #555;
 }
 
-
-
-/* .toolbar-title {
-  position: absolute;
-  text-align: center;
-  
-} */
 .list-item {
   /* border: 1px solid #020036; */
   border-left: none;
@@ -231,63 +188,6 @@ div::-webkit-scrollbar-thumb {
 
 .dapp-header {
   background: #00000000;
-}
-
-.bottomNavBar nav{
-position: fixed;
-z-index: 2;
-background: #00000000;
-left: 0;
-bottom:0;
-height: 60px;
-width: 100%;
-transition: transform .3s;
-}
-
-.bottomNavBar nav ul{
-  list-style: none;
-  padding: 0;
-  display: flex;
-  width: 100%;
-  margin-left: 12.5%;
-}
-
-.bottomNavBar nav ul li{
-  display: inline;
-  width: 100%;
-}
-
-.bottomNavBar nav ul li a{
-  text-decoration: none;
-  color: white;
-  display: inline;
-  width: 100%;
-  height: 10em;
-  visibility: visible;
-  transform: translateX(-100%);
-  transition: transform .3s;
-  cursor: pointer;
-}
-
-nav ul li a:hover{
-  background: #00000011;
-  opacity: 100%;
-  /* cursor: pointer; */
-}
-
-.leftNavBar nav {
-  visibility: collapse;
-  transform: translateX(-100%);
-  transition: transform .3s;
-  height: 0px;
-}
-
-/* .active{
-  background: lightgrey;
-} */
-
-.active:hover{
-  background: 4497FF ;
 }
 
 .searchBar{
@@ -320,128 +220,6 @@ nav ul li a:hover{
   background: #00000000;
   padding-bottom: 65px
 }
-}
-
-@media only screen and (min-width: 1000px) {
-.leftNavBar nav {
-    position: unset;
-    transform: translateX(0) !important;
-    border-radius: 0px;
-    height: 100vh;
-}
-
-.bottomNavBar nav {
-    visibility: hidden;
-    transform: translateX(-100%);
-    transition: transform .3s;
-}
-
-.coinHeader{
-  margin-left: 50%;
-  transform: translate(-250px) !important;
-  /* transform: translate(-250px) !important; */
-}
-
-
-.leftNavBar nav{
-  position: fixed;
-  z-index: 1;
-  background: linear-gradient(to bottom, #291A4C, #00000000 80%);
-  left: 0;
-  top:0;
-  height: 100vh;
-  width: 250px;
-  transform: translateX(-100%);
-  transition: transform .3s;
-  visibility: visible;
-}
-
-.telosLogo{
-  padding: 2.5em 5em .875em 4em
-}
-.menuIcon{
-  width: 1.5rem;
-  margin-left: 0.003rem;
-  margin-right: 1rem;
-}
-
-.leftNavBar nav ul{
-  list-style: none;
-  padding: 0;
-  width: 100%;
-  margin-bottom: 0%;
-}
-
-.leftNavBar nav ul li{
-  width: 100%;
-}
-
-.leftNavBar nav ul li a{
-  text-decoration: none;
-  color: white;
-  display: block;
-  padding: .875em 6em 3em 6em;
-  cursor: pointer;
-}
-
-div {
-  overflow: auto;
-}
-
-div::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
-  border-radius: 10px;
-  background-color: #0f0f0f3a;
-}
-
-div::-webkit-scrollbar {
-  width: 1px;
-  background-color: #0f0f0f3a;
-}
-
-div::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
-  background-color: #0f0f0f3a;
-}
-
-q-layout {
-  overflow: auto;
-}
-
-q-layout::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 0px rgba(0, 0, 0, 0);
-  border-radius: 1px;
-  background-color: #00000000;
-}
-
-q-layout:-webkit-scrollbar {
-  width: 1px;
-  background-color: #0f0f0f3a;
-}
-
-q-layout::-webkit-scrollbar-thumb {
-  border-radius: 1px;
-  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0);
-  background-color: rgba(0, 0, 0, 0);
-}
-
-.card{
-  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
-}
-
-.q-card{
-  box-shadow:  0 0px 0px rgb(0 0 0 / 0);
-}
-
-}
-
-
-@font-face {
-  font-family: silka-regularitalic-webfont;
-  font-style: normal;
-  font-weight: normal;
-  src: url("../css/fonts/silka-regularitalic-webfont.woff");
 }
 
 
