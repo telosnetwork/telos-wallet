@@ -37,7 +37,7 @@
         />
       </div>
 
-      <q-btn label="Buy RAM" @click="tryBuyRAM()" />
+      <q-btn label="Buy RAM" no-caps @click="tryBuyRAM()" />
     </q-card>
 
     <!-- Sell card -->
@@ -51,7 +51,7 @@
 
       <div>Selling {{input}} Bytes for {{(input*ramPrice).toFixed(4)}} TLOS</div>
 
-      <q-btn label="Sell RAM" @click="trySellRAM()" />
+      <q-btn label="Sell RAM" no-caps @click="trySellRAM()" />
     </q-card>
   </div>
 </template>

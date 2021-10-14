@@ -4,6 +4,7 @@
       <q-card>
         <q-tabs
           v-model="tab"
+          no-caps
         >
           <q-tab name="ram" label="Buy/Sell RAM" />
           <q-tab name="netcpu" label="Stake CPU/NET" />
@@ -34,7 +35,7 @@ export default {
   // name: 'PageName',
   data() {
     return {
-      tab: "mails"
+      tab: "ram"
     };
   }
 };

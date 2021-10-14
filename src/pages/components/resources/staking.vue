@@ -21,7 +21,7 @@
       <div>Amount of NET to Stake in TLOS</div>
       <q-input outlined v-model="inputNET" />
 
-      <q-btn label="Stake" @click="tryStake()" />
+      <q-btn label="Stake" no-caps @click="tryStake()" />
     </q-card>
 
     <!-- Unstake card -->
@@ -32,7 +32,7 @@
       <div>Amount of NET to Unstake in TLOS</div>
       <q-input outlined v-model="inputNET" />
 
-      <q-btn label="Unstake" @click="tryUnstake()" />
+      <q-btn label="Unstake" no-caps @click="tryUnstake()" />
     </q-card>
 
     <!-- TODO Refund card -->
