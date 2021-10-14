@@ -21,7 +21,7 @@
         <q-input
           v-model="input"
           label="Amount of RAM to buy in TLOS"
-          :hint="`~ ${estimatedBytes.toFixed(0)} Bytes`"
+          :hint="`~ ${Number(estimatedBytes).toLocaleString()} Bytes`"
           outlined
         />
       </div>
@@ -39,12 +39,23 @@
     </q-card>
 
     <!-- Sell card -->
-    <q-card v-if="buyorsell === 'sell'"> </q-card>
+    <q-card v-if="buyorsell === 'sell'">
+      <div>Amount of RAM to Sell</div>
+      <q-input v-model="input" outlined />
+      <q-btn color="primary" outline label="25%" @click="input=(ramAvail*0.25).toFixed(0)" />
+      <q-btn color="primary" outline label="50%" @click="input=(ramAvail*0.5).toFixed(0)" />
+      <q-btn color="primary" outline label="75%" @click="input=(ramAvail*0.75).toFixed(0)" />
+      <q-btn color="primary" outline label="100%" @click="input=(ramAvail*1).toFixed(0)" />
+
+      <div>Selling {{input}} Bytes for {{(input*ramPrice).toFixed(4)}} TLOS</div>
+
+      <q-btn label="Sell RAM" @click="trySellRAM()" />
+    </q-card>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   // name: 'ComponentName',
@@ -58,17 +69,24 @@ export default {
       ramAvail: 0,
       ramLow: false,
       ramThres: 1000,
-      polling: false,
+      polling: false
     };
   },
 
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
     estimatedBytes() {
       if (this.inputType === "asset" && this.input) {
-        return this.input / this.ramPrice * 0.995; 
+        return ((this.input / this.ramPrice) * 0.995).toFixed(0);
       } else if (this.inputType === "bytes" && this.input) {
-        return this.input;
+        return this.input.toFixed(0);
+      } else {
+        return 0;
+      }
+    },
+    bytesToSell() {
+      if (this.buyorsell === "sell") {
+        return this.input * this.fractionToSell;
       } else {
         return 0;
       }
@@ -103,13 +121,38 @@ export default {
       }
     },
 
+    async trySellRAM() {
+      let actions = [];
+      actions.push({
+        account: "eosio",
+        name: "sellram",
+        data: {
+          account: this.accountName.toLowerCase(),
+          bytes: this.input
+        }
+      });
+
+      const transaction = await this.$store.$api.signTransaction(actions);
+      if (transaction) {
+        this.$q.notify({
+          type: "primary",
+          message: `RAM sold`
+        });
+        this.$root.$emit("sold_ram");
+      } else {
+        this.$q.notify({
+          type: "negative",
+          message: `Failed to sell RAM`
+        });
+      }
+    },
+
     async checkResources() {
       await this.getRamPrice();
       let account = await this.$store.$api.getAccount(this.accountName);
       this.ramAvail = account.ram_quota - account.ram_usage;
       if (this.ramAvail < this.ramThres) this.ramLow = true;
     },
-
 
     async getRamPrice() {
       const res = await this.$store.$api.getTableRows({
@@ -123,9 +166,7 @@ export default {
       this.ramPrice =
         ramInfo.quote.balance.split(" ")[0] /
         ramInfo.base.balance.split(" ")[0];
-      console.log("ram price:")
-      console.log(this.ramPrice);
-    },
+    }
   },
 
   async mounted() {
@@ -133,11 +174,11 @@ export default {
 
     this.polling = setInterval(async () => {
       await this.checkResources();
-    }, 30000);
+    }, 10000);
   },
 
   beforeDestroy() {
     clearInterval(this.polling);
-  },
+  }
 };
 </script>
