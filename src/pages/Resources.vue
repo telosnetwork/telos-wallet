@@ -1,6 +1,6 @@
 <template>
-  <q-page>
-    <div class="q-gutter-y-md" style="max-width: 600px">
+  <div class="full-height main-div">
+    <div class="flex-center fit-div q-pa-lg">
       <q-card>
         <q-tabs
           v-model="tab"
@@ -23,7 +23,7 @@
         </q-tab-panels>
       </q-card>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script>
