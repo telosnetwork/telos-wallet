@@ -21,7 +21,7 @@
         <q-input
           v-model="input"
           label="Amount of RAM to buy in TLOS"
-          :hint="`~ ${estimatedBytes} Bytes`"
+          :hint="`~ ${estimatedBytes.toFixed(0)} Bytes`"
           outlined
         />
       </div>
@@ -54,6 +54,11 @@ export default {
       inputType: "asset", // or bytes
       input: "",
       fractionToSell: 0,
+      ramPrice: 0,
+      ramAvail: 0,
+      ramLow: false,
+      ramThres: 1000,
+      polling: false,
     };
   },
 
@@ -61,7 +66,7 @@ export default {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
     estimatedBytes() {
       if (this.inputType === "asset" && this.input) {
-        return this.input * 4; // TODO bancor algo here
+        return this.input / this.ramPrice * 0.995; 
       } else if (this.inputType === "bytes" && this.input) {
         return this.input;
       } else {
@@ -73,7 +78,6 @@ export default {
   methods: {
     async tryBuyRAM() {
       let actions = [];
-
       actions.push({
         account: "eosio",
         name: "buyrambytes",
@@ -97,7 +101,43 @@ export default {
           message: `Failed to buy RAM`
         });
       }
-    }
-  }
+    },
+
+    async checkResources() {
+      await this.getRamPrice();
+      let account = await this.$store.$api.getAccount(this.accountName);
+      this.ramAvail = account.ram_quota - account.ram_usage;
+      if (this.ramAvail < this.ramThres) this.ramLow = true;
+    },
+
+
+    async getRamPrice() {
+      const res = await this.$store.$api.getTableRows({
+        code: "eosio",
+        scope: "eosio",
+        table: "rammarket",
+        limit: 1,
+        show_payer: false
+      });
+      let ramInfo = res.rows[0];
+      this.ramPrice =
+        ramInfo.quote.balance.split(" ")[0] /
+        ramInfo.base.balance.split(" ")[0];
+      console.log("ram price:")
+      console.log(this.ramPrice);
+    },
+  },
+
+  async mounted() {
+    await this.checkResources();
+
+    this.polling = setInterval(async () => {
+      await this.checkResources();
+    }, 30000);
+  },
+
+  beforeDestroy() {
+    clearInterval(this.polling);
+  },
 };
 </script>
