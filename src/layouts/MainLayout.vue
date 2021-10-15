@@ -18,11 +18,11 @@
                 <li><a @click="logout()">
                 <img icon="logout">Logout</a>
                 </li>
-                <li>
+                <!-- <li>
                   <a @click="$router.replace('/resources')" class=" wallet"> 
                     Resources</a>
-                    <!-- <q-icon class="menuIcon fas fa-cogs" /> -->
-                </li>
+                    <q-icon class="menuIcon fas fa-cogs" />
+                </li> -->
             </ul>
         </nav>
     </div>
@@ -95,13 +95,6 @@ const pagesData = [
     caption: 'Settings',
     icon: 'fas fa-cog',
     path: '/settings',
-    available: true,
-  },
-  {
-    title: 'Resources',
-    caption: 'Resources',
-    icon: 'fas fa-cogs',
-    path: '/resources',
     available: true,
   },
 ];

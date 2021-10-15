@@ -130,7 +130,7 @@
                 :name="tab.title"
                 :label="tab.label"
                 :key="tab.title"
-                style="width: 50%; background: #00000000; visibility: hidden;"
+                style="width: 50%; background: #00000000;"
               />
             </q-tabs>
           </q-header>
@@ -162,7 +162,7 @@
           </q-page-container>
         </q-layout>
         
-        <div class="q-pr-none text-white absolute full-width"
+        <!-- <div class="q-pr-none text-white absolute full-width"
           :style="`bottom: ${footerHeight}px;`"
         >
           <q-banner
@@ -193,13 +193,13 @@
               />
             </template>
           </q-banner>
-        </div>
-        <div v-if="tEVMWithdrawing"
+        </div> -->
+        <!-- <div v-if="tEVMWithdrawing"
           class="justify-center absolute flex full-width full-height"
           style="background: rgba(0, 0, 0, 0.4);"
         >
           <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-        </div>
+        </div> -->
     </div>
     <History
       :showHistoryDlg.sync="showHistoryDlg"
