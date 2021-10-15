@@ -56,7 +56,6 @@
               rounded
               no-caps
               label="Withdraw from EVM"
-              :disable="sendAmountValue === 0"
               @click.stop="withdrawEvm"
               v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
             />

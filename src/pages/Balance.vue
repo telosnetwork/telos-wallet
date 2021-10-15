@@ -299,10 +299,6 @@ export default {
       }],
       nftTokenItems: {},
       nftTokenTags: [],
-      nftAccounts: [
-        'tlos.tbond',
-        'marble.code',
-      ],
       nftScopes: [
         0,
         0,
@@ -359,6 +355,18 @@ export default {
     },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+    },
+    nftAccounts() {
+      if (this.chainName === 'telos') {
+        return [
+        'tlos.tbond',
+        'marble.code',
+        ]
+      } else {
+        return [
+        'marbletessst',
+        ]
+      }
     },
   },
   methods: {
@@ -506,7 +514,6 @@ export default {
     async loadNftTokenTags() {
       for (const account of this.nftAccounts) {
         if (this.nftTokenItems[account]) {
-          console.log('nftTokenItems', this.nftTokenItems[account]);
           await this.loadNftTokenTagsPerAccount(account);
         }
       }
@@ -538,6 +545,7 @@ export default {
           table_key: "",
           upper_bound: null
         });
+        console.log(tagData);
         if (tagData.rows.length == 0) {
           if (foundFirstData) {
             break;
@@ -552,6 +560,12 @@ export default {
               image: image,
             });
           } else if (nftAccount === 'marble.code') {
+            const data = JSON.parse(tagData.rows.find(row => row.tag_name === 'data').content);
+            this.nftTokenTags.push({
+              title: data.ti,
+              image: data.dt,
+            });
+          } else if (nftAccount === 'marbletessst') {
             const data = JSON.parse(tagData.rows.find(row => row.tag_name === 'data').content);
             this.nftTokenTags.push({
               title: data.ti,
@@ -636,7 +650,7 @@ export default {
       }
     }, 10);
 
-    if (this.chainName === 'telos') {
+    if (this.chainName === 'telos' || 1) {
       await this.loadNftTokenItems();
       this.loadNftTokenTags();
     }
