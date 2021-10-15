@@ -182,12 +182,18 @@ export default {
         this.$emit('update:showSendToAddressDlg', value);
       },
     },
+    tSymbol() {
+      return this.selectedCoin.symbol.toLowerCase();
+    },
     isPToken() {
       if (!this.selectedCoin) {
         return false;
       }
-      if (!this.pTokens.includes(this.selectedCoin.symbol.toLowerCase())) {
+      if (!this.pTokens.includes(this.tSymbol)) {
         return false;
+      }
+      if (this.selectedCoin.network) {
+        return true;
       }
       return Object.keys(this.coinpTokenNetworks).length > 1;
     },
@@ -195,17 +201,22 @@ export default {
       if (this.networkType === 'telos') {
         return 'Username or Telos address';
       }
-      return `${this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][this.networkType]} address`;
+      return `${this.pTokenNetworks[this.tSymbol][this.networkType]} address`;
     },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
     },
     coinpTokenNetworks() {
-      const networks = {};
-      for (const key in this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()]) {
-        if (key !== 'tevm' || this.chainName !== 'telos') {
-          networks[key] = this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][key];
+      if (this.selectedCoin.network) {
+        return {
+          [this.selectedCoin.network]: this.pTokenNetworks[this.tSymbol][this.selectedCoin.network]
         }
+      }
+      const networks = {};
+      for (const key in this.pTokenNetworks[this.tSymbol]) {
+        // if (key !== 'tevm' || this.chainName !== 'telos') {
+          networks[key] = this.pTokenNetworks[this.tSymbol][key];
+        // }
       }
       return networks;
     }
@@ -294,6 +305,9 @@ export default {
       if (val) {
         this.toAddress = this.$root.qrcode_accountName || '';
         this.networkType = this.$root.qrcode_networkType || 'telos';
+        if (this.selectedCoin && this.selectedCoin.network) {
+          this.networkType = this.selectedCoin.network;
+        }
         this.$root.qrcode_accountName = '';
         this.notes = '';
         this.checking = false;

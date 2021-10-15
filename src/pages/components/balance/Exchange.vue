@@ -267,15 +267,9 @@
             class="q-mt-md text-subtitle2 text-weight-bold text-center"
             :style="`color: white; margin-top: 50px`"
           >
-            <span>
-              {{ unitReward }}
-            </span>
-            <div>
-              {{ `1 ${convertCoin.symbol} = $${getFixed(this.toCoin.price * this.reward, 4)} USD` }}
-            </div>
-            <div v-if="fee !== null">
-              Fee: {{ getFixed(fee, 4) }}
-            </div>
+            <span> {{ unitReward }} </span>
+            <div> {{ `1 ${convertCoin.symbol} = $${getFixed(this.toCoin.price * this.reward, 4)} USD` }} </div>
+            <div v-if="fee !== null"> Fee: {{ getFixed(fee, 4) }} </div>
             <div
               v-if="slippage !== null"
               :class="slippageHigh ? 'text-warning' : ''"
@@ -302,6 +296,12 @@
       </q-layout>
     </q-card>
     <SelectCoin :showSelectCoinDlg.sync="showSelectCoinDlg" :coins="coins" :selectedCoin.sync="selectedCoin" :type="dlgType" />
+    <div v-if="converting"
+      class="justify-center absolute flex full-width full-height"
+      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+    >
+      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
   </q-dialog>
 </template>
 
@@ -333,6 +333,7 @@ export default {
       dlgType: 'convert',
       inputWidth: 30,
       bancorModule: vxm.bancor,
+      converting: false,
     };
   },
   computed: {
@@ -473,31 +474,60 @@ export default {
       console.log(stepIndex, steps);
     },
     async convertPressed() {
+      this.converting = true;
       try {
         const result = await this.bancorModule.convert({
-          from: {
-            id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
-            amount: this.convertAmount,
+          tx: {
+            from: {
+              id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
+              amount: this.convertAmount,
+            },
+            to: {
+              id: `${this.toCoin.account}-${this.toCoin.symbol}`,
+              amount: this.toAmount,
+            },
+            onUpdate: this.onUpdate
           },
-          to: {
-            id: `${this.toCoin.account}-${this.toCoin.symbol}`,
-            amount: this.toAmount,
-          },
-          onUpdate: this.onUpdate
+          detail: `Convert ${this.convertAmount} ${this.convertCoin.symbol} into ${this.toAmount} ${this.toCoin.symbol}`
         });
-
-        this.$q.notify({
-          type: 'primary',
-          message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
-        });
-        this.showDlg = false;
+        if (result) {
+          if (result === 'needAuth') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Authentication is required`,
+            });
+          } else if (result === 'error') {
+            this.$q.notify({
+              type: 'negative',
+              message: `Conversion failed. Make sure authentication is done correctly.`,
+            });
+          } else if (result !== 'cancelled') {
+            this.$q.notify({
+              type: 'primary',
+              message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
+            });
+            this.showDlg = false;
+          }
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: `${this.convertCoin.symbol} is not converted into ${this.toCoin.symbol}`,
+          });
+        }
       } catch (e) {
         this.$q.notify({
           type: 'negative',
           message: e.message,
         });
       }
+      this.converting = false;
     },
+    changeCoins() {
+      const val = this.toCoin;
+      this.toCoin = this.convertCoin;
+      this.dlgType = 'convert';
+      this.selectedCoin = val;
+    }
   },
   watch: {
     showExchangeDlg: function(val, oldVal) {
@@ -510,6 +540,7 @@ export default {
         this.dlgType = 'convert';
         this.convertCoin = this.selectedConvertCoin;
         this.toCoin = null;
+        this.converting = false;
       }
     },
     exchangeType: function (val, oldVal) {

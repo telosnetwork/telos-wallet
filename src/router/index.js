@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import BigNumber from 'bignumber.js';
 import routes from './routes'
+import CryptoJS from 'crypto-js'
 
 Vue.use(VueRouter)
 Vue.mixin({
@@ -17,7 +18,6 @@ Vue.mixin({
         'coral',
         'gradientblue'
       ],
-      privateKey: null,
     };
   },
   computed: {
@@ -52,6 +52,12 @@ Vue.mixin({
     getFixed(value, decimal) {
       const decimalVal = Math.pow(10, decimal);
       return BigNumber((Math.floor(value * decimalVal) / decimalVal).toString()).toFormat();
+    },
+    encrypt (text) {
+      return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+    },
+    decrypt (data) {
+      return CryptoJS.enc.Base64.parse(data).toString(CryptoJS.enc.Utf8);
     },
     changeTheme() {
       const index = (this.themes.findIndex(theme => theme === this.theme.toLowerCase()) + 1) % this.themes.length;

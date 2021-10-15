@@ -1,6 +1,6 @@
 import { vxm } from "../../store";
 
-export const login = async function(
+export const login = async function (
   { commit, dispatch },
   { idx, account, returnUrl }
 ) {
@@ -22,6 +22,7 @@ export const login = async function(
       const accountName = await account.getAccountName();
       this.$ualUser = account;
       this.$type = "ual";
+      this.$idx = idx;
       commit("setAccountName", accountName);
       localStorage.setItem("autoLogin", authenticator.constructor.name);
       localStorage.setItem("account", accountName);
@@ -30,9 +31,9 @@ export const login = async function(
       vxm.tlosWallet.wallet = {
         auth: {
           accountName: accountName,
-          permission: "active",
+          permission: "active"
         },
-        eosApi: this.$ualUser,
+        eosApi: this.$ualUser
       };
     }
   } catch (e) {
@@ -47,7 +48,7 @@ export const login = async function(
   }
 };
 
-export const autoLogin = async function({ dispatch, commit }, returnUrl) {
+export const autoLogin = async function ({ dispatch, commit }, returnUrl) {
   const { authenticator, idx } = getAuthenticator(this.$ual);
   if (authenticator) {
     commit("setAutoLogin", true);
@@ -56,11 +57,12 @@ export const autoLogin = async function({ dispatch, commit }, returnUrl) {
       returnUrl,
       account: localStorage.getItem("account")
     });
+    this.$idx = idx;
     commit("setAutoLogin", false);
   }
 };
 
-const getAuthenticator = function(ual, wallet = null) {
+const getAuthenticator = function (ual, wallet = null) {
   wallet = wallet || localStorage.getItem("autoLogin");
   const idx = ual.authenticators.findIndex(
     auth => auth.constructor.name === wallet
@@ -71,13 +73,14 @@ const getAuthenticator = function(ual, wallet = null) {
   };
 };
 
-export const logout = async function({ commit }) {
+export const logout = async function ({ commit }) {
   const { authenticator } = getAuthenticator(this.$ual);
   try {
     authenticator && (await authenticator.logout());
   } catch (error) {
     console.log("Authenticator logout error", error);
   }
+  this.$account = {};
   commit("setProfile", undefined);
   commit("setAccountName");
   localStorage.removeItem("autoLogin");
@@ -87,7 +90,7 @@ export const logout = async function({ commit }) {
   }
 };
 
-export const getUserProfile = async function({ commit }, accountName) {
+export const getUserProfile = async function ({ commit }, accountName) {
   try {
     const profileResult = await this.$api.getTableRows({
       code: "profiles",
@@ -106,15 +109,12 @@ export const getUserProfile = async function({ commit }, accountName) {
   }
 };
 
-export const getAccountProfile = async function({ commit, dispatch }) {
+export const getAccountProfile = async function ({ commit, dispatch }) {
   if (!this.state.account.accountName) {
     return;
   }
 
-  dispatch(
-    "getUserProfile",
-    this.state.account.accountName
-  );
+  dispatch("getUserProfile", this.state.account.accountName);
 };
 
 export const accountExists = async function ({ commit, dispatch }, accountName) {
@@ -124,4 +124,4 @@ export const accountExists = async function ({ commit, dispatch }, accountName) 
   } catch (e) {
     return false;
   }
-}
+};

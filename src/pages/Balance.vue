@@ -162,44 +162,6 @@
           </q-page-container>
         </q-layout>
         
-        <!-- <div class="q-pr-none text-white absolute full-width"
-          :style="`bottom: ${footerHeight}px;`"
-        >
-          <q-banner
-            v-if="$root.oldtEVMBalance !== tEVMBalance && tEVMBalance"
-            inline-actions
-            dense
-            :style="`background: ${themeColor}; max-width: 600px; min-width: 300px; margin: auto;`"
-          >
-            <div :style="`font-size:16px; `">
-              <marquee behavior="scroll" direction="left" style="vertical-align: bottom;">
-                {{getFixed(tEVMBalance, 4)}} TLOS recieved from tEVM!
-              </marquee>
-            </div>
-            <template v-slot:action>
-              <q-btn
-                class=""
-                :style="`color: ${themeColor};`"
-                no-caps
-                size="12px"
-                label="Withdraw Now"
-                @click="withdrawEVM"
-              />
-              <q-btn
-                round flat dense
-                size="12px"
-                icon="close"
-                @click="$root.oldtEVMBalance = getCurrenttEVMBalance()"
-              />
-            </template>
-          </q-banner>
-        </div> -->
-        <!-- <div v-if="tEVMWithdrawing"
-          class="justify-center absolute flex full-width full-height"
-          style="background: rgba(0, 0, 0, 0.4);"
-        >
-          <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-        </div> -->
     </div>
     <History
       :showHistoryDlg.sync="showHistoryDlg"
@@ -219,6 +181,15 @@
       :coins="coins"
       :selectedCoin.sync="selectedCoin"
       :showSendAmountDlg.sync="showSendAmountDlg"
+    />
+    <DepositEVM
+      :showDepositEVMDlg.sync="showDepositEVMDlg"
+      :nativeTLOSBalance.sync="coins[0].amount"
+      :haveEVMAccount.sync="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
+    />
+    <WithdrawEVM
+      :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
+      :evmTLOSBalance.sync="coins[1].amount"
     />
     <Receive
       :showReceiveDlg.sync="showReceiveDlg"
@@ -248,6 +219,7 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import LoginButton from 'components/LoginButton.vue';
@@ -261,6 +233,8 @@ import ShareAddress from './components/balance/ShareAddress';
 import QRScanner from './components/balance/QRScanner';
 import History from './components/balance/History';
 import Exchange from './components/balance/Exchange';
+import DepositEVM from './components/balance/DepositEVM';
+import WithdrawEVM from './components/balance/WithdrawEVM';
 
 const tabsData = [
   {
@@ -289,6 +263,8 @@ export default {
     QRScanner,
     History,
     Exchange,
+    DepositEVM,
+    WithdrawEVM,
   },
   data() {
     return {
@@ -300,6 +276,15 @@ export default {
         price: 0.0,
         precision: 4,
         suggested: true,
+      }, {
+        account: 'eosio.token',
+        name: 'Telos EVM',
+        symbol: 'TLOS',
+        amount: 0,
+        price: 0.0,
+        precision: 4,
+        suggested: true,
+        network: 'tevm',
       }],
       nftTokenItems: {},
       nftTokenTags: [],
@@ -331,13 +316,15 @@ export default {
       showQRScannerDlg: false,
       showHistoryDlg: false,
       showExchangeDlg: false,
+      showDepositEVMDlg: false,
+      showWithdrawEVMDlg: false,
       tEVMBalance: 0,
       tEVMWithdrawing: false,
     };
   },
   computed: {
     ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens']),
+    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens', 'pTokenNetworks']),
     totalAmount() {
       return this.coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0);
     },
@@ -392,51 +379,57 @@ export default {
         });
     },
     async loadUserTokens() {
-      // const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
-      const settings = {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({code: "eosio.token", account: this.accountName, symbol: "TLOS"})
-      };
-      await fetch(`https://${this.chainName === 'telos' ? '' : 'testnet.'}telos.caleos.io/v1/chain/get_currency_balance`, settings)
-        .then(resp => resp.json())
-        .then(data => {
-          if (data.length > 0) {
-            this.coins[0].amount = parseFloat(data[0].split(' TLOS')[0]);
+      const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
+      if (userCoins.status === 200) {
+        const tokens = userCoins.data.tokens.filter((token) => {
+          if (userCoins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
+            return token.contract.toLowerCase() === 'eosio.token';
           }
+          return true;
         });
-
-      const coins = this.userTokens;
-      if (coins.status === 200) {
-        coins.data.tokens.forEach((token) => {
-          const tokenIndex = this.coins.findIndex(coin => coin.symbol.toLowerCase() === (token.symbol || token.currency).toLowerCase());
-          if (tokenIndex >= 0) {
-            this.coins[tokenIndex].amount = token.amount || 0;
-            this.coins[tokenIndex].precision = token.decimals;
-          }
+        userCoins.data.tokens.forEach((token) => {
+          this.coins.forEach((coin) => {
+            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase() && coin.account === token.contract) {
+              coin.amount = token.amount || 0;
+              coin.precision = token.precision || 4;
+            }
+          });
         });
       }
+
+      this.coins.forEach(async (coin) => {
+        if (coin.network === 'tevm') {
+          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+          coin.amount = BigNumber(evmAccount.balance.toString()).div(1e18).toFixed(4);
+        }
+      })
 
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
-              if (token.chain === 'eos') {
-                const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-                if (coinIndex >= 0 && this.coins[coinIndex].price === 0) {
-                  this.coins[coinIndex].price = token.price.usd;
-                }
+              if (token.chain === 'eos' && token.key.includes('ptokens')) {
+                this.coins.forEach((coin) => {
+                  if (coin.symbol === token.symbol) {
+                    coin.price = token.price.usd;
+                  }
+                });
               }
             } else if (token.metadata.name === 'Telos') {
+              this.coins.forEach((coin) => {
+                  if (coin.symbol === 'TLOS') {
+                    coin.price = token.price.usd;
+                  }
+              });
               this.coins[0].price = token.price.usd;
             } else if (token.symbol !== 'TLOS') {
-              const coinIndex = this.coins.findIndex(coin => coin.symbol === token.symbol);
-              if (coinIndex >= 0 && token.price.usd !== 0) {
-                this.coins[coinIndex].price = token.price.usd;
+              if (!token.key.includes('ptokens')) {
+                this.coins.forEach((coin) => {
+                  if (coin.symbol === token.symbol) {
+                    coin.price = token.price.usd;
+                  }
+                });
               }
             }
           });
@@ -444,9 +437,30 @@ export default {
 
       const sortCoin = function (suggestTokens) {
         return function (a, b) {
-          if (!suggestTokens.includes(a.symbol.toLowerCase()) || !suggestTokens.includes(b.symbol.toLowerCase())) {
-            if (suggestTokens.includes(a.symbol.toLowerCase())) return -1;
-            if (suggestTokens.includes(b.symbol.toLowerCase())) return 1;
+          const aSymbol = a.symbol.toLowerCase();
+          const bSymbol = b.symbol.toLowerCase();
+
+          if (aSymbol === bSymbol) {
+            if (a.network) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+
+          if (aSymbol === 'tlos') {
+            return -1;
+          } else if (bSymbol === 'tlos') {
+            return 1;
+          }
+
+          if (!suggestTokens.includes(aSymbol) || !suggestTokens.includes(bSymbol)) {
+            if (suggestTokens.includes(aSymbol)) {
+              return -1;
+            }
+            if (suggestTokens.includes(bSymbol)) {
+              return 1;
+            }
           }
           let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
           let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
@@ -543,8 +557,7 @@ export default {
     getCurrenttEVMBalance() {
       if (this.$root.tEVMAccount) {
         const balanceStr = this.$root.tEVMAccount.balance.toString();
-        const strLength = balanceStr.length;
-        return parseFloat(`${balanceStr.substring(0, strLength - 18)}.${balanceStr.substring(strLength - 18, strLength)}`) || 0;
+        return parseFloat(BigNumber(balanceStr).div(1e18).toFixed(4)) || 0;
       }
       return 0;
     },
@@ -560,13 +573,27 @@ export default {
           quantity: quantityStr,
         }
       });
-      const transaction = await this.$store.$api.signTransaction(actions);
+
+      const transaction = await this.$store.$api.signTransaction(actions, `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`);
+
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
-        });
-        this.oldtEVMBalance = this.getCurrenttEVMBalance();
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Withdraw failed. Make sure authentication is done correctly.`,
+          });
+        } else if (transaction !== 'cancelled') {
+          this.$q.notify({
+            type: 'primary',
+            message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+          });
+          this.oldtEVMBalance = this.getCurrenttEVMBalance();
+        }
       } else {
         this.$q.notify({
           type: 'negative',
@@ -592,6 +619,9 @@ export default {
         }
       }
       this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
+      if (window.time && Date.now() / 1000 - window.time > 10 * 60) {
+        location.reload();
+      }
     }, 10);
 
     if (this.chainName === 'telos') {
@@ -603,15 +633,19 @@ export default {
       this.coins = this.loadedCoins;
       this.coinLoadedAll = true;
     } else {
-      this.coins.length = 1;
+      this.coins.length = 2;
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
           json.forEach((token) => {
             if (token.chain !== 'telos') {
             } else if (token.metadata.name === 'Telos') {
-              this.coins[0].price = token.price.usd;
-              this.coins[0].icon = token.metadata.logo;
+              this.coins.forEach((coin) => {
+                if (coin.symbol === 'TLOS') {
+                  coin.price = token.price.usd;
+                  coin.icon = token.metadata.logo;
+                }
+              })
             } else if (token.symbol !== 'TLOS') {
               const precisionSplit = token.supply.circulating.toString().split('.');
               this.coins.push({
@@ -619,10 +653,23 @@ export default {
                 name: token.metadata.name,
                 symbol: token.symbol,
                 amount: 0,
-                price: token.price.usd,
+                price: 0,
                 icon: token.metadata.logo,
                 precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
               });
+              const tSymbol = token.symbol.toLowerCase();
+              if (this.pTokenNetworks[tSymbol] && this.pTokenNetworks[tSymbol].tevm) {
+                this.coins.push({
+                account: token.account.toLowerCase(),
+                name: token.metadata.name,
+                symbol: token.symbol,
+                amount: 0,
+                price: 0,
+                icon: token.metadata.logo,
+                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+                network: 'tevm'
+              });
+              }
             }
           });
         });
@@ -636,6 +683,11 @@ export default {
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {
+      }
+      window.time = Date.now() / 1000;
+      if (!window.location.href.includes('localhost')) {
+        console.clear();
+        console.log("Don't try to use Inspector!");
       }
     }, 5000);
   },
@@ -660,8 +712,54 @@ export default {
     });
   },
   beforeDestroy() {
-    if (this.interval) clearInterval(this.interval);
-    if (this.tokenInterval) clearInterval(this.tokenInterval);
-  }
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    if (this.tokenInterval) {
+      clearInterval(this.tokenInterval);
+    }
+  },
 };
 </script>
+
+<style scoped>
+/* .main-div {
+  display: flex;
+  flex-flow: column;
+}
+.fit-div {
+  flex-grow: 1;
+  display: flex;
+}
+.balance-div {
+  display: inline-flex;
+  justify-content: space-between;
+}
+.main-toolbar {
+  background-color: #0002;
+  border-radius: 15px;
+  width: 250px;
+  height: 35px;
+  min-block-size: auto;
+}
+.main-toolbar-sperator {
+  width: 2px;
+  height: 20px;
+  margin: auto;
+}
+.bar {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+}
+.coinview {
+  background-color: white;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom-left-radius: unset;
+  border-bottom-left-radius: unset;
+}
+.coin-header {
+  height: 40px;
+} */
+</style>

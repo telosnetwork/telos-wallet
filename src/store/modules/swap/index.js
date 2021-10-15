@@ -39,10 +39,10 @@ export class BancorModule extends VuexModule.With({
         if (
             store.state.routeModule &&
             store.state.routeModule.params &&
-            store.state.routeModule.params.service) {
+            store.state.routeModule.params.service
+        ) {
             return store.state.routeModule.params.service;
-        }
-        else {
+        } else {
             return defaultModule;
         }
     }
@@ -83,14 +83,23 @@ export class BancorModule extends VuexModule.With({
         return vxm[`${this.currentNetwork}Bancor`]["wallet"];
     }
     updateModule({ id, updater }) {
-        const newModules = updateArray(this.modules, module => compareString(id, module.id), updater);
+        const newModules = updateArray(
+            this.modules,
+            module => compareString(id, module.id),
+            updater
+        );
         this.modules = newModules;
     }
     moduleInitialised(id) {
         return __awaiter(this, void 0, void 0, function* () {
             this.updateModule({
                 id,
-                updater: module => (Object.assign(Object.assign({}, module), { loaded: true, loading: false, error: false }))
+                updater: module =>
+                    Object.assign(Object.assign({}, module), {
+                        loaded: true,
+                        loading: false,
+                        error: false
+                    })
             });
         });
     }
@@ -98,7 +107,12 @@ export class BancorModule extends VuexModule.With({
         return __awaiter(this, void 0, void 0, function* () {
             this.updateModule({
                 id,
-                updater: module => (Object.assign(Object.assign({}, module), { loaded: false, loading: false, error: true }))
+                updater: module =>
+                    Object.assign(Object.assign({}, module), {
+                        loaded: false,
+                        loading: false,
+                        error: true
+                    })
             });
         });
     }
@@ -106,7 +120,8 @@ export class BancorModule extends VuexModule.With({
         return __awaiter(this, void 0, void 0, function* () {
             this.updateModule({
                 id,
-                updater: module => (Object.assign(Object.assign({}, module), { loading: true }))
+                updater: module =>
+                    Object.assign(Object.assign({}, module), { loading: true })
             });
         });
     }
@@ -119,20 +134,17 @@ export class BancorModule extends VuexModule.With({
                         root: true
                     });
                     this.moduleInitialised(moduleId);
-                }
-                catch (e) {
+                } catch (e) {
                     this.moduleThrown(moduleId);
                 }
-            }
-            else {
+            } else {
                 try {
                     this.$store
                         .dispatch(`${moduleId}Bancor/init`, params || null, {
                             root: true
                         })
                         .then(() => this.moduleInitialised(moduleId));
-                }
-                catch (e) {
+                } catch (e) {
                     this.moduleThrown(moduleId);
                 }
             }
@@ -146,19 +158,25 @@ export class BancorModule extends VuexModule.With({
                     params: param.initialModuleParam,
                     resolveWhenFinished: true
                 });
-            }
-            else {
-                return Promise.all(this.modules
-                    .map(module => module.id)
-                    .map(moduleId => this.initialiseModule({ moduleId, resolveWhenFinished: true })));
+            } else {
+                return Promise.all(
+                    this.modules
+                        .map(module => module.id)
+                        .map(moduleId =>
+                            this.initialiseModule({ moduleId, resolveWhenFinished: true })
+                        )
+                );
             }
         });
     }
     getUsdPrice() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const reverse = (promise) => new Promise((resolve, reject) => Promise.resolve(promise).then(reject, resolve));
-                const any = (arr) => reverse(Promise.all(arr.map(reverse)));
+                const reverse = promise =>
+                    new Promise((resolve, reject) =>
+                        Promise.resolve(promise).then(reject, resolve)
+                    );
+                const any = arr => reverse(Promise.all(arr.map(reverse)));
                 const res = yield any([fetchUsdPriceOfTlos()]);
                 const usdPrice = res;
                 this.setUsdPriceOfTlos({
@@ -166,9 +184,10 @@ export class BancorModule extends VuexModule.With({
                     lastChecked: new Date().getTime()
                 });
                 return usdPrice;
-            }
-            catch (e) {
-                throw new Error(`Failed to find USD Price of TLOS from External API & Relay ${e.message}`);
+            } catch (e) {
+                throw new Error(
+                    `Failed to find USD Price of TLOS from External API & Relay ${e.message}`
+                );
             }
         });
     }
@@ -176,7 +195,8 @@ export class BancorModule extends VuexModule.With({
         return __awaiter(this, void 0, void 0, function* () {
             const timeNow = new Date().getTime();
             const millisecondGap = 900000;
-            const makeNetworkRequest = !this.usdPriceOfTlos.lastChecked ||
+            const makeNetworkRequest =
+                !this.usdPriceOfTlos.lastChecked ||
                 this.usdPriceOfTlos.lastChecked + millisecondGap < timeNow;
             return makeNetworkRequest
                 ? this.getUsdPrice()
@@ -190,7 +210,8 @@ export class BancorModule extends VuexModule.With({
         return __awaiter(this, void 0, void 0, function* () {
             const timeNow = new Date().getTime();
             const millisecondGap = 900000;
-            const makeNetworkRequest = !this.usdTlos24hPriceMove.lastChecked ||
+            const makeNetworkRequest =
+                !this.usdTlos24hPriceMove.lastChecked ||
                 this.usdTlos24hPriceMove.lastChecked + millisecondGap < timeNow;
             return makeNetworkRequest
                 ? this.getUsdPrice()
@@ -283,8 +304,16 @@ export class BancorModule extends VuexModule.With({
     dispatcher([methodName, params]) {
         return __awaiter(this, void 0, void 0, function* () {
             return params
-                ? this.$store.dispatch(`${this.currentNetwork}Bancor/${methodName}`, params, { root: true })
-                : this.$store.dispatch(`${this.currentNetwork}Bancor/${methodName}`, null, { root: true });
+                ? this.$store.dispatch(
+                    `${this.currentNetwork}Bancor/${methodName}`,
+                    params,
+                    { root: true }
+                )
+                : this.$store.dispatch(
+                    `${this.currentNetwork}Bancor/${methodName}`,
+                    null,
+                    { root: true }
+                );
         });
     }
     refreshBalances(symbols = []) {
@@ -295,90 +324,32 @@ export class BancorModule extends VuexModule.With({
         });
     }
 }
-__decorate([
-    mutation
-], BancorModule.prototype, "updateModule", null);
-__decorate([
-    action
-], BancorModule.prototype, "moduleInitialised", null);
-__decorate([
-    action
-], BancorModule.prototype, "moduleThrown", null);
-__decorate([
-    action
-], BancorModule.prototype, "moduleInitalising", null);
-__decorate([
-    action
-], BancorModule.prototype, "initialiseModule", null);
-__decorate([
-    action
-], BancorModule.prototype, "init", null);
-__decorate([
-    action
-], BancorModule.prototype, "getUsdPrice", null);
-__decorate([
-    action
-], BancorModule.prototype, "fetchusdPriceOfTlos", null);
-__decorate([
-    mutation
-], BancorModule.prototype, "setUsdPriceOfTlos", null);
-__decorate([
-    action
-], BancorModule.prototype, "fetchUsd24hPriceMove", null);
-__decorate([
-    mutation
-], BancorModule.prototype, "setUsdTlos24hPriceMove", null);
-__decorate([
-    action
-], BancorModule.prototype, "loadMoreTokens", null);
-__decorate([
-    action
-], BancorModule.prototype, "fetchHistoryData", null);
-__decorate([
-    action
-], BancorModule.prototype, "convert", null);
-__decorate([
-    action
-], BancorModule.prototype, "updateFee", null);
-__decorate([
-    action
-], BancorModule.prototype, "loadMorePools", null);
-__decorate([
-    action
-], BancorModule.prototype, "removeRelay", null);
-__decorate([
-    action
-], BancorModule.prototype, "updateOwner", null);
-__decorate([
-    action
-], BancorModule.prototype, "getUserBalances", null);
-__decorate([
-    action
-], BancorModule.prototype, "createPool", null);
-__decorate([
-    action
-], BancorModule.prototype, "getCost", null);
-__decorate([
-    action
-], BancorModule.prototype, "getReturn", null);
-__decorate([
-    action
-], BancorModule.prototype, "addLiquidity", null);
-__decorate([
-    action
-], BancorModule.prototype, "removeLiquidity", null);
-__decorate([
-    action
-], BancorModule.prototype, "calculateOpposingDeposit", null);
-__decorate([
-    action
-], BancorModule.prototype, "calculateOpposingWithdraw", null);
-__decorate([
-    action
-], BancorModule.prototype, "focusSymbol", null);
-__decorate([
-    action
-], BancorModule.prototype, "dispatcher", null);
-__decorate([
-    action
-], BancorModule.prototype, "refreshBalances", null);
+__decorate([mutation], BancorModule.prototype, "updateModule", null);
+__decorate([action], BancorModule.prototype, "moduleInitialised", null);
+__decorate([action], BancorModule.prototype, "moduleThrown", null);
+__decorate([action], BancorModule.prototype, "moduleInitalising", null);
+__decorate([action], BancorModule.prototype, "initialiseModule", null);
+__decorate([action], BancorModule.prototype, "init", null);
+__decorate([action], BancorModule.prototype, "getUsdPrice", null);
+__decorate([action], BancorModule.prototype, "fetchusdPriceOfTlos", null);
+__decorate([mutation], BancorModule.prototype, "setUsdPriceOfTlos", null);
+__decorate([action], BancorModule.prototype, "fetchUsd24hPriceMove", null);
+__decorate([mutation], BancorModule.prototype, "setUsdTlos24hPriceMove", null);
+__decorate([action], BancorModule.prototype, "loadMoreTokens", null);
+__decorate([action], BancorModule.prototype, "fetchHistoryData", null);
+__decorate([action], BancorModule.prototype, "convert", null);
+__decorate([action], BancorModule.prototype, "updateFee", null);
+__decorate([action], BancorModule.prototype, "loadMorePools", null);
+__decorate([action], BancorModule.prototype, "removeRelay", null);
+__decorate([action], BancorModule.prototype, "updateOwner", null);
+__decorate([action], BancorModule.prototype, "getUserBalances", null);
+__decorate([action], BancorModule.prototype, "createPool", null);
+__decorate([action], BancorModule.prototype, "getCost", null);
+__decorate([action], BancorModule.prototype, "getReturn", null);
+__decorate([action], BancorModule.prototype, "addLiquidity", null);
+__decorate([action], BancorModule.prototype, "removeLiquidity", null);
+__decorate([action], BancorModule.prototype, "calculateOpposingDeposit", null);
+__decorate([action], BancorModule.prototype, "calculateOpposingWithdraw", null);
+__decorate([action], BancorModule.prototype, "focusSymbol", null);
+__decorate([action], BancorModule.prototype, "dispatcher", null);
+__decorate([action], BancorModule.prototype, "refreshBalances", null);

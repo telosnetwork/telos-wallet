@@ -37,16 +37,14 @@ export class NetworkModule extends VuexModule.With({ namespaced: "network/" }) {
     }
     dispatcher([methodName, params]) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.$store.dispatch(`${this.currentNetwork}Network/${methodName}`, params, { root: true });
+            return this.$store.dispatch(
+                `${this.currentNetwork}Network/${methodName}`,
+                params,
+                { root: true }
+            );
         });
     }
 }
-__decorate([
-    action
-], NetworkModule.prototype, "transfer", null);
-__decorate([
-    action
-], NetworkModule.prototype, "getBalances", null);
-__decorate([
-    action
-], NetworkModule.prototype, "dispatcher", null);
+__decorate([action], NetworkModule.prototype, "transfer", null);
+__decorate([action], NetworkModule.prototype, "getBalances", null);
+__decorate([action], NetworkModule.prototype, "dispatcher", null);

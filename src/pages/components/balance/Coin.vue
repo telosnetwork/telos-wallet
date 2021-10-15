@@ -1,7 +1,8 @@
 <template>
   <div style="margin: auto">
     <q-infinite-scroll
-    style="display: grid; grid-template-rows: auto auto; margin: auto">
+      style="display: grid; grid-template-rows: auto auto; margin: auto"
+    >
       <!-- <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label> -->
       <!-- <q-item
         clickable
@@ -34,7 +35,7 @@
             <img src="~assets/telos-swap.png">
           </q-avatar>
         </q-item-section>
-        
+
         <q-item-section style="justify-content: start; display: grid;">
           <div class="text-white text-left display-grid">
             <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label>
@@ -43,7 +44,9 @@
         </q-item-section>
       </q-item> -->
       <!-- <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label> -->
-      <q-item flat v-for="(coin, index) in availbleCoins"
+      <q-item
+        flat
+        v-for="(coin, index) in availableCoins"
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
@@ -52,25 +55,75 @@
       >
         <q-item-section flat avatar>
           <q-avatar size="45px" class="q-my-sm">
-            <img :src="coin.icon">
+            <img
+              v-if="coin.network === 'tevm' || coin.name === 'Telos'"
+              src="~assets/TLOS.png"
+            />
+            <img v-else :src="coin.icon" />
+            <div
+              v-if="coin.network == 'tevm'"
+              class="flex absolute full-width full-height"
+            >
+              <img
+                class="flex q-ml-auto q-mt-auto"
+                alt="tEVM"
+                src="~assets/evm_logo.png"
+                style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+              />
+            </div>
           </q-avatar>
         </q-item-section>
-        
+
         <q-item-section style="justify-content: start; display: grid;">
           <div class="text-white text-left display-grid">
-            <label class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel">{{coin.name}}</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">{{coin.symbol}}</label>
+            <label
+              class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
+              >{{ coin.name }}</label
+            >
+            <label class="text-subtitle2 text-grey-5 wraplabel">{{
+              coin.symbol
+            }}</label>
           </div>
         </q-item-section>
-        
+
+        <q-item-section
+          class="col-6"
+          style="justify-content: start; display: grid;"
+        >
+          <div class="q-py-lg text-black text-left display-grid">
+            <q-btn
+              color="primary"
+              style="width: 12rem"
+              v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
+              @click.stop="withdrawEvm"
+              >Withdraw from EVM</q-btn
+            >
+            <q-btn
+              color="primary"
+              style="width: 12rem"
+              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+              @click.stop="depositEvm"
+              >Deposit to EVM</q-btn
+            >
+          </div>
+        </q-item-section>
+
         <q-item-section side>
           <div class="text-white text-right display-grid">
-            <label class="text-subtitle1 text-weight-small text-white h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
-            <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 2)}}</label>
+            <label class="text-subtitle1 text-weight-small text-white h-20">{{
+              `${getFixed(coin.amount, 8)} ${coin.symbol}`
+            }}</label>
+            <label class="text-caption text-grey-6"
+              >${{ getFixed(coin.amount * coin.price, 2) }}</label
+            >
           </div>
         </q-item-section>
+
+        
+
+
       </q-item>
-      <template v-if="!coinLoadedAll" v-slot:loading >
+      <template v-if="!coinLoadedAll" v-slot:loading>
         <div class="row justify-center q-my-md">
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -80,27 +133,50 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from "vuex";
 
 export default {
-  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'selectedCoin', 'suggestTokens'],
+  props: [
+    "coins",
+    "coinLoadedAll",
+    "showHistoryDlg",
+    "showExchangeDlg",
+    "showBuyAmountDlg",
+    "showDepositEVMDlg",
+    "showWithdrawEVMDlg",
+    "selectedCoin",
+    "suggestTokens"
+  ],
   computed: {
-    availbleCoins() {
-      return this.coins.filter(coin => coin.amount > 0 || this.suggestTokens.includes(coin.symbol.toLowerCase()));
-    },
+    availableCoins() {
+      return this.coins.filter(
+        coin =>
+          coin.amount > 0 ||
+          this.suggestTokens.includes(coin.symbol.toLowerCase())
+      );
+    }
   },
   methods: {
     clickPurchase() {
-      this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
-      this.$emit('update:showBuyAmountDlg', true);
+      this.$emit(
+        "update:selectedCoin",
+        this.coins.find(coin => coin.symbol === "TLOS")
+      );
+      this.$emit("update:showBuyAmountDlg", true);
     },
     clickExchange() {
-      this.$emit('update:showExchangeDlg', true);
+      this.$emit("update:showExchangeDlg", true);
     },
     selectCoin(coin) {
-      this.$emit('update:selectedCoin', coin);
-      this.$emit('update:showHistoryDlg', true);
+      this.$emit("update:selectedCoin", coin);
+      this.$emit("update:showHistoryDlg", true);
     },
+    depositEvm() {
+      this.$emit("update:showDepositEVMDlg", true);
+    },
+    withdrawEvm() {
+      this.$emit("update:showWithdrawEVMDlg", true);
+    }
   }
 };
 </script>
@@ -143,5 +219,4 @@ div.scroll::-webkit-scrollbar-thumb {
   -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0.3);
   background-color: rgb(223, 0, 0);
 }
-
 </style>

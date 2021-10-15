@@ -41,7 +41,7 @@
 <!-- Logout -->
     <div v-if="isAuthenticated" class="row absolute full-width">
       <q-btn
-        @click="logout"
+        @click="signOut"
         icon="power_settings_new"
         size="md"
         padding="3px 3px 3px 15px"
@@ -124,18 +124,29 @@
         </q-item>
       </q-list>
     </q-dialog>
+    <q-dialog v-model="showAuth" persistent>
+      <Authenticate :showAuth.sync="showAuth" :type.sync="authType"/>
+    </q-dialog>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { TelosEvmApi } from '@telosnetwork/telosevm-js';
-var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
-var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
+import Authenticate from '../pages/components/auth/Authenticate';
+var window_1 = require("../utils/telos-keycatjs/utils/window");
+var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
 
 export default {
   data() {
-    return { showLogin: false, error: null, close: false };
+    return {
+      showLogin: false,
+      showAuth: false,
+      authType: 'signin',
+      error: null,
+      authInterval: null,
+      close: false,
+    };
   },
   computed: {
     ...mapGetters('account', [
@@ -145,14 +156,30 @@ export default {
       'isAutoLoading',
     ])
   },
+  components: {
+    Authenticate
+  },
   methods: {
     ...mapActions('account', ['login', 'logout', 'autoLogin', 'getUserProfile']),
     ...mapMutations('account', ['setAccountName', 'getAccountProfile', 'setLoadingWallet']),
     async signUp() {
-      this.signPopup('/create');
+      this.showAuth = true;
+      this.authType = 'signup';
+      // this.signPopup('/create');
     },
     async signIn() {
       this.signPopup('/signin');
+    },
+    async signOut() {
+      if (gapi) {
+        const auth2 = gapi.auth2.getAuthInstance();
+        if (auth2) {
+          auth2.signOut().then(function () {
+            console.log('User signed out.');
+          });
+        }
+      }
+      this.logout();
     },
     async signPopup(type) {
       const keycat = this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId];
@@ -180,11 +207,16 @@ export default {
       }
     },
     async onLogin(idx) {
-      const error = await this.login({ idx });
-      if (!error) {
-        this.showLogin = false;
+      if (idx === 0) {
+        this.showAuth = true;
+        this.authType = 'signin';
       } else {
-        this.error = error;
+        const error = await this.login({ idx });
+        if (!error) {
+          this.showLogin = false;
+        } else {
+          this.error = error;
+        }
       }
     },
     openUrl(url) {
@@ -208,10 +240,12 @@ export default {
         })
         try {
           this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-        } catch {
+        } catch (e) {
+          console.log(e);
           this.$root.tEVMAccount = null;
         }
-      } catch {
+      } catch (e) {
+        console.log(e)
       }
     }
   },
@@ -220,7 +254,21 @@ export default {
     if (this.isAuthenticated) {
       await this.createEvmApi();
     }
-  }
+    this.authInterval = setInterval(() => {
+      if (this.$store.$account.needAuth) {
+        this.$store.$account.needAuth = false;
+        this.authType = 'auth';
+        this.showAuth = true;
+      } else if (this.$store.$account.needConfirm) {
+        this.$store.$account.needConfirm = false;
+        this.authType = 'confirm';
+        this.showAuth = true;
+      }
+    }, 500);
+  },
+  beforeDestroy() {
+    if (this.authInterval) clearInterval(this.authInterval);
+  },
 };
 </script>
 

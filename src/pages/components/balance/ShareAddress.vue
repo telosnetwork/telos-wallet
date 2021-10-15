@@ -254,7 +254,7 @@ export default {
       });
     },
     cardHeight() {
-       return window.innerHeight - 150;
+      return window.innerHeight - 150;
     },
     showDlg: {
       get() {
@@ -305,12 +305,18 @@ export default {
       }
       return false;
     },
+    tSymbol() {
+      return this.selectedCoin.symbol.toLowerCase();
+    },
     isPToken() {
       if (!this.selectedCoin) {
         return false;
       }
-      if (!this.pTokens.includes(this.selectedCoin.symbol.toLowerCase())) {
+      if (!this.pTokens.includes(this.tSymbol)) {
         return false;
+      }
+      if (this.selectedCoin.network) {
+        return true;
       }
       return Object.keys(this.coinpTokenNetworks).length > 1;
     },
@@ -318,10 +324,16 @@ export default {
       return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
     },
     coinpTokenNetworks() {
+      if (this.selectedCoin.network) {
+        return {
+          [this.selectedCoin.network]: this.pTokenNetworks[this.tSymbol][this.selectedCoin.network]
+        }
+      }
       const networks = {};
-      for (const key in this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()]) {
-        if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
-          networks[key] = this.pTokenNetworks[this.selectedCoin.symbol.toLowerCase()][key];
+      for (const key in this.pTokenNetworks[this.tSymbol]) {
+        // if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
+        if (key !== 'ethereum' || this.chainName !== 'telos') {
+          networks[key] = this.pTokenNetworks[this.tSymbol][key];
         }
       }
       return networks;
@@ -338,14 +350,26 @@ export default {
           data: 'test',
         }
       });
-      const transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(actions, `Create a new EVM address`);
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `A new address is successfully created`,
-        });
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-        this.networkType = 'tevm';
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Creation failed. Make sure authentication is done correctly.`,
+          });
+        } else if (transaction !== 'cancelled') {
+          this.$q.notify({
+            type: 'primary',
+            message: `A new address is successfully created`,
+          });
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+          this.networkType = 'tevm';
+        }
       } else {
         this.$q.notify({
           type: 'negative',
@@ -375,8 +399,6 @@ export default {
         newAddress = await ptoken.pbtc.getDepositAddress(this.accountName);
       } else if (this.selectedCoin.symbol.toLowerCase() === 'tlos') {
         newAddress = await ptoken.peth.issue(10, this.accountName);
-      } else {
-
       }
 
       if (newAddress.value) {
@@ -425,6 +447,9 @@ export default {
     showShareAddressDlg: async function(val, oldVal) {
       if (val) {
         this.networkType = 'telos';
+        if (this.selectedCoin && this.selectedCoin.network) {
+          this.networkType = this.selectedCoin.network;
+        }
         this.metaData = JSON.parse(window.localStorage.getItem('metaData')) || {};
         this.depositAddress = this.metaData[this.selectedCoin.symbol] || '';
       }

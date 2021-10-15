@@ -42,6 +42,14 @@
                 <q-item-section avatar>
                   <q-avatar size="45px" class="q-my-sm">
                     <img :src="coin.icon">
+                    <div v-if="coin.network == 'tevm'" class="flex absolute full-width full-height">
+                      <img
+                        class="flex q-ml-auto q-mt-auto"
+                        alt="tEVM"
+                        src="~assets/telosEVM_32.png"
+                        style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                      />
+                    </div>
                   </q-avatar>
                 </q-item-section>
 

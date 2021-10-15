@@ -38,15 +38,7 @@ export class WalletModule extends VuexModule.With({ namespaced: "wallet/" }) {
         });
     }
 }
-__decorate([
-    action
-], WalletModule.prototype, "dispatcher", null);
-__decorate([
-    action
-], WalletModule.prototype, "tx", null);
-__decorate([
-    action
-], WalletModule.prototype, "initLogin", null);
-__decorate([
-    action
-], WalletModule.prototype, "logout", null);
+__decorate([action], WalletModule.prototype, "dispatcher", null);
+__decorate([action], WalletModule.prototype, "tx", null);
+__decorate([action], WalletModule.prototype, "initLogin", null);
+__decorate([action], WalletModule.prototype, "logout", null);

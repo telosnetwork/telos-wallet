@@ -41,27 +41,35 @@
           </div>
           <div class="text-center q-my-md q-mx-xl" :style="`color: #3FA6F5; display: flex; opacity: 0.8;`">
             <q-space/>
+
             <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Send" icon="fas fa-sign-out-alt" @click="send"/>
             </div>
+
             <q-space/>
             <q-separator vertical/>
             <q-space/>
+
             <div class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Receive" icon="fas fa-sign-in-alt" @click="receive"/>
             </div>
+
             <q-space/>
             <q-separator v-if="selectedCoin.symbol === 'TLOS'" vertical/>
             <q-space v-if="selectedCoin.symbol === 'TLOS'"/>
+
             <div v-if="selectedCoin.symbol === 'TLOS'" class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Buy" icon="far fa-credit-card" @click="buy"/>
             </div>
+
             <q-space v-if="selectedCoin.symbol === 'TLOS'"/>
             <q-separator v-if="convertEnabled" vertical/>
             <q-space v-if="convertEnabled"/>
+
             <div v-if="convertEnabled" class="display-grid" style="width: 60px">
               <q-btn round flat dense stack size="sm" label="Convert" icon="fas fa-sync" @click="convert"/>
             </div>
+
             <q-space v-if="convertEnabled"/>
           </div>
           <q-input 
@@ -152,10 +160,10 @@ export default {
   },
   methods: {
     async loadMoreHistory(index, done) {
-      if (this.loadedAll) return;
-      const actionHistory = await this.$hyperion.get(
-        `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`
-      );
+      if (this.loadedAll) {
+        return;
+      }
+      const actionHistory = await this.$hyperion.get(`/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`);
       this.accountHistory.push(...(actionHistory.data.actions || []));
       this.page += this.pageLimit;
       if (actionHistory.data.actions.length === 0) {

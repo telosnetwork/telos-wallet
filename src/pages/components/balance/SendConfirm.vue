@@ -96,7 +96,7 @@ export default {
       },
     },
     cardHeight() {
-       return window.innerHeight - 200;
+      return window.innerHeight - 200;
     },
   },
   methods: {
@@ -104,7 +104,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      // this.sending = true;
+      this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`;
       if (this.networkType === 'telos') {
@@ -126,9 +126,9 @@ export default {
             data: {
               from: this.accountName.toLowerCase(),
               to: process.env.EVM_CONTRACT,
-              amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
+              // amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
               quantity: quantityStr,
-              symbol: this.selectedCoin.symbol,
+              // symbol: this.selectedCoin.symbol,
               memo: this.notes
             }
           });
@@ -145,6 +145,7 @@ export default {
             data: {
               ram_payer: this.accountName.toLowerCase(),
               tx: rawTrx,
+              estimate_gas: false,
               sender: this.$root.tEVMAccount.address.substring(2),
             }
           });
@@ -178,13 +179,25 @@ export default {
           }
         });
       }
-      const transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(actions, `Send ${quantityStr} to ${this.toAddress}`);
       if (transaction) {
-        this.$q.notify({
-          type: 'primary',
-          message: `${quantityStr} is sent to ${this.toAddress}`,
-        });
-        this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+        if (transaction === 'needAuth') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Authentication is required`,
+          });
+        } else if (transaction === 'error') {
+          this.$q.notify({
+            type: 'negative',
+            message: `Transaction failed. Make sure authentication is done correctly.`,
+          });
+        } else if (transaction !== 'cancelled') {
+          this.$q.notify({
+            type: 'primary',
+            message: `${quantityStr} is sent to ${this.toAddress}`,
+          });
+          this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+        }
       } else {
         this.$q.notify({
           type: 'negative',
