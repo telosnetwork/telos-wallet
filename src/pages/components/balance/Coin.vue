@@ -3,47 +3,6 @@
     <q-infinite-scroll
       style="display: grid; grid-template-rows: auto auto; margin: auto"
     >
-      <!-- <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label> -->
-      <!-- <q-item
-        clickable
-        v-ripple
-        class="list-item"
-        @click="clickPurchase()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <img src="~assets/telos-buy.png">
-          </q-avatar>
-        </q-item-section>
-        
-        <q-item-section style="justify-content:start; display:grid">
-          <div class="text-black text-left display-grid ">
-            <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label>
-            <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label>
-          </div>
-        </q-item-section>
-      </q-item> -->
-
-      <!-- <q-item
-        clickable
-        v-ripple
-        class="list-item"
-        @click="clickExchange()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <img src="~assets/telos-swap.png">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-white text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label>
-          </div>
-        </q-item-section>
-      </q-item> -->
-      <!-- <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label> -->
       <q-item
         flat
         v-for="(coin, index) in availableCoins"

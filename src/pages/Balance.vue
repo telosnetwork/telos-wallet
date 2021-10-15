@@ -143,6 +143,8 @@
                     :coins="coins"
                     :coinLoadedAll="coinLoadedAll"
                     :showHistoryDlg.sync="showHistoryDlg"
+                    :showDepositEVMDlg.sync="showDepositEVMDlg"
+                    :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
                     :showExchangeDlg.sync="showExchangeDlg"
                     :showBuyAmountDlg.sync="showBuyAmountDlg"
                     :selectedCoin.sync="selectedCoin"
@@ -161,7 +163,16 @@
             </q-page>
           </q-page-container>
         </q-layout>
-        
+        <div class="q-pr-none text-white absolute full-width"
+        :style="`bottom: ${footerHeight}px;`"
+      >
+      </div>
+      <div v-if="tEVMWithdrawing"
+        class="justify-center absolute flex full-width full-height"
+        style="background: rgba(0, 0, 0, 0.4);"
+      >
+        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+      </div>
     </div>
     <History
       :showHistoryDlg.sync="showHistoryDlg"
