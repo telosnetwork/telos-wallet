@@ -261,7 +261,7 @@ const tabsData = [
 ];
 
 export default {
-  props: ['loadedCoins', 'loadedNftTokens', 'suggestTokens'],
+  props: ['loadedCoins', 'loadedNftTokens'],
   components: {
     LoginButton,
     Coin,
@@ -506,6 +506,7 @@ export default {
     async loadNftTokenTags() {
       for (const account of this.nftAccounts) {
         if (this.nftTokenItems[account]) {
+          console.log('nftTokenItems', this.nftTokenItems[account]);
           await this.loadNftTokenTagsPerAccount(account);
         }
       }

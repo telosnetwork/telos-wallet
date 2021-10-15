@@ -50,20 +50,25 @@
           style="justify-content: start; display: grid;"
         >
           <div class="q-py-lg text-black text-left display-grid">
-            <q-btn
-              color="primary"
-              style="width: 12rem"
-              v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
+            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
+              flat
+              rounded
+              no-caps
+              label="Withdraw from EVM"
+              :disable="sendAmountValue === 0"
               @click.stop="withdrawEvm"
-              >Withdraw from EVM</q-btn
-            >
-            <q-btn
-              color="primary"
-              style="width: 12rem"
-              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+              v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
+            />
+            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
+              flat
+              rounded
+              no-caps
+              label="Deposit to EVM"
               @click.stop="depositEvm"
-              >Deposit to EVM</q-btn
-            >
+              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+            />
           </div>
         </q-item-section>
 
