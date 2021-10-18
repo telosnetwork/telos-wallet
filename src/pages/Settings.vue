@@ -248,8 +248,7 @@ import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 
 export default {
-  components: {
-  },
+  components: {},
   data() {
     return {
       accountHasProfile: false,

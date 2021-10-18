@@ -19,7 +19,7 @@
           />
         </div>
         <label class="description font-size-3-5vw" style="blue">
-           Send, Buy, Collect. It's Crypto Made Easy
+          Send, Buy, Collect. It's Crypto Made Easy
         </label>
       </q-carousel-slide>
 
@@ -74,7 +74,7 @@
         </label>
       </q-carousel-slide>-->
     </q-carousel>
-    
+
     <div v-if="!isAuthenticated" class="full-width" style="height: 180px;">
       <login-button />
     </div>
@@ -82,20 +82,20 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import LoginButton from 'components/LoginButton.vue';
+import { mapGetters } from "vuex";
+import LoginButton from "components/LoginButton.vue";
 
 export default {
-  name: 'Home',
+  name: "Home",
   data() {
     return {
-      slide: 'slide1'
+      slide: "slide1"
     };
   },
   components: { LoginButton },
   computed: {
-    ...mapGetters('account', ['isAuthenticated'])
-  },
+    ...mapGetters("account", ["isAuthenticated"])
+  }
 };
 </script>
 
@@ -114,7 +114,7 @@ export default {
   font-size: min(3.5vw, 40px);
 }
 .font-size-3-0vw {
-  font-size: min(3.0vw, 30px);
+  font-size: min(3vw, 30px);
 }
 .home-image {
   max-width: 700px;

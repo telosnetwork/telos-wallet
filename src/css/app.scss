@@ -18,13 +18,13 @@ body {
 }
 
 .footerStyle {
-  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
+  background: linear-gradient(to bottom, #130c3f00, #8946df00 200%);
 }
 
 .main-div {
   background-color: #00000000;
   display: flex;
-  flex-flow: column;  
+  flex-flow: column;
 }
 .fit-div {
   background-color: #00000000;
@@ -49,14 +49,14 @@ body {
   height: 20px;
   margin: auto;
 }
-.bar {  
+.bar {
   background-color: #00000000;
   width: 100%;
   height: 50px;
   position: absolute;
 }
 
-.coinHeader{
+.coinHeader {
   width: 80%;
   margin-top: -3rem;
   margin-left: 50%;
@@ -71,17 +71,17 @@ body {
   border-bottom-left-radius: unset;
 }
 
-.coinviewGrid{
+.coinviewGrid {
   background-color: #00000000;
 }
 .coin-header {
-  background-color: #130C3F00;
+  background-color: #130c3f00;
   height: 40px;
 }
 
-.balanceBtn{
-  color: #FFFFFF;
-  background: linear-gradient(120deg, #1DD1FE, #8946DF);
+.balanceBtn {
+  color: #ffffff;
+  background: linear-gradient(120deg, #1dd1fe, #8946df);
   border-radius: 2rem;
   margin-bottom: 2rem;
   margin-right: 1rem;
@@ -95,7 +95,7 @@ body {
   align-content: center;
 }
 
-.purchaseBtns{
+.purchaseBtns {
   background-image: url("~assets/Purchase.svg");
   height: 1rem;
   width: 8rem;
@@ -104,23 +104,23 @@ body {
   padding: 0px;
   text-align: center;
   display: flex;
-  outline:none;
+  outline: none;
   border: 0;
   background-repeat: no-repeat;
   margin-left: 5.5rem;
   margin-top: -8rem;
 }
 
-.convertBtns{
+.convertBtns {
   display: flex;
   background-image: url("~assets/Convert.svg");
   height: 1rem;
   width: 8rem;
   border: none;
   border-radius: 0%;
-    padding: 0px;
-    display: flex;
-  outline:none;
+  padding: 0px;
+  display: flex;
+  outline: none;
   border: 0;
   background-repeat: no-repeat;
   text-align: center;
@@ -128,13 +128,13 @@ body {
   margin-left: 1.5rem;
 }
 
-.convertBtns:hover {  
+.convertBtns:hover {
 }
 
-.profileImg{
+.profileImg {
   text-align: center;
-  height: 3rem; 
-  width: 3rem; 
+  height: 3rem;
+  width: 3rem;
   border-radius: 1rem;
   margin-top: 1rem;
   margin-left: 1rem;
@@ -142,18 +142,18 @@ body {
   background: no-repeat;
 }
 
-.bottomNavBar nav{
-position: fixed;
-z-index: 1;
-background: #00000000;
-left: 0;
-bottom:0;
-height: 65px;
-width: 100%;
-transition: transform .3s;
+.bottomNavBar nav {
+  position: fixed;
+  z-index: 1;
+  background: #00000000;
+  left: 0;
+  bottom: 0;
+  height: 65px;
+  width: 100%;
+  transition: transform 0.3s;
 }
 
-.bottomNavBar nav ul{
+.bottomNavBar nav ul {
   list-style: none;
   padding: 0;
   display: flex;
@@ -161,12 +161,12 @@ transition: transform .3s;
   margin-left: 12.5%;
 }
 
-.bottomNavBar nav ul li{
+.bottomNavBar nav ul li {
   display: inline;
   width: 100%;
 }
 
-.bottomNavBar nav ul li a{
+.bottomNavBar nav ul li a {
   text-decoration: none;
   color: white;
   display: inline;
@@ -174,30 +174,29 @@ transition: transform .3s;
   height: 10em;
   visibility: visible;
   transform: translateX(-100%);
-  transition: transform .3s;
+  transition: transform 0.3s;
   cursor: pointer;
 }
 
-nav ul li a:hover{
+nav ul li a:hover {
   background: #00000011;
   opacity: 100%;
 }
 
 .leftNavBar nav {
-    visibility: collapse;
-    transform: translate(-100%, -100%);
-    height: 0px;
-    width: 0px;
-    position: absolute;
+  visibility: collapse;
+  transform: translate(-100%, -100%);
+  height: 0px;
+  width: 0px;
+  position: absolute;
 }
-
 
 /* .active{
   background: lightgrey;
 } */
 
-.active:hover{
-  background: 4497FF ;
+.active:hover {
+  background: 4497ff;
   cursor: pointer;
 }
 
@@ -224,31 +223,31 @@ nav ul li a:hover{
 
 @media only screen and (min-width: 1000px) {
   .leftNavBar nav {
-      position: unset;
-      transform: translateX(0) !important;
-      border-radius: unset;
-      height: 100vh;
-      cursor: pointer;
+    position: unset;
+    transform: translateX(0) !important;
+    border-radius: unset;
+    height: 100vh;
+    cursor: pointer;
   }
 
   .bottomNavBar nav {
-      visibility: hidden;
-      transform: translateX(-100%);
-      transition: transform .3s;
-      cursor: pointer;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    cursor: pointer;
   }
 
-  .coinHeader{
+  .coinHeader {
     margin-left: 50%;
     width: 60%;
     transform: translate(-45%);
     /* transform: translate(-250px) !important; */
   }
 
-  .profileImg{
+  .profileImg {
     /* background-image: url("~assets/camera.svg"); */
-    height: 4rem; 
-    width: 4rem; 
+    height: 4rem;
+    width: 4rem;
     border-radius: 1rem;
     margin-top: 1rem;
     left: 70%;
@@ -256,33 +255,33 @@ nav ul li a:hover{
     background: no-repeat;
   }
 
-  .leftNavBar nav{
+  .leftNavBar nav {
     position: fixed;
     z-index: 1;
     /* background: linear-gradient(to bottom, #130C3F, #473283 200%); */
     /* background: linear-gradient(to bottom, #130C3F, #00000000 100%); */
-    background: linear-gradient(to bottom, #291A4C, #00000000 80%);
+    background: linear-gradient(to bottom, #291a4c, #00000000 80%);
     /* background: linear-gradient(to bottom, #473283, #00000000 100%); */
     ma: 0;
-    top:0;
+    top: 0;
     height: 100vh;
     width: 250px;
     transform: translateX(-100%);
-    transition: transform .3s;
+    transition: transform 0.3s;
     visibility: visible;
     cursor: pointer;
   }
 
-  .telosLogo{
-    padding: 2.5em 5em .875em 4em
+  .telosLogo {
+    padding: 2.5em 5em 0.875em 4em;
   }
-  .menuIcon{
+  .menuIcon {
     width: 1.5rem;
     margin-left: 0.003rem;
     margin-right: 1rem;
   }
 
-  .leftNavBar nav ul{
+  .leftNavBar nav ul {
     list-style: none;
     padding: 0;
     width: 100%;
@@ -290,16 +289,16 @@ nav ul li a:hover{
     cursor: pointer;
   }
 
-  .leftNavBar nav ul li{
+  .leftNavBar nav ul li {
     width: 100%;
     cursor: pointer;
   }
 
-  .leftNavBar nav ul li a{
+  .leftNavBar nav ul li a {
     text-decoration: none;
     color: white;
     display: block;
-    padding: .875em 6em 3em 6em;
+    padding: 0.875em 6em 3em 6em;
     cursor: pointer;
   }
 
@@ -345,7 +344,7 @@ nav ul li a:hover{
     background-color: rgba(0, 0, 0, 0);
   }
 
-  .convertBtns{
+  .convertBtns {
     display: flex;
     background-image: url("~assets/Convert.svg");
     height: 1rem;
@@ -354,13 +353,11 @@ nav ul li a:hover{
     border-radius: 0%;
     padding: 0px;
     display: flex;
-    outline:none;
+    outline: none;
     border: 0;
     background-repeat: no-repeat;
     margin-left: 1.5rem;
     text-align: center;
     margin-top: -8rem;
   }
-
-
 }

@@ -2,10 +2,7 @@
   <div class="full-height main-div">
     <div class="flex-center fit-div q-pa-lg">
       <q-card>
-        <q-tabs
-          v-model="tab"
-          no-caps
-        >
+        <q-tabs v-model="tab" no-caps>
           <q-tab name="ram" label="Buy/Sell RAM" />
           <q-tab name="netcpu" label="Stake CPU/NET" />
         </q-tabs>
