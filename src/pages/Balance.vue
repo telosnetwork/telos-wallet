@@ -25,8 +25,8 @@
         <div class="full-width items-center balance-div">
           <div class="full-width" ></div>
           <div class="full-width" >
-            <label class="text-weight-small text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{getFixed(parseInt(displayAmount), 0)}}.{{displayAmount.toFixed(2).slice(-2)}}
+            <label class="text-white" :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px`">
+              $ {{getFixed(parseInt(displayAmount), 0)}}.{{displayAmount.toFixed(2).slice(-2)}}
             </label>
           </div>
           <div class="full-width text-right">

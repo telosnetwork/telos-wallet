@@ -1,16 +1,24 @@
 // app global css in Sass form
-
-
-.footerStyle {
-  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
+@font-face {
+  font-family: silka-regular-italic;
+  font-style: normal;
+  font-weight: normal;
+  src: url("./fonts/silka-regularitalic-webfont.woff");
 }
-
 
 @font-face {
   font-family: silka-regular;
   font-style: normal;
   font-weight: normal;
-  src: url("../css/fonts/silka-regularitalic-webfont.woff");
+  src: url("./fonts/silka-regular-webfont.woff");
+}
+
+body {
+  font-family: silka-regular;
+}
+
+.footerStyle {
+  background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%);
 }
 
 .main-div {
