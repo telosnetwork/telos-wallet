@@ -1,51 +1,14 @@
 <template>
-  <q-layout view="hHh Lpr fFf" >
-      <!-- Left Naviggation Bar -->
-      <div class="left-col leftNavBar">
-        <nav>
-          <img src="~assets/telosLogo.svg" class="telosLogo">
-            <ul>
-                <li>
-                  <a @click="$router.replace('/balance')" class=" wallet"> 
-                    <img src="~assets/wallet.svg" class="menuIcon">Wallet</a>
-                </li>
-                <li><a @click="$router.replace('/dappsearch')">
-                  <img src="~assets/dApps1.svg" class="menuIcon">dApps</a></li>
-                <li><a @click="tab = 'Coins'">
-                  <img src="~assets/coin.svg" class="menuIcon">Coin</a></li>
-                <li><a @click="tab = 'Collectables'">
-                  <img src="~assets/nft.svg" class="menuIcon">Nft</a></li>
-                <li><a @click="logout()">
-                <img icon="logout">Logout</a>
-                </li>
-                <!-- <li>
-                  <a @click="$router.replace('/resources')" class=" wallet"> 
-                    Resources</a>
-                    <q-icon class="menuIcon fas fa-cogs" />
-                </li> -->
-            </ul>
-        </nav>
-    </div>
-    <q-page-container  :style="`height: auto;`">
-      <router-view :loadedCoins.sync="coins" :loadedNftTokens.sync="nftTokens"/>
+  <q-layout view="hHh Lpr fFf">
+    <nav-bar />
+    <q-page-container :style="`height: auto;`">
+      <router-view
+        :loadedCoins.sync="coins"
+        :loadedNftTokens.sync="nftTokens"
+      />
     </q-page-container>
-        <!-- Bottom Naviggation Bar -->
-    <div class="left-col bottomNavBar">
-      <nav>
-        <ul>
-          <li>
-            <a @click="$router.replace('/balance')" class="active wallet"> 
-              <img src="~assets/wallet.svg" class="menuIcon"></a>
-          </li>
-          <li><a @click="$router.replace('/dappsearch')">
-            <img src="~assets/dApps1.svg" class="menuIcon"></a></li>
-          <li><a @click="tab = 'Coins'">
-            <img src="~assets/coin.svg" class="menuIcon"></a></li>
-          <li><a @click="tab = 'Collectables'">
-            <img src="~assets/nft.svg" class="menuIcon"></a></li>
-        </ul>
-      </nav>
-    </div>
+    <nav-bar />
+
     <!-- <img src="~assets/bottomBg.svg" class=""> -->
 
     <!-- <q-footer class="footerStyle" v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
@@ -73,34 +36,36 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from "vuex";
+import navBar from "components/Navbar.vue";
 
 const pagesData = [
   {
-    title: 'Balance',
-    caption: 'Balance',
-    icon: 'fas fa-wallet',
-    path: '/balance',
-    available: true,
+    title: "Balance",
+    caption: "Balance",
+    icon: "fas fa-wallet",
+    path: "/balance",
+    available: true
   },
   {
-    title: 'DappSearch',
-    caption: 'DappSearch',
-    icon: 'fas fa-th-large',
-    path: '/dappsearch',
-    available: true,
+    title: "DappSearch",
+    caption: "DappSearch",
+    icon: "fas fa-th-large",
+    path: "/dappsearch",
+    available: true
   },
   {
-    title: 'Settings',
-    caption: 'Settings',
-    icon: 'fas fa-cog',
-    path: '/settings',
-    available: true,
-  },
+    title: "Settings",
+    caption: "Settings",
+    icon: "fas fa-cog",
+    path: "/settings",
+    available: true
+  }
 ];
 
 export default {
-  name: 'MainLayout',
+  name: "MainLayout",
+  components: { navBar },
   data() {
     return {
       avatar: null,
@@ -113,31 +78,40 @@ export default {
       tab: pagesData[0].title,
       pages: pagesData,
       coins: [],
-      nftTokens: [],
+      nftTokens: []
     };
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("global", ["footerHeight"]),
     containerHeight() {
       return window.innerHeight;
-    },
+    }
   },
   methods: {
-    ...mapActions('account', ['login', 'logout', 'autoLogin','getUserProfile']),
+    ...mapActions("account", [
+      "login",
+      "logout",
+      "autoLogin",
+      "getUserProfile"
+    ]),
     checkPath() {
       if (!this.isAuthenticated) {
-        if (this.$route.path !== '/') window.location = '/';
-      } else if (this.$route.path === '/') {
-        window.location = '/balance';
+        if (this.$route.path !== "/") window.location = "/";
+      } else if (this.$route.path === "/") {
+        window.location = "/balance";
       }
     },
     async loadUserProfile() {
       this.loadAccountHistory();
-      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
+      if (
+        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+      ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[this.accountName];
+      const accountProfile = this.$store.state.account.profiles[
+        this.accountName
+      ];
       if (!accountProfile) {
         return;
       }
@@ -153,9 +127,11 @@ export default {
       this.loadUserProfile();
     },
     async loadAccountHistory() {
-      const actionHistory = await this.$hyperion.get(`/v2/history/get_actions?limit=20&account=${this.accountName}`);
+      const actionHistory = await this.$hyperion.get(
+        `/v2/history/get_actions?limit=20&account=${this.accountName}`
+      );
       this.accountHistory = actionHistory.data.actions || [];
-    },
+    }
   },
   async mounted() {
     await this.autoLogin(this.$route.query.returnUrl);
@@ -164,10 +140,8 @@ export default {
   },
   beforeUpdate() {
     this.checkPath();
-  },
+  }
 };
 </script>
 
-<style>
-</style>
-
+<style></style>
