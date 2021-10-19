@@ -62,9 +62,11 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   props: ["tab"],
   methods: {
+    ...mapActions("account", ["logout"]),
     switchTab(val) {
       this.$emit("update:tab", val);
     }
