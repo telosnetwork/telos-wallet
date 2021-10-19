@@ -256,3 +256,15 @@ body {
     margin-top: -8rem;
   }
 }
+
+.dialogCard {
+  border: 1px solid #fafafa;
+  border-radius: 100px;
+  background-color: $blackDark;
+  color: $white;
+}
+
+.purpleGradient {
+  background: linear-gradient(120deg, $gradientblue, $gradientPurple);
+  color: $white;
+}

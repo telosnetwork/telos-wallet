@@ -50,8 +50,9 @@
           style="justify-content: start; display: grid;"
         >
           <div class="q-py-lg text-black text-left display-grid">
-            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
-              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
+            <q-btn
+              class="purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              :style="`height: 50px; margin-right:3rem; display:flex`"
               flat
               rounded
               no-caps
@@ -59,8 +60,9 @@
               @click.stop="withdrawEvm"
               v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
             />
-            <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
-              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
+            <q-btn
+              class="purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              :style="`height: 50px; margin-right:3rem; display:flex`"
               flat
               rounded
               no-caps
@@ -81,10 +83,6 @@
             >
           </div>
         </q-item-section>
-
-        
-
-
       </q-item>
       <template v-if="!coinLoadedAll" v-slot:loading>
         <div class="row justify-center q-my-md">
