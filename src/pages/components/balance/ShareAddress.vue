@@ -242,6 +242,7 @@ export default {
       sendAmountValue: 0,
       coinInput: '',
       sendAmount: 0,
+      amountFontSize: '',
     }
   },
   components: {
