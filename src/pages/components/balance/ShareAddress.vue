@@ -238,7 +238,11 @@ export default {
       awaiting: false,
       username: '',
       notes: "",
-      selectedDestCoin: ""
+      selectedDestCoin: "",
+      sendAmountValue: 0,
+      coinInput: '',
+      sendAmount: 0,
+      amountFontSize: '',
     }
   },
   components: {
@@ -455,6 +459,9 @@ export default {
       }
     },
   },
+  mounted() {
+    console.log('mounted share address');
+  }
 };
 </script>
 
