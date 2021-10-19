@@ -1,13 +1,14 @@
 <template>
-  <q-layout view="hHh Lpr fFf">
-    <nav-bar />
-    <q-page-container :style="`height: auto;`">
+  <q-layout view="hHh Lpr fFf" class="row">
+    <nav-bar :tab.sync="balanceTab" />
+    <q-page-container class="col">
       <router-view
         :loadedCoins.sync="coins"
         :loadedNftTokens.sync="nftTokens"
+        :balanceTab.sync="balanceTab"
       />
     </q-page-container>
-    <nav-bar />
+    <!-- <nav-bar /> -->
 
     <!-- <img src="~assets/bottomBg.svg" class=""> -->
 
@@ -75,7 +76,7 @@ export default {
       profileAccountName: null,
       accountHasProfile: false,
       accountHistory: [{}],
-      tab: pagesData[0].title,
+      balanceTab: "Coins",
       pages: pagesData,
       coins: [],
       nftTokens: []

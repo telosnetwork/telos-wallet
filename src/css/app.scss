@@ -128,9 +128,6 @@ body {
   margin-left: 1.5rem;
 }
 
-.convertBtns:hover {
-}
-
 .profileImg {
   text-align: center;
   height: 3rem;
@@ -140,55 +137,6 @@ body {
   margin-left: 1rem;
   cursor: pointer;
   background: no-repeat;
-}
-
-.bottomNavBar nav {
-  position: fixed;
-  z-index: 1;
-  background: #00000000;
-  left: 0;
-  bottom: 0;
-  height: 65px;
-  width: 100%;
-  transition: transform 0.3s;
-}
-
-.bottomNavBar nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  width: 100%;
-  margin-left: 12.5%;
-}
-
-.bottomNavBar nav ul li {
-  display: inline;
-  width: 100%;
-}
-
-.bottomNavBar nav ul li a {
-  text-decoration: none;
-  color: white;
-  display: inline;
-  width: 100%;
-  height: 10em;
-  visibility: visible;
-  transform: translateX(-100%);
-  transition: transform 0.3s;
-  cursor: pointer;
-}
-
-nav ul li a:hover {
-  background: #00000011;
-  opacity: 100%;
-}
-
-.leftNavBar nav {
-  visibility: collapse;
-  transform: translate(-100%, -100%);
-  height: 0px;
-  width: 0px;
-  position: absolute;
 }
 
 /* .active{
@@ -222,21 +170,6 @@ nav ul li a:hover {
 }
 
 @media only screen and (min-width: 1000px) {
-  .leftNavBar nav {
-    position: unset;
-    transform: translateX(0) !important;
-    border-radius: unset;
-    height: 100vh;
-    cursor: pointer;
-  }
-
-  .bottomNavBar nav {
-    visibility: hidden;
-    transform: translateX(-100%);
-    transition: transform 0.3s;
-    cursor: pointer;
-  }
-
   .coinHeader {
     margin-left: 50%;
     width: 60%;
@@ -255,23 +188,6 @@ nav ul li a:hover {
     background: no-repeat;
   }
 
-  .leftNavBar nav {
-    position: fixed;
-    z-index: 1;
-    /* background: linear-gradient(to bottom, #130C3F, #473283 200%); */
-    /* background: linear-gradient(to bottom, #130C3F, #00000000 100%); */
-    background: linear-gradient(to bottom, #291a4c, #00000000 80%);
-    /* background: linear-gradient(to bottom, #473283, #00000000 100%); */
-    ma: 0;
-    top: 0;
-    height: 100vh;
-    width: 250px;
-    transform: translateX(-100%);
-    transition: transform 0.3s;
-    visibility: visible;
-    cursor: pointer;
-  }
-
   .telosLogo {
     padding: 2.5em 5em 0.875em 4em;
   }
@@ -279,27 +195,6 @@ nav ul li a:hover {
     width: 1.5rem;
     margin-left: 0.003rem;
     margin-right: 1rem;
-  }
-
-  .leftNavBar nav ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    margin-bottom: 0%;
-    cursor: pointer;
-  }
-
-  .leftNavBar nav ul li {
-    width: 100%;
-    cursor: pointer;
-  }
-
-  .leftNavBar nav ul li a {
-    text-decoration: none;
-    color: white;
-    display: block;
-    padding: 0.875em 6em 3em 6em;
-    cursor: pointer;
   }
 
   .coinHeader {

@@ -32,9 +32,9 @@
           <div class="full-width"></div>
           <div class="full-width">
             <label
-              class="text-white"
+              class="text-white "
               :style="
-                `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px`
+                `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
               "
             >
               $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
@@ -149,7 +149,8 @@
       >
         <q-header class="coin-header flex-center" style="width:100%">
           <q-tabs
-            v-model="tab"
+            :value="balanceTab"
+            @input="switchTab($event)"
             wide-indicator
             active-color="white"
             class=" text-white shadow-2 full-height no-shadow"
@@ -168,7 +169,12 @@
 
         <q-page-container style="width: 100%;">
           <q-page flat v-touch-pan.vertical.prevent.mouse="handlePan">
-            <q-tab-panels flat v-model="tab" class="coinviewGrid">
+            <q-tab-panels
+              flat
+              :value="balanceTab"
+              @input="switchTab($event)"
+              class="coinviewGrid"
+            >
               <q-tab-panel
                 flat
                 name="Coins"
@@ -301,7 +307,7 @@ const tabsData = [
 ];
 
 export default {
-  props: ["loadedCoins", "loadedNftTokens"],
+  props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
   components: {
     LoginButton,
     Coin,
@@ -349,8 +355,8 @@ export default {
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tab: tabsData[0].title,
       tabs: tabsData,
+      tab: "Coins",
       userTokens: {},
       interval: null,
       tokenInterval: null,
@@ -418,6 +424,10 @@ export default {
     }
   },
   methods: {
+    switchTab(val) {
+      console.log("asdf");
+      this.$emit("update:balanceTab", val);
+    },
     clickPurchase() {
       // this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
       this.selectedCoin = this.coins.find(coin => coin.symbol === "TLOS");
@@ -862,44 +872,4 @@ export default {
 };
 </script>
 
-<style scoped>
-/* .main-div {
-  display: flex;
-  flex-flow: column;
-}
-.fit-div {
-  flex-grow: 1;
-  display: flex;
-}
-.balance-div {
-  display: inline-flex;
-  justify-content: space-between;
-}
-.main-toolbar {
-  background-color: #0002;
-  border-radius: 15px;
-  width: 250px;
-  height: 35px;
-  min-block-size: auto;
-}
-.main-toolbar-sperator {
-  width: 2px;
-  height: 20px;
-  margin: auto;
-}
-.bar {
-  width: 100%;
-  height: 50px;
-  position: absolute;
-}
-.coinview {
-  background-color: white;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-}
-.coin-header {
-  height: 40px;
-} */
-</style>
+<style lang="scss" scoped></style>
