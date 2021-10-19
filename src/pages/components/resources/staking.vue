@@ -128,7 +128,7 @@ export default {
 
     async checkResources() {
       let account = await this.$store.$api.getAccount(this.accountName);
-      console.log(account);
+      // console.log(account);
       this.CPUavail = account.cpu_limit.available;
       this.NETavail = account.net_limit.available;    
     },
