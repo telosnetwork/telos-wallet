@@ -20,16 +20,16 @@
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
                 <label class="text-subtitle1 text-weight-medium h-20">{{`Receive ${selectedCoin.symbol}`}}</label>
-                <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->
+                <!-- <label class="text-subtitle2 text-grey-4">Share your address</label> -->              
               </div>
             </q-toolbar-title>
             <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
           </q-toolbar>
         </q-header>
         <q-page-container>
-          <q-card class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow" :style="`height: ${cardHeight}px;`">
+          <q-card class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow" :style="`height: ${cardHeight}px; background: #00000000`">
             <div v-if="isPToken" class="list-item q-pb-sm">
-              <label class="text-center full-width">From Network</label>
+              <label class="text-center full-width text-white">From Network</label>
             </div>
             <div v-if="isPToken" class="list-item -center">
               <q-btn-group class="full-width justify-center" push unelevated>
@@ -66,12 +66,12 @@
               :class="networkType === 'telos' || networkType === 'ethereum' || !isAddressAvailable ?
                 'text-h6' :
                 'text-caption'"
+              class="text-white"
               style="word-break: break-word;"
             >
               {{ displayAccountName }}
             </div>
-            <div>({{selectedCoin.name}})</div>
-            <div class="text-grey">Share address</div>
+            <div class="text-white">({{selectedCoin.name}})</div>
             <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
               <q-spinner color="primary" size="2em" :thickness="5" />
               Awaiting New Deposits...
