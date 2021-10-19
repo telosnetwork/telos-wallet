@@ -69,6 +69,7 @@ export default {
     ...mapActions("account", ["logout"]),
     switchTab(val) {
       this.$emit("update:tab", val);
+      this.$router.replace("/balance");
     }
   }
 };
