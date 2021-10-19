@@ -129,7 +129,7 @@ export default {
       ramAvail: 0,
       ramLow: false,
       ramThres: 1000,
-      polling: false,
+      resourcePoll: false,
       nativeTokenBalance: 0
     };
   },
@@ -258,14 +258,14 @@ export default {
     await this.getNativeTokenBalance();
     await this.checkResources();
 
-    this.polling = setInterval(async () => {
+    this.resourcePoll = setInterval(async () => {
       await this.getNativeTokenBalance();
       await this.checkResources();
     }, 10000);
   },
 
   beforeDestroy() {
-    clearInterval(this.polling);
+    clearInterval(this.resourcePoll);
   }
 };
 </script>
