@@ -39,14 +39,8 @@
                 <img :src="dapp.icon" />
               </q-avatar>
             </q-item-section>
-            <q-item-section style="justify-content: start; display: grid;">
-              <div class="text-white text-left display-grid">
-                <label
-                  class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
-                  >{{ dapp.name }}</label
-                >
-                <label class="text-caption text-white">{{}}</label>
-              </div>
+            <q-item-section class="text-subtitle2 text-weight-medium">
+              {{ dapp.name }}
             </q-item-section>
             <q-item-section side>
               <div class="text-white text-right display-grid">
