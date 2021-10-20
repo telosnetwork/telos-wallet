@@ -17,11 +17,12 @@
         class="shadow-4 coinview main-background-overlay"
       >
         <!-- Header -->
-        <q-header class="text-white q-pa-sm" style="background: #00000000">
-          <q-toolbar class="no-padding">
+        <q-header class="text-white q-ma-lg" style="background: #00000000">
+          <q-toolbar class="">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid ">
-                <label class="text-subtitle1 text-weight-medium h-20 text-white"
+                <label
+                  class="text-subtitle1 text-weight-medium h-20 text-white q-mb-sm"
                   >Send</label
                 >
                 <label class="text-subtitle2 text-white">Select a coin</label>
@@ -38,19 +39,26 @@
               icon="west"
             />
           </q-toolbar>
-          <q-input
-            v-model="searchCoinName"
-            label="Search coin"
-            dense
-            class="round-sm q-pl-sm"
-            standout="bg-transparent text-white"
-            label-color="white"
-            S
-            color="white"
-            input-class="text-white"
-          />
+
+          <div class="q-pa-md">
+            <q-input
+              v-model="searchCoinName"
+              borderless
+              label-color="white"
+              color="white"
+              placeholder="Search coin"
+              dense
+              input-style="color: white"
+              input-class="text-white"
+            >
+              <template v-slot:append>
+                <img src="~/assets/icons/search.svg" />
+              </template>
+            </q-input>
+            <q-separator dark class="q-my-sm" />
+          </div>
         </q-header>
-        <q-page-container>
+        <q-page-container class=" q-ma-lg">
           <q-list>
             <div
               v-for="(coin, index) in searchCoins"
