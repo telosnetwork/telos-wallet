@@ -67,15 +67,6 @@ body {
   background: no-repeat;
 }
 
-/* .active{
-  background: lightgrey;
-} */
-
-.active:hover {
-  background: 4497ff;
-  cursor: pointer;
-}
-
 @media only screen and (min-width: 1000px) {
   .profileImg {
     /* background-image: url("~assets/camera.svg"); */
@@ -90,11 +81,6 @@ body {
 
   .telosLogo {
     padding: 2.5em 5em 0.875em 4em;
-  }
-  .menuIcon {
-    width: 1.5rem;
-    margin-left: 0.003rem;
-    margin-right: 1rem;
   }
 
   .container {

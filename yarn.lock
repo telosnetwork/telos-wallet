@@ -1525,17 +1525,29 @@
   resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.1.1-14.tgz#9ac289237d0493b6a43e01120f0ccbd67ddd5eb1"
   integrity sha512-X50XeF0vwLEBJ1TJZJvYNzJ9Y5kc7slWO2T5lnEw1CwLacmmHYTuTN2aAYqIsvQQmYVbwk/Gr7Ig0Ek8m7/S7w==
   dependencies:
-    "@ethereumjs/common" "^2.3.1"
-    "@ethereumjs/tx" "^3.2.1"
-    assert "^2.0.0"
-    axios "^0.21.1"
+    query-string "^6.5.0"
+
+"@telosnetwork/telosevm-js@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.0.7.tgz#fa8761c0be5ab99cb5aa6d9e0ef8b80530ea42ae"
+  integrity sha512-Cfq+YPDNtMFYItycisj0cGUNXoon1PkB2Dpvt7hesDHOKDmX64DhrBCvwOKBzN5rb3L4PjZV8v0Ntuim0XTzhA==
+  dependencies:
     bn.js "^5.1.1"
-    buffer "^6.0.3"
     eosjs "^21.0.3"
     ethereumjs-abi "^0.6.8"
+    ethereumjs-common "^1.5.0"
+    ethereumjs-tx "^2.1.2"
     ethereumjs-util "^6.2.0"
     node-fetch "^2.6.0"
-    stream "^0.0.2"
+    text-encoding "^0.7.0"
+
+"@telosnetwork/ual-telos-keycat@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/ual-telos-keycat/-/ual-telos-keycat-1.10.3.tgz#8c6eb2977ce725728a4a098073c3a4cfe27dda69"
+  integrity sha512-fBBiCBvHQ7pBNKOyp5e8V9arVbR8LkpLzCT81e3r7+RyP8ioBr+jouc54vWleHR+TvAdMYLyMGBFrG/DlMUmTQ==
+  dependencies:
+    "@telosnetwork/telos-keycatjs" "0.12.4"
+    eosjs "^20.0.3"
     text-encoding "^0.7.0"
 
 "@types/anymatch@*":
@@ -2555,9 +2567,9 @@ bfj@^6.1.1:
     tryer "^1.0.1"
 
 big-integer@^1.6.48:
-  version "1.6.49"
-  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.49.tgz#f6817d3ea5d4f3fb19e24df9f4b1b4471a8328ce"
-  integrity sha512-KJ7VhqH+f/BOt9a3yMwJNmcZjG53ijWMTjSAGMveQWyLwqIiwkjNP5PFgDob3Snnx86SjDj6I89fIbv0dkQeNw==
+  version "1.6.50"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.50.tgz#299a4be8bd441c73dcc492ed46b7169c34e92e70"
+  integrity sha512-+O2uoQWFRo8ysZNo/rjtri2jIwjr3XfeAgRjAUADRqGG+ZITvyn8J1kvXLTaKVr3hhGXk+f23tKfdzmklVM9vQ==
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -2692,7 +2704,7 @@ bn.js@4.11.6:
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.6.tgz#53344adb14617a13f6e8dd2ce28905d1c0ba3215"
   integrity sha1-UzRK2xRhehP26N0s4okF0cC6MhU=
 
-bn.js@5.2.0, bn.js@^5.1.2, bn.js@^5.2.0:
+bn.js@5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.2.0.tgz#358860674396c6997771a9d051fcc1b57d4ae002"
   integrity sha512-D7iWRBvnZE8ecXiLj/9wbxH7Tk79fAh8IHaTNq1RWRixsS02W+5qS+iE9yq6RYl0asXx5tw0bLhmT5pIfbSquw==
@@ -5030,7 +5042,7 @@ ethereumjs-common@^1.3.2, ethereumjs-common@^1.5.0:
   resolved "https://registry.yarnpkg.com/ethereumjs-common/-/ethereumjs-common-1.5.2.tgz#2065dbe9214e850f2e955a80e650cb6999066979"
   integrity sha512-hTfZjwGX52GS2jcVO6E2sx4YuFnf0Fhp5ylo4pEPhEffNln7vS59Hr5sLnp3/QCazFLluuBZ+FZ6J5HTp0EqCA==
 
-ethereumjs-tx@^2.1.1:
+ethereumjs-tx@^2.1.1, ethereumjs-tx@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ethereumjs-tx/-/ethereumjs-tx-2.1.2.tgz#5dfe7688bf177b45c9a23f86cf9104d47ea35fed"
   integrity sha512-zZEK1onCeiORb0wyCXUvg94Ve5It/K6GD1K+26KfFKodiBiS6d9lfCXlUKGBBdQ+bv7Day+JK0tj1K+BeNFRAw==

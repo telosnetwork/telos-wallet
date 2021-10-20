@@ -4,24 +4,16 @@
       <img src="~assets/telosLogo.svg" class="telosLogo" />
       <ul>
         <li>
-          <a @click="switchTab('wallet')" class=" wallet">
-            <img :src="srcWallet" class="menuIcon" />Wallet
-          </a>
+          <a @click="switchTab('wallet')"> <img :src="srcWallet" />Wallet </a>
         </li>
         <li>
-          <a @click="switchTab('dapps')">
-            <img :src="srcDapps" class="menuIcon" />dApps
-          </a>
+          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
         </li>
         <li>
-          <a @click="switchTab('coins')">
-            <img :src="srcCoins" class="menuIcon" />Coin
-          </a>
+          <a @click="switchTab('coins')"> <img :src="srcCoins" />Coin </a>
         </li>
         <li>
-          <a @click="switchTab('nft')">
-            <img :src="srcNft" class="menuIcon" />Nft
-          </a>
+          <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
         </li>
         <li>
           <a @click="logout()"> <img icon="logout" />Logout </a>
@@ -37,23 +29,23 @@
     <nav class="bottomNavBar">
       <ul>
         <li>
-          <a @click="switchTab('wallet')" class="active wallet">
-            <img :src="srcWallet" class="menuIcon" />
+          <a @click="switchTab('wallet')">
+            <img :src="srcWallet" />
           </a>
         </li>
         <li>
           <a @click="switchTab('dapps')">
-            <img :src="srcDapps" class="menuIcon" />
+            <img :src="srcDapps" />
           </a>
         </li>
         <li>
           <a @click="switchTab('coins')">
-            <img :src="srcCoins" class="menuIcon" />
+            <img :src="srcCoins" />
           </a>
         </li>
         <li>
           <a @click="switchTab('nft')">
-            <img :src="srcNft" class="menuIcon" />
+            <img :src="srcNft" />
           </a>
         </li>
       </ul>
@@ -131,6 +123,10 @@ nav ul li a:hover {
   opacity: 100%;
 }
 
+a img {
+  width: 1.5rem;
+}
+
 .leftNavBar {
   visibility: collapse;
   transform: translate(-100%, -100%);
@@ -142,7 +138,7 @@ nav ul li a:hover {
 .bottomNavBar {
   position: fixed;
   z-index: 1;
-  background: #00000000;
+  background: linear-gradient(to top, #3a246b, #00000042 100%);
   left: 0;
   bottom: 0;
   height: 65px;
@@ -151,20 +147,19 @@ nav ul li a:hover {
   ul {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: flex;
-    width: 100%;
-    margin-left: 12.5%;
+    justify-content: space-evenly;
+    height: 100%;
     li {
-      display: inline;
       width: 100%;
+      height: 100%;
       a {
         text-decoration: none;
-        color: white;
-        display: inline;
-        width: 100%;
-        height: 10em;
+        display: flex;
+        justify-content: center;
+        height: 100%;
         visibility: visible;
-        transform: translateX(-100%);
         transition: transform 0.3s;
         cursor: pointer;
       }
@@ -212,6 +207,10 @@ nav ul li a:hover {
     transform: translateX(-100%);
     transition: transform 0.3s;
     cursor: pointer;
+  }
+  img {
+    margin-left: 0.003rem;
+    margin-right: 1rem;
   }
 }
 </style>
