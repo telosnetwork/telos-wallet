@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr fFf" class="">
-    <nav-bar :tab.sync="balanceTab" />
+    <nav-bar :balanceTab.sync="balanceTab" />
     <q-page-container class="pageContainer">
       <router-view
         :loadedCoins.sync="coins"

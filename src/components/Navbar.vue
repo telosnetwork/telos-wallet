@@ -4,23 +4,23 @@
       <img src="~assets/telosLogo.svg" class="telosLogo" />
       <ul>
         <li>
-          <a @click="$router.replace('/balance')" class=" wallet">
-            <img src="~assets/wallet.svg" class="menuIcon" />Wallet
+          <a @click="switchTab('wallet')" class=" wallet">
+            <img :src="srcWallet" class="menuIcon" />Wallet
           </a>
         </li>
         <li>
-          <a @click="$router.replace('/dappsearch')">
-            <img src="~assets/dApps1.svg" class="menuIcon" />dApps
+          <a @click="switchTab('dapps')">
+            <img :src="srcDapps" class="menuIcon" />dApps
           </a>
         </li>
         <li>
-          <a @click="switchTab('Coins')">
-            <img src="~assets/coin.svg" class="menuIcon" />Coin
+          <a @click="switchTab('coins')">
+            <img :src="srcCoins" class="menuIcon" />Coin
           </a>
         </li>
         <li>
-          <a @click="switchTab('Collectables')">
-            <img src="~assets/nft.svg" class="menuIcon" />Nft
+          <a @click="switchTab('nft')">
+            <img :src="srcNft" class="menuIcon" />Nft
           </a>
         </li>
         <li>
@@ -37,23 +37,23 @@
     <nav class="bottomNavBar">
       <ul>
         <li>
-          <a @click="$router.replace('/balance')" class="active wallet">
-            <img src="~assets/wallet.svg" class="menuIcon" />
+          <a @click="switchTab('wallet')" class="active wallet">
+            <img :src="srcWallet" class="menuIcon" />
           </a>
         </li>
         <li>
-          <a @click="$router.replace('/dappsearch')">
-            <img src="~assets/dApps1.svg" class="menuIcon" />
+          <a @click="switchTab('dapps')">
+            <img :src="srcDapps" class="menuIcon" />
           </a>
         </li>
         <li>
-          <a @click="switchTab('Coins')">
-            <img src="~assets/coin.svg" class="menuIcon" />
+          <a @click="switchTab('coins')">
+            <img :src="srcCoins" class="menuIcon" />
           </a>
         </li>
         <li>
-          <a @click="switchTab('Collectables')">
-            <img src="~assets/nft.svg" class="menuIcon" />
+          <a @click="switchTab('nft')">
+            <img :src="srcNft" class="menuIcon" />
           </a>
         </li>
       </ul>
@@ -64,12 +64,62 @@
 <script>
 import { mapActions } from "vuex";
 export default {
-  props: ["tab"],
+  props: ["balanceTab"],
+  data() {
+    return {
+      srcDir: "/nav/",
+      selectedTab: "wallet"
+    };
+  },
+  computed: {
+    srcWallet() {
+      if (this.selectedTab === "wallet")
+        return this.srcDir + "wallet_selected.svg";
+      else return this.srcDir + "wallet.svg";
+    },
+    srcDapps() {
+      if (this.selectedTab === "dapps")
+        return this.srcDir + "dapps_selected.svg";
+      else return this.srcDir + "dapps.svg";
+    },
+    srcCoins() {
+      if (this.selectedTab === "coins")
+        return this.srcDir + "coins_selected.svg";
+      else return this.srcDir + "coins.svg";
+    },
+    srcNft() {
+      if (this.selectedTab === "nft") return this.srcDir + "nft_selected.svg";
+      else return this.srcDir + "nft.svg";
+    }
+  },
   methods: {
     ...mapActions("account", ["logout"]),
     switchTab(val) {
-      this.$emit("update:tab", val);
-      this.$router.replace("/balance");
+      this.selectedTab = val;
+      switch (val) {
+        case "wallet":
+          this.$router.replace("/balance");
+          break;
+        case "dapps":
+          this.$router.replace("/dappsearch");
+          break;
+        case "coins":
+          this.$emit("update:balanceTab", "Coins");
+          this.$router.replace("/balance");
+          break;
+        case "nft":
+          this.$emit("update:balanceTab", "Collectables");
+          this.$router.replace("/balance");
+          break;
+        default:
+          break;
+      }
+    }
+  },
+  watch: {
+    balanceTab() {
+      if (this.balanceTab === "Coins") this.switchTab("coins");
+      else this.switchTab("nft");
     }
   }
 };
