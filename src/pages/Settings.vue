@@ -5,26 +5,12 @@
   >
     <div>
       <div class="profile text-white flex-center">
-        <label style="height: 70px; margin-bottom: 80px">Profile</label>
-
-        <!-- Save Button -->
-        <q-item class="saveBtn text-white userAvatar">
-          <q-btn
-            text-color="white"
-            :style="
-              `height: 35px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`
-            "
-            label="SAVE"
-            @click="save"
-            :disable="display_name.length === 0"
-          />
-          <!-- Back Button -->
-        </q-item>
+        <label style="height: 10px; margin-bottom: 40px">Profile</label>
       </div>
       <q-list round flat dense class="text-white closebBtn" icon="west">
         <!-- User Avatar -->
         <div class="flex-center relative" style="display:flex;">
-          <video
+          <!-- <video
             autoplay
             loop
             class="userAvatar"
@@ -37,15 +23,10 @@
               style="width: 300px; background: #00000000"
             />
           </video>
-          <div class="overlay" style="width: 100%; height: 100%;"></div>
+          <div class="overlay" style="width: 100%; height: 100%;"></div> -->
 
           <q-item class="justify-center userAvatar">
-            <q-avatar
-              size="100px"
-              font-size="52px"
-              color="transparent"
-              text-color="white"
-            >
+            <q-avatar size="150px" color="transparent" text-color="white">
               <!-- <img :src="userAvatar" style="border: 1px solid purple"/> -->
               <img style="" src="~assets/default_avatar.svg" />
             </q-avatar>
@@ -79,7 +60,7 @@
             <img
               class="profileImg"
               src="~assets/avatarImg.svg"
-              style="margin-top: 10px;"
+              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
             />
             <q-input
               v-model="avatar"
@@ -115,7 +96,11 @@
 
           <!-- Status -->
           <q-item style="height: 70px;">
-            <img class="profileImg" src="~assets/statusImg.svg" />
+            <img
+              class="profileImg"
+              src="~assets/statusImg.svg"
+              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
+            />
             <q-input
               v-model="status"
               dense
@@ -130,7 +115,11 @@
 
           <!-- Bio -->
           <q-item style="height: 70px;">
-            <img class="profileImg" src="~assets/bioImg.svg" />
+            <img
+              class="profileImg"
+              src="~assets/bioImg.svg"
+              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
+            />
             <q-input
               v-model="bio"
               dense
@@ -144,8 +133,21 @@
           </q-item>
         </div>
 
+        <!-- Save Button -->
+        <q-item class="saveBtn text-white userAvatar">
+          <q-btn
+            text-color="white"
+            :style="
+              `height: 50px; width: 200px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`
+            "
+            label="SAVE"
+            @click="save"
+            :disable="display_name.length === 0"
+          />
+          <!-- Back Button -->
+        </q-item>
         <!-- Google label -->
-        <div
+        <!-- <div
           class="flex-center"
           style="position: relative; display:flex; left: 1rem; top: 1rem; bottom: 0rem"
         >
@@ -153,7 +155,7 @@
             Google account is connected | <b> Private Key</b>
           </p>
           <img src="~assets/googleBlock.svg" />
-        </div>
+        </div> -->
 
         <!-- <q-item class="column">
           <label class="q-mr-auto information" >Bio</label>
@@ -615,10 +617,8 @@ export default {
 
 .saveBtn {
   border-radius: 6rem;
-  top: 1rem;
-  right: 3rem;
-  top: 4%;
-  z-index: 1;
+  margin-top: 1rem;
+  left: 50%;
 }
 
 .profile {
@@ -655,7 +655,7 @@ export default {
 
 .profileInformation {
   margin-top: 100px;
-  width: auto;
+  width: 35rem;
 }
 
 .settingImg {
