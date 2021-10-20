@@ -7,42 +7,83 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="full-height main-background" style="max-width: auto; margin: auto; ">
+    <q-card
+      class="full-height main-background"
+      style="max-width: auto; margin: auto; "
+    >
       <q-layout
         view="hhh Lpr fFf"
         container
         class="shadow-4 coinview main-background-overlay"
       >
-        <q-header class=" text-white q-pa-sm" style="background: #00000000" >
-          <q-toolbar class="no-padding">
+        <q-header class=" text-white q-pa-md" style="background: #00000000">
+          <q-toolbar class="">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">Receive</label>
+                <label class="text-subtitle1 text-weight-medium h-20 q-mb-sm"
+                  >Receive</label
+                >
                 <label class="text-subtitle2 text-grey-4">Select a coin</label>
               </div>
             </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-white closebBtn" icon="west"/>
+            <q-btn
+              round
+              flat
+              dense
+              v-close-popup
+              class="text-white closebBtn"
+              icon="west"
+            />
           </q-toolbar>
-          <q-input 
-          v-model="searchCoinName" 
-          label="Search coin" 
-          dense 
-          class="round-sm q-pl-sm" 
-          standout="bg-transparent text-white" 
-          label-color="white" 
-          color="white" 
-          input-class="text-white"/>
+
+          <div class="q-pa-md">
+            <q-input
+              v-model="searchCoinName"
+              borderless
+              label-color="white"
+              color="white"
+              placeholder="Search coin"
+              dense
+              input-style="color: white"
+              input-class="text-white"
+            >
+              <template v-slot:append>
+                <img src="~/assets/icons/search.svg" />
+              </template>
+            </q-input>
+            <q-separator dark class="q-my-sm" />
+          </div>
         </q-header>
-        <q-page-container>
+        <q-page-container class=" q-mx-md">
           <q-list>
-            <div v-for="(coin, index) in searchCoins" :key="`${coin.name}_${index}`">
-              <q-item-label v-if="index === 0 && coin.suggested" header style="">Suggested</q-item-label>
-              <q-item-label v-if="index === searchCoins.findIndex(c => !c.suggested) && !coin.suggested" header>All coins</q-item-label>
-              <q-item clickable v-ripple class="list-item" @click="selectCoin(coin)">
+            <div
+              v-for="(coin, index) in searchCoins"
+              :key="`${coin.name}_${index}`"
+            >
+              <q-item-label v-if="index === 0 && coin.suggested" header style=""
+                >Suggested</q-item-label
+              >
+              <q-item-label
+                v-if="
+                  index === searchCoins.findIndex(c => !c.suggested) &&
+                    !coin.suggested
+                "
+                header
+                >All coins</q-item-label
+              >
+              <q-item
+                clickable
+                v-ripple
+                class="list-item"
+                @click="selectCoin(coin)"
+              >
                 <q-item-section avatar>
                   <q-avatar size="45px" class="q-my-sm">
-                    <img :src="coin.icon">
-                    <div v-if="coin.network == 'tevm'" class="flex absolute full-width full-height">
+                    <img :src="coin.icon" />
+                    <div
+                      v-if="coin.network == 'tevm'"
+                      class="flex absolute full-width full-height"
+                    >
                       <img
                         class="flex q-ml-auto q-mt-auto"
                         alt="tEVM"
@@ -55,15 +96,25 @@
 
                 <q-item-section style="justify-content: start; display: grid;">
                   <div class="text-white text-left display-grid">
-                    <label class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel">{{coin.name}}</label>
-                    <label class="text-subtitle2 text-white wraplabel">{{coin.symbol}}</label>
+                    <label
+                      class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
+                      >{{ coin.name }}</label
+                    >
+                    <label class="text-subtitle2 text-white wraplabel">{{
+                      coin.symbol
+                    }}</label>
                   </div>
                 </q-item-section>
 
                 <q-item-section side>
                   <div class="text-white text-right display-grid">
-                    <label class="text-subtitle1 text-weight-small text-white h-20">{{`${getFixed(coin.amount, 8)} ${coin.symbol}`}}</label>
-                    <label class="text-caption text-white">${{getFixed(coin.amount * coin.price, 2)}}</label>
+                    <label
+                      class="text-subtitle1 text-weight-small text-white h-20"
+                      >{{ `${getFixed(coin.amount, 8)} ${coin.symbol}` }}</label
+                    >
+                    <label class="text-caption text-white"
+                      >${{ getFixed(coin.amount * coin.price, 2) }}</label
+                    >
                   </div>
                 </q-item-section>
               </q-item>
@@ -76,22 +127,24 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
+import { mapGetters, mapActions } from "vuex";
+import moment from "moment";
 
 export default {
-  props: ['showReceiveDlg', 'coins', 'selectedCoin', 'showShareAddressDlg'],
+  props: ["showReceiveDlg", "coins", "selectedCoin", "showShareAddressDlg"],
   data() {
     return {
-      searchCoinName: '',
-    }
+      searchCoinName: ""
+    };
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
     searchCoins() {
-      return this.coins.filter((coin) => {
-        return coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase())
-            || coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase());
+      return this.coins.filter(coin => {
+        return (
+          coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
+          coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
+        );
       });
     },
     showDlg: {
@@ -99,16 +152,16 @@ export default {
         return this.showReceiveDlg;
       },
       set(value) {
-        this.$emit('update:showReceiveDlg', value);
-      },
-    },
+        this.$emit("update:showReceiveDlg", value);
+      }
+    }
   },
   methods: {
     selectCoin(coin) {
       this.$emit(`update:showShareAddressDlg`, true);
       this.$emit(`update:selectedCoin`, coin);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -134,16 +187,15 @@ export default {
   text-overflow: ellipsis;
 }
 
-.receiveGrid{
+.receiveGrid {
   background-color: #00000000;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
-
 }
 
-.closebBtn{
+.closebBtn {
   border: 2px solid white;
 }
 
@@ -152,8 +204,8 @@ export default {
 }
 
 .main-background-overlay {
-   background:  url("~assets/MainBG.png");
-   background-repeat: no-repeat;
-   background-size: cover;
+  background: url("~assets/MainBG.png");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 </style>

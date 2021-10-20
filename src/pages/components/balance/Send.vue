@@ -67,7 +67,7 @@
               <q-item-label
                 v-if="index === 0 && coin.suggested"
                 header
-                class="text-subtitle1 text-weight-medium text-white"
+                class="text-subtitle1 "
                 >Suggested</q-item-label
               >
               <q-item-label
