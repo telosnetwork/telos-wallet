@@ -16,27 +16,23 @@
         <q-btn
           @click="showLogin = true"
           no-caps
-          outline
           label="Connect Wallet"
-          class="full-width login-btn"
-          :style="`color: ${themeColor}`"
+          class="purpleGradient q-pa-sm"
+          rounded
         />
       </div>
 
       <!-- Signup Button -->
-      <q-separator
-        v-if="!isAuthenticated"
-        class="q-mt-md q-mx-auto"
-        style="max-width: 500px;"
-      />
+      <q-separator v-if="!isAuthenticated" style="max-width: 500px;" />
       <div class="q-mt-md">
         <q-btn
           @click="signUp"
           text-color="white"
           no-caps
+          outline
+          rounded
           label="Create New Account"
-          class="login-btn"
-          :style="`background: #2cb678`"
+          class=" q-pa-sm"
         />
       </div>
     </div>
@@ -138,7 +134,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <p>We recommend you buy {{ ramThres/1024 }} KB additional RAM.</p>
+          <p>We recommend you buy {{ ramThres / 1024 }} KB additional RAM.</p>
         </q-card-section>
 
         <div align="center">Proceed?</div>
@@ -267,8 +263,7 @@ export default {
       cpuLow: false,
       resourcePoll: false,
       inputCPU: 0,
-      inputNET: 0,
-      
+      inputNET: 0
     };
   },
   computed: {
@@ -277,7 +272,7 @@ export default {
       "accountName",
       "loading",
       "isAutoLoading"
-    ]),
+    ])
   },
   components: {
     Authenticate
@@ -433,8 +428,10 @@ export default {
         data: {
           from: this.accountName.toLowerCase(),
           receiver: this.accountName.toLowerCase(),
-          stake_cpu_quantity: String(parseFloat(this.inputCPU).toFixed(4)) + String(" TLOS"),
-          stake_net_quantity: String(parseFloat(this.inputNET).toFixed(4)) + String(" TLOS"),
+          stake_cpu_quantity:
+            String(parseFloat(this.inputCPU).toFixed(4)) + String(" TLOS"),
+          stake_net_quantity:
+            String(parseFloat(this.inputNET).toFixed(4)) + String(" TLOS"),
           transfer: false
         }
       });
@@ -476,11 +473,13 @@ export default {
       let account = await this.$store.$api.getAccount(this.accountName);
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
-      this.netAvail = account.net_limit.available;    
+      this.netAvail = account.net_limit.available;
       if (this.ramAvail < this.ramThres) this.ramLow = true;
-      if (this.netAvail/account.net_limit.max < this.netThres) this.netLow = true;
-      if (this.cpuAvail/account.cpu_limit.max < this.cpuThres) this.cpuLow = true;
-    },
+      if (this.netAvail / account.net_limit.max < this.netThres)
+        this.netLow = true;
+      if (this.cpuAvail / account.cpu_limit.max < this.cpuThres)
+        this.cpuLow = true;
+    }
   },
   async mounted() {
     await this.checkResources();

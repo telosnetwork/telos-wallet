@@ -15,7 +15,7 @@
         <li>
           <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
         </li>
-        <li>
+        <li v-if="isAuthenticated">
           <a @click="logout()"> <img :src="srcDir + 'logout.svg'" />Logout </a>
         </li>
         <!-- <li>
@@ -48,7 +48,7 @@
             <img :src="srcNft" />
           </a>
         </li> -->
-        <li>
+        <li v-if="isAuthenticated">
           <a @click="logout()"> <img :src="srcDir + 'logout.svg'"/></a>
         </li>
       </ul>
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   props: ["balanceTab"],
   data() {
@@ -67,6 +67,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters("account", ["isAuthenticated"]),
     srcWallet() {
       if (this.selectedTab === "wallet")
         return this.srcDir + "wallet_selected.svg";

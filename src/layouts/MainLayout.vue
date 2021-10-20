@@ -98,7 +98,8 @@ export default {
     ]),
     checkPath() {
       if (!this.isAuthenticated) {
-        if (this.$route.path !== "/") window.location = "/";
+        if (!["/", "/dappsearch"].includes(this.$route.path))
+          window.location = "/";
       } else if (this.$route.path === "/") {
         window.location = "/balance";
       }
