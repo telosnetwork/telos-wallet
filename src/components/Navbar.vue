@@ -16,7 +16,7 @@
           <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
         </li>
         <li>
-          <a @click="logout()"> <img icon="logout" />Logout </a>
+          <a @click="logout()"> <img :src="srcDir + 'logout.svg'" />Logout </a>
         </li>
         <!-- <li>
             <a @click="$router.replace('/resources')" class=" wallet">
@@ -38,7 +38,7 @@
             <img :src="srcDapps" />
           </a>
         </li>
-        <li>
+        <!-- <li>
           <a @click="switchTab('coins')">
             <img :src="srcCoins" />
           </a>
@@ -47,6 +47,9 @@
           <a @click="switchTab('nft')">
             <img :src="srcNft" />
           </a>
+        </li> -->
+        <li>
+          <a @click="logout()"> <img :src="srcDir + 'logout.svg'"/></a>
         </li>
       </ul>
     </nav>
