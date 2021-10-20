@@ -797,12 +797,12 @@ export default {
             }
           });
         });
-      this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated) this.getUserTokens().then(this.loadUserTokens());
     }
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated) this.getUserTokens().then(this.loadUserTokens());
       try {
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
           this.accountName

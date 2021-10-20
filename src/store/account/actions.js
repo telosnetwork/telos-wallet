@@ -35,6 +35,7 @@ export const login = async function (
         },
         eosApi: this.$ualUser
       };
+      await this.$router.push({path: "/balance" });
     }
   } catch (e) {
     const error =
