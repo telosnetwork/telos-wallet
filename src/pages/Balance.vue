@@ -1,10 +1,7 @@
 <template>
-  <div class="">
-    <!-- <div class="flex-center fit-div"></div> -->
-
-    <!-- Coin Header -->
-    <div class=" ">
-      <div style="height: 99%; overflow:auto">
+  <div class="row justify-center">
+    <div style="width: 90vh">
+      <div style="height: 100%; overflow:auto">
         <div
           class="text-center full-width"
           style="display: grid; grid-gap: 1.2rem"
