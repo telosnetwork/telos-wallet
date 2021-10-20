@@ -53,12 +53,11 @@
 
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
-      <q-list class="showLoginPopup" :style="'background: #000000aa'">
-        <br />
-        <label class="connectWallet">Connect Wallet</label>
-        <div class="showLoginPopupStyle">
+      <div class="column showLoginPopup q-pa-lg">
+        <div class="text-subtitle1">Connect Wallet</div>
+        <q-list class="" dark separator>
           <q-item
-            class="itemStyling"
+            class="q-my-sm"
             v-for="(wallet, idx) in $ual.authenticators"
             :key="wallet.getStyle().text"
             v-ripple
@@ -66,11 +65,9 @@
             <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
               <img :src="wallet.getStyle().icon" width="30" />
             </q-item-section>
-
             <q-item-section class="cursor-pointer" @click="onLogin(idx)">
               {{ wallet.getStyle().text }}
             </q-item-section>
-
             <q-item-section class="flex" avatar>
               <q-spinner
                 v-if="loading === wallet.getStyle().text"
@@ -78,39 +75,34 @@
                 size="2em"
               />
               <!-- <q-btn
-              v-else
-              :color="wallet.getStyle().textColor"
-              icon="get_app"
-              @click="openUrl(wallet.getOnboardingLink())"
-              target="_blank"
-              dense
-              flat
-              size="12px"
-            >
-              <q-tooltip>
-                Get app
-              </q-tooltip>
-            </q-btn> -->
+                v-else
+                :color="wallet.getStyle().textColor"
+                icon="get_app"
+                @click="openUrl(wallet.getOnboardingLink())"
+                target="_blank"
+                dense
+                flat
+                size="12px"
+              >
+                <q-tooltip>
+                  Get app
+                </q-tooltip>
+              </q-btn> -->
             </q-item-section>
           </q-item>
-          <br />
-          <!-- <q-separator  class="q-mt-md q-mx-auto" style="max-width: 20rem; height: 1px; border-color:black"/> -->
-
-          <!-- Close Button -->
-          <q-btn
-            v-close-popup
-            @click="close"
-            size="md"
-            padding="3px 3px 3px 3px"
-            no-caps
-            rounded
-            flat
-            class="closeBtn flex-center"
-            label="Close"
-            :style="`display:flex;`"
-          />
-        </div>
-
+        </q-list>
+        <!-- Close Button -->
+        <q-btn
+          v-close-popup
+          @click="close"
+          size="md"
+          no-caps
+          rounded
+          flat
+          class="self-center flex-center"
+          label="Close"
+          :style="`display:flex;`"
+        />
         <q-item
           v-if="error"
           :active="!!error"
@@ -120,7 +112,7 @@
             {{ error }}
           </q-item-section>
         </q-item>
-      </q-list>
+      </div>
     </q-dialog>
     <q-dialog v-model="showAuth" persistent>
       <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
@@ -505,7 +497,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
 .login-btn {
   max-width: 500px;
   height: 40px;
@@ -535,6 +527,7 @@ export default {
   width: 30rem;
   height: auto;
   margin-bottom: 5rem;
+  background: rgba($blackDark, 0.8);
 }
 
 .showLoginPopupStyle {
