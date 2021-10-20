@@ -1,214 +1,196 @@
 <template>
-  <div class="full-height main-div" :style="'background: #00000000'">
-    <div class="flex-center fit-div">
-      <div
-        class="text-center full-width"
-        style="display: grid; grid-gap: 1.2rem"
-      >
-        <login-button v-if="isAuthenticated" style="display:none" />
-
-        <!-- Profile Image top left -->
-        <div>
-          <q-item class="userAvatar">
-            <q-avatar
-              class="profileImg  userAvatar"
-              @click="$router.replace('/settings')"
-            >
-              <img src="~assets/default_avatar.svg" />
-            </q-avatar>
-          </q-item>
-
-          <!-- Account Name -->
-          <label
-            class="text-white"
-            :style="`opacity: ${accountNameStyle.opacity};`"
-          >
-            {{ accountName }}
-          </label>
-        </div>
-
-        <!-- Account Amount -->
-        <div class="full-width items-center balance-div">
-          <div class="full-width"></div>
-          <div class="full-width">
-            <label
-              class="text-white "
-              :style="
-                `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
-              "
-            >
-              $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
-                displayAmount.toFixed(2).slice(-2)
-              }}
-            </label>
-          </div>
-          <div class="full-width text-right">
-            <q-btn
-              round
-              flat
-              icon="qr_code_scanner"
-              size="10px"
-              class="text-white q-mr-md"
-              :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
-              @click="showQRScannerDlg = true"
-            />
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex-center" :style="`display:flex; height: 10%`">
-          <div class="balanceBtn">
-            <q-btn
-              stretch
-              flat
-              no-caps
-              label="Send"
-              @click="showSendDlg = true"
-            />
-          </div>
-          <div class="qrCodeBtn">
-            <q-btn
-              stretch
-              flat
-              icon="qr_code_scanner"
-              style="width: 40px; color: #FFFFFF; "
-              @click="showQRScannerDlg = true"
-            />
-          </div>
-          <div class="balanceBtn">
-            <q-btn
-              stretch
-              flat
-              no-caps
-              label="Receive"
-              @click="showReceiveDlg = true"
-            />
-          </div>
-          <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
-          <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-          <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-          <!-- </q-toolbar> -->
-        </div>
-
-        <!-- Convert Coins -->
-        <div class="flex-center" :style="`display:flex; height: 0%`">
-          <q-item
-            clickable
-            v-ripple
-            class="convertBtns"
-            @click="clickExchange()"
-          >
-            <q-item-section avatar>
-              <q-avatar size="45px" class="q-my-sm">
-                <!-- <img src="~assets/telos-swap.png"> -->
-              </q-avatar>
-            </q-item-section>
-
-            <q-item-section>
-              <div class="text-white text-left">
-                <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
-                <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
-              </div>
-            </q-item-section>
-          </q-item>
-
-          <!-- Purchase Coins -->
-          <q-item
-            clickable
-            v-ripple
-            class="purchaseBtns"
-            @click="clickPurchase()"
-          >
-            <q-item-section avatar>
-              <q-avatar size="45px" class="q-my-sm">
-                <!-- <img src="~assets/telos-buy.png"> -->
-              </q-avatar>
-            </q-item-section>
-
-            <q-item-section>
-              <div class="text-black text-left ">
-                <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
-                <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
-              </div>
-            </q-item-section>
-          </q-item>
-        </div>
-      </div>
-    </div>
+  <div class="">
+    <!-- <div class="flex-center fit-div"></div> -->
 
     <!-- Coin Header -->
-    <div class="coinHeader ">
-      <!-- <div class="bar" :style="`background: ${themeColor}`"/> -->
-      <!-- view="hhh Lpr fFf" -->
-      <q-layout
-        view="hHh LpR lFr"
-        class="coinview flex-center"
-        :style="
-          `max-height: 100%; max-width: 800px; min-width: 300px; display:flex; width:100%`
-        "
-      >
-        <q-header class="coin-header flex-center" style="width:100%">
-          <q-tabs
-            :value="balanceTab"
-            @input="switchTab($event)"
-            wide-indicator
-            active-color="white"
-            class=" text-white shadow-2 full-height no-shadow"
-            style="width: 100%; background: #00000000"
-          >
-            <q-tab
-              no-caps
-              v-for="tab in tabs"
-              :name="tab.title"
-              :label="tab.label"
-              :key="tab.title"
-              style="width: 50%; background: #00000000;"
-            />
-          </q-tabs>
-        </q-header>
+    <div class=" ">
+      <div style="height: 99%; overflow:auto">
+        <div
+          class="text-center full-width"
+          style="display: grid; grid-gap: 1.2rem"
+        >
+          <login-button v-if="isAuthenticated" style="display:none" />
 
-        <q-page-container style="width: 100%;">
-          <q-page flat v-touch-pan.vertical.prevent.mouse="handlePan">
-            <q-tab-panels
-              flat
-              :value="balanceTab"
-              @input="switchTab($event)"
-              class="coinviewGrid"
+          <!-- Profile Image top left -->
+          <div>
+            <q-item class="userAvatar">
+              <q-avatar
+                class="profileImg  userAvatar"
+                @click="$router.replace('/settings')"
+              >
+                <img src="~assets/default_avatar.svg" />
+              </q-avatar>
+            </q-item>
+
+            <!-- Account Name -->
+            <label
+              class="text-white"
+              :style="`opacity: ${accountNameStyle.opacity};`"
             >
-              <q-tab-panel
+              {{ accountName }}
+            </label>
+          </div>
+
+          <!-- Account Amount -->
+          <div class="full-width items-center balance-div">
+            <div class="full-width"></div>
+            <div class="full-width">
+              <label
+                class="text-white "
+                :style="
+                  `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
+                "
+              >
+                $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
+                  displayAmount.toFixed(2).slice(-2)
+                }}
+              </label>
+            </div>
+            <div class="full-width text-right">
+              <q-btn
+                round
                 flat
-                name="Coins"
-                class="no-padding"
-                :style="'background: #00000000; border:0px;'"
-              >
-                <Coin
-                  flat
-                  :coins="coins"
-                  :coinLoadedAll="coinLoadedAll"
-                  :showHistoryDlg.sync="showHistoryDlg"
-                  :showDepositEVMDlg.sync="showDepositEVMDlg"
-                  :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-                  :showExchangeDlg.sync="showExchangeDlg"
-                  :showBuyAmountDlg.sync="showBuyAmountDlg"
-                  :selectedCoin.sync="selectedCoin"
-                  :suggestTokens="suggestTokens"
-                />
-              </q-tab-panel>
-              <q-tab-panel
-                name="Collectables"
-                :style="'background:  #00000000'"
-              >
-                <Collectables
-                  :nftTokenTags="nftTokenTags"
-                  :nftTokenLoadedAll="nftTokenLoadedAll"
-                  :coinViewHeight="coinViewHeight"
-                  :loadNftTokenTags="loadNftTokenTags"
-                />
-              </q-tab-panel>
-            </q-tab-panels>
-          </q-page>
-        </q-page-container>
-      </q-layout>
+                icon="qr_code_scanner"
+                size="10px"
+                class="text-white q-mr-md"
+                :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
+                @click="showQRScannerDlg = true"
+              />
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex-center" :style="`display:flex; height: 10%`">
+            <div class="balanceBtn">
+              <q-btn
+                stretch
+                flat
+                no-caps
+                label="Send"
+                @click="showSendDlg = true"
+              />
+            </div>
+            <div class="qrCodeBtn">
+              <q-btn
+                stretch
+                flat
+                icon="qr_code_scanner"
+                style="width: 40px; color: #FFFFFF; "
+                @click="showQRScannerDlg = true"
+              />
+            </div>
+            <div class="balanceBtn">
+              <q-btn
+                stretch
+                flat
+                no-caps
+                label="Receive"
+                @click="showReceiveDlg = true"
+              />
+            </div>
+            <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+            <!-- </q-toolbar> -->
+          </div>
+
+          <!-- Convert Coins -->
+          <div class="flex-center" :style="`display:flex; height: 0%`">
+            <q-item
+              clickable
+              v-ripple
+              class="convertBtns"
+              @click="clickExchange()"
+            >
+              <q-item-section avatar>
+                <q-avatar size="45px" class="q-my-sm">
+                  <!-- <img src="~assets/telos-swap.png"> -->
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <div class="text-white text-left">
+                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
+                  <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
+                </div>
+              </q-item-section>
+            </q-item>
+
+            <!-- Purchase Coins -->
+            <q-item
+              clickable
+              v-ripple
+              class="purchaseBtns"
+              @click="clickPurchase()"
+            >
+              <q-item-section avatar>
+                <q-avatar size="45px" class="q-my-sm">
+                  <!-- <img src="~assets/telos-buy.png"> -->
+                </q-avatar>
+              </q-item-section>
+
+              <q-item-section>
+                <div class="text-black text-left ">
+                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
+                  <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
+                </div>
+              </q-item-section>
+            </q-item>
+          </div>
+        </div>
+
+        <q-tabs
+          :value="balanceTab"
+          @input="switchTab($event)"
+          wide-indicator
+          active-color="white"
+          class=" text-white shadow-2 no-shadow"
+          style="width: 100%; background: #00000000"
+        >
+          <q-tab
+            no-caps
+            v-for="tab in tabs"
+            :name="tab.title"
+            :label="tab.label"
+            :key="tab.title"
+            style="width: 50%; background: #00000000;"
+          />
+        </q-tabs>
+        <q-tab-panels
+          flat
+          :value="balanceTab"
+          @input="switchTab($event)"
+          class="coinviewGrid"
+        >
+          <q-tab-panel
+            flat
+            name="Coins"
+            class="no-padding"
+            :style="'background: #00000000; border:0px;'"
+          >
+            <Coin
+              flat
+              :coins="coins"
+              :coinLoadedAll="coinLoadedAll"
+              :showHistoryDlg.sync="showHistoryDlg"
+              :showDepositEVMDlg.sync="showDepositEVMDlg"
+              :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
+              :showExchangeDlg.sync="showExchangeDlg"
+              :showBuyAmountDlg.sync="showBuyAmountDlg"
+              :selectedCoin.sync="selectedCoin"
+              :suggestTokens="suggestTokens"
+            />
+          </q-tab-panel>
+          <q-tab-panel name="Collectables" :style="'background:  #00000000'">
+            <Collectables
+              :nftTokenTags="nftTokenTags"
+              :nftTokenLoadedAll="nftTokenLoadedAll"
+              :coinViewHeight="coinViewHeight"
+              :loadNftTokenTags="loadNftTokenTags"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
+      </div>
       <div
         class="q-pr-none text-white absolute full-width"
         :style="`bottom: ${footerHeight}px;`"
@@ -872,4 +854,81 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.balance-div {
+  background-color: #00000000;
+  display: inline-flex;
+  justify-content: space-between;
+}
+.coinviewGrid {
+  background-color: #00000000;
+}
+
+.balanceBtn {
+  color: #ffffff;
+  background: linear-gradient(120deg, #1dd1fe, #8946df);
+  border-radius: 2rem;
+  margin-bottom: 2rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+  margin-top: 3rem;
+  padding-top: 0.4rem;
+  width: 8rem;
+  height: 3rem;
+  text-align: center;
+  justify-content: center;
+  align-content: center;
+}
+
+.purchaseBtns {
+  background-image: url("~assets/Purchase.svg");
+  height: 1rem;
+  width: 8rem;
+  border: none;
+  border-radius: 0%;
+  padding: 0px;
+  text-align: center;
+  display: flex;
+  outline: none;
+  border: 0;
+  background-repeat: no-repeat;
+  margin-left: 5.5rem;
+  margin-top: -8rem;
+}
+
+.convertBtns {
+  display: flex;
+  background-image: url("~assets/Convert.svg");
+  height: 1rem;
+  width: 8rem;
+  border: none;
+  border-radius: 0%;
+  padding: 0px;
+  display: flex;
+  outline: none;
+  border: 0;
+  background-repeat: no-repeat;
+  text-align: center;
+  margin-top: -8rem;
+  margin-left: 1.5rem;
+}
+
+@media only screen and (min-width: 1000px) {
+  .convertBtns {
+    display: flex;
+    background-image: url("~assets/Convert.svg");
+    height: 1rem;
+    width: 8rem;
+    border: none;
+    border-radius: 0%;
+    padding: 0px;
+    display: flex;
+    outline: none;
+    border: 0;
+    background-repeat: no-repeat;
+    margin-left: 1.5rem;
+    text-align: center;
+    margin-top: -8rem;
+  }
+}
+</style>

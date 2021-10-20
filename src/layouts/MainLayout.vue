@@ -1,7 +1,7 @@
 <template>
-  <q-layout view="hHh Lpr fFf" class="row">
+  <q-layout view="hHh Lpr fFf" class="">
     <nav-bar :tab.sync="balanceTab" />
-    <q-page-container class="col">
+    <q-page-container class="pageContainer">
       <router-view
         :loadedCoins.sync="coins"
         :loadedNftTokens.sync="nftTokens"
@@ -145,4 +145,14 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+@media only screen and (min-width: 1000px) {
+  .pageContainer {
+    margin-left: 250px;
+  }
+}
+
+.footerStyle {
+  background: linear-gradient(to bottom, #130c3f00, #8946df00 200%);
+}
+</style>

@@ -86,7 +86,7 @@ nav ul li a:hover {
   transform: translate(-100%, -100%);
   height: 0px;
   width: 0px;
-  // position: absolute;
+  position: fixed;
 }
 
 .bottomNavBar {
