@@ -33,7 +33,12 @@
           </q-avatar>
         </q-item-section>
 
-        <q-item-section style="justify-content: start; display: grid;">
+        <q-item-section
+          :class="
+            coin.network === 'tevm' || coin.name === 'Telos' ? 'col-2' : ''
+          "
+          style="justify-content: start; display: grid;"
+        >
           <div class="text-white text-left display-grid">
             <label
               class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
@@ -46,30 +51,32 @@
         </q-item-section>
 
         <q-item-section
-          class="col-6"
-          style="justify-content: start; display: grid;"
+          class="col "
+          v-if="coin.network === 'tevm' || coin.name === 'Telos'"
         >
-          <div class="q-py-lg text-black text-left display-grid">
+          <div>
             <q-btn
-              class="purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
-              :style="`height: 50px; margin-right:3rem; display:flex`"
+              class="purpleGradient "
               flat
               rounded
               no-caps
-              label="Withdraw from EVM"
               @click.stop="withdrawEvm"
               v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
-            />
+            >
+              <div class="q-pr-sm">EVM</div>
+              <img src="~assets/icons/networkArrows.svg" />
+            </q-btn>
             <q-btn
-              class="purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
-              :style="`height: 50px; margin-right:3rem; display:flex`"
+              class="purpleGradient"
               flat
               rounded
               no-caps
-              label="Deposit to EVM"
               @click.stop="depositEvm"
               v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
-            />
+            >
+              <img src="~assets/icons/networkArrows.svg" />
+              <div class="q-pl-sm">EVM</div>
+            </q-btn>
           </div>
         </q-item-section>
 
