@@ -57,7 +57,7 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex-center q-mb-lg" :style="`display:flex`">
+          <div class="flex-center " :style="`display:flex`">
             <q-btn
               class="balanceBtn purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
               flat
@@ -89,48 +89,16 @@
             <!-- </q-toolbar> -->
           </div>
 
-          <!-- Convert Coins -->
-          <div class="flex-center" :style="`display:flex; height: 0%`">
-            <q-item
-              clickable
-              v-ripple
-              class="convertBtns"
-              @click="clickExchange()"
-            >
-              <q-item-section avatar>
-                <q-avatar size="45px" class="q-my-sm">
-                  <!-- <img src="~assets/telos-swap.png"> -->
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <div class="text-white text-left">
-                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
-                  <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
-                </div>
-              </q-item-section>
-            </q-item>
-
-            <!-- Purchase Coins -->
-            <q-item
-              clickable
-              v-ripple
-              class="purchaseBtns"
-              @click="clickPurchase()"
-            >
-              <q-item-section avatar>
-                <q-avatar size="45px" class="q-my-sm">
-                  <!-- <img src="~assets/telos-buy.png"> -->
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <div class="text-black text-left ">
-                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
-                  <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
-                </div>
-              </q-item-section>
-            </q-item>
+          <!-- Convert and Purchace -->
+          <div class="row justify-center">
+            <div class="convertBtn" @click="clickExchange()">
+              <img src="~assets/Convert.svg" class="q-mr-xs" />
+              Convert
+            </div>
+            <div class="purchaceBtn" @click="clickPurchase()">
+              Purchase
+              <img src="~assets/Purchase.svg" class="q-ml-xs" />
+            </div>
           </div>
         </div>
 
@@ -866,52 +834,23 @@ export default {
   height: 3rem;
 }
 
-.purchaseBtns {
-  background-image: url("~assets/Purchase.svg");
-  height: 1rem;
-  width: 8rem;
-  border: none;
-  border-radius: 0%;
-  padding: 0px;
-  text-align: center;
+.convertBtn,
+.purchaceBtn {
+  padding: 0.5rem;
+  cursor: pointer;
   display: flex;
-  outline: none;
-  border: 0;
-  background-repeat: no-repeat;
-  margin-left: 5.5rem;
-}
-
-.convertBtns {
-  display: flex;
-  background-image: url("~assets/Convert.svg");
-  height: 1rem;
-  width: 8rem;
-  border: none;
-  border-radius: 0%;
-  padding: 0px;
-  display: flex;
-  outline: none;
-  border: 0;
-  background-repeat: no-repeat;
-  text-align: center;
-  margin-left: 1.5rem;
-}
-
-@media only screen and (min-width: 1000px) {
-  .convertBtns {
-    display: flex;
-    background-image: url("~assets/Convert.svg");
-    height: 1rem;
-    width: 8rem;
-    border: none;
-    border-radius: 0%;
-    padding: 0px;
-    display: flex;
-    outline: none;
-    border: 0;
-    background-repeat: no-repeat;
-    margin-left: 1.5rem;
-    text-align: center;
+  align-items: center;
+  img {
+    border-radius: 20px;
   }
+  &:hover {
+    text-shadow: 0 0 5px $white;
+    img {
+      box-shadow: 0 0 5px $white;
+    }
+  }
+}
+.convertBtn {
+  margin-right: 3rem;
 }
 </style>
