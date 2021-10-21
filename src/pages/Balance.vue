@@ -90,7 +90,7 @@
           </div>
 
           <!-- Convert and Purchace -->
-          <div class="row justify-center">
+          <div class="row justify-center q-mb-md">
             <div class="convertBtn" @click="clickExchange()">
               <img src="~assets/Convert.svg" class="q-mr-xs" />
               Convert
