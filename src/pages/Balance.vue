@@ -725,7 +725,7 @@ export default {
               this.coins.forEach(coin => {
                 if (coin.symbol === "TLOS") {
                   coin.price = token.price.usd;
-                  coin.icon = token.metadata.logo;
+                  coin.icon = "/img/TLOS.png";
                 }
               });
             } else if (token.symbol !== "TLOS") {
