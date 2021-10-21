@@ -115,4 +115,8 @@ body {
 .purpleGradient {
   background: linear-gradient(120deg, $gradientblue, $gradientPurple);
   color: $white;
+  transition: transform 0.3s;
+  &:hover {
+    background: linear-gradient(120deg, $gradientPurple, $gradientblue);
+  }
 }

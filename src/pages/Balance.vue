@@ -57,16 +57,15 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex-center" :style="`display:flex; height: 10%`">
-            <div class="balanceBtn">
-              <q-btn
-                stretch
-                flat
-                no-caps
-                label="Send"
-                @click="showSendDlg = true"
-              />
-            </div>
+          <div class="flex-center q-mb-lg" :style="`display:flex`">
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              flat
+              rounded
+              no-caps
+              label="Send"
+              @click="showSendDlg = true"
+            />
             <div class="qrCodeBtn">
               <q-btn
                 stretch
@@ -76,15 +75,14 @@
                 @click="showQRScannerDlg = true"
               />
             </div>
-            <div class="balanceBtn">
-              <q-btn
-                stretch
-                flat
-                no-caps
-                label="Receive"
-                @click="showReceiveDlg = true"
-              />
-            </div>
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              flat
+              rounded
+              no-caps
+              label="Receive"
+              @click="showReceiveDlg = true"
+            />
             <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
             <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
             <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
@@ -862,19 +860,10 @@ export default {
 }
 
 .balanceBtn {
-  color: #ffffff;
-  background: linear-gradient(120deg, #1dd1fe, #8946df);
-  border-radius: 2rem;
-  margin-bottom: 2rem;
-  margin-right: 1rem;
-  margin-left: 1rem;
-  margin-top: 3rem;
-  padding-top: 0.4rem;
+  margin-right: 0.5vw;
+  margin-left: 0.5vw;
   width: 8rem;
   height: 3rem;
-  text-align: center;
-  justify-content: center;
-  align-content: center;
 }
 
 .purchaseBtns {
@@ -890,7 +879,6 @@ export default {
   border: 0;
   background-repeat: no-repeat;
   margin-left: 5.5rem;
-  margin-top: -8rem;
 }
 
 .convertBtns {
@@ -906,7 +894,6 @@ export default {
   border: 0;
   background-repeat: no-repeat;
   text-align: center;
-  margin-top: -8rem;
   margin-left: 1.5rem;
 }
 
@@ -925,7 +912,6 @@ export default {
     background-repeat: no-repeat;
     margin-left: 1.5rem;
     text-align: center;
-    margin-top: -8rem;
   }
 }
 </style>
