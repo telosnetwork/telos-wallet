@@ -37,3 +37,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.main-div {
+  color: $dark;
+}
+</style>

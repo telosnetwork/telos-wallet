@@ -120,7 +120,7 @@
 
     <!-- RAM low dialog -->
     <q-dialog v-model="ramLow">
-      <q-card style="max-width: 400px">
+      <q-card style="max-width: 400px; " class="bg-dark">
         <q-card-section class="row items-center">
           <div class="col text-h6">Your RAM is low</div>
         </q-card-section>
@@ -129,10 +129,9 @@
           <p>We recommend you buy {{ ramThres / 1024 }} KB additional RAM.</p>
         </q-card-section>
 
-        <div align="center">Proceed?</div>
+        <div align="center" class="q-pb-md">Proceed?</div>
         <q-card-actions class="q-pt-none" align="center">
           <q-btn
-            outline
             no-caps
             class="hover-accent"
             label="Deny"
@@ -140,7 +139,6 @@
             v-close-popup
           />
           <q-btn
-            outline
             no-caps
             label="Approve"
             color="primary"
@@ -247,7 +245,7 @@ export default {
       ramAvail: 0,
       cpuAvail: 0,
       netAvail: 0,
-      ramThres: 1000,
+      ramThres: 1024,
       netThres: 0.9,
       cpuThres: 0.9,
       ramLow: false,
