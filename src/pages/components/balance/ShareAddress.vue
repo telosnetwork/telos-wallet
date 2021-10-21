@@ -98,6 +98,7 @@ import moment from "moment";
 import { QRCanvas } from "qrcanvas-vue";
 import { pERC20 } from "ptokens-perc20";
 import pTokens from "ptokens";
+import { copyToClipboard } from "quasar";
 
 export default {
   props: ["showShareAddressDlg", "selectedCoin"],
@@ -326,19 +327,11 @@ export default {
       }
     },
     copyToClipboard(str) {
-      const accountName = str.substring(0, str.lastIndexOf("("));
-      var el = document.createElement("textarea");
-      el.value = accountName;
-      el.setAttribute("readonly", "");
-      el.style = { display: "none" };
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-
-      this.$q.notify({
-        type: "primary",
-        message: "Copied it to the clipboard successfully"
+      copyToClipboard(this.qrcodeData).then(() => {
+        this.$q.notify({
+          type: "primary",
+          message: "Copied to clipboard",
+        });
       });
     }
   },
@@ -356,7 +349,6 @@ export default {
     }
   },
   mounted() {
-    console.log("mounted share address");
   }
 };
 </script>

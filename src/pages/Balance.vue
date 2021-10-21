@@ -574,7 +574,6 @@ export default {
           table_key: "",
           upper_bound: null
         });
-        console.log(tagData);
         if (tagData.rows.length == 0) {
           if (foundFirstData) {
             break;
