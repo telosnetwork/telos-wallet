@@ -27,8 +27,7 @@
 
           <q-item class="justify-center userAvatar">
             <q-avatar size="150px" color="transparent" text-color="white">
-              <!-- <img :src="userAvatar" style="border: 1px solid purple"/> -->
-              <img style="" src="~assets/default_avatar.svg" />
+              <img :src="userAvatar" />
             </q-avatar>
           </q-item>
 
@@ -134,7 +133,7 @@
         </div>
 
         <!-- Save Button -->
-        <q-item class="saveBtn text-white userAvatar">
+        <q-item class="text-white row justify-center saveBtn">
           <q-btn
             text-color="white"
             :style="
@@ -281,7 +280,7 @@ export default {
     userAvatar() {
       if (this.avatar) return this.avatar;
 
-      return "https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng";
+      return "/profile/default_avatar.svg";
     }
   },
   methods: {
@@ -618,7 +617,6 @@ export default {
 .saveBtn {
   border-radius: 6rem;
   margin-top: 1rem;
-  left: 50%;
 }
 
 .profile {
