@@ -32,14 +32,14 @@
               <label class="text-center full-width text-white">From Network</label>
             </div>
             <div v-if="isPToken" class="list-item -center">
-              <q-btn-group class="full-width justify-center" push unelevated>
+              <q-btn-group class="full-width justify-center"  push unelevated rounded>
                 <q-btn 
                   v-for="(pTokenNetwork, key) of coinpTokenNetworks"
                   :key="pTokenNetwork"
                   class="q-px-md"
                   push no-caps
                   :label="pTokenNetwork"
-                  :style="`background: ${networkType === key ? 'rgb(220, 220, 220)' : 'rgb(245, 245, 245)'};`"
+                  :style="`background: ${networkType === key ? '#363636' : '#616161'};`"
                   @click="networkType = key"
                 />
               </q-btn-group>
@@ -327,7 +327,7 @@ export default {
       }
     },
     copyToClipboard(str) {
-      copyToClipboard(this.qrcodeData).then(() => {
+      copyToClipboard(str).then(() => {
         this.$q.notify({
           type: "primary",
           message: "Copied to clipboard",
