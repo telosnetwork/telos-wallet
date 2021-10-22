@@ -105,19 +105,6 @@ body {
   }
 }
 
-.popupCard {
-  background-color: $blackDark;
-  max-width: 600px !important;
-  padding: 20px;
-}
-
-.popupHeading {
-  display: grid;
-  grid-template-columns: 50px auto 50px;
-  align-items: center;
-  padding-bottom: 8px;
-}
-
 .purpleGradient {
   background: linear-gradient(120deg, $gradientblue, $gradientPurple);
   color: $white;
@@ -133,4 +120,48 @@ body {
   label {
     width: 50%;
   }
+}
+
+.main-background {
+  background: $blackDark;
+}
+
+.main-background-overlay {
+  background: url("~assets/MainBG.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.dialogPage {
+  @extend .main-background-overlay;
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.dialogPageContent {
+  width: 800px;
+}
+
+.popupCard {
+  background-color: $blackDark;
+  max-width: 600px !important;
+  padding: 20px;
+}
+
+.dialogPageHeading,
+.popupHeading {
+  display: grid;
+  grid-template-columns: 50px auto 50px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.dialogPageHeading {
+  padding: 10px 0 10px 0;
+}
+
+.closebBtn {
+  border: 2px solid white;
 }

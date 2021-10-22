@@ -6,9 +6,9 @@
     <login-button v-if="isAuthenticated" style="display: none" />
     <div>
       <div class="profile text-white flex-center">
-        <label style="height: 10px; margin-bottom: 40px">Profile</label>
+        <label style="height: 10px; margin-bottom: 100px">Profile</label>
       </div>
-      <q-list round flat dense class="text-white closebBtn" icon="west">
+      <q-list round flat dense class="text-white" icon="west">
         <!-- User Avatar -->
         <div class="flex-center relative" style="display:flex;">
           <!-- <video
@@ -723,31 +723,4 @@ export default {
   background-color: #020039; 
   z-index: 0;
 } */
-
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.closebBtn {
-  border-radius: 2px solid white;
-  margin-left: 2rem;
-  margin-top: 4rem;
-  z-index: 99;
-}
-.customBtn {
-  display: inline-block;
-  background: white;
-  color: #444;
-  width: 190px;
-  border-radius: 5px;
-  border: thin solid #888;
-  box-shadow: 1px 1px 1px grey;
-  white-space: nowrap;
-}
 </style>

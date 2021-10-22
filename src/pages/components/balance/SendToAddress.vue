@@ -63,7 +63,10 @@
             </q-avatar>
             <div><img src="~assets/icons/networkArrows.svg" /></div>
             <q-avatar size="6rem">
-              <img v-if="networkType === 'telos' || networkType === 'tevm'" :src="selectedCoin.icon" />
+              <img
+                v-if="networkType === 'telos' || networkType === 'tevm'"
+                :src="selectedCoin.icon"
+              />
               <div
                 v-if="networkType == 'tevm'"
                 class="flex absolute full-width full-height"
@@ -75,7 +78,10 @@
                   style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
                 />
               </div>
-              <img v-if="networkType == 'ethereum'" src="~assets/Ethereum.svg" />
+              <img
+                v-if="networkType == 'ethereum'"
+                src="~assets/Ethereum.svg"
+              />
             </q-avatar>
           </div>
         </q-header>
@@ -431,16 +437,6 @@ export default {
   height: 20px;
 }
 
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .cryptoImg1 {
   position: absolute;
   width: 6rem;
@@ -477,9 +473,6 @@ export default {
   width: 8rem;
   height: 8rem;
   /* margin-bottom: -1rem; */
-}
-.closebBtn {
-  border: 2px solid white;
 }
 
 .cryptoButtons {

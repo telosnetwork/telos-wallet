@@ -6,11 +6,10 @@
   </div>
 </template>
 <script>
-
 import { vxm } from "./store/index.js";
 
 export default {
-  name: 'App',
+  name: "App",
   methods: {
     async loadBancor() {
       const trade = this.$route.meta.feature == "Trade";
@@ -25,7 +24,9 @@ export default {
         initialChain: this.$route.params.service,
         ...(paramsSatisfied && {
           initialModuleParam: {
-            [trade ? "tradeQuery" : "poolQuery"]: trade ? this.$route.query : pool
+            [trade ? "tradeQuery" : "poolQuery"]: trade
+              ? this.$route.query
+              : pool
           }
         })
       };
@@ -48,19 +49,7 @@ export default {
   async created() {
     this.loadBancor();
   }
-}
+};
 </script>
 
-<style scoped>
-
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-   background:  url("~assets/MainBG.png");
-   background-repeat: no-repeat;
-   background-size: cover;
-}
-
-</style>
+<style scoped></style>
