@@ -423,12 +423,6 @@ export default {
   font-size: 2rem;
 }
 
-.nextBtn {
-  width: 400px;
-  border-radius: 0;
-  padding: 1.5rem;
-}
-
 @media only screen and (min-width: 1000px) {
 }
 </style>
