@@ -136,6 +136,7 @@ export default {
     }
   },
   async mounted() {
+    console.log("As iron sharpens iron, so one person sharpens another.")
     await this.autoLogin(this.$route.query.returnUrl);
     this.loadUserProfile();
     this.checkPath();

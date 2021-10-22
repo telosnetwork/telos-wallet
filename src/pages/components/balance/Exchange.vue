@@ -92,18 +92,17 @@
             <q-item class="row list-item full-width q-px-none">
               <div class="col q-mx-lg text-center">
                 <q-item-section style="display: block;">
-                  <div class="text-white display-grid">
+                  <div class="text-white display-grid cursor-pointer" @click="showSelectCoinDlg = true; dlgType = 'convert';">
                     <label class="text-white text-subtitle1 text-weight-medium text-white">Convert</label>
                     
                     <q-container class="flex-center relative row" style="display:flex; margin-top: -4rem;">
-                      <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline; width: 100%">
+                      <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline; width: 100%" >
                       <img class="avatarBackground1" src="~assets/dollarRectBg.svg">
                       <img v-if="convertCoin" class="cryptoImg1" :src="convertCoin.icon">
                     </q-container>
                     <label
                         class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
-                        :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`"
-                        @click="showSelectCoinDlg = true; dlgType = 'convert';"
+                        :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`"                        
                       >
                         <q-item-section v-if="convertCoin" avatar class="q-pr-sm" style="min-width: unset;">
                           <!-- <q-avatar size="25px"> -->
@@ -122,7 +121,7 @@
               <q-separator vertical class="q-my-auto" style="width: 0px; height: 80%;" />
               <div class="col q-mx-lg text-center">
                 <q-item-section style="display: block;">
-                  <div class="text-white display-grid">
+                  <div class="text-white display-grid cursor-pointer" @click="showSelectCoinDlg = true; dlgType = 'to';">
                     <label class="text-white text-subtitle1 text-weight-medium text-white">To</label>
                     <q-container class="flex-center relative row" style="display:flex; margin-top: -4rem;">
                           <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline; width: 100%;">
@@ -131,8 +130,7 @@
                     </q-container>
                     <label
                       class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
-                      :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`"
-                      @click="showSelectCoinDlg = true; dlgType = 'to';"
+                      :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`" 
                     >
                       <q-item-section v-if="toCoin" avatar class="q-pr-sm" style="min-width: unset;">
                         <!-- <q-avatar size="25px"> -->
