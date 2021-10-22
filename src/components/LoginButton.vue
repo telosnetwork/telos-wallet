@@ -119,34 +119,47 @@
     </q-dialog>
 
     <!-- RAM low dialog -->
-    <q-dialog v-model="resLow">
-      <q-card style="max-width: 400px; " class="bg-dark">
-        <q-card-section class="row items-center">
-          <div class="col text-h6">Your resources is low</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <p>We recommend you buy more for 1 TLOS</p>
-        </q-card-section>
-
-        <div align="center" class="q-pb-md">Proceed?</div>
-        <q-card-actions class="q-pt-none" align="center">
-          <q-btn
-            no-caps
-            class="hover-accent"
-            label="Deny"
-            color="primary"
-            v-close-popup
-          />
-          <q-btn
-            no-caps
-            label="Approve"
-            color="primary"
-            class="hover-accent"
-            @click="buyResources()"
-          />
-        </q-card-actions>
-      </q-card>
+    <q-dialog persistent v-model="resLow">
+      <div class="popupCard">
+        <div class="popupHeading">
+          <div>
+            <q-btn
+              round
+              flat
+              dense
+              v-close-popup
+              class="text-grey-6"
+              icon="close"
+            />
+          </div>
+          <div class="text-subtitle1 text-weight-medium text-center ">
+            Your resources is low
+          </div>
+          <div />
+        </div>
+        <div class="text-center">
+          <div class="q-pb-md">
+            We recommend you buy more for 1 TLOS
+          </div>
+          <div class="">Proceed?</div>
+          <div class="text-center q-gutter-x-sm q-pt-sm">
+            <q-btn
+              no-caps
+              rounded
+              class="purpleGradient"
+              label="Deny"
+              v-close-popup
+            />
+            <q-btn
+              no-caps
+              rounded
+              label="Approve"
+              class="purpleGradient"
+              @click="buyResources()"
+            />
+          </div>
+        </div>
+      </div>
     </q-dialog>
   </div>
 </template>
@@ -330,7 +343,8 @@ export default {
           data: {
             payer: this.accountName.toLowerCase(),
             receiver: this.accountName.toLowerCase(),
-            quant: String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(" TLOS")
+            quant:
+              String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(" TLOS")
           }
         });
       }
@@ -342,12 +356,10 @@ export default {
           data: {
             from: this.accountName.toLowerCase(),
             receiver: this.accountName.toLowerCase(),
-            stake_net_quantity: String(
-              parseFloat(this.NETtoBuy).toFixed(4)
-            ) + String(" TLOS"),
-            stake_cpu_quantity: String(
-              parseFloat(this.CPUtoBuy).toFixed(4)
-            ) + String(" TLOS"),
+            stake_net_quantity:
+              String(parseFloat(this.NETtoBuy).toFixed(4)) + String(" TLOS"),
+            stake_cpu_quantity:
+              String(parseFloat(this.CPUtoBuy).toFixed(4)) + String(" TLOS"),
             transfer: false
           }
         });
@@ -394,10 +406,11 @@ export default {
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (account.ram_usage / account.ram_quota > this.ramThres) this.ramLow = true;
-      if (1-this.netAvail / account.net_limit.max > this.netThres)
+      if (account.ram_usage / account.ram_quota > this.ramThres)
+        this.ramLow = true;
+      if (1 - this.netAvail / account.net_limit.max > this.netThres)
         this.netLow = true;
-      if (1-this.cpuAvail / account.cpu_limit.max > this.cpuThres)
+      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres)
         this.cpuLow = true;
     }
   },
