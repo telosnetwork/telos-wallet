@@ -95,11 +95,11 @@
                   <div class="text-white display-grid cursor-pointer" @click="showSelectCoinDlg = true; dlgType = 'convert';">
                     <label class="text-white text-subtitle1 text-weight-medium text-white">Convert</label>
                     
-                    <q-container class="flex-center relative row" style="display:flex; margin-top: -4rem;">
+                    <div class="flex-center relative row" style="display:flex; margin-top: -4rem;">
                       <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline; width: 100%" >
                       <img class="avatarBackground1" src="~assets/dollarRectBg.svg">
                       <img v-if="convertCoin" class="cryptoImg1" :src="convertCoin.icon">
-                    </q-container>
+                    </div>
                     <label
                         class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
                         :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`"                        
@@ -123,11 +123,11 @@
                 <q-item-section style="display: block;">
                   <div class="text-white display-grid cursor-pointer" @click="showSelectCoinDlg = true; dlgType = 'to';">
                     <label class="text-white text-subtitle1 text-weight-medium text-white">To</label>
-                    <q-container class="flex-center relative row" style="display:flex; margin-top: -4rem;">
+                    <div class="flex-center relative row" style="display:flex; margin-top: -4rem;">
                           <img class="dollarBgimg1 flex-center" src="~assets/dollarBgImg.svg"  style="display: inline; width: 100%;">
                           <img class="avatarBackground1" src="~assets/dollarRectBg.svg">
                           <img v-if="toCoin" class="cryptoImg1" :src="toCoin.icon">                   
-                    </q-container>
+                    </div>
                     <label
                       class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
                       :style="`color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`" 
