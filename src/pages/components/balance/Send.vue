@@ -94,7 +94,7 @@
                       <img
                         class="flex q-ml-auto q-mt-auto"
                         alt="tEVM"
-                        src="~assets/telosEVM_32.png"
+                        src="~assets/evm_logo.png"
                         style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
                       />
                     </div>
