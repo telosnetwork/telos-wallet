@@ -119,109 +119,47 @@
     </q-dialog>
 
     <!-- RAM low dialog -->
-    <q-dialog v-model="ramLow">
-      <q-card style="max-width: 400px">
-        <q-card-section class="row items-center">
-          <div class="col text-h6">Your RAM is low</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <p>We recommend you buy {{ ramThres / 1024 }} KB additional RAM.</p>
-        </q-card-section>
-
-        <div align="center">Proceed?</div>
-        <q-card-actions class="q-pt-none" align="center">
-          <q-btn
-            outline
-            no-caps
-            class="hover-accent"
-            label="Deny"
-            color="primary"
-            v-close-popup
-          />
-          <q-btn
-            outline
-            no-caps
-            label="Approve"
-            color="primary"
-            class="hover-accent"
-            @click="
-              bytestobuy = ramThres;
-              tryBuyRAM();
-            "
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <!-- CPU low dialog -->
-    <q-dialog v-model="cpuLow">
-      <q-card style="max-width: 400px">
-        <q-card-section class="row items-center">
-          <div class="col text-h6">Your CPU is low</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <p>We recommend you buy 1 TLOS additional CPU.</p>
-        </q-card-section>
-
-        <div align="center">Proceed?</div>
-        <q-card-actions class="q-pt-none" align="center">
-          <q-btn
-            outline
-            no-caps
-            class="hover-accent"
-            label="Deny"
-            color="primary"
-            v-close-popup
-          />
-          <q-btn
-            outline
-            no-caps
-            label="Approve"
-            color="primary"
-            class="hover-accent"
-            @click="
-              inputCPU = 1;
-              tryStake();
-            "
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <!-- NET low dialog -->
-    <q-dialog v-model="netLow">
-      <q-card style="max-width: 400px">
-        <q-card-section class="row items-center">
-          <div class="col text-h6">Your Net is low</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <p>We recommend you buy 1 TLOS additional NET.</p>
-        </q-card-section>
-
-        <div align="center">Proceed?</div>
-        <q-card-actions class="q-pt-none" align="center">
-          <q-btn
-            outline
-            no-caps
-            class="hover-accent"
-            label="Deny"
-            color="primary"
-            v-close-popup
-          />
-          <q-btn
-            outline
-            no-caps
-            label="Approve"
-            color="primary"
-            class="hover-accent"
-            @click="
-              inputNET = 1;
-              tryStake();
-            "
-          />
-        </q-card-actions>
-      </q-card>
+    <q-dialog persistent v-model="resLow">
+      <div class="popupCard">
+        <div class="popupHeading">
+          <div>
+            <q-btn
+              round
+              flat
+              dense
+              v-close-popup
+              class="text-grey-6"
+              icon="close"
+            />
+          </div>
+          <div class="text-subtitle1 text-weight-medium text-center ">
+            Your resources is low
+          </div>
+          <div />
+        </div>
+        <div class="text-center">
+          <div class="q-pb-md">
+            We recommend you buy more for 1 TLOS
+          </div>
+          <div class="">Proceed?</div>
+          <div class="text-center q-gutter-x-sm q-pt-sm">
+            <q-btn
+              no-caps
+              rounded
+              class="purpleGradient"
+              label="Deny"
+              v-close-popup
+            />
+            <q-btn
+              no-caps
+              rounded
+              label="Approve"
+              class="purpleGradient"
+              @click="buyResources()"
+            />
+          </div>
+        </div>
+      </div>
     </q-dialog>
   </div>
 </template>
@@ -242,20 +180,21 @@ export default {
       error: null,
       authInterval: null,
       close: false,
-      bytestobuy: "",
       ramPrice: 0,
       ramAvail: 0,
       cpuAvail: 0,
       netAvail: 0,
-      ramThres: 1000,
+      ramThres: 0.9,
       netThres: 0.9,
       cpuThres: 0.9,
       ramLow: false,
       netLow: false,
       cpuLow: false,
       resourcePoll: false,
-      inputCPU: 0,
-      inputNET: 0
+      RAMtoBuy: "",
+      CPUtoBuy: 0,
+      NETtoBuy: 0,
+      buyAmount: 1 // 1 TLOS
     };
   },
   computed: {
@@ -264,7 +203,10 @@ export default {
       "accountName",
       "loading",
       "isAutoLoading"
-    ])
+    ]),
+    resLow() {
+      return this.ramLow || this.netLow || this.cpuLow;
+    }
   },
   components: {
     Authenticate
@@ -380,26 +322,57 @@ export default {
         console.log(e);
       }
     },
-    async tryBuyRAM() {
+
+    async buyResources() {
+      // TODO dynamically calculate buy amount
+      if (this.ramLow) {
+        this.RAMtoBuy = this.buyAmount;
+      }
+      if (this.cpuLow) {
+        this.CPUtoBuy = this.buyAmount;
+      }
+      if (this.netLow) {
+        this.NETtoBuy = this.buyAmount;
+      }
+
       let actions = [];
-      actions.push({
-        account: "eosio",
-        name: "buyrambytes",
-        data: {
-          payer: this.accountName.toLowerCase(),
-          receiver: this.accountName.toLowerCase(),
-          bytes: this.bytestobuy
-        }
-      });
+      if (this.ramLow) {
+        actions.push({
+          account: "eosio",
+          name: "buyram",
+          data: {
+            payer: this.accountName.toLowerCase(),
+            receiver: this.accountName.toLowerCase(),
+            quant:
+              String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(" TLOS")
+          }
+        });
+      }
+
+      if (this.cpuLow || this.netLow) {
+        actions.push({
+          account: "eosio",
+          name: "delegatebw",
+          data: {
+            from: this.accountName.toLowerCase(),
+            receiver: this.accountName.toLowerCase(),
+            stake_net_quantity:
+              String(parseFloat(this.NETtoBuy).toFixed(4)) + String(" TLOS"),
+            stake_cpu_quantity:
+              String(parseFloat(this.CPUtoBuy).toFixed(4)) + String(" TLOS"),
+            transfer: false
+          }
+        });
+      }
 
       let transaction = false;
       try {
         transaction = await this.$store.$api.signTransaction(actions);
         this.$q.notify({
           type: "positive",
-          message: `RAM bought`
+          message: `Resources bought`
         });
-        this.$root.$emit("bought_ram");
+        this.$root.$emit("bought_resources");
       } catch (error) {
         this.$q.notify({
           color: "red-5",
@@ -409,41 +382,8 @@ export default {
         });
       }
       if (transaction) this.ramLow = false;
-    },
-
-    async tryStake() {
-      // TODO more dynamic calculation of cpu and net
-      let actions = [];
-      actions.push({
-        account: "eosio",
-        name: "delegatebw",
-        data: {
-          from: this.accountName.toLowerCase(),
-          receiver: this.accountName.toLowerCase(),
-          stake_cpu_quantity:
-            String(parseFloat(this.inputCPU).toFixed(4)) + String(" TLOS"),
-          stake_net_quantity:
-            String(parseFloat(this.inputNET).toFixed(4)) + String(" TLOS"),
-          transfer: false
-        }
-      });
-
-      let transaction = false;
-      try {
-        transaction = await this.$store.$api.signTransaction(actions);
-        this.$q.notify({
-          type: "positive",
-          message: `Staked resources`
-        });
-        this.$root.$emit("staked_resources");
-      } catch (error) {
-        this.$q.notify({
-          color: "red-5",
-          textColor: "white",
-          icon: "warning",
-          message: `${error}`
-        });
-      }
+      if (transaction) this.cpuLow = false;
+      if (transaction) this.netLow = false;
     },
 
     async getRamPrice() {
@@ -466,10 +406,11 @@ export default {
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (this.ramAvail < this.ramThres) this.ramLow = true;
-      if (this.netAvail / account.net_limit.max < this.netThres)
+      if (account.ram_usage / account.ram_quota > this.ramThres)
+        this.ramLow = true;
+      if (1 - this.netAvail / account.net_limit.max > this.netThres)
         this.netLow = true;
-      if (this.cpuAvail / account.cpu_limit.max < this.cpuThres)
+      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres)
         this.cpuLow = true;
     }
   },

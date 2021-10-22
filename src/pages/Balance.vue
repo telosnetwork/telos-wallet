@@ -57,16 +57,15 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex-center" :style="`display:flex; height: 10%`">
-            <div class="balanceBtn">
-              <q-btn
-                stretch
-                flat
-                no-caps
-                label="Send"
-                @click="showSendDlg = true"
-              />
-            </div>
+          <div class="flex-center " :style="`display:flex`">
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              flat
+              rounded
+              no-caps
+              label="Send"
+              @click="showSendDlg = true"
+            />
             <div class="qrCodeBtn">
               <q-btn
                 stretch
@@ -76,63 +75,30 @@
                 @click="showQRScannerDlg = true"
               />
             </div>
-            <div class="balanceBtn">
-              <q-btn
-                stretch
-                flat
-                no-caps
-                label="Receive"
-                @click="showReceiveDlg = true"
-              />
-            </div>
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              flat
+              rounded
+              no-caps
+              label="Receive"
+              @click="showReceiveDlg = true"
+            />
             <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
             <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
             <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
             <!-- </q-toolbar> -->
           </div>
 
-          <!-- Convert Coins -->
-          <div class="flex-center" :style="`display:flex; height: 0%`">
-            <q-item
-              clickable
-              v-ripple
-              class="convertBtns"
-              @click="clickExchange()"
-            >
-              <q-item-section avatar>
-                <q-avatar size="45px" class="q-my-sm">
-                  <!-- <img src="~assets/telos-swap.png"> -->
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <div class="text-white text-left">
-                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Convert</label> -->
-                  <!-- <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label> -->
-                </div>
-              </q-item-section>
-            </q-item>
-
-            <!-- Purchase Coins -->
-            <q-item
-              clickable
-              v-ripple
-              class="purchaseBtns"
-              @click="clickPurchase()"
-            >
-              <q-item-section avatar>
-                <q-avatar size="45px" class="q-my-sm">
-                  <!-- <img src="~assets/telos-buy.png"> -->
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <div class="text-black text-left ">
-                  <!-- <label class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel">Purchase crypto</label> -->
-                  <!-- <label class="text-subtitle2 text-weight-small text-grey-5 wraplabel">Purchase TLOS</label> -->
-                </div>
-              </q-item-section>
-            </q-item>
+          <!-- Convert and Purchace -->
+          <div class="row justify-center q-mb-md">
+            <div class="convertBtn" @click="clickExchange()">
+              <img src="~assets/Convert.svg" class="q-mr-xs" />
+              Convert
+            </div>
+            <div class="purchaceBtn" @click="clickPurchase()">
+              Purchase
+              <img src="~assets/Purchase.svg" class="q-ml-xs" />
+            </div>
           </div>
         </div>
 
@@ -608,7 +574,6 @@ export default {
           table_key: "",
           upper_bound: null
         });
-        console.log(tagData);
         if (tagData.rows.length == 0) {
           if (foundFirstData) {
             break;
@@ -760,7 +725,7 @@ export default {
               this.coins.forEach(coin => {
                 if (coin.symbol === "TLOS") {
                   coin.price = token.price.usd;
-                  coin.icon = token.metadata.logo;
+                  coin.icon = "/img/TLOS.png";
                 }
               });
             } else if (token.symbol !== "TLOS") {
@@ -862,70 +827,29 @@ export default {
 }
 
 .balanceBtn {
-  color: #ffffff;
-  background: linear-gradient(120deg, #1dd1fe, #8946df);
-  border-radius: 2rem;
-  margin-bottom: 2rem;
-  margin-right: 1rem;
-  margin-left: 1rem;
-  margin-top: 3rem;
-  padding-top: 0.4rem;
+  margin-right: 0.5vw;
+  margin-left: 0.5vw;
   width: 8rem;
   height: 3rem;
-  text-align: center;
-  justify-content: center;
-  align-content: center;
 }
 
-.purchaseBtns {
-  background-image: url("~assets/Purchase.svg");
-  height: 1rem;
-  width: 8rem;
-  border: none;
-  border-radius: 0%;
-  padding: 0px;
-  text-align: center;
+.convertBtn,
+.purchaceBtn {
+  padding: 0.5rem;
+  cursor: pointer;
   display: flex;
-  outline: none;
-  border: 0;
-  background-repeat: no-repeat;
-  margin-left: 5.5rem;
-  margin-top: -8rem;
-}
-
-.convertBtns {
-  display: flex;
-  background-image: url("~assets/Convert.svg");
-  height: 1rem;
-  width: 8rem;
-  border: none;
-  border-radius: 0%;
-  padding: 0px;
-  display: flex;
-  outline: none;
-  border: 0;
-  background-repeat: no-repeat;
-  text-align: center;
-  margin-top: -8rem;
-  margin-left: 1.5rem;
-}
-
-@media only screen and (min-width: 1000px) {
-  .convertBtns {
-    display: flex;
-    background-image: url("~assets/Convert.svg");
-    height: 1rem;
-    width: 8rem;
-    border: none;
-    border-radius: 0%;
-    padding: 0px;
-    display: flex;
-    outline: none;
-    border: 0;
-    background-repeat: no-repeat;
-    margin-left: 1.5rem;
-    text-align: center;
-    margin-top: -8rem;
+  align-items: center;
+  img {
+    border-radius: 20px;
   }
+  &:hover {
+    text-shadow: 0 0 5px $white;
+    img {
+      box-shadow: 0 0 5px $white;
+    }
+  }
+}
+.convertBtn {
+  margin-right: 3rem;
 }
 </style>

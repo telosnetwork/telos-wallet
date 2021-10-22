@@ -105,14 +105,75 @@ body {
   }
 }
 
-.dialogCard {
-  border: 1px solid #fafafa;
-  border-radius: 100px;
-  background-color: $blackDark;
-  color: $white;
-}
-
 .purpleGradient {
   background: linear-gradient(120deg, $gradientblue, $gradientPurple);
   color: $white;
+  transition: transform 0.3s;
+  &:hover {
+    background: linear-gradient(120deg, $gradientPurple, $gradientblue);
+  }
+}
+
+.inputAmount {
+  font-size: 2rem;
+  z-index: 1;
+  label {
+    width: 50%;
+  }
+}
+
+.main-background {
+  background: $blackDark;
+}
+
+.main-background-overlay {
+  background: url("~assets/MainBG.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+// .dialogWrapper {
+//   display: block;
+//   overflow: auto;
+// }
+
+.dialogPage {
+  @extend .main-background-overlay;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  height: auto;
+  min-height: 100%;
+}
+
+.dialogPageContent {
+  width: 800px;
+}
+
+.popupCard {
+  background-color: $blackDark;
+  max-width: 600px !important;
+  padding: 20px;
+}
+
+.dialogPageHeading,
+.popupHeading {
+  display: grid;
+  grid-template-columns: 50px auto 50px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.dialogPageHeading {
+  padding: 10px 0 10px 0;
+}
+
+.closebBtn {
+  border: 2px solid white;
+}
+
+.nextBtn {
+  width: 300px;
+  border-radius: 0;
+  padding: 1.2rem;
 }

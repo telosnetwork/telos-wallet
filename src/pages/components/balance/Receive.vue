@@ -1,41 +1,33 @@
 <template>
   <q-dialog
-    class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card
-      class="full-height main-background"
-      style="max-width: auto; margin: auto; "
-    >
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview main-background-overlay"
-      >
-        <q-header class=" text-white q-pa-md" style="background: #00000000">
-          <q-toolbar class="">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20 q-mb-sm"
-                  >Receive</label
-                >
-                <label class="text-subtitle2 text-grey-4">Select a coin</label>
-              </div>
-            </q-toolbar-title>
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-white closebBtn"
-              icon="west"
-            />
-          </q-toolbar>
-
+    <div class="main-background dialogWrapper">
+      <div class="dialogPage ">
+        <div class="dialogPageContent">
+          <div class="dialogPageHeading">
+            <div>
+              <q-btn
+                round
+                flat
+                dense
+                v-close-popup
+                class="closebBtn"
+                icon="west"
+              />
+            </div>
+            <div class="text-subtitle1 text-weight-medium text-center">
+              Receive
+            </div>
+            <div />
+          </div>
+          <div class="text-subtitle2 text-grey-4 text-center q-pb-md">
+            Select a coin
+          </div>
           <div class="q-pa-md">
             <q-input
               v-model="searchCoinName"
@@ -53,76 +45,70 @@
             </q-input>
             <q-separator dark class="q-my-sm" />
           </div>
-        </q-header>
-        <q-page-container class=" q-mx-md">
-          <q-list>
-            <div
-              v-for="(coin, index) in searchCoins"
-              :key="`${coin.name}_${index}`"
+          <div
+            v-for="(coin, index) in searchCoins"
+            :key="`${coin.name}_${index}`"
+          >
+            <q-item-label v-if="index === 0 && coin.suggested" header style=""
+              >Suggested</q-item-label
             >
-              <q-item-label v-if="index === 0 && coin.suggested" header style=""
-                >Suggested</q-item-label
-              >
-              <q-item-label
-                v-if="
-                  index === searchCoins.findIndex(c => !c.suggested) &&
-                    !coin.suggested
-                "
-                header
-                >All coins</q-item-label
-              >
-              <q-item
-                clickable
-                v-ripple
-                class="list-item"
-                @click="selectCoin(coin)"
-              >
-                <q-item-section avatar>
-                  <q-avatar size="45px" class="q-my-sm">
-                    <img :src="coin.icon" />
-                    <div
-                      v-if="coin.network == 'tevm'"
-                      class="flex absolute full-width full-height"
-                    >
-                      <img
-                        class="flex q-ml-auto q-mt-auto"
-                        alt="tEVM"
-                        src="~assets/telosEVM_32.png"
-                        style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
-                      />
-                    </div>
-                  </q-avatar>
-                </q-item-section>
-
-                <q-item-section style="justify-content: start; display: grid;">
-                  <div class="text-white text-left display-grid">
-                    <label
-                      class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
-                      >{{ coin.name }}</label
-                    >
-                    <label class="text-subtitle2 text-white wraplabel">{{
-                      coin.symbol
-                    }}</label>
+            <q-item-label
+              v-if="
+                index === searchCoins.findIndex(c => !c.suggested) &&
+                  !coin.suggested
+              "
+              header
+              >All coins</q-item-label
+            >
+            <q-item
+              clickable
+              v-ripple
+              class="list-item"
+              @click="selectCoin(coin)"
+            >
+              <q-item-section avatar>
+                <q-avatar size="45px" class="q-my-sm">
+                  <img :src="coin.icon" />
+                  <div
+                    v-if="coin.network == 'tevm'"
+                    class="flex absolute full-width full-height"
+                  >
+                    <img
+                      class="flex q-ml-auto q-mt-auto"
+                      alt="tEVM"
+                      src="~assets/evm_logo.png"
+                      style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                    />
                   </div>
-                </q-item-section>
-
-                <q-item-section side>
-                  <div class="text-white text-right display-grid">
-                    <label
-                      class="text-subtitle1 text-weight-small text-white h-20"
-                      >{{ `${getFixed(coin.amount, 8)} ${coin.symbol}` }}</label
-                    >
-                    <label class="text-caption text-white"
-                      >${{ getFixed(coin.amount * coin.price, 2) }}</label
-                    >
-                  </div>
-                </q-item-section>
-              </q-item>
-            </div>
-          </q-list>
-        </q-page-container>
-      </q-layout>
-    </q-card>
+                </q-avatar>
+              </q-item-section>
+              <q-item-section style="justify-content: start; display: grid;">
+                <div class="text-white text-left display-grid">
+                  <label
+                    class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
+                    >{{ coin.name }}</label
+                  >
+                  <label class="text-subtitle2 text-white wraplabel">{{
+                    coin.symbol
+                  }}</label>
+                </div>
+              </q-item-section>
+              <q-item-section side>
+                <div class="text-white text-right display-grid">
+                  <label
+                    class="text-subtitle1 text-weight-small text-white h-20"
+                    >{{ `${getFixed(coin.amount, 8)} ${coin.symbol}` }}</label
+                  >
+                  <label class="text-caption text-white"
+                    >${{ getFixed(coin.amount * coin.price, 2) }}</label
+                  >
+                </div>
+              </q-item-section>
+            </q-item>
+          </div>
+        </div>
+      </div>
+    </div>
   </q-dialog>
 </template>
 
@@ -193,19 +179,5 @@ export default {
   border-top-right-radius: 15px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
-}
-
-.closebBtn {
-  border: 2px solid white;
-}
-
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 </style>
