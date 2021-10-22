@@ -3,6 +3,7 @@
     class="profile flex-center main-background-overlay"
     :style="` display:flex; overflow: auto; height: 100vh !important;`"
   >
+    <login-button v-if="isAuthenticated" style="display: none" />
     <div>
       <div class="profile text-white flex-center">
         <label style="height: 10px; margin-bottom: 40px">Profile</label>
@@ -147,99 +148,110 @@
         </q-item>
         <!-- Google label -->
         <!-- <div
-          class="flex-center"
-          style="position: relative; display:flex; left: 1rem; top: 1rem; bottom: 0rem"
+          class="text-center"
         >
-          <p class="googleAccount text-white">
+          <p class="googleAccount text-white text-center">
             Google account is connected | <b> Private Key</b>
           </p>
           <img src="~assets/googleBlock.svg" />
         </div> -->
-
-        <!-- <q-item class="column">
-          <label class="q-mr-auto information" >Bio</label>
-          <q-input v-model="bio" />
-        </q-item> -->
       </q-list>
-      <!-- <div class="column q-mx-md" :style="`max-width: 800px; margin: auto; overflow: auto; height: ${availableHeight}px !important;`">
-    <login-button v-if="isAuthenticated" style="display: none"/>
-    <q-list class="q-py-md">
-      <q-item class="justify-center">
-        <q-avatar size="110px" font-size="52px" color="white" text-color="white">
-          <img :src="userAvatar" style="border: 1px solid purple"/>
-        </q-avatar>
-      </q-item>
-      <q-item class="justify-center">
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`" label="UPLOAD IMAGE"  @click="onPickFile" />
-        <input type="file" ref="fileInput" accept="image/*" style="display: none" @change="onFilePicked"/>
-      </q-item>
-      <q-item>
-        <q-input v-model="avatar" dense borderless filled disable class="round-sm full-width" maxlength="128" counter label="Avatar URL" />
-      </q-item>
-      <q-item>
-        <q-input v-model="display_name" dense borderless filled
-          class="round-sm full-width" maxlength="16" counter label="Name"
-          :rules="[val => !!val || 'This field is required']"/> 
-      </q-item>
-      <q-item>
-        <q-input v-model="status" dense borderless filled class="round-sm full-width" maxlength="16" counter label="Status" />
-      </q-item>
-      <q-item class="column">
-        <label class="q-mr-auto">Bio</label>
-        <q-editor v-model="bio" min-height="5rem" />
-      </q-item>
-      <q-item>
-        <q-btn text-color="white" :style="`height: 35px; background: ${themeColor}`" label="SAVE" @click="save" :disable="display_name.length === 0" />
-      </q-item>
-      <q-item>
-        <label v-if="privateKey && connected" class="flex items-center text-weight-medium q-ml-sm" :style="`color: ${themeColor}`">Google Account is Connected:</label>
-        <label v-else class="flex items-center text-weight-medium" :style="'color: grey'">Connect Google Account:</label>
-        <q-btn v-if="!privateKey" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          no-caps label="Authenticate" @click="onGoogleSignIn(null)"/>
-        <div class="q-ml-sm" id="google-authentication-button" :style="`display: ${(privateKey && !connected) ? 'unset' : 'none'}`"></div>
-        <q-btn v-if="privateKey && connected" class="q-ml-sm" text-color="white" :style="`height: 35px; background: ${themeColor}`"
-          no-caps label="View Private Key" @click="confirm = true"/>
-      </q-item>
-    </q-list>
 
-    <q-dialog v-model="confirm" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <span class="q-mx-auto text-h5">Warning!</span>
-          <span class="q-mx-auto text-center">
-            Are you sure you want to show your Telos private keys?
-            Be sure you are in a private location and no one can see your screen.
-            Anyone viewing your private keys can steal your funds.
-          </span>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup />
-          <q-btn flat label="Yes, I'm sure" color="primary" @click="confirm = false; keyView = true;" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <!-- <q-item class="row justify-center q-pt-md">
+        <label
+          v-if="privateKey && connected"
+          class="flex items-center text-weight-medium q-ml-sm"
+          :style="`color: white`"
+          >Google Account is Connected:</label
+        >
+        <label
+          v-else
+          class="flex items-center text-weight-medium"
+          :style="'color: white'"
+          >Connect Google Account:</label
+        >
+        <q-btn
+          v-if="!privateKey"
+          class="q-ml-sm"
+          text-color="white"
+          :style="`height: 35px; background: ${themeColor}`"
+          no-caps
+          label="Authenticate"
+          @click="onGoogleSignIn(null)"
+        />
+        <div
+          class="q-ml-sm"
+          data-height="200"
+          id="google-authentication-button"
+          :style="`display: ${privateKey && !connected ? 'unset' : 'none'}`"
+        ></div>
+        <q-btn
+          v-if="privateKey && connected"
+          class="q-ml-sm"
+          text-color="white"
+          :style="`height: 35px; background: ${themeColor}`"
+          no-caps
+          label="View Private Key"
+          @click="confirm = true"
+        />
+      </q-item> -->
 
-    <q-dialog v-model="keyView">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Private Key</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none text-center" style="word-break: break-all;">
-          {{privateKey}}
-          <q-btn flat dense size="sm" icon="far fa-copy" @click="copyToClipboard(privateKey)"/>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <q-dialog v-model="confirm" persistent>
+        <q-card>
+          <q-card-section class="row items-center">
+            <span class="q-mx-auto text-h5">Warning!</span>
+            <span class="q-mx-auto text-center">
+              Are you sure you want to show your Telos private keys? Be sure you
+              are in a private location and no one can see your screen. Anyone
+              viewing your private keys can steal your funds.
+            </span>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn
+              flat
+              label="Yes, I'm sure"
+              color="primary"
+              @click="
+                confirm = false;
+                keyView = true;
+              "
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
 
-    <div v-if="saving"
-      class="justify-center absolute flex full-width full-height"
-      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
-    >
-      <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-    </div> -->
+      <q-dialog v-model="keyView">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Private Key</div>
+          </q-card-section>
+          <q-card-section
+            class="q-pt-none text-center"
+            style="word-break: break-all;"
+          >
+            {{ privateKey }}
+            <q-btn
+              flat
+              dense
+              size="sm"
+              icon="far fa-copy"
+              @click="copyToClipboard(privateKey)"
+            />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Close" color="primary" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <div
+        v-if="saving"
+        class="justify-center absolute flex full-width full-height"
+        style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+      >
+        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+      </div>
     </div>
   </div>
 </template>
@@ -249,7 +261,7 @@ import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 
 export default {
-  components: {},
+  components: { LoginButton },
   data() {
     return {
       accountHasProfile: false,
@@ -422,7 +434,9 @@ export default {
       this.saving = false;
     },
     async onGoogleSignIn(user) {
+      console.log(this.$store);
       if (!user && !this.privateKey) {
+        console.log("No user");
         this.$store.$account.needAuth = true;
       }
       while (!this.privateKey) {
@@ -431,6 +445,7 @@ export default {
       let driveData = null;
       const { result } = await this.loadFromGoogleDrive();
       if (result) {
+        console.log("Drive data", result);
         const accounts = Object.keys(result);
         if (accounts.length > 0) {
           driveData = result;
@@ -442,8 +457,10 @@ export default {
           acc => driveData[acc].privateKey === this.privateKey
         ) >= 0
       ) {
+        console.log("Private key found");
         this.connected = true;
       } else if (user) {
+        console.log("Private key not found");
         this.saveToGoogleDrive();
       }
     },
@@ -676,12 +693,12 @@ export default {
 }
 
 .googleAccount {
-  position: absolute;
+  /* position: absolute; */
   margin-top: 2rem;
   display: block;
   text-decoration-color: white;
   font-size: 0.95rem;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
 }
 
 .googleBlock {
@@ -722,5 +739,15 @@ export default {
   margin-left: 2rem;
   margin-top: 4rem;
   z-index: 99;
+}
+.customBtn {
+  display: inline-block;
+  background: white;
+  color: #444;
+  width: 190px;
+  border-radius: 5px;
+  border: thin solid #888;
+  box-shadow: 1px 1px 1px grey;
+  white-space: nowrap;
 }
 </style>
