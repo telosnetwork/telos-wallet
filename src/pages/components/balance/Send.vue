@@ -3,11 +3,11 @@
     class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card
+    <div
       class="full-height main-background"
       style="max-width: auto; margin: auto;"
     >
@@ -129,7 +129,7 @@
           </q-list>
         </q-page-container>
       </q-layout>
-    </q-card>
+    </div>
   </q-dialog>
 </template>
 
@@ -208,15 +208,5 @@ export default {
 
 .closebBtn {
   border: 2px solid white;
-}
-
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 </style>

@@ -707,16 +707,6 @@ export default {
   z-index: 0;
 } */
 
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .closebBtn {
   border-radius: 2px solid white;
   margin-left: 2rem;

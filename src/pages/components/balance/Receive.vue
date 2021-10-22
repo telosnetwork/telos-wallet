@@ -198,14 +198,4 @@ export default {
 .closebBtn {
   border: 2px solid white;
 }
-
-.main-background {
-  background: #020039;
-}
-
-.main-background-overlay {
-  background: url("~assets/MainBG.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-}
 </style>

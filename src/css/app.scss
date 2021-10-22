@@ -134,3 +134,13 @@ body {
     width: 50%;
   }
 }
+
+.main-background {
+  background: $blackDark;
+}
+
+.main-background-overlay {
+  background: url("~assets/MainBG.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
