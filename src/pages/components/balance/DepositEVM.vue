@@ -1,14 +1,71 @@
 <template>
   <q-dialog
     v-model="showDlg"
-    persistent
-    :maximized="true"
     :full-height="false"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="dialogCard q-pa-md" style="max-width: 800px; height:25%;">
-      <q-layout view="hhh Lpr fFf" container class="">
+    <div class="popupCard">
+      <div class="popupHeading">
+        <div>
+          <q-btn
+            round
+            flat
+            dense
+            v-close-popup
+            class="text-grey-6"
+            icon="close"
+          />
+        </div>
+        <div class="text-subtitle1 text-weight-medium text-center ">
+          EVM Deposit
+        </div>
+        <!-- <div class="text-center q-gutter-y-xs">
+        </div> -->
+        <div />
+      </div>
+      <div class="text-center">
+        <div class="text-subtitle2 text-grey-4">
+          Deposit your TLOS into the EVM, fast, free and instant.
+        </div>
+        <div class="text-center">
+          <div class="inputAmount row items-center ">
+            <input
+              type="text"
+              class="col text-weight-regular text-right no-border no-outline transparent text-white"
+              v-model="depositAmount"
+              @focus="
+                depositAmount = depositAmount === '0' ? '' : depositAmount
+              "
+              @blur="depositBlur"
+            />
+            <label class="text-weight-regular q-ml-sm text-left">
+              TLOS
+            </label>
+          </div>
+          <!-- <q-input
+            bg-color="secondary"
+            rounded
+            outlined
+            v-model="depositAmount"
+            label="Deposit amount"
+            placeholder="0.0000"
+          /> -->
+          <div class="">Max: {{ nativeTLOSBalance }}</div>
+        </div>
+        <q-btn
+          class="purpleGradient q-mt-lg"
+          no-caps
+          rounded
+          label="Deposit"
+          @click="deposit"
+        />
+        <div v-if="!haveEVMAccount" class="q-mt-md">
+          NOTE: This is your first deposit so an additional “create” action will
+          be included
+        </div>
+      </div>
+      <!-- <q-layout view="hhh Lpr fFf" container class="">
         <q-header class="bg-dark q-pa-sm">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
@@ -54,8 +111,8 @@
             will be included
           </div>
         </q-page-container>
-      </q-layout>
-    </q-card>
+      </q-layout> -->
+    </div>
   </q-dialog>
 </template>
 
@@ -68,7 +125,7 @@ export default {
   data() {
     return {
       amount: "",
-      depositAmount: ""
+      depositAmount: "0"
     };
   },
   computed: {
@@ -83,6 +140,10 @@ export default {
     }
   },
   methods: {
+    depositBlur() {
+      if (isNaN(this.depositAmount)) this.depositAmount = "0";
+      else this.depositAmount = Number(this.depositAmount).toString();
+    },
     async deposit() {
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
@@ -151,7 +212,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toolbar-title {
   position: absolute;
   text-align: center;
@@ -164,12 +225,16 @@ export default {
 .display-grid {
   display: grid;
 }
-.h-20 {
-  height: 20px;
-}
 .wraplabel {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.inputAmount {
+  font-size: 3rem;
+  z-index: 1;
+  label {
+    width: 50%;
+  }
 }
 </style>

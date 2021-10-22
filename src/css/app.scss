@@ -105,11 +105,17 @@ body {
   }
 }
 
-.dialogCard {
-  border: 1px solid #fafafa;
-  border-radius: 100px;
+.popupCard {
   background-color: $blackDark;
-  color: $white;
+  max-width: 800px !important;
+  padding: 20px;
+}
+
+.popupHeading {
+  display: grid;
+  grid-template-columns: 50px auto 50px;
+  align-items: center;
+  padding-bottom: 8px;
 }
 
 .purpleGradient {
