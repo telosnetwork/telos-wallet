@@ -63,7 +63,19 @@
             </q-avatar>
             <div><img src="~assets/icons/networkArrows.svg" /></div>
             <q-avatar size="6rem">
-              <img :src="selectedCoin.icon" />
+              <img v-if="networkType === 'telos' || networkType === 'tevm'" :src="selectedCoin.icon" />
+              <div
+                v-if="networkType == 'tevm'"
+                class="flex absolute full-width full-height"
+              >
+                <img
+                  class="flex q-ml-auto q-mt-auto"
+                  alt="tEVM"
+                  src="~assets/evm_logo.png"
+                  style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                />
+              </div>
+              <img v-if="networkType == 'ethereum'" src="~assets/Ethereum.svg" />
             </q-avatar>
           </div>
         </q-header>
