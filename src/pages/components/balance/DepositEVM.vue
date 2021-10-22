@@ -37,7 +37,7 @@
               @focus="
                 depositAmount = depositAmount === '0' ? '' : depositAmount
               "
-              @blur="depositBlur"
+              @blur="inputBlur"
             />
             <label class="text-weight-regular q-ml-sm text-left">
               TLOS
@@ -65,53 +65,6 @@
           be included
         </div>
       </div>
-      <!-- <q-layout view="hhh Lpr fFf" container class="">
-        <q-header class="bg-dark q-pa-sm">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20"
-                  >EVM Deposit</label
-                >
-                <label class="text-subtitle2 text-grey-4"
-                  >Deposit your TLOS into the EVM, fast, free and
-                  instant.</label
-                >
-              </div>
-            </q-toolbar-title>
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-grey-6"
-              icon="close"
-            />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="column items-center q-gutter-y-md">
-          <q-input
-            bg-color="secondary"
-            rounded
-            outlined
-            v-model="depositAmount"
-            label="Deposit amount"
-            placeholder="0.0000"
-          >
-          </q-input>
-          <div style="text-align:center;">Max: {{ nativeTLOSBalance }}</div>
-          <q-btn
-            class="purpleGradient"
-            no-caps
-            label="Deposit"
-            @click="deposit"
-          />
-          <div v-if="!haveEVMAccount">
-            NOTE: This is your first deposit so an additional “create” action
-            will be included
-          </div>
-        </q-page-container>
-      </q-layout> -->
     </div>
   </q-dialog>
 </template>
@@ -140,7 +93,7 @@ export default {
     }
   },
   methods: {
-    depositBlur() {
+    inputBlur() {
       if (isNaN(this.depositAmount)) this.depositAmount = "0";
       else this.depositAmount = Number(this.depositAmount).toString();
     },
@@ -229,12 +182,5 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.inputAmount {
-  font-size: 3rem;
-  z-index: 1;
-  label {
-    width: 50%;
-  }
 }
 </style>

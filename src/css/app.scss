@@ -107,7 +107,7 @@ body {
 
 .popupCard {
   background-color: $blackDark;
-  max-width: 800px !important;
+  max-width: 600px !important;
   padding: 20px;
 }
 
@@ -124,5 +124,13 @@ body {
   transition: transform 0.3s;
   &:hover {
     background: linear-gradient(120deg, $gradientPurple, $gradientblue);
+  }
+}
+
+.inputAmount {
+  font-size: 2rem;
+  z-index: 1;
+  label {
+    width: 50%;
   }
 }
