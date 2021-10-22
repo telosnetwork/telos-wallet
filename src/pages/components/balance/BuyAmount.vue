@@ -495,9 +495,6 @@ export default {
   margin-top: 1rem;
   color: white;
 }
-.closebBtn {
-  border: 2px solid white;
-}
 
 .nextBtn {
   margin-top: 0.5rem;

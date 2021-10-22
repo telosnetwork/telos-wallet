@@ -898,8 +898,4 @@ export default {
 .q-card {
   box-shadow: 0 0px 0px rgb(0 0 0 / 0);
 }
-
-.closebBtn {
-  border: 2px solid white;
-}
 </style>

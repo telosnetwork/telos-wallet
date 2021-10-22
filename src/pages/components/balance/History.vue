@@ -395,8 +395,4 @@ export default {
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 }
-
-.closebBtn {
-  border: 2px solid white;
-}
 </style>

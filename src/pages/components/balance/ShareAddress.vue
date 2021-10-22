@@ -433,10 +433,6 @@ export default {
   border-radius: 20px;
 } */
 
-.closebBtn {
-  border: 2px solid white;
-}
-
 .cryptoImg1 {
   position: absolute;
   width: 6rem;

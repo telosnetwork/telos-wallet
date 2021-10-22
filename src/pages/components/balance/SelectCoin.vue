@@ -209,8 +209,4 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.closebBtn {
-  border: 2px solid white;
-}
 </style>

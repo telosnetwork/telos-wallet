@@ -472,9 +472,6 @@ export default {
   margin-bottom: 3rem;
   font-size: 2rem;
 }
-.closebBtn {
-  border: 2px solid white;
-}
 
 .nextBtn {
   margin-top: 0.5rem;

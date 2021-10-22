@@ -474,9 +474,6 @@ export default {
   height: 8rem;
   /* margin-bottom: -1rem; */
 }
-.closebBtn {
-  border: 2px solid white;
-}
 
 .cryptoButtons {
   margin-top: 40vh;
