@@ -17,7 +17,7 @@
           <q-toolbar class="no-padding" style="background: #00000000">
             <q-toolbar-title class="absolute full-width no-padding text-center">
               <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20">Send</label>
+                <label class="text-subtitle1 text-weight-medium">Send</label>
                 <!-- <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label> -->
               </div>
             </q-toolbar-title>
@@ -28,7 +28,7 @@
 <!-- Body Information -->
         <q-page-container>
 <!-- Coin Image -->
-           <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+           <div class="absolute" style=" left: 50%; margin-left:-3.5rem;">
             <q-item-section avatar class="cryptoImg">
               <q-avatar size="6rem">
                 <img :src="selectedCoin.icon">
@@ -129,14 +129,14 @@
               </div>
             </div>
 <!-- Crypto Available -->
-            <div class="display-grid cryptoAvailable">
+            <div class="display-grid cryptoAvailable full-width justify-center">
                 <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label>
             </div>
 
 <!-- Next Button -->
-          <div class="networkinfo flex-center" style="display:flex;">
+          <div class="networkinfo flex-center full-width" style="display:flex;">
             <q-btn class="text-white text-subtitle2 q-mx-md nextBtn flex-center" 
-              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem; display:flex`"
+              :style="`height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF);  display:flex`"
               flat
               no-caps
               label="Next"
