@@ -20,7 +20,12 @@
         <q-header class="text-white q-pa-sm" style="background: #00000000">
           <q-toolbar class="no-padding">
             <q-toolbar-title class="absolute full-width no-padding text-center">
-              <q-btn-group class=" full-width justify-center" push unelevated>
+              <q-btn-group
+                class=" full-width justify-center"
+                push
+                unelevated
+                rounded
+              >
                 <q-btn
                   class="q-px-md"
                   push

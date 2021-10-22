@@ -95,7 +95,7 @@
             </label>
 
             <!-- Exchange persentage -->
-            <q-btn-group class="q-my-lg" push unelevated>
+            <q-btn-group class="q-my-lg" push unelevated rounded>
               <q-btn
                 push
                 no-caps

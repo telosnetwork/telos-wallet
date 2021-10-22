@@ -68,7 +68,12 @@
           </div>
           <!-- Crypto Buttons -->
           <q-item v-if="isPToken" class="list-item ">
-            <q-btn-group class="full-width justify-center" push unelevated>
+            <q-btn-group
+              class="full-width justify-center"
+              push
+              unelevated
+              rounded
+            >
               <q-btn
                 v-for="(pTokenNetwork, key) of coinpTokenNetworks"
                 :key="pTokenNetwork"

@@ -160,21 +160,21 @@
       <q-item class="row justify-center q-pt-md">
         <label
           v-if="privateKey && connected"
-          class="flex items-center text-weight-medium q-ml-sm"
+          class="text-subtitle1 flex items-center text-weight-medium q-ml-sm"
           :style="`color: white`"
           >Google Account is Connected:</label
         >
         <label
           v-else
-          class="flex items-center text-weight-medium"
+          class="text-subtitle1 flex items-center text-weight-medium"
           :style="'color: white'"
           >Connect Google Account:</label
         >
         <q-btn
           v-if="!privateKey"
-          class="q-ml-sm"
-          text-color="white"
-          :style="`height: 35px; background: ${themeColor}`"
+          class="purpleGradient q-ml-sm"
+          :style="`height: 35px; `"
+          rounded
           no-caps
           label="Authenticate"
           @click="onGoogleSignIn(null)"
@@ -187,9 +187,8 @@
         ></div>
         <q-btn
           v-if="privateKey && connected"
-          class="q-ml-sm"
-          text-color="white"
-          :style="`height: 35px; background: ${themeColor}`"
+          class="purpleGradient q-ml-sm"
+          :style="`height: 35px; `"
           no-caps
           label="View Private Key"
           @click="confirm = true"
