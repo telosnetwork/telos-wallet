@@ -2,69 +2,83 @@
   <q-dialog
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card class="bg-white full-height" style="max-width: auto; margin: auto;">
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview"
-      >
-        <q-header class="bg-white text-grey-8 q-pa-sm">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <label class="text-subtitle1 text-weight-medium h-20">Confirm Send</label>
-            </q-toolbar-title>
-            <q-btn round flat dense v-close-popup class="text-grey-6" icon="west"/>
-          </q-toolbar>
-          <div class="column text-center" style="height: 100px;">
-            <q-space/>
-            <label class="text-h5" :style="`font-size: ${amountFontSize}px; color: ${themeColor}`">
-              {{`${getFixed(sendAmount, selectedCoin.precision)} ${selectedCoin.symbol}`}}
-            </label>
-            <q-space/>
-          </div>
-        </q-header>
-        <q-page-container>
-          <div class="column" :style="`height: ${cardHeight}px;`">
-            <q-list>
-              <q-item class="list-item">
-                <q-item-section side>To</q-item-section>
-                <q-item-section class="to-address">{{toAddress}}</q-item-section>
-              </q-item>
-              <q-item v-if="networkType !== 'telos'"
-                class="list-item">
-                <q-item-section side class="text-weight-bold">Network Fee</q-item-section>
-                <q-item-section></q-item-section>
-                <q-item-section side>{{`$ 0.00`}}</q-item-section>
-              </q-item>
-              <q-item class="list-item">
-                <q-item-section side class="text-weight-bold">Total</q-item-section>
-                <q-item-section></q-item-section>
-                <q-item-section side>{{`$ ${getFixed(sendAmount * selectedCoin.price, 8)}`}}</q-item-section>
-              </q-item>
-            </q-list>
-            <div v-if="selectedCoin.symbol === 'TLOS' && networkType === 'ethereum'"
-              class="text-caption text-grey-8 cursor-pointer text-center q-mt-xl"
-              @click="copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')"
-            >
-              Ethereum Wallet users: to view TLOS balance in wallet, add TLOS with contract address: 0x7825e833D495F3d1c28872415a4aee339D26AC88
+    <div class="main-background">
+      <div class="dialogPage">
+        <div class="dialogPageContent">
+          <div class="dialogPageHeading">
+            <div>
+              <q-btn
+                round
+                flat
+                dense
+                v-close-popup
+                class="closebBtn"
+                icon="west"
+              />
             </div>
-            <q-space/>
-            <q-btn class="text-grey-5 text-subtitle2 q-mx-md"
-              :style="`height: 50px; background: ${themeColor}`"
-              flat
-              no-caps
-              label="Confirm send"
-              @click="confirm()"
-            />
+            <div class="text-subtitle1 text-weight-medium text-center">
+              Confirm Send
+            </div>
+            <div />
           </div>
-        </q-page-container>
-      </q-layout>
-    </q-card>
-    <div v-if="sending"
+          <div class="text-h5 text-center">
+            {{
+              `${getFixed(sendAmount, selectedCoin.precision)} ${
+                selectedCoin.symbol
+              }`
+            }}
+          </div>
+          <div>
+            <div class="column items-center ">
+              <div class="confirmGrid q-py-lg q-gutter-y-sm">
+                <div class="text-weight-bold">To</div>
+                <div class="">
+                  {{ toAddress }}
+                </div>
+                <div v-if="networkType !== 'telos'" class="text-weight-bold">
+                  Network Fee
+                </div>
+                <div v-if="networkType !== 'telos'">{{ `$ 0.00` }}</div>
+                <div class="text-weight-bold">Total</div>
+                <div>
+                  {{ `$ ${getFixed(sendAmount * selectedCoin.price, 8)}` }}
+                </div>
+              </div>
+              <div
+                v-if="
+                  selectedCoin.symbol === 'TLOS' && networkType === 'ethereum'
+                "
+                class="text-caption text-grey-8 cursor-pointer text-center q-mt-xl"
+                @click="
+                  copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')
+                "
+              >
+                Ethereum Wallet users: to view TLOS balance in wallet, add TLOS
+                with contract address:
+                0x7825e833D495F3d1c28872415a4aee339D26AC88
+              </div>
+              <div class="text-center">
+                <q-btn
+                  class="purpleGradient text-white text-subtitle2 nextBtn flex-center"
+                  flat
+                  no-caps
+                  label="Confirm send"
+                  :disable="sendAmountValue === 0"
+                  @click="confirm()"
+                />
+              </div>
+            </div>
+          </div>
+          <div />
+        </div>
+      </div>
+    </div>
+    <div
+      v-if="sending"
       class="justify-center absolute flex"
       style="background: rgba(0, 0, 0, 0.4);"
     >
@@ -74,30 +88,37 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import { networkInterfaces } from 'os';
+import { mapGetters, mapActions } from "vuex";
+import moment from "moment";
+import { networkInterfaces } from "os";
 
 export default {
-  props: ['showSendConfirmDlg', 'selectedCoin', 'sendAmount', 'toAddress', 'notes', 'networkType'],
+  props: [
+    "showSendConfirmDlg",
+    "selectedCoin",
+    "sendAmount",
+    "toAddress",
+    "notes",
+    "networkType"
+  ],
   data() {
     return {
-      sending: false,
+      sending: false
     };
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
     showDlg: {
       get() {
         return this.showSendConfirmDlg;
       },
       set(value) {
-        this.$emit('update:showSendConfirmDlg', value);
-      },
+        this.$emit("update:showSendConfirmDlg", value);
+      }
     },
     cardHeight() {
       return window.innerHeight - 200;
-    },
+    }
   },
   methods: {
     amountFontSize() {
@@ -106,11 +127,13 @@ export default {
     async confirm() {
       this.sending = true;
       let actions = [];
-      const quantityStr = `${parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)} ${this.selectedCoin.symbol}`;
-      if (this.networkType === 'telos') {
+      const quantityStr = `${parseFloat(this.sendAmount).toFixed(
+        this.selectedCoin.precision
+      )} ${this.selectedCoin.symbol}`;
+      if (this.networkType === "telos") {
         actions.push({
           account: this.selectedCoin.account,
-          name: 'transfer',
+          name: "transfer",
           data: {
             from: this.accountName.toLowerCase(),
             to: this.toAddress,
@@ -118,11 +141,11 @@ export default {
             memo: this.notes
           }
         });
-      } else if (this.networkType === 'tevm') {
+      } else if (this.networkType === "tevm") {
         try {
           actions.push({
             account: this.selectedCoin.account,
-            name: 'transfer',
+            name: "transfer",
             data: {
               from: this.accountName.toLowerCase(),
               to: process.env.EVM_CONTRACT,
@@ -137,91 +160,98 @@ export default {
             sender: this.$root.tEVMAccount.address,
             to: this.toAddress,
             quantity: quantityStr,
-            returnRaw: true,
+            returnRaw: true
           });
           actions.push({
             account: process.env.EVM_CONTRACT,
-            name: 'raw',
+            name: "raw",
             data: {
               ram_payer: this.accountName.toLowerCase(),
               tx: rawTrx,
               estimate_gas: false,
-              sender: this.$root.tEVMAccount.address.substring(2),
+              sender: this.$root.tEVMAccount.address.substring(2)
             }
           });
         } catch {
           this.$q.notify({
-            type: 'negative',
-            message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+            type: "negative",
+            message: `Failed to send ${quantityStr} to ${this.toAddress}`
           });
           this.sending = false;
           return;
         }
-      } else if (this.networkType === 'ethereum') {
+      } else if (this.networkType === "ethereum") {
         actions.push({
-          account: 'eosio.token',
-          name: 'transfer',
+          account: "eosio.token",
+          name: "transfer",
           data: {
             from: this.accountName.toLowerCase(),
-            to: 'xeth.ptokens',
+            to: "xeth.ptokens",
             quantity: quantityStr,
             memo: this.toAddress
           }
         });
-      } else if (this.networkType === 'ptoken') {
+      } else if (this.networkType === "ptoken") {
         actions.push({
           account: this.selectedCoin.account,
-          name: 'redeem',
+          name: "redeem",
           data: {
             sender: this.accountName.toLowerCase(),
             memo: this.toAddress,
-            quantity: quantityStr,
+            quantity: quantityStr
           }
         });
       }
-      const transaction = await this.$store.$api.signTransaction(actions, `Send ${quantityStr} to ${this.toAddress}`);
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Send ${quantityStr} to ${this.toAddress}`
+      );
       if (transaction) {
-        if (transaction === 'needAuth') {
+        if (transaction === "needAuth") {
           this.$q.notify({
-            type: 'negative',
-            message: `Authentication is required`,
+            type: "negative",
+            message: `Authentication is required`
           });
-        } else if (transaction === 'error') {
+        } else if (transaction === "error") {
           this.$q.notify({
-            type: 'negative',
-            message: `Transaction failed. Make sure authentication is done correctly.`,
+            type: "negative",
+            message: `Transaction failed. Make sure authentication is done correctly.`
           });
-        } else if (transaction !== 'cancelled') {
+        } else if (transaction !== "cancelled") {
           this.$q.notify({
-            type: 'primary',
-            message: `${quantityStr} is sent to ${this.toAddress}`,
+            type: "primary",
+            message: `${quantityStr} is sent to ${this.toAddress}`
           });
-          this.$root.$emit('successfully_sent', this.sendAmount, this.toAddress);
+          this.$root.$emit(
+            "successfully_sent",
+            this.sendAmount,
+            this.toAddress
+          );
         }
       } else {
         this.$q.notify({
-          type: 'negative',
-          message: `Failed to send ${quantityStr} to ${this.toAddress}`,
+          type: "negative",
+          message: `Failed to send ${quantityStr} to ${this.toAddress}`
         });
       }
       this.sending = false;
     },
     copyToClipboard(str) {
-      var el = document.createElement('textarea');
+      var el = document.createElement("textarea");
       el.value = str;
-      el.setAttribute('readonly', '');
-      el.style = {display: 'none'};
+      el.setAttribute("readonly", "");
+      el.style = { display: "none" };
       document.body.appendChild(el);
       el.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(el);
 
       this.$q.notify({
-        type: 'primary',
-        message: 'Copied it to the clipboard successfully',
+        type: "primary",
+        message: "Copied it to the clipboard successfully"
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -229,11 +259,6 @@ export default {
 .toolbar-title {
   position: absolute;
   text-align: center;
-}
-.list-item {
-  border: 1px solid #fafafa;
-  border-left: none;
-  border-right: none;
 }
 .display-grid {
   display: grid;
@@ -248,5 +273,9 @@ export default {
   display: block;
   padding-top: inherit;
   padding-bottom: inherit;
+}
+.confirmGrid {
+  display: grid;
+  grid-template-columns: 7rem auto;
 }
 </style>
