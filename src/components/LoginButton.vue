@@ -311,7 +311,7 @@ export default {
     },
 
     async buyResources() {
-      // split buy amount equally between ram, cpu and net if
+      // TODO dynamically calculate buy amount
       if (this.ramLow) {
         this.RAMtoBuy = this.buyAmount;
       }
@@ -394,10 +394,10 @@ export default {
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (this.ramAvail / account.ram_quota > this.ramThres) this.ramLow = true;
-      if (this.netAvail / account.net_limit.max < this.netThres)
+      if (account.ram_usage / account.ram_quota > this.ramThres) this.ramLow = true;
+      if (1-this.netAvail / account.net_limit.max > this.netThres)
         this.netLow = true;
-      if (this.cpuAvail / account.cpu_limit.max < this.cpuThres)
+      if (1-this.cpuAvail / account.cpu_limit.max > this.cpuThres)
         this.cpuLow = true;
     }
   },
