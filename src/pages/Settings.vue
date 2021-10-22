@@ -157,7 +157,7 @@
         </div> -->
       </q-list>
 
-      <!-- <q-item class="row justify-center q-pt-md">
+      <q-item class="row justify-center q-pt-md">
         <label
           v-if="privateKey && connected"
           class="flex items-center text-weight-medium q-ml-sm"
@@ -194,10 +194,10 @@
           label="View Private Key"
           @click="confirm = true"
         />
-      </q-item> -->
+      </q-item>
 
       <q-dialog v-model="confirm" persistent>
-        <q-card>
+        <q-card class="popupCard">
           <q-card-section class="row items-center">
             <span class="q-mx-auto text-h5">Warning!</span>
             <span class="q-mx-auto text-center">
@@ -207,11 +207,11 @@
             </span>
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Cancel" color="white" v-close-popup />
             <q-btn
               flat
               label="Yes, I'm sure"
-              color="primary"
+              color="white"
               @click="
                 confirm = false;
                 keyView = true;
@@ -222,7 +222,7 @@
       </q-dialog>
 
       <q-dialog v-model="keyView">
-        <q-card>
+        <q-card class="popupCard">
           <q-card-section>
             <div class="text-h6">Private Key</div>
           </q-card-section>
@@ -240,7 +240,7 @@
             />
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn flat label="Close" color="primary" v-close-popup />
+            <q-btn flat label="Close" color="white" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
