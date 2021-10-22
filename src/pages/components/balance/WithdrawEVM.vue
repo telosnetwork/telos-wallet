@@ -1,60 +1,58 @@
 <template>
   <q-dialog
     v-model="showDlg"
-    persistent
-    :maximized="true"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card
-      class="dialogCard"
-      style="max-width: 800px; height:25%; margin: auto; padding-top: .75rem;
-    border-radius: 5px !important;"
-    >
-      <q-layout view="hhh Lpr fFf" container class="shadow-4 coinview">
-        <q-header class="bg-dark q-pa-sm">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-20"
-                  >EVM Withdraw</label
-                >
-                <label class="text-subtitle2 text-grey-4"
-                  >Withdraw your TLOS from the EVM, fast, free and
-                  instant.</label
-                >
-              </div>
-            </q-toolbar-title>
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-grey-6"
-              icon="close"
-            />
-          </q-toolbar>
-        </q-header>
-        <q-page-container class="column items-center q-gutter-y-md">
-          <q-input
-            outlined
-            v-model="withdrawAmount"
-            label="Withdraw amount"
-            placeholder="0.0000"
-            rounded
-            bg-color="secondary"
-          >
-          </q-input>
-          <div>Max: {{ evmTLOSBalance }}</div>
+    <div class="popupCard">
+      <div class="popupHeading">
+        <div>
           <q-btn
-            class="purpleGradient"
-            no-caps
-            label="Withdraw"
-            @click="withdraw"
+            round
+            flat
+            dense
+            v-close-popup
+            class="text-grey-6"
+            icon="close"
           />
-        </q-page-container>
-      </q-layout>
-    </q-card>
+        </div>
+        <div class="text-subtitle1 text-weight-medium text-center ">
+          EVM Withdraw
+        </div>
+        <!-- <div class="text-center q-gutter-y-xs">
+        </div> -->
+        <div />
+      </div>
+      <div class="text-center">
+        <div class="text-subtitle2 text-grey-4">
+          Withdraw your TLOS from the EVM, fast, free and instant.
+        </div>
+        <div class="text-center">
+          <div class="inputAmount row items-center ">
+            <input
+              type="text"
+              class="col text-weight-regular text-right no-border no-outline transparent text-white"
+              v-model="withdrawAmount"
+              @focus="
+                withdrawAmount = withdrawAmount === '0' ? '' : withdrawAmount
+              "
+              @blur="inputBlur"
+            />
+            <label class="text-weight-regular q-ml-sm text-left">
+              TLOS
+            </label>
+          </div>
+          <div class="">Max: {{ evmTLOSBalance }}</div>
+        </div>
+        <q-btn
+          class="purpleGradient q-mt-lg"
+          no-caps
+          rounded
+          label="Withdraw"
+          @click="withdraw"
+        />
+      </div>
+    </div>
   </q-dialog>
 </template>
 
@@ -66,7 +64,7 @@ export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
   data() {
     return {
-      withdrawAmount: ""
+      withdrawAmount: "0"
     };
   },
   computed: {
@@ -81,6 +79,10 @@ export default {
     }
   },
   methods: {
+    inputBlur() {
+      if (isNaN(this.withdrawAmount)) this.withdrawAmount = "0";
+      else this.withdrawAmount = Number(this.withdrawAmount).toString();
+    },
     async withdraw() {
       let amount = parseFloat(this.withdrawAmount);
       if (amount > parseFloat(this.evmTLOSBalance)) {
@@ -137,7 +139,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toolbar-title {
   position: absolute;
   text-align: center;
