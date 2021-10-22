@@ -39,7 +39,8 @@
                   class="q-px-md"
                   push no-caps
                   :label="pTokenNetwork"
-                  :style="`background: ${networkType === key ? '#363636' : '#616161'};`"
+                  :style="`background: ${networkType === key ? '#FFFFFF55' : '#FFFFFF22'};
+                          color: ${networkType === key? 'white' : 'grey'};`"
                   @click="networkType = key"
                 />
               </q-btn-group>
