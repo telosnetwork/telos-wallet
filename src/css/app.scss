@@ -132,12 +132,18 @@ body {
   background-size: cover;
 }
 
+// .dialogWrapper {
+//   display: block;
+//   overflow: auto;
+// }
+
 .dialogPage {
   @extend .main-background-overlay;
   padding: 20px;
-  height: 100%;
   display: flex;
   justify-content: center;
+  height: auto;
+  min-height: 100%;
 }
 
 .dialogPageContent {

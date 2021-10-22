@@ -59,7 +59,7 @@
           <!-- Action Buttons -->
           <div class="flex-center " :style="`display:flex`">
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
               flat
               rounded
               no-caps
@@ -76,7 +76,7 @@
               />
             </div>
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 q-mx-md nextBtn flex-center"
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
               flat
               rounded
               no-caps
