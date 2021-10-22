@@ -67,7 +67,7 @@
           >
             <div class="full-width items-center amount-div">
               <div class="full-width column">
-                <label class="amount">Amount</label>
+                <div class="amount">Amount</div>
                 <label
                   ref="widthElement"
                   :style="

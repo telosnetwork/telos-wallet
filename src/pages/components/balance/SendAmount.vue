@@ -1,141 +1,102 @@
 <template>
   <q-dialog
-    class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card
-      v-if="selectedCoin"
-      class=" full-height main-background"
-      style="max-width: auto; margin: auto;"
-    >
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview main-background-overlay"
-      >
-        <q-header class=" text-white q-pa-sm" style="background: #00000000">
-          <q-toolbar class="no-padding" style="background: #00000000">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium">Send</label>
-                <!-- <label class="text-subtitle2 text-white">{{`${getFixed(selectedCoin.amount, selectedCoin.precision)} ${selectedCoin.symbol} Available`}}</label> -->
-              </div>
-            </q-toolbar-title>
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-white closebBtn"
-              icon="west"
-            />
-          </q-toolbar>
-        </q-header>
-
-        <!-- Body Information -->
-        <q-page-container>
-          <!-- Coin Image -->
-          <div class="absolute" style=" left: 50%; margin-left:-3.5rem;">
-            <q-item-section avatar class="cryptoImg">
-              <q-avatar size="6rem">
-                <img :src="selectedCoin.icon" />
-                <!-- <img :src="coin.icon"> -->
-              </q-avatar>
-            </q-item-section>
-            <img class="avatarBackground" src="~assets/avatarBackground.svg" />
-          </div>
-
-          <div class="column text-center" :style="`height: ${cardHeight}px;`">
-            <q-space />
-
-            <!-- Amount Shown -->
-            <div class="full-width items-center amount-div">
-              <div class="full-width column">
-                <label class="amount">Amount</label>
-                <label
-                  ref="widthElement"
-                  :style="
-                    `display: fit-content; visibility: hidden; position: absolute; font-size: ${amountFontSize}px;`
-                  "
-                >
-                  {{ sendAmount }}
-                </label>
-                <div class="desktop-only flex flex-center">
-                  <label
-                    class="text-weight-regular q-mr-sm"
-                    :style="
-                      `font-size: ${amountFontSize}px; color: ${themeColor}`
-                    "
-                  >
-                    {{ coinInput ? `` : "$ " }}
-                  </label>
-                  <input
-                    type="text"
-                    :class="
-                      `text-weight-regular ${
-                        coinInput ? 'text-right' : 'text-left'
-                      } no-border no-outline transparent`
-                    "
-                    :style="
-                      `font-size: ${amountFontSize}px; color: white; z-index: 1; width: ${inputWidth}px;`
-                    "
-                    v-model="sendAmount"
-                    @focus="sendAmount = sendAmount === '0' ? '' : sendAmount"
-                    @blur="
-                      sendAmount = Number(
-                        sendAmount === '' ? '0' : sendAmount
-                      ).toString()
-                    "
-                    @change="sendPercentage = 0"
-                  />
-                  <label
-                    class="text-weight-regular q-ml-sm"
-                    :style="`font-size: ${amountFontSize}px; color: white`"
-                  >
-                    {{ coinInput ? selectedCoin.symbol : "" }}
-                  </label>
-                </div>
-                <label
-                  class="text-weight-regular full-width mobile-only"
-                  :style="
-                    `font-size: ${amountFontSize}px; color: ${themeColor}`
-                  "
-                >
-                  {{
-                    coinInput
-                      ? `${sendAmount} ${selectedCoin.symbol}`
-                      : `$${sendAmount}`
-                  }}
-                </label>
-                <label class="text-subtitle1 text-weight-large text-white">
-                  {{
-                    coinInput
-                      ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}`
-                      : `${getFixed(
-                          sendAmountValue / selectedCoin.price,
-                          selectedCoin.precision
-                        )} ${selectedCoin.symbol}`
-                  }}
-                </label>
-              </div>
-              <!-- <div class="full-width text-right absolute"> -->
-              <!-- <q-btn round flat icon="fas fa-sync" size="12px" class="text-grey-4 q-mr-sm" @click="changeCoinInput()" style="background: linear-gradient(120deg, #1DD1FE, #8946DF); margin-right:3rem"/> -->
-              <!-- </div> -->
+    <div class="main-background" v-if="selectedCoin">
+      <div class="dialogPage">
+        <div class="dialogPageContent">
+          <div class="dialogPageHeading">
+            <div>
+              <q-btn
+                round
+                flat
+                dense
+                v-close-popup
+                class="closebBtn"
+                icon="west"
+              />
             </div>
+            <div class="text-subtitle1 text-weight-medium text-center">
+              Send
+            </div>
+            <div />
+          </div>
+          <div class="column items-center q-pt-md">
+            <q-avatar size="6rem">
+              <img :src="selectedCoin.icon" />
+            </q-avatar>
+            <!-- <img class="avatarBackground" src="~assets/avatarBackground.svg" /> -->
+            <!-- Amount Shown -->
+            <div class="amount">Amount</div>
+            <!-- <label
+              ref="widthElement"
+              :style="
+                `display: fit-content; position: absolute; font-size: ${amountFontSize}px;`
+              "
+            >
+              {{ sendAmount }}
+            </label> -->
+            <div class="desktop-only flex flex-center">
+              <label
+                class="text-weight-regular q-mr-sm"
+                :style="`font-size: ${amountFontSize}px; color: ${themeColor}`"
+              >
+                {{ coinInput ? `` : "$ " }}
+              </label>
+              <input
+                type="text"
+                :class="
+                  `text-weight-regular ${
+                    coinInput ? 'text-right' : 'text-left'
+                  } no-border no-outline transparent`
+                "
+                :style="
+                  `font-size: ${amountFontSize}px; color: white; z-index: 1; width: 300px; margin-left: -200px`
+                "
+                v-model="sendAmount"
+                @focus="sendAmount = sendAmount === '0' ? '' : sendAmount"
+                @blur="
+                  sendAmount = Number(
+                    sendAmount === '' ? '0' : sendAmount
+                  ).toString()
+                "
+                @change="sendPercentage = 0"
+              />
+              <label
+                class="text-weight-regular q-ml-sm"
+                :style="`font-size: ${amountFontSize}px; color: white`"
+              >
+                {{ coinInput ? selectedCoin.symbol : "" }}
+              </label>
+            </div>
+            <label
+              class="text-weight-regular full-width mobile-only"
+              :style="`font-size: ${amountFontSize}px; color: ${themeColor}`"
+            >
+              {{
+                coinInput
+                  ? `${sendAmount} ${selectedCoin.symbol}`
+                  : `$${sendAmount}`
+              }}
+            </label>
+            <label class="text-subtitle1 text-weight-large text-white">
+              {{
+                coinInput
+                  ? `$ ${getFixed(sendAmountValue * selectedCoin.price, 8)}`
+                  : `${getFixed(
+                      sendAmountValue / selectedCoin.price,
+                      selectedCoin.precision
+                    )} ${selectedCoin.symbol}`
+              }}
+            </label>
 
             <!-- Exchange persentage -->
-            <q-btn-group
-              class=" full-width justify-center"
-              push
-              unelevated
-              style="margin-top: 2rem"
-            >
+            <q-btn-group class="q-my-lg" push unelevated>
               <q-btn
-                class="q-px-md"
                 push
                 no-caps
                 label="25%"
@@ -155,7 +116,6 @@
                 "
               />
               <q-btn
-                class="q-px-md"
                 push
                 no-caps
                 label="50%"
@@ -175,7 +135,6 @@
                 "
               />
               <q-btn
-                class="q-px-md"
                 push
                 no-caps
                 label="75%"
@@ -195,7 +154,6 @@
                 "
               />
               <q-btn
-                class="q-px-md"
                 push
                 no-caps
                 label="100%"
@@ -216,8 +174,6 @@
               />
             </q-btn-group>
 
-            <q-space />
-            <q-space />
             <div class="q-pa-sm full-width mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn
@@ -230,37 +186,32 @@
                   @click="buttonClicked(key)"
                 />
               </div>
-            </div>
-            <!-- Crypto Available -->
-            <div class="display-grid cryptoAvailable full-width justify-center">
-              <label class="text-subtitle2 text-white">{{
-                `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
-                  selectedCoin.symbol
-                } Available`
-              }}</label>
+
+              <!-- Crypto Available -->
+              <div
+                class="display-grid cryptoAvailable full-width justify-center"
+              >
+                <label class="text-subtitle2 text-white">{{
+                  `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
+                    selectedCoin.symbol
+                  } Available`
+                }}</label>
+              </div>
             </div>
 
             <!-- Next Button -->
-            <div
-              class="networkinfo flex-center full-width"
-              style="display:flex;"
-            >
-              <q-btn
-                class="text-white text-subtitle2 q-mx-md nextBtn flex-center"
-                :style="
-                  `height: 50px; background:linear-gradient(120deg, #1DD1FE, #8946DF);  display:flex`
-                "
-                flat
-                no-caps
-                label="Next"
-                :disable="sendAmountValue === 0"
-                @click="nextPressed()"
-              />
-            </div>
+            <q-btn
+              class="purpleGradient text-white text-subtitle2 nextBtn flex-center"
+              flat
+              no-caps
+              label="Next"
+              :disable="sendAmountValue === 0"
+              @click="nextPressed()"
+            />
           </div>
-        </q-page-container>
-      </q-layout>
-    </q-card>
+        </div>
+      </div>
+    </div>
     <SendToAddress
       :showSendToAddressDlg.sync="showSendToAddressDlg"
       :selectedCoin="selectedCoin"
@@ -448,9 +399,8 @@ export default {
 }
 .amount {
   color: #fafafa;
-  margin-top: 7rem;
-  margin-bottom: 2rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  margin: 2rem 0 0.5rem 0;
 }
 .cryptoImg {
   position: absolute;
@@ -474,9 +424,9 @@ export default {
 }
 
 .nextBtn {
-  margin-top: 0.5rem;
-  width: 600px;
-  margin-bottom: 1rem;
+  width: 400px;
+  border-radius: 0;
+  padding: 1.5rem;
 }
 
 @media only screen and (min-width: 1000px) {
