@@ -1,5 +1,6 @@
 <template>
   <q-dialog
+    v-if="selectedCoin"
     v-model="showDlg"
     persistent
     maximized
