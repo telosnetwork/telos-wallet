@@ -13,7 +13,7 @@
             <q-item class="userAvatar">
               <q-avatar
                 class="profileImg  userAvatar"
-                @click="$router.replace('/settings')"
+                @click="$router.push('/settings')"
               >
                 <img src="~assets/default_avatar.svg" />
               </q-avatar>
@@ -725,7 +725,7 @@ export default {
               this.coins.forEach(coin => {
                 if (coin.symbol === "TLOS") {
                   coin.price = token.price.usd;
-                  coin.icon = token.metadata.logo;
+                  coin.icon = "~assets/TLOS.png";
                 }
               });
             } else if (token.symbol !== "TLOS") {

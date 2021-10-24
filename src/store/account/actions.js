@@ -27,6 +27,9 @@ export const login = async function (
       localStorage.setItem("autoLogin", authenticator.constructor.name);
       localStorage.setItem("account", accountName);
       localStorage.setItem("returning", true);
+      if (this.$router.currentRoute.path === "/") {
+        await this.$router.push({path: "/balance" });
+      }
       dispatch("getAccountProfile");
       vxm.tlosWallet.wallet = {
         auth: {
@@ -34,8 +37,7 @@ export const login = async function (
           permission: "active"
         },
         eosApi: this.$ualUser
-      };
-      await this.$router.push({path: "/balance" });
+      };      
     }
   } catch (e) {
     const error =
