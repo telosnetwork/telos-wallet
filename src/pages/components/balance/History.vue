@@ -62,22 +62,30 @@
                   flat
                   dense
                   stack
-                  size="sm"
-                  label="Send"
-                  icon="fas fa-sign-out-alt"
+                  size="md"
+                  no-caps
                   @click="send"
-                />
+                >
+                  <div class="column">
+                    <img src="~assets/send.svg" />
+                    Send
+                  </div>
+                </q-btn>
 
                 <q-btn
                   class="col"
                   flat
                   dense
                   stack
-                  size="sm"
-                  label="Receive"
-                  icon="fas fa-sign-in-alt"
+                  size="md"
+                  no-caps
                   @click="receive"
-                />
+                >
+                  <div class="column">
+                    <img src="~assets/receive.svg" />
+                    Receive
+                  </div>
+                </q-btn>
 
                 <q-btn
                   class="col"
