@@ -85,11 +85,15 @@
                   flat
                   dense
                   stack
-                  size="sm"
-                  label="Buy"
-                  icon="far fa-credit-card"
+                  size="md"
+                  no-caps
                   @click="buy"
-                />
+                >
+                  <div class="column">
+                    <img src="~assets/Purchase.svg" />
+                    Buy
+                  </div>
+                </q-btn>
 
                 <q-btn
                   class="col"
@@ -97,11 +101,15 @@
                   flat
                   dense
                   stack
-                  size="sm"
-                  label="Convert"
-                  icon="fas fa-sync"
+                  size="md"
+                  no-caps
                   @click="convert"
-                />
+                >
+                  <div class="column">
+                    <img src="~assets/Convert.svg" />
+                    Convert
+                  </div>
+                </q-btn>
               </div>
               <div class="q-pa-md">
                 <q-input
@@ -311,10 +319,16 @@ export default {
 
 <style lang="scss" scoped>
 .sendActions {
-  color: #3fa6f5;
+  // color: #3fa6f5;
   opacity: 0.8;
   button {
     padding: 0.5rem;
+    background-color: #ffffff1a;
+    margin: 0.1rem;
+    border-radius: 0;
+    img {
+      padding-bottom: 5px;
+    }
   }
 }
 .toolbar-title {
