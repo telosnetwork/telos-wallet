@@ -7,7 +7,7 @@
     transition-hide="slide-right"
   >
     <div v-if="selectedCoin" class="main-background">
-      <q-layout view="hhh Lpr fFf" container>
+      <q-layout view="hhh Lpr fFf" container class="main-background-overlay">
         <div class="dialogPage">
           <div class="dialogPageContent">
             <div class="dialogPageHeading">
@@ -389,5 +389,8 @@ export default {
   border-top-right-radius: 30px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
+}
+.dialogPage {
+  background-image: none;
 }
 </style>
