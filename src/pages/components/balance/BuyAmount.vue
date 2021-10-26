@@ -158,41 +158,35 @@
             </div>
 
             <!-- Information -->
-            <div>
+            <div class="row justify-center q-pa-md">
               <div
-                class="q-mx-lg text-white position: absolute; eosNextInf"
-                style="left: 50%; margin-left:-8rem;"
+                class=" row items-start justify-center q-pa-md infoBox text-white "
               >
-                <img class="infoIcon" src="~assets/c-info 1.svg" />
-                By Clicking 'Next' you will be using Moonpay to purchase 'EOS'
-                which will be sent to a cross chain contract for exchange to
-                TLOS on the Telos Network at the estimated rate. Do not alter
-                the 'TO' or 'MEMO' field or risk losing your funds.
-                <!-- <img class="infoTextBlock" src="~assets/Subtract.svg"> -->
-              </div>
-              <img
-                class="infoTextBlock"
-                style="left: 50%; margin-left:-11rem; margin-top: -10rem"
-                src="~assets/Subtract.svg"
-              />
-
-              <!-- Keyboard -->
-              <div class="q-pa-sm full-width mobile-only">
-                <div class="q-gutter-x-xs q-gutter-y-lg">
-                  <q-btn
-                    v-for="key in keyboard"
-                    :key="key"
-                    class="bg-white text-grey-8 q-mx-auto q-my-auto text-h5"
-                    style="width: 30%; height: auto;"
-                    flat
-                    :label="key"
-                    @click="buttonClicked(key)"
-                  />
+                <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
+                <div class="col-8 text-justify ">
+                  By Clicking 'Next' you will be using Moonpay to purchase 'EOS'
+                  which will be sent to a cross chain contract for exchange to
+                  TLOS on the Telos Network at the estimated rate. Do not alter
+                  the 'TO' or 'MEMO' field or risk losing your funds.
                 </div>
               </div>
             </div>
+            <!-- Keyboard -->
+            <div class="q-pt-lg full-width mobile-only">
+              <div class="q-gutter-x-xs q-gutter-y-lg">
+                <q-btn
+                  v-for="key in keyboard"
+                  :key="key"
+                  class="bg-transparent text-grey-8 q-mx-auto q-my-auto text-h5"
+                  style="width: 30%; height: auto;"
+                  flat
+                  :label="key"
+                  @click="buttonClicked(key)"
+                />
+              </div>
+            </div>
             <!-- Next Button -->
-            <div class="networkinfo flex-center" style="display:flex;">
+            <div class="flex-center" style="display:flex;">
               <q-btn
                 class="text-white text-subtitle2 q-mx-md nextButton nextBtn"
                 :style="`height: 50px;`"
@@ -475,11 +469,8 @@ export default {
   /* margin-bottom: 6rem; */
 }
 
-.infoTextBlock {
-  display: flex;
-  position: absolute;
-  width: 24rem;
-  height: auto;
+.infoBox {
+  background-color: #0000002a;
 }
 
 .infoIcon {
