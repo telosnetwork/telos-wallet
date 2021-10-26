@@ -95,7 +95,7 @@
             </label>
 
             <!-- Exchange persentage -->
-            <q-btn-group class="q-my-lg" push unelevated rounded>
+            <q-btn-group class="q-mt-md" push unelevated rounded>
               <q-btn
                 push
                 no-caps
@@ -173,29 +173,25 @@
                 "
               />
             </q-btn-group>
-
-            <div class="q-pa-sm full-width mobile-only">
+            <!-- Crypto Available -->
+            <div class="text-center q-pt-sm q-pb-lg ">
+              <label class="text-subtitle2 text-white">{{
+                `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
+                  selectedCoin.symbol
+                } Available`
+              }}</label>
+            </div>
+            <div class="text-center q-py-md mobile-only">
               <div class="q-gutter-x-xs q-gutter-y-lg">
                 <q-btn
                   v-for="key in keyboard"
                   :key="key"
-                  class="bg-white text-white q-mx-auto q-my-auto text-h5"
+                  class="bg-transparent text-white q-mx-auto q-my-auto text-h5"
                   style="width: 30%; height: 60px;"
                   flat
                   :label="key"
                   @click="buttonClicked(key)"
                 />
-              </div>
-
-              <!-- Crypto Available -->
-              <div
-                class="display-grid cryptoAvailable full-width justify-center"
-              >
-                <label class="text-subtitle2 text-white">{{
-                  `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
-                    selectedCoin.symbol
-                  } Available`
-                }}</label>
               </div>
             </div>
 
@@ -416,11 +412,6 @@ export default {
   margin-left: -4rem;
   margin-top: 0.5rem;
   /* margin-bottom: -1rem; */
-}
-
-.cryptoAvailable {
-  margin-bottom: 3rem;
-  font-size: 2rem;
 }
 
 @media only screen and (min-width: 1000px) {
