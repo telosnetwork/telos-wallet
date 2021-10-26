@@ -1,71 +1,57 @@
 <template>
   <q-dialog
-    class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-up"
     transition-hide="slide-down"
   >
     <!-- Body -->
-    <q-card
-      v-if="selectedCoin"
-      class="full-height main-background"
-      style="max-width: auto; margin: auto;"
-    >
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview  main-background-overlay"
-      >
-        <!-- Header-->
-        <q-header class="text-white q-pa-sm" style="background: #00000000">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <div class="display-grid">
-                <label class="text-subtitle1 text-weight-medium h-25"
-                  >Buy {{ selectedCoin.symbol }}</label
-                >
-              </div>
-            </q-toolbar-title>
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-white closebBtn"
-              icon="west"
-            />
-          </q-toolbar>
-        </q-header>
-
-        <!-- Body Information -->
-        <q-page-container class="flex-center">
-          <div class="absolute" style=" left: 50%; margin-left:-3rem;">
-            <q-item-section avatar class="cryptoImg">
-              <q-avatar size="6rem">
-                <img :src="selectedCoin.icon" />
-                <!-- <img :src="coin.icon"> -->
-              </q-avatar>
-            </q-item-section>
-            <img class="avatarBackground" src="~assets/avatarBackground.svg" />
+    <div v-if="selectedCoin" class="main-background">
+      <div class="dialogPage">
+        <div class="dialogPageContent">
+          <div class="dialogPageHeading">
+            <div>
+              <q-btn
+                round
+                flat
+                dense
+                v-close-popup
+                class="closebBtn"
+                icon="west"
+              />
+            </div>
+            <div class="text-subtitle1 text-weight-medium text-center">
+              Buy {{ selectedCoin.symbol }}
+            </div>
+            <div />
           </div>
 
-          <!-- <div style="position: relative; left: 0; top: 0; align-content: center;" >
+          <!-- Body Information -->
+          <div class="text-center">
+            <q-avatar size="6rem" class="q-py-md">
+              <img :src="selectedCoin.icon" />
+            </q-avatar>
+            <!-- <div class="absolute" style=" left: 50%; margin-left:-3rem;">
               <q-item-section avatar class="cryptoImg">
-                <q-avatar size="45px" class="q-my-sm">
-                  <img src="coin.icon"> -->
-          <!-- <img :src="coin.icon"> -->
-          <!-- </q-avatar>
               </q-item-section>
-              <img class="cryptoImg" src="~assets/avatarBackground.svg">
-              <img class="cryptoImg" src="~assets/avatarBackground.svg">
+              <img
+                class="avatarBackground"
+                src="~assets/avatarBackground.svg"
+              />
             </div> -->
-          <div
-            class="column text-center"
-            :style="`height: ${cardHeight}px; display: grid;`"
-          >
-            <div class="full-width items-center amount-div">
+
+            <!-- <div style="position: relative; left: 0; top: 0; align-content: center;" >
+                <q-item-section avatar class="cryptoImg">
+                  <q-avatar size="45px" class="q-my-sm">
+                    <img src="coin.icon"> -->
+            <!-- <img :src="coin.icon"> -->
+            <!-- </q-avatar>
+                </q-item-section>
+                <img class="cryptoImg" src="~assets/avatarBackground.svg">
+                <img class="cryptoImg" src="~assets/avatarBackground.svg">
+              </div> -->
+            <div class="column text-center q-mt-xl">
               <div class="full-width column">
                 <div class="amount">Amount</div>
                 <label
@@ -78,7 +64,7 @@
                 </label>
                 <div class="desktop-only flex flex-center">
                   <label
-                    class="text-weight-small q-mr-sm"
+                    class="text-weight-small "
                     :style="`font-size: 1.4rem; color: white;`"
                   >
                     {{ coinInput ? `` : "$ " }}
@@ -155,41 +141,36 @@
                   </label>
                 </div>
               </div>
-            </div>
 
-            <!-- Information -->
-            <div class="row justify-center q-pa-md">
-              <div
-                class=" row items-start justify-center q-pa-md infoBox text-white "
-              >
-                <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
-                <div class="col-8 text-justify ">
-                  By Clicking 'Next' you will be using Moonpay to purchase 'EOS'
-                  which will be sent to a cross chain contract for exchange to
-                  TLOS on the Telos Network at the estimated rate. Do not alter
-                  the 'TO' or 'MEMO' field or risk losing your funds.
+              <!-- Keyboard -->
+              <div class="q-pt-lg q-mt-sm full-width mobile-only">
+                <div class="q-gutter-x-xs q-gutter-y-lg">
+                  <q-btn
+                    v-for="key in keyboard"
+                    :key="key"
+                    class="bg-transparent text-grey-8 q-mx-auto q-my-auto text-h5"
+                    style="width: 30%; height: auto;"
+                    flat
+                    :label="key"
+                    @click="buttonClicked(key)"
+                  />
                 </div>
               </div>
-            </div>
-            <!-- Keyboard -->
-            <div class="q-pt-lg full-width mobile-only">
-              <div class="q-gutter-x-xs q-gutter-y-lg">
-                <q-btn
-                  v-for="key in keyboard"
-                  :key="key"
-                  class="bg-transparent text-grey-8 q-mx-auto q-my-auto text-h5"
-                  style="width: 30%; height: auto;"
-                  flat
-                  :label="key"
-                  @click="buttonClicked(key)"
-                />
+              <!-- Information -->
+              <div class="row justify-center q-my-md">
+                <div class=" row items-start  q-pa-md infoBox text-white ">
+                  <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
+                  <div class="col text-justify ">
+                    By Clicking 'Next' you will be using Moonpay to purchase
+                    'EOS' which will be sent to a cross chain contract for
+                    exchange to TLOS on the Telos Network at the estimated rate.
+                    Do not alter the 'TO' or 'MEMO' field or risk losing your
+                    funds.
+                  </div>
+                </div>
               </div>
-            </div>
-            <!-- Next Button -->
-            <div class="flex-center" style="display:flex;">
               <q-btn
-                class="text-white text-subtitle2 q-mx-md nextButton nextBtn"
-                :style="`height: 50px;`"
+                class="self-center  purpleGradient text-white text-subtitle2 nextBtn flex-center"
                 flat
                 no-caps
                 label="Next"
@@ -198,9 +179,9 @@
               />
             </div>
           </div>
-        </q-page-container>
-      </q-layout>
-    </q-card>
+        </div>
+      </div>
+    </div>
   </q-dialog>
 </template>
 
@@ -412,11 +393,6 @@ export default {
   position: absolute;
   text-align: center;
 }
-.amount-div {
-  display: flex;
-  margin-top: 8rem;
-  /* justify-content: space-between; */
-}
 .list-item {
   /* border: 1px solid #fafafa; */
   border-left: none;
@@ -471,6 +447,7 @@ export default {
 
 .infoBox {
   background-color: #0000002a;
+  max-width: 500px;
 }
 
 .infoIcon {
@@ -483,13 +460,6 @@ export default {
 .amount {
   text-align: center;
   font-size: 1.2rem;
-  margin-top: 1rem;
   color: white;
-}
-
-.nextBtn {
-  margin-top: 0.5rem;
-  width: 600px;
-  margin-bottom: 1rem;
 }
 </style>

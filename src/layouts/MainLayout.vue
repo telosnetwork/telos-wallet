@@ -136,7 +136,7 @@ export default {
     }
   },
   async mounted() {
-    console.log("As iron sharpens iron, so one person sharpens another.")
+    console.log("As iron sharpens iron, so one person sharpens another.");
     await this.autoLogin(this.$route.query.returnUrl);
     this.loadUserProfile();
     this.checkPath();
@@ -147,10 +147,12 @@ export default {
 };
 </script>
 
-<style>
-@media only screen and (min-width: 1000px) {
-  .pageContainer {
+<style lang="scss" scoped>
+.pageContainer {
+  padding-bottom: 65px; // for mobile nav-bar
+  @media only screen and (min-width: 1000px) {
     margin-left: 250px;
+    padding-bottom: 0;
   }
 }
 

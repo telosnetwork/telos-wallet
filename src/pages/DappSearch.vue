@@ -35,9 +35,7 @@
             @click="openInNewTab(dapp.link)"
           >
             <q-item-section avatar>
-              <q-avatar size="45px" class="q-my-sm justify-center">
-                <img :src="dapp.icon" />
-              </q-avatar>
+                <img :src="dapp.icon" style="width: 30px; height: 30px" />
             </q-item-section>
             <q-item-section class="text-subtitle2 text-weight-medium">
               {{ dapp.name }}
