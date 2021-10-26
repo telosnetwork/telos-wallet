@@ -7,7 +7,7 @@
     transition-hide="slide-down"
   >
     <!-- Body -->
-    <div class="main-background">
+    <div v-if="selectedCoin" class="main-background">
       <div class="dialogPage">
         <div class="dialogPageContent">
           <div class="dialogPageHeading">
