@@ -142,23 +142,8 @@
                 </div>
               </div>
 
-              <!-- Information -->
-              <div class="row justify-center q-pa-md">
-                <div
-                  class=" row items-start justify-center q-pa-md infoBox text-white "
-                >
-                  <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
-                  <div class="col-8 text-justify ">
-                    By Clicking 'Next' you will be using Moonpay to purchase
-                    'EOS' which will be sent to a cross chain contract for
-                    exchange to TLOS on the Telos Network at the estimated rate.
-                    Do not alter the 'TO' or 'MEMO' field or risk losing your
-                    funds.
-                  </div>
-                </div>
-              </div>
               <!-- Keyboard -->
-              <div class="q-pt-lg full-width mobile-only">
+              <div class="q-pt-lg q-mt-sm full-width mobile-only">
                 <div class="q-gutter-x-xs q-gutter-y-lg">
                   <q-btn
                     v-for="key in keyboard"
@@ -171,18 +156,27 @@
                   />
                 </div>
               </div>
-              <!-- Next Button -->
-              <div class="flex-center" style="display:flex;">
-                <q-btn
-                  class="text-white text-subtitle2 q-mx-md nextButton nextBtn"
-                  :style="`height: 50px;`"
-                  flat
-                  no-caps
-                  label="Next"
-                  :disable="buyAmountValue === 0"
-                  @click="buyPressed()"
-                />
+              <!-- Information -->
+              <div class="row justify-center q-my-md">
+                <div class=" row items-start  q-pa-md infoBox text-white ">
+                  <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
+                  <div class="col text-justify ">
+                    By Clicking 'Next' you will be using Moonpay to purchase
+                    'EOS' which will be sent to a cross chain contract for
+                    exchange to TLOS on the Telos Network at the estimated rate.
+                    Do not alter the 'TO' or 'MEMO' field or risk losing your
+                    funds.
+                  </div>
+                </div>
               </div>
+              <q-btn
+                class="self-center  purpleGradient text-white text-subtitle2 nextBtn flex-center"
+                flat
+                no-caps
+                label="Next"
+                :disable="buyAmountValue === 0"
+                @click="buyPressed()"
+              />
             </div>
           </div>
         </div>
@@ -453,6 +447,7 @@ export default {
 
 .infoBox {
   background-color: #0000002a;
+  max-width: 500px;
 }
 
 .infoIcon {
@@ -466,11 +461,5 @@ export default {
   text-align: center;
   font-size: 1.2rem;
   color: white;
-}
-
-.nextBtn {
-  margin-top: 0.5rem;
-  width: 600px;
-  margin-bottom: 1rem;
 }
 </style>
