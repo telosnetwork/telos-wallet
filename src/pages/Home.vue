@@ -77,7 +77,6 @@
       Telos Wallet
     </div>
     <div class="text-h5 text-center q-pb-lg">
-      Send, Buy, Collect.<br />
       It's Crypto Made Easy
     </div>
     <div v-if="!isAuthenticated" class="text-center">

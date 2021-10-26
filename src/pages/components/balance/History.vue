@@ -52,81 +52,52 @@
               }`
             }}</label>
           </div>
-          <div
-            class="text-center q-my-md q-mx-xl"
-            :style="`color: #3FA6F5; display: flex; opacity: 0.8;`"
-          >
-            <q-space />
+          <div class="sendActions row q-my-md">
+            <q-btn
+              class="col"
+              flat
+              dense
+              stack
+              size="sm"
+              label="Send"
+              icon="fas fa-sign-out-alt"
+              @click="send"
+            />
 
-            <div class="display-grid" style="width: 60px">
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Send"
-                icon="fas fa-sign-out-alt"
-                @click="send"
-              />
-            </div>
+            <q-btn
+              class="col"
+              flat
+              dense
+              stack
+              size="sm"
+              label="Receive"
+              icon="fas fa-sign-in-alt"
+              @click="receive"
+            />
 
-            <q-space />
-            <q-separator vertical />
-            <q-space />
-
-            <div class="display-grid" style="width: 60px">
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Receive"
-                icon="fas fa-sign-in-alt"
-                @click="receive"
-              />
-            </div>
-
-            <q-space />
-            <q-separator v-if="selectedCoin.symbol === 'TLOS'" vertical />
-            <q-space v-if="selectedCoin.symbol === 'TLOS'" />
-
-            <div
+            <q-btn
+              class="col"
               v-if="selectedCoin.symbol === 'TLOS'"
-              class="display-grid"
-              style="width: 60px"
-            >
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Buy"
-                icon="far fa-credit-card"
-                @click="buy"
-              />
-            </div>
+              flat
+              dense
+              stack
+              size="sm"
+              label="Buy"
+              icon="far fa-credit-card"
+              @click="buy"
+            />
 
-            <q-space v-if="selectedCoin.symbol === 'TLOS'" />
-            <q-separator v-if="convertEnabled" vertical />
-            <q-space v-if="convertEnabled" />
-
-            <div v-if="convertEnabled" class="display-grid" style="width: 60px">
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Convert"
-                icon="fas fa-sync"
-                @click="convert"
-              />
-            </div>
-
-            <q-space v-if="convertEnabled" />
+            <q-btn
+              class="col"
+              v-if="convertEnabled"
+              flat
+              dense
+              stack
+              size="sm"
+              label="Convert"
+              icon="fas fa-sync"
+              @click="convert"
+            />
           </div>
           <q-input
             v-model="searchHistory"
@@ -330,7 +301,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.sendActions {
+  color: #3fa6f5;
+  opacity: 0.8;
+  button {
+    padding: 0.5rem;
+  }
+}
 .toolbar-title {
   position: absolute;
   text-align: center;
