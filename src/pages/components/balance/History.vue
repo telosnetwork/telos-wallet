@@ -6,8 +6,8 @@
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-layout view="hhh Lpr fFf" container>
-      <div v-if="selectedCoin" class="main-background">
+    <div v-if="selectedCoin" class="main-background">
+      <q-layout view="hhh Lpr fFf" container>
         <div class="dialogPage">
           <div class="dialogPageContent">
             <div class="dialogPageHeading">
@@ -175,8 +175,8 @@
             </q-page-container>
           </div>
         </div>
-      </div>
-    </q-layout>
+      </q-layout>
+    </div>
   </q-dialog>
 </template>
 
