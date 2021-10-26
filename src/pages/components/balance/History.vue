@@ -1,40 +1,31 @@
 <template>
   <q-dialog
-    class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card
-      v-if="selectedCoin"
-      class="full-height main-background"
-      style="max-width: auto; margin: auto;"
-    >
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview main-background-overlay"
-      >
-        <q-header class="text-white q-pa-sm" :style="'background: #00000000'">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <!-- Crypto Name -->
-              <label class="text-subtitle1 text-weight-medium h-20">
-                {{ selectedCoin.name }}
-              </label>
-            </q-toolbar-title>
-            <!-- Close Button -->
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-white closebBtn"
-              icon="west"
-            />
-          </q-toolbar>
+    <div v-if="selectedCoin" class="main-background">
+      <div class="dialogPage">
+        <div class="dialogPageContent">
+          <div class="dialogPageHeading">
+            <div>
+              <q-btn
+                round
+                flat
+                dense
+                v-close-popup
+                class="closebBtn"
+                icon="west"
+              />
+            </div>
+            <div class="text-subtitle1 text-weight-medium text-center">
+              {{ selectedCoin.name }}
+            </div>
+            <div />
+          </div>
+
           <div class="text-white text-center display-grid">
             <!-- Crypto Image -->
             <div class="absolute" style=" left: 50%; margin-left:-3rem;">
@@ -148,61 +139,65 @@
             color="white"
             input-class="text-white"
           />
-        </q-header>
 
-        <!-- Crypto History Container -->
-        <q-page-container>
-          <q-infinite-scroll @load="loadMoreHistory" :offset="100">
-            <div
-              v-for="(history, index) in searchHistories"
-              :key="`${history.block_num}_${index}`"
-            >
-              <q-item clickable v-ripple class="list-item">
-                <q-item-section avatar>
-                  <q-avatar size="35px" class="q-my-none">
-                    <img :src="selectedCoin.icon" />
-                  </q-avatar>
-                </q-item-section>
+          <!-- Crypto History Container -->
+          <div>
+            <q-infinite-scroll @load="loadMoreHistory" :offset="100">
+              <div
+                v-for="(history, index) in searchHistories"
+                :key="`${history.block_num}_${index}`"
+              >
+                <q-item clickable v-ripple class="list-item">
+                  <q-item-section avatar>
+                    <q-avatar size="35px" class="q-my-none">
+                      <img :src="selectedCoin.icon" />
+                    </q-avatar>
+                  </q-item-section>
 
-                <q-item-section style="justify-content: start; display: grid;">
-                  <div class="text-white text-left display-grid">
-                    <label
-                      class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
-                      >{{ historyData(history).actionName }}</label
-                    >
-                    <label
-                      class="text-caption text-white text-weight-regular wraplabel"
-                      >{{ historyData(history).actionDetail }}</label
-                    >
-                  </div>
-                </q-item-section>
+                  <q-item-section
+                    style="justify-content: start; display: grid;"
+                  >
+                    <div class="text-white text-left display-grid">
+                      <label
+                        class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
+                        >{{ historyData(history).actionName }}</label
+                      >
+                      <label
+                        class="text-caption text-white text-weight-regular wraplabel"
+                        >{{ historyData(history).actionDetail }}</label
+                      >
+                    </div>
+                  </q-item-section>
 
-                <q-item-section side>
-                  <div class="text-white text-right display-grid">
-                    <label
-                      class="text-subtitle2 text-weight-medium text-white h-20"
-                      >{{
-                        `${getFixed(historyData(history).coinAmount, 4)} ${
-                          selectedCoin.symbol
-                        }`
-                      }}</label
-                    >
-                    <label class="text-caption text-white"
-                      >${{ getFixed(historyData(history).usdAmount, 4) }}</label
-                    >
-                  </div>
-                </q-item-section>
-              </q-item>
-            </div>
-            <template v-if="!loadedAll" v-slot:loading>
-              <div class="row justify-center q-my-md">
-                <q-spinner-dots color="primary" size="40px" />
+                  <q-item-section side>
+                    <div class="text-white text-right display-grid">
+                      <label
+                        class="text-subtitle2 text-weight-medium text-white h-20"
+                        >{{
+                          `${getFixed(historyData(history).coinAmount, 4)} ${
+                            selectedCoin.symbol
+                          }`
+                        }}</label
+                      >
+                      <label class="text-caption text-white"
+                        >${{
+                          getFixed(historyData(history).usdAmount, 4)
+                        }}</label
+                      >
+                    </div>
+                  </q-item-section>
+                </q-item>
               </div>
-            </template>
-          </q-infinite-scroll>
-        </q-page-container>
-      </q-layout>
-    </q-card>
+              <template v-if="!loadedAll" v-slot:loading>
+                <div class="row justify-center q-my-md">
+                  <q-spinner-dots color="primary" size="40px" />
+                </div>
+              </template>
+            </q-infinite-scroll>
+          </div>
+        </div>
+      </div>
+    </div>
   </q-dialog>
 </template>
 
