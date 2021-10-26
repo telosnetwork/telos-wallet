@@ -103,17 +103,23 @@
                   @click="convert"
                 />
               </div>
-              <q-input
-                v-model="searchHistory"
-                label="Search Transaction History"
-                dense
-                borderless
-                class="round-sm q-pl-sm"
-                standout="text-white"
-                label-color="white"
-                color="white"
-                input-class="text-white"
-              />
+              <div class="q-pa-md">
+                <q-input
+                  v-model="searchHistory"
+                  borderless
+                  label-color="white"
+                  color="white"
+                  placeholder="Search Transaction History"
+                  dense
+                  input-style="color: white"
+                  input-class="text-white"
+                >
+                  <template v-slot:append>
+                    <img src="~/assets/icons/search.svg" />
+                  </template>
+                </q-input>
+                <q-separator dark class="q-my-sm" />
+              </div>
               <q-infinite-scroll @load="loadMoreHistory" :offset="100">
                 <div
                   v-for="(history, index) in searchHistories"
@@ -319,8 +325,8 @@ export default {
   /* border: 1px solid #fafafa; */
   border-left: none;
   border-right: none;
-  border-top-left-radius: 30px;
-  border-top-right-radius: 30px;
+  // border-top-left-radius: 30px;
+  // border-top-right-radius: 30px;
   border-bottom-left-radius: unset;
   border-bottom-left-radius: unset;
 }
