@@ -1,208 +1,211 @@
 <template>
   <q-dialog
-    class="main-background"
     v-model="showDlg"
     persistent
-    :maximized="true"
+    maximized
     transition-show="slide-left"
     transition-hide="slide-right"
   >
-    <q-card
-      v-if="selectedCoin"
-      class="full-height main-background"
-      style="max-width: auto; margin: auto;"
-    >
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview main-background-overlay"
-      >
-        <q-header class="text-white q-pa-sm" :style="'background: #00000000'">
-          <q-toolbar class="no-padding">
-            <q-toolbar-title class="absolute full-width no-padding text-center">
-              <!-- Crypto Name -->
-              <label class="text-subtitle1 text-weight-medium h-20">
-                {{ selectedCoin.name }}
-              </label>
-            </q-toolbar-title>
-            <!-- Close Button -->
-            <q-btn
-              round
-              flat
-              dense
-              v-close-popup
-              class="text-white closebBtn"
-              icon="west"
-            />
-          </q-toolbar>
-          <div class="text-white text-center display-grid">
-            <!-- Crypto Image -->
-            <div class="absolute" style=" left: 50%; margin-left:-3rem;">
-              <q-item-section avatar class="cryptoImg">
-                <q-avatar size="6rem">
-                  <img :src="selectedCoin.icon" />
-                </q-avatar>
-              </q-item-section>
-              <img
-                class="avatarBackground"
-                src="~assets/avatarBackground.svg"
-              />
-            </div>
-
-            <!-- Crypto Amount -->
-            <label class="cryptoAmount text-h5 text-weight-small text-whhite"
-              >${{
-                getFixed(selectedCoin.amount * selectedCoin.price, 2)
-              }}</label
-            >
-            <label class="text-caption text-white">{{
-              `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
-                selectedCoin.symbol
-              }`
-            }}</label>
-          </div>
-          <div
-            class="text-center q-my-md q-mx-xl"
-            :style="`color: #3FA6F5; display: flex; opacity: 0.8;`"
-          >
-            <q-space />
-
-            <div class="display-grid" style="width: 60px">
+    <div v-if="selectedCoin" class="main-background">
+      <q-layout view="hhh Lpr fFf" container class="dialogPage">
+        <div class="dialogPageContent">
+          <q-header class="text-white q-pa-sm" :style="'background: #00000000'">
+            <q-toolbar class="no-padding">
+              <q-toolbar-title
+                class="absolute full-width no-padding text-center"
+              >
+                <!-- Crypto Name -->
+                <label class="text-subtitle1 text-weight-medium h-20">
+                  {{ selectedCoin.name }}
+                </label>
+              </q-toolbar-title>
+              <!-- Close Button -->
               <q-btn
                 round
                 flat
                 dense
-                stack
-                size="sm"
-                label="Send"
-                icon="fas fa-sign-out-alt"
-                @click="send"
+                v-close-popup
+                class="text-white closebBtn"
+                icon="west"
               />
-            </div>
-
-            <q-space />
-            <q-separator vertical />
-            <q-space />
-
-            <div class="display-grid" style="width: 60px">
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Receive"
-                icon="fas fa-sign-in-alt"
-                @click="receive"
-              />
-            </div>
-
-            <q-space />
-            <q-separator v-if="selectedCoin.symbol === 'TLOS'" vertical />
-            <q-space v-if="selectedCoin.symbol === 'TLOS'" />
-
-            <div
-              v-if="selectedCoin.symbol === 'TLOS'"
-              class="display-grid"
-              style="width: 60px"
-            >
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Buy"
-                icon="far fa-credit-card"
-                @click="buy"
-              />
-            </div>
-
-            <q-space v-if="selectedCoin.symbol === 'TLOS'" />
-            <q-separator v-if="convertEnabled" vertical />
-            <q-space v-if="convertEnabled" />
-
-            <div v-if="convertEnabled" class="display-grid" style="width: 60px">
-              <q-btn
-                round
-                flat
-                dense
-                stack
-                size="sm"
-                label="Convert"
-                icon="fas fa-sync"
-                @click="convert"
-              />
-            </div>
-
-            <q-space v-if="convertEnabled" />
-          </div>
-          <q-input
-            v-model="searchHistory"
-            label="Search Transaction History"
-            dense
-            borderless
-            class="round-sm q-pl-sm"
-            standout="text-white"
-            label-color="white"
-            color="white"
-            input-class="text-white"
-          />
-        </q-header>
-
-        <!-- Crypto History Container -->
-        <q-page-container>
-          <q-infinite-scroll @load="loadMoreHistory" :offset="100">
-            <div
-              v-for="(history, index) in searchHistories"
-              :key="`${history.block_num}_${index}`"
-            >
-              <q-item clickable v-ripple class="list-item">
-                <q-item-section avatar>
-                  <q-avatar size="35px" class="q-my-none">
+            </q-toolbar>
+            <div class="text-white text-center display-grid">
+              <!-- Crypto Image -->
+              <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+                <q-item-section avatar class="cryptoImg">
+                  <q-avatar size="6rem">
                     <img :src="selectedCoin.icon" />
                   </q-avatar>
                 </q-item-section>
-
-                <q-item-section style="justify-content: start; display: grid;">
-                  <div class="text-white text-left display-grid">
-                    <label
-                      class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
-                      >{{ historyData(history).actionName }}</label
-                    >
-                    <label
-                      class="text-caption text-white text-weight-regular wraplabel"
-                      >{{ historyData(history).actionDetail }}</label
-                    >
-                  </div>
-                </q-item-section>
-
-                <q-item-section side>
-                  <div class="text-white text-right display-grid">
-                    <label
-                      class="text-subtitle2 text-weight-medium text-white h-20"
-                      >{{
-                        `${getFixed(historyData(history).coinAmount, 4)} ${
-                          selectedCoin.symbol
-                        }`
-                      }}</label
-                    >
-                    <label class="text-caption text-white"
-                      >${{ getFixed(historyData(history).usdAmount, 4) }}</label
-                    >
-                  </div>
-                </q-item-section>
-              </q-item>
-            </div>
-            <template v-if="!loadedAll" v-slot:loading>
-              <div class="row justify-center q-my-md">
-                <q-spinner-dots color="primary" size="40px" />
+                <img
+                  class="avatarBackground"
+                  src="~assets/avatarBackground.svg"
+                />
               </div>
-            </template>
-          </q-infinite-scroll>
-        </q-page-container>
+
+              <!-- Crypto Amount -->
+              <label class="cryptoAmount text-h5 text-weight-small text-whhite"
+                >${{
+                  getFixed(selectedCoin.amount * selectedCoin.price, 2)
+                }}</label
+              >
+              <label class="text-caption text-white">{{
+                `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
+                  selectedCoin.symbol
+                }`
+              }}</label>
+            </div>
+            <div
+              class="text-center q-my-md q-mx-xl"
+              :style="`color: #3FA6F5; display: flex; opacity: 0.8;`"
+            >
+              <q-space />
+
+              <div class="display-grid" style="width: 60px">
+                <q-btn
+                  round
+                  flat
+                  dense
+                  stack
+                  size="sm"
+                  label="Send"
+                  icon="fas fa-sign-out-alt"
+                  @click="send"
+                />
+              </div>
+
+              <q-space />
+              <q-separator vertical />
+              <q-space />
+
+              <div class="display-grid" style="width: 60px">
+                <q-btn
+                  round
+                  flat
+                  dense
+                  stack
+                  size="sm"
+                  label="Receive"
+                  icon="fas fa-sign-in-alt"
+                  @click="receive"
+                />
+              </div>
+
+              <q-space />
+              <q-separator v-if="selectedCoin.symbol === 'TLOS'" vertical />
+              <q-space v-if="selectedCoin.symbol === 'TLOS'" />
+
+              <div
+                v-if="selectedCoin.symbol === 'TLOS'"
+                class="display-grid"
+                style="width: 60px"
+              >
+                <q-btn
+                  round
+                  flat
+                  dense
+                  stack
+                  size="sm"
+                  label="Buy"
+                  icon="far fa-credit-card"
+                  @click="buy"
+                />
+              </div>
+
+              <q-space v-if="selectedCoin.symbol === 'TLOS'" />
+              <q-separator v-if="convertEnabled" vertical />
+              <q-space v-if="convertEnabled" />
+
+              <div
+                v-if="convertEnabled"
+                class="display-grid"
+                style="width: 60px"
+              >
+                <q-btn
+                  round
+                  flat
+                  dense
+                  stack
+                  size="sm"
+                  label="Convert"
+                  icon="fas fa-sync"
+                  @click="convert"
+                />
+              </div>
+
+              <q-space v-if="convertEnabled" />
+            </div>
+            <q-input
+              v-model="searchHistory"
+              label="Search Transaction History"
+              dense
+              borderless
+              class="round-sm q-pl-sm"
+              standout="text-white"
+              label-color="white"
+              color="white"
+              input-class="text-white"
+            />
+          </q-header>
+
+          <!-- Crypto History Container -->
+          <q-page-container>
+            <q-infinite-scroll @load="loadMoreHistory" :offset="100">
+              <div
+                v-for="(history, index) in searchHistories"
+                :key="`${history.block_num}_${index}`"
+              >
+                <q-item clickable v-ripple class="list-item">
+                  <q-item-section avatar>
+                    <q-avatar size="35px" class="q-my-none">
+                      <img :src="selectedCoin.icon" />
+                    </q-avatar>
+                  </q-item-section>
+
+                  <q-item-section
+                    style="justify-content: start; display: grid;"
+                  >
+                    <div class="text-white text-left display-grid">
+                      <label
+                        class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
+                        >{{ historyData(history).actionName }}</label
+                      >
+                      <label
+                        class="text-caption text-white text-weight-regular wraplabel"
+                        >{{ historyData(history).actionDetail }}</label
+                      >
+                    </div>
+                  </q-item-section>
+
+                  <q-item-section side>
+                    <div class="text-white text-right display-grid">
+                      <label
+                        class="text-subtitle2 text-weight-medium text-white h-20"
+                        >{{
+                          `${getFixed(historyData(history).coinAmount, 4)} ${
+                            selectedCoin.symbol
+                          }`
+                        }}</label
+                      >
+                      <label class="text-caption text-white"
+                        >${{
+                          getFixed(historyData(history).usdAmount, 4)
+                        }}</label
+                      >
+                    </div>
+                  </q-item-section>
+                </q-item>
+              </div>
+              <template v-if="!loadedAll" v-slot:loading>
+                <div class="row justify-center q-my-md">
+                  <q-spinner-dots color="primary" size="40px" />
+                </div>
+              </template>
+            </q-infinite-scroll>
+          </q-page-container>
+        </div>
       </q-layout>
-    </q-card>
+    </div>
   </q-dialog>
 </template>
 
