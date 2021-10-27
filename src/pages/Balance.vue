@@ -4,7 +4,7 @@
       <div style="height: 100%; overflow:auto">
         <div
           class="text-center full-width"
-          style="display: grid; grid-gap: 1.2rem"
+          style="display: grid; grid-gap: 1rem"
         >
           <login-button v-if="isAuthenticated" style="display:none" />
 
@@ -25,6 +25,22 @@
               :style="`opacity: ${accountNameStyle.opacity};`"
             >
               {{ accountName }}
+            </label>
+          </div>
+
+          <!-- EVM address -->
+          <div>
+            <q-btn
+              v-if="!$root.tEVMAccount"
+              class="purpleGradient text-caption"
+              push
+              no-caps
+              style="width: 12rem;"
+              :label="'Generate EVM Address'"
+              @click="generateEVMAddress()"
+            />
+            <label v-else class="text-white">
+              {{ $root.tEVMAccount.address }}
             </label>
           </div>
 
@@ -673,6 +689,48 @@ export default {
         });
       }
       this.tEVMWithdrawing = false;
+    },
+    async generateEVMAddress() {
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: "create",
+        data: {
+          account: this.accountName,
+          data: "test"
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Create a new EVM address`
+      );
+      if (transaction) {
+        if (transaction === "needAuth") {
+          this.$q.notify({
+            type: "negative",
+            message: `Authentication is required`
+          });
+        } else if (transaction === "error") {
+          this.$q.notify({
+            type: "negative",
+            message: `Creation failed. Make sure authentication is done correctly.`
+          });
+        } else if (transaction !== "cancelled") {
+          this.$q.notify({
+            type: "primary",
+            message: `A new address is successfully created`
+          });
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+          this.networkType = "tevm";
+        }
+      } else {
+        this.$q.notify({
+          type: "negative",
+          message: `Failed to create an address`
+        });
+      }
     }
   },
   created: async function() {
@@ -762,12 +820,14 @@ export default {
             }
           });
         });
-      if (this.isAuthenticated) this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated)
+        this.getUserTokens().then(this.loadUserTokens());
     }
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      if (this.isAuthenticated) this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated)
+        this.getUserTokens().then(this.loadUserTokens());
       try {
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
           this.accountName
