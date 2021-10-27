@@ -52,10 +52,18 @@
                     style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
                   />
                 </div>
-                <img
+                <img v-if="networkType == 'ethereum'" src="~assets/pTLOS.svg" />
+                <div
                   v-if="networkType == 'ethereum'"
-                  src="~assets/Ethereum.svg"
-                />
+                  class="flex absolute full-width full-height"
+                >                  
+                  <img
+                    class="flex q-ml-auto q-mt-auto"
+                    alt="tEVM"
+                    src="~assets/ETH.svg"
+                    style="width: 50%; height: 35%; margin-right: 0%; margin-bottom: -5%;"
+                  />
+                </div>
               </q-avatar>
             </div>
             <div class="text-subtitle1 text-weight-medium text-center q-py-md">
