@@ -67,7 +67,7 @@
                   flat
                   no-caps
                   label="Confirm send"
-                  :disable="sendAmountValue === 0"
+                  :disable="sendAmount === 0"
                   @click="confirm()"
                 />
               </div>
@@ -142,6 +142,7 @@ export default {
           }
         });
       } else if (this.networkType === "tevm") {
+        //TODO if selected coin is telos, then use telos account
         try {
           actions.push({
             account: this.selectedCoin.account,
@@ -149,9 +150,7 @@ export default {
             data: {
               from: this.accountName.toLowerCase(),
               to: process.env.EVM_CONTRACT,
-              // amount: parseFloat(parseFloat(this.sendAmount).toFixed(this.selectedCoin.precision)),
               quantity: quantityStr,
-              // symbol: this.selectedCoin.symbol,
               memo: this.notes
             }
           });

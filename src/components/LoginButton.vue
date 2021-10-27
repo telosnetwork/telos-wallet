@@ -191,7 +191,7 @@ export default {
       netLow: false,
       cpuLow: false,
       resourcePoll: false,
-      RAMtoBuy: "",
+      RAMtoBuy: 0,
       CPUtoBuy: 0,
       NETtoBuy: 0,
       buyAmount: 1 // 1 TLOS
@@ -206,10 +206,15 @@ export default {
     ]),
     resLow() {
       return this.ramLow || this.netLow || this.cpuLow;
-    }
+    },
+    chainName() {
+      return this.$ual.authenticators[0].keycatMap[
+        this.$ual.authenticators[0].selectedChainId
+      ].config.blockchain.name;
+    },
   },
   components: {
-    Authenticate
+    Authenticate,
   },
   methods: {
     ...mapActions("account", [
@@ -305,7 +310,7 @@ export default {
       try {
         this.$root.tEVMApi = new TelosEvmApi({
           endpoint: process.env.HYPERION_ENDPOINT,
-          chainId: 41,
+          chainId: this.chainName === 'telos' ? 40: 41,
           ethPrivateKeys: [],
           telosContract: process.env.EVM_CONTRACT,
           telosPrivateKeys: []
