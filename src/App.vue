@@ -1,8 +1,6 @@
 <template>
-  <div id="q-app" class="main-background">
-    <div class="main-background-overlay">
-      <router-view />
-    </div>
+  <div id="q-app">
+    <router-view />
   </div>
 </template>
 <script>

@@ -1,5 +1,27 @@
 <template>
   <q-layout view="hHh Lpr fFf" class="">
+    <div class="videoWrapper">
+      <video
+        playsinline
+        autoplay
+        muted
+        loop
+        poster="~/assets/Video-top_compressed-poster-00001.jpg"
+        id="bgvid"
+      >
+        <source
+          src="~/assets/Video-top_compressed-transcode.webm"
+          type="video/webm"
+        />
+        <source
+          src="~/assets/Video-top_compressed-transcode.mp4"
+          type="video/mp4"
+        />
+      </video>
+    </div>
+    <div class="videoOverlay" />
+    <div class="videoOverlay shadedOverlay" />
+
     <nav-bar :balanceTab.sync="balanceTab" />
     <q-page-container class="pageContainer">
       <router-view
@@ -158,5 +180,38 @@ export default {
 
 .footerStyle {
   background: linear-gradient(to bottom, #130c3f00, #8946df00 200%);
+}
+
+.videoWrapper {
+  background: black;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: -1;
+  video {
+    object-fit: cover;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    transform: rotate(180deg);
+    top: 35vh;
+    left: 0;
+  }
+}
+
+.videoOverlay {
+  background: url("~assets/MainBG.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  object-fit: cover;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  z-index: -1;
+}
+
+.shadedOverlay {
+  background: #442ab652;
 }
 </style>
