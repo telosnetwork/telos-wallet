@@ -1,8 +1,8 @@
 <template>
-  <div class="row justify-center">
+  <div class="row justify-center ">
     <div style="width: 600px">
       <div style="height: 100%; overflow:auto">
-        <div class="text-center q-px-sm">
+        <div class="text-center ">
           <login-button v-if="isAuthenticated" style="display:none" />
 
           <!-- Profile Image top left -->
@@ -49,6 +49,7 @@
               v-else
               rounded
               outline
+              no-caps
               @click="copyStrToClipboard($root.tEVMAccount.address)"
             >
               <div class="lt-md">{{ shortenedEvmAddress }}</div>
@@ -57,7 +58,7 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="row q-mt-lg q-mb-md">
+          <div class="row q-mt-lg q-mb-md ">
             <q-btn
               class="col balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
@@ -99,10 +100,9 @@
         <q-tabs
           :value="balanceTab"
           @input="switchTab($event)"
-          wide-indicator
-          active-color="white"
-          class=" text-white shadow-2 no-shadow"
-          style="width: 100%; background: #00000000"
+          content-class="coinTabs"
+          class=" shadow-2 no-shadow"
+          style="width: 100%"
         >
           <q-tab
             no-caps
@@ -117,13 +117,13 @@
           flat
           :value="balanceTab"
           @input="switchTab($event)"
-          class="bg-transparent"
+          class="coinTabPanels"
         >
           <q-tab-panel
             flat
             name="Coins"
             class="no-padding"
-            :style="'background: #00000000; border:0px;'"
+            :style="' border:0px;'"
           >
             <Coin
               flat
