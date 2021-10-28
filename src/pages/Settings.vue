@@ -1,6 +1,6 @@
 <template>
   <div
-    class="profile flex-center main-background-overlay"
+    class="profile flex-center "
     :style="` display:flex; overflow: auto; height: 100vh !important;`"
   >
     <login-button v-if="isAuthenticated" style="display: none" />

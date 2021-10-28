@@ -23,7 +23,6 @@
       </div>
 
       <!-- Signup Button -->
-      <q-separator v-if="!isAuthenticated" style="max-width: 500px;" />
       <div class="q-mt-md">
         <q-btn
           @click="signUp"
