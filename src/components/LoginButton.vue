@@ -197,7 +197,7 @@ export default {
       CPUtoBuy: 0,
       NETtoBuy: 0,
       buyAmount: 1, // 1 TLOS
-      resLow: false
+      resLow: false,
     };
   },
   computed: {
@@ -395,6 +395,8 @@ export default {
           if (transaction) this.ramLow = false;
           if (transaction) this.cpuLow = false;
           if (transaction) this.netLow = false;
+          if (transaction) this.resLow = false;
+
           this.$q.notify({
             type: "primary",
             message: `Resources bought`
