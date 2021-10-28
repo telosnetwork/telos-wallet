@@ -2,10 +2,7 @@
   <div class="row justify-center">
     <div style="width: 90vh">
       <div style="height: 100%; overflow:auto">
-        <div
-          class="text-center full-width"
-          style="display: grid; grid-gap: 1rem"
-        >
+        <div class="text-center full-width">
           <login-button v-if="isAuthenticated" style="display:none" />
 
           <!-- Profile Image top left -->
@@ -18,22 +15,6 @@
             :style="`opacity: ${accountNameStyle.opacity};`"
           >
             {{ accountName }}
-          </div>
-
-          <!-- EVM address -->
-          <div>
-            <q-btn
-              v-if="!$root.tEVMAccount"
-              class="purpleGradient text-caption"
-              push
-              no-caps
-              style="width: 12rem;"
-              :label="'Generate EVM Address'"
-              @click="generateEVMAddress()"
-            />
-            <label v-else class="text-white">
-              {{ $root.tEVMAccount.address }}
-            </label>
           </div>
 
           <!-- Account Amount -->
@@ -53,21 +34,37 @@
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex-center " :style="`display:flex`">
+          <!-- EVM address -->
+          <div class="text-caption q-pt-sm">
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              v-if="!$root.tEVMAccount"
+              no-caps
+              rounded
+              outline
+              style="width: 12rem;"
+              :label="'Generate EVM Address'"
+              @click="generateEVMAddress()"
+            />
+            <q-btn v-else rounded outline>
+              {{ $root.tEVMAccount.address }}
+            </q-btn>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex-center q-mt-lg q-mb-md" :style="`display:flex`">
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
               rounded
               no-caps
               label="Send"
               @click="showSendDlg = true"
             />
-            <div @click="showQRScannerDlg = true" class="qrBtn">
+            <div @click="showQRScannerDlg = true" class="qrBtn q-mx-xs">
               <img src="~assets/icons/qr_scan.svg" />
             </div>
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              class="balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
               rounded
               no-caps
