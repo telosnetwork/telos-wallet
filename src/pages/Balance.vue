@@ -45,11 +45,11 @@
           </div>
 
           <!-- Account Amount -->
-          <div class="full-width items-center balance-div">
+          <div class="full-width items-center balance-div row">
             <div class="full-width"></div>
             <div class="full-width">
               <label
-                class="text-white "
+                class="text-white items-center"
                 :style="
                   `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
                 "
@@ -58,17 +58,6 @@
                   displayAmount.toFixed(2).slice(-2)
                 }}
               </label>
-            </div>
-            <div class="full-width text-right">
-              <q-btn
-                round
-                flat
-                icon="qr_code_scanner"
-                size="10px"
-                class="text-white q-mr-md"
-                :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
-                @click="showQRScannerDlg = true"
-              />
             </div>
           </div>
 
