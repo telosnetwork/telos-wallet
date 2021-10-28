@@ -9,23 +9,15 @@
           <login-button v-if="isAuthenticated" style="display:none" />
 
           <!-- Profile Image top left -->
-          <div>
-            <q-item class="userAvatar">
-              <q-avatar
-                class="profileImg  userAvatar"
-                @click="$router.push('/settings')"
-              >
-                <img src="~assets/default_avatar.svg" />
-              </q-avatar>
-            </q-item>
-
-            <!-- Account Name -->
-            <label
-              class="text-white"
-              :style="`opacity: ${accountNameStyle.opacity};`"
-            >
-              {{ accountName }}
-            </label>
+          <q-avatar class="profileImg" @click="$router.push('/settings')">
+            <img :src="userAvatar" />
+          </q-avatar>
+          <!-- Account Name -->
+          <div
+            class="text-white q-mt-xl"
+            :style="`opacity: ${accountNameStyle.opacity};`"
+          >
+            {{ accountName }}
           </div>
 
           <!-- EVM address -->
@@ -322,7 +314,8 @@ export default {
       showDepositEVMDlg: false,
       showWithdrawEVMDlg: false,
       tEVMBalance: 0,
-      tEVMWithdrawing: false
+      tEVMWithdrawing: false,
+      avatar: ""
     };
   },
   computed: {
@@ -335,6 +328,11 @@ export default {
       "suggestTokens",
       "pTokenNetworks"
     ]),
+    userAvatar() {
+      if (this.avatar) return this.avatar;
+
+      return "/profile/default_avatar.svg";
+    },
     totalAmount() {
       return this.coins
         .map(coin => coin.amount * coin.price)
@@ -374,6 +372,22 @@ export default {
     }
   },
   methods: {
+    ...mapActions("account", ["accountExists", "getUserProfile"]),
+    async loadUserProfile() {
+      if (
+        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+      ) {
+        await this.getUserProfile(this.accountName);
+      }
+      const accountProfile = this.$store.state.account.profiles[
+        this.accountName
+      ];
+      if (!accountProfile) {
+        return;
+      }
+
+      this.avatar = accountProfile.avatar;
+    },
     switchTab(val) {
       console.log("asdf");
       this.$emit("update:balanceTab", val);
@@ -840,6 +854,7 @@ export default {
       window.innerHeight - this.footerHeight - this.maxSpace;
   },
   mounted() {
+    this.loadUserProfile();
     this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
@@ -865,6 +880,11 @@ export default {
     }
     if (this.tokenInterval) {
       clearInterval(this.tokenInterval);
+    }
+  },
+  watch: {
+    accountName() {
+      this.loadUserProfile();
     }
   }
 };
@@ -906,28 +926,18 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
-
 .profileImg {
-  text-align: center;
-  height: 3rem;
-  width: 3rem;
-  border-radius: 1rem;
-  margin-top: 1rem;
-  margin-left: 1rem;
+  height: 4rem;
+  width: 4rem;
+  // margin: 1rem;
   cursor: pointer;
   background: no-repeat;
-}
-
-@media only screen and (min-width: 1000px) {
-  .profileImg {
-    /* background-image: url("~assets/camera.svg"); */
-    height: 4rem;
-    width: 4rem;
-    border-radius: 1rem;
-    margin-top: 1rem;
-    left: 70%;
-    cursor: pointer;
-    background: no-repeat;
+  right: 1.5rem;
+  top: 1.5rem;
+  position: absolute;
+  display: none;
+  @media only screen and (min-width: 1000px) {
+    display: block;
   }
 }
 </style>

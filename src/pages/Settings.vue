@@ -128,14 +128,19 @@
         </div>
 
         <!-- Save Button -->
-        <q-item class="text-white row justify-center saveBtn">
+        <q-item class="row q-gutter-x-sm">
           <q-btn
-            text-color="white"
-            :style="
-              `height: 50px; width: 200px; background: #2e1f4f;  border-radius: 10rem; text-decoration-color: white;`
-            "
+            class="settingBtn col"
+            rounded
             label="SAVE"
             @click="save"
+            :disable="display_name.length === 0"
+          />
+          <q-btn
+            class="settingBtn col"
+            rounded
+            label="LOGOUT"
+            @click="logout"
             :disable="display_name.length === 0"
           />
           <!-- Back Button -->
@@ -289,7 +294,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions("account", ["accountExists", "getUserProfile"]),
+    ...mapActions("account", ["accountExists", "getUserProfile", "logout"]),
     upload(file, p) {
       var fd = new FormData();
       fd.append("image", file); // Append the file
@@ -624,9 +629,9 @@ export default {
   align-self: center;
 }
 
-.saveBtn {
-  border-radius: 6rem;
-  margin-top: 1rem;
+.settingBtn {
+  background: #2e1f4f;
+  padding: 0.5rem;
 }
 
 .profile {

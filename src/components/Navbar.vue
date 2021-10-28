@@ -15,10 +15,10 @@
         <li>
           <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
         </li>
-        <li v-if="isAuthenticated">
+        <!-- <li v-if="isAuthenticated">
           <a @click="logout()"> <img :src="srcDir + 'logout.svg'" />Logout </a>
         </li>
-        <!-- <li>
+        <li>
             <a @click="$router.replace('/resources')" class=" wallet">
               Resources
             </a>
@@ -47,9 +47,14 @@
           <a @click="switchTab('nft')">
             <img :src="srcNft" />
           </a>
-        </li> -->
+        </li> 
         <li v-if="isAuthenticated">
           <a @click="logout()"> <img :src="srcDir + 'logout.svg'"/></a>
+        </li> -->
+        <li>
+          <a @click="switchTab('settings')">
+            <img :src="srcSettings" />
+          </a>
         </li>
       </ul>
     </nav>
@@ -86,10 +91,14 @@ export default {
     srcNft() {
       if (this.selectedTab === "nft") return this.srcDir + "nft_selected.svg";
       else return this.srcDir + "nft.svg";
+    },
+    srcSettings() {
+      if (this.selectedTab === "settings")
+        return this.srcDir + "settings_selected.svg";
+      else return this.srcDir + "settings.svg";
     }
   },
   methods: {
-    ...mapActions("account", ["logout"]),
     switchTab(val) {
       this.selectedTab = val;
       switch (val) {
@@ -106,6 +115,9 @@ export default {
         case "nft":
           this.$emit("update:balanceTab", "Collectables");
           this.$router.replace("/balance");
+          break;
+        case "settings":
+          this.$router.push("/settings");
           break;
         default:
           break;
