@@ -20,6 +20,7 @@
       </video>
     </div>
     <div class="videoOverlay" />
+    <div class="videoOverlay shadedOverlay" />
 
     <nav-bar :balanceTab.sync="balanceTab" />
     <q-page-container class="pageContainer">
@@ -208,5 +209,9 @@ export default {
   position: fixed;
   left: 0;
   z-index: -1;
+}
+
+.shadedOverlay {
+  background: #442ab652;
 }
 </style>

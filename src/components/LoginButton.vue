@@ -52,7 +52,7 @@
 
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
-      <div class="column showLoginPopup q-pa-lg">
+      <div class="column showLoginPopup q-pa-lg popupCard">
         <div class="text-subtitle1">Connect Wallet</div>
         <q-list class="" dark separator>
           <q-item
@@ -399,9 +399,7 @@ export default {
             type: "primary",
             message: `Resources bought`
           });
-          this.$root.$emit(
-            "resources_bought"
-          );
+          this.$root.$emit("resources_bought");
         }
       } else {
         this.$q.notify({
@@ -468,7 +466,6 @@ export default {
 .login-btn {
   max-width: 500px;
   height: 40px;
-  round: 5px;
   border-radius: 10px;
 }
 .account-name {
@@ -494,7 +491,6 @@ export default {
   width: 30rem;
   height: auto;
   margin-bottom: 5rem;
-  background: rgba($blackDark, 0.8);
 }
 
 .showLoginPopupStyle {

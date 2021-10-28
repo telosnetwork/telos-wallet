@@ -129,7 +129,8 @@ body {
 }
 
 .popupCard {
-  background-color: $blackDark;
+  @extend .main-background-overlay;
+  background-color: rgba($blackDark, 0.9);
   max-width: 600px !important;
   padding: 20px;
 }
