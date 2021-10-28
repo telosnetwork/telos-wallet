@@ -63,14 +63,8 @@
               label="Send"
               @click="showSendDlg = true"
             />
-            <div class="qrCodeBtn">
-              <q-btn
-                stretch
-                flat
-                icon="qr_code_scanner"
-                style="width: 40px; color: #FFFFFF; "
-                @click="showQRScannerDlg = true"
-              />
+            <div @click="showQRScannerDlg = true" class="qrBtn">
+              <img src="~assets/icons/qr_scan.svg" />
             </div>
             <q-btn
               class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"

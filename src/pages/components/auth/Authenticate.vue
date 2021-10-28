@@ -537,7 +537,7 @@ export default {
         );
         this.getUserProfile();
         this.setLoadingWallet();
-        this.$router.push("/balance")
+        this.$router.push("/balance");
         // await this.createEvmApi();
       } else {
         this.$q.notify({
@@ -813,7 +813,7 @@ export default {
 .item-min-height {
   min-height: 24px;
 }
-.q-item{
+.q-item {
   color: black;
 }
 </style>

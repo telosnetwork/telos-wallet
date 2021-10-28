@@ -35,7 +35,9 @@
               <q-avatar size="6rem">
                 <img :src="selectedCoin.icon" />
                 <div
-                  v-if="networkType == 'tevm' && selectedCoin.name == 'Telos EVM'"
+                  v-if="
+                    networkType == 'tevm' && selectedCoin.name == 'Telos EVM'
+                  "
                   class="flex absolute full-width full-height"
                 >
                   <img
@@ -130,14 +132,9 @@
                   />
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn
-                    round
-                    flat
-                    size="12px"
-                    class="text-white q-mr-none"
-                    icon="qr_code_scanner"
-                    @click="showQRScanner()"
-                  />
+                  <div @click="showQRScanner()" class="qrBtn">
+                    <img src="~assets/icons/qr_scan.svg" />
+                  </div>
                 </q-item-section>
               </q-item>
               <q-item
