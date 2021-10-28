@@ -1520,10 +1520,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@telosnetwork/telosevm-js@0.1.1-14":
-  version "0.1.1-14"
-  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.1.1-14.tgz#9ac289237d0493b6a43e01120f0ccbd67ddd5eb1"
-  integrity sha512-X50XeF0vwLEBJ1TJZJvYNzJ9Y5kc7slWO2T5lnEw1CwLacmmHYTuTN2aAYqIsvQQmYVbwk/Gr7Ig0Ek8m7/S7w==
+"@telosnetwork/telosevm-js@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.0.tgz#82199ca78be3dac1a25c4b893027d44400fe4ffa"
+  integrity sha512-w7hoLX3ajaOepHODx3DAnfJCwtELy5Rg7RlOsz2jXzZ+k8aIbOP9wBihmEEOktu6q4yzKCYvhe4GKf/O+ZlwUA==
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
@@ -1531,7 +1531,7 @@
     axios "^0.21.1"
     bn.js "^5.1.1"
     buffer "^6.0.3"
-    eosjs "^21.0.3"
+    eosjs "^22.1.0"
     ethereumjs-abi "^0.6.8"
     ethereumjs-util "^6.2.0"
     node-fetch "^2.6.0"
@@ -2555,9 +2555,9 @@ bfj@^6.1.1:
     tryer "^1.0.1"
 
 big-integer@^1.6.48:
-  version "1.6.49"
-  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.49.tgz#f6817d3ea5d4f3fb19e24df9f4b1b4471a8328ce"
-  integrity sha512-KJ7VhqH+f/BOt9a3yMwJNmcZjG53ijWMTjSAGMveQWyLwqIiwkjNP5PFgDob3Snnx86SjDj6I89fIbv0dkQeNw==
+  version "1.6.50"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.50.tgz#299a4be8bd441c73dcc492ed46b7169c34e92e70"
+  integrity sha512-+O2uoQWFRo8ysZNo/rjtri2jIwjr3XfeAgRjAUADRqGG+ZITvyn8J1kvXLTaKVr3hhGXk+f23tKfdzmklVM9vQ==
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -4685,6 +4685,16 @@ eosjs@^21.0.3:
     elliptic "6.5.3"
     hash.js "1.1.7"
     pako "1.0.11"
+
+eosjs@^22.1.0:
+  version "22.1.0"
+  resolved "https://registry.yarnpkg.com/eosjs/-/eosjs-22.1.0.tgz#7ac40e2f1f959fab70539c30ac8ae46c9038aa3c"
+  integrity sha512-Ka8KO7akC3RxNdSg/3dkGWuUWUQESTzSUzQljBdVP16UG548vmQoBqSGnZdnjlZyfcab8VOu2iEt+JjyfYc5+A==
+  dependencies:
+    bn.js "5.2.0"
+    elliptic "6.5.4"
+    hash.js "1.1.7"
+    pako "2.0.3"
 
 errno@^0.1.3, errno@~0.1.7:
   version "0.1.7"

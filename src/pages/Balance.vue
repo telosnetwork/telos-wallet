@@ -1,108 +1,181 @@
 <template>
-  <div class="full-height main-div">
-    <div class="flex-center fit-div" :style="`background: ${themeColor}`">
-      <div class="text-center full-width" style="display: grid;">
-        <login-button v-if="isAuthenticated"/>
-        <label
-          class="text-white"
-          :style="`height: ${accountNameStyle.height}px; opacity: ${accountNameStyle.opacity}; margin-bottom: 5px;`"
+  <div class="row justify-center">
+    <div style="width: 90vh">
+      <div style="height: 100%; overflow:auto">
+        <div
+          class="text-center full-width"
+          style="display: grid; grid-gap: 1rem"
         >
-          {{accountName}}
-        </label>
+          <login-button v-if="isAuthenticated" style="display:none" />
 
-        <div class="full-width items-center balance-div">
-          <div class="full-width" ></div>
-          <div class="full-width" >
-            <label class="text-weight-medium text-white" :style="`font-size: ${balanceTextSize}px;`">
-              ${{getFixed(parseInt(displayAmount), 0)}}.{{displayAmount.toFixed(2).slice(-2)}}
+          <!-- Profile Image top left -->
+          <div>
+            <q-item class="userAvatar">
+              <q-avatar
+                class="profileImg  userAvatar"
+                @click="$router.push('/settings')"
+              >
+                <img src="~assets/default_avatar.svg" />
+              </q-avatar>
+            </q-item>
+
+            <!-- Account Name -->
+            <label
+              class="text-white"
+              :style="`opacity: ${accountNameStyle.opacity};`"
+            >
+              {{ accountName }}
             </label>
           </div>
-          <div class="full-width text-right">
+
+          <!-- EVM address -->
+          <div>
             <q-btn
-              round
-              flat
-              icon="qr_code_scanner"
-              size="10px"
-              class="text-white q-mr-md"
-              :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
-              @click="showQRScannerDlg = true"
+              v-if="!$root.tEVMAccount"
+              class="purpleGradient text-caption"
+              push
+              no-caps
+              style="width: 12rem;"
+              :label="'Generate EVM Address'"
+              @click="generateEVMAddress()"
             />
+            <label v-else class="text-white">
+              {{ $root.tEVMAccount.address }}
+            </label>
+          </div>
+
+          <!-- Account Amount -->
+          <div class="full-width items-center balance-div">
+            <div class="full-width"></div>
+            <div class="full-width">
+              <label
+                class="text-white "
+                :style="
+                  `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
+                "
+              >
+                $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
+                  displayAmount.toFixed(2).slice(-2)
+                }}
+              </label>
+            </div>
+            <div class="full-width text-right">
+              <q-btn
+                round
+                flat
+                icon="qr_code_scanner"
+                size="10px"
+                class="text-white q-mr-md"
+                :style="`background-color: #0002; opacity: ${qrcodeOpacity};`"
+                @click="showQRScannerDlg = true"
+              />
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex-center " :style="`display:flex`">
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              flat
+              rounded
+              no-caps
+              label="Send"
+              @click="showSendDlg = true"
+            />
+            <div class="qrCodeBtn">
+              <q-btn
+                stretch
+                flat
+                icon="qr_code_scanner"
+                style="width: 40px; color: #FFFFFF; "
+                @click="showQRScannerDlg = true"
+              />
+            </div>
+            <q-btn
+              class="balanceBtn purpleGradient text-subtitle2 q-mx-md flex-center"
+              flat
+              rounded
+              no-caps
+              label="Receive"
+              @click="showReceiveDlg = true"
+            />
+            <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
+            <!-- </q-toolbar> -->
+          </div>
+
+          <!-- Convert and Purchace -->
+          <div class="row justify-center q-mb-md">
+            <div class="convertBtn" @click="clickExchange()">
+              <img src="~assets/Convert.svg" class="q-mr-xs" />
+              Convert
+            </div>
+            <div class="purchaceBtn" @click="clickPurchase()">
+              Purchase
+              <img src="~assets/Purchase.svg" class="q-ml-xs" />
+            </div>
           </div>
         </div>
 
-        <div class="flex-center" :style="`display:flex; height: ${accountNameStyle.height * 2}px;`">
-          <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`">
-            <q-btn stretch flat no-caps label="Send" @click="showSendDlg = true"/>
-            <q-separator dark vertical class="main-toolbar-sperator"/>
-            <q-btn stretch flat no-caps label="Receive" @click="showReceiveDlg = true"/>
-            <q-separator dark vertical class="main-toolbar-sperator"/>
-            <q-btn stretch flat icon="qr_code_scanner" style="width: 40px;" @click="showQRScannerDlg = true"/>
-          </q-toolbar>
-        </div>
-      </div>
-    </div>
-
-    <div :style="`height: ${coinViewHeight}px; text-align: -webkit-center;`">
-      <div class="bar" :style="`background: ${themeColor}`"/>
-      <q-layout
-        view="hhh Lpr fFf"
-        container
-        class="shadow-4 coinview"
-        :style="`margin-left: ${coinViewMargin}px; margin-right: ${coinViewMargin}px; width: auto; max-width: 800px;`"
-      >
-        <q-header class="coin-header flex-center q-px-md transparent">
-          <q-tabs
-            v-model="tab"
-            dense
-            align="center"
-            narrow-indicator
-            active-color="deep-purple-10"
-            class="bg-white text-grey shadow-2 full-height no-shadow"
-            style="min-width: 250px;"
+        <q-tabs
+          :value="balanceTab"
+          @input="switchTab($event)"
+          wide-indicator
+          active-color="white"
+          class=" text-white shadow-2 no-shadow"
+          style="width: 100%; background: #00000000"
+        >
+          <q-tab
+            no-caps
+            v-for="tab in tabs"
+            :name="tab.title"
+            :label="tab.label"
+            :key="tab.title"
+            style="width: 50%; background: #00000000;"
+          />
+        </q-tabs>
+        <q-tab-panels
+          flat
+          :value="balanceTab"
+          @input="switchTab($event)"
+          class="coinviewGrid"
+        >
+          <q-tab-panel
+            flat
+            name="Coins"
+            class="no-padding"
+            :style="'background: #00000000; border:0px;'"
           >
-            <q-tab
-              no-caps
-              v-for="tab in tabs"
-              :name="tab.title"
-              :label="tab.label"
-              :key="tab.title"
+            <Coin
+              flat
+              :coins="coins"
+              :coinLoadedAll="coinLoadedAll"
+              :showHistoryDlg.sync="showHistoryDlg"
+              :showDepositEVMDlg.sync="showDepositEVMDlg"
+              :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
+              :showExchangeDlg.sync="showExchangeDlg"
+              :showBuyAmountDlg.sync="showBuyAmountDlg"
+              :selectedCoin.sync="selectedCoin"
+              :suggestTokens="suggestTokens"
             />
-          </q-tabs>
-        </q-header>
-
-        <q-page-container>
-          <q-page v-touch-pan.vertical.prevent.mouse="handlePan">
-            <q-tab-panels v-model="tab" animated>
-              <q-tab-panel name="Coins" class="no-padding">
-                <Coin
-                  :coins="coins"
-                  :coinLoadedAll="coinLoadedAll"
-                  :showHistoryDlg.sync="showHistoryDlg"
-                  :showDepositEVMDlg.sync="showDepositEVMDlg"
-                  :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-                  :showExchangeDlg.sync="showExchangeDlg"
-                  :showBuyAmountDlg.sync="showBuyAmountDlg"
-                  :selectedCoin.sync="selectedCoin"
-                  :suggestTokens="suggestTokens"
-                />
-              </q-tab-panel>
-              <q-tab-panel name="Collectables">
-                <Collectables
-                  :nftTokenTags="nftTokenTags"
-                  :nftTokenLoadedAll="nftTokenLoadedAll"
-                  :coinViewHeight="coinViewHeight"
-                  :loadNftTokenTags="loadNftTokenTags"
-                />
-              </q-tab-panel>
-            </q-tab-panels>
-          </q-page>
-        </q-page-container>
-      </q-layout>
-      <div class="q-pr-none text-white absolute full-width"
-        :style="`bottom: ${footerHeight}px;`"
-      >
+          </q-tab-panel>
+          <q-tab-panel name="Collectables" :style="'background:  #00000000'">
+            <Collectables
+              :nftTokenTags="nftTokenTags"
+              :nftTokenLoadedAll="nftTokenLoadedAll"
+              :coinViewHeight="coinViewHeight"
+              :loadNftTokenTags="loadNftTokenTags"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
       </div>
-      <div v-if="tEVMWithdrawing"
+      <div
+        class="q-pr-none text-white absolute full-width"
+        :style="`bottom: ${footerHeight}px;`"
+      ></div>
+      <div
+        v-if="tEVMWithdrawing"
         class="justify-center absolute flex full-width full-height"
         style="background: rgba(0, 0, 0, 0.4);"
       >
@@ -131,7 +204,9 @@
     <DepositEVM
       :showDepositEVMDlg.sync="showDepositEVMDlg"
       :nativeTLOSBalance.sync="coins[0].amount"
-      :haveEVMAccount.sync="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
+      :haveEVMAccount.sync="
+        this.$root.tEVMAccount && this.$root.tEVMAccount.address
+      "
     />
     <WithdrawEVM
       :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
@@ -157,46 +232,43 @@
       :showShareAddressDlg.sync="showShareAddressDlg"
       :selectedCoin="selectedCoin"
     />
-    <QRScanner
-      :showQRScannerDlg.sync="showQRScannerDlg"
-      :coins="coins"
-    />
+    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
   </div>
 </template>
 
 <script>
-import BigNumber from 'bignumber.js';
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import LoginButton from 'components/LoginButton.vue';
-import Coin from './components/balance/Coin';
-import Collectables from './components/balance/Collectables';
-import Send from './components/balance/Send';
-import SendAmount from './components/balance/SendAmount';
-import Receive from './components/balance/Receive';
-import BuyAmount from './components/balance/BuyAmount';
-import ShareAddress from './components/balance/ShareAddress';
-import QRScanner from './components/balance/QRScanner';
-import History from './components/balance/History';
-import Exchange from './components/balance/Exchange';
-import DepositEVM from './components/balance/DepositEVM';
-import WithdrawEVM from './components/balance/WithdrawEVM';
+import BigNumber from "bignumber.js";
+import { mapGetters, mapActions } from "vuex";
+import moment from "moment";
+import LoginButton from "components/LoginButton.vue";
+import Coin from "./components/balance/Coin";
+import Collectables from "./components/balance/Collectables";
+import Send from "./components/balance/Send";
+import SendAmount from "./components/balance/SendAmount";
+import Receive from "./components/balance/Receive";
+import BuyAmount from "./components/balance/BuyAmount";
+import ShareAddress from "./components/balance/ShareAddress";
+import QRScanner from "./components/balance/QRScanner";
+import History from "./components/balance/History";
+import Exchange from "./components/balance/Exchange";
+import DepositEVM from "./components/balance/DepositEVM";
+import WithdrawEVM from "./components/balance/WithdrawEVM";
 
 const tabsData = [
   {
-    title: 'Coins',
-    caption: 'Coins',
-    label: 'Coins',
+    title: "Coins",
+    caption: "Coins",
+    label: "Coins"
   },
   {
-    title: 'Collectables',
-    caption: 'Collectables',
-    label: 'Collectables',
-  },
+    title: "Collectables",
+    caption: "Collectables",
+    label: "Collectables"
+  }
 ];
 
 export default {
-  props: ['loadedCoins', 'loadedNftTokens'],
+  props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
   components: {
     LoginButton,
     Coin,
@@ -210,46 +282,42 @@ export default {
     History,
     Exchange,
     DepositEVM,
-    WithdrawEVM,
+    WithdrawEVM
   },
   data() {
     return {
-      coins: [{
-        account: 'eosio.token',
-        name: 'Telos',
-        symbol: 'TLOS',
-        amount: 0,
-        price: 0.0,
-        precision: 4,
-        suggested: true,
-      }, {
-        account: 'eosio.token',
-        name: 'Telos EVM',
-        symbol: 'TLOS',
-        amount: 0,
-        price: 0.0,
-        precision: 4,
-        suggested: true,
-        network: 'tevm',
-      }],
+      coins: [
+        {
+          account: "eosio.token",
+          name: "Telos",
+          symbol: "TLOS",
+          amount: 0,
+          price: 0.0,
+          precision: 4,
+          suggested: true
+        },
+        {
+          account: "eosio.token",
+          name: "Telos EVM",
+          symbol: "TLOS",
+          amount: 0,
+          price: 0.0,
+          precision: 4,
+          suggested: true,
+          network: "tevm"
+        }
+      ],
       nftTokenItems: {},
       nftTokenTags: [],
-      nftAccounts: [
-        'tlos.tbond',
-        'marble.code',
-      ],
-      nftScopes: [
-        0,
-        0,
-      ],
+      nftScopes: [0, 0],
       displayAmount: 0,
       nftTagLoading: false,
       coinLoadedAll: false,
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tab: tabsData[0].title,
       tabs: tabsData,
+      tab: "Coins",
       userTokens: {},
       interval: null,
       tokenInterval: null,
@@ -265,17 +333,28 @@ export default {
       showDepositEVMDlg: false,
       showWithdrawEVMDlg: false,
       tEVMBalance: 0,
-      tEVMWithdrawing: false,
+      tEVMWithdrawing: false
     };
   },
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
-    ...mapGetters('global', ['footerHeight', 'minSpace', 'maxSpace', 'supportTokens', 'suggestTokens', 'pTokenNetworks']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("global", [
+      "footerHeight",
+      "minSpace",
+      "maxSpace",
+      "supportTokens",
+      "suggestTokens",
+      "pTokenNetworks"
+    ]),
     totalAmount() {
-      return this.coins.map(coin => coin.amount * coin.price).reduce((a, b) => a + b, 0);
+      return this.coins
+        .map(coin => coin.amount * coin.price)
+        .reduce((a, b) => a + b, 0);
     },
     availableHeight() {
-      return window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0);
+      return (
+        window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0)
+      );
     },
     coinViewMargin() {
       return (this.availableHeight - this.coinViewHeight - this.minSpace) * 0.1;
@@ -286,20 +365,44 @@ export default {
     accountNameStyle() {
       return {
         opacity: Math.max(0, (this.balanceTextSize - 15) * 0.05),
-        height: Math.max(0, (this.balanceTextSize - 15) * 1),
+        height: Math.max(0, (this.balanceTextSize - 15) * 1)
       };
     },
     qrcodeOpacity() {
       return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[this.$ual.authenticators[0].selectedChainId].config.blockchain.name;
+      return this.$ual.authenticators[0].keycatMap[
+        this.$ual.authenticators[0].selectedChainId
+      ].config.blockchain.name;
     },
+    nftAccounts() {
+      if (this.chainName === "telos") {
+        return ["tlos.tbond", "marble.code"];
+      } else {
+        return ["marbletessst"];
+      }
+    }
   },
   methods: {
+    switchTab(val) {
+      console.log("asdf");
+      this.$emit("update:balanceTab", val);
+    },
+    clickPurchase() {
+      // this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
+      this.selectedCoin = this.coins.find(coin => coin.symbol === "TLOS");
+      // this.$emit('update:showBuyAmountDlg', true);
+      this.showBuyAmountDlg = true;
+    },
+    clickExchange() {
+      console.log("Pina Colladas!!!", "Clicked me!!!!!");
+      // this.$emit('update:showExchangeDlg', true); // not working anymore
+      this.showExchangeDlg = true;
+    },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
-      this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+      // this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
       if (info.isFirst) {
         this.panning = true;
       } else if (info.isFinal) {
@@ -307,24 +410,37 @@ export default {
       }
     },
     async getUserTokens() {
-      await fetch(`https://www.api.bloks.io/telos${this.chainName === 'telos' ? '' : '-test'}/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`)
+      await fetch(
+        `https://www.api.bloks.io/telos${
+          this.chainName === "telos" ? "" : "-test"
+        }/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`
+      )
         .then(resp => resp.json())
         .then(data => {
           this.userTokens = { data, status: 200 };
         });
     },
     async loadUserTokens() {
-      const userCoins = await this.$hyperion.get(`/v2/state/get_tokens?account=${this.accountName}`);
+      const userCoins = await this.$hyperion.get(
+        `/v2/state/get_tokens?account=${this.accountName}`
+      );
       if (userCoins.status === 200) {
-        const tokens = userCoins.data.tokens.filter((token) => {
-          if (userCoins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
-            return token.contract.toLowerCase() === 'eosio.token';
+        const tokens = userCoins.data.tokens.filter(token => {
+          if (
+            userCoins.data.tokens.filter(t => t.symbol === token.symbol)
+              .length > 1
+          ) {
+            return token.contract.toLowerCase() === "eosio.token";
           }
           return true;
         });
-        userCoins.data.tokens.forEach((token) => {
-          this.coins.forEach((coin) => {
-            if (!coin.network && coin.symbol.toLowerCase() === token.symbol.toLowerCase() && coin.account === token.contract) {
+        userCoins.data.tokens.forEach(token => {
+          this.coins.forEach(coin => {
+            if (
+              !coin.network &&
+              coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
+              coin.account === token.contract
+            ) {
               coin.amount = token.amount || 0;
               coin.precision = token.precision || 4;
             }
@@ -332,35 +448,39 @@ export default {
         });
       }
 
-      this.coins.forEach(async (coin) => {
-        if (coin.network === 'tevm') {
-          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
-          coin.amount = BigNumber(evmAccount.balance.toString()).div(1e18).toFixed(4);
+      this.coins.forEach(async coin => {
+        if (coin.network === "tevm") {
+          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+          coin.amount = BigNumber(evmAccount.balance.toString())
+            .div(1e18)
+            .toFixed(4);
         }
-      })
+      });
 
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
-          json.forEach((token) => {
-            if (token.chain !== 'telos') {
-              if (token.chain === 'eos' && token.key.includes('ptokens')) {
-                this.coins.forEach((coin) => {
+          json.forEach(token => {
+            if (token.chain !== "telos") {
+              if (token.chain === "eos" && token.key.includes("ptokens")) {
+                this.coins.forEach(coin => {
                   if (coin.symbol === token.symbol) {
                     coin.price = token.price.usd;
                   }
                 });
               }
-            } else if (token.metadata.name === 'Telos') {
-              this.coins.forEach((coin) => {
-                  if (coin.symbol === 'TLOS') {
-                    coin.price = token.price.usd;
-                  }
+            } else if (token.metadata.name === "Telos") {
+              this.coins.forEach(coin => {
+                if (coin.symbol === "TLOS") {
+                  coin.price = token.price.usd;
+                }
               });
               this.coins[0].price = token.price.usd;
-            } else if (token.symbol !== 'TLOS') {
-              if (!token.key.includes('ptokens')) {
-                this.coins.forEach((coin) => {
+            } else if (token.symbol !== "TLOS") {
+              if (!token.key.includes("ptokens")) {
+                this.coins.forEach(coin => {
                   if (coin.symbol === token.symbol) {
                     coin.price = token.price.usd;
                   }
@@ -370,8 +490,8 @@ export default {
           });
         });
 
-      const sortCoin = function (suggestTokens) {
-        return function (a, b) {
+      const sortCoin = function(suggestTokens) {
+        return function(a, b) {
           const aSymbol = a.symbol.toLowerCase();
           const bSymbol = b.symbol.toLowerCase();
 
@@ -383,13 +503,16 @@ export default {
             }
           }
 
-          if (aSymbol === 'tlos') {
+          if (aSymbol === "tlos") {
             return -1;
-          } else if (bSymbol === 'tlos') {
+          } else if (bSymbol === "tlos") {
             return 1;
           }
 
-          if (!suggestTokens.includes(aSymbol) || !suggestTokens.includes(bSymbol)) {
+          if (
+            !suggestTokens.includes(aSymbol) ||
+            !suggestTokens.includes(bSymbol)
+          ) {
             if (suggestTokens.includes(aSymbol)) {
               return -1;
             }
@@ -400,10 +523,10 @@ export default {
           let aAmount = a.amount * a.price + (a.amount > 0 ? 1 : 0);
           let bAmount = b.amount * b.price + (b.amount > 0 ? 1 : 0);
           return bAmount - aAmount;
-        }
-      }
+        };
+      };
       this.coins = this.coins.sort(sortCoin(this.suggestTokens));
-      this.$emit('update:loadedCoins', this.coins);
+      this.$emit("update:loadedCoins", this.coins);
     },
     async loadNftTokenItems() {
       for (const account of this.nftAccounts) {
@@ -425,7 +548,9 @@ export default {
         table_key: "",
         upper_bound: null
       });
-      this.nftTokenItems[nftAccount] = tagData.rows.filter(row => row.owner === this.accountName);
+      this.nftTokenItems[nftAccount] = tagData.rows.filter(
+        row => row.owner === this.accountName
+      );
     },
     async loadNftTokenTags() {
       for (const account of this.nftAccounts) {
@@ -439,11 +564,13 @@ export default {
         return;
       }
       this.nftTagLoading = true;
-      const index = this.nftAccounts.findIndex(account => account === nftAccount);
+      const index = this.nftAccounts.findIndex(
+        account => account === nftAccount
+      );
       let foundFirstData = false;
       let count = 10;
 
-      while(count > 0) {
+      while (count > 0) {
         if (this.nftScopes[index] >= this.nftTokenItems[nftAccount].length) {
           break;
         }
@@ -455,7 +582,9 @@ export default {
           limit: "100",
           lower_bound: null,
           reverse: false,
-          scope: `${this.nftTokenItems[nftAccount][this.nftScopes[index]].serial}`,
+          scope: `${
+            this.nftTokenItems[nftAccount][this.nftScopes[index]].serial
+          }`,
           show_payer: false,
           table: "tags",
           table_key: "",
@@ -467,21 +596,33 @@ export default {
           }
           this.nftScopes[index] += 1;
         } else {
-          if (nftAccount === 'tlos.tbond') {
-            const title = tagData.rows.find(row => row.tag_name === 'title').content;
-            const image = tagData.rows.find(row => row.tag_name === 'image').content;
+          if (nftAccount === "tlos.tbond") {
+            const title = tagData.rows.find(row => row.tag_name === "title")
+              .content;
+            const image = tagData.rows.find(row => row.tag_name === "image")
+              .content;
             this.nftTokenTags.push({
               title: title,
-              image: image,
+              image: image
             });
-          } else if (nftAccount === 'marble.code') {
-            const data = JSON.parse(tagData.rows.find(row => row.tag_name === 'data').content);
+          } else if (nftAccount === "marble.code") {
+            const data = JSON.parse(
+              tagData.rows.find(row => row.tag_name === "data").content
+            );
             this.nftTokenTags.push({
               title: data.ti,
-              image: data.dt,
+              image: data.dt
+            });
+          } else if (nftAccount === "marbletessst") {
+            const data = JSON.parse(
+              tagData.rows.find(row => row.tag_name === "data").content
+            );
+            this.nftTokenTags.push({
+              title: data.ti,
+              image: data.dt
             });
           }
-          this.$emit('update:loadedNftTokens', this.nftTokenTags);
+          this.$emit("update:loadedNftTokens", this.nftTokenTags);
           foundFirstData = true;
           this.nftScopes[index] += 1;
           count -= 1;
@@ -492,74 +633,138 @@ export default {
     getCurrenttEVMBalance() {
       if (this.$root.tEVMAccount) {
         const balanceStr = this.$root.tEVMAccount.balance.toString();
-        return parseFloat(BigNumber(balanceStr).div(1e18).toFixed(4)) || 0;
+        return (
+          parseFloat(
+            BigNumber(balanceStr)
+              .div(1e18)
+              .toFixed(4)
+          ) || 0
+        );
       }
       return 0;
     },
     async withdrawEVM() {
       // this.tEVMWithdrawing = true;
-      const quantityStr = `${this.getFixed(this.getCurrenttEVMBalance(), 4).replace(',', '')} ${'TLOS'}`;
+      const quantityStr = `${this.getFixed(
+        this.getCurrenttEVMBalance(),
+        4
+      ).replace(",", "")} ${"TLOS"}`;
       let actions = [];
       actions.push({
         account: process.env.EVM_CONTRACT,
-        name: 'withdraw',
+        name: "withdraw",
         data: {
           to: this.accountName.toLowerCase(),
-          quantity: quantityStr,
+          quantity: quantityStr
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(actions, `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`);
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`
+      );
 
       if (transaction) {
-        if (transaction === 'needAuth') {
+        if (transaction === "needAuth") {
           this.$q.notify({
-            type: 'negative',
-            message: `Authentication is required`,
+            type: "negative",
+            message: `Authentication is required`
           });
-        } else if (transaction === 'error') {
+        } else if (transaction === "error") {
           this.$q.notify({
-            type: 'negative',
-            message: `Withdraw failed. Make sure authentication is done correctly.`,
+            type: "negative",
+            message: `Withdraw failed. Make sure authentication is done correctly.`
           });
-        } else if (transaction !== 'cancelled') {
+        } else if (transaction !== "cancelled") {
           this.$q.notify({
-            type: 'primary',
-            message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+            type: "primary",
+            message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`
           });
           this.oldtEVMBalance = this.getCurrenttEVMBalance();
         }
       } else {
         this.$q.notify({
-          type: 'negative',
-          message: `Failed to withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+          type: "negative",
+          message: `Failed to withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`
         });
       }
       this.tEVMWithdrawing = false;
+    },
+    async generateEVMAddress() {
+      let actions = [];
+      actions.push({
+        account: process.env.EVM_CONTRACT,
+        name: "create",
+        data: {
+          account: this.accountName,
+          data: "test"
+        }
+      });
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Create a new EVM address`
+      );
+      if (transaction) {
+        if (transaction === "needAuth") {
+          this.$q.notify({
+            type: "negative",
+            message: `Authentication is required`
+          });
+        } else if (transaction === "error") {
+          this.$q.notify({
+            type: "negative",
+            message: `Creation failed. Make sure authentication is done correctly.`
+          });
+        } else if (transaction !== "cancelled") {
+          this.$q.notify({
+            type: "primary",
+            message: `A new address is successfully created`
+          });
+          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+          this.networkType = "tevm";
+        }
+      } else {
+        this.$q.notify({
+          type: "negative",
+          message: `Failed to create an address`
+        });
+      }
     }
   },
   created: async function() {
     this.interval = setInterval(() => {
       if (!this.panning) {
-        if (this.coinViewHeight < this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
-          && this.coinViewHeight > this.availableHeight - this.maxSpace) {
-          this.coinViewHeight = this.coinViewHeight - 3;
-        } else if (this.coinViewHeight >= this.availableHeight - (this.minSpace + this.maxSpace) * 0.5
-          && this.coinViewHeight < this.availableHeight - this.minSpace){
-          this.coinViewHeight = this.coinViewHeight + 3;
+        if (
+          this.coinViewHeight <
+            this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
+          this.coinViewHeight > this.availableHeight - this.maxSpace
+        ) {
+          // this.coinViewHeight = this.coinViewHeight - 3;
+        } else if (
+          this.coinViewHeight >=
+            this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
+          this.coinViewHeight < this.availableHeight - this.minSpace
+        ) {
+          // this.coinViewHeight = this.coinViewHeight + 3;
         }
-        const approxViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
+        const approxViewHeight = Math.min(
+          this.availableHeight - this.minSpace,
+          Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight)
+        );
         if (this.coinViewHeight != approxViewHeight) {
-          this.coinViewHeight = approxViewHeight;
+          // this.coinViewHeight = approxViewHeight;
         }
       }
-      this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
+      this.displayAmount =
+        this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
       if (window.time && Date.now() / 1000 - window.time > 10 * 60) {
         location.reload();
       }
     }, 10);
 
-    if (this.chainName === 'telos') {
+    if (this.chainName === "telos" || 1) {
       await this.loadNftTokenItems();
       this.loadNftTokenTags();
     }
@@ -572,17 +777,19 @@ export default {
       await fetch(`https://www.api.bloks.io/telos/tokens`)
         .then(response => response.json())
         .then(json => {
-          json.forEach((token) => {
-            if (token.chain !== 'telos') {
-            } else if (token.metadata.name === 'Telos') {
-              this.coins.forEach((coin) => {
-                if (coin.symbol === 'TLOS') {
+          json.forEach(token => {
+            if (token.chain !== "telos") {
+            } else if (token.metadata.name === "Telos") {
+              this.coins.forEach(coin => {
+                if (coin.symbol === "TLOS") {
                   coin.price = token.price.usd;
-                  coin.icon = token.metadata.logo;
+                  coin.icon = "/coins/TLOS.png";
                 }
-              })
-            } else if (token.symbol !== 'TLOS') {
-              const precisionSplit = token.supply.circulating.toString().split('.');
+              });
+            } else if (token.symbol !== "TLOS") {
+              const precisionSplit = token.supply.circulating
+                .toString()
+                .split(".");
               this.coins.push({
                 account: token.account.toLowerCase(),
                 name: token.metadata.name,
@@ -590,59 +797,76 @@ export default {
                 amount: 0,
                 price: 0,
                 icon: token.metadata.logo,
-                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+                precision:
+                  precisionSplit.length > 1 ? precisionSplit[1].length : 0
               });
               const tSymbol = token.symbol.toLowerCase();
-              if (this.pTokenNetworks[tSymbol] && this.pTokenNetworks[tSymbol].tevm) {
+              if (
+                this.pTokenNetworks[tSymbol] &&
+                this.pTokenNetworks[tSymbol].tevm
+              ) {
                 this.coins.push({
-                account: token.account.toLowerCase(),
-                name: token.metadata.name,
-                symbol: token.symbol,
-                amount: 0,
-                price: 0,
-                icon: token.metadata.logo,
-                precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0,
-                network: 'tevm'
-              });
+                  account: token.account.toLowerCase(),
+                  name: token.metadata.name,
+                  symbol: token.symbol,
+                  amount: 0,
+                  price: 0,
+                  icon: token.metadata.logo,
+                  precision:
+                    precisionSplit.length > 1 ? precisionSplit[1].length : 0,
+                  network: "tevm"
+                });
               }
             }
           });
         });
-      this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated)
+        this.getUserTokens().then(this.loadUserTokens());
     }
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      this.getUserTokens().then(this.loadUserTokens());
+      if (this.isAuthenticated)
+        this.getUserTokens().then(this.loadUserTokens());
       try {
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(this.accountName);
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          this.accountName
+        );
         this.tEVMBalance = this.getCurrenttEVMBalance();
-      } catch {
+      } catch {}
+      window.time = Date.now() / 1000;
+      if (!window.location.href.includes("localhost")) {
+        console.clear();
+        console.log("Don't try to use Inspector!");
       }
       window.time = Date.now() / 1000;
-      if (!window.location.href.includes('localhost')) {
+      if (!window.location.href.includes("localhost")) {
         console.clear();
         console.log("Don't try to use Inspector!");
       }
     }, 5000);
   },
   beforeMount() {
-    this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
+    this.coinViewHeight =
+      window.innerHeight - this.footerHeight - this.maxSpace;
   },
   mounted() {
-    this.$root.$on('successfully_sent', (sendAmount, toAddress) => {
+    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
     });
-    this.$root.$on('qrcode_scanned', ({ accountName, coinName, networkType }) => {
-      if (!this.selectedCoin) {
-        this.$root.qrcode_accountName = accountName;
-        this.$root.qrcode_networkType = networkType;
-        this.selectedCoin = this.coins.find(coin => coin.name === coinName);
-        this.showSendAmountDlg = true;
+    this.$root.$on(
+      "qrcode_scanned",
+      ({ accountName, coinName, networkType }) => {
+        if (!this.selectedCoin) {
+          this.$root.qrcode_accountName = accountName;
+          this.$root.qrcode_networkType = networkType;
+          this.selectedCoin = this.coins.find(coin => coin.name === coinName);
+          this.showSendAmountDlg = true;
+        }
       }
-    });
-    this.$root.$on('show_qrscanner', () => {
+    );
+    this.$root.$on("show_qrscanner", () => {
       this.showQRScannerDlg = true;
     });
   },
@@ -653,48 +877,68 @@ export default {
     if (this.tokenInterval) {
       clearInterval(this.tokenInterval);
     }
-  },
+  }
 };
 </script>
 
-<style scoped>
-.main-div {
-  display: flex;
-  flex-flow: column;
-}
-.fit-div {
-  flex-grow: 1;
-  display: flex;
-}
+<style lang="scss" scoped>
 .balance-div {
+  background-color: #00000000;
   display: inline-flex;
   justify-content: space-between;
 }
-.main-toolbar {
-  background-color: #0002;
-  border-radius: 15px;
-  width: 250px;
-  height: 35px;
-  min-block-size: auto;
+.coinviewGrid {
+  background-color: #00000000;
 }
-.main-toolbar-sperator {
-  width: 2px;
-  height: 20px;
-  margin: auto;
+
+.balanceBtn {
+  margin-right: 0.5vw;
+  margin-left: 0.5vw;
+  width: 8rem;
+  height: 3rem;
 }
-.bar {
-  width: 100%;
-  height: 50px;
-  position: absolute;
+
+.convertBtn,
+.purchaceBtn {
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  img {
+    border-radius: 20px;
+  }
+  &:hover {
+    text-shadow: 0 0 5px $white;
+    img {
+      box-shadow: 0 0 5px $white;
+    }
+  }
 }
-.coinview {
-  background-color: white;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
+.convertBtn {
+  margin-right: 3rem;
 }
-.coin-header {
-  height: 40px;
+
+.profileImg {
+  text-align: center;
+  height: 3rem;
+  width: 3rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  background: no-repeat;
+}
+
+@media only screen and (min-width: 1000px) {
+  .profileImg {
+    /* background-image: url("~assets/camera.svg"); */
+    height: 4rem;
+    width: 4rem;
+    border-radius: 1rem;
+    margin-top: 1rem;
+    left: 70%;
+    cursor: pointer;
+    background: no-repeat;
+  }
 }
 </style>

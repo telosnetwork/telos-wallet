@@ -1,6 +1,6 @@
 import { vxm } from "../../store";
 
-export const login = async function (
+export const login = async function(
   { commit, dispatch },
   { idx, account, returnUrl }
 ) {
@@ -27,6 +27,9 @@ export const login = async function (
       localStorage.setItem("autoLogin", authenticator.constructor.name);
       localStorage.setItem("account", accountName);
       localStorage.setItem("returning", true);
+      if (this.$router.currentRoute.path === "/") {
+        await this.$router.push({ path: "/balance" });
+      }
       dispatch("getAccountProfile");
       vxm.tlosWallet.wallet = {
         auth: {
@@ -48,7 +51,7 @@ export const login = async function (
   }
 };
 
-export const autoLogin = async function ({ dispatch, commit }, returnUrl) {
+export const autoLogin = async function({ dispatch, commit }, returnUrl) {
   const { authenticator, idx } = getAuthenticator(this.$ual);
   if (authenticator) {
     commit("setAutoLogin", true);
@@ -62,7 +65,7 @@ export const autoLogin = async function ({ dispatch, commit }, returnUrl) {
   }
 };
 
-const getAuthenticator = function (ual, wallet = null) {
+const getAuthenticator = function(ual, wallet = null) {
   wallet = wallet || localStorage.getItem("autoLogin");
   const idx = ual.authenticators.findIndex(
     auth => auth.constructor.name === wallet
@@ -73,7 +76,7 @@ const getAuthenticator = function (ual, wallet = null) {
   };
 };
 
-export const logout = async function ({ commit }) {
+export const logout = async function({ commit }) {
   const { authenticator } = getAuthenticator(this.$ual);
   try {
     authenticator && (await authenticator.logout());
@@ -90,7 +93,7 @@ export const logout = async function ({ commit }) {
   }
 };
 
-export const getUserProfile = async function ({ commit }, accountName) {
+export const getUserProfile = async function({ commit }, accountName) {
   try {
     const profileResult = await this.$api.getTableRows({
       code: "profiles",
@@ -109,7 +112,7 @@ export const getUserProfile = async function ({ commit }, accountName) {
   }
 };
 
-export const getAccountProfile = async function ({ commit, dispatch }) {
+export const getAccountProfile = async function({ commit, dispatch }) {
   if (!this.state.account.accountName) {
     return;
   }
@@ -117,7 +120,7 @@ export const getAccountProfile = async function ({ commit, dispatch }) {
   dispatch("getUserProfile", this.state.account.accountName);
 };
 
-export const accountExists = async function ({ commit, dispatch }, accountName) {
+export const accountExists = async function({ commit, dispatch }, accountName) {
   try {
     const account = await this.$api.getAccount(accountName);
     return !!account;

@@ -1,5 +1,6 @@
 <template>
-  <q-page class="main-div text-center items-center full-height">
+  <q-page class="column justify-center items-center content-center">
+    <!--
     <q-carousel
       v-model="slide"
       transition-prev="slide-right"
@@ -8,22 +9,19 @@
       animated
       control-color="primary"
       :navigation="false"
-      class="full-width fit-div"
+      class="full-width fit-div row justify-center"
     >
       <q-carousel-slide name="slide1" class="column flex-center">
-        <div class="full-width justify-center q-pa-md">
-          <q-img
-            class="full-width home-image"
-            alt="Telos Wallet logo"
-            src="~assets/telos-wallet-logo-full.png"
-          />
+        <div class="text-center q-pb-lg text-h1">
+          Telos Wallet
         </div>
-        <label class="description font-size-3-5vw">
-           Send, Buy, Collect. It's Crypto Made Easy
-        </label>
+        <div class="text-h5">
+          Send, Buy, Collect.<br />
+          It's Crypto Made Easy
+        </div>
       </q-carousel-slide>
 
-      <!--<q-carousel-slide name="slide2" class="column flex-center">
+      <q-carousel-slide name="slide2" class="column flex-center">
         <div class="full-width justify-center q-pa-md">
           <q-img
             class="full-width home-image"
@@ -72,30 +70,36 @@
         <label class="description font-size-3-0vw">
           Pay anyone in the world with just their Telos Wallet username
         </label>
-      </q-carousel-slide>-->
-    </q-carousel>
-    
-    <div v-if="!isAuthenticated" class="full-width" style="height: 180px;">
+      </q-carousel-slide>
+    </q-carousel>-->
+
+    <div class="text-center q-pb-md text-h1">
+      Telos Wallet
+    </div>
+    <div class="text-h5 text-center q-pb-lg">
+      It's Crypto Made Easy
+    </div>
+    <div v-if="!isAuthenticated" class="text-center">
       <login-button />
     </div>
   </q-page>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import LoginButton from 'components/LoginButton.vue';
+import { mapGetters } from "vuex";
+import LoginButton from "components/LoginButton.vue";
 
 export default {
-  name: 'Home',
+  name: "Home",
   data() {
     return {
-      slide: 'slide1'
+      slide: "slide1"
     };
   },
   components: { LoginButton },
   computed: {
-    ...mapGetters('account', ['isAuthenticated'])
-  },
+    ...mapGetters("account", ["isAuthenticated"])
+  }
 };
 </script>
 
@@ -114,7 +118,7 @@ export default {
   font-size: min(3.5vw, 40px);
 }
 .font-size-3-0vw {
-  font-size: min(3.0vw, 30px);
+  font-size: min(3vw, 30px);
 }
 .home-image {
   max-width: 700px;

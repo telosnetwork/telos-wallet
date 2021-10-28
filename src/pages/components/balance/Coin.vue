@@ -1,58 +1,28 @@
 <template>
-  <div>
-    <q-infinite-scroll>
-      <q-item-label header class="text-left text-grey-5">ACTIONS</q-item-label>
+  <div style="margin: auto">
+    <q-infinite-scroll
+      style="display: grid; grid-template-rows: auto auto; margin: auto"
+    >
       <q-item
-        clickable
-        v-ripple
-        class="list-item"
-        @click="clickPurchase()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <img src="~assets/telos-buy.png">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Purchase crypto</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">Purchase TLOS</label>
-          </div>
-        </q-item-section>
-      </q-item>
-      <q-item
-        clickable
-        v-ripple
-        class="list-item"
-        @click="clickExchange()"
-      >
-        <q-item-section avatar>
-          <q-avatar size="45px" class="q-my-sm">
-            <img src="~assets/telos-swap.png">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">Convert</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">From one crypto to another</label>
-          </div>
-        </q-item-section>
-      </q-item>
-      <q-item-label header class="text-left text-grey-5">BALANCE</q-item-label>
-      <q-item v-for="(coin, index) in availableCoins"
+        flat
+        v-for="(coin, index) in availableCoins"
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
         class="list-item"
         @click="selectCoin(coin)"
       >
-        <q-item-section avatar>
+        <q-item-section flat avatar>
           <q-avatar size="45px" class="q-my-sm">
-            <img v-if="coin.network === 'tevm' || coin.name === 'Telos'" src="~assets/TLOS.png">
-            <img v-else :src="coin.icon" >
-            <div v-if="coin.network == 'tevm'" class="flex absolute full-width full-height">
+            <img
+              v-if="coin.network === 'tevm' || coin.name === 'Telos'"
+              src="~assets/TLOS.png"
+            />
+            <img v-else :src="coin.icon" />
+            <div
+              v-if="coin.network == 'tevm'"
+              class="flex absolute full-width full-height"
+            >
               <img
                 class="flex q-ml-auto q-mt-auto"
                 alt="tEVM"
@@ -63,23 +33,61 @@
           </q-avatar>
         </q-item-section>
 
-        <q-item-section class="col" style="justify-content: start; display: grid;">
-          <div class="text-black text-left display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20 self-end wraplabel">{{coin.name}}</label>
-            <label class="text-subtitle2 text-grey-5 wraplabel">{{coin.symbol}}</label>
-          </div>
-        </q-item-section>
-        <q-item-section class="col-6" style="justify-content: start; display: grid;">
-          <div class="q-py-lg text-black text-left display-grid">
-            <q-btn color="primary" style="width: 12rem" v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'" @click.stop="withdrawEvm">Withdraw from EVM</q-btn>
-            <q-btn color="primary" style="width: 12rem" v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'" @click.stop="depositEvm">Deposit to EVM</q-btn>
+        <q-item-section
+          :class="
+            coin.network === 'tevm' || coin.name === 'Telos' ? 'col-2' : ''
+          "
+          style="justify-content: start; display: grid;"
+        >
+          <div class="text-white text-left display-grid">
+            <label
+              class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
+              >{{ coin.name }}</label
+            >
+            <label class="text-subtitle2 text-grey-5 wraplabel">{{
+              coin.symbol
+            }}</label>
           </div>
         </q-item-section>
 
-        <q-item-section class="col" side>
-          <div class="text-black text-right display-grid">
-            <label class="text-subtitle1 text-weight-medium text-blue-grey-10 h-20">{{`${getFixed(coin.amount, coin.precision)} ${coin.symbol}`}}</label>
-            <label class="text-caption text-grey-6">${{getFixed(coin.amount * coin.price, 2)}}</label>
+        <q-item-section
+          class="col "
+          v-if="coin.network === 'tevm' || coin.name === 'Telos'"
+        >
+          <div>
+            <q-btn
+              class="purpleGradient "
+              flat
+              rounded
+              no-caps
+              @click.stop="withdrawEvm"
+              v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
+            >
+              <div class="q-pr-sm">EVM</div>
+              <img src="~assets/icons/networkArrows.svg" />
+            </q-btn>
+            <q-btn
+              class="purpleGradient"
+              flat
+              rounded
+              no-caps
+              @click.stop="depositEvm"
+              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+            >
+              <img src="~assets/icons/networkArrows.svg" />
+              <div class="q-pl-sm">EVM</div>
+            </q-btn>
+          </div>
+        </q-item-section>
+
+        <q-item-section side>
+          <div class="text-white text-right display-grid">
+            <label class="text-subtitle1 text-weight-small text-white h-20">{{
+              `${getFixed(coin.amount, 8)} ${coin.symbol}`
+            }}</label>
+            <label class="text-caption text-grey-6"
+              >${{ getFixed(coin.amount * coin.price, 2) }}</label
+            >
           </div>
         </q-item-section>
       </q-item>
@@ -93,32 +101,49 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from "vuex";
 
 export default {
-  props: ['coins', 'coinLoadedAll', 'showHistoryDlg', 'showExchangeDlg', 'showBuyAmountDlg', 'showDepositEVMDlg', 'showWithdrawEVMDlg', 'selectedCoin', 'suggestTokens'],
+  props: [
+    "coins",
+    "coinLoadedAll",
+    "showHistoryDlg",
+    "showExchangeDlg",
+    "showBuyAmountDlg",
+    "showDepositEVMDlg",
+    "showWithdrawEVMDlg",
+    "selectedCoin",
+    "suggestTokens"
+  ],
   computed: {
     availableCoins() {
-      return this.coins.filter(coin => coin.amount > 0 || this.suggestTokens.includes(coin.symbol.toLowerCase()));
-    },
+      return this.coins.filter(
+        coin =>
+          coin.amount > 0 ||
+          this.suggestTokens.includes(coin.symbol.toLowerCase())
+      );
+    }
   },
   methods: {
     clickPurchase() {
-      this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
-      this.$emit('update:showBuyAmountDlg', true);
+      this.$emit(
+        "update:selectedCoin",
+        this.coins.find(coin => coin.symbol === "TLOS")
+      );
+      this.$emit("update:showBuyAmountDlg", true);
     },
     clickExchange() {
-      this.$emit('update:showExchangeDlg', true);
+      this.$emit("update:showExchangeDlg", true);
     },
     selectCoin(coin) {
-      this.$emit('update:selectedCoin', coin);
-      this.$emit('update:showHistoryDlg', true);
+      this.$emit("update:selectedCoin", coin);
+      this.$emit("update:showHistoryDlg", true);
     },
     depositEvm() {
-      this.$emit('update:showDepositEVMDlg', true);
+      this.$emit("update:showDepositEVMDlg", true);
     },
     withdrawEvm() {
-      this.$emit('update:showWithdrawEVMDlg', true);
+      this.$emit("update:showWithdrawEVMDlg", true);
     }
   }
 };
@@ -126,7 +151,7 @@ export default {
 
 <style scoped>
 .list-item {
-  border: 1px solid #fafafa;
+  border: 1px solid #fafafa00;
   border-left: none;
   border-right: none;
 }
@@ -140,5 +165,26 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+div.scroll {
+  overflow: auto;
+}
+
+div.scroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 0px rgba(184, 18, 18, 0.3);
+  border-radius: 1px;
+  background-color: #00000000;
+}
+
+div.scroll:-webkit-scrollbar {
+  width: 1px;
+  background-color: #7802ff;
+}
+
+div.scroll::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0.3);
+  background-color: rgb(223, 0, 0);
 }
 </style>

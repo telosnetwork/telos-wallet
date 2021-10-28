@@ -88,56 +88,56 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import LoginButton from 'components/LoginButton.vue';
+import { mapGetters, mapActions } from "vuex";
+import moment from "moment";
+import LoginButton from "components/LoginButton.vue";
 
 const historyColumns = [
   {
-    name: 'block',
+    name: "block",
     required: true,
-    label: 'Block',
-    align: 'left',
+    label: "Block",
+    align: "left",
     field: row => row.block_num,
     sortable: true
   },
   {
-    name: 'timestamp',
+    name: "timestamp",
     required: true,
-    label: 'Timestamp',
-    align: 'left',
+    label: "Timestamp",
+    align: "left",
     field: row =>
-      moment.utc(row.timestamp).format('dddd, MMMM Do YYYY, h:mm:ss a'),
+      moment.utc(row.timestamp).format("dddd, MMMM Do YYYY, h:mm:ss a"),
     sortable: true
   },
   {
-    name: 'contract',
+    name: "contract",
     required: true,
-    label: 'Contract',
-    align: 'left',
+    label: "Contract",
+    align: "left",
     field: row => row.act.account,
     sortable: true
   },
   {
-    name: 'action',
+    name: "action",
     required: true,
-    label: 'Action',
-    align: 'left',
+    label: "Action",
+    align: "left",
     field: row => row.act.name,
     sortable: true
   },
   {
-    name: 'data',
+    name: "data",
     required: true,
-    label: 'Data',
-    align: 'left',
+    label: "Data",
+    align: "left",
     field: row => row.act.data,
     format: val => {
       let lines = [];
       for (let key in val) {
         lines.push(`<b>${key}</b>: ${val[key]}`);
       }
-      return lines.join('\n');
+      return lines.join("\n");
     },
     sortable: false
   }
@@ -158,21 +158,25 @@ export default {
   },
   components: { LoginButton },
   computed: {
-    ...mapGetters('account', ['isAuthenticated', 'accountName']),
+    ...mapGetters("account", ["isAuthenticated", "accountName"]),
     userAvatar() {
       if (this.avatar) return this.avatar;
 
-      return 'https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng';
+      return "https://images.squarespace-cdn.com/content/54b7b93ce4b0a3e130d5d232/1519987165674-QZAGZHQWHWV8OXFW6KRT/icon.png?content-type=image%2Fpng";
     }
   },
   methods: {
-    ...mapActions('account', ['getUserProfile']),
+    ...mapActions("account", ["getUserProfile"]),
     async loadUserProfile() {
       this.loadAccountHistory();
-      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
+      if (
+        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+      ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[this.accountName];
+      const accountProfile = this.$store.state.account.profiles[
+        this.accountName
+      ];
       if (!accountProfile) {
         return;
       }

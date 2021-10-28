@@ -4,6 +4,7 @@ import Vuex from "vuex";
 import account from "./account";
 import general from "./general";
 import global from "./global";
+import resources from "./resources";
 import { GeneralModule } from "./modules/general";
 import { EosTransitModule } from "./modules/wallet/tlosWallet";
 import { TlosBancorModule } from "./modules/swap/tlosBancor";
@@ -15,12 +16,13 @@ import { createProxy, extractVuexModule } from "vuex-class-component";
 
 Vue.use(Vuex);
 
-export default function () {
+export default function() {
   const Store = new Vuex.Store({
     modules: {
       general,
       account,
-      global
+      global,
+      resources
     },
 
     strict: process.env.DEV

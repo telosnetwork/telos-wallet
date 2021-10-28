@@ -23,7 +23,7 @@ module.exports = function(/* ctx */) {
     boot: ["ual", "hyperion", "api"],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
-    css: ["app.sass"],
+    css: ["app.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
@@ -33,9 +33,9 @@ module.exports = function(/* ctx */) {
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
-      // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
+      // 'silka-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-      "roboto-font", // optional, you are not bound to it
+      //"roboto-font", // optional, you are not bound to it
       "material-icons" // optional, you are not bound to it
     ],
 

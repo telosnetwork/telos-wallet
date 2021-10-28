@@ -1,0 +1,6 @@
+<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path opacity="0.56"
+        d="M2 16H15C15.552 16 16 15.552 16 15V2C16 1.448 15.552 1 15 1H2C1.448 1 1 1.448 1 2V15C1 15.552 1.448 16 2 16Z"
+        stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+    <path opacity="0.56" d="M10 5L6.5 8.5L10 12" stroke="white" stroke-width="1.5" stroke-miterlimit="10" />
+</svg>

@@ -1,14 +1,15 @@
 <template>
-  <div id="q-app">
-    <router-view />
+  <div id="q-app" class="main-background">
+    <div class="main-background-overlay">
+      <router-view />
+    </div>
   </div>
 </template>
 <script>
-
 import { vxm } from "./store/index.js";
 
 export default {
-  name: 'App',
+  name: "App",
   methods: {
     async loadBancor() {
       const trade = this.$route.meta.feature == "Trade";
@@ -23,7 +24,9 @@ export default {
         initialChain: this.$route.params.service,
         ...(paramsSatisfied && {
           initialModuleParam: {
-            [trade ? "tradeQuery" : "poolQuery"]: trade ? this.$route.query : pool
+            [trade ? "tradeQuery" : "poolQuery"]: trade
+              ? this.$route.query
+              : pool
           }
         })
       };
@@ -46,5 +49,7 @@ export default {
   async created() {
     this.loadBancor();
   }
-}
+};
 </script>
+
+<style scoped></style>
