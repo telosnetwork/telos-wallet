@@ -120,7 +120,7 @@
 
     <!-- RAM low dialog -->
     <q-dialog persistent v-model="resLow">
-      <div class="popupCard">
+      <q-card class="popupCard">
         <div class="popupHeading">
           <div>
             <q-btn
@@ -159,7 +159,7 @@
             />
           </div>
         </div>
-      </div>
+      </q-card>
     </q-dialog>
     <q-dialog v-model="showAuth" persistent>
       <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
@@ -197,7 +197,8 @@ export default {
       RAMtoBuy: 0,
       CPUtoBuy: 0,
       NETtoBuy: 0,
-      buyAmount: 1 // 1 TLOS
+      buyAmount: 1, // 1 TLOS
+      resLow: false
     };
   },
   computed: {
@@ -207,9 +208,9 @@ export default {
       "loading",
       "isAutoLoading"
     ]),
-    resLow() {
-      return this.ramLow || this.netLow || this.cpuLow;
-    },
+    // resLow() {
+    //   return this.ramLow || this.netLow || this.cpuLow;
+    // },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[
         this.$ual.authenticators[0].selectedChainId
@@ -376,25 +377,39 @@ export default {
         });
       }
 
-      let transaction = false;
-      try {
-        transaction = await this.$store.$api.signTransaction(actions);
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Buying resources`
+      );
+      if (transaction) {
+        if (transaction === "needAuth") {
+          this.$q.notify({
+            type: "negative",
+            message: `Authentication is required`
+          });
+        } else if (transaction === "error") {
+          this.$q.notify({
+            type: "negative",
+            message: `Transaction failed. Make sure authentication is done correctly.`
+          });
+        } else if (transaction !== "cancelled") {
+          if (transaction) this.ramLow = false;
+          if (transaction) this.cpuLow = false;
+          if (transaction) this.netLow = false;
+          this.$q.notify({
+            type: "primary",
+            message: `Resources bought`
+          });
+          this.$root.$emit(
+            "resources_bought"
+          );
+        }
+      } else {
         this.$q.notify({
-          type: "positive",
-          message: `Resources bought`
-        });
-        this.$root.$emit("bought_resources");
-      } catch (error) {
-        this.$q.notify({
-          color: "red-5",
-          textColor: "white",
-          icon: "warning",
-          message: `${error}`
+          type: "negative",
+          message: `Failed to buy resources`
         });
       }
-      if (transaction) this.ramLow = false;
-      if (transaction) this.cpuLow = false;
-      if (transaction) this.netLow = false;
     },
 
     async getRamPrice() {
@@ -423,6 +438,7 @@ export default {
         this.netLow = true;
       if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres)
         this.cpuLow = true;
+      this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }
   },
   async mounted() {
