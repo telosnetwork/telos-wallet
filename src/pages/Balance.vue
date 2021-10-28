@@ -912,4 +912,28 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
+
+.profileImg {
+  text-align: center;
+  height: 3rem;
+  width: 3rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  background: no-repeat;
+}
+
+@media only screen and (min-width: 1000px) {
+  .profileImg {
+    /* background-image: url("~assets/camera.svg"); */
+    height: 4rem;
+    width: 4rem;
+    border-radius: 1rem;
+    margin-top: 1rem;
+    left: 70%;
+    cursor: pointer;
+    background: no-repeat;
+  }
+}
 </style>

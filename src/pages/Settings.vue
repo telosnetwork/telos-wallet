@@ -56,12 +56,10 @@
 
         <div class="profileInformation">
           <!-- Avatar Name -->
-          <q-item style="height: 70px;">
-            <img
-              class="profileImg"
-              src="~assets/avatarImg.svg"
-              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
-            />
+          <q-item>
+            <q-section avatar>
+              <img class="" src="~assets/avatarImg.svg" />
+            </q-section>
             <q-input
               v-model="avatar"
               dense
@@ -71,16 +69,15 @@
               input-class="text-white"
               class="round-sm full-width"
               label="Avatar URL"
+              :rules="true"
             />
           </q-item>
 
           <!-- Name -->
-          <q-item style="height: 70px; margin-top: 18.4px">
-            <img
-              class="profileImg"
-              src="~assets/nameImg.svg"
-              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
-            />
+          <q-item>
+            <q-section avatar>
+              <img class="" src="~assets/nameImg.svg" />
+            </q-section>
             <q-input
               v-model="display_name"
               dense
@@ -91,16 +88,15 @@
               class="round-sm full-width"
               label="Name"
               :rules="[val => !!val || 'This field is required']"
+              hide-bottom-space
             />
           </q-item>
 
           <!-- Status -->
-          <q-item style="height: 70px;">
-            <img
-              class="profileImg"
-              src="~assets/statusImg.svg"
-              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
-            />
+          <q-item>
+            <q-section avatar>
+              <img class="" src="~assets/statusImg.svg" />
+            </q-section>
             <q-input
               v-model="status"
               dense
@@ -114,12 +110,10 @@
           </q-item>
 
           <!-- Bio -->
-          <q-item style="height: 70px;">
-            <img
-              class="profileImg"
-              src="~assets/bioImg.svg"
-              style="margin-top: 5px; margin-bottom: 0px; padding-bottom: 18.4px"
-            />
+          <q-item>
+            <q-section avatar>
+              <img class="" src="~assets/bioImg.svg" />
+            </q-section>
             <q-input
               v-model="bio"
               dense
@@ -157,7 +151,7 @@
         </div> -->
       </q-list>
 
-      <q-item class="row justify-center q-pt-md">
+      <q-item class="row justify-center items-center q-pt-md">
         <label
           v-if="privateKey && connected"
           class="text-subtitle1 flex items-center text-weight-medium q-ml-sm"
@@ -623,7 +617,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .container {
   display: flex;
   block-size: auto;
@@ -640,7 +634,6 @@ export default {
   font-weight: normal;
   font-size: large;
   top: 2rem;
-  z-indremex: 1;
 }
 .uploadImage {
   /* background-image: url("~assets/camera.svg"); */
@@ -669,7 +662,12 @@ export default {
 
 .profileInformation {
   margin-top: 100px;
-  width: 35rem;
+  max-width: 25rem;
+  img {
+    height: 2.5rem;
+    width: 2.5rem;
+    margin-right: 15px;
+  }
 }
 
 .settingImg {
@@ -680,11 +678,6 @@ export default {
   border-bottom-left-radius: unset;
   margin-top: -2.5rem;
   margin-left: 1rem;
-}
-
-.profileImg {
-  margin: 1rem 1.5rem 1rem;
-  z-index: 5;
 }
 
 .nameImg {
