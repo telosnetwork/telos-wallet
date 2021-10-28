@@ -1,8 +1,8 @@
 <template>
   <div class="row justify-center">
-    <div style="width: 90vh">
+    <div style="width: 600px">
       <div style="height: 100%; overflow:auto">
-        <div class="text-center full-width">
+        <div class="text-center q-px-sm">
           <login-button v-if="isAuthenticated" style="display:none" />
 
           <!-- Profile Image top left -->
@@ -45,15 +45,20 @@
               :label="'Generate EVM Address'"
               @click="generateEVMAddress()"
             />
-            <q-btn v-else rounded outline>
+            <q-btn
+              v-else
+              rounded
+              outline
+              @click="copyStrToClipboard($root.tEVMAccount.address)"
+            >
               {{ $root.tEVMAccount.address }}
             </q-btn>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex-center q-mt-lg q-mb-md" :style="`display:flex`">
+          <div class="row q-mt-lg q-mb-md">
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 flex-center"
+              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
               rounded
               no-caps
@@ -64,7 +69,7 @@
               <img src="~assets/icons/qr_scan.svg" />
             </div>
             <q-btn
-              class="balanceBtn purpleGradient text-subtitle2 flex-center"
+              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
               rounded
               no-caps
@@ -78,7 +83,7 @@
           </div>
 
           <!-- Convert and Purchace -->
-          <div class="row justify-center q-mb-md">
+          <div class="row justify-between q-mb-md">
             <div class="convertBtn" @click="clickExchange()">
               <img src="~assets/Convert.svg" class="q-mr-xs" />
               Convert
@@ -111,7 +116,7 @@
           flat
           :value="balanceTab"
           @input="switchTab($event)"
-          class="coinviewGrid"
+          class="bg-transparent"
         >
           <q-tab-panel
             flat
@@ -225,6 +230,7 @@ import History from "./components/balance/History";
 import Exchange from "./components/balance/Exchange";
 import DepositEVM from "./components/balance/DepositEVM";
 import WithdrawEVM from "./components/balance/WithdrawEVM";
+import { copyToClipboard } from "quasar";
 
 const tabsData = [
   {
@@ -364,6 +370,14 @@ export default {
   },
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile"]),
+    copyStrToClipboard(str) {
+      copyToClipboard(str).then(() => {
+        this.$q.notify({
+          type: "primary",
+          message: "Copied to clipboard"
+        });
+      });
+    },
     async loadUserProfile() {
       if (
         !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
@@ -886,9 +900,6 @@ export default {
   background-color: #00000000;
   display: inline-flex;
   justify-content: space-between;
-}
-.coinviewGrid {
-  background-color: #00000000;
 }
 
 .balanceBtn {
