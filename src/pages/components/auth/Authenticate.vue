@@ -392,7 +392,7 @@ export default {
       showDetail: false,
       driveData: null,
       recaptchaValue: "",
-      signUpStep: 1,
+      signUpStep: 0,
       creating: false,
       authInterval: null,
       accounts: [],
