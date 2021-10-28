@@ -125,6 +125,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
+      console.log(this.selectedCoin);
       this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(
@@ -142,35 +143,37 @@ export default {
           }
         });
       } else if (this.networkType === "tevm") {
-        //TODO if selected coin is telos, then use telos account
         try {
-          actions.push({
-            account: this.selectedCoin.account,
-            name: "transfer",
-            data: {
-              from: this.accountName.toLowerCase(),
-              to: process.env.EVM_CONTRACT,
+          if (this.selectedCoin.name === "Telos EVM") {
+            const rawTrx = await this.$root.tEVMApi.transfer({
+              account: this.accountName,
+              sender: this.$root.tEVMAccount.address,
+              to: this.toAddress,
               quantity: quantityStr,
-              memo: this.notes
-            }
-          });
-          const rawTrx = await this.$root.tEVMApi.transfer({
-            account: this.accountName,
-            sender: this.$root.tEVMAccount.address,
-            to: this.toAddress,
-            quantity: quantityStr,
-            returnRaw: true
-          });
-          actions.push({
-            account: process.env.EVM_CONTRACT,
-            name: "raw",
-            data: {
-              ram_payer: this.accountName.toLowerCase(),
-              tx: rawTrx,
-              estimate_gas: false,
-              sender: this.$root.tEVMAccount.address.substring(2)
-            }
-          });
+              returnRaw: true
+            });
+            actions.push({
+              account: process.env.EVM_CONTRACT,
+              name: "raw",
+              data: {
+                ram_payer: this.accountName.toLowerCase(),
+                tx: rawTrx,
+                estimate_gas: false,
+                sender: this.$root.tEVMAccount.address.substring(2)
+              }
+            });
+          } else {
+            actions.push({
+              account: this.selectedCoin.account,
+              name: "transfer",
+              data: {
+                from: this.accountName.toLowerCase(),
+                to: process.env.EVM_CONTRACT,
+                quantity: quantityStr,
+                memo: this.toAddress
+              }
+            });
+          }
         } catch {
           this.$q.notify({
             type: "negative",
