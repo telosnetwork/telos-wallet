@@ -51,7 +51,8 @@
               outline
               @click="copyStrToClipboard($root.tEVMAccount.address)"
             >
-              {{ $root.tEVMAccount.address }}
+              <div class="lt-md">{{ shortenedEvmAddress }}</div>
+              <div class="gt-sm">{{ $root.tEVMAccount.address }}</div>
             </q-btn>
           </div>
 
@@ -366,6 +367,10 @@ export default {
       } else {
         return ["marbletessst"];
       }
+    },
+    shortenedEvmAddress() {
+      const address = this.$root.tEVMAccount.address;
+      return `${address.slice(0, 12)}..${address.slice(-12)}`;
     }
   },
   methods: {

@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-center">
-    <div style="width: 90vh">
+    <div style="width: 600px">
       <div
         class="q-pb-lg q-pt-xl text-subtitle1 text-weight-medium text-center"
       >
@@ -35,7 +35,7 @@
             @click="openInNewTab(dapp.link)"
           >
             <q-item-section avatar>
-                <img :src="dapp.icon" style="width: 30px; height: 30px" />
+              <img :src="dapp.icon" style="width: 30px; height: 30px" />
             </q-item-section>
             <q-item-section class="text-subtitle2 text-weight-medium">
               {{ dapp.name }}

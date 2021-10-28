@@ -9,78 +9,77 @@
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
-        class="list-item"
+        class="column "
         @click="selectCoin(coin)"
-      >
-        <div class="row">
-          <q-item-section flat avatar>
-            <q-avatar size="45px" class="q-my-sm">
-              <img
-                v-if="coin.network === 'tevm' || coin.name === 'Telos'"
-                src="~assets/TLOS.png"
-              />
-              <img v-else :src="coin.icon" />
-              <div
-                v-if="coin.network == 'tevm'"
-                class="flex absolute full-width full-height"
-              >
+        ><div class="self-stretch list-item">
+          <div class="row">
+            <q-item-section flat avatar>
+              <q-avatar size="45px" class="q-my-sm">
                 <img
-                  class="flex q-ml-auto q-mt-auto"
-                  alt="tEVM"
-                  src="~assets/evm_logo.png"
-                  style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                  v-if="coin.network === 'tevm' || coin.name === 'Telos'"
+                  src="~assets/TLOS.png"
                 />
+                <img v-else :src="coin.icon" />
+                <div
+                  v-if="coin.network == 'tevm'"
+                  class="flex absolute full-width full-height"
+                >
+                  <img
+                    class="flex q-ml-auto q-mt-auto"
+                    alt="tEVM"
+                    src="~assets/evm_logo.png"
+                    style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                  />
+                </div>
+              </q-avatar>
+            </q-item-section>
+            <q-item-section style="justify-content: start; display: grid;">
+              <div class="text-white text-left display-grid">
+                <label
+                  class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
+                  >{{ coin.name }}</label
+                >
+                <label class="text-subtitle2 text-grey-5 wraplabel">{{
+                  coin.symbol
+                }}</label>
               </div>
-            </q-avatar>
-          </q-item-section>
-          <q-item-section style="justify-content: start; display: grid;">
-            <div class="text-white text-left display-grid">
-              <label
-                class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
-                >{{ coin.name }}</label
-              >
-              <label class="text-subtitle2 text-grey-5 wraplabel">{{
-                coin.symbol
+            </q-item-section>
+          </div>
+          <div class="tevmBtnWrapper">
+            <q-btn
+              class="tevmBtn"
+              flat
+              rounded
+              no-caps
+              @click.stop="withdrawEvm"
+              v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
+            >
+              <div class="q-pr-sm">EVM</div>
+              <img src="~assets/icons/networkArrows.svg" />
+            </q-btn>
+            <q-btn
+              class="tevmBtn"
+              flat
+              rounded
+              no-caps
+              @click.stop="depositEvm"
+              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+            >
+              <img src="~assets/icons/networkArrows.svg" />
+              <div class="q-pl-sm">EVM</div>
+            </q-btn>
+          </div>
+          <q-item-section>
+            <div class="text-white text-right display-grid">
+              <label class="text-subtitle1 text-weight-small text-white h-20">{{
+                `${getFixed(coin.amount, 8)} ${coin.symbol}`
               }}</label>
+              <label class="text-caption text-grey-6"
+                >${{ getFixed(coin.amount * coin.price, 2) }}</label
+              >
             </div>
           </q-item-section>
         </div>
-
-        <div class="tevmBtnWrapper">
-          <q-btn
-            class="tevmBtn"
-            flat
-            rounded
-            no-caps
-            @click.stop="withdrawEvm"
-            v-if="coin.symbol === 'TLOS' && coin.network === 'tevm'"
-          >
-            <div class="q-pr-sm">EVM</div>
-            <img src="~assets/icons/networkArrows.svg" />
-          </q-btn>
-          <q-btn
-            class="tevmBtn"
-            flat
-            rounded
-            no-caps
-            @click.stop="depositEvm"
-            v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
-          >
-            <img src="~assets/icons/networkArrows.svg" />
-            <div class="q-pl-sm">EVM</div>
-          </q-btn>
-        </div>
-
-        <q-item-section>
-          <div class="text-white text-right display-grid">
-            <label class="text-subtitle1 text-weight-small text-white h-20">{{
-              `${getFixed(coin.amount, 8)} ${coin.symbol}`
-            }}</label>
-            <label class="text-caption text-grey-6"
-              >${{ getFixed(coin.amount * coin.price, 2) }}</label
-            >
-          </div>
-        </q-item-section>
       </q-item>
       <template v-if="!coinLoadedAll" v-slot:loading>
         <div class="row justify-center q-my-md">
