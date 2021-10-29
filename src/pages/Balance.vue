@@ -3,7 +3,7 @@
     <div style="width: 600px">
       <div style="height: 100%; overflow:auto">
         <div class="text-center ">
-          <login-button v-if="isAuthenticated" style="display:none" />
+          <!-- <login-button v-if="isAuthenticated" style="display:none" /> -->
 
           <!-- Profile Image top left -->
           <q-avatar class="profileImg" @click="$router.push('/settings')">
@@ -249,7 +249,6 @@ const tabsData = [
 export default {
   props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
   components: {
-    LoginButton,
     Coin,
     Collectables,
     Send,

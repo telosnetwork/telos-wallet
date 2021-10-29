@@ -244,12 +244,13 @@ export default {
         const auth2 = gapi.auth2.getAuthInstance();
         if (auth2) {
           auth2.signOut().then(function() {
+            auth2.disconnect();
             console.log("User signed out.");
           });
         }
       }
-      this.logout();
       this.$emit("update:loadedCoins", []);
+      this.logout();
     },
     async signPopup(type) {
       const keycat = this.$ual.authenticators[0].keycatMap[
@@ -455,6 +456,8 @@ export default {
         this.showAuth = true;
       }
     }, 500);
+    this.$root.$on(
+      "signOut", () => {this.signOut()})
   },
   beforeDestroy() {
     if (this.authInterval) clearInterval(this.authInterval);

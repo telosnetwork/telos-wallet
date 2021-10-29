@@ -3,7 +3,7 @@
     class="profile flex-center "
     :style="` display:flex; overflow: auto; height: 100vh !important;`"
   >
-    <login-button v-if="isAuthenticated" style="display: none" />
+    <!-- <login-button v-if="isAuthenticated" style="display: none" /> -->
     <div>
       <div class="profile text-white flex-center">
         <label style="height: 10px; margin-bottom: 100px">Profile</label>
@@ -140,7 +140,7 @@
             class="settingBtn col"
             rounded
             label="LOGOUT"
-            @click="logout"
+            @click="signOut"
           />
           <!-- Back Button -->
         </q-item>
@@ -258,7 +258,7 @@ import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 
 export default {
-  components: { LoginButton },
+  components: {  },
   data() {
     return {
       accountHasProfile: false,
@@ -591,6 +591,9 @@ export default {
         type: "primary",
         message: "Copied it to the clipboard successfully"
       });
+    },
+    signOut() {
+      this.$root.$emit("signOut");
     }
   },
   created: async function() {
