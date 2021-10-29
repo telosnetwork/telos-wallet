@@ -152,6 +152,7 @@ export default {
             message: `${quantityStr} is deposited to the EVM`
           });
           this.$root.$emit("successfully_deposited", quantityStr);
+          this.showDlg = false;
         }
       } else {
         this.$q.notify({

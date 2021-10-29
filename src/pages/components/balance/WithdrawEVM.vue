@@ -126,6 +126,7 @@ export default {
             message: `${quantityStr} is withdrawn from the EVM`
           });
           this.$root.$emit("successfully_withdrew", quantityStr);
+          this.showDlg = false;
         }
       } else {
         this.$q.notify({
