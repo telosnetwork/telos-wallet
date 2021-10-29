@@ -125,7 +125,7 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      console.log(this.selectedCoin);
+      // console.log(this.selectedCoin);
       this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(
@@ -163,6 +163,21 @@ export default {
               }
             });
           } else {
+            try {
+              const accountAddress = await this.$root.tEVMApi.telos.getEthAccount(
+                this.toAddress.toLowerCase()
+              );
+            } catch (error) {
+              actions.push({
+                account: process.env.EVM_CONTRACT,
+                name: "openwallet",
+                data: {
+                  account: this.accountName.toLowerCase(),
+                  address: this.toAddress.slice(2)
+                }
+              });
+            }
+
             actions.push({
               account: this.selectedCoin.account,
               name: "transfer",
