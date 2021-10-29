@@ -85,7 +85,7 @@
               </label>
             </div>
             <label
-              class="text-weight-regular full-width mobile-only"
+              class="text-weight-regular full-width mobile-only flex flex-center"
               :style="`font-size: ${amountFontSize}px; color: ${themeColor}`"
             >
               {{
