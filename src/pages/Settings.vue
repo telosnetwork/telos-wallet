@@ -141,7 +141,6 @@
             rounded
             label="LOGOUT"
             @click="logout"
-            :disable="display_name.length === 0"
           />
           <!-- Back Button -->
         </q-item>
@@ -432,7 +431,6 @@ export default {
       this.saving = false;
     },
     async onGoogleSignIn(user) {
-      console.log(this.$store);
       if (!user && !this.privateKey) {
         console.log("No user");
         this.$store.$account.needAuth = true;

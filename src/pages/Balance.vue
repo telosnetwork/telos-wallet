@@ -540,6 +540,7 @@ export default {
       };
       this.coins = this.coins.sort(sortCoin(this.suggestTokens));
       this.$emit("update:loadedCoins", this.coins);
+      // console.log(this.loadedCoins);
     },
     async loadNftTokenItems() {
       for (const account of this.nftAccounts) {
@@ -775,13 +776,12 @@ export default {
       if (window.time && Date.now() / 1000 - window.time > 10 * 60) {
         location.reload();
       }
-    }, 10);
+    }, 5);
 
     if (this.chainName === "telos" || 1) {
       await this.loadNftTokenItems();
       this.loadNftTokenTags();
     }
-
     if (this.loadedCoins.length > 0) {
       this.coins = this.loadedCoins;
       this.coinLoadedAll = true;
@@ -891,6 +891,8 @@ export default {
     if (this.tokenInterval) {
       clearInterval(this.tokenInterval);
     }
+    this.coins = [];
+    this.$emit("update:loadedCoins", []);
   },
   watch: {
     accountName() {
