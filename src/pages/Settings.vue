@@ -57,9 +57,9 @@
         <div class="profileInformation">
           <!-- Avatar Name -->
           <q-item>
-            <q-section avatar>
+            <div avatar>
               <img class="" src="~assets/avatarImg.svg" />
-            </q-section>
+            </div>
             <q-input
               v-model="avatar"
               dense
@@ -69,15 +69,15 @@
               input-class="text-white"
               class="round-sm full-width"
               label="Avatar URL"
-              :rules="true"
+              
             />
           </q-item>
 
           <!-- Name -->
           <q-item>
-            <q-section avatar>
+            <div avatar>
               <img class="" src="~assets/nameImg.svg" />
-            </q-section>
+            </div>
             <q-input
               v-model="display_name"
               dense
@@ -94,9 +94,9 @@
 
           <!-- Status -->
           <q-item>
-            <q-section avatar>
+            <div avatar>
               <img class="" src="~assets/statusImg.svg" />
-            </q-section>
+            </div>
             <q-input
               v-model="status"
               dense
@@ -111,9 +111,9 @@
 
           <!-- Bio -->
           <q-item>
-            <q-section avatar>
+            <div avatar>
               <img class="" src="~assets/bioImg.svg" />
-            </q-section>
+            </div>
             <q-input
               v-model="bio"
               dense
