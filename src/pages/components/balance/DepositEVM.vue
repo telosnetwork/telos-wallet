@@ -53,16 +53,65 @@
           /> -->
           <div class="">Max: {{ nativeTLOSBalance }}</div>
         </div>
+        <div class="q-mt-md row justify-center">
+          <div
+            class="depositAddressToggle q-mb-md"
+            v-if="depositOwnAddress"
+            @click="depositOwnAddress = false"
+          >
+            + Deposit to a different address
+          </div>
+          <div
+            class="depositAddressToggle"
+            v-else
+            @click="depositOwnAddress = true"
+          >
+            - Deposit to myself
+          </div>
+        </div>
+        <div v-if="!depositOwnAddress" class="row justify-center">
+          <q-input
+            v-model="recipientAddress"
+            label="Recipient"
+            dense
+            rounded
+            class="q-pt-xs col-11"
+            standout="bg-transparent text-white"
+            label-color="white"
+            color="white"
+            input-class="text-white"
+            @input="checkRecipientExist"
+            @focus="checkRecipientExist"
+            :rules="[
+              val =>
+                (val.slice(0, 2) === '0x' && val.length === 42) ||
+                'Invalid address'
+            ]"
+          />
+        </div>
         <q-btn
-          class="purpleGradient q-mt-lg"
+          class="purpleGradient"
           no-caps
           rounded
           label="Deposit"
           @click="deposit"
         />
-        <div v-if="!haveEVMAccount" class="q-mt-md">
-          NOTE: This is your first deposit so an additional “create” action will
-          be included
+        <div class="row justify-center q-mt-md">
+          <div v-if="!haveEVMAccount && depositOwnAddress" class="note">
+            NOTE: This is your first deposit so an additional “create” action
+            will be included
+          </div>
+          <div
+            v-if="
+              !recipientAddressExists &&
+                !depositOwnAddress &&
+                recipientAddress != ''
+            "
+            class="note"
+          >
+            NOTE: The recipient address does not exist so an additional “create”
+            action will be included
+          </div>
         </div>
       </div>
     </div>
@@ -78,7 +127,10 @@ export default {
   data() {
     return {
       amount: "",
-      depositAmount: "0"
+      depositAmount: "0",
+      depositOwnAddress: false,
+      recipientAddress: "",
+      recipientAddressExists: true
     };
   },
   computed: {
@@ -97,6 +149,16 @@ export default {
       if (isNaN(this.depositAmount)) this.depositAmount = "0";
       else this.depositAmount = Number(this.depositAmount).toString();
     },
+    async checkRecipientExist() {
+      try {
+        _ = await this.$root.tEVMApi.telos.getEthAccount(
+          this.recipientAddress.toLowerCase()
+        );
+        this.recipientAddressExists = true;
+      } catch (error) {
+        this.recipientAddressExists = false;
+      }
+    },
     async deposit() {
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
@@ -109,15 +171,31 @@ export default {
 
       let quantityStr = `${amount.toFixed(4)} TLOS`;
       let actions = [];
-      if (!this.haveEVMAccount) {
-        actions.push({
-          account: "eosio.evm",
-          name: "create",
-          data: {
-            account: this.accountName.toLowerCase(),
-            data: "create"
-          }
-        });
+      let memo = "";
+      if (this.depositOwnAddress) {
+        if (!this.haveEVMAccount) {
+          actions.push({
+            account: "eosio.evm",
+            name: "create",
+            data: {
+              account: this.accountName.toLowerCase(),
+              data: "create"
+            }
+          });
+        }
+      } else {
+        memo = this.recipientAddress.toLowerCase();
+        await this.checkRecipientExist();
+        if (!this.recipientAddressExists) {
+          actions.push({
+            account: process.env.EVM_CONTRACT,
+            name: "openwallet",
+            data: {
+              account: this.accountName.toLowerCase(),
+              address: this.recipientAddress.slice(2)
+            }
+          });
+        }
       }
 
       actions.push({
@@ -127,7 +205,7 @@ export default {
           from: this.accountName.toLowerCase(),
           to: "eosio.evm",
           quantity: quantityStr,
-          memo: ""
+          memo: memo
         }
       });
 
@@ -151,6 +229,10 @@ export default {
             type: "primary",
             message: `${quantityStr} is deposited to the EVM`
           });
+          if (!this.depositOwnAddress) {
+            this.depositOwnAddress = true;
+            this.recipientAddress = "";
+          }
           this.$root.$emit("successfully_deposited", quantityStr);
           this.showDlg = false;
         }
@@ -183,5 +265,12 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.depositAddressToggle {
+  cursor: pointer;
+  color: $lightBlue;
+}
+.note {
+  max-width: 25rem;
 }
 </style>
