@@ -892,7 +892,6 @@ export default {
       clearInterval(this.tokenInterval);
     }
     this.coins = [];
-    this.$emit("update:loadedCoins", []);
   },
   watch: {
     accountName() {

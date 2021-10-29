@@ -1,5 +1,6 @@
 <template>
   <q-layout view="hHh Lpr fFf" class="">
+    <login-button v-if="isAuthenticated" style="display: none" />
     <div class="videoWrapper">
       <video
         playsinline
@@ -61,6 +62,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import navBar from "components/Navbar.vue";
+import LoginButton from "components/LoginButton.vue";
 
 const pagesData = [
   {
@@ -88,7 +90,7 @@ const pagesData = [
 
 export default {
   name: "MainLayout",
-  components: { navBar },
+  components: { navBar, LoginButton },
   data() {
     return {
       avatar: null,

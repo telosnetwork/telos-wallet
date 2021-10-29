@@ -197,7 +197,7 @@ export default {
       CPUtoBuy: 0,
       NETtoBuy: 0,
       buyAmount: 1, // 1 TLOS
-      resLow: false,
+      resLow: false
     };
   },
   computed: {
@@ -252,6 +252,7 @@ export default {
         }
       }
       this.logout();
+      this.$emit("update:loadedCoins", []);
     },
     async signPopup(type) {
       const keycat = this.$ual.authenticators[0].keycatMap[
