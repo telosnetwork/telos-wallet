@@ -113,9 +113,6 @@
         </q-item>
       </div>
     </q-dialog>
-    <q-dialog v-model="showAuth" persistent>
-      <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
-    </q-dialog>
 
     <!-- RAM low dialog -->
     <q-dialog persistent v-model="resLow">
