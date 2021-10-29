@@ -30,7 +30,7 @@
     "ptokens": "^0.9.0",
     "qrcanvas-vue": "^2.1.0",
     "quasar": "^1.0.0",
-    "ual-anchor": "^0.5.1",
+    "ual-anchor": "^1.1.2",
     "ual-ledger": "^0.3.0",
     "ual-scatter": "^0.3.0",
     "universal-authenticator-library": "^0.3.0",
