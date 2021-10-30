@@ -23,8 +23,10 @@
     <div class="videoOverlay" />
     <div class="videoOverlay shadedOverlay" />
 
-    <nav-bar :balanceTab.sync="balanceTab" />
-    <q-page-container class="pageContainer">
+    <nav-bar :balanceTab.sync="balanceTab" v-if="isAuthenticated" />
+    <q-page-container
+      :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
+    >
       <router-view
         :loadedCoins.sync="coins"
         :loadedNftTokens.sync="nftTokens"
@@ -175,7 +177,9 @@ export default {
 .pageContainer {
   padding-bottom: 65px; // for mobile nav-bar
   @media only screen and (min-width: 1000px) {
-    margin-left: 250px;
+    .authenticated {
+      margin-left: 250px;
+    }
     padding-bottom: 0;
   }
 }
