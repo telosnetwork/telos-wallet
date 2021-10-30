@@ -96,6 +96,8 @@
                   class="qrCanvas q-pa-lg bg-white"
                 />
               </div>
+              {{qrcodeData}}
+              {{networkType}}
               <div
                 :class="
                   networkType === 'telos' ||
@@ -195,25 +197,14 @@ export default {
       }
     },
     qrcodeData() {
-      //TODO values in brackets are causing issues
-      // if (this.networkType === "telos") {
-      //   return `${this.accountName}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "tevm") {
-      //   return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "ethereum") {
-      //   return `${this.accountName}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "ptoken") {
-      //   return `${this.depositAddress}(${this.selectedCoin.name})`;
-      // }
-      // return "";
       if (this.networkType === "telos") {
-        return `${this.accountName}`;
+        return `${this.accountName}(${this.selectedCoin.name})`;
       } else if (this.networkType === "tevm") {
-        return `${this.$root.tEVMAccount.address}`;
+        return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
       } else if (this.networkType === "ethereum") {
-        return `${this.accountName}`;
+        return `${this.accountName}(${this.selectedCoin.name})`;
       } else if (this.networkType === "ptoken") {
-        return `${this.depositAddress}`;
+        return `${this.depositAddress}(${this.selectedCoin.name})`;
       }
       return "";
     },
