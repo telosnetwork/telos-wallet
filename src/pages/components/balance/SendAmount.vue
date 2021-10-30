@@ -435,7 +435,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   height: 400px;
-  @media only screen and (max-height: 800px) {
+  @media only screen and (max-height: 900px) {
     height: 90%;
   }
 }
