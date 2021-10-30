@@ -36,9 +36,8 @@
             <div class="column items-center ">
               <div class="confirmGrid q-py-lg q-gutter-y-sm">
                 <div class="text-weight-bold">To</div>
-                <div class="">
-                  {{ toAddress }}
-                </div>
+                <div class="lt-md">{{ toAddressShort }}</div>
+                <div class="gt-sm">{{ toAddress }}</div>
                 <div v-if="networkType !== 'telos'" class="text-weight-bold">
                   Network Fee
                 </div>
@@ -118,6 +117,9 @@ export default {
     },
     cardHeight() {
       return window.innerHeight - 200;
+    },
+    toAddressShort() {
+      return `${this.toAddress.slice(0, 10)}..${this.toAddress.slice(-10)}`;
     }
   },
   methods: {
