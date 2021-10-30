@@ -445,6 +445,8 @@ export default {
   grid-template-rows: 1fr 1fr 1fr 1fr;
   width: 100%;
   height: 100%;
+  max-width: 20rem;
+  min-height: 12rem;
 }
 
 .keypadKey {
