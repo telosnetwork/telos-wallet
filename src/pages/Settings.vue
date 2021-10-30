@@ -186,7 +186,6 @@
         <q-btn
           v-if="privateKey && connected"
           class="purpleGradient q-ml-sm"
-          :style="`height: 35px; `"
           no-caps
           label="View Private Key"
           @click="confirm = true"
