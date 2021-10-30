@@ -177,7 +177,7 @@ export default {
 .pageContainer {
   padding-bottom: 65px; // for mobile nav-bar
   @media only screen and (min-width: 1000px) {
-    .authenticated {
+    &.authenticated {
       margin-left: 250px;
     }
     padding-bottom: 0;
