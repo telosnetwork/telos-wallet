@@ -21,19 +21,19 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Send
+              Send Amount
             </div>
             <div />
           </div>
-          <div class="column items-center q-pt-md">
-            <q-avatar size="6rem">
+          <div class="inputContainer">
+            <q-avatar class="coinAvatar" size="5rem">
               <img :src="selectedCoin.icon" />
               <div
                 v-if="selectedCoin.name == 'Telos EVM'"
                 class="flex absolute full-width full-height"
               >
                 <img
-                  class="flex q-ml-auto q-mt-auto"
+                  class="flex q-ml-auto"
                   alt="tEVM"
                   src="~assets/evm_logo.png"
                   style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
@@ -42,7 +42,7 @@
             </q-avatar>
             <!-- <img class="avatarBackground" src="~assets/avatarBackground.svg" /> -->
             <!-- Amount Shown -->
-            <div class="amount">Amount</div>
+            <!-- <div class="amount q-pt-sm">Amount</div> -->
             <!-- <label
               ref="widthElement"
               :style="
@@ -84,16 +84,20 @@
                 {{ coinInput ? selectedCoin.symbol : "" }}
               </label>
             </div>
-            <label
-              class="text-weight-regular full-width mobile-only flex flex-center"
-              :style="`font-size: ${amountFontSize}px; color: ${themeColor}`"
-            >
-              {{
-                coinInput
-                  ? `${sendAmount} ${selectedCoin.symbol}`
-                  : `$${sendAmount}`
-              }}
-            </label>
+            <div class="mobileAmountContainer  full-width  mobile-only">
+              <label
+                class="text-weight-regular"
+                :style="
+                  `font-size: ${amountFontSizeMobile}px; color: ${themeColor}`
+                "
+              >
+                {{
+                  coinInput
+                    ? `${sendAmount} ${selectedCoin.symbol}`
+                    : `$${sendAmount}`
+                }}
+              </label>
+            </div>
             <label class="text-subtitle1 text-weight-large text-white">
               {{
                 coinInput
@@ -106,7 +110,7 @@
             </label>
 
             <!-- Exchange persentage -->
-            <q-btn-group class="q-mt-md" push unelevated rounded>
+            <q-btn-group class="q-mt-sm" push unelevated rounded>
               <q-btn
                 push
                 no-caps
@@ -185,24 +189,22 @@
               />
             </q-btn-group>
             <!-- Crypto Available -->
-            <div class="text-center q-pt-sm q-pb-lg ">
+            <div class="text-center q-pt-xs q-pb-l ">
               <label class="text-subtitle2 text-white">{{
                 `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
                   selectedCoin.symbol
                 } Available`
               }}</label>
             </div>
-            <div class="text-center q-py-md mobile-only">
-              <div class="q-gutter-x-xs q-gutter-y-lg">
-                <q-btn
-                  v-for="key in keyboard"
-                  :key="key"
-                  class="bg-transparent text-white q-mx-auto q-my-auto text-h5"
-                  style="width: 30%; height: 60px;"
-                  flat
-                  :label="key"
-                  @click="buttonClicked(key)"
-                />
+            <div class="keypad  q-py-md mobile-only">
+              <div
+                v-for="key in keyboard"
+                :key="key"
+                class="keypadKey text-h5"
+                :label="key"
+                @click="buttonClicked(key)"
+              >
+                <div>{{ key }}</div>
               </div>
             </div>
 
@@ -264,6 +266,9 @@ export default {
     },
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
+    },
+    amountFontSizeMobile() {
+      return Math.min(40, window.innerWidth / (this.sendAmount.length + 1));
     },
     sendAmountValue() {
       return Number(this.sendAmount.replace(",", ""));
@@ -384,7 +389,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toolbar-title {
   position: absolute;
   text-align: center;
@@ -407,7 +412,6 @@ export default {
 .amount {
   color: #fafafa;
   font-size: 1.2rem;
-  margin: 2rem 0 0.5rem 0;
 }
 .cryptoImg {
   position: absolute;
@@ -425,6 +429,42 @@ export default {
   /* margin-bottom: -1rem; */
 }
 
-@media only screen and (min-width: 1000px) {
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 400px;
+  @media only screen and (max-height: 800px) {
+    height: 90%;
+  }
+}
+.keypad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+.keypadKey {
+  display: grid;
+  place-items: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  &:active {
+    background-color: #00000021;
+  }
+  // width: 30%;
+  // height: 3rem;
+  // bg-transparent text-white q-mx-auto q-my-auto text-h5
+}
+.mobileAmountContainer {
+  height: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
