@@ -96,8 +96,6 @@
                   class="qrCanvas q-pa-lg bg-white"
                 />
               </div>
-              {{qrcodeData}}
-              {{networkType}}
               <div
                 :class="
                   networkType === 'telos' ||
