@@ -93,7 +93,7 @@
               >
                 <q-r-canvas
                   :options="{ data: qrcodeData, cellSize: 10 }"
-                  style="width: 120px"
+                  class="qrCanvas q-pa-lg bg-white"
                 />
               </div>
               <div
@@ -403,7 +403,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toolbar-title {
   position: absolute;
   text-align: center;
@@ -533,5 +533,9 @@ input[type="number"] {
   .coin_icon {
     background: "~assets/ethereumLogo.svg";
   }
+}
+.qrCanvas {
+  width: 15rem;
+  border-radius: 2rem;
 }
 </style>
