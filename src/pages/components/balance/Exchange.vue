@@ -102,15 +102,10 @@
             </div>
           </q-item>
           <!-- Dollar currency converter -->
-          <q-page-container
-            flat
-            class="q-mx-auto q-py-sm"
-            style="max-width: 600px"
-          >
-            <q-card
+          <div class="">
+            <div
               v-if="exchangeType === 'dollars'"
-              class=" card column q-mx-lg q-mt-xl convert-card"
-              style="height: 200px; background: none"
+              class="full-width self-center column q-mx-lg q-mt-md "
             >
               <!-- <q-space/> -->
               <!-- <q-item class="list-item full-width">
@@ -135,127 +130,48 @@
                 </div>
               </q-item> -->
               <!-- <q-space/> -->
-              <q-item class="row list-item full-width q-px-none">
-                <div class="col q-mx-lg text-center">
-                  <q-item-section style="display: block;">
-                    <div
-                      class="text-white display-grid cursor-pointer"
-                      @click="
-                        showSelectCoinDlg = true;
-                        dlgType = 'convert';
-                      "
-                    >
-                      <label
-                        class="text-white text-subtitle1 text-weight-medium text-white"
-                        >Convert</label
-                      >
-                      <div
-                        class="flex-center relative row"
-                        style="display:flex; margin-top: -4rem;"
-                      >
-                        <img
-                          class="dollarBgimg1 flex-center"
-                          src="~assets/dollarBgImg.svg"
-                          style="display: inline; width: 100%"
-                        />
-                        <img
-                          class="avatarBackground1"
-                          src="~assets/dollarRectBg.svg"
-                        />
-                        <img
-                          v-if="convertCoin"
-                          class="cryptoImg1"
-                          :src="convertCoin.icon"
-                        />
-                      </div>
-                      <label
-                        class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
-                        :style="
-                          `color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`
-                        "
-                      >
-                        <q-item-section
-                          v-if="convertCoin"
-                          avatar
-                          class="q-pr-sm"
-                          style="min-width: unset;"
-                        >
-                          <!-- <q-avatar size="25px"> -->
-                          <!-- <img :src="convertCoin.icon"> -->
-                          <!-- </q-avatar> -->
-                        </q-item-section>
-                        {{ convertCoin ? convertCoin.name : "Choose coin" }}
-                      </label>
+              <div
+                class="row list-item full-width q-px-none q-gutter-x-sm text-subtitle1 text-weight-medium"
+              >
+                <div
+                  class="convertBtn col no-shadow"
+                  @click="
+                    showSelectCoinDlg = true;
+                    dlgType = 'convert';
+                  "
+                >
+                  <div class="column items-center q-gutter-y-md q-py-lg">
+                    <div class="">Convert</div>
+                    <div class="coinAvatarWrapper">
+                      <img v-if="convertCoin" :src="convertCoin.icon" />
                     </div>
-                  </q-item-section>
-                </div>
-                <q-separator
-                  vertical
-                  class="q-my-auto"
-                  style="width: 0px; height: 80%;"
-                />
-                <div class="col q-mx-lg text-center">
-                  <q-item-section style="display: block;">
-                    <div
-                      class="text-white display-grid cursor-pointer"
-                      @click="
-                        showSelectCoinDlg = true;
-                        dlgType = 'to';
-                      "
-                    >
-                      <label
-                        class="text-white text-subtitle1 text-weight-medium text-white"
-                        >To</label
-                      >
-                      <div
-                        class="flex-center relative row"
-                        style="display:flex; margin-top: -4rem;"
-                      >
-                        <img
-                          class="dollarBgimg1 flex-center"
-                          src="~assets/dollarBgImg.svg"
-                          style="display: inline; width: 100%;"
-                        />
-                        <img
-                          class="avatarBackground1"
-                          src="~assets/dollarRectBg.svg"
-                        />
-                        <img
-                          v-if="toCoin"
-                          class="cryptoImg1"
-                          :src="toCoin.icon"
-                        />
-                      </div>
-                      <label
-                        class="text-white flex-center text-subtitle1 text-weight-medium wraplabel cursor-pointer"
-                        :style="
-                          `color: ${themeColor}; display: inline-flex; z-index: 1; margin-top: -4rem;`
-                        "
-                      >
-                        <q-item-section
-                          v-if="toCoin"
-                          avatar
-                          class="q-pr-sm"
-                          style="min-width: unset;"
-                        >
-                          <!-- <q-avatar size="25px"> -->
-                          <!-- <img :src="toCoin.icon"> -->
-                          <!-- </q-avatar> -->
-                        </q-item-section>
-                        {{ toCoin ? toCoin.name : "Choose coin" }}
-                      </label>
+                    <div class="text-center">
+                      {{ convertCoin ? convertCoin.name : "Choose coin" }}
                     </div>
-                  </q-item-section>
+                  </div>
                 </div>
-              </q-item>
+                <div
+                  class="convertBtn col no-shadow"
+                  @click="
+                    showSelectCoinDlg = true;
+                    dlgType = 'to';
+                  "
+                >
+                  <div class="column items-center q-gutter-y-md q-py-lg">
+                    <div class="">To</div>
+                    <div class="coinAvatarWrapper">
+                      <img v-if="toCoin" :src="toCoin.icon" />
+                    </div>
+                    <div class="text-center">
+                      {{ toCoin ? toCoin.name : "Choose coin" }}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <q-space />
-            </q-card>
+            </div>
             <!-- Crypto Amount Converter -->
-            <q-card
-              v-else
-              class="column q-mx-lg q-mt-xl convert-card"
-              style="height: 200px; background: #fafafa00;"
-            >
+            <div v-else class="column q-mx-lg q-mt-xl ">
               <q-space />
               <q-item
                 class="list-item full-width q-pb-none"
@@ -415,13 +331,12 @@
               </q-item>
               <q-separator style="height: 1px;" color="white" />
               <q-space />
-            </q-card>
+            </div>
             <div
               v-if="
                 convertCoin && toCoin && convertAmountValue && toAmountValue
               "
-              class="q-mt-md text-subtitle2 text-weight-bold text-center"
-              :style="`color: white; margin-top: 50px`"
+              class="text-subtitle2 text-weight-bold text-center q-pt-md"
             >
               <span> {{ unitReward }} </span>
               <div>
@@ -441,14 +356,11 @@
                 {{ displayedSlippage }}
               </div>
             </div>
-          </q-page-container>
+          </div>
           <!-- Convert Button -->
-          <div class="convertBtn flex-center" style="display: block;">
+          <div class=" text-center">
             <q-btn
-              class="flex-center text-white text-subtitle2 convertBtn1"
-              :style="
-                `height: auto; background: linear-gradient(120deg, #1DD1FE, #8946DF); font-size: 20px;`
-              "
+              class="purpleGradient text-white text-subtitle2 nextBtn flex-center q-mt-md"
               flat
               no-caps
               label="Convert"
@@ -796,7 +708,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toolbar-title {
   position: absolute;
   text-align: center;
@@ -831,16 +743,11 @@ export default {
 
 .convertBtn {
   /* position:relative; */
-  width: 100%;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.convertBtn1 {
-  /* position:relative; */
-  width: 400px;
-  left: 50%;
-  transform: translate(-200px);
+  cursor: pointer;
+  background: #ffffff0c;
+  &:hover {
+    background: #ffffff1e;
+  }
 }
 
 .dollarBgimg1 {
@@ -887,10 +794,23 @@ export default {
 }
 
 .card {
-  box-shadow: 0 0px 0px rgb(0 0 0 / 0);
+  // box-shadow: 0 0px 0px rgb(0 0 0 0);
 }
 
 .q-card {
-  box-shadow: 0 0px 0px rgb(0 0 0 / 0);
+  // box-shadow: 0 0px 0px rgb(0 0 0 0);
+}
+
+.coinCardContainer {
+}
+
+.coinAvatarWrapper {
+  width: 4rem;
+  height: 4rem;
+  background: #0000003f;
+  border-radius: 50%;
+  img {
+    width: 100%;
+  }
 }
 </style>
