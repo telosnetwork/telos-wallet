@@ -20,87 +20,41 @@
                 icon="west"
               />
             </div>
-            <div class="text-subtitle1 text-weight-medium text-center">
+            <!-- <div class="text-subtitle1 text-weight-medium text-center">
               Exchange
+            </div> -->
+            <div class="grpWrapper">
+              <q-btn-group class=" " rounded>
+                <q-btn
+                  no-caps
+                  label="Dollars"
+                  :style="
+                    `background: ${
+                      exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
+                    };
+                                color: ${
+                                  exchangeType === 'dollars' ? 'white' : 'white'
+                                };`
+                  "
+                  @click="exchangeType = 'dollars'"
+                />
+                <q-btn
+                  no-caps
+                  label="Crypto"
+                  :style="
+                    `background: ${
+                      exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
+                    };
+                                color: ${
+                                  exchangeType !== 'dollars' ? 'white' : 'white'
+                                };`
+                  "
+                  @click="exchangeType = 'crypto'"
+                />
+              </q-btn-group>
             </div>
             <div />
           </div>
-          <div class="text-center q-py-md">
-            <q-btn-group
-              class=" full-width justify-center"
-              push
-              unelevated
-              rounded
-            >
-              <q-btn
-                class="q-px-md"
-                push
-                no-caps
-                label="Dollars"
-                :style="
-                  `background: ${
-                    exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                            color: ${
-                              exchangeType === 'dollars' ? 'white' : 'white'
-                            };`
-                "
-                @click="exchangeType = 'dollars'"
-              />
-              <q-btn
-                class="q-px-md"
-                push
-                no-caps
-                label="Crypto"
-                :style="
-                  `background: ${
-                    exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                            color: ${
-                              exchangeType !== 'dollars' ? 'white' : 'white'
-                            };`
-                "
-                @click="exchangeType = 'crypto'"
-              />
-            </q-btn-group>
-          </div>
-          <!-- Equal Amount-->
-          <q-item class="list-item full-width ">
-            <div class="text-black display-grid full-width">
-              <label
-                ref="widthElement"
-                style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;"
-              >
-                {{ dollarsAmount }}
-              </label>
-              <div class="flex flex-center full-width">
-                <label
-                  class="text-weight-regular text-white q-mr-none"
-                  style="font-size: 1.4rem;"
-                >
-                  $
-                </label>
-                <input
-                  type="text"
-                  maxlength="8"
-                  class="text-weight-regular text-white text-center no-border q-pa-none no-outline transparent"
-                  :style="`font-size: 45px; width: ${inputWidth}px;`"
-                  v-model="dollarsAmount"
-                  @focus="
-                    dollarsAmount = dollarsAmount === '0' ? '' : dollarsAmount
-                  "
-                  @blur="
-                    dollarsAmount = Number(
-                      dollarsAmount === '' ? '0' : dollarsAmount
-                    ).toString()
-                  "
-                />
-              </div>
-              <label class="text-subtitle1 text-center text-white"
-                >Equivalent to</label
-              >
-            </div>
-          </q-item>
           <!-- Dollar currency converter -->
           <div class="">
             <div
@@ -130,6 +84,41 @@
                 </div>
               </q-item> -->
               <!-- <q-space/> -->
+              <!-- Equal Amount-->
+              <div class="text-black display-grid full-width q-pb-md">
+                <label
+                  ref="widthElement"
+                  style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;"
+                >
+                  {{ dollarsAmount }}
+                </label>
+                <div class="flex flex-center full-width">
+                  <label
+                    class="text-weight-regular text-white q-mr-none"
+                    style="font-size: 1.4rem;"
+                  >
+                    $
+                  </label>
+                  <input
+                    type="text"
+                    maxlength="8"
+                    class="text-weight-regular text-white text-center no-border q-pa-none no-outline transparent"
+                    :style="`font-size: 45px; width: ${inputWidth}px;`"
+                    v-model="dollarsAmount"
+                    @focus="
+                      dollarsAmount = dollarsAmount === '0' ? '' : dollarsAmount
+                    "
+                    @blur="
+                      dollarsAmount = Number(
+                        dollarsAmount === '' ? '0' : dollarsAmount
+                      ).toString()
+                    "
+                  />
+                </div>
+                <label class="text-subtitle1 text-center text-white">
+                  Equivalent to
+                </label>
+              </div>
               <div
                 class="row list-item full-width q-px-none q-gutter-x-sm text-subtitle1 text-weight-medium"
               >
@@ -811,6 +800,21 @@ export default {
   border-radius: 50%;
   img {
     width: 100%;
+  }
+}
+
+.grpWrapper {
+  text-align: right;
+}
+.dialogPageHeading {
+  grid-template-columns: 50px auto;
+}
+@media only screen and (max-width: 1000px) {
+  .grpWrapper {
+    text-align: center;
+  }
+  .dialogPageHeading {
+    grid-template-columns: 50px auto 50px;
   }
 }
 </style>
