@@ -29,7 +29,7 @@
 
           <!-- Body Information -->
           <div class="text-center">
-            <q-avatar size="6rem" class="q-py-md">
+            <q-avatar size="5rem" class="">
               <img :src="selectedCoin.icon" />
             </q-avatar>
             <!-- <div class="absolute" style=" left: 50%; margin-left:-3rem;">
@@ -51,9 +51,9 @@
                 <img class="cryptoImg" src="~assets/avatarBackground.svg">
                 <img class="cryptoImg" src="~assets/avatarBackground.svg">
               </div> -->
-            <div class="column text-center q-mt-xl">
-              <div class="full-width column">
-                <div class="amount">Amount</div>
+            <div class="column text-center q-pt-sm ">
+              <div class="full-width column ">
+                <!-- <div class="amount">Amount</div> -->
                 <label
                   ref="widthElement"
                   :style="
@@ -96,7 +96,6 @@
                     {{ coinInput ? selectedCoin.symbol : "" }}
                   </label>
                 </div>
-                <br />
                 <label
                   class="text-weight-regular full-width mobile-only"
                   :style="
@@ -143,31 +142,41 @@
               </div>
 
               <!-- Keyboard -->
-              <div class="q-pt-lg q-mt-sm full-width mobile-only">
-                <div class="q-gutter-x-xs q-gutter-y-lg">
-                  <q-btn
-                    v-for="key in keyboard"
-                    :key="key"
-                    class="bg-transparent text-grey-8 q-mx-auto q-my-auto text-h5"
-                    style="width: 30%; height: auto;"
-                    flat
-                    :label="key"
-                    @click="buttonClicked(key)"
-                  />
+              <div class="self-center keypad  q-py-md mobile-only">
+                <div
+                  v-for="key in keyboard"
+                  :key="key"
+                  class="keypadKey text-h5"
+                  :label="key"
+                  @click="buttonClicked(key)"
+                >
+                  <div>{{ key }}</div>
                 </div>
               </div>
               <!-- Information -->
-              <div class="row justify-center q-my-md">
-                <div class=" row items-start  q-pa-md infoBox text-white ">
-                  <img class="q-pr-sm q-pt-xs" src="~assets/c-info 1.svg" />
-                  <div class="col text-justify ">
+              <div class="row justify-center text-left q-my-md">
+                <q-expansion-item
+                  class="infoBox "
+                  label="Buy using Moonpay"
+                  icon="fas fa-info-circle"
+                >
+                  <!-- <template v-slot:header>
+                    <div class="row justify-between">
+                      <img
+                        class="col q-pr-sm q-pt-xs"
+                        src="~assets/c-info 1.svg"
+                      />
+                      <div class="col">asdf</div>
+                    </div>
+                  </template> -->
+                  <div class="col text-justify q-pa-md ">
                     By Clicking 'Next' you will be using Moonpay to purchase
                     'EOS' which will be sent to a cross chain contract for
                     exchange to TLOS on the Telos Network at the estimated rate.
                     Do not alter the 'TO' or 'MEMO' field or risk losing your
                     funds.
                   </div>
-                </div>
+                </q-expansion-item>
               </div>
               <q-btn
                 class="self-center  purpleGradient text-white text-subtitle2 nextBtn flex-center"
@@ -447,7 +456,7 @@ export default {
 
 .infoBox {
   background-color: #0000002a;
-  max-width: 500px;
+  flex: 0 1 300px;
 }
 
 .infoIcon {
