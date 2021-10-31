@@ -128,7 +128,7 @@ export default {
     return {
       amount: "",
       depositAmount: "0",
-      depositOwnAddress: false,
+      depositOwnAddress: true,
       recipientAddress: "",
       recipientAddressExists: true
     };
