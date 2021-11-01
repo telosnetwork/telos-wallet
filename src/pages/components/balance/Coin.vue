@@ -19,7 +19,7 @@
                   v-if="coin.network === 'tevm' || coin.name === 'Telos'"
                   src="~assets/TLOS.png"
                 />
-                <img v-else :src="coin.icon" />
+                <token-avatar :token="coin.icon" :avatarSize="45" />
                 <div
                   v-if="coin.network == 'tevm'"
                   class="flex absolute full-width full-height"
@@ -92,8 +92,12 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
+  components: {
+    tokenAvatar
+  },
   props: [
     "coins",
     "coinLoadedAll",

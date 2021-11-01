@@ -131,7 +131,11 @@
                 <div class="column items-center q-gutter-y-md q-py-lg">
                   <div class="">Convert</div>
                   <div class="coinAvatarWrapper">
-                    <img v-if="convertCoin" :src="convertCoin.icon" />
+                    <token-avatar
+                      v-if="convertCoin"
+                      :token="convertCoin.icon"
+                      :avatarSize="65"
+                    />
                   </div>
                   <div class="text-center">
                     {{ convertCoin ? convertCoin.name : "Choose coin" }}
@@ -148,7 +152,11 @@
                 <div class="column items-center q-gutter-y-md q-py-lg">
                   <div class="">To</div>
                   <div class="coinAvatarWrapper">
-                    <img v-if="toCoin" :src="toCoin.icon" />
+                    <token-avatar
+                      v-if="toCoin"
+                      :token="toCoin.icon"
+                      :avatarSize="65"
+                    />
                   </div>
                   <div class="text-center">
                     {{ toCoin ? toCoin.name : "Choose coin" }}
@@ -219,7 +227,10 @@
                         style="min-width: unset;"
                       >
                         <q-avatar size="25px">
-                          <img :src="convertCoin.icon" />
+                          <token-avatar
+                            :token="convertCoin.icon"
+                            :avatarSize="25"
+                          />
                         </q-avatar>
                       </q-item-section>
                       {{ convertCoin ? convertCoin.name : "Choose coin" }}
@@ -295,7 +306,7 @@
                         style="min-width: unset;"
                       >
                         <q-avatar size="25px">
-                          <img :src="toCoin.icon" />
+                          <token-avatar :token="toCoin.icon" :avatarSize="25" />
                         </q-avatar>
                       </q-item-section>
                       {{ toCoin ? toCoin.name : "Choose coin" }}
@@ -373,11 +384,13 @@ import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import SelectCoin from "./SelectCoin";
 import { vxm } from "../../../store";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   props: ["showExchangeDlg", "selectedConvertCoin", "coins"],
   components: {
-    SelectCoin
+    SelectCoin,
+    tokenAvatar
   },
   data() {
     return {

@@ -70,7 +70,10 @@
                 >
                   <q-item-section avatar>
                     <q-avatar size="45px" class="q-my-sm">
-                      <img :src="coin.icon" />
+                      <token-avatar
+                        :token="coin.icon"
+                        :avatarSize="45"
+                      />
                       <div
                         v-if="coin.network == 'tevm'"
                         class="flex absolute full-width full-height"
@@ -78,7 +81,7 @@
                         <img
                           class="flex q-ml-auto q-mt-auto"
                           alt="tEVM"
-                          src="~assets/telosEVM_32.png"
+                          src="~assets/evm_logo.png"
                           style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
                         />
                       </div>
@@ -124,9 +127,13 @@
 import { mapGetters, mapActions } from "vuex";
 import { vxm } from "../../../store";
 import moment from "moment";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   props: ["showSelectCoinDlg", "coins", "selectedCoin", "type"],
+  components: {
+    tokenAvatar
+  },
   data() {
     return {
       searchCoinName: "",

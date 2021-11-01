@@ -3183,6 +3183,13 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001124:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001124.tgz#5d9998190258e11630d674fc50ea8e579ae0ced2"
   integrity sha512-zQW8V3CdND7GHRH6rxm6s59Ww4g/qGWTheoboW9nfeMg7sUoopIfKCcNZUjwYRCOrvereh3kwDpZj4VLQ7zGtA==
 
+canvas-renderer@~2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/canvas-renderer/-/canvas-renderer-2.2.0.tgz#512151f5494aaac5270802fba22599785114716d"
+  integrity sha512-Itdq9pwXcs4IbbkRCXc7reeGBk6i6tlDtZTjE1yc+KvYkx1Mt3WLf6tidZ/Ixbm7Vmi+jpWKG0dRBor67x9yGw==
+  dependencies:
+    "@types/node" "*"
+
 caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
@@ -6842,6 +6849,13 @@ javascript-stringify@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/javascript-stringify/-/javascript-stringify-2.0.1.tgz#6ef358035310e35d667c675ed63d3eb7c1aa19e5"
   integrity sha512-yV+gqbd5vaOYjqlbk16EG89xB5udgjqQF3C5FAORDg4f/IS1Yc5ERCv5e/57yBcfJYw05V5JyIXabhwb75Xxow==
+
+jdenticon@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/jdenticon/-/jdenticon-3.1.1.tgz#76a5b81195d7147c635a1303adf314dd08bcd4cb"
+  integrity sha512-/m0Kk5ou7tPHjW6YovCysRETqPlFcTabWG96r8NbbSsEK+eQ3jHiGULaGOtp4XBqkRxWS1XMopLRGwdhet5ezw==
+  dependencies:
+    canvas-renderer "~2.2.0"
 
 jest-worker@^26.3.0:
   version "26.3.0"

@@ -834,6 +834,8 @@ export default {
         });
       if (this.isAuthenticated)
         this.getUserTokens().then(this.loadUserTokens());
+
+      console.log(this.coins)
     }
 
     this.coinLoadedAll = true;
