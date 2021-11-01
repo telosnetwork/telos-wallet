@@ -34,7 +34,7 @@
                 <div class="absolute" style=" left: 50%; margin-left:-3rem;">
                   <q-item-section avatar class="cryptoImg">
                     <q-avatar size="6rem">
-                      <img :src="selectedCoin.icon" />
+                      <token-avatar :token="selectedCoin.icon" :avatarSize="100" />
                       <div
                         v-if="selectedCoin.name == 'Telos EVM'"
                         class="flex absolute full-width full-height"
@@ -155,7 +155,7 @@
                   <q-item clickable v-ripple class="list-item">
                     <q-item-section avatar>
                       <q-avatar size="35px" class="q-my-none">
-                        <img :src="selectedCoin.icon" />
+                        <token-avatar :token="selectedCoin.icon" :avatarSize="35" />
                       </q-avatar>
                     </q-item-section>
 
@@ -210,8 +210,12 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
+  components: {
+    tokenAvatar
+  },
   props: [
     "showHistoryDlg",
     "selectedCoin",
