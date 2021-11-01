@@ -155,7 +155,8 @@
         </div> -->
       </q-list>
 
-      <q-item class="row justify-center items-center q-pt-md">
+      <!-- TODO google sign -->
+      <!-- <q-item class="row justify-center items-center q-pt-md">
         <label
           v-if="privateKey && connected"
           class="text-subtitle1 flex items-center text-weight-medium q-ml-sm"
@@ -190,7 +191,7 @@
           label="View Private Key"
           @click="confirm = true"
         />
-      </q-item>
+      </q-item> -->
 
       <q-dialog v-model="confirm" persistent>
         <q-card class="popupCard">

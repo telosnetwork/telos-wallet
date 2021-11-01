@@ -33,7 +33,8 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <div class="q-ml-auto" id="google-signin-button"></div>
+        <!-- TODO google sign -->
+        <!-- <div class="q-ml-auto" id="google-signin-button"></div> --> 
         <q-btn
           no-caps
           text-color="white"
@@ -82,7 +83,8 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <div class="q-ml-auto" id="google-signin-button"></div>
+        <!-- TODO google sign -->
+        <!-- <div class="q-ml-auto" id="google-signin-button"></div> -->
         <q-btn
           no-caps
           text-color="white"
@@ -219,7 +221,8 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <div class="q-ml-auto" id="google-signin-button"></div>
+        <!-- TODO google sign -->
+        <!-- <div class="q-ml-auto" id="google-signin-button"></div> -->
         <q-btn
           no-caps
           text-color="white"
