@@ -1,16 +1,13 @@
 <template>
-  <div
-    class="profile flex-center "
-    :style="` display:flex; overflow: auto; height: 100vh !important;`"
-  >
+  <div class="pageContainer row justify-center">
     <!-- <login-button v-if="isAuthenticated" style="display: none" /> -->
-    <div>
-      <div class="profile text-white flex-center">
-        <label style="height: 10px; margin-bottom: 100px">Profile</label>
-      </div>
+    <div class="text-center">
       <q-list round flat dense class="text-white" icon="west">
+        <!-- <div class="profile text-white flex-center desktop-only">
+          <label style="height: 10px">Profile</label>
+        </div> -->
         <!-- User Avatar -->
-        <div class="flex-center relative" style="display:flex;">
+        <div class="row flex-center relative q-mt-xl">
           <!-- <video
             autoplay
             loop
@@ -26,11 +23,11 @@
           </video>
           <div class="overlay" style="width: 100%; height: 100%;"></div> -->
 
-          <q-item class="justify-center userAvatar">
-            <q-avatar size="150px" color="transparent" text-color="white">
-              <img :src="userAvatar" />
-            </q-avatar>
-          </q-item>
+          <div class="userAvatar">
+            <img :src="userAvatar" />
+            <!-- <q-avatar size="10rem" color="transparent" text-color="white">
+            </q-avatar> -->
+          </div>
 
           <!-- </q-container> -->
           <q-item class="justify-center uploadImage">
@@ -69,7 +66,6 @@
               input-class="text-white"
               class="round-sm full-width"
               label="Avatar URL"
-              
             />
           </q-item>
 
@@ -257,7 +253,7 @@ import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 
 export default {
-  components: {  },
+  components: {},
   data() {
     return {
       accountHasProfile: false,
@@ -640,6 +636,13 @@ export default {
   font-size: large;
   top: 2rem;
 }
+
+.pageContainer {
+  height: 100vh;
+  display: grid;
+  place-content: center;
+}
+
 .uploadImage {
   /* background-image: url("~assets/camera.svg"); */
   background-repeat: no-repeat;
@@ -654,6 +657,10 @@ export default {
 
 .userAvatar {
   position: absolute;
+  height: clamp(5rem, 20vh, 10rem);
+  img {
+    height: 100%;
+  }
 }
 
 .avatarBackground {
@@ -666,7 +673,7 @@ export default {
 }
 
 .profileInformation {
-  margin-top: 100px;
+  margin-top: 5rem;
   max-width: 25rem;
   img {
     height: 2.5rem;
