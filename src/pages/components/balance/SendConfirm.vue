@@ -163,8 +163,9 @@ export default {
               sender: this.$root.tEVMAccount.address,
               to: this.toAddress,
               quantity: quantityStr,
-              gasLimit: 21000,
               returnRaw: true
+            }, {
+              gasLimit: 21000
             });
             actions.push({
               account: process.env.EVM_CONTRACT,
