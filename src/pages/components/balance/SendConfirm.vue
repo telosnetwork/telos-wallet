@@ -41,7 +41,7 @@
                 <div v-if="networkType !== 'telos'" class="text-weight-bold">
                   Network Fee
                 </div>
-                <div v-if="networkType !== 'telos'">{{ `$ 0.00` }}</div>
+                <div v-if="networkType !== 'telos'">{{ `$ ${getFixed(gasFee * selectedCoin.price, 8)}` }}</div>
                 <div class="text-weight-bold">Total</div>
                 <div>
                   {{ `$ ${getFixed(sendAmount * selectedCoin.price, 8)}` }}
@@ -90,6 +90,7 @@
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import { networkInterfaces } from "os";
+import BigNumber from 'bignumber.js';
 
 export default {
   props: [
@@ -102,7 +103,8 @@ export default {
   ],
   data() {
     return {
-      sending: false
+      sending: false,
+      gasPrice: new BigNumber(0),
     };
   },
   computed: {
@@ -120,9 +122,16 @@ export default {
     },
     toAddressShort() {
       return `${this.toAddress.slice(0, 10)}..${this.toAddress.slice(-10)}`;
-    }
+    },
+    gasFee() {
+      return this.gasPrice
+        .times(21000)
+        .div(1e18)
+        .toFixed(4);
+    },
   },
   methods: {
+    ...mapActions("evm", ["getGasPrice"]),
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
@@ -252,6 +261,9 @@ export default {
         message: "Copied it to the clipboard successfully"
       });
     }
+  },
+  async mounted() {
+    this.gasPrice = new BigNumber("0x" + (await this.getGasPrice()));
   }
 };
 </script>

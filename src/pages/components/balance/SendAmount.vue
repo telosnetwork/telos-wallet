@@ -125,9 +125,7 @@
                   sendPercentage === 25
                     ? (sendPercentage = 0)
                     : (sendPercentage = 25);
-                  sendAmount = Number(
-                    sendPercentage === 0 ? '' : selectedCoin.amount / 4
-                  ).toString();
+                  clickedPercent(25);
                 "
               />
               <q-btn
@@ -144,9 +142,7 @@
                   sendPercentage === 50
                     ? (sendPercentage = 0)
                     : (sendPercentage = 50);
-                  sendAmount = Number(
-                    sendPercentage === 0 ? '' : selectedCoin.amount / 2
-                  ).toString();
+                  clickedPercent(50);
                 "
               />
               <q-btn
@@ -163,9 +159,7 @@
                   sendPercentage === 75
                     ? (sendPercentage = 0)
                     : (sendPercentage = 75);
-                  sendAmount = Number(
-                    sendPercentage === 0 ? '' : selectedCoin.amount * 0.75
-                  ).toString();
+                  clickedPercent(75);
                 "
               />
               <q-btn
@@ -182,7 +176,7 @@
                   sendPercentage === 100
                     ? (sendPercentage = 0)
                     : (sendPercentage = 100);
-                  clicked100Percent();
+                  clickedPercent(100);
                 "
               />
             </q-btn-group>
@@ -317,14 +311,17 @@ export default {
         this.coinInput ? " " + this.selectedCoin.symbol : ""
       }`;
     },
-    clicked100Percent() {
+    clickedPercent(percent) {
       this.sendAmount = Number(
-        this.sendPercentage === 0 ? "" : this.selectedCoin.amount
-      ).toString();
-      console.log(this.sendAmount)
+        this.sendPercentage === 0
+          ? ""
+          : (this.selectedCoin.amount * percent) / 100
+      )
+        .toFixed(this.selectedCoin.precision)
+        .toString();
       if (this.selectedCoin.name === "Telos EVM" && this.sendAmount > 0) {
-        this.sendAmount -= this.gasFee;
-        this.sendAmount = Number(this.sendAmount).toString();
+        this.sendAmount = Number(this.sendAmount) - this.gasFee - 1;
+        this.sendAmount = Number(this.sendAmount.toFixed(4)).toString();
       }
     },
     buttonClicked(key) {
@@ -367,8 +364,6 @@ export default {
       this.showSendToAddressDlg = false;
     });
     this.gasPrice = new BigNumber("0x" + (await this.getGasPrice()));
-    console.log(this.gasPrice.toString());
-    console.log(this.gasFee);
   },
   watch: {
     showSendAmountDlg: function(val, oldVal) {
