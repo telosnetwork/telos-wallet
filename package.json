@@ -13,7 +13,7 @@
     "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",
     "@quasar/extras": "^1.0.0",
     "@smontero/ual-sqrl": "^0.1.22",
-    "@telosnetwork/telosevm-js": "0.2.0",
+    "@telosnetwork/telosevm-js": "0.2.1",
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
     "bignumber.js": "^9.0.1",

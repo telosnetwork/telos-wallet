@@ -320,7 +320,7 @@ export default {
         .toFixed(this.selectedCoin.precision)
         .toString();
       if (this.selectedCoin.name === "Telos EVM" && this.sendAmount > 0) {
-        this.sendAmount = Number(this.sendAmount) - this.gasFee - 1;
+        this.sendAmount = Number(this.sendAmount) - this.gasFee;
         this.sendAmount = Number(this.sendAmount.toFixed(4)).toString();
       }
     },

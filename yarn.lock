@@ -1542,10 +1542,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@telosnetwork/telosevm-js@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.0.tgz#82199ca78be3dac1a25c4b893027d44400fe4ffa"
-  integrity sha512-w7hoLX3ajaOepHODx3DAnfJCwtELy5Rg7RlOsz2jXzZ+k8aIbOP9wBihmEEOktu6q4yzKCYvhe4GKf/O+ZlwUA==
+"@telosnetwork/telosevm-js@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.1.tgz#8d4ab075be214bf27428029ae5ec67ae839a49e5"
+  integrity sha512-LKzlJsuXMNczb/8QG11kGK6QAHT+94ljqvphW63JotsTRCyR4m5Wutar6oS2koJoUMML1K+qQ59oX/XFpkMU0w==
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
