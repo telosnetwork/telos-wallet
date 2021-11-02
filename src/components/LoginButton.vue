@@ -375,38 +375,22 @@ export default {
         });
       }
 
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Buying resources`
-      );
-      if (transaction) {
-        if (transaction === "needAuth") {
-          this.$q.notify({
-            type: "negative",
-            message: `Authentication is required`
-          });
-        } else if (transaction === "error") {
-          this.$q.notify({
-            type: "negative",
-            message: `Transaction failed. Make sure authentication is done correctly.`
-          });
-        } else if (transaction !== "cancelled") {
-          if (transaction) this.ramLow = false;
-          if (transaction) this.cpuLow = false;
-          if (transaction) this.netLow = false;
-          if (transaction) this.resLow = false;
-
-          this.$q.notify({
-            type: "primary",
-            message: `Resources bought`
-          });
-          this.$root.$emit("resources_bought");
-        }
-      } else {
+      try {
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Buying resources`
+        );
         this.$q.notify({
-          type: "negative",
-          message: `Failed to buy resources`
+          type: "primary",
+          message: `Resources bought`
         });
+        if (transaction) this.ramLow = false;
+        if (transaction) this.cpuLow = false;
+        if (transaction) this.netLow = false;
+        if (transaction) this.resLow = false;
+        this.$root.$emit("resources_bought");
+      } catch (error) {
+        this.$errorNotification(error);
       }
     },
 
@@ -456,8 +440,9 @@ export default {
         this.showAuth = true;
       }
     }, 500);
-    this.$root.$on(
-      "signOut", () => {this.signOut()})
+    this.$root.$on("signOut", () => {
+      this.signOut();
+    });
   },
   beforeDestroy() {
     if (this.authInterval) clearInterval(this.authInterval);

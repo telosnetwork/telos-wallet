@@ -235,7 +235,6 @@ export default {
           actions,
           `Send ${quantityStr} to ${this.toAddress}`
         );
-        console.log(transaction);
         this.$q.notify({
           type: "primary",
           message: `${quantityStr} is sent to ${this.toAddress}`

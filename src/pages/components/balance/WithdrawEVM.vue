@@ -105,34 +105,19 @@ export default {
         }
       });
 
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Deposit ${quantityStr} to the EVM`
-      );
-      if (transaction) {
-        if (transaction === "needAuth") {
-          this.$q.notify({
-            type: "negative",
-            message: `Authentication is required`
-          });
-        } else if (transaction === "error") {
-          this.$q.notify({
-            type: "negative",
-            message: `Transaction failed. Make sure authentication is done correctly.`
-          });
-        } else if (transaction !== "cancelled") {
-          this.$q.notify({
-            type: "primary",
-            message: `${quantityStr} is withdrawn from the EVM`
-          });
-          this.$root.$emit("successfully_withdrew", quantityStr);
-          this.showDlg = false;
-        }
-      } else {
+      try {
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Deposit ${quantityStr} to the EVM`
+        );
         this.$q.notify({
-          type: "negative",
-          message: `Failed to withdraw ${quantityStr} from EVM`
+          type: "primary",
+          message: `${quantityStr} is withdrawn from the EVM`
         });
+        this.$root.$emit("successfully_withdrew", quantityStr);
+        this.showDlg = false;
+      } catch (error) {
+        this.$errorNotification(error);
       }
     }
   },

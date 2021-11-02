@@ -392,37 +392,22 @@ export default {
       }
       if (actions.length > 0) {
         this.saving = true;
-        const transaction = await this.$store.$api.signTransaction(
-          actions,
-          `${!accountProfile ? "Created new profile" : "Updated profile"}`
-        );
-        if (transaction) {
-          if (transaction === "needAuth") {
-            this.$q.notify({
-              type: "negative",
-              message: `Authentication is required`
-            });
-          } else if (transaction === "error") {
-            this.$q.notify({
-              type: "negative",
-              message: `Action failed. Make sure authentication is done correctly.`
-            });
-          } else if (transaction !== "cancelled") {
-            this.$q.notify({
-              type: "primary",
-              message: `${
-                !accountProfile
-                  ? "New profile is created successfully"
-                  : "Profile is updated successfully"
-              }`
-            });
-          }
+        try {
+          const transaction = await this.$store.$api.signTransaction(
+            actions,
+            `${!accountProfile ? "Created new profile" : "Updated profile"}`
+          );
+          this.$q.notify({
+            type: "primary",
+            message: `${
+              !accountProfile
+                ? "New profile is created successfully"
+                : "Profile is updated successfully"
+            }`
+          });
+        } catch (error) {
+          this.$errorNotification(error);
         }
-      } else {
-        this.$q.notify({
-          type: "primary",
-          message: `No change to save`
-        });
       }
       this.saving = false;
     },

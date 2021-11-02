@@ -284,36 +284,21 @@ export default {
           data: "test"
         }
       });
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Create a new EVM address`
-      );
-      if (transaction) {
-        if (transaction === "needAuth") {
-          this.$q.notify({
-            type: "negative",
-            message: `Authentication is required`
-          });
-        } else if (transaction === "error") {
-          this.$q.notify({
-            type: "negative",
-            message: `Creation failed. Make sure authentication is done correctly.`
-          });
-        } else if (transaction !== "cancelled") {
-          this.$q.notify({
-            type: "primary",
-            message: `A new address is successfully created`
-          });
-          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-          this.networkType = "tevm";
-        }
-      } else {
+      try {
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Create a new EVM address`
+        );
         this.$q.notify({
-          type: "negative",
-          message: `Failed to create an address`
+          type: "primary",
+          message: `A new address is successfully created`
         });
+        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          this.accountName
+        );
+        this.networkType = "tevm";
+      } catch (error) {
+        this.$errorNotification(error);
       }
     },
     getImgUrl(pic) {

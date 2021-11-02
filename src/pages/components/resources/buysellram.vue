@@ -180,12 +180,7 @@ export default {
         });
         this.$root.$emit("bought_ram");
       } catch (error) {
-        this.$q.notify({
-          color: "red-5",
-          textColor: "white",
-          icon: "warning",
-          message: `${error}`
-        });
+        this.$errorNotification(error);
       }
       if (transaction) this.ramLow = false;
     },
