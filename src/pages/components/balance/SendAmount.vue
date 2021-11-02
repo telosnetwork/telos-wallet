@@ -182,9 +182,7 @@
                   sendPercentage === 100
                     ? (sendPercentage = 0)
                     : (sendPercentage = 100);
-                  sendAmount = Number(
-                    sendPercentage === 0 ? '' : selectedCoin.amount
-                  ).toString();
+                  clicked100Percent();
                 "
               />
             </q-btn-group>
@@ -235,6 +233,7 @@ import moment from "moment";
 import SendToAddress from "./SendToAddress";
 import { setInterval } from "timers";
 import { isNumber } from "util";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showSendAmountDlg", "showHistoryDlg", "selectedCoin"],
@@ -245,7 +244,8 @@ export default {
       sendPercentage: 0,
       coinInput: true,
       showSendToAddressDlg: false,
-      inputWidth: 50
+      inputWidth: 50,
+      gasPrice: new BigNumber(0)
     };
   },
   components: {
@@ -273,6 +273,12 @@ export default {
     sendAmountValue() {
       return Number(this.sendAmount.replace(",", ""));
     },
+    gasFee() {
+      return this.gasPrice
+        .times(21000)
+        .div(1e18)
+        .toFixed(4);
+    },
     sendCoinAmount() {
       if (!this.selectedCoin) {
         return 0;
@@ -280,6 +286,7 @@ export default {
       if (this.coinInput) {
         return this.sendAmountValue;
       }
+
       return this.getFixed(
         this.sendAmountValue / this.selectedCoin.price,
         this.selectedCoin.precision
@@ -287,6 +294,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("evm", ["getGasPrice"]),
     selectCoin(coin) {
       this.showShareAddressDlg = true;
       this.selectedCoin = coin;
@@ -308,6 +316,16 @@ export default {
       this.inputValue = `${!this.coinInput ? "$ " : ""}${this.sendAmount}${
         this.coinInput ? " " + this.selectedCoin.symbol : ""
       }`;
+    },
+    clicked100Percent() {
+      this.sendAmount = Number(
+        this.sendPercentage === 0 ? "" : this.selectedCoin.amount
+      ).toString();
+      console.log(this.sendAmount)
+      if (this.selectedCoin.name === "Telos EVM" && this.sendAmount > 0) {
+        this.sendAmount -= this.gasFee;
+        this.sendAmount = Number(this.sendAmount).toString();
+      }
     },
     buttonClicked(key) {
       if (key === ".") {
@@ -344,10 +362,13 @@ export default {
       this.showSendToAddressDlg = true;
     }
   },
-  mounted() {
+  async mounted() {
     this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendToAddressDlg = false;
     });
+    this.gasPrice = new BigNumber("0x" + (await this.getGasPrice()));
+    console.log(this.gasPrice.toString());
+    console.log(this.gasFee);
   },
   watch: {
     showSendAmountDlg: function(val, oldVal) {

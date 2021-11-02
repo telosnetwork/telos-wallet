@@ -221,37 +221,19 @@ export default {
           }
         });
       }
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Send ${quantityStr} to ${this.toAddress}`
-      );
-      if (transaction) {
-        if (transaction === "needAuth") {
-          this.$q.notify({
-            type: "negative",
-            message: `Authentication is required`
-          });
-        } else if (transaction === "error") {
-          this.$q.notify({
-            type: "negative",
-            message: `Transaction failed. Make sure authentication is done correctly.`
-          });
-        } else if (transaction !== "cancelled") {
-          this.$q.notify({
-            type: "primary",
-            message: `${quantityStr} is sent to ${this.toAddress}`
-          });
-          this.$root.$emit(
-            "successfully_sent",
-            this.sendAmount,
-            this.toAddress
-          );
-        }
-      } else {
+      try {
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Send ${quantityStr} to ${this.toAddress}`
+        );
+        console.log(transaction);
         this.$q.notify({
-          type: "negative",
-          message: `Failed to send ${quantityStr} to ${this.toAddress}`
+          type: "primary",
+          message: `${quantityStr} is sent to ${this.toAddress}`
         });
+        this.$root.$emit("successfully_sent", this.sendAmount, this.toAddress);
+      } catch (error) {
+        this.$errorNotification(error);
       }
       this.sending = false;
     },
