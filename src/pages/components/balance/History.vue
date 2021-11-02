@@ -147,7 +147,8 @@
                 </q-input>
                 <q-separator dark class="q-my-sm" />
               </div>
-              <q-infinite-scroll @load="loadMoreHistory" :offset="100">
+              <!-- TODO get evm history -->
+              <q-infinite-scroll v-if="selectedCoin.name !== 'Telos EVM'" @load="loadMoreHistory" :offset="100">
                 <div
                   v-for="(history, index) in searchHistories"
                   :key="`${history.block_num}_${index}`"
