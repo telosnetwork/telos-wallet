@@ -167,8 +167,11 @@
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
 import Authenticate from "../pages/components/auth/Authenticate";
-var window_1 = require("../utils/telos-keycatjs/utils/window");
-var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
+// var window_1 = require("../utils/telos-keycatjs/utils/window");
+// var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
+var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
+var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
+
 
 export default {
   data() {
@@ -289,17 +292,17 @@ export default {
       }
     },
     async onLogin(idx) {
-      if (idx === 0) {
-        this.showAuth = true;
-        this.authType = "signin";
-      } else {
+      // if (idx === 0) {
+      //   this.showAuth = true;
+      //   this.authType = "signin";
+      // } else {
         const error = await this.login({ idx });
         if (!error) {
           this.showLogin = false;
         } else {
           this.error = error;
         }
-      }
+      // }
     },
     openUrl(url) {
       window.open(url);

@@ -1,5 +1,6 @@
 import { UAL } from "universal-authenticator-library";
-import { KeycatAuthenticator } from "../utils/ual-telos-keycat";
+// import { KeycatAuthenticator } from "../utils/ual-telos-keycat";
+import { KeycatAuthenticator } from "@telosnetwork/ual-telos-keycat";
 import { Scatter } from "ual-scatter";
 import { Sqrl } from "@smontero/ual-sqrl";
 import { Anchor } from "ual-anchor";
