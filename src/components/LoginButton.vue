@@ -157,9 +157,9 @@
         </div>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="showAuth" persistent>
+    <!-- <q-dialog v-model="showAuth" persistent>
       <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
-    </q-dialog>
+    </q-dialog> -->
   </div>
 </template>
 
@@ -207,9 +207,6 @@ export default {
       "loading",
       "isAutoLoading"
     ]),
-    // resLow() {
-    //   return this.ramLow || this.netLow || this.cpuLow;
-    // },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[
         this.$ual.authenticators[0].selectedChainId
@@ -217,7 +214,6 @@ export default {
     }
   },
   components: {
-    Authenticate
   },
   components: {
     Authenticate
@@ -235,9 +231,9 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      this.showAuth = true;
-      this.authType = "signup";
-      // this.signPopup('/create');
+      // this.showAuth = true;
+      // this.authType = "signup";
+      this.signPopup('/create');
     },
     async signIn() {
       this.signPopup("/signin");
