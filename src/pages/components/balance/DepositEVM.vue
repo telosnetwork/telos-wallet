@@ -6,18 +6,19 @@
     transition-hide="slide-down"
   >
     <div class="popupCard">
+      <div class="exitBtn">
+        <q-btn
+          round
+          flat
+          dense
+          v-close-popup
+          class="text-grey-6"
+          icon="close"
+        />
+      </div>
       <div class="popupHeading">
-        <div>
-          <q-btn
-            round
-            flat
-            dense
-            v-close-popup
-            class="text-grey-6"
-            icon="close"
-          />
-        </div>
-        <div class="text-subtitle1 text-weight-medium text-center ">
+        <div />
+        <div class="text-h5 text-weight-medium text-center q-mt-lg">
           EVM Deposit
         </div>
         <!-- <div class="text-center q-gutter-y-xs">
@@ -25,10 +26,10 @@
         <div />
       </div>
       <div class="text-center">
-        <div class="text-subtitle2 text-grey-4">
-          Deposit your TLOS into the EVM, fast, free and instant.
+        <div class="text-subtitle2 text-grey-4 text-center">
+          Deposit your TLOS into the EVM,<br />fast, free and instant.
         </div>
-        <div class="text-center">
+        <div class="text-center q-mt-md">
           <div class="inputAmount row items-center ">
             <input
               type="text"
@@ -39,7 +40,7 @@
               "
               @blur="inputBlur"
             />
-            <label class="text-weight-regular q-ml-sm text-left">
+            <label class="text-weight-medium q-ml-sm text-left">
               TLOS
             </label>
           </div>
@@ -53,16 +54,25 @@
           /> -->
           <div class="">Max: {{ nativeTLOSBalance }}</div>
         </div>
+        <div class="row justify-center q-mt-md">
+          <q-btn
+            class="purpleGradient depositBtn"
+            no-caps
+            rounded
+            label="Deposit"
+            @click="deposit"
+          />
+        </div>
         <div class="q-mt-md row justify-center">
           <div
-            class="depositAddressToggle q-mb-md"
+            class="lightBlue depositAddressToggle q-mb-md"
             v-if="depositOwnAddress"
             @click="depositOwnAddress = false"
           >
             + Deposit to a different address
           </div>
           <div
-            class="depositAddressToggle"
+            class="lightBlue depositAddressToggle"
             v-else
             @click="depositOwnAddress = true"
           >
@@ -75,6 +85,7 @@
             label="Recipient"
             dense
             rounded
+            outlined
             class="q-pt-xs col-11"
             standout="bg-transparent text-white"
             label-color="white"
@@ -89,13 +100,6 @@
             ]"
           />
         </div>
-        <q-btn
-          class="purpleGradient"
-          no-caps
-          rounded
-          label="Deposit"
-          @click="deposit"
-        />
         <div class="row justify-center q-mt-md">
           <div v-if="!haveEVMAccount && depositOwnAddress" class="note">
             NOTE: This is your first deposit so an additional “create” action
@@ -253,9 +257,22 @@ export default {
 }
 .depositAddressToggle {
   cursor: pointer;
+}
+.lightBlue {
   color: $lightBlue;
 }
 .note {
   max-width: 25rem;
+}
+.depositBtn {
+  flex-basis: 15rem;
+  height: 3rem;
+}
+// .popupCard {
+//   position: relative;
+// }
+.exitBtn {
+  position: absolute;
+  // right: 0px;
 }
 </style>

@@ -157,9 +157,9 @@
         </div>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="showAuth" persistent>
+    <!-- <q-dialog v-model="showAuth" persistent>
       <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
-    </q-dialog>
+    </q-dialog> -->
   </div>
 </template>
 
@@ -167,8 +167,11 @@
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
 import Authenticate from "../pages/components/auth/Authenticate";
-var window_1 = require("../utils/telos-keycatjs/utils/window");
-var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
+// var window_1 = require("../utils/telos-keycatjs/utils/window");
+// var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
+var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
+var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
+
 
 export default {
   data() {
@@ -204,9 +207,6 @@ export default {
       "loading",
       "isAutoLoading"
     ]),
-    // resLow() {
-    //   return this.ramLow || this.netLow || this.cpuLow;
-    // },
     chainName() {
       return this.$ual.authenticators[0].keycatMap[
         this.$ual.authenticators[0].selectedChainId
@@ -214,7 +214,6 @@ export default {
     }
   },
   components: {
-    Authenticate
   },
   components: {
     Authenticate
@@ -232,9 +231,9 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      this.showAuth = true;
-      this.authType = "signup";
-      // this.signPopup('/create');
+      // this.showAuth = true;
+      // this.authType = "signup";
+      this.signPopup('/create');
     },
     async signIn() {
       this.signPopup("/signin");
@@ -289,17 +288,17 @@ export default {
       }
     },
     async onLogin(idx) {
-      if (idx === 0) {
-        this.showAuth = true;
-        this.authType = "signin";
-      } else {
+      // if (idx === 0) {
+      //   this.showAuth = true;
+      //   this.authType = "signin";
+      // } else {
         const error = await this.login({ idx });
         if (!error) {
           this.showLogin = false;
         } else {
           this.error = error;
         }
-      }
+      // }
     },
     openUrl(url) {
       window.open(url);

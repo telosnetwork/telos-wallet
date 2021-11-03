@@ -1542,6 +1542,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@telosnetwork/telos-keycatjs@0.12.4":
+  version "0.12.4"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telos-keycatjs/-/telos-keycatjs-0.12.4.tgz#c42b020ba066597f17569e16007ea812b308b41d"
+  integrity sha512-8OXJlG+wbyS/tooXhb81zd3MTJI7Q2Xfr/qjC/UItkW0kILHPd3fzLYYq7gyg9FbsgIGAyt3KMyFy8kSRFM6Vw==
+  dependencies:
+    query-string "^6.5.0"
+
 "@telosnetwork/telosevm-js@0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.1.tgz#8d4ab075be214bf27428029ae5ec67ae839a49e5"
@@ -1559,6 +1566,16 @@
     node-fetch "^2.6.0"
     stream "^0.0.2"
     text-encoding "^0.7.0"
+
+"@telosnetwork/ual-telos-keycat@1.11.1":
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/ual-telos-keycat/-/ual-telos-keycat-1.11.1.tgz#d9bff227a9a761c0b205843ebd45e0e081c70ee6"
+  integrity sha512-1ZV878mk9XYZnRHIxRzXVIl+0o2NjEj/6HlaXZppfwHV9jHcLL4khyfjs979jRYsxFeIKWSYBEgH+d8HMCbZzA==
+  dependencies:
+    "@telosnetwork/telos-keycatjs" "0.12.4"
+    eosjs "^20.0.3"
+    text-encoding "^0.7.0"
+    universal-authenticator-library "0.1.0"
 
 "@types/anymatch@*":
   version "1.3.1"
@@ -11247,6 +11264,11 @@ unique-slug@^2.0.0:
   integrity sha512-zoWr9ObaxALD3DOPfjPSqxt4fnZiWblxHIgeWqW8x7UqDzEtHEQLzji2cuJYQFCU6KmoJikOYAZlrTHHebjx2w==
   dependencies:
     imurmurhash "^0.1.4"
+
+universal-authenticator-library@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/universal-authenticator-library/-/universal-authenticator-library-0.1.0.tgz#187e6a85f43e75d4d76b66c228c9e4b59770d4af"
+  integrity sha512-45nl80BWf+9WA8vTMXunMicZmHPm4wWdxNnSlL65cCP4OjA1ra4IuH+T7+Ko3P6IfXSfS9+VNCuXai3fip+taA==
 
 universal-authenticator-library@0.1.4:
   version "0.1.4"

@@ -3,11 +3,16 @@
 
 const errorNotification = function(error) {
   let errorStr;
-  if (error.startsWith("assertion failure with message:")) {
-    errorStr = error.split("assertion failure with message:")[1];
+  if (error !== undefined) {
+    if (error.startsWith("assertion failure with message:")) {
+      errorStr = error.split("assertion failure with message:")[1];
+    } else {
+      errorStr = error;
+    }
   } else {
-    errorStr = error;
+    errorStr = "Cancelled transaction";
   }
+  
   this.$q.notify({
     type: "negative",
     icon: "warning",
