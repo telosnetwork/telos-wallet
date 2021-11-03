@@ -10,7 +10,7 @@ const errorNotification = function(error) {
       errorStr = error;
     }
   } else {
-    errorStr = "Cancelled transactoin";
+    errorStr = "Cancelled transaction";
   }
   
   this.$q.notify({
