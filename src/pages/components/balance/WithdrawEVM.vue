@@ -5,29 +5,31 @@
     transition-hide="slide-down"
   >
     <div class="popupCard">
+      <div class="exitBtn">
+        <q-btn
+          round
+          flat
+          dense
+          v-close-popup
+          class="text-grey-6"
+          icon="close"
+        />
+      </div>
       <div class="popupHeading">
-        <div>
-          <q-btn
-            round
-            flat
-            dense
-            v-close-popup
-            class="text-grey-6"
-            icon="close"
-          />
-        </div>
-        <div class="text-subtitle1 text-weight-medium text-center ">
+        <div />
+        <div class="text-h5 text-weight-medium text-center q-mt-lg ">
           EVM Withdraw
         </div>
         <!-- <div class="text-center q-gutter-y-xs">
         </div> -->
         <div />
       </div>
-      <div class="text-center">
-        <div class="text-subtitle2 text-grey-4">
-          Withdraw your TLOS from the EVM, fast, free and instant.
+      <div class="popupBody text-center">
+        <div class="text-center text-subtitle2 text-grey-4">
+          Withdraw your TLOS from the EVM,<br />
+          fast, free and instant.
         </div>
-        <div class="text-center">
+        <div class="text-center q-mt-md">
           <div class="inputAmount row items-center ">
             <input
               type="text"
@@ -44,13 +46,15 @@
           </div>
           <div class="">Max: {{ evmTLOSBalance }}</div>
         </div>
-        <q-btn
-          class="purpleGradient q-mt-lg"
-          no-caps
-          rounded
-          label="Withdraw"
-          @click="withdraw"
-        />
+        <div class="row justify-center q-mt-md q-mb-lg">
+          <q-btn
+            class="purpleGradient withdrawBtn"
+            no-caps
+            rounded
+            label="Withdraw"
+            @click="withdraw"
+          />
+        </div>
       </div>
     </div>
   </q-dialog>
@@ -145,5 +149,12 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.exitBtn {
+  position: absolute;
+}
+.withdrawBtn {
+  flex-basis: 15rem;
+  height: 3rem;
 }
 </style>
