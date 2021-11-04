@@ -434,7 +434,7 @@ export default {
     },
     async loadUserTokens() {
       const userCoins = await this.$hyperion.get(
-        `/v2/state/get_tokens?account=${this.accountName}`
+        `/v2/state/get_tokens?account=${this.accountName}&limit=1000`
       );
       if (userCoins.status === 200) {
         const tokens = userCoins.data.tokens.filter(token => {
