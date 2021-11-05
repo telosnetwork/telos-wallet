@@ -281,7 +281,7 @@ export default {
         name: "create",
         data: {
           account: this.accountName,
-          data: "test"
+          data: "data"
         }
       });
       try {
