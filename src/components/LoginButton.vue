@@ -129,7 +129,7 @@
             />
           </div>
           <div class="text-subtitle1 text-weight-medium text-center ">
-            Your resources is low
+            Your resources are low
           </div>
           <div />
         </div>
