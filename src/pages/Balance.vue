@@ -383,14 +383,10 @@ export default {
       });
     },
     async loadUserProfile() {
-      if (
-        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
-      ) {
+      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile = this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
         return;
       }
@@ -447,6 +443,9 @@ export default {
           return true;
         });
         userCoins.data.tokens.forEach(token => {
+          if (token.symbol === undefined) {
+            return;
+          }
           this.coins.forEach(coin => {
             if (
               !coin.network &&
