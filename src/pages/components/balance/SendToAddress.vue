@@ -33,7 +33,7 @@
             </q-item>
             <div class="row q-gutter-x-md items-center justify-center q-pt-md">
               <q-avatar size="6rem">
-                <img :src="selectedCoin.icon" />
+                <token-avatar :token="selectedCoin.icon" :avatarSize="95" />
                 <div
                   v-if="
                     networkType == 'tevm' && selectedCoin.name == 'Telos EVM'
@@ -50,10 +50,7 @@
               </q-avatar>
               <div><img src="~assets/icons/networkArrows.svg" /></div>
               <q-avatar size="6rem">
-                <img
-                  v-if="networkType === 'telos' || networkType === 'tevm'"
-                  :src="selectedCoin.icon"
-                />
+                <token-avatar v-if="networkType === 'telos' || networkType === 'tevm'" :token="selectedCoin.icon" :avatarSize="95" />
                 <div
                   v-if="networkType == 'tevm'"
                   class="flex absolute full-width full-height"
@@ -224,6 +221,7 @@
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import SendConfirm from "./SendConfirm";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   props: ["showSendToAddressDlg", "selectedCoin", "sendAmount"],
@@ -237,7 +235,8 @@ export default {
     };
   },
   components: {
-    SendConfirm
+    SendConfirm,
+    tokenAvatar
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),

@@ -27,7 +27,7 @@
           </div>
           <div class="inputContainer">
             <q-avatar class="coinAvatar" size="5rem">
-              <img :src="selectedCoin.icon" />
+              <token-avatar :token="selectedCoin.icon" :avatarSize="80" />
               <div
                 v-if="selectedCoin.name == 'Telos EVM'"
                 class="flex absolute full-width full-height"
@@ -228,6 +228,7 @@ import SendToAddress from "./SendToAddress";
 import { setInterval } from "timers";
 import { isNumber } from "util";
 import BigNumber from "bignumber.js";
+import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   props: ["showSendAmountDlg", "showHistoryDlg", "selectedCoin"],
@@ -243,7 +244,8 @@ export default {
     };
   },
   components: {
-    SendToAddress
+    SendToAddress,
+    tokenAvatar
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),
