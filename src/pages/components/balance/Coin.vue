@@ -74,7 +74,7 @@
               <label class="text-subtitle1 text-weight-small text-white h-20">{{
                 `${getFixed(coin.amount, 8)} ${coin.symbol}`
               }}</label>
-              <label class="text-caption text-grey-6"
+              <label v-if="coin.price !== 0" class="text-caption text-grey-6"
                 >${{ getFixed(coin.amount * coin.price, 2) }}</label
               >
             </div>
