@@ -296,7 +296,6 @@ export default {
       coinViewHeight: 0,
       tabs: tabsData,
       tab: "Coins",
-      userTokens: {},
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
@@ -417,16 +416,53 @@ export default {
         this.panning = false;
       }
     },
-    async getUserTokens() {
-      await fetch(
-        `https://www.api.bloks.io/telos${
-          this.chainName === "telos" ? "" : "-test"
-        }/account/${this.accountName}?type=getAccountTokens&coreSymbol=TLOS`
-      )
-        .then(resp => resp.json())
-        .then(data => {
-          this.userTokens = { data, status: 200 };
-        });
+    async loadCoinList() {
+      /*
+                account: token.account.toLowerCase(),
+          name: token.metadata.name,
+          symbol: token.symbol,
+          amount: 0,
+          price: 0,
+          icon: token.metadata.logo,
+          precision:
+            precisionSplit.length > 1 ? precisionSplit[1].length : 0
+            network: tevm
+       */
+      const coins = await this.$store.$api.getTableRows({
+        code: 'tokenmanager',
+        limit: "1000",
+        scope: 'tokenmanager',
+        table: "tokens"
+      });
+
+      coins.rows.forEach(token => {
+        const [precision, symbol] = token.token_symbol.split(',');
+        const account = token.contract_account;
+        if (account == 'eosio.token' && symbol == 'TLOS')
+          return;
+
+        const name = token.token_name;
+        const icon = token.logo_sm;
+        const amount = 0;
+        const price = 0;
+
+        this.coins.push({
+          account, name, symbol, amount, price, icon, precision
+        })
+      })
+    },
+    async loadPrices() {
+      const tlosUsdDataPoints = await this.$store.$api.getTableRows({
+        code: 'delphioracle',
+        limit: "1000",
+        scope: 'tlosusd',
+        table: "datapoints"
+      });
+
+      const tlosPrice = tlosUsdDataPoints.rows[0].median / 10000;
+      this.coins[0].price = tlosPrice;
+      this.coins[1].price = tlosPrice;
+
     },
     async loadUserTokens() {
       const userCoins = await this.$hyperion.get(
@@ -434,10 +470,7 @@ export default {
       );
       if (userCoins.status === 200) {
         const tokens = userCoins.data.tokens.filter(token => {
-          if (
-            userCoins.data.tokens.filter(t => t.symbol === token.symbol)
-              .length > 1
-          ) {
+          if (userCoins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
             return token.contract.toLowerCase() === "eosio.token";
           }
           return true;
@@ -469,37 +502,6 @@ export default {
             .toFixed(4);
         }
       });
-
-      await fetch(`https://www.api.bloks.io/telos/tokens`)
-        .then(response => response.json())
-        .then(json => {
-          json.forEach(token => {
-            if (token.chain !== "telos") {
-              if (token.chain === "eos" && token.key.includes("ptokens")) {
-                this.coins.forEach(coin => {
-                  if (coin.symbol === token.symbol) {
-                    coin.price = token.price.usd;
-                  }
-                });
-              }
-            } else if (token.metadata.name === "Telos") {
-              this.coins.forEach(coin => {
-                if (coin.symbol === "TLOS") {
-                  coin.price = token.price.usd;
-                }
-              });
-              this.coins[0].price = token.price.usd;
-            } else if (token.symbol !== "TLOS") {
-              if (!token.key.includes("ptokens")) {
-                this.coins.forEach(coin => {
-                  if (coin.symbol === token.symbol) {
-                    coin.price = token.price.usd;
-                  }
-                });
-              }
-            }
-          });
-        });
 
       const sortCoin = function(suggestTokens) {
         return function(a, b) {
@@ -755,60 +757,18 @@ export default {
       this.coinLoadedAll = true;
     } else {
       this.coins.length = 2;
-      await fetch(`https://www.api.bloks.io/telos/tokens`)
-        .then(response => response.json())
-        .then(json => {
-          json.forEach(token => {
-            if (token.chain !== "telos") {
-            } else if (token.metadata.name === "Telos") {
-              this.coins.forEach(coin => {
-                if (coin.symbol === "TLOS") {
-                  coin.price = token.price.usd;
-                  coin.icon = "/coins/TLOS.png";
-                }
-              });
-            } else if (token.symbol !== "TLOS") {
-              const precisionSplit = token.supply.circulating
-                .toString()
-                .split(".");
-              this.coins.push({
-                account: token.account.toLowerCase(),
-                name: token.metadata.name,
-                symbol: token.symbol,
-                amount: 0,
-                price: 0,
-                icon: token.metadata.logo,
-                precision:
-                  precisionSplit.length > 1 ? precisionSplit[1].length : 0
-              });
-              const tSymbol = token.symbol.toLowerCase();
-              if (
-                this.pTokenNetworks[tSymbol] &&
-                this.pTokenNetworks[tSymbol].tevm
-              ) {
-                this.coins.push({
-                  account: token.account.toLowerCase(),
-                  name: token.metadata.name,
-                  symbol: token.symbol,
-                  amount: 0,
-                  price: 0,
-                  icon: token.metadata.logo,
-                  precision:
-                    precisionSplit.length > 1 ? precisionSplit[1].length : 0,
-                  network: "tevm"
-                });
-              }
-            }
-          });
-        });
+      await this.loadCoinList();
+      await this.loadPrices();
+
       if (this.isAuthenticated)
-        this.getUserTokens().then(this.loadUserTokens());
+        this.loadUserTokens();
     }
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
       if (this.isAuthenticated)
-        this.getUserTokens().then(this.loadUserTokens());
+        this.loadUserTokens();
+
       try {
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
           this.accountName
