@@ -541,9 +541,9 @@ export default {
             }
           }
 
-          if (aSymbol === "tlos") {
+          if (aSymbol === "tlos" && a.account === "eosio.token") {
             return -1;
-          } else if (bSymbol === "tlos") {
+          } else if (bSymbol === "tlos" && b.account === "eosio.token") {
             return 1;
           }
 

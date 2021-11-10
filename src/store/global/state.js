@@ -3,7 +3,6 @@ export default () => ({
   minSpace: 60,
   maxSpace: 140,
   suggestTokens: [
-    'tlos',
     'pbtc',
     'peth',
     'plink',
