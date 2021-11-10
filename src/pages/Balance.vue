@@ -382,10 +382,14 @@ export default {
       });
     },
     async loadUserProfile() {
-      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
+      if (
+        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+      ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[this.accountName];
+      const accountProfile = this.$store.state.account.profiles[
+        this.accountName
+      ];
       if (!accountProfile) {
         return;
       }
@@ -418,28 +422,26 @@ export default {
     },
     async loadCoinList() {
       /*
-                account: token.account.toLowerCase(),
+          account: token.account.toLowerCase(),
           name: token.metadata.name,
           symbol: token.symbol,
           amount: 0,
           price: 0,
           icon: token.metadata.logo,
-          precision:
-            precisionSplit.length > 1 ? precisionSplit[1].length : 0
-            network: tevm
+          precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0
+          network: tevm
        */
       const coins = await this.$store.$api.getTableRows({
-        code: 'tokenmanager',
+        code: "tokenmanager",
         limit: "1000",
-        scope: 'tokenmanager',
+        scope: "tokenmanager",
         table: "tokens"
       });
 
       coins.rows.forEach(token => {
-        const [precision, symbol] = token.token_symbol.split(',');
+        const [precision, symbol] = token.token_symbol.split(",");
         const account = token.contract_account;
-        if (account == 'eosio.token' && symbol == 'TLOS')
-          return;
+        if (account == "eosio.token" && symbol == "TLOS") return;
 
         const name = token.token_name;
         const icon = token.logo_sm;
@@ -447,22 +449,27 @@ export default {
         const price = 0;
 
         this.coins.push({
-          account, name, symbol, amount, price, icon, precision
-        })
-      })
+          account,
+          name,
+          symbol,
+          amount,
+          price,
+          icon,
+          precision
+        });
+      });
     },
     async loadPrices() {
       const tlosUsdDataPoints = await this.$store.$api.getTableRows({
-        code: 'delphioracle',
+        code: "delphioracle",
         limit: "1000",
-        scope: 'tlosusd',
+        scope: "tlosusd",
         table: "datapoints"
       });
 
       const tlosPrice = tlosUsdDataPoints.rows[0].median / 10000;
       this.coins[0].price = tlosPrice;
       this.coins[1].price = tlosPrice;
-
     },
     async loadUserTokens() {
       const userCoins = await this.$hyperion.get(
@@ -489,6 +496,24 @@ export default {
               coin.precision = token.precision || 4;
             }
           });
+          // if token not in coins, add it
+          if (
+            !this.coins.find(
+              coin =>
+                coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
+                coin.account === token.contract
+            )
+          ) {
+            this.coins.push({
+              account: token.contract,
+              name: `${token.contract}`,
+              symbol: token.symbol,
+              amount: token.amount || 0,
+              price: 0,
+              precision: token.precision || 4,
+              icon: `${token.contract}-${token.symbol}`
+            });
+          }
         });
       }
 
@@ -760,14 +785,15 @@ export default {
       await this.loadCoinList();
       await this.loadPrices();
 
-      if (this.isAuthenticated)
-        this.loadUserTokens();
+      if (this.isAuthenticated) this.loadUserTokens();
     }
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      if (this.isAuthenticated)
+      if (this.isAuthenticated) {
         this.loadUserTokens();
+        await this.loadPrices();
+      }
 
       try {
         this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
