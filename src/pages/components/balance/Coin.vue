@@ -63,7 +63,7 @@
               rounded
               no-caps
               @click.stop="depositEvm"
-              v-if="coin.symbol === 'TLOS' && coin.network !== 'tevm'"
+              v-if="coin.symbol === 'TLOS' && coin.account === 'eosio.token' && coin.network !== 'tevm'"
             >
               <img src="~assets/icons/networkArrows.svg" />
               <div class="q-pl-sm">EVM</div>

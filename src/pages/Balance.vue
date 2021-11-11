@@ -514,6 +514,11 @@ export default {
               icon: `${token.contract}-${token.symbol}`
             });
           }
+          this.coins.forEach(coin => {
+          if (coin.symbol === "TLOS" && coin.account === "eosio.token") {
+            coin.icon = "/coins/TLOS.png";
+          }
+        });
         });
       }
 
@@ -541,9 +546,9 @@ export default {
             }
           }
 
-          if (aSymbol === "tlos") {
+          if (aSymbol === "tlos" && a.account === "eosio.token") {
             return -1;
-          } else if (bSymbol === "tlos") {
+          } else if (bSymbol === "tlos" && b.account === "eosio.token") {
             return 1;
           }
 
