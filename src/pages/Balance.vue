@@ -477,7 +477,10 @@ export default {
       );
       if (userCoins.status === 200) {
         const tokens = userCoins.data.tokens.filter(token => {
-          if (userCoins.data.tokens.filter(t => t.symbol === token.symbol).length > 1) {
+          if (
+            userCoins.data.tokens.filter(t => t.symbol === token.symbol)
+              .length > 1
+          ) {
             return token.contract.toLowerCase() === "eosio.token";
           }
           return true;
@@ -515,10 +518,10 @@ export default {
             });
           }
           this.coins.forEach(coin => {
-          if (coin.symbol === "TLOS" && coin.account === "eosio.token") {
-            coin.icon = "/coins/TLOS.png";
-          }
-        });
+            if (coin.symbol === "TLOS" && coin.account === "eosio.token") {
+              coin.icon = "/coins/TLOS.png";
+            }
+          });
         });
       }
 
@@ -578,23 +581,42 @@ export default {
       }
     },
     async loadNftTokenItemssPerAccount(nftAccount) {
-      const tagData = await this.$store.$api.getTableRows({
-        code: nftAccount,
-        index_position: 1,
-        json: true,
-        key_type: "",
-        limit: "1000",
-        lower_bound: null,
-        reverse: false,
-        scope: nftAccount,
-        show_payer: false,
-        table: "items",
-        table_key: "",
-        upper_bound: null
-      });
-      this.nftTokenItems[nftAccount] = tagData.rows.filter(
-        row => row.owner === this.accountName
-      );
+      let more = true;
+      let next_key = 0;
+      while (more === true) {
+        const tagData = await this.$store.$api.getTableRows({
+          code: nftAccount,
+          index_position: 1,
+          json: true,
+          key_type: "",
+          limit: "10000",
+          lower_bound: next_key,
+          reverse: false,
+          scope: nftAccount,
+          show_payer: false,
+          table: "items",
+          table_key: "",
+          upper_bound: next_key + 10000
+        });
+        if (tagData.more === false) {
+          more = false;
+        } else {
+          next_key = tagData.next_key;
+        }
+
+        if (this.nftTokenItems[nftAccount]) {
+          let moreNFTs = tagData.rows.filter(
+            row => row.owner === this.accountName
+          );
+          this.nftTokenItems[nftAccount] = this.nftTokenItems[
+            nftAccount
+          ].concat(moreNFTs);
+        } else {
+          this.nftTokenItems[nftAccount] = tagData.rows.filter(
+            row => row.owner === this.accountName
+          );
+        }
+      }
     },
     async loadNftTokenTags() {
       for (const account of this.nftAccounts) {
@@ -623,7 +645,7 @@ export default {
           index_position: 1,
           json: true,
           key_type: "",
-          limit: "100",
+          limit: 9999,
           lower_bound: null,
           reverse: false,
           scope: `${
