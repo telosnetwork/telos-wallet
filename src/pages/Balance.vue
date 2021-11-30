@@ -52,8 +52,13 @@
               no-caps
               @click="copyStrToClipboard($root.tEVMAccount.address)"
             >
-              <div class="lt-md">{{ shortenedEvmAddress }}</div>
-              <div class="gt-sm">{{ $root.tEVMAccount.address }}</div>
+              <div v-if="!showEVMAddress" @click="showEVMWarning = true">
+                Show EVM address
+              </div>
+              <div v-if="showEVMAddress" class="lt-md">
+                {{ shortenedEvmAddress }}
+              </div>
+              <!-- <div class="gt-sm">{{ $root.tEVMAccount.address }}</div> -->
             </q-btn>
           </div>
 
@@ -211,6 +216,31 @@
       :selectedCoin="selectedCoin"
     />
     <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
+
+    <q-dialog v-model="showEVMWarning">
+      <q-card class="popupCard">
+        <q-card-section>
+          <div class="text-h6">WARNING!</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          DO NOT USE THIS ANYWHERE EXCEPT TELOS EVM OR ELSE IT COULD RESULT IN A
+          LOSS OF FUNDS.
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            @click="showEVMAddress = true"
+            flat
+            no-caps
+            label="I Understand"
+            color="white"
+            v-close-popup
+            class="purpleGradient"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -309,6 +339,8 @@ export default {
       showExchangeDlg: false,
       showDepositEVMDlg: false,
       showWithdrawEVMDlg: false,
+      showEVMWarning: false,
+      showEVMAddress: false,
       tEVMBalance: 0,
       tEVMWithdrawing: false,
       avatar: ""
@@ -382,10 +414,14 @@ export default {
       });
     },
     async loadUserProfile() {
-      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
+      if (
+        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+      ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[this.accountName];
+      const accountProfile = this.$store.state.account.profiles[
+        this.accountName
+      ];
       if (!accountProfile) {
         return;
       }
@@ -554,8 +590,8 @@ export default {
           }
 
           if (
-            (!suggestTokens.map(t => t.sym).includes(aSymbol)) ||
-            (!suggestTokens.map(t => t.sym).includes(bSymbol))
+            !suggestTokens.map(t => t.sym).includes(aSymbol) ||
+            !suggestTokens.map(t => t.sym).includes(bSymbol)
           ) {
             if (
               suggestTokens.map(t => t.sym).includes(aSymbol) &&
