@@ -58,7 +58,7 @@
               <div v-if="showEVMAddress" class="lt-md">
                 {{ shortenedEvmAddress }}
               </div>
-              <div class="gt-sm">{{ $root.tEVMAccount.address }}</div>
+              <div v-if="showEVMAddress" class="gt-sm">{{ $root.tEVMAccount.address }}</div>
             </q-btn>
             <q-icon
               class="q-ml-sm"
