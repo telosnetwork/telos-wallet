@@ -60,6 +60,14 @@
               </div>
               <!-- <div class="gt-sm">{{ $root.tEVMAccount.address }}</div> -->
             </q-btn>
+            <q-icon
+              class="q-ml-sm"
+              @click="addEvmNetwork()"
+              name="fas fa-external-link-alt"
+              size="1.3rem"
+            >
+              <q-tooltip>Add EVM network to wallet</q-tooltip></q-icon
+            >
           </div>
 
           <!-- Action Buttons -->
@@ -225,7 +233,7 @@
 
         <q-card-section class="q-pt-none">
           DO NOT USE THIS ANYWHERE EXCEPT TELOS EVM OR ELSE IT COULD RESULT IN A
-          LOSS OF FUNDS.
+          LOSS OF FUNDS. THIS PRIVATE KEY IS NOT AVAILABLE.
         </q-card-section>
 
         <q-card-actions align="right">
@@ -811,6 +819,28 @@ export default {
       } catch (error) {
         this.$errorNotification(error);
       }
+    },
+
+    addEvmNetwork() {
+      console.log("addEvmNetwork");
+      const params = [
+        {
+          chainId: "0x28",
+          chainName: "Telos EVM Mainnet",
+          nativeCurrency: {
+            name: "Telos",
+            symbol: "TLOS",
+            decimals: 4
+          },
+          rpcUrls: ["https://mainnet.telos.net/evm"],
+          blockExplorerUrls: ["https://teloscan.io"]
+        }
+      ];
+
+      window.ethereum
+        .request({ method: "wallet_addEthereumChain", params })
+        .then(() => console.log("Success"))
+        .catch(error => console.log("Error", error.message));
     }
   },
   created: async function() {
