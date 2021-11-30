@@ -1,6 +1,6 @@
 {
   "name": "telos-web-wallet",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A Web Wallet for Telos",
   "productName": "Telos Web Wallet",
   "author": "Ryuhei Matsuda <ryuheimat3@gmail.com>",
