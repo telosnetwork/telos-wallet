@@ -581,10 +581,11 @@ export default {
       }
     },
     async loadNftTokenItemssPerAccount(nftAccount) {
+      console.log(this.accountName)
       let more = true;
       let next_key = 10000;
       while (more === true) {
-        let lower_bound = BigNumber(this.$nameToUint64(await this.accountName)).times("1e16");
+        let lower_bound = BigNumber(this.$nameToUint64(this.accountName)).times("1e16");
         let upper_bound = lower_bound.plus(next_key);
         const tagData = await this.$store.$api.getTableRows({
           code: nftAccount,
@@ -600,7 +601,6 @@ export default {
           lower_bound: lower_bound.toFixed(),
           upper_bound: upper_bound.toFixed()
         });
-        console.log(tagData);
         if (tagData.more === false) {
           more = false;
         } else {
@@ -803,10 +803,6 @@ export default {
       }
     }, 5);
 
-    if (this.chainName === "telos" || 1) {
-      await this.loadNftTokenItems();
-      this.loadNftTokenTags();
-    }
     if (this.loadedCoins.length > 0) {
       this.coins = this.loadedCoins;
       this.coinLoadedAll = true;
@@ -847,7 +843,7 @@ export default {
     this.coinViewHeight =
       window.innerHeight - this.footerHeight - this.maxSpace;
   },
-  mounted() {
+  async mounted() {
     this.loadUserProfile();
     this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
@@ -878,8 +874,12 @@ export default {
     this.coins = [];
   },
   watch: {
-    accountName() {
+    async accountName() {
       this.loadUserProfile();
+      if ((this.chainName === "telos" || 1) && this.isAuthenticated) {
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
+    }
     }
   }
 };
