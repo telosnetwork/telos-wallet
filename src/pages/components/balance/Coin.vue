@@ -114,7 +114,7 @@ export default {
       return this.coins.filter(
         coin =>
           coin.amount > 0 ||
-          this.suggestTokens.includes(coin.symbol.toLowerCase())
+          this.suggestTokens.map(t => t.sym).includes(coin.symbol.toLowerCase())
       );
     }
   },

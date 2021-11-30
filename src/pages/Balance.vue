@@ -382,14 +382,10 @@ export default {
       });
     },
     async loadUserProfile() {
-      if (
-        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
-      ) {
+      if (!this.$store.state.account.profiles.hasOwnProperty(this.accountName)) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile = this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
         return;
       }
@@ -540,6 +536,8 @@ export default {
         return function(a, b) {
           const aSymbol = a.symbol.toLowerCase();
           const bSymbol = b.symbol.toLowerCase();
+          const aContract = a.account.toLowerCase();
+          const bContract = b.account.toLowerCase();
 
           if (aSymbol === bSymbol) {
             if (a.network) {
@@ -556,13 +554,19 @@ export default {
           }
 
           if (
-            !suggestTokens.includes(aSymbol) ||
-            !suggestTokens.includes(bSymbol)
+            (!suggestTokens.map(t => t.sym).includes(aSymbol)) ||
+            (!suggestTokens.map(t => t.sym).includes(bSymbol))
           ) {
-            if (suggestTokens.includes(aSymbol)) {
+            if (
+              suggestTokens.map(t => t.sym).includes(aSymbol) &&
+              suggestTokens.map(t => t.contract).includes(aContract)
+            ) {
               return -1;
             }
-            if (suggestTokens.includes(bSymbol)) {
+            if (
+              suggestTokens.map(t => t.sym).includes(bSymbol) &&
+              suggestTokens.map(t => t.contract).includes(bContract)
+            ) {
               return 1;
             }
           }
@@ -581,11 +585,12 @@ export default {
       }
     },
     async loadNftTokenItemssPerAccount(nftAccount) {
-      console.log(this.accountName)
       let more = true;
       let next_key = 10000;
       while (more === true) {
-        let lower_bound = BigNumber(this.$nameToUint64(this.accountName)).times("1e16");
+        let lower_bound = BigNumber(this.$nameToUint64(this.accountName)).times(
+          "1e16"
+        );
         let upper_bound = lower_bound.plus(next_key);
         const tagData = await this.$store.$api.getTableRows({
           code: nftAccount,
@@ -877,9 +882,9 @@ export default {
     async accountName() {
       this.loadUserProfile();
       if ((this.chainName === "telos" || 1) && this.isAuthenticated) {
-      await this.loadNftTokenItems();
-      this.loadNftTokenTags();
-    }
+        await this.loadNftTokenItems();
+        this.loadNftTokenTags();
+      }
     }
   }
 };
