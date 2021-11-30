@@ -582,22 +582,25 @@ export default {
     },
     async loadNftTokenItemssPerAccount(nftAccount) {
       let more = true;
-      let next_key = 0;
+      let next_key = 10000;
       while (more === true) {
+        let lower_bound = BigNumber(this.$nameToUint64(await this.accountName)).times("1e16");
+        let upper_bound = lower_bound.plus(next_key);
         const tagData = await this.$store.$api.getTableRows({
           code: nftAccount,
-          index_position: 1,
+          index_position: 3,
           json: true,
-          key_type: "",
+          key_type: "i128",
           limit: "10000",
-          lower_bound: next_key,
           reverse: false,
           scope: nftAccount,
           show_payer: false,
           table: "items",
           table_key: "",
-          upper_bound: next_key + 10000
+          lower_bound: lower_bound.toFixed(),
+          upper_bound: upper_bound.toFixed()
         });
+        console.log(tagData);
         if (tagData.more === false) {
           more = false;
         } else {
