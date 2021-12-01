@@ -82,7 +82,7 @@
         <div v-if="!depositOwnAddress" class="row justify-center">
           <q-input
             v-model="recipientAddress"
-            label="Recipient"
+            label="Recipient (Metamask Address)"
             dense
             rounded
             outlined
@@ -132,7 +132,7 @@ export default {
     return {
       amount: "",
       depositAmount: "0",
-      depositOwnAddress: true,
+      depositOwnAddress: false,
       recipientAddress: "",
       recipientAddressExists: true
     };

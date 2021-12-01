@@ -1549,10 +1549,10 @@
   dependencies:
     query-string "^6.5.0"
 
-"@telosnetwork/telosevm-js@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.1.tgz#8d4ab075be214bf27428029ae5ec67ae839a49e5"
-  integrity sha512-LKzlJsuXMNczb/8QG11kGK6QAHT+94ljqvphW63JotsTRCyR4m5Wutar6oS2koJoUMML1K+qQ59oX/XFpkMU0w==
+"@telosnetwork/telosevm-js@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@telosnetwork/telosevm-js/-/telosevm-js-0.2.6.tgz#237af9cf256c209a8bab3571a325088be4047ab1"
+  integrity sha512-DLkAAVzAtcqmMstcXepq08N0CFaZdieKRxAzDn+RRbdov+Mg1Rg8nZooyU9gzbNPW/rQBQ0Qe1b3i0FZ88UElQ==
   dependencies:
     "@ethereumjs/common" "^2.3.1"
     "@ethereumjs/tx" "^3.2.1"
