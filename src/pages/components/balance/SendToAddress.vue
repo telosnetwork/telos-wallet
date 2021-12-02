@@ -50,7 +50,11 @@
               </q-avatar>
               <div><img src="~assets/icons/networkArrows.svg" /></div>
               <q-avatar size="6rem">
-                <token-avatar v-if="networkType === 'telos' || networkType === 'tevm'" :token="selectedCoin.icon" :avatarSize="95" />
+                <token-avatar
+                  v-if="networkType === 'telos' || networkType === 'tevm'"
+                  :token="selectedCoin.icon"
+                  :avatarSize="95"
+                />
                 <div
                   v-if="networkType == 'tevm'"
                   class="flex absolute full-width full-height"
@@ -110,10 +114,10 @@
           </q-item>
           <!-- To network -->
           <div class="row justify-center">
-            <q-list class="q-pt-md " style="width: 70%">
-              <q-item class="list-item listItemTo">
-                <q-item-section text-white side style="width: 50px"
-                  >To:
+            <q-list class="q-pt-md ">
+              <q-item class="list-item">
+                <q-item-section side style=" color: white">
+                  To:
                 </q-item-section>
                 <q-item-section>
                   <q-input
@@ -142,8 +146,8 @@
                   text-white
                   side
                   class="col-1"
-                  style="width: 50px"
-                  >Notes:</q-item-section
+                  style="width: 50px; color: white"
+                  >Memo:</q-item-section
                 >
                 <q-item-section>
                   <q-input
