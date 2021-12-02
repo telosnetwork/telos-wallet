@@ -52,16 +52,7 @@
             label="Deposit amount"
             placeholder="0.0000"
           /> -->
-          <div class="">Max: {{ nativeTLOSBalance }}</div>
-        </div>
-        <div class="row justify-center q-mt-md">
-          <q-btn
-            class="purpleGradient depositBtn"
-            no-caps
-            rounded
-            label="Deposit"
-            @click="deposit"
-          />
+          <div @click="depositAmount = nativeTLOSBalance" class="depositAddressToggle">Max: {{ nativeTLOSBalance }}</div>
         </div>
         <div class="q-mt-md row justify-center">
           <div
@@ -69,14 +60,14 @@
             v-if="depositOwnAddress"
             @click="depositOwnAddress = false"
           >
-            + Deposit to a different address
+            Deposit to a different address
           </div>
           <div
             class="lightBlue depositAddressToggle"
             v-else
             @click="depositOwnAddress = true"
           >
-            - Deposit to myself
+            Deposit to myself
           </div>
         </div>
         <div v-if="!depositOwnAddress" class="row justify-center">
@@ -98,6 +89,15 @@
                 (val.slice(0, 2) === '0x' && val.length === 42) ||
                 'Invalid address'
             ]"
+          />
+        </div>
+        <div class="row justify-center q-mt-md">
+          <q-btn
+            class="purpleGradient depositBtn"
+            no-caps
+            rounded
+            label="Deposit"
+            @click="deposit"
           />
         </div>
         <div class="row justify-center q-mt-md">
