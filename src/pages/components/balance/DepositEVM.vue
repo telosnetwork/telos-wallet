@@ -52,7 +52,12 @@
             label="Deposit amount"
             placeholder="0.0000"
           /> -->
-          <div @click="depositAmount = nativeTLOSBalance" class="depositAddressToggle">Max: {{ nativeTLOSBalance }}</div>
+          <div
+            @click="depositAmount = nativeTLOSBalance"
+            class="depositAddressToggle"
+          >
+            Max: {{ nativeTLOSBalance }}
+          </div>
         </div>
         <div class="q-mt-md row justify-center">
           <div
@@ -99,6 +104,12 @@
             label="Deposit"
             @click="deposit"
           />
+        </div>
+        <div
+          class="lightBlue depositAddressToggle q-mt-md"
+          @click="$emit('addEvmNetwork')"
+        >
+          Add EVM Network
         </div>
         <div class="row justify-center q-mt-md">
           <div v-if="!haveEVMAccount && depositOwnAddress" class="note">

@@ -35,7 +35,7 @@
           </div>
 
           <!-- EVM address -->
-          <div class="text-caption q-pt-sm">
+          <!-- <div class="text-caption q-pt-sm">
             <q-btn
               v-if="!$root.tEVMAccount"
               no-caps
@@ -68,7 +68,7 @@
             >
               <q-tooltip>Add EVM network to wallet</q-tooltip></q-icon
             >
-          </div>
+          </div> -->
 
           <!-- Action Buttons -->
           <div class="row q-mt-lg q-mb-md ">
@@ -198,6 +198,7 @@
       :haveEVMAccount.sync="
         this.$root.tEVMAccount && this.$root.tEVMAccount.address
       "
+      @addEvmNetwork="addEvmNetwork()"
     />
     <WithdrawEVM
       :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
