@@ -157,7 +157,7 @@
               <div class="row justify-center text-left q-my-md">
                 <q-expansion-item
                   class="infoBox "
-                  label="Buy using Moonpay"
+                  label="Buy with Card"
                   icon="fas fa-info-circle"
                 >
                   <!-- <template v-slot:header>
@@ -170,9 +170,7 @@
                     </div>
                   </template> -->
                   <div class="col text-justify q-pa-md ">
-                    By Clicking 'Next' you will be using Moonpay to purchase
-                    'EOS' which will be sent to a cross chain contract for
-                    exchange to TLOS on the Telos Network at the estimated rate.
+                    By Clicking 'Next' you will be taken to Moonpay to purchase Telos (TLOS) with card.
                     Do not alter the 'TO' or 'MEMO' field or risk losing your
                     funds.
                   </div>
