@@ -59,7 +59,7 @@
             Max: {{ nativeTLOSBalance }}
           </div>
         </div>
-        <div class="q-mt-md row justify-center">
+        <!-- <div class="q-mt-md row justify-center">
           <div
             class="lightBlue depositAddressToggle q-mb-md"
             v-if="depositOwnAddress"
@@ -74,15 +74,14 @@
           >
             Deposit to myself
           </div>
-        </div>
-        <div v-if="!depositOwnAddress" class="row justify-center">
+        </div> -->
+        <div class="depositInput row justify-center">
           <q-input
             v-model="recipientAddress"
             label="Recipient (Metamask Address)"
-            dense
             rounded
             outlined
-            class="q-pt-xs col-11"
+            class="q-pt-md col-11"
             standout="bg-transparent text-white"
             label-color="white"
             color="white"
@@ -96,7 +95,7 @@
             ]"
           />
         </div>
-        <div class="row justify-center q-mt-md">
+        <div class="row justify-center ">
           <q-btn
             class="purpleGradient depositBtn"
             no-caps
@@ -105,11 +104,24 @@
             @click="deposit"
           />
         </div>
-        <div
-          class="lightBlue depositAddressToggle q-mt-md"
-          @click="$emit('addEvmNetwork')"
-        >
-          Add EVM Network
+        <div class="row justify-center q-mt-sm">
+          <div
+            class="lightBlue depositAddressToggle"
+            @click="
+              depositOwnAddress = true;
+              deposit();
+            "
+          >
+            Deposit to myself
+          </div>
+        </div>
+        <div class="row justify-center">
+          <div
+            class="lightBlue depositAddressToggle q-mt-xs"
+            @click="$emit('addEvmNetwork')"
+          >
+            Add EVM Network
+          </div>
         </div>
         <div class="row justify-center q-mt-md">
           <div v-if="!haveEVMAccount && depositOwnAddress" class="note">

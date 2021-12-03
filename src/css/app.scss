@@ -225,3 +225,9 @@ body {
   // height: 3rem;
   // bg-transparent text-white q-mx-auto q-my-auto text-h5
 }
+
+.depositInput {
+  .q-field--outlined .q-field__control:before {
+    border-color: #ffffff73;
+  }
+}
