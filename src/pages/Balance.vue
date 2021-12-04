@@ -823,7 +823,6 @@ export default {
     },
 
     addEvmNetwork() {
-      console.log("addEvmNetwork");
       const params = [
         {
           chainId: "0x28",

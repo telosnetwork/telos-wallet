@@ -256,7 +256,13 @@ export default {
       }
     }
   },
-  watch: {}
+  watch: {
+    showDepositEVMDlg() {
+      if (this.showDlg) {
+        this.$emit("addEvmNetwork");
+      }
+    }
+  }
 };
 </script>
 
