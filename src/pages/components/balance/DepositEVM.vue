@@ -52,41 +52,36 @@
             label="Deposit amount"
             placeholder="0.0000"
           /> -->
-          <div class="">Max: {{ nativeTLOSBalance }}</div>
+          <div
+            @click="depositAmount = nativeTLOSBalance"
+            class="depositAddressToggle"
+          >
+            Max: {{ nativeTLOSBalance }}
+          </div>
         </div>
-        <div class="row justify-center q-mt-md">
-          <q-btn
-            class="purpleGradient depositBtn"
-            no-caps
-            rounded
-            label="Deposit"
-            @click="deposit"
-          />
-        </div>
-        <div class="q-mt-md row justify-center">
+        <!-- <div class="q-mt-md row justify-center">
           <div
             class="lightBlue depositAddressToggle q-mb-md"
             v-if="depositOwnAddress"
             @click="depositOwnAddress = false"
           >
-            + Deposit to a different address
+            Deposit to a different address
           </div>
           <div
             class="lightBlue depositAddressToggle"
             v-else
             @click="depositOwnAddress = true"
           >
-            - Deposit to myself
+            Deposit to myself
           </div>
-        </div>
-        <div v-if="!depositOwnAddress" class="row justify-center">
+        </div> -->
+        <div class="depositInput row justify-center">
           <q-input
             v-model="recipientAddress"
             label="Recipient (Metamask Address)"
-            dense
             rounded
             outlined
-            class="q-pt-xs col-11"
+            class="q-pt-md col-11"
             standout="bg-transparent text-white"
             label-color="white"
             color="white"
@@ -99,6 +94,34 @@
                 'Invalid address'
             ]"
           />
+        </div>
+        <div class="row justify-center ">
+          <q-btn
+            class="purpleGradient depositBtn"
+            no-caps
+            rounded
+            label="Deposit"
+            @click="deposit"
+          />
+        </div>
+        <div class="row justify-center q-mt-sm">
+          <div
+            class="lightBlue depositAddressToggle"
+            @click="
+              depositOwnAddress = true;
+              deposit();
+            "
+          >
+            Deposit to myself
+          </div>
+        </div>
+        <div class="row justify-center">
+          <div
+            class="lightBlue depositAddressToggle q-mt-xs"
+            @click="$emit('addEvmNetwork')"
+          >
+            Add EVM Network
+          </div>
         </div>
         <div class="row justify-center q-mt-md">
           <div v-if="!haveEVMAccount && depositOwnAddress" class="note">
@@ -233,7 +256,13 @@ export default {
       }
     }
   },
-  watch: {}
+  watch: {
+    showDepositEVMDlg() {
+      if (this.showDlg) {
+        this.$emit("addEvmNetwork");
+      }
+    }
+  }
 };
 </script>
 

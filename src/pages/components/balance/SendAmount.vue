@@ -36,7 +36,7 @@
                   class="flex q-ml-auto"
                   alt="tEVM"
                   src="~assets/evm_logo.png"
-                  style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                  style="width: 50%; height: 50%; margin-right: -10%; margin-top: 60%;"
                 />
               </div>
             </q-avatar>

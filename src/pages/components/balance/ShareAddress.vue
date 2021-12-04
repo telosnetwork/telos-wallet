@@ -109,7 +109,7 @@
               >
                 {{ displayAccountName }}
               </div>
-              <div class="text-white">({{ selectedCoin.name }})</div>
+              <div class="text-white">({{ selectedCoin.name }} address)</div>
               <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
                 <q-spinner color="primary" size="2em" :thickness="5" />
                 Awaiting New Deposits...
@@ -117,10 +117,9 @@
               <q-space />
               <div
                 v-if="networkType === 'tevm'"
-                class="text-caption text-grey-8"
+                class="text-caption text-red"
               >
-                Alert will display on balance screen when TLOS is recieved in
-                your account
+                WARNING! This a a Telos EVM address only. Do not send funds to this address on any other network!
               </div>
               <div
                 v-else-if="networkType === 'ptoken'"
@@ -133,9 +132,6 @@
                 tokens on the TELOS address: {{ accountName }}
               </div>
             </q-card>
-          </div>
-          <div class="text-center text-grey-6">
-            Transactions may take a few minutes to complete
           </div>
         </div>
       </div>
