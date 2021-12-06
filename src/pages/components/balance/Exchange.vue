@@ -229,16 +229,16 @@
               <q-space />
 
               <!-- Swap tokens -->
-              <!-- <div
+              <div
                 class="full-width row  justify-center items-center content-center "
               >
                 <q-separator class="col" style="height: 0.3px;" color="grey" />
-                <q-btn class="swapBtn" flat round>
+                <q-btn class="swapBtn" flat round @click="changeCoins()">
                   <img src="~assets/icons/swap_arrows.svg" />
                 </q-btn>
                 <q-separator class="col" style="height: 0.3px;" color="grey" />
-              </div> -->
-              <q-separator style="height: 0.3px;" color="grey" />
+              </div>
+              <!-- <q-separator style="height: 0.3px;" color="grey" /> -->
 
               <q-space />
               <q-item
