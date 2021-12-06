@@ -231,8 +231,8 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      // this.signPopup('/create'); // enable this to open signup popup
-      this.onLogin(1)
+      this.signPopup('/create'); // enable this to open signup popup
+      // this.onLogin(1)
     },
     async signIn() {
       this.signPopup("/signin");
