@@ -35,6 +35,7 @@
     "ual-anchor": "^1.1.2",
     "ual-ledger": "^0.3.0",
     "ual-scatter": "^0.3.0",
+    "ual-wombat": "^0.3.3",
     "universal-authenticator-library": "^0.3.0",
     "vue-qrcode-reader": "^2.3.16",
     "vue-recaptcha": "^1.3.0",

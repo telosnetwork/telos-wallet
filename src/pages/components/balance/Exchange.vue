@@ -60,29 +60,6 @@
             v-if="exchangeType === 'dollars'"
             class="full-width self-center column q-mx-lg q-mt-md "
           >
-            <!-- <q-space/> -->
-            <!-- <q-item class="list-item full-width">
-                  <div class="text-black display-grid full-width">
-                    <label ref="widthElement" style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;">
-                      {{ dollarsAmount }}
-                    </label>
-                    <div class="flex flex-center full-width">
-                      <label class="text-weight-regular text-grey-6 q-mr-none" style="font-size: 45px;">
-                        $
-                      </label>
-                      <input
-                        type="text" maxlength="8"
-                        class="text-weight-regular text-grey-6 text-center no-border q-pa-none no-outline transparent"
-                        :style="`font-size: 45px; width: ${inputWidth}px;`"
-                        v-model="dollarsAmount"
-                        @focus="dollarsAmount = (dollarsAmount === '0' ? '' : dollarsAmount)"
-                        @blur="dollarsAmount = Number(dollarsAmount === '' ? '0' : dollarsAmount).toString()"
-                      />
-                    </div>
-                    <label class="text-subtitle1 text-center text-grey-6">Equivalent to ...</label>
-                  </div>
-                </q-item> -->
-            <!-- <q-space/> -->
             <!-- Equal Amount-->
             <div class="text-black display-grid full-width q-pb-md">
               <label
@@ -182,25 +159,14 @@
                   </div>
                 </q-item-section>
                 <q-item-section side>
-                  <div class="text-white text-right display-grid">
-                    <input
-                      ref="convertAmountElement"
-                      type="text"
-                      maxlength="8"
-                      :class="
-                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
-                      "
-                      v-model="convertAmount"
-                      @focus="
-                        convertAmount =
-                          convertAmount === '0' ? '' : convertAmount
-                      "
-                      @blur="
-                        convertAmount = Number(
-                          convertAmount === '' ? '0' : convertAmount
-                        ).toString()
-                      "
-                    />
+                  <div class="text-right display-grid">
+                    <label class="text-caption "
+                      >${{
+                        convertCoin
+                          ? getFixed(convertAmount * convertCoin.price, 2)
+                          : 0
+                      }}</label
+                    >
                   </div>
                 </q-item-section>
               </q-item>
@@ -233,24 +199,47 @@
                           />
                         </q-avatar>
                       </q-item-section>
-                      {{ convertCoin ? convertCoin.name : "Choose coin" }}
+                      {{ convertCoin ? convertCoin.symbol : "Choose coin" }}
                     </label>
                   </div>
                 </q-item-section>
                 <q-item-section side>
-                  <div class="text-right display-grid">
-                    <label class="text-caption "
-                      >${{
-                        convertCoin
-                          ? getFixed(convertAmount * convertCoin.price, 2)
-                          : 0
-                      }}</label
-                    >
+                  <div class="text-white text-right display-grid">
+                    <input
+                      ref="convertAmountElement"
+                      type="text"
+                      maxlength="8"
+                      :class="
+                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
+                      "
+                      v-model="convertAmount"
+                      @focus="
+                        convertAmount =
+                          convertAmount === '0' ? '' : convertAmount
+                      "
+                      @blur="
+                        convertAmount = Number(
+                          convertAmount === '' ? '0' : convertAmount
+                        ).toString()
+                      "
+                    />
                   </div>
                 </q-item-section>
               </q-item>
               <q-space />
+
+              <!-- Swap tokens -->
+              <!-- <div
+                class="full-width row  justify-center items-center content-center "
+              >
+                <q-separator class="col" style="height: 0.3px;" color="grey" />
+                <q-btn class="swapBtn" flat round>
+                  <img src="~assets/icons/swap_arrows.svg" />
+                </q-btn>
+                <q-separator class="col" style="height: 0.3px;" color="grey" />
+              </div> -->
               <q-separator style="height: 0.3px;" color="grey" />
+
               <q-space />
               <q-item
                 class="list-item full-width q-pb-none"
@@ -264,22 +253,12 @@
                   </div>
                 </q-item-section>
                 <q-item-section side>
-                  <div class="text-white text-right display-grid">
-                    <input
-                      ref="toAmountElement"
-                      type="text"
-                      maxlength="8"
-                      :class="
-                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
-                      "
-                      v-model="toAmount"
-                      @focus="toAmount = toAmount === '0' ? '' : toAmount"
-                      @blur="
-                        toAmount = Number(
-                          toAmount === '' ? '0' : toAmount
-                        ).toString()
-                      "
-                    />
+                  <div class="text-caption text-right display-grid">
+                    <label class=""
+                      >${{
+                        toCoin ? getFixed(toAmount * toCoin.price, 2) : 0
+                      }}</label
+                    >
                   </div>
                 </q-item-section>
               </q-item>
@@ -309,17 +288,27 @@
                           <token-avatar :token="toCoin.icon" :avatarSize="25" />
                         </q-avatar>
                       </q-item-section>
-                      {{ toCoin ? toCoin.name : "Choose coin" }}
+                      {{ toCoin ? toCoin.symbol : "Choose coin" }}
                     </label>
                   </div>
                 </q-item-section>
                 <q-item-section side>
-                  <div class="text-caption text-right display-grid">
-                    <label class=""
-                      >${{
-                        toCoin ? getFixed(toAmount * toCoin.price, 2) : 0
-                      }}</label
-                    >
+                  <div class="text-white text-right display-grid">
+                    <input
+                      ref="toAmountElement"
+                      type="text"
+                      maxlength="8"
+                      :class="
+                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
+                      "
+                      v-model="toAmount"
+                      @focus="toAmount = toAmount === '0' ? '' : toAmount"
+                      @blur="
+                        toAmount = Number(
+                          toAmount === '' ? '0' : toAmount
+                        ).toString()
+                      "
+                    />
                   </div>
                 </q-item-section>
               </q-item>
@@ -832,5 +821,12 @@ export default {
   flex-grow: 0;
   flex-shrink: 1;
   flex-basis: 600px;
+}
+
+.swapBtn {
+  background: rgba($white, 0.1);
+  &:hover {
+    background: rgba($white, 0.2);
+  }
 }
 </style>
