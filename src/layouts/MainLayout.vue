@@ -27,6 +27,15 @@
     <q-page-container
       :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
     >
+      <div v-if="warningShow">
+        <q-banner inline-actions dark class="bg-grey text-white">
+          {{warningText}}
+
+          <template v-slot:action>
+            <q-icon name="fas fa-times-circle" style="font-size: 1.3rem;" color="text-white" @click="warningShow = false" />
+          </template>
+        </q-banner>
+      </div>
       <router-view
         :loadedCoins.sync="coins"
         :loadedNftTokens.sync="nftTokens"
@@ -105,7 +114,9 @@ export default {
       balanceTab: "Coins",
       pages: pagesData,
       coins: [],
-      nftTokens: []
+      nftTokens: [],
+      warningShow: true,
+      warningText: "Telos sign is undergoing maintenance. Please use alternative login methods",
     };
   },
   computed: {

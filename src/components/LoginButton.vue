@@ -208,8 +208,6 @@ export default {
       "isAutoLoading"
     ]),
     chainName() {
-      console.log(this.$ual.authenticators[0])
-      console.log(process.env.CHAIN_NAME)
       return process.env.CHAIN_NAME;
     }
   },
