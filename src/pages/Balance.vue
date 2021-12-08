@@ -392,10 +392,10 @@ export default {
       return process.env.CHAIN_NAME;
     },
     nftAccounts() {
-      if (this.chainName === "telos") {
-        return ["tlos.tbond", "marble.code"];
-      } else {
+      if (this.chainName !== "telos") {
         return ["marbletessst"];
+      } else {
+        return ["tlos.tbond", "marble.code"];
       }
     },
     shortenedEvmAddress() {
@@ -905,15 +905,10 @@ export default {
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {}
       window.time = Date.now() / 1000;
-      if (!window.location.href.includes("localhost")) {
-        console.clear();
-        console.log("Don't try to use Inspector!");
-      }
-      window.time = Date.now() / 1000;
-      if (!window.location.href.includes("localhost")) {
-        console.clear();
-        console.log("Don't try to use Inspector!");
-      }
+      // if (!window.location.href.includes("localhost")) {
+      //   console.clear();
+      //   console.log("Don't try to use Inspector!");
+      // }
     }, 5000);
   },
   beforeMount() {
