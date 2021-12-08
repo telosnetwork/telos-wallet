@@ -821,19 +821,36 @@ export default {
     },
 
     addEvmNetwork() {
-      const params = [
-        {
-          chainId: "0x28",
-          chainName: "Telos EVM Mainnet",
-          nativeCurrency: {
-            name: "Telos",
-            symbol: "TLOS",
-            decimals: 4
-          },
-          rpcUrls: ["https://mainnet.telos.net/evm"],
-          blockExplorerUrls: ["https://teloscan.io"]
-        }
-      ];
+      let params = [];
+      if (this.chainName !== "telos") {
+        params = [
+          {
+            chainId: "0x29",
+            chainName: "Telos EVM Testnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4
+            },
+            rpcUrls: ["https://testnet.telos.net/evm"],
+            blockExplorerUrls: ["https://testnet.teloscan.io"]
+          }
+        ];
+      } else {
+        params = [
+          {
+            chainId: "0x28",
+            chainName: "Telos EVM Mainnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4
+            },
+            rpcUrls: ["https://mainnet.telos.net/evm"],
+            blockExplorerUrls: ["https://teloscan.io"]
+          }
+        ];
+      }
 
       window.ethereum
         .request({ method: "wallet_addEthereumChain", params })
