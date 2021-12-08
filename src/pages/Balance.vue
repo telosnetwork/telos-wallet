@@ -5,10 +5,7 @@
         <div class="text-center ">
           <!-- <login-button v-if="isAuthenticated" style="display:none" /> -->
 
-          <!-- Profile Image top left -->
-          <q-avatar class="profileImg" @click="$router.push('/settings')">
-            <img :src="userAvatar" />
-          </q-avatar>
+          
           <!-- Account Name -->
           <div
             class="text-white q-mt-xl"
@@ -365,11 +362,7 @@ export default {
       "suggestTokens",
       "pTokenNetworks"
     ]),
-    userAvatar() {
-      if (this.avatar) return this.avatar;
-
-      return "/profile/default_avatar.svg";
-    },
+    
     totalAmount() {
       return this.coins
         .map(coin => coin.amount * coin.price)
@@ -436,7 +429,6 @@ export default {
       this.avatar = accountProfile.avatar;
     },
     switchTab(val) {
-      console.log("asdf");
       this.$emit("update:balanceTab", val);
     },
     clickPurchase() {
@@ -446,7 +438,6 @@ export default {
       this.showBuyAmountDlg = true;
     },
     clickExchange() {
-      console.log("Pina Colladas!!!", "Clicked me!!!!!");
       // this.$emit('update:showExchangeDlg', true); // not working anymore
       this.showExchangeDlg = true;
     },
@@ -961,8 +952,8 @@ export default {
   },
   watch: {
     async accountName() {
-      this.loadUserProfile();
       if ((this.chainName === "telos" || 1) && this.isAuthenticated) {
+        this.loadUserProfile();
         await this.loadNftTokenItems();
         this.loadNftTokenTags();
       }
@@ -1004,18 +995,5 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
-.profileImg {
-  height: 4rem;
-  width: 4rem;
-  // margin: 1rem;
-  cursor: pointer;
-  background: no-repeat;
-  right: 1.5rem;
-  top: 1.5rem;
-  position: absolute;
-  display: none;
-  @media only screen and (min-width: 1000px) {
-    display: block;
-  }
-}
+
 </style>

@@ -29,13 +29,22 @@
     >
       <div v-if="warningShow">
         <q-banner inline-actions dark class="bg-grey text-white">
-          {{warningText}}
+          {{ warningText }}
 
           <template v-slot:action>
-            <q-icon name="fas fa-times-circle" style="font-size: 1.3rem;" color="text-white" @click="warningShow = false" />
+            <q-icon
+              name="fas fa-times-circle"
+              style="font-size: 1.3rem;"
+              color="text-white"
+              @click="warningShow = false"
+            />
           </template>
         </q-banner>
       </div>
+      <!-- Profile Image top right -->
+      <q-avatar v-if="$route.path === '/balance'"  class="profileImg" @click="$router.push('/settings')">
+        <img :src="userAvatar" />
+      </q-avatar>
       <router-view
         :loadedCoins.sync="coins"
         :loadedNftTokens.sync="nftTokens"
@@ -116,7 +125,8 @@ export default {
       coins: [],
       nftTokens: [],
       warningShow: true,
-      warningText: "Telos sign is undergoing maintenance. Please use alternative login methods",
+      warningText:
+        "Telos sign is undergoing maintenance. Please use alternative login methods"
     };
   },
   computed: {
@@ -124,6 +134,11 @@ export default {
     ...mapGetters("global", ["footerHeight"]),
     containerHeight() {
       return window.innerHeight;
+    },
+    userAvatar() {
+      if (this.avatar) return this.avatar;
+
+      return "/profile/default_avatar.svg";
     }
   },
   methods: {
@@ -230,5 +245,20 @@ export default {
 
 .shadedOverlay {
   background: #442ab652;
+}
+
+.profileImg {
+  height: 4rem;
+  width: 4rem;
+  // margin: 1rem;
+  cursor: pointer;
+  background: no-repeat;
+  left: 92%;
+  top: 1.5rem;
+  // position: absolute;
+  display: none;
+  @media only screen and (min-width: 1000px) {
+    display: block;
+  }
 }
 </style>
