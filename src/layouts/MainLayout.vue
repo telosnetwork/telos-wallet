@@ -28,7 +28,7 @@
       :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
     >
       <div v-if="warningShow">
-        <q-banner inline-actions dark class="bg-grey text-white">
+        <q-banner inline-actions dark class="warningSign text-white">
           {{ warningText }}
 
           <template v-slot:action>
@@ -261,4 +261,9 @@ export default {
     display: block;
   }
 }
+
+.warningSign {
+  background: #8946df;
+}
+
 </style>
