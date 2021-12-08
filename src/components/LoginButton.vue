@@ -166,7 +166,7 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
-import Authenticate from "../pages/components/auth/Authenticate";
+// import Authenticate from "../pages/components/auth/Authenticate";
 // var window_1 = require("../utils/telos-keycatjs/utils/window");
 // var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
 var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
@@ -208,15 +208,12 @@ export default {
       "isAutoLoading"
     ]),
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      console.log(this.$ual.authenticators[0])
+      console.log(process.env.CHAIN_NAME)
+      return process.env.CHAIN_NAME;
     }
   },
   components: {
-  },
-  components: {
-    Authenticate
   },
   methods: {
     ...mapActions("account", [
@@ -231,11 +228,12 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      this.signPopup('/create'); // enable this to open signup popup
+      // this.signPopup('/create'); // enable this to open signup popup
       // this.onLogin(1)
+      this.openUrl("https://app.telos.net/accounts/add");
     },
     async signIn() {
-      this.signPopup("/signin");
+      // this.signPopup("/signin");
     },
     async signOut() {
       if (gapi) {
@@ -422,10 +420,10 @@ export default {
     }
   },
   async mounted() {
-    await this.checkResources();
     await this.autoLogin(this.$route.query.returnUrl);
     if (this.isAuthenticated) {
       await this.createEvmApi();
+      await this.checkResources();
     }
     this.authInterval = setInterval(() => {
       if (this.$store.$account.needAuth) {

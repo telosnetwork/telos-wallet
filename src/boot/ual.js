@@ -19,7 +19,7 @@ export default async ({ Vue, store }) => {
   };
 
   const authenticators = [
-    new KeycatAuthenticator([chain], { appName: process.env.APP_NAME }),
+    // new KeycatAuthenticator([chain], { appName: process.env.APP_NAME }),
     // new Sqrl([chain], { appName: process.env.APP_NAME }),
     new Wombat([chain], { appName: process.env.APP_NAME }),
     new Anchor([chain], { appName: process.env.APP_NAME }),

@@ -396,9 +396,7 @@ export default {
       return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      return process.env.CHAIN_NAME;
     },
     nftAccounts() {
       if (this.chainName === "telos") {

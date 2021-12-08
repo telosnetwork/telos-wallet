@@ -247,9 +247,7 @@ export default {
       return Object.keys(this.coinpTokenNetworks).length > 1;
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      return process.env.CHAIN_NAME;
     },
     coinpTokenNetworks() {
       if (this.selectedCoin.network) {
