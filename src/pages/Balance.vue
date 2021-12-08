@@ -389,7 +389,11 @@ export default {
       return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
     },
     chainName() {
-      return process.env.CHAIN_NAME;
+      if (process.env.CHAIN_NAME === undefined) {
+        return "telos";
+      } else {       
+        return process.env.CHAIN_NAME;
+      }
     },
     nftAccounts() {
       if (this.chainName !== "telos") {
