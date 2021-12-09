@@ -6,7 +6,7 @@ https://wallet.telos.net (mainnet)
 https://wallet-dev.telos.net (testnet)
 
 ## CI/CD NOTE
-Push to `developer` branch always first, this will auto-deploy wallet-dev.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
+Push to `developer` branch always first, this will auto-deploy wallet-dev.telos.net & wallet-stage.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
 
 ## Install the dependencies
 ```bash

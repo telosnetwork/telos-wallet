@@ -590,12 +590,12 @@ export default {
       this.account = this.$store.$account.account;
       this.privateKey = this.$store.$account.privateKey;
     }, 50);
-    if (!window.location.href.includes("localhost")) {
-      this.clearInterval = setInterval(async () => {
-        console.clear();
-        console.log("Don't try to use Inspector!");
-      }, 5000);
-    }
+    // if (!window.location.href.includes("localhost")) {
+    //   this.clearInterval = setInterval(async () => {
+    //     console.clear();
+    //     console.log("Don't try to use Inspector!");
+    //   }, 5000);
+    // }
   },
   async beforeDestroy() {
     if (this.checkInterval) clearInterval(this.checkInterval);

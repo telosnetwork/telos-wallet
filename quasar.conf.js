@@ -50,7 +50,8 @@ module.exports = function(/* ctx */) {
         NETWORK_PROTOCOL: process.env.NETWORK_PROTOCOL,
         NETWORK_EXPLORER: process.env.NETWORK_EXPLORER,
         HYPERION_ENDPOINT: process.env.HYPERION_ENDPOINT,
-        EVM_CONTRACT: process.env.EVM_CONTRACT
+        EVM_CONTRACT: process.env.EVM_CONTRACT,
+        CHAIN_NAME: process.env.CHAIN_NAME,
       },
 
       // transpile: false,

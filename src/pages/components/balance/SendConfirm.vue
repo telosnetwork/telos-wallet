@@ -37,7 +37,7 @@
               <div class="confirmGrid q-py-lg q-gutter-y-sm">
                 <div class="text-weight-bold">To</div>
                 <div class="lt-md">{{ toAddressShort }}</div>
-                <!-- <div class="gt-sm">{{ toAddress }}</div> -->
+                <div class="gt-sm">{{ toAddress }}</div>
                 <div v-if="networkType !== 'telos'" class="text-weight-bold">
                   Network Fee
                 </div>
