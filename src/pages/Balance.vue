@@ -3,7 +3,6 @@
     <div style="width: 600px">
       <div style="height: 100%; overflow:auto">
         <div class="text-center ">
-          <!-- <login-button v-if="isAuthenticated" style="display:none" /> -->
 
           
           <!-- Account Name -->
@@ -88,10 +87,6 @@
               label="Receive"
               @click="showReceiveDlg = true"
             />
-            <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
-            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-            <!-- </q-toolbar> -->
           </div>
 
           <!-- Convert and Purchace -->
@@ -436,9 +431,7 @@ export default {
       this.$emit("update:balanceTab", val);
     },
     clickPurchase() {
-      // this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
       this.selectedCoin = this.coins.find(coin => coin.symbol === "TLOS");
-      // this.$emit('update:showBuyAmountDlg', true);
       this.showBuyAmountDlg = true;
     },
     clickExchange() {
@@ -447,7 +440,6 @@ export default {
     },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
-      // this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
       if (info.isFirst) {
         this.panning = true;
       } else if (info.isFinal) {
@@ -455,16 +447,7 @@ export default {
       }
     },
     async loadCoinList() {
-      /*
-          account: token.account.toLowerCase(),
-          name: token.metadata.name,
-          symbol: token.symbol,
-          amount: 0,
-          price: 0,
-          icon: token.metadata.logo,
-          precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0
-          network: tevm
-       */
+      
       const coins = await this.$store.$api.getTableRows({
         code: "tokenmanager",
         limit: "1000",
@@ -615,7 +598,6 @@ export default {
       };
       this.coins = this.coins.sort(sortCoin(this.suggestTokens));
       this.$emit("update:loadedCoins", this.coins);
-      // console.log(this.loadedCoins);
     },
     async loadNftTokenItems() {
       for (const account of this.nftAccounts) {
@@ -756,7 +738,6 @@ export default {
       return 0;
     },
     async withdrawEVM() {
-      // this.tEVMWithdrawing = true;
       const quantityStr = `${this.getFixed(
         this.getCurrenttEVMBalance(),
         4
@@ -861,20 +842,17 @@ export default {
             this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
           this.coinViewHeight > this.availableHeight - this.maxSpace
         ) {
-          // this.coinViewHeight = this.coinViewHeight - 3;
         } else if (
           this.coinViewHeight >=
             this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
           this.coinViewHeight < this.availableHeight - this.minSpace
         ) {
-          // this.coinViewHeight = this.coinViewHeight + 3;
         }
         const approxViewHeight = Math.min(
           this.availableHeight - this.minSpace,
           Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight)
         );
         if (this.coinViewHeight != approxViewHeight) {
-          // this.coinViewHeight = approxViewHeight;
         }
       }
       this.displayAmount =

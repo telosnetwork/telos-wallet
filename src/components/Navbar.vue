@@ -15,15 +15,6 @@
         <li>
           <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
         </li>
-        <!-- <li v-if="isAuthenticated">
-          <a @click="logout()"> <img :src="srcDir + 'logout.svg'" />Logout </a>
-        </li>
-        <li>
-            <a @click="$router.replace('/resources')" class=" wallet">
-              Resources
-            </a>
-            <q-icon class="menuIcon fas fa-cogs" />
-          </li> -->
       </ul>
     </nav>
     <nav class="bottomNavBar">
@@ -38,19 +29,6 @@
             <img :src="srcDapps" />
           </a>
         </li>
-        <!-- <li>
-          <a @click="switchTab('coins')">
-            <img :src="srcCoins" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('nft')">
-            <img :src="srcNft" />
-          </a>
-        </li> 
-        <li v-if="isAuthenticated">
-          <a @click="logout()"> <img :src="srcDir + 'logout.svg'"/></a>
-        </li> -->
         <li>
           <a @click="switchTab('settings')">
             <img :src="srcSettings" />
@@ -187,8 +165,6 @@ a img {
   .leftNavBar {
     transform: translateX(0);
     border-radius: unset;
-    // position: fixed;
-    // z-index: 1;
     background: linear-gradient(to bottom, #291a4c, #00000000 80%);
     top: 0;
     height: 100vh;

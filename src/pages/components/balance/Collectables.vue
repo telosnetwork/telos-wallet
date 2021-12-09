@@ -16,13 +16,13 @@
         :key="`${token.name}_${index}`"
         clickable
         v-ripple
-        class="imgContainer "
+        class="imgContainer"
         @click="selectNftToken(token)"
       >
         <img :src="token.image" />
         <div
-          class="absolute-bottom text-subtitle2 text-center text-white"
-          style="background-color: #0005; pointer-events: none;"
+          class="collectablesName absolute-bottom text-subtitle2 text-center text-white"
+          style=""
         >
           {{ token.title }}
         </div>
@@ -34,31 +34,6 @@
       </template>
     </q-infinite-scroll>
   </div>
-  <!-- <div class="bg-white" :style="`max-width: 800px; margin: auto; height: ${coinViewHeight - footerHeight - 30}px;`">
-    <q-infinite-scroll @load="loadMoreNftTokens" :offset="20" style="display: grid; grid-template-columns: auto auto;">
-      <q-item v-for="(token, index) in availableTokenTags"
-        :key="`${token.name}_${index}`"
-        clickable
-        v-ripple
-        class="list-item justify-center"
-        @click="selectNftToken(token)"
-      >
-        <q-item-section avatar class="q-px-none">
-          <q-avatar rounded :size="`${itemSize}px`" class="q-my-none q-mx-auto">
-            <img :src="token.image"/>
-            <div class="absolute-bottom text-subtitle2 text-center text-white" style="background-color: #0005; pointer-events: none;">
-              {{ token.title }}
-            </div>
-          </q-avatar>
-        </q-item-section>
-      </q-item>
-      <template v-slot:loading>
-        <div class="row justify-center q-my-md">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-      </template>
-    </q-infinite-scroll>
-  </div> -->
 </template>
 
 <script>
@@ -83,7 +58,6 @@ export default {
     },
     availableTokenTags() {
       return this.nftTokenTags;
-      // return this.nftTokenTags.filter(token => token.amount > 0);
     }
   },
   methods: {
@@ -98,22 +72,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 .imgContainer {
   border: none;
   background-color: #ffffff09;
+  justify-content: center;
+
   img {
     max-width: 100%;
+    max-height: 100%;
+    
   }
+.collectablesName{
+  
+  background-color: #0005;
+  pointer-events: none;
+}
 }
 </style>

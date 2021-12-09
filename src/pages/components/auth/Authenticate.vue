@@ -33,8 +33,6 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <!-- TODO google sign -->
-        <!-- <div class="q-ml-auto" id="google-signin-button"></div> --> 
         <q-btn
           no-caps
           text-color="white"
@@ -83,8 +81,6 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <!-- TODO google sign -->
-        <!-- <div class="q-ml-auto" id="google-signin-button"></div> -->
         <q-btn
           no-caps
           text-color="white"
@@ -221,8 +217,6 @@
         />
       </q-item>
       <q-item class="q-mt-lg">
-        <!-- TODO google sign -->
-        <!-- <div class="q-ml-auto" id="google-signin-button"></div> -->
         <q-btn
           no-caps
           text-color="white"
@@ -541,7 +535,6 @@ export default {
         this.getUserProfile();
         this.setLoadingWallet();
         this.$router.push("/balance");
-        // await this.createEvmApi();
       } else {
         this.$q.notify({
           type: "negative",
@@ -815,8 +808,5 @@ export default {
 <style scoped>
 .item-min-height {
   min-height: 24px;
-}
-.q-item {
-  color: black;
 }
 </style>

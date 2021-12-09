@@ -55,7 +55,7 @@
           <!-- Avatar Name -->
           <q-item>
             <div avatar>
-              <img class="" src="~assets/avatarImg.svg" />
+              <img class="profileInformationIcons" src="~assets/avatarImg.svg" />
             </div>
             <q-input
               v-model="avatar"
@@ -72,7 +72,7 @@
           <!-- Name -->
           <q-item>
             <div avatar>
-              <img class="" src="~assets/nameImg.svg" />
+              <img class="profileInformationIcons" src="~assets/nameImg.svg" />
             </div>
             <q-input
               v-model="display_name"
@@ -91,7 +91,7 @@
           <!-- Status -->
           <q-item>
             <div avatar>
-              <img class="" src="~assets/statusImg.svg" />
+              <img class="profileInformationIcons" src="~assets/statusImg.svg" />
             </div>
             <q-input
               v-model="status"
@@ -108,7 +108,7 @@
           <!-- Bio -->
           <q-item>
             <div avatar>
-              <img class="" src="~assets/bioImg.svg" />
+              <img class="profileInformationIcons" src="~assets/bioImg.svg" />
             </div>
             <q-input
               v-model="bio"
@@ -138,56 +138,8 @@
             label="LOGOUT"
             @click="signOut"
           />
-          <!-- Back Button -->
         </q-item>
-        <!-- Google label -->
-        <!-- <div
-          class="text-center"
-        >
-          <p class="googleAccount text-white text-center">
-            Google account is connected | <b> Private Key</b>
-          </p>
-          <img src="~assets/googleBlock.svg" />
-        </div> -->
       </q-list>
-
-      <!-- TODO google sign -->
-      <!-- <q-item class="row justify-center items-center q-pt-md">
-        <label
-          v-if="privateKey && connected"
-          class="text-subtitle1 flex items-center text-weight-medium q-ml-sm"
-          :style="`color: white`"
-          >Google Account is Connected:</label
-        >
-        <label
-          v-else
-          class="text-subtitle1 flex items-center text-weight-medium"
-          :style="'color: white'"
-          >Connect Google Account:</label
-        >
-        <q-btn
-          v-if="!privateKey"
-          class="purpleGradient q-ml-sm"
-          :style="`height: 35px; `"
-          rounded
-          no-caps
-          label="Authenticate"
-          @click="onGoogleSignIn(null)"
-        />
-        <div
-          class="q-ml-sm"
-          data-height="200"
-          id="google-authentication-button"
-          :style="`display: ${privateKey && !connected ? 'unset' : 'none'}`"
-        ></div>
-        <q-btn
-          v-if="privateKey && connected"
-          class="purpleGradient q-ml-sm"
-          no-caps
-          label="View Private Key"
-          @click="confirm = true"
-        />
-      </q-item> -->
 
       <q-dialog v-model="confirm" persistent>
         <q-card class="popupCard">
@@ -605,22 +557,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  block-size: auto;
-  align-self: center;
-}
-
 .settingBtn {
   background: #2e1f4f;
   padding: 0.5rem;
-}
-
-.profile {
-  display: flex;
-  font-weight: normal;
-  font-size: large;
-  top: 2rem;
 }
 
 .pageContainer {
@@ -630,7 +569,6 @@ export default {
 }
 
 .uploadImage {
-  /* background-image: url("~assets/camera.svg"); */
   background-repeat: no-repeat;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
@@ -642,75 +580,21 @@ export default {
 }
 
 .userAvatar {
-  position: absolute;
   height: clamp(5rem, 20vh, 10rem);
+  border-radius: 50%;
+  overflow: hidden;
   img {
     height: 100%;
   }
 }
 
-.avatarBackground {
-  display: flex;
-  position: relative;
-  left: center;
-  margin-bottom: 6rem;
-  margin-left: 4rem;
-  top: -2rem;
-}
-
 .profileInformation {
   margin-top: 5rem;
   max-width: 25rem;
-  img {
+  .profileInformationIcons {
     height: 2.5rem;
     width: 2.5rem;
     margin-right: 15px;
   }
 }
-
-.settingImg {
-  background-color: white;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-  margin-top: -2.5rem;
-  margin-left: 1rem;
-}
-
-.nameImg {
-  margin: 1rem 1.5rem 1rem;
-}
-
-.googleAccount {
-  /* position: absolute; */
-  margin-top: 2rem;
-  display: block;
-  text-decoration-color: white;
-  font-size: 0.95rem;
-  /* margin-bottom: 2rem; */
-}
-
-.googleBlock {
-}
-
-.backBtn {
-  top: 0rem;
-  position: absolute;
-  /* border: 1px solid white; */
-  z-index: 10;
-  float: left;
-}
-
-/* .overlay {
-  position: absolute; 
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #020039; 
-  z-index: 0;
-} */
 </style>

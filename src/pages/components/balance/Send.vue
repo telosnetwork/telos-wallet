@@ -184,8 +184,7 @@ export default {
 </script>
 
 <style scoped>
-.list-item {
-  /* border: 1px solid #fafafa; */
+/* .list-item {
   border-left: none;
   border-right: none;
 }
@@ -199,5 +198,5 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
+} */
 </style>
