@@ -27,17 +27,21 @@
             <div />
           </div>
           <div>
-            <q-card
+            <!-- <q-card
               class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow bg-transparent q-gutter-md"
+            > -->
+            <q-card
+              class="bg-transparent no-shadow text-center"
             >
-              <div v-if="isPToken" class="list-item q-pb-sm">
+              <!-- <div v-if="isPToken" class="list-item q-pb-sm"> -->
+              <div v-if="isPToken" class="q-py-md">
                 <label class="text-center full-width text-white"
                   >From Network</label
                 >
               </div>
-              <div v-if="isPToken" class="list-item ">
+              <div v-if="isPToken" class="">
                 <q-btn-group
-                  class="full-width justify-center"
+                  class="full-width justify-center q-pb-md"
                   push
                   unelevated
                   rounded
@@ -247,9 +251,7 @@ export default {
       return Object.keys(this.coinpTokenNetworks).length > 1;
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      return process.env.CHAIN_NAME;
     },
     coinpTokenNetworks() {
       if (this.selectedCoin.network) {
@@ -374,95 +376,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.main-card {
-  background-image: linear-gradient(white, #f0f0f0);
-}
-/* .qr-card {
-  width: 95%;
-  border-radius: 20px;
-} */
-
-.cryptoImg1 {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  margin-top: 6rem;
-  margin-left: 1rem;
-  width: 6rem;
-  height: 6rem;
-}
-.cryptoImg2 {
-  position: absolute;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin-top: 8rem;
-  margin-right: 3rem;
-  margin-left: -5rem;
-}
-
-.avatarBackground {
-  display: flex;
-  position: relative;
-  left: 30%;
-  margin-left: -3.4rem;
-  margin-top: 4.5rem;
-  /* margin-bottom: -1rem; */
-}
-
-.avatarBackground2 {
-  display: flex;
-  position: relative;
-  left: -1rem;
-  margin-left: -6.6rem;
-  margin-top: 4.3rem;
-  width: 8rem;
-  height: 8rem;
-  /* margin-bottom: -1rem; */
-}
-
-.cryptoBtn {
-  margin-top: 1rem;
-}
-
-.networkinfo {
-  display: block;
-  margin-left: 2rem;
-  margin-right: 2rem;
-  margin-top: 1rem;
-}
-
-.nextBtn {
-  margin-top: 0.5rem;
-  width: 600px;
-  margin-bottom: 1rem;
-}
-
-.qrCode {
-  margin-left: 50%;
-  transform: translateX(-10%);
-}
-
-.amount-div {
-  display: inline-flex;
-  justify-content: space-between;
-}
-
-.amount {
-  color: #fafafa;
-  margin-top: 7rem;
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-}
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -474,36 +387,10 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-.generateBtn {
-  background: linear-gradient(120deg, #1dd1fe, #8946df);
-  color: white;
-  margin-top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-}
 
-.username {
-  width: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.notes {
-  width: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-}
 @media only screen and (min-width: 1000px) {
-  .networkinfo {
-    display: block;
-    margin-left: 10rem;
-    margin-right: 10rem;
-    margin-top: 1rem;
-  }
-
-  .coin_icon {
-    background: "~assets/ethereumLogo.svg";
-  }
 }
+
 .qrCanvas {
   width: 15rem;
   border-radius: 2rem;

@@ -160,16 +160,15 @@ export default {
 </script>
 
 <style scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  /* border: 1px solid #fafafa; */
+
+/* .list-item {
+  border: 1px solid #fafafa00;
   border-left: none;
   border-right: none;
-}
-.display-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+} */
+/* .display-grid {
   display: grid;
 }
 .h-20 {
@@ -179,13 +178,6 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
+} */
 
-.receiveGrid {
-  background-color: #00000000;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-}
 </style>

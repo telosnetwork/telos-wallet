@@ -3,12 +3,8 @@
     <div style="width: 600px">
       <div style="height: 100%; overflow:auto">
         <div class="text-center ">
-          <!-- <login-button v-if="isAuthenticated" style="display:none" /> -->
 
-          <!-- Profile Image top left -->
-          <q-avatar class="profileImg" @click="$router.push('/settings')">
-            <img :src="userAvatar" />
-          </q-avatar>
+          
           <!-- Account Name -->
           <div
             class="text-white q-mt-xl"
@@ -91,10 +87,6 @@
               label="Receive"
               @click="showReceiveDlg = true"
             />
-            <!-- <q-toolbar v-if="accountNameStyle.opacity > 0" class="text-white main-toolbar" :style="`opacity: ${accountNameStyle.opacity};`"> -->
-            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-            <!-- <q-separator dark vertical class="main-toolbar-sperator"/> -->
-            <!-- </q-toolbar> -->
           </div>
 
           <!-- Convert and Purchace -->
@@ -365,11 +357,7 @@ export default {
       "suggestTokens",
       "pTokenNetworks"
     ]),
-    userAvatar() {
-      if (this.avatar) return this.avatar;
-
-      return "/profile/default_avatar.svg";
-    },
+    
     totalAmount() {
       return this.coins
         .map(coin => coin.amount * coin.price)
@@ -396,15 +384,17 @@ export default {
       return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      if (process.env.CHAIN_NAME === undefined) {
+        return "telos";
+      } else {       
+        return process.env.CHAIN_NAME;
+      }
     },
     nftAccounts() {
-      if (this.chainName === "telos") {
-        return ["tlos.tbond", "marble.code"];
-      } else {
+      if (this.chainName !== "telos") {
         return ["marbletessst"];
+      } else {
+        return ["tlos.tbond", "marble.code"];
       }
     },
     shortenedEvmAddress() {
@@ -438,23 +428,18 @@ export default {
       this.avatar = accountProfile.avatar;
     },
     switchTab(val) {
-      console.log("asdf");
       this.$emit("update:balanceTab", val);
     },
     clickPurchase() {
-      // this.$emit('update:selectedCoin', this.coins.find(coin => coin.symbol === 'TLOS'));
       this.selectedCoin = this.coins.find(coin => coin.symbol === "TLOS");
-      // this.$emit('update:showBuyAmountDlg', true);
       this.showBuyAmountDlg = true;
     },
     clickExchange() {
-      console.log("Pina Colladas!!!", "Clicked me!!!!!");
       // this.$emit('update:showExchangeDlg', true); // not working anymore
       this.showExchangeDlg = true;
     },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
-      // this.coinViewHeight = Math.min(this.availableHeight - this.minSpace, Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight));
       if (info.isFirst) {
         this.panning = true;
       } else if (info.isFinal) {
@@ -462,16 +447,7 @@ export default {
       }
     },
     async loadCoinList() {
-      /*
-          account: token.account.toLowerCase(),
-          name: token.metadata.name,
-          symbol: token.symbol,
-          amount: 0,
-          price: 0,
-          icon: token.metadata.logo,
-          precision: precisionSplit.length > 1 ? precisionSplit[1].length : 0
-          network: tevm
-       */
+      
       const coins = await this.$store.$api.getTableRows({
         code: "tokenmanager",
         limit: "1000",
@@ -622,7 +598,6 @@ export default {
       };
       this.coins = this.coins.sort(sortCoin(this.suggestTokens));
       this.$emit("update:loadedCoins", this.coins);
-      // console.log(this.loadedCoins);
     },
     async loadNftTokenItems() {
       for (const account of this.nftAccounts) {
@@ -763,7 +738,6 @@ export default {
       return 0;
     },
     async withdrawEVM() {
-      // this.tEVMWithdrawing = true;
       const quantityStr = `${this.getFixed(
         this.getCurrenttEVMBalance(),
         4
@@ -823,19 +797,36 @@ export default {
     },
 
     addEvmNetwork() {
-      const params = [
-        {
-          chainId: "0x28",
-          chainName: "Telos EVM Mainnet",
-          nativeCurrency: {
-            name: "Telos",
-            symbol: "TLOS",
-            decimals: 4
-          },
-          rpcUrls: ["https://mainnet.telos.net/evm"],
-          blockExplorerUrls: ["https://teloscan.io"]
-        }
-      ];
+      let params = [];
+      if (this.chainName !== "telos") {
+        params = [
+          {
+            chainId: "0x29",
+            chainName: "Telos EVM Testnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4
+            },
+            rpcUrls: ["https://testnet.telos.net/evm"],
+            blockExplorerUrls: ["https://testnet.teloscan.io"]
+          }
+        ];
+      } else {
+        params = [
+          {
+            chainId: "0x28",
+            chainName: "Telos EVM Mainnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4
+            },
+            rpcUrls: ["https://mainnet.telos.net/evm"],
+            blockExplorerUrls: ["https://teloscan.io"]
+          }
+        ];
+      }
 
       window.ethereum
         .request({ method: "wallet_addEthereumChain", params })
@@ -851,20 +842,17 @@ export default {
             this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
           this.coinViewHeight > this.availableHeight - this.maxSpace
         ) {
-          // this.coinViewHeight = this.coinViewHeight - 3;
         } else if (
           this.coinViewHeight >=
             this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
           this.coinViewHeight < this.availableHeight - this.minSpace
         ) {
-          // this.coinViewHeight = this.coinViewHeight + 3;
         }
         const approxViewHeight = Math.min(
           this.availableHeight - this.minSpace,
           Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight)
         );
         if (this.coinViewHeight != approxViewHeight) {
-          // this.coinViewHeight = approxViewHeight;
         }
       }
       this.displayAmount =
@@ -899,15 +887,10 @@ export default {
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {}
       window.time = Date.now() / 1000;
-      if (!window.location.href.includes("localhost")) {
-        console.clear();
-        console.log("Don't try to use Inspector!");
-      }
-      window.time = Date.now() / 1000;
-      if (!window.location.href.includes("localhost")) {
-        console.clear();
-        console.log("Don't try to use Inspector!");
-      }
+      // if (!window.location.href.includes("localhost")) {
+      //   console.clear();
+      //   console.log("Don't try to use Inspector!");
+      // }
     }, 5000);
   },
   beforeMount() {
@@ -946,8 +929,8 @@ export default {
   },
   watch: {
     async accountName() {
-      this.loadUserProfile();
       if ((this.chainName === "telos" || 1) && this.isAuthenticated) {
+        this.loadUserProfile();
         await this.loadNftTokenItems();
         this.loadNftTokenTags();
       }
@@ -989,18 +972,5 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
-.profileImg {
-  height: 4rem;
-  width: 4rem;
-  // margin: 1rem;
-  cursor: pointer;
-  background: no-repeat;
-  right: 1.5rem;
-  top: 1.5rem;
-  position: absolute;
-  display: none;
-  @media only screen and (min-width: 1000px) {
-    display: block;
-  }
-}
+
 </style>

@@ -37,7 +37,7 @@
               <div class="confirmGrid q-py-lg q-gutter-y-sm">
                 <div class="text-weight-bold">To</div>
                 <div class="lt-md">{{ toAddressShort }}</div>
-                <!-- <div class="gt-sm">{{ toAddress }}</div> -->
+                <div class="gt-sm">{{ toAddress }}</div>
                 <div v-if="networkType !== 'telos'" class="text-weight-bold">
                   Network Fee
                 </div>
@@ -142,7 +142,6 @@ export default {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
     async confirm() {
-      // console.log(this.selectedCoin);
       this.sending = true;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(
@@ -276,24 +275,6 @@ export default {
 </script>
 
 <style scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.to-address {
-  width: 0px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  padding-top: inherit;
-  padding-bottom: inherit;
-}
 .confirmGrid {
   display: grid;
   grid-template-columns: 7rem auto;

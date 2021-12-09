@@ -21,8 +21,6 @@
         <div class="text-h5 text-weight-medium text-center q-mt-lg">
           EVM Deposit
         </div>
-        <!-- <div class="text-center q-gutter-y-xs">
-        </div> -->
         <div />
       </div>
       <div class="text-center">
@@ -267,23 +265,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  border: 1px solid #fafafa;
-  border-left: none;
-  border-right: none;
-}
-.display-grid {
-  display: grid;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 .depositAddressToggle {
   cursor: pointer;
 }

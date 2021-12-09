@@ -6,6 +6,7 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
+
     <!-- Body -->
     <div v-if="selectedCoin" class="main-background">
       <div class="dialogPage">
@@ -29,31 +30,11 @@
 
           <!-- Body Information -->
           <div class="text-center">
-            <q-avatar size="5rem" class="">
-              <img :src="selectedCoin.icon" />
-            </q-avatar>
-            <!-- <div class="absolute" style=" left: 50%; margin-left:-3rem;">
-              <q-item-section avatar class="cryptoImg">
-              </q-item-section>
-              <img
-                class="avatarBackground"
-                src="~assets/avatarBackground.svg"
-              />
-            </div> -->
-
-            <!-- <div style="position: relative; left: 0; top: 0; align-content: center;" >
-                <q-item-section avatar class="cryptoImg">
-                  <q-avatar size="45px" class="q-my-sm">
-                    <img src="coin.icon"> -->
-            <!-- <img :src="coin.icon"> -->
-            <!-- </q-avatar>
-                </q-item-section>
-                <img class="cryptoImg" src="~assets/avatarBackground.svg">
-                <img class="cryptoImg" src="~assets/avatarBackground.svg">
-              </div> -->
+              <q-avatar size="5rem" class="">
+                <img :src="selectedCoin.icon" />
+              </q-avatar>
             <div class="column text-center q-pt-sm ">
               <div class="full-width column ">
-                <!-- <div class="amount">Amount</div> -->
                 <label
                   ref="widthElement"
                   :style="
@@ -153,6 +134,7 @@
                   <div>{{ key }}</div>
                 </div>
               </div>
+
               <!-- Information -->
               <div class="row justify-center text-left q-my-md">
                 <q-expansion-item
@@ -160,15 +142,6 @@
                   label="Buy with Card"
                   icon="fas fa-info-circle"
                 >
-                  <!-- <template v-slot:header>
-                    <div class="row justify-between">
-                      <img
-                        class="col q-pr-sm q-pt-xs"
-                        src="~assets/c-info 1.svg"
-                      />
-                      <div class="col">asdf</div>
-                    </div>
-                  </template> -->
                   <div class="col text-justify q-pa-md ">
                     By Clicking 'Next' you will be taken to Moonpay to purchase Telos (TLOS) with card.
                     Do not alter the 'TO' or 'MEMO' field or risk losing your
@@ -396,77 +369,10 @@ export default {
 </script>
 
 <style scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  /* border: 1px solid #fafafa; */
-  border-left: none;
-  border-right: none;
-}
-.display-grid {
-  display: grid;
-}
-.h-25 {
-  height: 25px;
-}
-
-.nextButton {
-  position: relative;
-  left: 0%;
-  right: 50%;
-  bottom: 5%;
-  top: 20%;
-  background: linear-gradient(120deg, #1dd1fe, #8946df);
-  height: 3rem;
-  text-align: center;
-}
-.cryptoImg {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  margin-top: 1.5rem;
-}
-
-.avatarBackground {
-  display: flex;
-  position: relative;
-  left: 50%;
-  margin-left: -4rem;
-  /* margin-bottom: -1rem; */
-}
-
-.eosNextInf {
-  display: flex;
-  position: relative;
-  left: 4rem;
-  right: 3rem;
-  margin-top: 3rem;
-  margin-left: 4rem;
-  text-align: justify;
-  width: 20rem;
-  height: auto;
-
-  /* font-family: 'Silka'; */
-  /* margin-bottom: 6rem; */
-}
 
 .infoBox {
   background-color: #0000002a;
   flex: 0 1 300px;
 }
 
-.infoIcon {
-  margin-left: -2.5rem;
-  margin-right: 1rem;
-  margin-top: -5rem;
-  transform: translate(-50%, 50);
-}
-
-.amount {
-  text-align: center;
-  font-size: 1.2rem;
-  color: white;
-}
 </style>

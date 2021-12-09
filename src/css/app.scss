@@ -101,21 +101,14 @@ body {
 }
 
 .main-background {
-  background: $blackDark;
-  // background: url("~assets/bg-noise.png");
-  // background-repeat: repeat;
+  background: $blackDark;;
 }
 
 .main-background-overlay {
-  background: url("~assets/MainBG.png");
+  background: linear-gradient(0.40turn, #0a1d5f52, #814cdc52 );
   background-repeat: no-repeat;
   background-size: cover;
 }
-
-// .dialogWrapper {
-//   display: block;
-//   overflow: auto;
-// }
 
 .dialogPage {
   @extend .main-background-overlay;
@@ -221,9 +214,6 @@ body {
   &:active {
     background-color: #00000021;
   }
-  // width: 30%;
-  // height: 3rem;
-  // bg-transparent text-white q-mx-auto q-my-auto text-h5
 }
 
 .depositInput {
@@ -231,3 +221,23 @@ body {
     border-color: #ffffff73;
   }
 }
+// .list-item {
+//   border: 1px solid #fafafa00;
+//   border-left: none;
+//   border-right: none;
+//   display: grid;
+//   grid-template-columns: 1fr auto 1fr;
+// }
+
+.display-grid {
+  display: grid;
+}
+.h-20 {
+  height: 20px;
+}
+.wraplabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

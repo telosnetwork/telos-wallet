@@ -2,16 +2,6 @@
   <div>
     <!-- Login Button -->
     <div v-if="!isAuthenticated" class="q-px-md">
-      <!-- <div>
-        <q-btn
-          @click="signIn"
-          text-color="white"
-          no-caps
-          label="Sign In"
-          class="full-width login-btn"
-          :style="`background: ${themeColor}`" 
-        />
-      </div> -->
       <div class="q-mt-md q-mb-sm">
         <q-btn
           @click="showLogin = true"
@@ -73,23 +63,10 @@
                 :color="wallet.getStyle().textColor"
                 size="2em"
               />
-              <!-- <q-btn
-                v-else
-                :color="wallet.getStyle().textColor"
-                icon="get_app"
-                @click="openUrl(wallet.getOnboardingLink())"
-                target="_blank"
-                dense
-                flat
-                size="12px"
-              >
-                <q-tooltip>
-                  Get app
-                </q-tooltip>
-              </q-btn> -->
             </q-item-section>
           </q-item>
         </q-list>
+
         <!-- Close Button -->
         <q-btn
           v-close-popup
@@ -157,16 +134,13 @@
         </div>
       </q-card>
     </q-dialog>
-    <!-- <q-dialog v-model="showAuth" persistent>
-      <Authenticate :showAuth.sync="showAuth" :type.sync="authType" />
-    </q-dialog> -->
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
-import Authenticate from "../pages/components/auth/Authenticate";
+// import Authenticate from "../pages/components/auth/Authenticate";
 // var window_1 = require("../utils/telos-keycatjs/utils/window");
 // var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
 var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
@@ -208,15 +182,10 @@ export default {
       "isAutoLoading"
     ]),
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      return process.env.CHAIN_NAME;
     }
   },
   components: {
-  },
-  components: {
-    Authenticate
   },
   methods: {
     ...mapActions("account", [
@@ -231,12 +200,12 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      // this.showAuth = true;
-      // this.authType = "signup";
-      this.signPopup('/create');
+      // this.signPopup('/create'); // enable this to open signup popup
+      // this.onLogin(1)
+      this.openUrl("https://app.telos.net/accounts/add");
     },
     async signIn() {
-      this.signPopup("/signin");
+      // this.signPopup("/signin");
     },
     async signOut() {
       if (gapi) {
@@ -288,10 +257,6 @@ export default {
       }
     },
     async onLogin(idx) {
-      // if (idx === 0) {
-      //   this.showAuth = true;
-      //   this.authType = "signin";
-      // } else {
         const error = await this.login({ idx });
         if (!error) {
           this.showLogin = false;
@@ -333,7 +298,6 @@ export default {
     },
 
     async buyResources() {
-      // TODO dynamically calculate buy amount
       if (this.ramLow) {
         this.RAMtoBuy = this.buyAmount;
       }
@@ -423,10 +387,10 @@ export default {
     }
   },
   async mounted() {
-    await this.checkResources();
     await this.autoLogin(this.$route.query.returnUrl);
     if (this.isAuthenticated) {
       await this.createEvmApi();
+      await this.checkResources();
     }
     this.authInterval = setInterval(() => {
       if (this.$store.$account.needAuth) {
@@ -450,15 +414,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.login-btn {
-  max-width: 500px;
-  height: 40px;
-  border-radius: 10px;
-}
-.account-name {
-  color: white;
-  font-size: 20px;
-}
 .logout-btn {
   /* // margin-left: auto; */
   left: -15px;
@@ -467,34 +422,10 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.connectWallet {
-  margin-top: 4rem;
-  margin-left: 4rem;
-  margin-bottom: 3rem;
-  color: white;
-  font-size: 17px;
-}
 .showLoginPopup {
   width: 30rem;
   height: auto;
   margin-bottom: 5rem;
 }
 
-.showLoginPopupStyle {
-  width: 20rem;
-  height: 18rem;
-}
-
-.itemStyling {
-  color: white;
-  padding-left: 4rem;
-  padding-top: 0.5rem;
-}
-
-.closeBtn {
-  display: flex;
-  width: 7rem;
-  color: white;
-  left: 55%;
-}
 </style>

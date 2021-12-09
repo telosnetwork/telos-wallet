@@ -40,17 +40,6 @@
                 />
               </div>
             </q-avatar>
-            <!-- <img class="avatarBackground" src="~assets/avatarBackground.svg" /> -->
-            <!-- Amount Shown -->
-            <!-- <div class="amount q-pt-sm">Amount</div> -->
-            <!-- <label
-              ref="widthElement"
-              :style="
-                `display: fit-content; position: absolute; font-size: ${amountFontSize}px;`
-              "
-            >
-              {{ sendAmount }}
-            </label> -->
             <div class="desktop-only flex flex-center">
               <label
                 class="text-weight-regular q-mr-sm"
@@ -408,45 +397,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.amount-div {
-  display: inline-flex;
-  justify-content: space-between;
-}
-.list-item {
-  /* border: 1px solid #fafafa; */
-  border-left: none;
-  border-right: none;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.amount {
-  color: #fafafa;
-  font-size: 1.2rem;
-}
-.cryptoImg {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  margin-top: 2rem;
-}
-
-.avatarBackground {
-  display: flex;
-  position: relative;
-  left: 50%;
-  margin-left: -4rem;
-  margin-top: 0.5rem;
-  /* margin-bottom: -1rem; */
-}
-
 .inputContainer {
   display: flex;
   flex-direction: column;
