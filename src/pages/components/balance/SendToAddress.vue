@@ -275,9 +275,7 @@ export default {
       return `${this.pTokenNetworks[this.tSymbol][this.networkType]} address`;
     },
     chainName() {
-      return this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].config.blockchain.name;
+      return process.env.CHAIN_NAME;
     },
     coinpTokenNetworks() {
       if (this.selectedCoin.network) {
