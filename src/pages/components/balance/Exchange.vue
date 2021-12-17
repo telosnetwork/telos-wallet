@@ -138,7 +138,7 @@
           </div>
 
           <!-- Crypto Amount Converter -->
-          <div v-else class="row justify-center q-mt-md ">
+          <div v-else class="row justify-center q-mt-md">
             <div class="cryptoWrapper">
               <q-space />
               <q-item
@@ -147,7 +147,7 @@
               >
                 <q-item-section>
                   <div class="text-white display-grid">
-                    <label class="text-subtitle1 text-weight-medium"
+                    <label class="text-subtitle1 text-weight-medium wrap"
                       >Convert</label
                     >
                   </div>
@@ -689,6 +689,7 @@ export default {
 <style lang="scss" scoped>
 .list-item {
   // border: none;
+  flex-wrap: wrap;
   border-left: none;
   border-right: none;
 }
