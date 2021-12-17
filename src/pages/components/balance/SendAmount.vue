@@ -169,6 +169,7 @@
                 "
               />
             </q-btn-group>
+
             <!-- Crypto Available -->
             <div class="text-center q-pt-xs q-pb-l ">
               <label class="text-subtitle2 text-white">{{
