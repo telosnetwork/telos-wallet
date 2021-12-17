@@ -9,7 +9,7 @@
     <div class="main-background">
       <div class="dialogPage">
         <div class="dialogPageContent column">
-          <div class="dialogPageHeading ">
+          <div class="dialogPageHeading full-width row  justify-between  ">
             <div>
               <q-btn
                 round
@@ -46,7 +46,6 @@
                 />
               </q-btn-group>
             </div>
-            <div />
           </div>
 
           <!-- Dollar currency converter -->
@@ -155,7 +154,7 @@
                 </q-item-section>
                 <q-item-section side>
                   <div class="text-right display-grid">
-                    <label class="text-caption "
+                    <label class=""
                       >${{
                         convertCoin
                           ? getFixed(convertAmount * convertCoin.price, 2)
@@ -170,7 +169,7 @@
                 style="min-height: 28px;"
               >
                 <q-item-section>
-                  <div class="text-white display-grid">
+                  <div class="text-white display-grid" style="width: 200px;">
                     <label
                       class="text-white text-subtitle1 text-weight-medium cursor-pointer"
                       :style="
@@ -227,11 +226,11 @@
               <div
                 class="full-width row  justify-center items-center content-center "
               >
-                <q-separator class="col" style="height: 0.3px;" color="grey" />
+                <q-separator class="col" style="height: 1px;" color="grey" />
                 <q-btn class="swapBtn" flat round @click="changeCoins()">
                   <img src="~assets/icons/swap_arrows.svg" />
                 </q-btn>
-                <q-separator class="col" style="height: 0.3px;" color="grey" />
+                <q-separator class="col" style="height: 1px;" color="grey" />
               </div>
               <!-- <q-separator style="height: 0.3px;" color="grey" /> -->
 
@@ -718,6 +717,7 @@ export default {
   text-align: right;
 }
 .dialogPageHeading {
+  display: flex;
   grid-template-columns: 50px auto;
 }
 @media only screen and (max-width: 1000px) {
