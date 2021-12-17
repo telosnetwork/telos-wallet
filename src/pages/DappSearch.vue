@@ -52,7 +52,6 @@
               </div>
             </q-item-section>
           </q-item>
-          <!-- <q-separator style="height: 1px;" color="white"/> -->
         </div>
         <template v-if="!loadedAll" v-slot:loading>
           <div class="row justify-center q-my-md">
@@ -116,9 +115,7 @@ export default {
       });
       this.dapps.push(...json);
       this.page += 1;
-      // if (json.length === 0) {
       this.loadedAll = true;
-      // }
       done();
     },
     openInNewTab(url) {
@@ -160,8 +157,7 @@ div::-webkit-scrollbar-thumb {
   background-color: #555;
 }
 
-.list-item {
-  /* border: 1px solid #020036; */
+/* .list-item {
   border-left: none;
   border-right: none;
 }
@@ -172,49 +168,14 @@ div::-webkit-scrollbar-thumb {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.bg-transparent {
-  background: #00000000;
-}
+} */
 
 .display-grid::-webkit-scrollbar {
   display: none;
 }
 
-.dapp-header {
-  background: #00000000;
-}
-
-.searchBar {
-  width: 50%;
-  margin-left: 25%;
-}
-
-.dappsHead {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-  background: #00000000;
-}
-
-.card {
-  box-shadow: 0 0px 0px rgb(0 0 0 / 0);
-}
-
-.q-card {
-  box-shadow: 0 0px 0px rgb(0 0 0 / 0);
-}
 
 @media only screen and (max-width: 1000px) {
-  .dappsHead {
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    border-bottom-left-radius: unset;
-    border-bottom-left-radius: unset;
-    background: #00000000;
-    padding-bottom: 65px;
-  }
+  
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="q-pa-md">
+
     <!-- Stake, Unstake, refund options -->
     <q-btn-toggle
       v-model="resourceOption"
@@ -34,9 +35,6 @@
 
       <q-btn label="Unstake" no-caps @click="tryUnstake()" />
     </q-card>
-
-    <!-- TODO Refund card -->
-
 
   </div>
 </template>

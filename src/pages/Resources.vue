@@ -29,7 +29,6 @@ import Staking from "./components/resources/staking.vue";
 
 export default {
   components: { buysellram, Staking },
-  // name: 'PageName',
   data() {
     return {
       tab: "ram"

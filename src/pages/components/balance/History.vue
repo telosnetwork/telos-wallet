@@ -30,6 +30,7 @@
             <!-- Crypto History Container -->
             <q-page-container>
               <div class="text-white text-center display-grid">
+
                 <!-- Crypto Image -->
                 <div class="absolute" style=" left: 50%; margin-left:-3rem;">
                   <q-item-section avatar class="cryptoImg">
@@ -147,7 +148,7 @@
                 </q-input>
                 <q-separator dark class="q-my-sm" />
               </div>
-              <!-- TODO get evm history -->
+              
               <q-infinite-scroll v-if="selectedCoin.name !== 'Telos EVM'" @load="loadMoreHistory" :offset="100">
                 <div
                   v-for="(history, index) in searchHistories"
@@ -355,30 +356,24 @@ export default {
     }
   }
 }
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  /* border: 1px solid #fafafa; */
-  border-left: none;
-  border-right: none;
-  // border-top-left-radius: 30px;
-  // border-top-right-radius: 30px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+// .list-item {
+ 
+//   border-left: none;
+//   border-right: none;
+//   border-bottom-left-radius: unset;
+//   border-bottom-left-radius: unset;
+// }
+// .display-grid {
+//   display: grid;
+// }
+// .h-20 {
+//   height: 20px;
+// }
+// .wraplabel {
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// }
 
 .cryptoImg {
   position: absolute;
@@ -400,20 +395,6 @@ export default {
   margin-top: 10rem;
 }
 
-.searchBar {
-  width: auto;
-  margin-left: 2rem;
-  margin-right: 2rem;
-  background-color: #462584;
-  text-decoration-color: white;
-}
-
-.cryptoInfo {
-  border-top-left-radius: 30px;
-  border-top-right-radius: 30px;
-  border-bottom-left-radius: unset;
-  border-bottom-left-radius: unset;
-}
 .dialogPage {
   background-image: none;
 }

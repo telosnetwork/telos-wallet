@@ -151,38 +151,18 @@ export default {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
 }
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+// .display-grid {
+//   display: grid;
+// }
+// .h-20 {
+//   height: 20px;
+// }
+// .wraplabel {
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// }
 
-div.scroll {
-  overflow: auto;
-}
-
-div.scroll::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 0px rgba(184, 18, 18, 0.3);
-  border-radius: 1px;
-  background-color: #00000000;
-}
-
-div.scroll:-webkit-scrollbar {
-  width: 1px;
-  background-color: #7802ff;
-}
-
-div.scroll::-webkit-scrollbar-thumb {
-  border-radius: 1px;
-  -webkit-box-shadow: inset 0 0 6px rgba(6, 103, 160, 0.3);
-  background-color: rgb(223, 0, 0);
-}
 .tevmBtnWrapper {
   justify-self: center;
   display: flex;

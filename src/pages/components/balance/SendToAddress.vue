@@ -88,6 +88,7 @@
               }}
             </div>
           </div>
+
           <!-- Crypto Buttons -->
           <q-item v-if="isPToken" class="list-item ">
             <q-btn-group
@@ -112,6 +113,7 @@
               />
             </q-btn-group>
           </q-item>
+
           <!-- To network -->
           <div class="row justify-center">
             <q-list class="q-pt-md ">
@@ -418,57 +420,10 @@ export default {
 </script>
 
 <style scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  /* border: 1px solid #fafafa; */
+
+/* .list-item {
   border-left: none;
   border-right: none;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
+} */
 
-.cryptoImg1 {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  margin-top: 9rem;
-  margin-left: 1rem;
-  width: 6rem;
-  height: 6rem;
-}
-.cryptoImg2 {
-  position: absolute;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin-top: 11rem;
-  margin-right: 3rem;
-  margin-left: -5rem;
-}
-
-.avatarBackground {
-  display: flex;
-  position: relative;
-  left: 30%;
-  margin-left: -3.4rem;
-  margin-top: 7.5rem;
-  /* margin-bottom: -1rem; */
-}
-
-.avatarBackground2 {
-  display: flex;
-  position: relative;
-  left: -1rem;
-  margin-left: -6.6rem;
-  margin-top: 7.3rem;
-  width: 8rem;
-  height: 8rem;
-  /* margin-bottom: -1rem; */
-}
 </style>

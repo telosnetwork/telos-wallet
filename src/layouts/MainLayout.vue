@@ -51,31 +51,7 @@
         :balanceTab.sync="balanceTab"
       />
     </q-page-container>
-    <!-- <nav-bar /> -->
-
-    <!-- <img src="~assets/bottomBg.svg" class=""> -->
-
-    <!-- <q-footer class="footerStyle" v-if="isAuthenticated" style="max-width: auto; margin: 0rem 0rem; opacity: 100; place-content: center;">
-      <q-tabs 
-        v-model="tab"
-        dense
-        align="justify"
-        narrow-indicator
-        active-color="deep-purple-10"
-        class="text-grey shadow-2"
-        :style="`height: ${footerHeight}px; background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%)`"
-      >
-        <q-route-tab style=""
-          v-for="page in pages"
-          :name="page.title"
-          :icon="page.icon"
-          :key="page.title"
-          :to="page.path"
-          :disable="!page.available"
-          :style="`opacity: ${page.available ? 1 : 0.3} !important; background: linear-gradient(to bottom, #130C3F00, #8946DF00 200%)`"
-        />
-      </q-tabs>
-    </q-footer> -->
+    
   </q-layout>
 </template>
 
@@ -210,10 +186,6 @@ export default {
   }
 }
 
-.footerStyle {
-  background: linear-gradient(to bottom, #130c3f00, #8946df00 200%);
-}
-
 .videoWrapper {
   background: black;
   width: 100vw;
@@ -232,7 +204,8 @@ export default {
 }
 
 .videoOverlay {
-  background: url("~assets/MainBG.png");
+  // background: url("~assets/MainBG.png");  
+  background: linear-gradient(0.40turn, #0a1d5f52, #814cdc52 );
   background-repeat: no-repeat;
   background-size: cover;
   object-fit: cover;
@@ -244,7 +217,7 @@ export default {
 }
 
 .shadedOverlay {
-  background: #442ab652;
+  background: linear-gradient(0.40turn, #0a1d5f52, #814cdc52 );
 }
 
 .profileImg {

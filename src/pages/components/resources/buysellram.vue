@@ -1,5 +1,6 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md"> 
+    
     <!-- Buy or sell option -->
     <q-btn-toggle
       v-model="buyorsell"

@@ -116,21 +116,9 @@ export default {
 </script>
 
 <style scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
+
 .main-card {
   background-image: linear-gradient(white, #f0f0f0);
 }
-.qr-card {
-  width: 85%;
-  border-radius: 20px;
-}
+
 </style>

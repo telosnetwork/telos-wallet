@@ -20,8 +20,6 @@
         <div class="text-h5 text-weight-medium text-center q-mt-lg ">
           EVM Withdraw
         </div>
-        <!-- <div class="text-center q-gutter-y-xs">
-        </div> -->
         <div />
       </div>
       <div class="popupBody text-center">
@@ -44,7 +42,7 @@
               TLOS
             </label>
           </div>
-          <div class="">Max: {{ evmTLOSBalance }}</div>
+          <div @click="withdrawAmount=evmTLOSBalance" class="">Max: {{ evmTLOSBalance }}</div>
         </div>
         <div class="row justify-center q-mt-md q-mb-lg">
           <q-btn
@@ -130,26 +128,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
-.list-item {
-  border: 1px solid #fafafa;
-  border-left: none;
-  border-right: none;
-}
-.display-grid {
-  display: grid;
-}
-.h-20 {
-  height: 20px;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 .exitBtn {
   position: absolute;
 }

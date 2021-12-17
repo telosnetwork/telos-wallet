@@ -9,7 +9,7 @@
     <div class="main-background">
       <div class="dialogPage">
         <div class="dialogPageContent column">
-          <div class="dialogPageHeading ">
+          <div class="dialogPageHeading full-width row  justify-between  ">
             <div>
               <q-btn
                 round
@@ -20,9 +20,6 @@
                 icon="west"
               />
             </div>
-            <!-- <div class="text-subtitle1 text-weight-medium text-center">
-              Exchange
-            </div> -->
             <div class="grpWrapper">
               <q-btn-group class=" " rounded>
                 <q-btn
@@ -32,9 +29,7 @@
                     `background: ${
                       exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
                     };
-                                color: ${
-                                  exchangeType === 'dollars' ? 'white' : 'white'
-                                };`
+                    color: ${exchangeType === 'dollars' ? 'white' : 'white'};`
                   "
                   @click="exchangeType = 'dollars'"
                 />
@@ -45,16 +40,14 @@
                     `background: ${
                       exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
                     };
-                                color: ${
-                                  exchangeType !== 'dollars' ? 'white' : 'white'
-                                };`
+                    color: ${exchangeType !== 'dollars' ? 'white' : 'white'};`
                   "
                   @click="exchangeType = 'crypto'"
                 />
               </q-btn-group>
             </div>
-            <div />
           </div>
+
           <!-- Dollar currency converter -->
           <div
             v-if="exchangeType === 'dollars'"
@@ -143,8 +136,9 @@
             </div>
             <q-space />
           </div>
+
           <!-- Crypto Amount Converter -->
-          <div v-else class="row justify-center q-mt-md ">
+          <div v-else class="row justify-center q-mt-md">
             <div class="cryptoWrapper">
               <q-space />
               <q-item
@@ -153,14 +147,14 @@
               >
                 <q-item-section>
                   <div class="text-white display-grid">
-                    <label class="text-subtitle1 text-weight-medium"
+                    <label class="text-subtitle1 text-weight-medium wrap"
                       >Convert</label
                     >
                   </div>
                 </q-item-section>
                 <q-item-section side>
                   <div class="text-right display-grid">
-                    <label class="text-caption "
+                    <label class=""
                       >${{
                         convertCoin
                           ? getFixed(convertAmount * convertCoin.price, 2)
@@ -175,7 +169,7 @@
                 style="min-height: 28px;"
               >
                 <q-item-section>
-                  <div class="text-white display-grid">
+                  <div class="text-white display-grid" style="width: 200px;">
                     <label
                       class="text-white text-subtitle1 text-weight-medium cursor-pointer"
                       :style="
@@ -232,11 +226,11 @@
               <div
                 class="full-width row  justify-center items-center content-center "
               >
-                <q-separator class="col" style="height: 0.3px;" color="grey" />
+                <q-separator class="col" style="height: 1px;" color="grey" />
                 <q-btn class="swapBtn" flat round @click="changeCoins()">
                   <img src="~assets/icons/swap_arrows.svg" />
                 </q-btn>
-                <q-separator class="col" style="height: 0.3px;" color="grey" />
+                <q-separator class="col" style="height: 1px;" color="grey" />
               </div>
               <!-- <q-separator style="height: 0.3px;" color="grey" /> -->
 
@@ -338,6 +332,7 @@
               {{ displayedSlippage }}
             </div>
           </div>
+
           <!-- Convert Button -->
           <div class=" text-center">
             <q-btn
@@ -692,99 +687,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.toolbar-title {
-  position: absolute;
-  text-align: center;
-}
 .list-item {
-  border: none;
+  // border: none;
+  flex-wrap: wrap;
   border-left: none;
   border-right: none;
 }
 .display-grid {
   display: grid;
 }
-.h-20 {
-  height: 20px;
-}
-.wraplabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.main-card {
-  background-image: linear-gradient(white, #f0f0f0);
-}
-.convert-card {
-  border-radius: 25px;
-}
-
-.equalAmount {
-  margin-top: 5rem;
-  margin-bottom: -5rem;
-}
 
 .convertBtn {
-  /* position:relative; */
   cursor: pointer;
   background: #ffffff0c;
   &:hover {
     background: #ffffff1e;
   }
-}
-
-.dollarBgimg1 {
-  align-content: center;
-  height: auto;
-  width: 15rem;
-  align-content: center;
-  align-self: center;
-}
-
-.dollarBgimg2 {
-  align-content: center;
-  width: 12rem;
-  height: auto;
-  align-content: center;
-  align-self: center;
-}
-
-.cryptoImg1 {
-  position: absolute;
-  width: 2rem;
-  height: 2rem;
-}
-.cryptoImg2 {
-  position: absolute;
-  width: 3rem;
-  height: 3rem;
-}
-
-.avatarBackground1 {
-  position: absolute;
-  width: 3rem;
-  height: 3rem;
-
-  /* margin-bottom: -1rem; */
-}
-.avatarBackground2 {
-  position: absolute;
-  width: 4rem;
-  height: 4rem;
-  margin-top: 0rem;
-  margin-left: 0rem;
-  /* margin-bottom: -1rem; */
-}
-
-.card {
-  // box-shadow: 0 0px 0px rgb(0 0 0 0);
-}
-
-.q-card {
-  // box-shadow: 0 0px 0px rgb(0 0 0 0);
-}
-
-.coinCardContainer {
 }
 
 .coinAvatarWrapper {
@@ -796,11 +714,11 @@ export default {
     width: 100%;
   }
 }
-
 .grpWrapper {
   text-align: right;
 }
 .dialogPageHeading {
+  display: flex;
   grid-template-columns: 50px auto;
 }
 @media only screen and (max-width: 1000px) {
@@ -812,11 +730,6 @@ export default {
   }
 }
 
-.cryptoInput {
-  font-size: 1rem;
-  min-width: 0;
-  height: 48px;
-}
 .cryptoWrapper {
   flex-grow: 0;
   flex-shrink: 1;
