@@ -63,6 +63,20 @@
                 :color="wallet.getStyle().textColor"
                 size="2em"
               />
+              <q-btn
+                v-else
+                :color="wallet.getStyle().textColor"
+                icon="get_app"
+                @click="openUrl(wallet.getOnboardingLink())"
+                target="_blank"
+                dense
+                flat
+                size="12px"
+              >
+                <q-tooltip>
+                  Get app
+                </q-tooltip>
+              </q-btn>
             </q-item-section>
           </q-item>
         </q-list>
