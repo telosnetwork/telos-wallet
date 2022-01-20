@@ -404,6 +404,7 @@ export default {
   },
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile"]),
+    ...mapActions("rex", ["getRexBalance"]),
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
         this.$q.notify({
@@ -506,13 +507,18 @@ export default {
           if (token.symbol === undefined) {
             return;
           }
-          this.coins.forEach(coin => {
+          this.coins.forEach(async coin => {
             if (
               !coin.network &&
               coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
               coin.account === token.contract
             ) {
-              coin.amount = token.amount || 0;
+                  // TODO get REX balance here and add to amount
+                if (token.contract === "eosio.token" && token.symbol === "TLOS") {
+                    coin.amount = token.amount + await this.getRexBalance(this.accountName)                    
+                } else {
+                    coin.amount = token.amount || 0;
+                }
               coin.precision = token.precision || 4;
             }
           });
