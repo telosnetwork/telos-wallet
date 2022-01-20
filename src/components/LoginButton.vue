@@ -177,6 +177,9 @@ export default {
       ramThres: 0.9,
       netThres: 0.9,
       cpuThres: 0.9,
+      ramMinimum: 5000, //5 kB
+      netMinimum: 10000,
+      cpuMinimum: 50000,
       ramLow: false,
       netLow: false,
       cpuLow: false,
@@ -388,14 +391,15 @@ export default {
     async checkResources() {
       await this.getRamPrice();
       let account = await this.$store.$api.getAccount(this.accountName);
+      console.log(account)
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (account.ram_usage / account.ram_quota > this.ramThres)
+      if (account.ram_usage / account.ram_quota > this.ramThres || this.ramAvail < this.ramMinimum) 
         this.ramLow = true;
-      if (1 - this.netAvail / account.net_limit.max > this.netThres)
+      if (1 - this.netAvail / account.net_limit.max > this.netThres || this.netAvail < this.netMinimum) 
         this.netLow = true;
-      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres)
+      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres || this.cpuAvail < this.cpuMinimum) 
         this.cpuLow = true;
       this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }
@@ -441,5 +445,4 @@ export default {
   height: auto;
   margin-bottom: 5rem;
 }
-
 </style>
