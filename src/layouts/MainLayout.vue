@@ -100,9 +100,9 @@ export default {
       pages: pagesData,
       coins: [],
       nftTokens: [],
-      warningShow: true,
+      warningShow: false,
       warningText:
-        "Telos sign is undergoing maintenance. Please use alternative login methods"
+        ""
     };
   },
   computed: {

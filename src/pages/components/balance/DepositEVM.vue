@@ -151,7 +151,6 @@ export default {
   props: ["showDepositEVMDlg", "nativeTLOSBalance", "haveEVMAccount"],
   data() {
     return {
-      amount: "",
       depositAmount: "0",
       depositOwnAddress: false,
       recipientAddress: "",
@@ -243,11 +242,12 @@ export default {
           type: "primary",
           message: `${quantityStr} is deposited to the EVM`
         });
-        if (!this.depositOwnAddress) {
-          this.depositOwnAddress = true;
-          this.recipientAddress = "";
-        }
+        this.depositAmount = "0"
+        this.depositOwnAddress = false
+        this.recipientAddress = ""
+        this.recipientAddressExists = true
         this.$root.$emit("successfully_deposited", quantityStr);
+
         this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);
@@ -265,7 +265,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .depositAddressToggle {
   cursor: pointer;
 }
