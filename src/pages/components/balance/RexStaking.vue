@@ -23,7 +23,7 @@
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-          Earn up to 130% APR
+          Earn up to 130% APR.
         </div>
         <q-btn-toggle
           v-model="staking"
@@ -129,6 +129,9 @@
             @click="staking ? tryStake() : tryUnstake()"
           />
         </div>
+        <div v-if="staking" class="q-mt-sm">
+          This will lock your tokens for 4 days
+        </div>
       </div>
     </div>
   </q-dialog>
@@ -189,20 +192,26 @@ export default {
       ];
       const transaction = await this.$store.$api.signTransaction(
         actions,
-        `Deposit ${this.amount} TLOS to the REX`
+        `Deposit ${this.amount} TLOS to REX`
       );
     },
 
     async unstakeRex() {
-      console.log(Number(this.amount).toFixed(4));
       let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
+      let accountInfo = await this.$store.$api.getAccount(this.accountName);
+      //   console.log(accountInfo);
+      let totalRex = Number(accountInfo.rex_info.rex_balance.split(" ")[0]);
+      let portionToUnstake = Number(this.amount) / this.selectedCoin.rexBalance;
+      let rexToUnstake = (totalRex * portionToUnstake).toFixed(4);
+
+      //   TODO check maturities
       const actions = [
         {
           account: "eosio",
           name: "sellrex",
           data: {
             from: this.accountName,
-            rex: quantityStr,
+            rex: `${rexToUnstake} REX`,
           },
         },
         {
@@ -216,7 +225,7 @@ export default {
       ];
       const transaction = await this.$store.$api.signTransaction(
         actions,
-        `Deposit ${this.amount} TLOS to the REX`
+        `Withdraw ${this.amount} TLOS from REX`
       );
     },
 
