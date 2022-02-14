@@ -125,7 +125,7 @@
             class="purpleGradient depositBtn"
             no-caps
             rounded
-            label="Start Earning"
+            :label="staking ? 'Start Earning' : 'Return Funds'"
             @click="staking ? tryStake() : tryUnstake()"
           />
         </div>
@@ -137,6 +137,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
+import { stakeRex } from "src/store/rex/actions";
 
 export default {
   props: ["showRexStakeDlg", "haveEVMAccount", "selectedCoin"],
@@ -164,73 +165,89 @@ export default {
       if (isNaN(this.amount)) this.amount = "0";
       else this.amount = Number(this.amount).toString();
     },
-    async deposit() {
-      let amount = parseFloat(this.amount);
-      if (amount > parseFloat(this.selectedCoin.nativeBalance)) {
-        this.$q.notify({
-          type: "negative",
-          message: `Cannot deposit more than native TLOS balance: ${this.selectedCoin.nativeBalance}`,
-        });
-        return;
-      }
 
-      let quantityStr = `${amount.toFixed(4)} TLOS`;
-      let actions = [];
-      let memo = "";
-      if (this.depositOwnAddress) {
-        if (!this.haveEVMAccount) {
-          actions.push({
-            account: "eosio.evm",
-            name: "create",
-            data: {
-              account: this.accountName.toLowerCase(),
-              data: "create",
-            },
-          });
-        }
-      } else {
-        memo = this.recipientAddress.toLowerCase();
-        await this.checkRecipientExist();
-        if (!this.recipientAddressExists) {
-          actions.push({
-            account: process.env.EVM_CONTRACT,
-            name: "openwallet",
-            data: {
-              account: this.accountName.toLowerCase(),
-              address: this.recipientAddress.slice(2),
-            },
-          });
-        }
-      }
-
-      actions.push({
-        account: "eosio.token",
-        name: "transfer",
-        data: {
-          from: this.accountName.toLowerCase(),
-          to: "eosio.evm",
-          quantity: quantityStr,
-          memo: memo,
+    async stakeRex() {
+      console.log(Number(this.amount).toFixed(4));
+      let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
+      const actions = [
+        {
+          account: "eosio",
+          name: "deposit",
+          data: {
+            owner: this.accountName,
+            amount: quantityStr,
+          },
         },
-      });
+        {
+          account: "eosio",
+          name: "buyrex",
+          data: {
+            from: this.accountName,
+            amount: quantityStr,
+          },
+        },
+      ];
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Deposit ${this.amount} TLOS to the REX`
+      );
+    },
 
+    async unstakeRex() {
+      console.log(Number(this.amount).toFixed(4));
+      let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
+      const actions = [
+        {
+          account: "eosio",
+          name: "sellrex",
+          data: {
+            from: this.accountName,
+            rex: quantityStr,
+          },
+        },
+        {
+          account: "eosio",
+          name: "withdraw",
+          data: {
+            owner: this.accountName,
+            amount: quantityStr,
+          },
+        },
+      ];
+      const transaction = await this.$store.$api.signTransaction(
+        actions,
+        `Deposit ${this.amount} TLOS to the REX`
+      );
+    },
+
+    async tryStake() {
+      console.log("tryStake");
       try {
-        const transaction = await this.$store.$api.signTransaction(
-          actions,
-          `Deposit ${quantityStr} to the EVM`
-        );
+        await this.stakeRex();
         this.$q.notify({
           type: "primary",
-          message: `${quantityStr} is deposited to the EVM`,
+          message: `${this.amount} TLOS is staked to REX`,
         });
         this.amount = "0";
-        this.depositOwnAddress = false;
-        this.recipientAddress = "";
-        this.recipientAddressExists = true;
-        this.$root.$emit("successfully_deposited", quantityStr);
-
         this.showDlg = false;
       } catch (error) {
+        console.error(error);
+        this.$errorNotification(error);
+      }
+    },
+
+    async tryUnstake() {
+      console.log("tryStake");
+      try {
+        await this.unstakeRex();
+        this.$q.notify({
+          type: "primary",
+          message: `${this.amount} TLOS is withdrawn from REX`,
+        });
+        this.amount = "0";
+        this.showDlg = false;
+      } catch (error) {
+        console.error(error);
         this.$errorNotification(error);
       }
     },
