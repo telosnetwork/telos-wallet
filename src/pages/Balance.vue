@@ -215,12 +215,9 @@
     />
     <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
     <RexStaking
-      :haveEVMAccount.sync="
-        this.$root.tEVMAccount && this.$root.tEVMAccount.address
-      "
+      v-if="selectedCoin"
       :selectedCoin.sync="selectedCoin"
       :showRexStakeDlg.sync="showRexStakeDlg"
-      :nativeTLOSBalance.sync="coins[0].amount"
     />
 
     <q-dialog v-model="showEVMWarning">
@@ -519,11 +516,12 @@ export default {
               coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
               coin.account === token.contract
             ) {
-              // TODO get REX balance here and add to amount
+              // get REX balance here and add to amount
               if (token.contract === "eosio.token" && token.symbol === "TLOS") {
                 coin.amount =
-                  token.amount + (await this.getRexBalance(this.accountName)) ||
-                  0;
+                  (
+                    token.amount + (await this.getRexBalance(this.accountName))
+                  ).toFixed(4) || 0;
                 coin.nativeBalance = token.amount || 0;
                 coin.rexBalance =
                   (await this.getRexBalance(this.accountName)) || 0;

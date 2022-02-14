@@ -69,17 +69,20 @@
                     getFixed(selectedCoin.amount * selectedCoin.price, 2)
                   }}</label
                 >
-                <label class="text-caption text-white">
-                  {{
-                    `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
-                      selectedCoin.symbol
-                    }`
-                  }}</label
-                >
+
                 <div
                   v-if="selectedCoin.rexBalance !== undefined"
                   class="fit column wrap justify-end items-end content-center"
                 >
+                  <label class="text-caption text-white">
+                    Total:
+                    {{
+                      `${getFixed(
+                        selectedCoin.amount,
+                        selectedCoin.precision
+                      )} ${selectedCoin.symbol}`
+                    }}</label
+                  >
                   <label class="text-caption text-white"
                     >Liquid:
                     {{
@@ -105,20 +108,7 @@
                 class="sendActions fit row justify-center items-center content-center q-my-md"
               >
                 <q-btn
-                  class="col"
-                  flat
-                  dense
-                  stack
-                  size="md"
-                  no-caps
-                  @click="stakeRex"
-                >
-                  <q-icon name="fas fa-hand-holding-usd"></q-icon>
-                  <div class="column items-center">Earn</div>
-                </q-btn>
-
-                <q-btn
-                  class="col"
+                  class=""
                   flat
                   dense
                   stack
@@ -133,7 +123,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   flat
                   dense
                   stack
@@ -148,7 +138,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   v-if="selectedCoin.symbol === 'TLOS'"
                   flat
                   dense
@@ -164,7 +154,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   v-if="convertEnabled"
                   flat
                   dense
@@ -177,6 +167,26 @@
                     <img src="~assets/Convert.svg" />
                     Convert
                   </div>
+                </q-btn>
+
+                <q-btn
+                  v-if="
+                    selectedCoin.account === 'eosio.token' &&
+                    selectedCoin.symbol === 'TLOS'
+                  "
+                  class=""
+                  flat
+                  dense
+                  stack
+                  size="md"
+                  no-caps
+                  @click="stakeRex"
+                >
+                  <q-icon
+                    size="2.3em"
+                    name="fas fa-hand-holding-usd q-mb-xs"
+                  ></q-icon>
+                  <div class="column items-center">Earn</div>
                 </q-btn>
               </div>
               <div class="q-pa-md">
@@ -410,7 +420,7 @@ export default {
   button:not(.rexbtn) {
     padding: 0.5rem;
     background-color: #ffffff1a;
-    // margin: 0.1rem;
+    margin: 0.1rem;
     border-radius: 0;
     img {
       padding-bottom: 5px;

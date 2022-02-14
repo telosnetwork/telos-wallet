@@ -41,14 +41,16 @@
           @click="amount = selectedCoin.nativeBalance"
           class="q-mt-md"
         >
-          Available: {{ selectedCoin.nativeBalance }} {{ selectedCoin.symbol }}
+          Available: {{ selectedCoin.nativeBalance }}
+          {{ selectedCoin.symbol }}
         </div>
         <div
           v-if="!staking"
           @click="amount = selectedCoin.rexBalance"
           class="q-mt-md"
         >
-          Deposited: {{ selectedCoin.rexBalance }} {{ selectedCoin.symbol }}
+          Deposited: {{ selectedCoin.rexBalance }}
+          {{ selectedCoin.symbol }}
         </div>
         <div class="text-center q-mt-md">
           <div class="inputAmount row items-center">
@@ -170,7 +172,6 @@ export default {
     },
 
     async stakeRex() {
-      console.log(Number(this.amount).toFixed(4));
       let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
       const actions = [
         {
@@ -230,7 +231,6 @@ export default {
     },
 
     async tryStake() {
-      console.log("tryStake");
       try {
         await this.stakeRex();
         this.$q.notify({
@@ -238,6 +238,7 @@ export default {
           message: `${this.amount} TLOS is staked to REX`,
         });
         this.amount = "0";
+        this.staking = true;
         this.showDlg = false;
       } catch (error) {
         console.error(error);
@@ -246,7 +247,6 @@ export default {
     },
 
     async tryUnstake() {
-      console.log("tryStake");
       try {
         await this.unstakeRex();
         this.$q.notify({
@@ -254,6 +254,7 @@ export default {
           message: `${this.amount} TLOS is withdrawn from REX`,
         });
         this.amount = "0";
+        this.staking = true;
         this.showDlg = false;
       } catch (error) {
         console.error(error);
