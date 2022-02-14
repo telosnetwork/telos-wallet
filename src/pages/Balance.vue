@@ -1,10 +1,8 @@
 <template>
-  <div class="row justify-center ">
+  <div class="row justify-center">
     <div style="width: 600px">
-      <div style="height: 100%; overflow:auto">
-        <div class="text-center ">
-
-          
+      <div style="height: 100%; overflow: auto">
+        <div class="text-center">
           <!-- Account Name -->
           <div
             class="text-white q-mt-xl"
@@ -19,9 +17,7 @@
             <div class="full-width">
               <label
                 class="text-white items-center"
-                :style="
-                  `font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`
-                "
+                :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
               >
                 $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
                   displayAmount.toFixed(2).slice(-2)
@@ -67,7 +63,7 @@
           </div> -->
 
           <!-- Action Buttons -->
-          <div class="row q-mt-lg q-mb-md ">
+          <div class="row q-mt-lg q-mb-md">
             <q-btn
               class="col balanceBtn purpleGradient text-subtitle2 flex-center"
               flat
@@ -106,7 +102,7 @@
           :value="balanceTab"
           @input="switchTab($event)"
           content-class="coinTabs"
-          class=" shadow-2 no-shadow"
+          class="shadow-2 no-shadow"
           style="width: 100%"
         >
           <q-tab
@@ -115,7 +111,7 @@
             :name="tab.title"
             :label="tab.label"
             :key="tab.title"
-            style="width: 50%; background: #00000000;"
+            style="width: 50%; background: #00000000"
           />
         </q-tabs>
         <q-tab-panels
@@ -160,7 +156,7 @@
       <div
         v-if="tEVMWithdrawing"
         class="justify-center absolute flex full-width full-height"
-        style="background: rgba(0, 0, 0, 0.4);"
+        style="background: rgba(0, 0, 0, 0.4)"
       >
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
@@ -172,6 +168,7 @@
       :showShareAddressDlg.sync="showShareAddressDlg"
       :showBuyAmountDlg.sync="showBuyAmountDlg"
       :showExchangeDlg.sync="showExchangeDlg"
+      :showRexStakeDlg.sync="showRexStakeDlg"
     />
     <Exchange
       :showExchangeDlg.sync="showExchangeDlg"
@@ -217,6 +214,14 @@
       :selectedCoin="selectedCoin"
     />
     <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
+    <RexStaking
+      :haveEVMAccount.sync="
+        this.$root.tEVMAccount && this.$root.tEVMAccount.address
+      "
+      :selectedCoin.sync="selectedCoin"
+      :showRexStakeDlg.sync="showRexStakeDlg"
+      :nativeTLOSBalance.sync="coins[0].amount"
+    />
 
     <q-dialog v-model="showEVMWarning">
       <q-card class="popupCard">
@@ -262,19 +267,20 @@ import History from "./components/balance/History";
 import Exchange from "./components/balance/Exchange";
 import DepositEVM from "./components/balance/DepositEVM";
 import WithdrawEVM from "./components/balance/WithdrawEVM";
+import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
 const tabsData = [
   {
     title: "Coins",
     caption: "Coins",
-    label: "Coins"
+    label: "Coins",
   },
   {
     title: "Collectables",
     caption: "Collectables",
-    label: "Collectables"
-  }
+    label: "Collectables",
+  },
 ];
 
 export default {
@@ -291,7 +297,8 @@ export default {
     History,
     Exchange,
     DepositEVM,
-    WithdrawEVM
+    WithdrawEVM,
+    RexStaking,
   },
   data() {
     return {
@@ -303,7 +310,7 @@ export default {
           amount: 0,
           price: 0.0,
           precision: 4,
-          suggested: true
+          suggested: true,
         },
         {
           account: "eosio.token",
@@ -313,8 +320,8 @@ export default {
           price: 0.0,
           precision: 4,
           suggested: true,
-          network: "tevm"
-        }
+          network: "tevm",
+        },
       ],
       nftTokenItems: {},
       nftTokenTags: [],
@@ -342,9 +349,10 @@ export default {
       showWithdrawEVMDlg: false,
       showEVMWarning: false,
       showEVMAddress: false,
+      showRexStakeDlg: false,
       tEVMBalance: 0,
       tEVMWithdrawing: false,
-      avatar: ""
+      avatar: "",
     };
   },
   computed: {
@@ -355,12 +363,12 @@ export default {
       "maxSpace",
       "supportTokens",
       "suggestTokens",
-      "pTokenNetworks"
+      "pTokenNetworks",
     ]),
-    
+
     totalAmount() {
       return this.coins
-        .map(coin => coin.amount * coin.price)
+        .map((coin) => coin.amount * coin.price)
         .reduce((a, b) => a + b, 0);
     },
     availableHeight() {
@@ -377,7 +385,7 @@ export default {
     accountNameStyle() {
       return {
         opacity: Math.max(0, (this.balanceTextSize - 15) * 0.05),
-        height: Math.max(0, (this.balanceTextSize - 15) * 1)
+        height: Math.max(0, (this.balanceTextSize - 15) * 1),
       };
     },
     qrcodeOpacity() {
@@ -386,7 +394,7 @@ export default {
     chainName() {
       if (process.env.CHAIN_NAME === undefined) {
         return "telos";
-      } else {       
+      } else {
         return process.env.CHAIN_NAME;
       }
     },
@@ -400,7 +408,7 @@ export default {
     shortenedEvmAddress() {
       const address = this.$root.tEVMAccount.address;
       return `${address.slice(0, 12)}..${address.slice(-12)}`;
-    }
+    },
   },
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile"]),
@@ -409,7 +417,7 @@ export default {
       copyToClipboard(str).then(() => {
         this.$q.notify({
           type: "primary",
-          message: "Copied to clipboard"
+          message: "Copied to clipboard",
         });
       });
     },
@@ -419,9 +427,8 @@ export default {
       ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile =
+        this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
         return;
       }
@@ -432,7 +439,7 @@ export default {
       this.$emit("update:balanceTab", val);
     },
     clickPurchase() {
-      this.selectedCoin = this.coins.find(coin => coin.symbol === "TLOS");
+      this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
       this.showBuyAmountDlg = true;
     },
     clickExchange() {
@@ -448,15 +455,14 @@ export default {
       }
     },
     async loadCoinList() {
-      
       const coins = await this.$store.$api.getTableRows({
         code: "tokenmanager",
         limit: "1000",
         scope: "tokenmanager",
-        table: "tokens"
+        table: "tokens",
       });
 
-      coins.rows.forEach(token => {
+      coins.rows.forEach((token) => {
         const [precision, symbol] = token.token_symbol.split(",");
         const account = token.contract_account;
         if (account == "eosio.token" && symbol == "TLOS") return;
@@ -473,7 +479,7 @@ export default {
           amount,
           price,
           icon,
-          precision
+          precision,
         });
       });
     },
@@ -482,7 +488,7 @@ export default {
         code: "delphioracle",
         limit: "1000",
         scope: "tlosusd",
-        table: "datapoints"
+        table: "datapoints",
       });
 
       const tlosPrice = tlosUsdDataPoints.rows[0].median / 10000;
@@ -494,38 +500,43 @@ export default {
         `/v2/state/get_tokens?account=${this.accountName}&limit=1000`
       );
       if (userCoins.status === 200) {
-        const tokens = userCoins.data.tokens.filter(token => {
+        const tokens = userCoins.data.tokens.filter((token) => {
           if (
-            userCoins.data.tokens.filter(t => t.symbol === token.symbol)
+            userCoins.data.tokens.filter((t) => t.symbol === token.symbol)
               .length > 1
           ) {
             return token.contract.toLowerCase() === "eosio.token";
           }
           return true;
         });
-        userCoins.data.tokens.forEach(token => {
+        userCoins.data.tokens.forEach((token) => {
           if (token.symbol === undefined) {
             return;
           }
-          this.coins.forEach(async coin => {
+          this.coins.forEach(async (coin) => {
             if (
               !coin.network &&
               coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
               coin.account === token.contract
             ) {
-                  // TODO get REX balance here and add to amount
-                if (token.contract === "eosio.token" && token.symbol === "TLOS") {
-                    coin.amount = token.amount + await this.getRexBalance(this.accountName)                    
-                } else {
-                    coin.amount = token.amount || 0;
-                }
+              // TODO get REX balance here and add to amount
+              if (token.contract === "eosio.token" && token.symbol === "TLOS") {
+                coin.amount =
+                  token.amount + (await this.getRexBalance(this.accountName)) ||
+                  0;
+                coin.nativeBalance = token.amount || 0;
+                coin.rexBalance =
+                  (await this.getRexBalance(this.accountName)) || 0;
+              } else {
+                coin.amount = token.amount || 0;
+              }
               coin.precision = token.precision || 4;
             }
           });
           // if token not in coins, add it
           if (
             !this.coins.find(
-              coin =>
+              (coin) =>
                 coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
                 coin.account === token.contract
             )
@@ -537,10 +548,10 @@ export default {
               amount: token.amount || 0,
               price: 0,
               precision: token.precision || 4,
-              icon: `${token.contract}-${token.symbol}`
+              icon: `${token.contract}-${token.symbol}`,
             });
           }
-          this.coins.forEach(coin => {
+          this.coins.forEach((coin) => {
             if (coin.symbol === "TLOS" && coin.account === "eosio.token") {
               coin.icon = "/coins/TLOS.png";
             }
@@ -548,19 +559,20 @@ export default {
         });
       }
 
-      this.coins.forEach(async coin => {
+      this.coins.forEach(async (coin) => {
         if (coin.network === "tevm") {
-          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
+          const evmAccount =
+            await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+              this.accountName
+            );
           coin.amount = BigNumber(evmAccount.balance.toString())
             .div(1e18)
             .toFixed(4);
         }
       });
 
-      const sortCoin = function(suggestTokens) {
-        return function(a, b) {
+      const sortCoin = function (suggestTokens) {
+        return function (a, b) {
           const aSymbol = a.symbol.toLowerCase();
           const bSymbol = b.symbol.toLowerCase();
           const aContract = a.account.toLowerCase();
@@ -581,18 +593,18 @@ export default {
           }
 
           if (
-            !suggestTokens.map(t => t.sym).includes(aSymbol) ||
-            !suggestTokens.map(t => t.sym).includes(bSymbol)
+            !suggestTokens.map((t) => t.sym).includes(aSymbol) ||
+            !suggestTokens.map((t) => t.sym).includes(bSymbol)
           ) {
             if (
-              suggestTokens.map(t => t.sym).includes(aSymbol) &&
-              suggestTokens.map(t => t.contract).includes(aContract)
+              suggestTokens.map((t) => t.sym).includes(aSymbol) &&
+              suggestTokens.map((t) => t.contract).includes(aContract)
             ) {
               return -1;
             }
             if (
-              suggestTokens.map(t => t.sym).includes(bSymbol) &&
-              suggestTokens.map(t => t.contract).includes(bContract)
+              suggestTokens.map((t) => t.sym).includes(bSymbol) &&
+              suggestTokens.map((t) => t.contract).includes(bContract)
             ) {
               return 1;
             }
@@ -630,7 +642,7 @@ export default {
           table: "items",
           table_key: "",
           lower_bound: lower_bound.toFixed(),
-          upper_bound: upper_bound.toFixed()
+          upper_bound: upper_bound.toFixed(),
         });
         if (tagData.more === false) {
           more = false;
@@ -640,14 +652,13 @@ export default {
 
         if (this.nftTokenItems[nftAccount]) {
           let moreNFTs = tagData.rows.filter(
-            row => row.owner === this.accountName
+            (row) => row.owner === this.accountName
           );
-          this.nftTokenItems[nftAccount] = this.nftTokenItems[
-            nftAccount
-          ].concat(moreNFTs);
+          this.nftTokenItems[nftAccount] =
+            this.nftTokenItems[nftAccount].concat(moreNFTs);
         } else {
           this.nftTokenItems[nftAccount] = tagData.rows.filter(
-            row => row.owner === this.accountName
+            (row) => row.owner === this.accountName
           );
         }
       }
@@ -665,7 +676,7 @@ export default {
       }
       this.nftTagLoading = true;
       const index = this.nftAccounts.findIndex(
-        account => account === nftAccount
+        (account) => account === nftAccount
       );
       let foundFirstData = false;
       let count = 10;
@@ -688,7 +699,7 @@ export default {
           show_payer: false,
           table: "tags",
           table_key: "",
-          upper_bound: null
+          upper_bound: null,
         });
         if (tagData.rows.length == 0) {
           if (foundFirstData) {
@@ -697,29 +708,31 @@ export default {
           this.nftScopes[index] += 1;
         } else {
           if (nftAccount === "tlos.tbond") {
-            const title = tagData.rows.find(row => row.tag_name === "title")
-              .content;
-            const image = tagData.rows.find(row => row.tag_name === "image")
-              .content;
+            const title = tagData.rows.find(
+              (row) => row.tag_name === "title"
+            ).content;
+            const image = tagData.rows.find(
+              (row) => row.tag_name === "image"
+            ).content;
             this.nftTokenTags.push({
               title: title,
-              image: image
+              image: image,
             });
           } else if (nftAccount === "marble.code") {
             const data = JSON.parse(
-              tagData.rows.find(row => row.tag_name === "data").content
+              tagData.rows.find((row) => row.tag_name === "data").content
             );
             this.nftTokenTags.push({
               title: data.ti,
-              image: data.dt
+              image: data.dt,
             });
           } else if (nftAccount === "marbletessst") {
             const data = JSON.parse(
-              tagData.rows.find(row => row.tag_name === "data").content
+              tagData.rows.find((row) => row.tag_name === "data").content
             );
             this.nftTokenTags.push({
               title: data.ti,
-              image: data.dt
+              image: data.dt,
             });
           }
           this.$emit("update:loadedNftTokens", this.nftTokenTags);
@@ -733,13 +746,7 @@ export default {
     getCurrenttEVMBalance() {
       if (this.$root.tEVMAccount) {
         const balanceStr = this.$root.tEVMAccount.balance.toString();
-        return (
-          parseFloat(
-            BigNumber(balanceStr)
-              .div(1e18)
-              .toFixed(4)
-          ) || 0
-        );
+        return parseFloat(BigNumber(balanceStr).div(1e18).toFixed(4)) || 0;
       }
       return 0;
     },
@@ -754,8 +761,8 @@ export default {
         name: "withdraw",
         data: {
           to: this.accountName.toLowerCase(),
-          quantity: quantityStr
-        }
+          quantity: quantityStr,
+        },
       });
 
       try {
@@ -765,7 +772,7 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`
+          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
         });
         this.oldtEVMBalance = this.getCurrenttEVMBalance();
       } catch (error) {
@@ -781,8 +788,8 @@ export default {
         name: "create",
         data: {
           account: this.accountName,
-          data: "test"
-        }
+          data: "test",
+        },
       });
       try {
         const transaction = await this.$store.$api.signTransaction(
@@ -791,11 +798,12 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `A new address is successfully created`
+          message: `A new address is successfully created`,
         });
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-          this.accountName
-        );
+        this.$root.tEVMAccount =
+          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
         this.networkType = "tevm";
       } catch (error) {
         this.$errorNotification(error);
@@ -812,11 +820,11 @@ export default {
             nativeCurrency: {
               name: "Telos",
               symbol: "TLOS",
-              decimals: 4
+              decimals: 4,
             },
             rpcUrls: ["https://testnet.telos.net/evm"],
-            blockExplorerUrls: ["https://testnet.teloscan.io"]
-          }
+            blockExplorerUrls: ["https://testnet.teloscan.io"],
+          },
         ];
       } else {
         params = [
@@ -826,21 +834,21 @@ export default {
             nativeCurrency: {
               name: "Telos",
               symbol: "TLOS",
-              decimals: 4
+              decimals: 4,
             },
             rpcUrls: ["https://mainnet.telos.net/evm"],
-            blockExplorerUrls: ["https://teloscan.io"]
-          }
+            blockExplorerUrls: ["https://teloscan.io"],
+          },
         ];
       }
 
       window.ethereum
         .request({ method: "wallet_addEthereumChain", params })
         .then(() => console.log("Success"))
-        .catch(error => console.log("Error", error.message));
-    }
+        .catch((error) => console.log("Error", error.message));
+    },
   },
-  created: async function() {
+  created: async function () {
     this.interval = setInterval(() => {
       if (!this.panning) {
         if (
@@ -887,9 +895,10 @@ export default {
       }
 
       try {
-        this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-          this.accountName
-        );
+        this.$root.tEVMAccount =
+          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {}
       window.time = Date.now() / 1000;
@@ -915,7 +924,7 @@ export default {
         if (!this.selectedCoin) {
           this.$root.qrcode_accountName = accountName;
           this.$root.qrcode_networkType = networkType;
-          this.selectedCoin = this.coins.find(coin => coin.name === coinName);
+          this.selectedCoin = this.coins.find((coin) => coin.name === coinName);
           this.showSendAmountDlg = true;
         }
       }
@@ -940,8 +949,8 @@ export default {
         await this.loadNftTokenItems();
         this.loadNftTokenTags();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -978,5 +987,4 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
-
 </style>

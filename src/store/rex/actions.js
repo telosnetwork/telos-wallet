@@ -10,11 +10,15 @@ export const getRexBalance = async function ({ commit, dispatch }, account) {
             reverse: false, // Optional: Get reversed data
             show_payer: false, // Optional: Show ram payer
         });
-        // console.log(Number(rexbal.rows[0].vote_stake.split(" ")[0]));
+        // console.log(rexbal.rows[0]);
 
         // commit("setRexBalance", rexbal.rows[0]);
+        if (rexbal.rows[0]) {
+            return Number(rexbal.rows[0].vote_stake.split(" ")[0]);
+        } else {
+            return 0;
+        }
 
-        return Number(rexbal.rows[0].vote_stake.split(" ")[0]);
     } catch (error) {
         console.error("getRexBalance");
         commit("general/setErrorMsg", error.message || error, { root: true });
