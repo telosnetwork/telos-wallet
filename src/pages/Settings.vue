@@ -216,6 +216,7 @@
 import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
 import ManageResources from "components/ManageResources.vue";
+import { accountName } from "src/store/account/getters";
 
 export default {
   components: { ManageResources },
@@ -547,6 +548,7 @@ export default {
     this.loadUserProfile();
   },
   async mounted() {
+    await this.loadUserProfile();
     gapi.signin2.render("google-authentication-button", {
       height: 35,
       scope: "profile email https://www.googleapis.com/auth/drive",
@@ -566,6 +568,12 @@ export default {
   async beforeDestroy() {
     if (this.checkInterval) clearInterval(this.checkInterval);
     if (this.clearInterval) clearInterval(this.clearInterval);
+  },
+
+  watch: {
+    async accountName() {
+      await this.loadUserProfile();
+    },
   },
 };
 </script>

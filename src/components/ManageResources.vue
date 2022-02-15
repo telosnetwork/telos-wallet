@@ -159,13 +159,13 @@ import { format } from "quasar";
 const { capitalize, humanStorageSize } = format;
 
 export default {
-  props: ["showManageResourcesDlg", "haveEVMAccount", "selectedCoin"],
+  props: ["showManageResourcesDlg"],
   data() {
     return {
       amount: "",
       selectedResource: "RAM", //ram,cpu,net
       resourceOptions: ["RAM", "CPU", "NET"],
-      accountInfo: [],
+      accountInfo: undefined,
     };
   },
   computed: {
@@ -260,13 +260,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions("rex", ["getRexBalance"]),
-
-    inputBlur() {
-      if (isNaN(this.amount)) this.amount = "0";
-      else this.amount = Number(this.amount).toString();
-    },
-
     async buyResources() {
       let actions = [];
       if (this.selectedResource == "RAM") {
@@ -333,10 +326,19 @@ export default {
       return humanStorageSize(bytes);
     },
   },
-  watch: {},
+  watch: {
+    async accountName(newAccountName) {
+      if (this.isAuthenticated) {
+        this.accountInfo = await this.$store.$api.getAccount(this.accountName);
+        console.log(this.accountInfo);
+      }
+    },
+  },
   async mounted() {
-    this.accountInfo = await this.$store.$api.getAccount(this.accountName);
-    console.log(this.accountInfo);
+    if (this.isAuthenticated) {
+      this.accountInfo = await this.$store.$api.getAccount(this.accountName);
+      console.log(this.accountInfo);
+    }
   },
 };
 </script>
