@@ -37,20 +37,23 @@
               <q-circular-progress
                 show-value
                 font-size="12px"
-                :value="value"
-                size="50px"
-                :thickness="0.22"
+                :value="usedCPU/totalCPU * 100"
+                size="70px"
+                :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ 50 }}%
+                {{ (usedCPU/totalCPU * 100).toFixed(0) }}%
               </q-circular-progress>
 
               <div>CPU</div>
-              <div>x KB/ x KB</div>
-              <div>Total Staked: xx</div>
-              <div>Staked by other: xx</div>
+              <div>
+                {{(usedCPU/1000).toFixed(3)}} ms /
+                {{(totalCPU/1000).toFixed(3)}} ms
+              </div>
+              <div>Total Staked:</div>
+              <div>{{stakedTotalCPU}}</div>
             </div>
           </div>
           <!-- NET -->
@@ -61,20 +64,23 @@
               <q-circular-progress
                 show-value
                 font-size="12px"
-                :value="value"
-                size="50px"
-                :thickness="0.22"
+                :value="usedNET/totalNET*100"
+                size="70px"
+                :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ 50 }}%
+                {{ (usedNET/totalNET * 100).toFixed(0) }}%
               </q-circular-progress>
 
               <div>NET</div>
-              <div>x KB/ x KB</div>
-              <div>Total Staked: xx</div>
-              <div>Staked by other: xx</div>
+              <div>
+                {{(usedNET/1024).toFixed(2)}} kB /
+                {{(totalNET/1024).toFixed(2)}} kB
+              </div>
+              <div>Total Staked:</div>
+              <div>{{stakedTotalNET}}</div>
             </div>
           </div>
           <!-- RAM -->
@@ -86,8 +92,8 @@
                 show-value
                 font-size="12px"
                 :value="usedRAM/totalRAM*100"
-                size="50px"
-                :thickness="0.22"
+                size="70px"
+                :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
@@ -97,8 +103,8 @@
 
               <div>RAM</div>
               <div>
-                {{(usedRAM/1024).toFixed(2)}} KB /
-                {{(totalRAM/1024).toFixed(2)}} KB
+                {{(usedRAM/1024).toFixed(2)}} kB /
+                {{(totalRAM/1024).toFixed(2)}} kB
               </div>
             </div>
           </div>
@@ -110,18 +116,21 @@
           <q-select
             class="q-mr-sm"
             rounded
-            standout
             v-model="selectedResource"
             :options="resourceOptions"
           />
           <q-input
             class="q-mr-sm"
             rounded
-            outlined
             v-model="amount"
             label="Amount in TLOS"
           />
-          <q-btn @click="buyResource()" rounded color="primary" label="Stake" />
+          <q-btn
+            @click="buyResources()"
+            rounded
+            color="primary"
+            :label="selectedResource === 'RAM' ? 'Buy' : 'Stake'"
+          />
         </div>
       </div>
     </div>
@@ -176,8 +185,66 @@ export default {
         } else {
             return 0;
         }
-
     },
+
+    totalCPU() {
+        if (this.accountInfo) {
+            return this.accountInfo.cpu_limit.max;
+        } else {
+            return 0;
+        }
+    },
+    availCPU() {
+        if (this.accountInfo) {
+            return this.accountInfo.cpu_limit.available;
+        } else {
+            return 0;
+        }
+    },
+    usedCPU() {
+        if (this.accountInfo) {
+            return this.accountInfo.cpu_limit.used;
+        } else {
+            return 0;
+        }
+    },
+    stakedTotalCPU() {
+        if (this.accountInfo) {
+            return this.accountInfo.total_resources.cpu_weight;
+        } else {
+            return "0 TLOS";
+        }
+    },
+
+    totalNET() {
+        if (this.accountInfo) {
+            return this.accountInfo.net_limit.max;
+        } else {
+            return 0;
+        }
+    },
+    availNET() {
+        if (this.accountInfo) {
+            return this.accountInfo.net_limit.available;
+        } else {
+            return 0;
+        }
+    },
+    usedNET() {
+        if (this.accountInfo) {
+            return this.accountInfo.net_limit.used;
+        } else {
+            return 0;
+        }
+    },
+    stakedTotalNET() {
+        if (this.accountInfo) {
+            return this.accountInfo.total_resources.net_weight;
+        } else {
+            return "0 TLOS";
+        }
+    },
+
   },
   methods: {
     ...mapActions("rex", ["getRexBalance"]),
@@ -187,96 +254,57 @@ export default {
       else this.amount = Number(this.amount).toString();
     },
 
-    async stakeRex() {
-      let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
-      const actions = [
-        {
-          account: "eosio",
-          name: "deposit",
-          data: {
-            owner: this.accountName,
-            amount: quantityStr,
-          },
-        },
-        {
-          account: "eosio",
-          name: "buyrex",
-          data: {
-            from: this.accountName,
-            amount: quantityStr,
-          },
-        },
-      ];
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Deposit ${this.amount} TLOS to REX`
-      );
-    },
+    async buyResources() {
 
-    async unstakeRex() {
-      let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
-      let accountInfo = await this.$store.$api.getAccount(this.accountName);
-      //   console.log(accountInfo);
-      let totalRex = Number(accountInfo.rex_info.rex_balance.split(" ")[0]);
-      let portionToUnstake = Number(this.amount) / this.selectedCoin.rexBalance;
-      let rexToUnstake = (totalRex * portionToUnstake).toFixed(4);
-
-      //   TODO check maturities
-      const actions = [
-        {
+      let actions = [];
+      if (this.selectedResource == "RAM") {
+        actions.push({
           account: "eosio",
-          name: "sellrex",
+          name: "buyram",
           data: {
-            from: this.accountName,
-            rex: `${rexToUnstake} REX`,
-          },
-        },
-        {
-          account: "eosio",
-          name: "withdraw",
-          data: {
-            owner: this.accountName,
-            amount: quantityStr,
-          },
-        },
-      ];
-      const transaction = await this.$store.$api.signTransaction(
-        actions,
-        `Withdraw ${this.amount} TLOS from REX`
-      );
-    },
+            payer: this.accountName.toLowerCase(),
+            receiver: this.accountName.toLowerCase(),
+            quant:
+              String(parseFloat(this.amount).toFixed(4)) + String(" TLOS")
+          }
+        });
+      }
 
-    async tryStake() {
+      if (this.selectedResource === "CPU" || this.selectedResource === "NET") {
+        let NETtoBuy = this.selectedResource === "NET" ? this.amount : 0;
+        let CPUtoBuy = this.selectedResource === "CPU" ? this.amount : 0;
+        actions.push({
+          account: "eosio",
+          name: "delegatebw",
+          data: {
+            from: this.accountName.toLowerCase(),
+            receiver: this.accountName.toLowerCase(),
+            stake_net_quantity:
+              String(parseFloat(NETtoBuy).toFixed(4)) + String(" TLOS"),
+            stake_cpu_quantity:
+              String(parseFloat(CPUtoBuy).toFixed(4)) + String(" TLOS"),
+            transfer: false
+          }
+        });
+      }
+
       try {
-        await this.stakeRex();
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Buying resources`
+        );
         this.$q.notify({
           type: "primary",
-          message: `${this.amount} TLOS is staked to REX`,
+          message: `Resources bought`
         });
-        this.amount = "0";
-        this.staking = true;
-        this.showDlg = false;
+        this.accountInfo = await this.$store.$api.getAccount(
+          this.accountName.toLowerCase()
+        );
+        this.$root.$emit("resources_bought");
       } catch (error) {
-        console.error(error);
         this.$errorNotification(error);
       }
-    },
-
-    async tryUnstake() {
-      try {
-        await this.unstakeRex();
-        this.$q.notify({
-          type: "primary",
-          message: `${this.amount} TLOS is withdrawn from REX`,
-        });
-        this.amount = "0";
-        this.staking = true;
-        this.showDlg = false;
-      } catch (error) {
-        console.error(error);
-        this.$errorNotification(error);
-      }
-    },
+    }
   },
   watch: {},
   async mounted() {

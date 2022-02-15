@@ -211,6 +211,7 @@
       </div>
     </div>
     <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
+    {{showManageResourcesDlg}}
   </div>
 </template>
 
