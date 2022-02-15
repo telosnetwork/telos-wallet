@@ -37,26 +37,26 @@
               <q-circular-progress
                 show-value
                 font-size="12px"
-                :value="usedCPU/totalCPU * 100"
+                :value="(usedCPU / totalCPU) * 100"
                 size="70px"
                 :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                <div v-if="usedCPU/totalCPU * 100 > 1">
-                  {{ (usedCPU/totalCPU * 100).toFixed(0) }}%
+                <div v-if="(usedCPU / totalCPU) * 100 > 1">
+                  {{ ((usedCPU / totalCPU) * 100).toFixed(0) }}%
                 </div>
                 <div v-else>&lt; 1%</div>
               </q-circular-progress>
 
               <div>CPU</div>
               <div class="q-mt-sm">
-                {{formatSec(usedCPU)}} /
-                {{formatSec(totalCPU)}}
+                {{ formatSec(usedCPU) }} /
+                {{ formatSec(totalCPU) }}
               </div>
               <div class="q-mt-sm">Total Staked:</div>
-              <div>{{stakedTotalCPU}}</div>
+              <div>{{ stakedTotalCPU }}</div>
             </div>
           </div>
           <!-- NET -->
@@ -67,26 +67,26 @@
               <q-circular-progress
                 show-value
                 font-size="12px"
-                :value="usedNET/totalNET*100"
+                :value="(usedNET / totalNET) * 100"
                 size="70px"
                 :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                <div v-if="usedNET/totalNET * 100 > 1">
-                  {{ (usedNET/totalNET * 100).toFixed(0) }}%
+                <div v-if="(usedNET / totalNET) * 100 > 1">
+                  {{ ((usedNET / totalNET) * 100).toFixed(0) }}%
                 </div>
                 <div v-else>&lt; 1%</div>
               </q-circular-progress>
 
               <div>NET</div>
               <div class="q-mt-sm">
-                {{formatBytes(usedNET)}} / {{formatBytes(totalNET)}}
+                {{ formatBytes(usedNET) }} / {{ formatBytes(totalNET) }}
               </div>
 
               <div class="q-mt-sm">Total Staked:</div>
-              <div>{{stakedTotalNET}}</div>
+              <div>{{ stakedTotalNET }}</div>
             </div>
           </div>
           <!-- RAM -->
@@ -97,42 +97,50 @@
               <q-circular-progress
                 show-value
                 font-size="12px"
-                :value="usedRAM/totalRAM*100"
+                :value="(usedRAM / totalRAM) * 100"
                 size="70px"
                 :thickness="0.3"
                 color="teal"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ (usedRAM/totalRAM * 100).toFixed(0) }}%
+                {{ ((usedRAM / totalRAM) * 100).toFixed(0) }}%
               </q-circular-progress>
 
               <div>RAM</div>
               <div class="q-mt-sm">
-                {{(formatBytes(usedRAM))}} / {{formatBytes(totalRAM)}}
+                {{ formatBytes(usedRAM) }} / {{ formatBytes(totalRAM) }}
               </div>
             </div>
           </div>
         </div>
 
         <div
-          class="q-mt-md fit row wrap justify-center items-center content-center"
+          class="q-mt-sm q-gutter-sm fit row wrap justify-center items-center content-center"
         >
           <q-select
-            class="q-mr-sm"
             rounded
+            outlined
+            dark
+            options-dark
             v-model="selectedResource"
             :options="resourceOptions"
           />
           <q-input
-            class="q-mr-sm"
             rounded
+            outlined
+            dark
+            darklabel-color="white"
+            color="white"
+            input-style="color: white"
+            input-class="text-white"
             v-model="amount"
             label="Amount in TLOS"
           />
           <q-btn
             @click="buyResources()"
             rounded
+            size="lg"
             color="primary"
             :label="selectedResource === 'RAM' ? 'Buy' : 'Stake'"
           />
@@ -146,20 +154,18 @@
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import { stakeRex } from "src/store/rex/actions";
-import { format } from 'quasar'
+import { format } from "quasar";
 // destructuring to keep only what is needed
-const { capitalize, humanStorageSize } = format
+const { capitalize, humanStorageSize } = format;
 
 export default {
   props: ["showManageResourcesDlg", "haveEVMAccount", "selectedCoin"],
   data() {
     return {
-      amount: 0,
-      selectedResource: 'RAM', //ram,cpu,net
-      resourceOptions: [
-        "RAM", "CPU", "NET"
-      ],
-      accountInfo: []
+      amount: "",
+      selectedResource: "RAM", //ram,cpu,net
+      resourceOptions: ["RAM", "CPU", "NET"],
+      accountInfo: [],
     };
   },
   computed: {
@@ -174,85 +180,84 @@ export default {
     },
 
     totalRAM() {
-        if (this.accountInfo) {
-          return this.accountInfo.ram_quota;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.ram_quota;
+      } else {
+        return 0;
+      }
     },
     availRAM() {
-        if (this.accountInfo) {
-            return this.accountInfo.ram_quota - this.accountInfo.ram_usage;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.ram_quota - this.accountInfo.ram_usage;
+      } else {
+        return 0;
+      }
     },
     usedRAM() {
-        if (this.accountInfo) {
-            return this.accountInfo.ram_usage;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.ram_usage;
+      } else {
+        return 0;
+      }
     },
 
     totalCPU() {
-        if (this.accountInfo) {
-            return this.accountInfo.cpu_limit.max;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.cpu_limit.max;
+      } else {
+        return 0;
+      }
     },
     availCPU() {
-        if (this.accountInfo) {
-            return this.accountInfo.cpu_limit.available;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.cpu_limit.available;
+      } else {
+        return 0;
+      }
     },
     usedCPU() {
-        if (this.accountInfo) {
-            return this.accountInfo?.cpu_limit?.used;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo?.cpu_limit?.used;
+      } else {
+        return 0;
+      }
     },
     stakedTotalCPU() {
-        if (this.accountInfo) {
-            return this.accountInfo.total_resources.cpu_weight;
-        } else {
-            return "0 TLOS";
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.total_resources.cpu_weight;
+      } else {
+        return "0 TLOS";
+      }
     },
 
     totalNET() {
-        if (this.accountInfo) {
-            return this.accountInfo.net_limit.max;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.net_limit.max;
+      } else {
+        return 0;
+      }
     },
     availNET() {
-        if (this.accountInfo) {
-            return this.accountInfo.net_limit.available;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.net_limit.available;
+      } else {
+        return 0;
+      }
     },
     usedNET() {
-        if (this.accountInfo) {
-            return this.accountInfo.net_limit.used;
-        } else {
-            return 0;
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.net_limit.used;
+      } else {
+        return 0;
+      }
     },
     stakedTotalNET() {
-        if (this.accountInfo) {
-            return this.accountInfo.total_resources.net_weight;
-        } else {
-            return "0 TLOS";
-        }
+      if (this.accountInfo) {
+        return this.accountInfo.total_resources.net_weight;
+      } else {
+        return "0 TLOS";
+      }
     },
-
   },
   methods: {
     ...mapActions("rex", ["getRexBalance"]),
@@ -263,7 +268,6 @@ export default {
     },
 
     async buyResources() {
-
       let actions = [];
       if (this.selectedResource == "RAM") {
         actions.push({
@@ -272,9 +276,8 @@ export default {
           data: {
             payer: this.accountName.toLowerCase(),
             receiver: this.accountName.toLowerCase(),
-            quant:
-              String(parseFloat(this.amount).toFixed(4)) + String(" TLOS")
-          }
+            quant: String(parseFloat(this.amount).toFixed(4)) + String(" TLOS"),
+          },
         });
       }
 
@@ -291,8 +294,8 @@ export default {
               String(parseFloat(NETtoBuy).toFixed(4)) + String(" TLOS"),
             stake_cpu_quantity:
               String(parseFloat(CPUtoBuy).toFixed(4)) + String(" TLOS"),
-            transfer: false
-          }
+            transfer: false,
+          },
         });
       }
 
@@ -303,7 +306,7 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `Resources bought`
+          message: `Resources bought`,
         });
         this.accountInfo = await this.$store.$api.getAccount(
           this.accountName.toLowerCase()
@@ -315,25 +318,25 @@ export default {
     },
 
     formatSec(secs) {
-        if (secs !== undefined) {
-            if (secs > 1000 && secs < 1000000) {
-                return `${(secs/1000).toFixed(2)} ms`;
-            } else if (secs > 1000000) {
-                return `${(secs/1000000).toFixed(2)} s`;
-            } else {
-                return secs;
-            }
+      if (secs !== undefined) {
+        if (secs > 1000 && secs < 1000000) {
+          return `${(secs / 1000).toFixed(2)} ms`;
+        } else if (secs > 1000000) {
+          return `${(secs / 1000000).toFixed(2)} s`;
+        } else {
+          return secs;
         }
+      }
     },
 
     formatBytes(bytes) {
-        return humanStorageSize(bytes)
-    }
+      return humanStorageSize(bytes);
+    },
   },
   watch: {},
   async mounted() {
     this.accountInfo = await this.$store.$api.getAccount(this.accountName);
-    console.log(this.accountInfo)
+    console.log(this.accountInfo);
   },
 };
 </script>
