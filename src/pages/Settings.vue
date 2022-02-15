@@ -49,13 +49,22 @@
           </q-item>
         </div>
 
+        <q-item>
+          <q-btn @click="manageResources()">
+            Manage Resources
+          </q-btn>
+        </q-item>
+
         <!-- Upload Image Button -->
 
         <div class="profileInformation">
           <!-- Avatar Name -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/avatarImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/avatarImg.svg"
+              />
             </div>
             <q-input
               v-model="avatar"
@@ -91,7 +100,10 @@
           <!-- Status -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/statusImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/statusImg.svg"
+              />
             </div>
             <q-input
               v-model="status"
@@ -198,15 +210,17 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
+    <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
+import ManageResources from 'components/ManageResources.vue';
 
 export default {
-  components: {},
+  components: {ManageResources},
   data() {
     return {
       accountHasProfile: false,
@@ -223,7 +237,8 @@ export default {
       clearInterval: null,
       connected: false,
       confirm: false,
-      keyView: false
+      keyView: false,
+      showManageResourcesDlg: false,
     };
   },
   computed: {
@@ -527,6 +542,9 @@ export default {
     },
     signOut() {
       this.$root.$emit("signOut");
+    },
+    manageResources() {
+        this.showManageResourcesDlg = true;
     }
   },
   created: async function() {
