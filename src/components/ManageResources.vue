@@ -44,15 +44,18 @@
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ (usedCPU/totalCPU * 100).toFixed(0) }}%
+                <div v-if="usedCPU/totalCPU * 100 > 1">
+                  {{ (usedCPU/totalCPU * 100).toFixed(0) }}%
+                </div>
+                <div v-else>&lt; 1%</div>
               </q-circular-progress>
 
               <div>CPU</div>
-              <div>
-                {{(usedCPU/1000).toFixed(3)}} ms /
-                {{(totalCPU/1000).toFixed(3)}} ms
+              <div class="q-mt-sm">
+                {{formatSec(usedCPU)}} /
+                {{formatSec(totalCPU)}}
               </div>
-              <div>Total Staked:</div>
+              <div class="q-mt-sm">Total Staked:</div>
               <div>{{stakedTotalCPU}}</div>
             </div>
           </div>
@@ -71,15 +74,18 @@
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ (usedNET/totalNET * 100).toFixed(0) }}%
+                <div v-if="usedNET/totalNET * 100 > 1">
+                  {{ (usedNET/totalNET * 100).toFixed(0) }}%
+                </div>
+                <div v-else>&lt; 1%</div>
               </q-circular-progress>
 
               <div>NET</div>
-              <div>
-                {{(usedNET/1024).toFixed(2)}} kB /
-                {{(totalNET/1024).toFixed(2)}} kB
+              <div class="q-mt-sm">
+                {{formatBytes(usedNET)}} / {{formatBytes(totalNET)}}
               </div>
-              <div>Total Staked:</div>
+
+              <div class="q-mt-sm">Total Staked:</div>
               <div>{{stakedTotalNET}}</div>
             </div>
           </div>
@@ -102,9 +108,8 @@
               </q-circular-progress>
 
               <div>RAM</div>
-              <div>
-                {{(usedRAM/1024).toFixed(2)}} kB /
-                {{(totalRAM/1024).toFixed(2)}} kB
+              <div class="q-mt-sm">
+                {{(formatBytes(usedRAM))}} / {{formatBytes(totalRAM)}}
               </div>
             </div>
           </div>
@@ -141,6 +146,9 @@
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import { stakeRex } from "src/store/rex/actions";
+import { format } from 'quasar'
+// destructuring to keep only what is needed
+const { capitalize, humanStorageSize } = format
 
 export default {
   props: ["showManageResourcesDlg", "haveEVMAccount", "selectedCoin"],
@@ -203,7 +211,7 @@ export default {
     },
     usedCPU() {
         if (this.accountInfo) {
-            return this.accountInfo.cpu_limit.used;
+            return this.accountInfo?.cpu_limit?.used;
         } else {
             return 0;
         }
@@ -304,6 +312,22 @@ export default {
       } catch (error) {
         this.$errorNotification(error);
       }
+    },
+
+    formatSec(secs) {
+        if (secs !== undefined) {
+            if (secs > 1000 && secs < 1000000) {
+                return `${(secs/1000).toFixed(2)} ms`;
+            } else if (secs > 1000000) {
+                return `${(secs/1000000).toFixed(2)} s`;
+            } else {
+                return secs;
+            }
+        }
+    },
+
+    formatBytes(bytes) {
+        return humanStorageSize(bytes)
     }
   },
   watch: {},
