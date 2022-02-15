@@ -23,7 +23,7 @@
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-          Earn up to 130% APR.
+          Earn up to 13% APR.
         </div>
         <q-btn-toggle
           v-model="staking"
@@ -263,7 +263,18 @@ export default {
     },
   },
   watch: {},
-  async mounted() {},
+  async mounted() {
+    //   TODO get rex apr from api, cors issues
+//       fetch("https://api.staker.one/v1/telos/apr", {
+//   mode: 'cors',
+//   headers: {
+//     'Access-Control-Allow-Origin':'*'
+//   }})
+//     .then(res => res.json())
+//     .then(json => {
+//       console.log(json);
+//     });
+  },
 };
 </script>
 
