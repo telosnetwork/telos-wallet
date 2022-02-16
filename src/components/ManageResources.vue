@@ -330,14 +330,12 @@ export default {
     async accountName(newAccountName) {
       if (this.isAuthenticated) {
         this.accountInfo = await this.$store.$api.getAccount(this.accountName);
-        console.log(this.accountInfo);
       }
     },
   },
   async mounted() {
     if (this.isAuthenticated) {
       this.accountInfo = await this.$store.$api.getAccount(this.accountName);
-      console.log(this.accountInfo);
     }
   },
 };
