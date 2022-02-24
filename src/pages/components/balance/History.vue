@@ -66,7 +66,12 @@
                 <label
                   class="cryptoAmount text-h5 text-weight-small text-whhite"
                   >${{
-                    getFixed(selectedCoin.amount * selectedCoin.price, 2)
+                    getFixed(
+                      (!selectedCoin.totalAmount
+                        ? selectedCoin.amount
+                        : selectedCoin.totalAmount) * selectedCoin.price,
+                      2
+                    )
                   }}</label
                 >
 
@@ -78,7 +83,9 @@
                     Total:
                     {{
                       `${getFixed(
-                        selectedCoin.amount,
+                        !selectedCoin.totalAmount
+                          ? selectedCoin.amount
+                          : selectedCoin.totalAmount,
                         selectedCoin.precision
                       )} ${selectedCoin.symbol}`
                     }}</label
@@ -87,7 +94,7 @@
                     >Liquid:
                     {{
                       `${getFixed(
-                        selectedCoin.amount - selectedCoin.rexBalance,
+                        selectedCoin.amount,
                         selectedCoin.precision
                       )} ${selectedCoin.symbol}`
                     }}</label
@@ -182,11 +189,10 @@
                   no-caps
                   @click="stakeRex"
                 >
-                  <q-icon
-                    size="2.3em"
-                    name="fas fa-hand-holding-usd q-mb-xs"
-                  ></q-icon>
-                  <div class="column items-center">Earn</div>
+                  <div class="column">
+                    <img src="~assets/Earn.svg" />
+                    Earn
+                  </div>
                 </q-btn>
               </div>
               <div class="q-pa-md">

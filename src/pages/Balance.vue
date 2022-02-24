@@ -365,7 +365,11 @@ export default {
 
     totalAmount() {
       return this.coins
-        .map((coin) => coin.amount * coin.price)
+        .map(
+          (coin) =>
+            (coin?.totalAmount === undefined ? coin.amount : coin.totalAmount) *
+            coin.price
+        )
         .reduce((a, b) => a + b, 0);
     },
     availableHeight() {
@@ -518,15 +522,13 @@ export default {
             ) {
               // get REX balance here and add to amount
               if (token.contract === "eosio.token" && token.symbol === "TLOS") {
-                coin.amount =
-                  (
-                    token.amount + (await this.getRexBalance(this.accountName))
-                  ).toFixed(4) || 0;
-                coin.nativeBalance = token.amount || 0;
+                coin.amount = token.amount || 0;
                 coin.rexBalance =
                   (await this.getRexBalance(this.accountName)) || 0;
+                coin.totalAmount = coin.amount + coin.rexBalance;
               } else {
                 coin.amount = token.amount || 0;
+                coin.totalAmount = coin.amount || 0;
               }
               coin.precision = token.precision || 4;
             }

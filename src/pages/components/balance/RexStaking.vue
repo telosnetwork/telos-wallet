@@ -38,10 +38,10 @@
         />
         <div
           v-if="staking"
-          @click="amount = selectedCoin.nativeBalance"
+          @click="amount = selectedCoin.amount"
           class="q-mt-md"
         >
-          Available: {{ selectedCoin.nativeBalance }}
+          Available: {{ selectedCoin.amount }}
           {{ selectedCoin.symbol }}
         </div>
         <div
@@ -74,7 +74,7 @@
             @click="
               amount = (
                 staking
-                  ? selectedCoin.nativeBalance * 0.25
+                  ? selectedCoin.amount * 0.25
                   : selectedCoin.rexBalance * 0.25
               ).toFixed(4)
             "
@@ -88,7 +88,7 @@
             @click="
               amount = (
                 staking
-                  ? selectedCoin.nativeBalance * 0.5
+                  ? selectedCoin.amount * 0.5
                   : selectedCoin.rexBalance * 0.5
               ).toFixed(4)
             "
@@ -102,7 +102,7 @@
             @click="
               amount = (
                 staking
-                  ? selectedCoin.nativeBalance * 0.75
+                  ? selectedCoin.amount * 0.75
                   : selectedCoin.rexBalance * 0.75
               ).toFixed(4)
             "
@@ -115,9 +115,7 @@
             label="100%"
             @click="
               amount = (
-                staking
-                  ? selectedCoin.nativeBalance
-                  : selectedCoin.rexBalance * 1
+                staking ? selectedCoin.amount : selectedCoin.rexBalance * 1
               ).toFixed(4)
             "
           />
@@ -265,15 +263,15 @@ export default {
   watch: {},
   async mounted() {
     //   TODO get rex apr from api, cors issues
-//       fetch("https://api.staker.one/v1/telos/apr", {
-//   mode: 'cors',
-//   headers: {
-//     'Access-Control-Allow-Origin':'*'
-//   }})
-//     .then(res => res.json())
-//     .then(json => {
-//       console.log(json);
-//     });
+    //       fetch("https://api.staker.one/v1/telos/apr", {
+    //   mode: 'cors',
+    //   headers: {
+    //     'Access-Control-Allow-Origin':'*'
+    //   }})
+    //     .then(res => res.json())
+    //     .then(json => {
+    //       console.log(json);
+    //     });
   },
 };
 </script>

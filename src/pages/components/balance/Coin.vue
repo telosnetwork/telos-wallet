@@ -9,7 +9,7 @@
         :key="`${coin.name}_${index}`"
         clickable
         v-ripple
-        class="column "
+        class="column"
         @click="selectCoin(coin)"
         ><div class="self-stretch list-item">
           <div class="row">
@@ -28,12 +28,17 @@
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
                     src="~assets/evm_logo.png"
-                    style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                    style="
+                      width: 50%;
+                      height: 50%;
+                      margin-right: -10%;
+                      margin-bottom: -5%;
+                    "
                   />
                 </div>
               </q-avatar>
             </q-item-section>
-            <q-item-section style="justify-content: start; display: grid;">
+            <q-item-section style="justify-content: start; display: grid">
               <div class="text-white text-left display-grid">
                 <label
                   class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
@@ -63,7 +68,11 @@
               rounded
               no-caps
               @click.stop="depositEvm"
-              v-if="coin.symbol === 'TLOS' && coin.account === 'eosio.token' && coin.network !== 'tevm'"
+              v-if="
+                coin.symbol === 'TLOS' &&
+                coin.account === 'eosio.token' &&
+                coin.network !== 'tevm'
+              "
             >
               <img src="~assets/icons/networkArrows.svg" />
               <div class="q-pl-sm">EVM</div>
@@ -72,10 +81,20 @@
           <q-item-section>
             <div class="text-white text-right display-grid">
               <label class="text-subtitle1 text-weight-small text-white h-20">{{
-                `${getFixed(coin.amount, 8)} ${coin.symbol}`
+                `${getFixed(
+                  !coin.totalAmount ? coin.amount : coin.totalAmount,
+                  8
+                )} ${coin.symbol}`
               }}</label>
               <label v-if="coin.price !== 0" class="text-caption text-grey-6"
-                >${{ getFixed(coin.amount * coin.price, 2) }}</label
+                >${{
+                  getFixed(
+                    !coin.totalAmount
+                      ? coin.amount
+                      : coin.totalAmount * coin.price,
+                    2
+                  )
+                }}</label
               >
             </div>
           </q-item-section>
@@ -96,7 +115,7 @@ import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   components: {
-    tokenAvatar
+    tokenAvatar,
   },
   props: [
     "coins",
@@ -107,22 +126,24 @@ export default {
     "showDepositEVMDlg",
     "showWithdrawEVMDlg",
     "selectedCoin",
-    "suggestTokens"
+    "suggestTokens",
   ],
   computed: {
     availableCoins() {
       return this.coins.filter(
-        coin =>
+        (coin) =>
           coin.amount > 0 ||
-          this.suggestTokens.map(t => t.sym).includes(coin.symbol.toLowerCase())
+          this.suggestTokens
+            .map((t) => t.sym)
+            .includes(coin.symbol.toLowerCase())
       );
-    }
+    },
   },
   methods: {
     clickPurchase() {
       this.$emit(
         "update:selectedCoin",
-        this.coins.find(coin => coin.symbol === "TLOS")
+        this.coins.find((coin) => coin.symbol === "TLOS")
       );
       this.$emit("update:showBuyAmountDlg", true);
     },
@@ -138,8 +159,8 @@ export default {
     },
     withdrawEvm() {
       this.$emit("update:showWithdrawEVMDlg", true);
-    }
-  }
+    },
+  },
 };
 </script>
 
