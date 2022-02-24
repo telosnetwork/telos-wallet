@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       srcDir: "/nav/",
-      selectedTab: "wallet"
+      selectedTab: "wallet",
     };
   },
   computed: {
@@ -74,7 +74,7 @@ export default {
       if (this.selectedTab === "settings")
         return this.srcDir + "settings_selected.svg";
       else return this.srcDir + "settings.svg";
-    }
+    },
   },
   methods: {
     switchTab(val) {
@@ -100,14 +100,14 @@ export default {
         default:
           break;
       }
-    }
+    },
   },
   watch: {
     balanceTab() {
       if (this.balanceTab === "Coins") this.switchTab("coins");
       else this.switchTab("nft");
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -32,9 +32,7 @@
           <!-- </q-container> -->
           <q-item class="justify-center uploadImage">
             <q-btn
-              :style="
-                `height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`
-              "
+              :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
               @click="onPickFile"
             >
               <q-icon name="add_a_photo" color="white" />
@@ -49,13 +47,22 @@
           </q-item>
         </div>
 
+        <q-item class="row justify-center q-mt-md">
+          <q-btn class="settingBtn" @click="manageResources()">
+            Manage Resources
+          </q-btn>
+        </q-item>
+
         <!-- Upload Image Button -->
 
         <div class="profileInformation">
           <!-- Avatar Name -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/avatarImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/avatarImg.svg"
+              />
             </div>
             <q-input
               v-model="avatar"
@@ -83,7 +90,7 @@
               input-class="text-white"
               class="round-sm full-width"
               label="Name"
-              :rules="[val => !!val || 'This field is required']"
+              :rules="[(val) => !!val || 'This field is required']"
               hide-bottom-space
             />
           </q-item>
@@ -91,7 +98,10 @@
           <!-- Status -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/statusImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/statusImg.svg"
+              />
             </div>
             <q-input
               v-model="status"
@@ -173,7 +183,7 @@
           </q-card-section>
           <q-card-section
             class="q-pt-none text-center"
-            style="word-break: break-all;"
+            style="word-break: break-all"
           >
             {{ privateKey }}
             <q-btn
@@ -193,20 +203,23 @@
       <div
         v-if="saving"
         class="justify-center absolute flex full-width full-height"
-        style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+        style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4)"
       >
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
+    <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import LoginButton from "components/LoginButton.vue";
+import ManageResources from "components/ManageResources.vue";
+import { accountName } from "src/store/account/getters";
 
 export default {
-  components: {},
+  components: { ManageResources },
   data() {
     return {
       accountHasProfile: false,
@@ -223,7 +236,8 @@ export default {
       clearInterval: null,
       connected: false,
       confirm: false,
-      keyView: false
+      keyView: false,
+      showManageResourcesDlg: false,
     };
   },
   computed: {
@@ -238,7 +252,7 @@ export default {
       if (this.avatar) return this.avatar;
 
       return "/profile/default_avatar.svg";
-    }
+    },
   },
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile", "logout"]),
@@ -249,7 +263,7 @@ export default {
       var xhr = new XMLHttpRequest();
       xhr.open("POST", "https://api.imgur.com/3/image"); // Boooom!
       xhr.setRequestHeader("Authorization", "Client-ID b3386c312851443");
-      xhr.onload = function() {
+      xhr.onload = function () {
         p.avatar = JSON.parse(xhr.responseText).data.link;
       };
       xhr.send(fd).then();
@@ -269,9 +283,8 @@ export default {
       ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile =
+        this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
         return;
       }
@@ -284,9 +297,8 @@ export default {
       this.is_verified = accountProfile.is_verified;
     },
     async save() {
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile =
+        this.$store.state.account.profiles[this.accountName];
       const actions = [];
       if (!accountProfile) {
         actions.push({
@@ -297,8 +309,8 @@ export default {
             display_name: this.display_name,
             avatar: this.avatar,
             bio: this.bio,
-            status: this.status
-          }
+            status: this.status,
+          },
         });
       } else {
         if (accountProfile.avatar !== this.avatar) {
@@ -307,8 +319,8 @@ export default {
             name: "editavatar",
             data: {
               account: this.accountName,
-              new_avatar: this.avatar
-            }
+              new_avatar: this.avatar,
+            },
           });
         }
         if (accountProfile.display_name !== this.display_name) {
@@ -317,8 +329,8 @@ export default {
             name: "editdisplay",
             data: {
               account: this.accountName,
-              new_display_name: this.display_name
-            }
+              new_display_name: this.display_name,
+            },
           });
         }
         if (accountProfile.bio !== this.bio) {
@@ -327,8 +339,8 @@ export default {
             name: "editbio",
             data: {
               account: this.accountName,
-              new_bio: this.bio
-            }
+              new_bio: this.bio,
+            },
           });
         }
         if (accountProfile.status !== this.status) {
@@ -337,8 +349,8 @@ export default {
             name: "editstatus",
             data: {
               account: this.accountName,
-              new_status: this.status
-            }
+              new_status: this.status,
+            },
           });
         }
       }
@@ -355,7 +367,7 @@ export default {
               !accountProfile
                 ? "New profile is created successfully"
                 : "Profile is updated successfully"
-            }`
+            }`,
           });
         } catch (error) {
           this.$errorNotification(error);
@@ -369,7 +381,7 @@ export default {
         this.$store.$account.needAuth = true;
       }
       while (!this.privateKey) {
-        await new Promise(res => setTimeout(res, 10));
+        await new Promise((res) => setTimeout(res, 10));
       }
       let driveData = null;
       const { result } = await this.loadFromGoogleDrive();
@@ -383,7 +395,7 @@ export default {
       if (
         driveData &&
         Object.keys(driveData).findIndex(
-          acc => driveData[acc].privateKey === this.privateKey
+          (acc) => driveData[acc].privateKey === this.privateKey
         ) >= 0
       ) {
         console.log("Private key found");
@@ -404,22 +416,22 @@ export default {
       await gapi.client.load("drive", "v2");
       var request = gapi.client.drive.files.list({
         q: `title = 'Telos Web Wallet${network}' and explicitlyTrashed = false`,
-        space: "drive"
+        space: "drive",
       });
       await request.execute(
-        async function(resp) {
+        async function (resp) {
           if (resp && resp.items && resp.items.length > 0) {
             fileId = resp.items[0].id;
             var file = gapi.client.drive.files.get({
               fileId: resp.items[0].id,
-              alt: "media"
+              alt: "media",
             });
             file.then(
-              function(response) {
+              function (response) {
                 result = JSON.parse(response.body);
                 callbacked = true;
               },
-              function(error) {
+              function (error) {
                 callbacked = true;
               }
             );
@@ -427,13 +439,13 @@ export default {
             callbacked = true;
           }
         },
-        function(error) {
+        function (error) {
           callbacked = true;
         }
       );
       let timeoutCnt = 100;
       while (!callbacked) {
-        await new Promise(res => setTimeout(res, 100));
+        await new Promise((res) => setTimeout(res, 100));
         timeoutCnt--;
         if (timeoutCnt === 0) {
           break;
@@ -457,7 +469,7 @@ export default {
         privateKey: keys
           ? this.encrypt(keys.privateKey)
           : this.encrypt(this.privateKey),
-        publicKey: keys ? keys.publicKey : null
+        publicKey: keys ? keys.publicKey : null,
       };
       var fileContent = JSON.stringify(result); // As a sample, upload a text file.
       var file = new Blob([fileContent], { type: "text/plain" });
@@ -467,7 +479,7 @@ export default {
           : "(mainnet)";
       var metadata = {
         name: `Telos Web Wallet${network}`, // Filename at Google Drive
-        mimeType: "text/plain" // mimeType at Google Drive
+        mimeType: "text/plain", // mimeType at Google Drive
       };
 
       var accessToken = gapi.auth2
@@ -481,16 +493,16 @@ export default {
       );
       form.append("file", file);
 
-      const showError = function(p, val) {
+      const showError = function (p, val) {
         if (val.message) {
           p.$q.notify({
             type: "negative",
-            message: val.message
+            message: val.message,
           });
         } else {
           p.$q.notify({
             type: "primary",
-            message: "Account is saved on your google drive"
+            message: "Account is saved on your google drive",
           });
         }
       };
@@ -501,14 +513,14 @@ export default {
         {
           method: fileId ? "PATCH" : "POST",
           headers: new Headers({ Authorization: "Bearer " + accessToken }),
-          body: form
+          body: form,
         }
       )
-        .then(res => {
+        .then((res) => {
           this.connected = true;
           return res.json();
         })
-        .then(val => showError(this, val));
+        .then((val) => showError(this, val));
     },
     copyToClipboard(str) {
       var el = document.createElement("textarea");
@@ -522,21 +534,25 @@ export default {
 
       this.$q.notify({
         type: "primary",
-        message: "Copied it to the clipboard successfully"
+        message: "Copied it to the clipboard successfully",
       });
     },
     signOut() {
       this.$root.$emit("signOut");
-    }
+    },
+    manageResources() {
+      this.showManageResourcesDlg = true;
+    },
   },
-  created: async function() {
+  created: async function () {
     this.loadUserProfile();
   },
   async mounted() {
+    await this.loadUserProfile();
     gapi.signin2.render("google-authentication-button", {
       height: 35,
       scope: "profile email https://www.googleapis.com/auth/drive",
-      onsuccess: this.onGoogleSignIn
+      onsuccess: this.onGoogleSignIn,
     });
     this.checkInterval = setInterval(async () => {
       this.account = this.$store.$account.account;
@@ -552,7 +568,13 @@ export default {
   async beforeDestroy() {
     if (this.checkInterval) clearInterval(this.checkInterval);
     if (this.clearInterval) clearInterval(this.clearInterval);
-  }
+  },
+
+  watch: {
+    async accountName() {
+      await this.loadUserProfile();
+    },
+  },
 };
 </script>
 
@@ -589,7 +611,7 @@ export default {
 }
 
 .profileInformation {
-  margin-top: 5rem;
+  margin-top: 1rem;
   max-width: 25rem;
   .profileInformationIcons {
     height: 2.5rem;

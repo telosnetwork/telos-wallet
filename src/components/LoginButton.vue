@@ -391,7 +391,6 @@ export default {
     async checkResources() {
       await this.getRamPrice();
       let account = await this.$store.$api.getAccount(this.accountName);
-      console.log(account)
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;

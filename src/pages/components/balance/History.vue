@@ -30,12 +30,14 @@
             <!-- Crypto History Container -->
             <q-page-container>
               <div class="text-white text-center display-grid">
-
                 <!-- Crypto Image -->
-                <div class="absolute" style=" left: 50%; margin-left:-3rem;">
+                <div class="absolute" style="left: 50%; margin-left: -3rem">
                   <q-item-section avatar class="cryptoImg">
                     <q-avatar size="6rem">
-                      <token-avatar :token="selectedCoin.icon" :avatarSize="100" />
+                      <token-avatar
+                        :token="selectedCoin.icon"
+                        :avatarSize="100"
+                      />
                       <div
                         v-if="selectedCoin.name == 'Telos EVM'"
                         class="flex absolute full-width full-height"
@@ -44,7 +46,12 @@
                           class="flex q-ml-auto q-mt-auto"
                           alt="tEVM"
                           src="~assets/evm_logo.png"
-                          style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                          style="
+                            width: 50%;
+                            height: 50%;
+                            margin-right: -10%;
+                            margin-bottom: -5%;
+                          "
                         />
                       </div>
                     </q-avatar>
@@ -59,18 +66,56 @@
                 <label
                   class="cryptoAmount text-h5 text-weight-small text-whhite"
                   >${{
-                    getFixed(selectedCoin.amount * selectedCoin.price, 2)
+                    getFixed(
+                      (!selectedCoin.totalAmount
+                        ? selectedCoin.amount
+                        : selectedCoin.totalAmount) * selectedCoin.price,
+                      2
+                    )
                   }}</label
                 >
-                <label class="text-caption text-white">{{
-                  `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
-                    selectedCoin.symbol
-                  }`
-                }}</label>
+
+                <div
+                  v-if="selectedCoin.rexBalance !== undefined"
+                  class="fit column wrap justify-end items-end content-center"
+                >
+                  <label class="text-caption text-white">
+                    Total:
+                    {{
+                      `${getFixed(
+                        !selectedCoin.totalAmount
+                          ? selectedCoin.amount
+                          : selectedCoin.totalAmount,
+                        selectedCoin.precision
+                      )} ${selectedCoin.symbol}`
+                    }}</label
+                  >
+                  <label class="text-caption text-white"
+                    >Liquid:
+                    {{
+                      `${getFixed(
+                        selectedCoin.amount,
+                        selectedCoin.precision
+                      )} ${selectedCoin.symbol}`
+                    }}</label
+                  >
+                  <label class="text-caption text-white q-ml-sm">
+                    Rex:
+                    {{
+                      `${getFixed(
+                        selectedCoin.rexBalance,
+                        selectedCoin.precision
+                      )} ${selectedCoin.symbol}`
+                    }}</label
+                  >
+                </div>
               </div>
-              <div class="sendActions row q-my-md">
+
+              <div
+                class="sendActions fit row justify-center items-center content-center q-my-md"
+              >
                 <q-btn
-                  class="col"
+                  class=""
                   flat
                   dense
                   stack
@@ -85,7 +130,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   flat
                   dense
                   stack
@@ -100,7 +145,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   v-if="selectedCoin.symbol === 'TLOS'"
                   flat
                   dense
@@ -116,7 +161,7 @@
                 </q-btn>
 
                 <q-btn
-                  class="col"
+                  class=""
                   v-if="convertEnabled"
                   flat
                   dense
@@ -128,6 +173,25 @@
                   <div class="column">
                     <img src="~assets/Convert.svg" />
                     Convert
+                  </div>
+                </q-btn>
+
+                <q-btn
+                  v-if="
+                    selectedCoin.account === 'eosio.token' &&
+                    selectedCoin.symbol === 'TLOS'
+                  "
+                  class=""
+                  flat
+                  dense
+                  stack
+                  size="md"
+                  no-caps
+                  @click="stakeRex"
+                >
+                  <div class="column">
+                    <img src="~assets/Earn.svg" />
+                    Earn
                   </div>
                 </q-btn>
               </div>
@@ -148,8 +212,12 @@
                 </q-input>
                 <q-separator dark class="q-my-sm" />
               </div>
-              
-              <q-infinite-scroll v-if="selectedCoin.name !== 'Telos EVM'" @load="loadMoreHistory" :offset="100">
+
+              <q-infinite-scroll
+                v-if="selectedCoin.name !== 'Telos EVM'"
+                @load="loadMoreHistory"
+                :offset="100"
+              >
                 <div
                   v-for="(history, index) in searchHistories"
                   :key="`${history.block_num}_${index}`"
@@ -157,12 +225,15 @@
                   <q-item clickable v-ripple class="list-item">
                     <q-item-section avatar>
                       <q-avatar size="35px" class="q-my-none">
-                        <token-avatar :token="selectedCoin.icon" :avatarSize="35" />
+                        <token-avatar
+                          :token="selectedCoin.icon"
+                          :avatarSize="35"
+                        />
                       </q-avatar>
                     </q-item-section>
 
                     <q-item-section
-                      style="justify-content: start; display: grid;"
+                      style="justify-content: start; display: grid"
                     >
                       <div class="text-white text-left display-grid">
                         <label
@@ -216,7 +287,7 @@ import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
   components: {
-    tokenAvatar
+    tokenAvatar,
   },
   props: [
     "showHistoryDlg",
@@ -224,7 +295,8 @@ export default {
     "showSendAmountDlg",
     "showBuyAmountDlg",
     "showShareAddressDlg",
-    "showExchangeDlg"
+    "showExchangeDlg",
+    "showRexStakeDlg",
   ],
   data() {
     return {
@@ -232,7 +304,7 @@ export default {
       accountHistory: [],
       page: 0,
       pageLimit: 10,
-      loadedAll: false
+      loadedAll: false,
     };
   },
   computed: {
@@ -243,10 +315,10 @@ export default {
       },
       set(value) {
         this.$emit("update:showHistoryDlg", value);
-      }
+      },
     },
     searchHistories() {
-      return this.accountHistory.filter(history => {
+      return this.accountHistory.filter((history) => {
         const historyData = this.historyData(history);
         return (
           historyData.actionName
@@ -260,7 +332,7 @@ export default {
     },
     convertEnabled() {
       return true;
-    }
+    },
   },
   methods: {
     async loadMoreHistory(index, done) {
@@ -292,6 +364,11 @@ export default {
     sell() {
       // this.$emit('update:showShareAddressDlg', true);
     },
+    stakeRex() {
+      this.$emit("update:showRexStakeDlg", true);
+      console.log("stake rex");
+    },
+
     historyData(history) {
       let actionName = "";
       let actionDetail = "";
@@ -323,12 +400,12 @@ export default {
         actionName,
         actionDetail,
         coinAmount,
-        usdAmount
+        usdAmount,
       };
-    }
+    },
   },
   watch: {
-    showHistoryDlg: function(val, oldVal) {
+    showHistoryDlg: function (val, oldVal) {
       if (val) {
         this.searchHistoryName = "";
         this.page = 0;
@@ -337,8 +414,8 @@ export default {
       } else {
         this.$emit("update:selectedCoin", null);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -346,7 +423,7 @@ export default {
 .sendActions {
   // color: #3fa6f5;
   opacity: 0.8;
-  button {
+  button:not(.rexbtn) {
     padding: 0.5rem;
     background-color: #ffffff1a;
     margin: 0.1rem;
@@ -356,8 +433,18 @@ export default {
     }
   }
 }
+
+.rexbtn {
+  padding: 0.5rem;
+  background-color: #ffffff1a;
+  //   margin: 0.1rem;
+  border-radius: 0;
+  img {
+    padding-bottom: 5px;
+  }
+}
 // .list-item {
- 
+
 //   border-left: none;
 //   border-right: none;
 //   border-bottom-left-radius: unset;

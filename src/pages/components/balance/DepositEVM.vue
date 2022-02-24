@@ -28,7 +28,7 @@
           Deposit your TLOS into the EVM,<br />fast, free and instant.
         </div>
         <div class="text-center q-mt-md">
-          <div class="inputAmount row items-center ">
+          <div class="inputAmount row items-center">
             <input
               type="text"
               class="col text-weight-regular text-right no-border no-outline transparent text-white"
@@ -38,9 +38,7 @@
               "
               @blur="inputBlur"
             />
-            <label class="text-weight-medium q-ml-sm text-left">
-              TLOS
-            </label>
+            <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
           <!-- <q-input
             bg-color="secondary"
@@ -87,13 +85,13 @@
             @input="checkRecipientExist"
             @focus="checkRecipientExist"
             :rules="[
-              val =>
+              (val) =>
                 (val.slice(0, 2) === '0x' && val.length === 42) ||
-                'Invalid address'
+                'Invalid address',
             ]"
           />
         </div>
-        <div class="row justify-center ">
+        <div class="row justify-center">
           <q-btn
             class="purpleGradient depositBtn"
             no-caps
@@ -110,7 +108,7 @@
               deposit();
             "
           >
-            Deposit to myself
+            Deposit to my generated address
           </div>
         </div>
         <div class="row justify-center">
@@ -129,8 +127,8 @@
           <div
             v-if="
               !recipientAddressExists &&
-                !depositOwnAddress &&
-                recipientAddress != ''
+              !depositOwnAddress &&
+              recipientAddress != ''
             "
             class="note"
           >
@@ -154,7 +152,7 @@ export default {
       depositAmount: "0",
       depositOwnAddress: false,
       recipientAddress: "",
-      recipientAddressExists: true
+      recipientAddressExists: true,
     };
   },
   computed: {
@@ -165,8 +163,8 @@ export default {
       },
       set(value) {
         this.$emit("update:showDepositEVMDlg", value);
-      }
-    }
+      },
+    },
   },
   methods: {
     inputBlur() {
@@ -188,7 +186,7 @@ export default {
       if (amount > parseFloat(this.nativeTLOSBalance)) {
         this.$q.notify({
           type: "negative",
-          message: `Cannot deposit more than native TLOS balance: ${this.nativeTLOSBalance}`
+          message: `Cannot deposit more than native TLOS balance: ${this.nativeTLOSBalance}`,
         });
         return;
       }
@@ -203,8 +201,8 @@ export default {
             name: "create",
             data: {
               account: this.accountName.toLowerCase(),
-              data: "create"
-            }
+              data: "create",
+            },
           });
         }
       } else {
@@ -216,8 +214,8 @@ export default {
             name: "openwallet",
             data: {
               account: this.accountName.toLowerCase(),
-              address: this.recipientAddress.slice(2)
-            }
+              address: this.recipientAddress.slice(2),
+            },
           });
         }
       }
@@ -229,8 +227,8 @@ export default {
           from: this.accountName.toLowerCase(),
           to: "eosio.evm",
           quantity: quantityStr,
-          memo: memo
-        }
+          memo: memo,
+        },
       });
 
       try {
@@ -240,27 +238,27 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `${quantityStr} is deposited to the EVM`
+          message: `${quantityStr} is deposited to the EVM`,
         });
-        this.depositAmount = "0"
-        this.depositOwnAddress = false
-        this.recipientAddress = ""
-        this.recipientAddressExists = true
+        this.depositAmount = "0";
+        this.depositOwnAddress = false;
+        this.recipientAddress = "";
+        this.recipientAddressExists = true;
         this.$root.$emit("successfully_deposited", quantityStr);
 
         this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);
       }
-    }
+    },
   },
   watch: {
     showDepositEVMDlg() {
       if (this.showDlg) {
         this.$emit("addEvmNetwork");
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

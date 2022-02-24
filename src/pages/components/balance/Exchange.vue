@@ -9,7 +9,7 @@
     <div class="main-background">
       <div class="dialogPage">
         <div class="dialogPageContent column">
-          <div class="dialogPageHeading full-width row  justify-between  ">
+          <div class="dialogPageHeading full-width row justify-between">
             <div>
               <q-btn
                 round
@@ -25,23 +25,19 @@
                 <q-btn
                   no-caps
                   label="Dollars"
-                  :style="
-                    `background: ${
-                      exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
-                    };
-                    color: ${exchangeType === 'dollars' ? 'white' : 'white'};`
-                  "
+                  :style="`background: ${
+                    exchangeType === 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
+                  };
+                    color: ${exchangeType === 'dollars' ? 'white' : 'white'};`"
                   @click="exchangeType = 'dollars'"
                 />
                 <q-btn
                   no-caps
                   label="Crypto"
-                  :style="
-                    `background: ${
-                      exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
-                    };
-                    color: ${exchangeType !== 'dollars' ? 'white' : 'white'};`
-                  "
+                  :style="`background: ${
+                    exchangeType !== 'dollars' ? '#FFFFFF55' : '#FFFFFF22'
+                  };
+                    color: ${exchangeType !== 'dollars' ? 'white' : 'white'};`"
                   @click="exchangeType = 'crypto'"
                 />
               </q-btn-group>
@@ -51,20 +47,25 @@
           <!-- Dollar currency converter -->
           <div
             v-if="exchangeType === 'dollars'"
-            class="full-width self-center column q-mx-lg q-mt-md "
+            class="full-width self-center column q-mx-lg q-mt-md"
           >
             <!-- Equal Amount-->
             <div class="text-black display-grid full-width q-pb-md">
               <label
                 ref="widthElement"
-                style="display: fit-content; visibility: hidden; position: absolute; font-size: 45px;"
+                style="
+                  display: fit-content;
+                  visibility: hidden;
+                  position: absolute;
+                  font-size: 45px;
+                "
               >
                 {{ dollarsAmount }}
               </label>
               <div class="flex flex-center full-width">
                 <label
                   class="text-weight-regular text-white q-mr-none"
-                  style="font-size: 1.4rem;"
+                  style="font-size: 1.4rem"
                 >
                   $
                 </label>
@@ -143,7 +144,7 @@
               <q-space />
               <q-item
                 class="list-item full-width q-pb-none"
-                style="min-height: 28px;"
+                style="min-height: 28px"
               >
                 <q-item-section>
                   <div class="text-white display-grid">
@@ -166,15 +167,13 @@
               </q-item>
               <q-item
                 class="list-item full-width q-pt-none"
-                style="min-height: 28px;"
+                style="min-height: 28px"
               >
                 <q-item-section>
-                  <div class="text-white display-grid" style="width: 200px;">
+                  <div class="text-white display-grid" style="width: 200px">
                     <label
                       class="text-white text-subtitle1 text-weight-medium cursor-pointer"
-                      :style="
-                        `color: ${themeColor}; display: inline-flex; z-index: 1;`
-                      "
+                      :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                       @click="
                         showSelectCoinDlg = true;
                         dlgType = 'convert';
@@ -184,7 +183,7 @@
                         v-if="convertCoin"
                         avatar
                         class="q-pr-sm"
-                        style="min-width: unset;"
+                        style="min-width: unset"
                       >
                         <q-avatar size="25px">
                           <token-avatar
@@ -203,9 +202,7 @@
                       ref="convertAmountElement"
                       type="text"
                       maxlength="8"
-                      :class="
-                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
-                      "
+                      :class="`cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`"
                       v-model="convertAmount"
                       @focus="
                         convertAmount =
@@ -224,20 +221,20 @@
 
               <!-- Swap tokens -->
               <div
-                class="full-width row  justify-center items-center content-center "
+                class="full-width row justify-center items-center content-center"
               >
-                <q-separator class="col" style="height: 1px;" color="grey" />
+                <q-separator class="col" style="height: 1px" color="grey" />
                 <q-btn class="swapBtn" flat round @click="changeCoins()">
                   <img src="~assets/icons/swap_arrows.svg" />
                 </q-btn>
-                <q-separator class="col" style="height: 1px;" color="grey" />
+                <q-separator class="col" style="height: 1px" color="grey" />
               </div>
               <!-- <q-separator style="height: 0.3px;" color="grey" /> -->
 
               <q-space />
               <q-item
                 class="list-item full-width q-pb-none"
-                style="min-height: 28px;"
+                style="min-height: 28px"
               >
                 <q-item-section>
                   <div class="text-white display-grid">
@@ -258,15 +255,13 @@
               </q-item>
               <q-item
                 class="list-item full-width q-pt-none"
-                style="min-height: 28px;"
+                style="min-height: 28px"
               >
                 <q-item-section>
-                  <div class="text-white display-grid" style="width: 200px;">
+                  <div class="text-white display-grid" style="width: 200px">
                     <label
                       class="text-white text-subtitle1 text-weight-medium cursor-pointer"
-                      :style="
-                        `color: ${themeColor}; display: inline-flex; z-index: 1;`
-                      "
+                      :style="`color: ${themeColor}; display: inline-flex; z-index: 1;`"
                       @click="
                         showSelectCoinDlg = true;
                         dlgType = 'to';
@@ -276,7 +271,7 @@
                         v-if="toCoin"
                         avatar
                         class="q-pr-sm"
-                        style="min-width: unset;"
+                        style="min-width: unset"
                       >
                         <q-avatar size="25px">
                           <token-avatar :token="toCoin.icon" :avatarSize="25" />
@@ -292,9 +287,7 @@
                       ref="toAmountElement"
                       type="text"
                       maxlength="8"
-                      :class="
-                        `cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`
-                      "
+                      :class="`cryptoInput text-weight-regular text-white text-right no-border no-outline transparent`"
                       v-model="toAmount"
                       @focus="toAmount = toAmount === '0' ? '' : toAmount"
                       @blur="
@@ -306,7 +299,7 @@
                   </div>
                 </q-item-section>
               </q-item>
-              <q-separator style="height: 1px;" color="grey" />
+              <q-separator style="height: 1px" color="grey" />
               <q-space />
             </div>
           </div>
@@ -334,15 +327,21 @@
           </div>
 
           <!-- Convert Button -->
-          <div class=" text-center">
+          <div class="text-center">
             <q-btn
               class="purpleGradient text-white text-subtitle2 nextBtn flex-center q-mt-md"
               flat
               no-caps
               label="Convert"
-              :disable="!convertButtonEnabled"
+              :disable="!convertButtonEnabled || true"
               @click="convertPressed()"
             />
+          </div>
+          <div class="text-center q-mt-sm" style="color: red">
+            Swapping has temporarily been disabled. Please go to
+            <a style="color: blue" href="http://tswaps.com/" target="_blank">
+              tswaps.com
+            </a>
           </div>
         </div>
       </div>
@@ -356,7 +355,7 @@
     <div
       v-if="converting"
       class="justify-center absolute flex full-width full-height"
-      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4);"
+      style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4)"
     >
       <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
     </div>
@@ -374,7 +373,7 @@ export default {
   props: ["showExchangeDlg", "selectedConvertCoin", "coins"],
   components: {
     SelectCoin,
-    tokenAvatar
+    tokenAvatar,
   },
   data() {
     return {
@@ -393,7 +392,7 @@ export default {
       dlgType: "convert",
       inputWidth: 30,
       bancorModule: vxm.bancor,
-      converting: false
+      converting: false,
     };
   },
   computed: {
@@ -404,7 +403,7 @@ export default {
       },
       set(value) {
         this.$emit("update:showExchangeDlg", value);
-      }
+      },
     },
     dollarsAmountValue() {
       return Number(this.dollarsAmount.replace(/\s/g, ""));
@@ -441,7 +440,7 @@ export default {
         return false;
       }
       return true;
-    }
+    },
   },
   methods: {
     async validateDollarAmount(val) {
@@ -489,9 +488,9 @@ export default {
           const reward = await this.bancorModule.getReturn({
             from: {
               id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
-              amount: this.convertAmount
+              amount: this.convertAmount,
             },
-            toId: `${this.toCoin.account}-${this.toCoin.symbol}`
+            toId: `${this.toCoin.account}-${this.toCoin.symbol}`,
           });
           if (reward.slippage) {
             this.slippage = reward.slippage;
@@ -508,7 +507,7 @@ export default {
         } catch (e) {
           this.$q.notify({
             type: "dark",
-            message: e.message
+            message: e.message,
           });
           this.convertible = false;
         }
@@ -532,8 +531,8 @@ export default {
             fromId: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
             to: {
               id: `${this.toCoin.account}-${this.toCoin.symbol}`,
-              amount: this.toAmount
-            }
+              amount: this.toAmount,
+            },
           });
           if (reward.slippage) {
             this.slippage = reward.slippage;
@@ -550,7 +549,7 @@ export default {
         } catch (e) {
           this.$q.notify({
             type: "dark",
-            message: e.message
+            message: e.message,
           });
           this.convertible = false;
         }
@@ -566,44 +565,44 @@ export default {
           tx: {
             from: {
               id: `${this.convertCoin.account}-${this.convertCoin.symbol}`,
-              amount: this.convertAmount
+              amount: this.convertAmount,
             },
             to: {
               id: `${this.toCoin.account}-${this.toCoin.symbol}`,
-              amount: this.toAmount
+              amount: this.toAmount,
             },
-            onUpdate: this.onUpdate
+            onUpdate: this.onUpdate,
           },
-          detail: `Convert ${this.convertAmount} ${this.convertCoin.symbol} into ${this.toAmount} ${this.toCoin.symbol}`
+          detail: `Convert ${this.convertAmount} ${this.convertCoin.symbol} into ${this.toAmount} ${this.toCoin.symbol}`,
         });
         if (result) {
           if (result === "needAuth") {
             this.$q.notify({
               type: "negative",
-              message: `Authentication is required`
+              message: `Authentication is required`,
             });
           } else if (result === "error") {
             this.$q.notify({
               type: "negative",
-              message: `Conversion failed. Make sure authentication is done correctly.`
+              message: `Conversion failed. Make sure authentication is done correctly.`,
             });
           } else if (result !== "cancelled") {
             this.$q.notify({
               type: "primary",
-              message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`
+              message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
             });
             this.showDlg = false;
           }
         } else {
           this.$q.notify({
             type: "negative",
-            message: `${this.convertCoin.symbol} is not converted into ${this.toCoin.symbol}`
+            message: `${this.convertCoin.symbol} is not converted into ${this.toCoin.symbol}`,
           });
         }
       } catch (e) {
         this.$q.notify({
           type: "negative",
-          message: e.message
+          message: e.message,
         });
       }
       this.converting = false;
@@ -613,10 +612,10 @@ export default {
       this.toCoin = this.convertCoin;
       this.dlgType = "convert";
       this.selectedCoin = val;
-    }
+    },
   },
   watch: {
-    showExchangeDlg: function(val, oldVal) {
+    showExchangeDlg: function (val, oldVal) {
       if (val) {
         this.exchangeType = "dollars";
         this.dollarsAmount = "0";
@@ -629,7 +628,7 @@ export default {
         this.converting = false;
       }
     },
-    exchangeType: function(val, oldVal) {
+    exchangeType: function (val, oldVal) {
       if (val === "dollars" && this.convertCoin) {
         this.dollarsAmount = this.getFixed(
           this.convertAmount * this.convertCoin.price,
@@ -637,7 +636,7 @@ export default {
         );
       }
     },
-    dollarsAmount: async function(val, oldVal) {
+    dollarsAmount: async function (val, oldVal) {
       setInterval(() => {
         const widthElement = this.$refs.widthElement;
         this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
@@ -647,7 +646,7 @@ export default {
         await this.validateDollarAmount(val);
       }
     },
-    convertAmount: async function(val, oldVal) {
+    convertAmount: async function (val, oldVal) {
       if (this.$refs.convertAmountElement !== window.document.activeElement) {
         return;
       }
@@ -655,7 +654,7 @@ export default {
         await this.validateConvertAmount(val);
       }
     },
-    toAmount: async function(val, oldVal) {
+    toAmount: async function (val, oldVal) {
       if (this.$refs.toAmountElement !== window.document.activeElement) {
         return;
       }
@@ -663,7 +662,7 @@ export default {
         this.validateToAmount(val);
       }
     },
-    selectedCoin: async function(val, oldVal) {
+    selectedCoin: async function (val, oldVal) {
       if (val) {
         if (this.dlgType === "convert") {
           this.convertCoin = val;
@@ -681,8 +680,8 @@ export default {
           }
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -6,6 +6,7 @@ import general from "./general";
 import global from "./global";
 import resources from "./resources";
 import evm from "./evm";
+import rex from "./rex";
 import { GeneralModule } from "./modules/general";
 import { EosTransitModule } from "./modules/wallet/tlosWallet";
 import { TlosBancorModule } from "./modules/swap/tlosBancor";
@@ -24,7 +25,8 @@ export default function() {
       account,
       global,
       resources,
-      evm
+      evm,
+      rex
     },
 
     strict: process.env.DEV
