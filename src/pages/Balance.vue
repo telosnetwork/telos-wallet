@@ -267,6 +267,8 @@ import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
+const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+
 const tabsData = [
   {
     title: "Coins",
@@ -441,7 +443,8 @@ export default {
     },
     clickPurchase() {
       this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
-      this.showBuyAmountDlg = true;
+      window.open(KUCOIN_BUY_URL);
+      //this.showBuyAmountDlg = true;
     },
     clickExchange() {
       // this.$emit('update:showExchangeDlg', true); // not working anymore
