@@ -113,6 +113,8 @@
 import { mapGetters, mapActions } from "vuex";
 import tokenAvatar from "src/components/TokenAvatar";
 
+const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+
 export default {
   components: {
     tokenAvatar,
@@ -141,11 +143,14 @@ export default {
   },
   methods: {
     clickPurchase() {
+      window.open(KUCOIN_BUY_URL);
+      /*
       this.$emit(
         "update:selectedCoin",
         this.coins.find((coin) => coin.symbol === "TLOS")
       );
       this.$emit("update:showBuyAmountDlg", true);
+       */
     },
     clickExchange() {
       this.$emit("update:showExchangeDlg", true);
