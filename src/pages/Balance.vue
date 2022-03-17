@@ -267,7 +267,7 @@ import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
-const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
 
 const tabsData = [
   {
@@ -323,7 +323,7 @@ export default {
         },
       ],
       nftTokenItems: {},
-      nftTokenTags: [],
+      nftTokenTags: new Set(),
       nftScopes: [0, 0],
       displayAmount: 0,
       nftTagLoading: false,
@@ -440,6 +440,17 @@ export default {
     },
     switchTab(val) {
       this.$emit("update:balanceTab", val);
+      if (
+        this.isAuthenticated &&
+        val === "Collectables" &&
+        this.nftTokenTags.length == 0
+      ) {
+        // this.nftTokenTags = [];
+        this.loadUserProfile();
+        this.loadNftTokenItems();
+
+        this.loadNftTokenTags();
+      }
     },
     clickPurchase() {
       this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
@@ -711,32 +722,46 @@ export default {
           this.nftScopes[index] += 1;
         } else {
           if (nftAccount === "tlos.tbond") {
-            const title = tagData.rows.find(
-              (row) => row.tag_name === "title"
-            ).content;
-            const image = tagData.rows.find(
-              (row) => row.tag_name === "image"
-            ).content;
-            this.nftTokenTags.push({
-              title: title,
-              image: image,
-            });
+            if (
+              tagData.rows.find((row) => row.tag_name === "title") !==
+                undefined &&
+              tagData.rows.find((row) => row.tag_name === "image") !== undefined
+            ) {
+              const title = tagData.rows.find(
+                (row) => row.tag_name === "title"
+              ).content;
+              const image = tagData.rows.find(
+                (row) => row.tag_name === "image"
+              ).content;
+              this.nftTokenTags.add({
+                title: title,
+                image: image,
+              });
+            }
           } else if (nftAccount === "marble.code") {
-            const data = JSON.parse(
-              tagData.rows.find((row) => row.tag_name === "data").content
-            );
-            this.nftTokenTags.push({
-              title: data.ti,
-              image: data.dt,
-            });
+            if (
+              tagData.rows.find((row) => row.tag_name === "data") !== undefined
+            ) {
+              const data = JSON.parse(
+                tagData.rows.find((row) => row.tag_name === "data").content
+              );
+              this.nftTokenTags.add({
+                title: data.ti,
+                image: data.dt,
+              });
+            }
           } else if (nftAccount === "marbletessst") {
-            const data = JSON.parse(
-              tagData.rows.find((row) => row.tag_name === "data").content
-            );
-            this.nftTokenTags.push({
-              title: data.ti,
-              image: data.dt,
-            });
+            if (
+              tagData.rows.find((row) => row.tag_name === "data") !== undefined
+            ) {
+              const data = JSON.parse(
+                tagData.rows.find((row) => row.tag_name === "data").content
+              );
+              this.nftTokenTags.add({
+                title: data.ti,
+                image: data.dt,
+              });
+            }
           }
           this.$emit("update:loadedNftTokens", this.nftTokenTags);
           foundFirstData = true;
