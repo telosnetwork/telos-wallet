@@ -438,17 +438,15 @@ export default {
 
       this.avatar = accountProfile.avatar;
     },
-    switchTab(val) {
+    async switchTab(val) {
       this.$emit("update:balanceTab", val);
       if (
         this.isAuthenticated &&
         val === "Collectables" &&
-        this.nftTokenTags.length == 0
+        this.nftTokenTags.size == 0
       ) {
-        // this.nftTokenTags = [];
         this.loadUserProfile();
-        this.loadNftTokenItems();
-
+        await this.loadNftTokenItems();
         this.loadNftTokenTags();
       }
     },
@@ -960,6 +958,11 @@ export default {
     this.$root.$on("show_qrscanner", () => {
       this.showQRScannerDlg = true;
     });
+    if (this.isAuthenticated) {
+      this.loadUserProfile();
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
+    }
   },
   beforeDestroy() {
     if (this.interval) {
@@ -972,7 +975,7 @@ export default {
   },
   watch: {
     async accountName() {
-      if ((this.chainName === "telos" || 1) && this.isAuthenticated) {
+      if (this.isAuthenticated) {
         this.loadUserProfile();
         await this.loadNftTokenItems();
         this.loadNftTokenTags();
