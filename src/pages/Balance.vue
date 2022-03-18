@@ -268,6 +268,7 @@ import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
 const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
+const TSWAPS_URL = "https://tswaps.com/";
 
 const tabsData = [
   {
@@ -456,8 +457,9 @@ export default {
       //this.showBuyAmountDlg = true;
     },
     clickExchange() {
+      window.open(TSWAPS_URL);
       // this.$emit('update:showExchangeDlg', true); // not working anymore
-      this.showExchangeDlg = true;
+      //   this.showExchangeDlg = true;
     },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;

@@ -285,7 +285,8 @@ import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 
-const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
+const TSWAPS_URL = "https://tswaps.com/";
 
 export default {
   components: {
@@ -362,7 +363,8 @@ export default {
       //this.$emit("update:showBuyAmountDlg", true);
     },
     convert() {
-      this.$emit("update:showExchangeDlg", true);
+      window.open(TSWAPS_URL);
+      //   this.$emit("update:showExchangeDlg", true);
     },
     sell() {
       // this.$emit('update:showShareAddressDlg', true);
