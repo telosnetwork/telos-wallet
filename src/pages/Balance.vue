@@ -749,6 +749,22 @@ export default {
                 title: data.ti,
                 image: data.dt,
               });
+            } else if (
+              tagData.rows.find((row) => row.tag_name === "json.hash") !==
+              undefined
+            ) {
+              // Get dstor data
+              let hash = tagData.rows.find(
+                (row) => row.tag_name === "json.hash"
+              ).content;
+              let response = await fetch(
+                `https://api.dStor.cloud/ipfs/${hash}`
+              );
+              const data = await response.json();
+              this.nftTokenTags.add({
+                title: data.ti,
+                image: data.dt,
+              });
             }
           } else if (nftAccount === "marbletessst") {
             if (
