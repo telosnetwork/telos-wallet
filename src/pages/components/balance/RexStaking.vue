@@ -27,8 +27,10 @@
         </div>
         <q-btn-toggle
           v-model="staking"
-          color="grey"
-          toggle-color="primary"
+          color="dark"
+          toggle-color="dark"
+          toggle-text-color="white"
+          text-color="grey-7"
           rounded
           no-caps
           :options="[
