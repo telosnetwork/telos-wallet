@@ -90,7 +90,7 @@
                 >${{
                   getFixed(
                     !coin.totalAmount
-                      ? coin.amount
+                      ? coin.amount * coin.price
                       : coin.totalAmount * coin.price,
                     2
                   )
@@ -113,7 +113,7 @@
 import { mapGetters, mapActions } from "vuex";
 import tokenAvatar from "src/components/TokenAvatar";
 
-const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
 
 export default {
   components: {
