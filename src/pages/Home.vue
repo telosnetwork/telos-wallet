@@ -7,7 +7,7 @@
     </div>
     <q-footer bordered>
       <q-toolbar class="bg-dark">
-        <div class="fit row wrap justify-between items-center content-between">
+        <div class="fit column wrap justify-center items-center content-center">
           <div>
             <a
               href="https://www.telos.net/terms-of-service"
