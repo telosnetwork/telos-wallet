@@ -40,14 +40,20 @@
                 :value="(usedCPU / totalCPU) * 100"
                 size="70px"
                 :thickness="0.3"
-                color="teal"
+                color="grey"
                 track-color="grey-3"
                 class="q-ma-md"
               >
                 <div v-if="(usedCPU / totalCPU) * 100 > 1">
-                  {{ ((usedCPU / totalCPU) * 100).toFixed(0) }}%
+                  <div class="col">
+                    <div>{{ ((usedCPU / totalCPU) * 100).toFixed(0) }}%</div>
+                    <div>Used</div>
+                  </div>
                 </div>
-                <div v-else>&lt; 1%</div>
+                <div v-else>
+                  &lt; 1%
+                  <div>Used</div>
+                </div>
               </q-circular-progress>
 
               <div>CPU</div>
@@ -75,9 +81,15 @@
                 class="q-ma-md"
               >
                 <div v-if="(usedNET / totalNET) * 100 > 1">
-                  {{ ((usedNET / totalNET) * 100).toFixed(0) }}%
+                  <div class="col">
+                    <div>{{ ((usedNET / totalNET) * 100).toFixed(0) }}%</div>
+                    <div>Used</div>
+                  </div>
                 </div>
-                <div v-else>&lt; 1%</div>
+                <div v-else>
+                  &lt; 1%
+                  <div>Used</div>
+                </div>
               </q-circular-progress>
 
               <div>NET</div>
@@ -100,11 +112,14 @@
                 :value="(usedRAM / totalRAM) * 100"
                 size="70px"
                 :thickness="0.3"
-                color="teal"
+                color="purple"
                 track-color="grey-3"
                 class="q-ma-md"
               >
-                {{ ((usedRAM / totalRAM) * 100).toFixed(0) }}%
+                <div class="col">
+                  <div>{{ ((usedRAM / totalRAM) * 100).toFixed(0) }}%</div>
+                  <div>Used</div>
+                </div>
               </q-circular-progress>
 
               <div>RAM</div>
@@ -116,19 +131,16 @@
         </div>
 
         <div
-          class="q-mt-sm q-gutter-sm fit row wrap justify-center items-center content-center"
+          class="q-mt-sm q-gutter-y-md fit column wrap justify-center items-center content-center"
         >
           <q-select
-            rounded
-            outlined
             dark
             options-dark
             v-model="selectedResource"
             :options="resourceOptions"
+            style="width: 20em"
           />
           <q-input
-            rounded
-            outlined
             dark
             darklabel-color="white"
             color="white"
@@ -136,13 +148,15 @@
             input-class="text-white"
             v-model="amount"
             label="Amount in TLOS"
+            style="width: 20em"
           />
           <q-btn
             @click="buyResources()"
             rounded
+            class="purpleGradient"
             size="lg"
-            color="primary"
             :label="selectedResource === 'RAM' ? 'Buy' : 'Stake'"
+            style="width: 15em"
           />
         </div>
       </div>
@@ -313,9 +327,9 @@ export default {
     formatSec(secs) {
       if (secs !== undefined) {
         if (secs > 1000 && secs < 1000000) {
-          return `${(secs / 1000).toFixed(2)} ms`;
+          return `${(secs / 1000).toFixed(2)}ms`;
         } else if (secs > 1000000) {
-          return `${(secs / 1000000).toFixed(2)} s`;
+          return `${(secs / 1000000).toFixed(2)}s`;
         } else {
           return secs;
         }

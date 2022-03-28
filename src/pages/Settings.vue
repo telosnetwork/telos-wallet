@@ -48,7 +48,7 @@
         </div>
 
         <q-item class="row justify-center q-mt-md">
-          <q-btn class="settingBtn" @click="manageResources()">
+          <q-btn rounded class="settingBtn" @click="manageResources()">
             Manage Resources
           </q-btn>
         </q-item>
