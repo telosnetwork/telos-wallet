@@ -371,7 +371,6 @@ export default {
     },
     stakeRex() {
       this.$emit("update:showRexStakeDlg", true);
-      console.log("stake rex");
     },
 
     historyData(history) {

@@ -34,7 +34,7 @@
           <template v-slot:action>
             <q-icon
               name="fas fa-times-circle"
-              style="font-size: 1.3rem;"
+              style="font-size: 1.3rem"
               color="text-white"
               @click="warningShow = false"
             />
@@ -42,7 +42,11 @@
         </q-banner>
       </div>
       <!-- Profile Image top right -->
-      <q-avatar v-if="$route.path === '/balance'"  class="profileImg" @click="$router.push('/settings')">
+      <q-avatar
+        v-if="$route.path === '/balance'"
+        class="profileImg"
+        @click="$router.push('/settings')"
+      >
         <img :src="userAvatar" />
       </q-avatar>
       <router-view
@@ -51,7 +55,6 @@
         :balanceTab.sync="balanceTab"
       />
     </q-page-container>
-    
   </q-layout>
 </template>
 
@@ -66,22 +69,22 @@ const pagesData = [
     caption: "Balance",
     icon: "fas fa-wallet",
     path: "/balance",
-    available: true
+    available: true,
   },
   {
     title: "DappSearch",
     caption: "DappSearch",
     icon: "fas fa-th-large",
     path: "/dappsearch",
-    available: true
+    available: true,
   },
   {
     title: "Settings",
     caption: "Settings",
     icon: "fas fa-cog",
     path: "/settings",
-    available: true
-  }
+    available: true,
+  },
 ];
 
 export default {
@@ -101,8 +104,7 @@ export default {
       coins: [],
       nftTokens: [],
       warningShow: false,
-      warningText:
-        ""
+      warningText: "",
     };
   },
   computed: {
@@ -115,14 +117,14 @@ export default {
       if (this.avatar) return this.avatar;
 
       return "/profile/default_avatar.svg";
-    }
+    },
   },
   methods: {
     ...mapActions("account", [
       "login",
       "logout",
       "autoLogin",
-      "getUserProfile"
+      "getUserProfile",
     ]),
     checkPath() {
       if (!this.isAuthenticated) {
@@ -139,9 +141,8 @@ export default {
       ) {
         await this.getUserProfile(this.accountName);
       }
-      const accountProfile = this.$store.state.account.profiles[
-        this.accountName
-      ];
+      const accountProfile =
+        this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
         return;
       }
@@ -161,7 +162,7 @@ export default {
         `/v2/history/get_actions?limit=20&account=${this.accountName}`
       );
       this.accountHistory = actionHistory.data.actions || [];
-    }
+    },
   },
   async mounted() {
     console.log("As iron sharpens iron, so one person sharpens another.");
@@ -171,7 +172,7 @@ export default {
   },
   beforeUpdate() {
     this.checkPath();
-  }
+  },
 };
 </script>
 
@@ -204,8 +205,8 @@ export default {
 }
 
 .videoOverlay {
-  // background: url("~assets/MainBG.png");  
-  background: linear-gradient(0.40turn, #0a1d5f52, #814cdc52 );
+  // background: url("~assets/MainBG.png");
+  background: linear-gradient(0.4turn, #0a1d5f52, #814cdc52);
   background-repeat: no-repeat;
   background-size: cover;
   object-fit: cover;
@@ -217,7 +218,7 @@ export default {
 }
 
 .shadedOverlay {
-  background: linear-gradient(0.40turn, #0a1d5f52, #814cdc52 );
+  background: linear-gradient(0.4turn, #0a1d5f52, #814cdc52);
 }
 
 .profileImg {
@@ -238,5 +239,4 @@ export default {
 .warningSign {
   background: #8946df;
 }
-
 </style>

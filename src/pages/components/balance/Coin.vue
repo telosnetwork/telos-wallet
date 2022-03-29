@@ -156,6 +156,7 @@ export default {
       this.$emit("update:showExchangeDlg", true);
     },
     selectCoin(coin) {
+      console.log(coin);
       this.$emit("update:selectedCoin", coin);
       this.$emit("update:showHistoryDlg", true);
     },
