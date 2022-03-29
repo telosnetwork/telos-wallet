@@ -7,15 +7,15 @@
         autoplay
         muted
         loop
-        poster="~/assets/Video-top_compressed-poster-00001.jpg"
+        poster="~/assets/background/Video-top_compressed-poster-00001.jpg"
         id="bgvid"
       >
         <source
-          src="~/assets/Video-top_compressed-transcode.webm"
+          src="~/assets/background/Video-top_compressed-transcode.webm"
           type="video/webm"
         />
         <source
-          src="~/assets/Video-top_compressed-transcode.mp4"
+          src="~/assets/background/Video-top_compressed-transcode.mp4"
           type="video/mp4"
         />
       </video>

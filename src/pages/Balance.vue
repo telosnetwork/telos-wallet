@@ -88,12 +88,12 @@
           <!-- Convert and Purchace -->
           <div class="row justify-between q-mb-md">
             <div class="convertBtn" @click="clickExchange()">
-              <img src="~assets/Convert.svg" class="q-mr-xs" />
+              <img src="~assets/coin/Convert.svg" class="q-mr-xs" />
               Convert
             </div>
             <div class="purchaceBtn" @click="clickPurchase()">
               Purchase
-              <img src="~assets/Purchase.svg" class="q-ml-xs" />
+              <img src="~assets/coin/Purchase.svg" class="q-ml-xs" />
             </div>
           </div>
         </div>

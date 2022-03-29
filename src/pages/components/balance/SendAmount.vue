@@ -35,8 +35,13 @@
                 <img
                   class="flex q-ml-auto"
                   alt="tEVM"
-                  src="~assets/evm_logo.png"
-                  style="width: 50%; height: 50%; margin-right: -10%; margin-top: 60%;"
+                  src="~assets/evm/evm_logo.png"
+                  style="
+                    width: 50%;
+                    height: 50%;
+                    margin-right: -10%;
+                    margin-top: 60%;
+                  "
                 />
               </div>
             </q-avatar>
@@ -49,14 +54,10 @@
               </label>
               <input
                 type="text"
-                :class="
-                  `text-weight-regular ${
-                    coinInput ? 'text-right' : 'text-left'
-                  } no-border no-outline transparent`
-                "
-                :style="
-                  `font-size: ${amountFontSize}px; color: white; z-index: 1; width: 300px; margin-left: -200px`
-                "
+                :class="`text-weight-regular ${
+                  coinInput ? 'text-right' : 'text-left'
+                } no-border no-outline transparent`"
+                :style="`font-size: ${amountFontSize}px; color: white; z-index: 1; width: 300px; margin-left: -200px`"
                 v-model="sendAmount"
                 @focus="sendAmount = sendAmount === '0' ? '' : sendAmount"
                 @blur="
@@ -73,12 +74,10 @@
                 {{ coinInput ? selectedCoin.symbol : "" }}
               </label>
             </div>
-            <div class="mobileAmountContainer  full-width  mobile-only">
+            <div class="mobileAmountContainer full-width mobile-only">
               <label
                 class="text-weight-regular"
-                :style="
-                  `font-size: ${amountFontSizeMobile}px; color: ${themeColor}`
-                "
+                :style="`font-size: ${amountFontSizeMobile}px; color: ${themeColor}`"
               >
                 {{
                   coinInput
@@ -104,12 +103,10 @@
                 push
                 no-caps
                 label="25%"
-                :style="
-                  `background: ${
-                    sendPercentage === 25 ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                          color: ${sendPercentage === 25 ? 'white' : 'grey'};`
-                "
+                :style="`background: ${
+                  sendPercentage === 25 ? '#FFFFFF55' : '#FFFFFF22'
+                };
+                          color: ${sendPercentage === 25 ? 'white' : 'grey'};`"
                 @click="
                   sendPercentage === 25
                     ? (sendPercentage = 0)
@@ -121,12 +118,10 @@
                 push
                 no-caps
                 label="50%"
-                :style="
-                  `background: ${
-                    sendPercentage === 50 ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                          color: ${sendPercentage === 50 ? 'white' : 'grey'};`
-                "
+                :style="`background: ${
+                  sendPercentage === 50 ? '#FFFFFF55' : '#FFFFFF22'
+                };
+                          color: ${sendPercentage === 50 ? 'white' : 'grey'};`"
                 @click="
                   sendPercentage === 50
                     ? (sendPercentage = 0)
@@ -138,12 +133,10 @@
                 push
                 no-caps
                 label="75%"
-                :style="
-                  `background: ${
-                    sendPercentage === 75 ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                          color: ${sendPercentage === 75 ? 'white' : 'grey'};`
-                "
+                :style="`background: ${
+                  sendPercentage === 75 ? '#FFFFFF55' : '#FFFFFF22'
+                };
+                          color: ${sendPercentage === 75 ? 'white' : 'grey'};`"
                 @click="
                   sendPercentage === 75
                     ? (sendPercentage = 0)
@@ -155,12 +148,10 @@
                 push
                 no-caps
                 label="100%"
-                :style="
-                  `background: ${
-                    sendPercentage === 100 ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                          color: ${sendPercentage === 100 ? 'white' : 'grey'};`
-                "
+                :style="`background: ${
+                  sendPercentage === 100 ? '#FFFFFF55' : '#FFFFFF22'
+                };
+                          color: ${sendPercentage === 100 ? 'white' : 'grey'};`"
                 @click="
                   sendPercentage === 100
                     ? (sendPercentage = 0)
@@ -171,14 +162,14 @@
             </q-btn-group>
 
             <!-- Crypto Available -->
-            <div class="text-center q-pt-xs q-pb-l ">
+            <div class="text-center q-pt-xs q-pb-l">
               <label class="text-subtitle2 text-white">{{
                 `${getFixed(selectedCoin.amount, selectedCoin.precision)} ${
                   selectedCoin.symbol
                 } Available`
               }}</label>
             </div>
-            <div class="keypad  q-py-md mobile-only">
+            <div class="keypad q-py-md mobile-only">
               <div
                 v-for="key in keyboard"
                 :key="key"
@@ -230,12 +221,12 @@ export default {
       coinInput: true,
       showSendToAddressDlg: false,
       inputWidth: 50,
-      gasPrice: new BigNumber(0)
+      gasPrice: new BigNumber(0),
     };
   },
   components: {
     SendToAddress,
-    tokenAvatar
+    tokenAvatar,
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),
@@ -245,7 +236,7 @@ export default {
       },
       set(value) {
         this.$emit("update:showSendAmountDlg", value);
-      }
+      },
     },
     cardHeight() {
       return window.innerHeight - 100;
@@ -260,10 +251,7 @@ export default {
       return Number(this.sendAmount.replace(",", ""));
     },
     gasFee() {
-      return this.gasPrice
-        .times(21000)
-        .div(1e18)
-        .toFixed(4);
+      return this.gasPrice.times(21000).div(1e18).toFixed(4);
     },
     sendCoinAmount() {
       if (!this.selectedCoin) {
@@ -277,7 +265,7 @@ export default {
         this.sendAmountValue / this.selectedCoin.price,
         this.selectedCoin.precision
       ).replace(",", "");
-    }
+    },
   },
   methods: {
     ...mapActions("evm", ["getGasPrice"]),
@@ -312,7 +300,8 @@ export default {
         .toFixed(this.selectedCoin.precision)
         .toString();
       if (this.selectedCoin.name === "Telos EVM" && this.sendAmount > 0) {
-        this.sendAmount = Number(this.sendAmount).toFixed(4) - this.gasFee - 0.0001;
+        this.sendAmount =
+          Number(this.sendAmount).toFixed(4) - this.gasFee - 0.0001;
         this.sendAmount = Number(this.sendAmount.toFixed(4)).toString();
       }
     },
@@ -349,7 +338,7 @@ export default {
     },
     nextPressed() {
       this.showSendToAddressDlg = true;
-    }
+    },
   },
   async mounted() {
     this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
@@ -358,7 +347,7 @@ export default {
     this.gasPrice = new BigNumber("0x" + (await this.getGasPrice()));
   },
   watch: {
-    showSendAmountDlg: function(val, oldVal) {
+    showSendAmountDlg: function (val, oldVal) {
       if (val) {
         this.coinInput = true;
         this.sendAmount = "0";
@@ -366,7 +355,7 @@ export default {
         this.$emit("update:selectedCoin", null);
       }
     },
-    sendAmount: function(val, oldVal) {
+    sendAmount: function (val, oldVal) {
       setInterval(() => {
         const widthElement = this.$refs.widthElement;
         this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
@@ -392,8 +381,8 @@ export default {
           }
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

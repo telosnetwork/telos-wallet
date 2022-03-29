@@ -17,7 +17,7 @@
               <q-avatar size="45px" class="q-my-sm">
                 <img
                   v-if="coin.network === 'tevm' || coin.name === 'Telos'"
-                  src="~assets/TLOS.png"
+                  src="/coins/TLOS.png"
                 />
                 <token-avatar :token="coin.icon" :avatarSize="45" />
                 <div
@@ -27,7 +27,7 @@
                   <img
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
-                    src="~assets/evm_logo.png"
+                    src="~assets/evm/evm_logo.png"
                     style="
                       width: 50%;
                       height: 50%;
@@ -156,7 +156,6 @@ export default {
       this.$emit("update:showExchangeDlg", true);
     },
     selectCoin(coin) {
-      console.log(coin);
       this.$emit("update:selectedCoin", coin);
       this.$emit("update:showHistoryDlg", true);
     },

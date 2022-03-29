@@ -60,8 +60,8 @@
                 </div>
                 <q-item-label
                   v-if="
-                    index === searchCoins.findIndex(c => !c.suggested) &&
-                      !coin.suggested
+                    index === searchCoins.findIndex((c) => !c.suggested) &&
+                    !coin.suggested
                   "
                   header
                   >All coins</q-item-label
@@ -74,10 +74,7 @@
                 >
                   <q-item-section avatar>
                     <q-avatar size="45px" class="q-my-sm">
-                      <token-avatar
-                        :token="coin.icon"
-                        :avatarSize="45"
-                      />
+                      <token-avatar :token="coin.icon" :avatarSize="45" />
                       <div
                         v-if="coin.network == 'tevm'"
                         class="flex absolute full-width full-height"
@@ -85,15 +82,18 @@
                         <img
                           class="flex q-ml-auto q-mt-auto"
                           alt="tEVM"
-                          src="~assets/evm_logo.png"
-                          style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                          src="~assets/evm/evm_logo.png"
+                          style="
+                            width: 50%;
+                            height: 50%;
+                            margin-right: -10%;
+                            margin-bottom: -5%;
+                          "
                         />
                       </div>
                     </q-avatar>
                   </q-item-section>
-                  <q-item-section
-                    style="justify-content: start; display: grid;"
-                  >
+                  <q-item-section style="justify-content: start; display: grid">
                     <div class="text-white text-left display-grid">
                       <label
                         class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel"
@@ -132,21 +132,20 @@ import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 
-
 export default {
   props: ["showSendDlg", "coins", "selectedCoin", "showSendAmountDlg"],
   components: {
-    tokenAvatar
+    tokenAvatar,
   },
   data() {
     return {
-      searchCoinName: ""
+      searchCoinName: "",
     };
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),
     searchCoins() {
-      return this.availableCoins.filter(coin => {
+      return this.availableCoins.filter((coin) => {
         return (
           coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
           coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
@@ -154,7 +153,7 @@ export default {
       });
     },
     availableCoins() {
-      return this.coins.filter(coin => coin.amount > 0);
+      return this.coins.filter((coin) => coin.amount > 0);
     },
     showDlg: {
       get() {
@@ -162,24 +161,24 @@ export default {
       },
       set(value) {
         this.$emit("update:showSendDlg", value);
-      }
-    }
+      },
+    },
   },
   methods: {
     selectCoin(coin) {
       this.$emit("update:showSendAmountDlg", true);
       this.$emit(`update:selectedCoin`, coin);
-    }
+    },
   },
   watch: {
-    showSendDlg: function(val, oldVal) {
+    showSendDlg: function (val, oldVal) {
       if (val) {
         this.searchCoinName = "";
       } else {
         this.$emit("update:selectedCoin", null);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
