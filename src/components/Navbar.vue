@@ -28,7 +28,9 @@
           </a>
         </li>
         <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />Earn </a>
+          <a @click="switchTab('earn')">
+            <img style="width: 35px" :src="srcEarn" />
+          </a>
         </li>
         <li>
           <a @click="switchTab('dapps')">
@@ -86,7 +88,6 @@ export default {
       else return this.srcDir + "settings.svg";
     },
     srcEarn() {
-      console.log(this.showRexStakeDlg);
       if (this.selectedTab === "earn" && this.showRexStakeDlg == false) {
         this.switchTab("wallet");
         return this.srcDir + "earn.svg";
