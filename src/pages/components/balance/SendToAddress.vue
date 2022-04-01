@@ -43,8 +43,13 @@
                   <img
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
-                    src="~assets/evm_logo.png"
-                    style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                    src="~assets/evm/evm_logo.png"
+                    style="
+                      width: 50%;
+                      height: 50%;
+                      margin-right: -10%;
+                      margin-bottom: -5%;
+                    "
                   />
                 </div>
               </q-avatar>
@@ -62,11 +67,19 @@
                   <img
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
-                    src="~assets/evm_logo.png"
-                    style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                    src="~assets/evm/evm_logo.png"
+                    style="
+                      width: 50%;
+                      height: 50%;
+                      margin-right: -10%;
+                      margin-bottom: -5%;
+                    "
                   />
                 </div>
-                <img v-if="networkType == 'ethereum'" src="~assets/pTLOS.svg" />
+                <img
+                  v-if="networkType == 'ethereum'"
+                  src="~assets/tokens/pTLOS.svg"
+                />
                 <div
                   v-if="networkType == 'ethereum'"
                   class="flex absolute full-width full-height"
@@ -74,8 +87,13 @@
                   <img
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
-                    src="~assets/ETH.svg"
-                    style="width: 50%; height: 35%; margin-right: 0%; margin-bottom: -5%;"
+                    src="~assets/evm/ETH.svg"
+                    style="
+                      width: 50%;
+                      height: 35%;
+                      margin-right: 0%;
+                      margin-bottom: -5%;
+                    "
                   />
                 </div>
               </q-avatar>
@@ -90,7 +108,7 @@
           </div>
 
           <!-- Crypto Buttons -->
-          <q-item v-if="isPToken" class="list-item ">
+          <q-item v-if="isPToken" class="list-item">
             <q-btn-group
               class="full-width justify-center"
               push
@@ -103,12 +121,10 @@
                 push
                 no-caps
                 :label="pTokenNetwork"
-                :style="
-                  `background: ${
-                    networkType === key ? '#FFFFFF55' : '#FFFFFF22'
-                  };
-                    color: ${networkType === 'key' ? 'grey' : 'white'};`
-                "
+                :style="`background: ${
+                  networkType === key ? '#FFFFFF55' : '#FFFFFF22'
+                };
+                    color: ${networkType === 'key' ? 'grey' : 'white'};`"
                 @click="networkType = key"
               />
             </q-btn-group>
@@ -116,11 +132,9 @@
 
           <!-- To network -->
           <div class="row justify-center">
-            <q-list class="q-pt-md ">
+            <q-list class="q-pt-md">
               <q-item class="list-item">
-                <q-item-section side style=" color: white">
-                  To:
-                </q-item-section>
+                <q-item-section side style="color: white"> To: </q-item-section>
                 <q-item-section>
                   <q-input
                     v-model="toAddress"
@@ -170,7 +184,7 @@
               <q-item
                 v-if="
                   networkType === 'ethereum' &&
-                    sendAmount * selectedCoin.price < 100
+                  sendAmount * selectedCoin.price < 100
                 "
                 class="list-item items-center text-center text-red-5 text-weight-bold"
               >
@@ -199,7 +213,7 @@
               label="Next"
               :disable="
                 networkType === 'ethereum' &&
-                  sendAmount * selectedCoin.price < 100
+                sendAmount * selectedCoin.price < 100
               "
               @click="
                 networkType === 'ethereum' &&
@@ -237,12 +251,12 @@ export default {
       notes: "",
       showSendConfirmDlg: false,
       networkType: "telos",
-      checking: false
+      checking: false,
     };
   },
   components: {
     SendConfirm,
-    tokenAvatar
+    tokenAvatar,
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),
@@ -253,7 +267,7 @@ export default {
       },
       set(value) {
         this.$emit("update:showSendToAddressDlg", value);
-      }
+      },
     },
     tSymbol() {
       return this.selectedCoin.symbol.toLowerCase();
@@ -282,9 +296,8 @@ export default {
     coinpTokenNetworks() {
       if (this.selectedCoin.network) {
         return {
-          [this.selectedCoin.network]: this.pTokenNetworks[this.tSymbol][
-            this.selectedCoin.network
-          ]
+          [this.selectedCoin.network]:
+            this.pTokenNetworks[this.tSymbol][this.selectedCoin.network],
         };
       }
       const networks = {};
@@ -294,7 +307,7 @@ export default {
         // }
       }
       return networks;
-    }
+    },
   },
   methods: {
     ...mapActions("account", ["accountExists"]),
@@ -302,7 +315,7 @@ export default {
       if (this.toAddress.length === 0) {
         this.$q.notify({
           type: "dark",
-          message: `Please fill the ${this.toPlaceHolder}`
+          message: `Please fill the ${this.toPlaceHolder}`,
         });
         return;
       }
@@ -312,7 +325,7 @@ export default {
         if (!(await this.accountExists(this.toAddress))) {
           this.$q.notify({
             type: "negative",
-            message: `Account ${this.toAddress} does not exist`
+            message: `Account ${this.toAddress} does not exist`,
           });
           this.checking = false;
           return;
@@ -324,7 +337,7 @@ export default {
         if (this.toAddress.length !== 42 || !this.toAddress.startsWith("0x")) {
           this.$q.notify({
             type: "negative",
-            message: `Address ${this.toAddress} is not valid`
+            message: `Address ${this.toAddress} is not valid`,
           });
           this.checking = false;
           return;
@@ -337,7 +350,7 @@ export default {
           ) {
             this.$q.notify({
               type: "negative",
-              message: `Address ${this.toAddress} is not valid`
+              message: `Address ${this.toAddress} is not valid`,
             });
             this.checking = false;
             return;
@@ -345,11 +358,11 @@ export default {
         } else if (this.selectedCoin.name === "pTokens BTC") {
           const data = await fetch(
             `https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`
-          ).then(resp => resp.json());
+          ).then((resp) => resp.json());
           if (!data.success) {
             this.$q.notify({
               type: "negative",
-              message: `Address ${this.toAddress} is not valid`
+              message: `Address ${this.toAddress} is not valid`,
             });
             this.checking = false;
             return;
@@ -362,7 +375,7 @@ export default {
     },
     showQRScanner() {
       this.$root.$emit("show_qrscanner");
-    }
+    },
   },
   mounted() {
     this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
@@ -375,7 +388,7 @@ export default {
           if (this.selectedCoin && coinName !== this.selectedCoin.name) {
             this.$q.notify({
               type: "dark",
-              message: `Please scan with correct token`
+              message: `Please scan with correct token`,
             });
           } else {
             this.toAddress = accountName;
@@ -386,7 +399,7 @@ export default {
     );
   },
   watch: {
-    showSendToAddressDlg: async function(val, oldVal) {
+    showSendToAddressDlg: async function (val, oldVal) {
       if (val) {
         this.toAddress = this.$root.qrcode_accountName || "";
         this.networkType = this.$root.qrcode_networkType || "telos";
@@ -398,32 +411,30 @@ export default {
         this.checking = false;
       }
     },
-    toAddress: function(val, oldVal) {
+    toAddress: function (val, oldVal) {
       if (this.networkType === "telos") {
         this.toAddress = this.toAddress.toLowerCase();
       }
     },
-    networkType: function(val, oldVal) {
+    networkType: function (val, oldVal) {
       if (val === "telos") {
         this.toAddress = this.toAddress.toLowerCase();
       } else if (val === "tevm") {
         if (!this.$root.tEVMAccount) {
           this.$q.notify({
             type: "dark",
-            message: `Please generate your tEVM address`
+            message: `Please generate your tEVM address`,
           });
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
-
 /* .list-item {
   border-left: none;
   border-right: none;
 } */
-
 </style>

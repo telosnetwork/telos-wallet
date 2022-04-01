@@ -48,7 +48,7 @@
         </div>
 
         <q-item class="row justify-center q-mt-md">
-          <q-btn class="settingBtn" @click="manageResources()">
+          <q-btn rounded class="settingBtn" @click="manageResources()">
             Manage Resources
           </q-btn>
         </q-item>
@@ -61,7 +61,7 @@
             <div avatar>
               <img
                 class="profileInformationIcons"
-                src="~assets/avatarImg.svg"
+                src="~assets/profile/avatarImg.svg"
               />
             </div>
             <q-input
@@ -79,7 +79,10 @@
           <!-- Name -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/nameImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/profile/nameImg.svg"
+              />
             </div>
             <q-input
               v-model="display_name"
@@ -100,7 +103,7 @@
             <div avatar>
               <img
                 class="profileInformationIcons"
-                src="~assets/statusImg.svg"
+                src="~assets/profile/statusImg.svg"
               />
             </div>
             <q-input
@@ -118,7 +121,10 @@
           <!-- Bio -->
           <q-item>
             <div avatar>
-              <img class="profileInformationIcons" src="~assets/bioImg.svg" />
+              <img
+                class="profileInformationIcons"
+                src="~assets/profile/bioImg.svg"
+              />
             </div>
             <q-input
               v-model="bio"

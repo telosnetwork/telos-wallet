@@ -45,7 +45,7 @@
                         <img
                           class="flex q-ml-auto q-mt-auto"
                           alt="tEVM"
-                          src="~assets/evm_logo.png"
+                          src="~assets/evm/evm_logo.png"
                           style="
                             width: 50%;
                             height: 50%;
@@ -58,7 +58,7 @@
                   </q-item-section>
                   <img
                     class="avatarBackground"
-                    src="~assets/avatarBackground.svg"
+                    src="~assets/background/avatarBackground.svg"
                   />
                 </div>
 
@@ -124,7 +124,7 @@
                   @click="send"
                 >
                   <div class="column">
-                    <img src="~assets/send.svg" />
+                    <img src="~assets/coin/send.svg" />
                     Send
                   </div>
                 </q-btn>
@@ -139,7 +139,7 @@
                   @click="receive"
                 >
                   <div class="column">
-                    <img src="~assets/receive.svg" />
+                    <img src="~assets/coin/receive.svg" />
                     Receive
                   </div>
                 </q-btn>
@@ -155,7 +155,7 @@
                   @click="buy"
                 >
                   <div class="column">
-                    <img src="~assets/Purchase.svg" />
+                    <img src="~assets/coin/Purchase.svg" />
                     Buy
                   </div>
                 </q-btn>
@@ -171,7 +171,7 @@
                   @click="convert"
                 >
                   <div class="column">
-                    <img src="~assets/Convert.svg" />
+                    <img src="~assets/coin/Convert.svg" />
                     Convert
                   </div>
                 </q-btn>
@@ -190,7 +190,7 @@
                   @click="stakeRex"
                 >
                   <div class="column">
-                    <img src="~assets/Earn.svg" />
+                    <img src="/nav/earn_selected.svg" />
                     Earn
                   </div>
                 </q-btn>
@@ -371,7 +371,6 @@ export default {
     },
     stakeRex() {
       this.$emit("update:showRexStakeDlg", true);
-      console.log("stake rex");
     },
 
     historyData(history) {

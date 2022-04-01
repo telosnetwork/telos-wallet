@@ -13,7 +13,10 @@
           <a @click="switchTab('coins')"> <img :src="srcCoins" />Coin </a>
         </li>
         <li>
-          <a @click="switchTab('nft')"> <img :src="srcNft" />Nft </a>
+          <a @click="switchTab('nft')"> <img :src="srcNft" />NFTs </a>
+        </li>
+        <li>
+          <a @click="switchTab('earn')"> <img :src="srcEarn" />Earn </a>
         </li>
       </ul>
     </nav>
@@ -22,6 +25,11 @@
         <li>
           <a @click="switchTab('wallet')">
             <img :src="srcWallet" />
+          </a>
+        </li>
+        <li>
+          <a @click="switchTab('earn')">
+            <img style="width: 35px" :src="srcEarn" />
           </a>
         </li>
         <li>
@@ -36,17 +44,21 @@
         </li>
       </ul>
     </nav>
+    <RexStaking :showRexStakeDlg.sync="showRexStakeDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import RexStaking from "../pages/components/balance/RexStaking.vue";
 export default {
   props: ["balanceTab"],
+  components: { RexStaking },
   data() {
     return {
       srcDir: "/nav/",
       selectedTab: "wallet",
+      showRexStakeDlg: false,
     };
   },
   computed: {
@@ -75,27 +87,39 @@ export default {
         return this.srcDir + "settings_selected.svg";
       else return this.srcDir + "settings.svg";
     },
+    srcEarn() {
+      if (this.selectedTab === "earn" && this.showRexStakeDlg == false) {
+        this.switchTab("wallet");
+        return this.srcDir + "earn.svg";
+      }
+      if (this.selectedTab === "earn") return this.srcDir + "earn_selected.svg";
+      else return this.srcDir + "earn.svg";
+    },
   },
   methods: {
     switchTab(val) {
       this.selectedTab = val;
       switch (val) {
         case "wallet":
-          this.$router.replace("/balance");
+          this.$router.push("/balance", () => {});
           break;
         case "dapps":
-          this.$router.replace("/dappsearch");
+          this.$router.push("/dappsearch", () => {});
           break;
         case "coins":
+          this.$router.push("/balance", () => {});
           this.$emit("update:balanceTab", "Coins");
-          this.$router.replace("/balance");
           break;
         case "nft":
+          this.$router.push("/balance", () => {});
           this.$emit("update:balanceTab", "Collectables");
-          this.$router.replace("/balance");
           break;
         case "settings":
-          this.$router.push("/settings");
+          this.$router.push("/settings", () => {});
+          break;
+        case "earn":
+          this.showRexStakeDlg = true;
+          //   this.$router.push("/earn");
           break;
         default:
           break;

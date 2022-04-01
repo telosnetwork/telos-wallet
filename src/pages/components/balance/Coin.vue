@@ -17,7 +17,7 @@
               <q-avatar size="45px" class="q-my-sm">
                 <img
                   v-if="coin.network === 'tevm' || coin.name === 'Telos'"
-                  src="~assets/TLOS.png"
+                  src="/coins/TLOS.png"
                 />
                 <token-avatar :token="coin.icon" :avatarSize="45" />
                 <div
@@ -27,7 +27,7 @@
                   <img
                     class="flex q-ml-auto q-mt-auto"
                     alt="tEVM"
-                    src="~assets/evm_logo.png"
+                    src="~assets/evm/evm_logo.png"
                     style="
                       width: 50%;
                       height: 50%;
@@ -90,7 +90,7 @@
                 >${{
                   getFixed(
                     !coin.totalAmount
-                      ? coin.amount
+                      ? coin.amount * coin.price
                       : coin.totalAmount * coin.price,
                     2
                   )
@@ -113,7 +113,7 @@
 import { mapGetters, mapActions } from "vuex";
 import tokenAvatar from "src/components/TokenAvatar";
 
-const KUCOIN_BUY_URL = 'https://www.kucoin.com/trade/TLOS-USDT';
+const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
 
 export default {
   components: {

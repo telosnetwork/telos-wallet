@@ -7,7 +7,7 @@
     transition-hide="slide-down"
   >
     <div class="main-background dialogWrapper">
-      <div class="dialogPage ">
+      <div class="dialogPage">
         <div class="dialogPageContent">
           <div class="dialogPageHeading">
             <div>
@@ -54,8 +54,8 @@
             >
             <q-item-label
               v-if="
-                index === searchCoins.findIndex(c => !c.suggested) &&
-                  !coin.suggested
+                index === searchCoins.findIndex((c) => !c.suggested) &&
+                !coin.suggested
               "
               header
               >All coins</q-item-label
@@ -68,10 +68,7 @@
             >
               <q-item-section avatar>
                 <q-avatar size="45px" class="q-my-sm">
-                  <token-avatar
-                        :token="coin.icon"
-                        :avatarSize="45"
-                      />
+                  <token-avatar :token="coin.icon" :avatarSize="45" />
                   <div
                     v-if="coin.network == 'tevm'"
                     class="flex absolute full-width full-height"
@@ -79,13 +76,18 @@
                     <img
                       class="flex q-ml-auto q-mt-auto"
                       alt="tEVM"
-                      src="~assets/evm_logo.png"
-                      style="width: 50%; height: 50%; margin-right: -10%; margin-bottom: -5%;"
+                      src="~assets/evm/evm_logo.png"
+                      style="
+                        width: 50%;
+                        height: 50%;
+                        margin-right: -10%;
+                        margin-bottom: -5%;
+                      "
                     />
                   </div>
                 </q-avatar>
               </q-item-section>
-              <q-item-section style="justify-content: start; display: grid;">
+              <q-item-section style="justify-content: start; display: grid">
                 <div class="text-white text-left display-grid">
                   <label
                     class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
@@ -120,21 +122,20 @@ import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 
-
 export default {
   props: ["showReceiveDlg", "coins", "selectedCoin", "showShareAddressDlg"],
   components: {
-    tokenAvatar
+    tokenAvatar,
   },
   data() {
     return {
-      searchCoinName: ""
+      searchCoinName: "",
     };
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated", "accountName"]),
     searchCoins() {
-      return this.coins.filter(coin => {
+      return this.coins.filter((coin) => {
         return (
           coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
           coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
@@ -147,20 +148,19 @@ export default {
       },
       set(value) {
         this.$emit("update:showReceiveDlg", value);
-      }
-    }
+      },
+    },
   },
   methods: {
     selectCoin(coin) {
       this.$emit(`update:showShareAddressDlg`, true);
       this.$emit(`update:selectedCoin`, coin);
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
-
 /* .list-item {
   border: 1px solid #fafafa00;
   border-left: none;
@@ -179,5 +179,4 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 } */
-
 </style>

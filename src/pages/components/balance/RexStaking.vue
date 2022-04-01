@@ -27,8 +27,10 @@
         </div>
         <q-btn-toggle
           v-model="staking"
-          color="grey"
-          toggle-color="primary"
+          color="dark"
+          toggle-color="dark"
+          toggle-text-color="white"
+          text-color="grey-7"
           rounded
           no-caps
           :options="[
@@ -36,21 +38,13 @@
             { label: 'Return Funds', value: false },
           ]"
         />
-        <div
-          v-if="staking"
-          @click="amount = selectedCoin.amount"
-          class="q-mt-md"
-        >
-          Available: {{ selectedCoin.amount }}
-          {{ selectedCoin.symbol }}
+        <div v-if="staking" @click="amount = tokenAmount" class="q-mt-md">
+          Available: {{ tokenAmount }}
+          {{ "TLOS" }}
         </div>
-        <div
-          v-if="!staking"
-          @click="amount = selectedCoin.rexBalance"
-          class="q-mt-md"
-        >
-          Deposited: {{ selectedCoin.rexBalance }}
-          {{ selectedCoin.symbol }}
+        <div v-if="!staking" @click="amount = tokenRexBalance" class="q-mt-md">
+          Deposited: {{ tokenRexBalance }}
+          {{ "TLOS" }}
         </div>
         <div class="text-center q-mt-md">
           <div class="inputAmount row items-center">
@@ -73,9 +67,7 @@
             label="25%"
             @click="
               amount = (
-                staking
-                  ? selectedCoin.amount * 0.25
-                  : selectedCoin.rexBalance * 0.25
+                staking ? tokenAmount * 0.25 : tokenRexBalance * 0.25
               ).toFixed(4)
             "
           />
@@ -87,9 +79,7 @@
             label="50%"
             @click="
               amount = (
-                staking
-                  ? selectedCoin.amount * 0.5
-                  : selectedCoin.rexBalance * 0.5
+                staking ? tokenAmount * 0.5 : tokenRexBalance * 0.5
               ).toFixed(4)
             "
           />
@@ -101,9 +91,7 @@
             label="75%"
             @click="
               amount = (
-                staking
-                  ? selectedCoin.amount * 0.75
-                  : selectedCoin.rexBalance * 0.75
+                staking ? tokenAmount * 0.75 : tokenRexBalance * 0.75
               ).toFixed(4)
             "
           />
@@ -114,9 +102,7 @@
             rounded
             label="100%"
             @click="
-              amount = (
-                staking ? selectedCoin.amount : selectedCoin.rexBalance * 1
-              ).toFixed(4)
+              amount = (staking ? tokenAmount : tokenRexBalance * 1).toFixed(4)
             "
           />
         </div>
@@ -148,6 +134,8 @@ export default {
     return {
       amount: 0,
       staking: true,
+      tokenAmount: 0,
+      tokenRexBalance: 0,
     };
   },
   computed: {
@@ -200,7 +188,7 @@ export default {
       let accountInfo = await this.$store.$api.getAccount(this.accountName);
       //   console.log(accountInfo);
       let totalRex = Number(accountInfo.rex_info.rex_balance.split(" ")[0]);
-      let portionToUnstake = Number(this.amount) / this.selectedCoin.rexBalance;
+      let portionToUnstake = Number(this.amount) / this.tokenRexBalance;
       let rexToUnstake = (totalRex * portionToUnstake).toFixed(4);
 
       //   TODO check maturities
@@ -272,6 +260,14 @@ export default {
     //     .then(json => {
     //       console.log(json);
     //     });
+    this.tokenRexBalance = await this.getRexBalance(this.accountName);
+
+    const rpc = this.$store.$api.getRpc();
+    this.tokenAmount = Number(
+      (
+        await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
+      )[0].split(" ")[0]
+    );
   },
 };
 </script>
