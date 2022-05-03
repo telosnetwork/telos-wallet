@@ -135,6 +135,12 @@
             NOTE: The recipient address does not exist so an additional “create”
             action will be included
           </div>
+
+          <q-card-section class="q-pt-sm text-warning">
+            DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS
+            WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN METAMASK
+            ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.
+          </q-card-section>
         </div>
       </div>
     </div>

@@ -203,6 +203,16 @@
                   Checking {{ networkType === "telos" ? "Account" : "Address" }}
                 </div>
               </q-item>
+              <q-item
+                v-if="networkType === 'tevm'"
+                class="list-item items-center text-center text-red-5 text-weight-bold"
+              >
+                <div>
+                  DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.).
+                  THIS WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN
+                  METAMASK ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.
+                </div>
+              </q-item>
             </q-list>
           </div>
           <div class="text-center">
