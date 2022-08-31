@@ -222,7 +222,8 @@
                   v-for="(history, index) in searchHistories"
                   :key="`${history.block_num}_${index}`"
                 >
-                  <q-item clickable v-ripple class="list-item">
+                  <q-item clickable v-ripple class="list-item"
+                    @click=openExplorer(history)>
                     <q-item-section avatar>
                       <q-avatar size="35px" class="q-my-none">
                         <token-avatar
@@ -345,7 +346,9 @@ export default {
       const actionHistory = await this.$hyperion.get(
         `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`
       );
-      this.accountHistory.push(...(actionHistory.data.actions || []));
+      this.accountHistory.push(...(actionHistory.data.actions.
+         filter((a) => 'quantity' in a.act.data &&
+           a.act.data.quantity.split(" ")[1] ===this.selectedCoin.symbol) || []));
       this.page += this.pageLimit;
       if (actionHistory.data.actions.length === 0) {
         this.loadedAll = true;
@@ -372,6 +375,11 @@ export default {
     stakeRex() {
       this.$emit("update:showRexStakeDlg", true);
     },
+    openExplorer(history) {
+      var url = `${process.env.NETWORK_EXPLORER}/transaction/${history.trx_id}`;
+      var win = window.open(url, "_blank");
+      win.focus();
+    },
 
     historyData(history) {
       let actionName = "";
@@ -397,6 +405,11 @@ export default {
       } else if (history.act.name === "sellram") {
         actionName = "Sold Ram";
         actionDetail = `${history.act.data.bytes} bytes`;
+      } else {
+        actionName = history.act.name
+        coinAmount = Number(
+          history.act.data.quantity.split(this.selectedCoin.symbol)[0]
+        );
       }
       usdAmount = this.getFixed(coinAmount * this.selectedCoin.price, 2);
 

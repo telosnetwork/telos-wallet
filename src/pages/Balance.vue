@@ -528,6 +528,9 @@ export default {
           if (token.symbol === undefined) {
             return;
           }
+          if (token.precision === undefined) {
+            token.precision = 0;
+          }
           this.coins.forEach(async (coin) => {
             if (
               !coin.network &&
@@ -544,7 +547,7 @@ export default {
                 coin.amount = token.amount || 0;
                 coin.totalAmount = coin.amount || 0;
               }
-              coin.precision = token.precision || 4;
+              coin.precision = token.precision;
             }
           });
           // if token not in coins, add it
@@ -557,7 +560,7 @@ export default {
           ) {
             this.coins.push({
               account: token.contract,
-              name: `${token.contract}`,
+              name: `${token.symbol} (${token.contract})`,
               symbol: token.symbol,
               amount: token.amount || 0,
               price: 0,
