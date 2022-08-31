@@ -222,7 +222,8 @@
                   v-for="(history, index) in searchHistories"
                   :key="`${history.block_num}_${index}`"
                 >
-                  <q-item clickable v-ripple class="list-item">
+                  <q-item clickable v-ripple class="list-item"
+                    @click=openExplorer(history)>
                     <q-item-section avatar>
                       <q-avatar size="35px" class="q-my-none">
                         <token-avatar
@@ -373,6 +374,11 @@ export default {
     },
     stakeRex() {
       this.$emit("update:showRexStakeDlg", true);
+    },
+    openExplorer(history) {
+      var url = `${process.env.NETWORK_EXPLORER}/transaction/${history.trx_id}`;
+      var win = window.open(url, "_blank");
+      win.focus();
     },
 
     historyData(history) {
