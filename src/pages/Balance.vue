@@ -557,7 +557,7 @@ export default {
           ) {
             this.coins.push({
               account: token.contract,
-              name: `${token.contract}`,
+              name: `${token.symbol} (${token.contract})`,
               symbol: token.symbol,
               amount: token.amount || 0,
               price: 0,

@@ -8,6 +8,8 @@
 /* eslint-env node */
 
 require("dotenv").config();
+const env = require("./env");
+
 
 module.exports = function(/* ctx */) {
   return {
@@ -42,17 +44,7 @@ module.exports = function(/* ctx */) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
-      env: {
-        APP_NAME: process.env.APP_NAME,
-        NETWORK_CHAIN_ID: process.env.NETWORK_CHAIN_ID,
-        NETWORK_HOST: process.env.NETWORK_HOST,
-        NETWORK_PORT: parseInt(process.env.NETWORK_PORT),
-        NETWORK_PROTOCOL: process.env.NETWORK_PROTOCOL,
-        NETWORK_EXPLORER: process.env.NETWORK_EXPLORER,
-        HYPERION_ENDPOINT: process.env.HYPERION_ENDPOINT,
-        EVM_CONTRACT: process.env.EVM_CONTRACT,
-        CHAIN_NAME: process.env.CHAIN_NAME,
-      },
+      env,
 
       // transpile: false,
 
