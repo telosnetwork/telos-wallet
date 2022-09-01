@@ -7,9 +7,8 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 
-require("dotenv").config();
+const ESLintPlugin = require('eslint-webpack-plugin')
 const env = require("./env");
-
 
 module.exports = function(/* ctx */) {
   return {
@@ -45,6 +44,11 @@ module.exports = function(/* ctx */) {
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
       env,
+      chainWebpack (chain) {
+        chain
+          .plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
+      }
 
       // transpile: false,
 

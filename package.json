@@ -41,13 +41,17 @@
   },
   "devDependencies": {
     "@quasar/app-webpack": "3",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^6.8.0",
+    "@babel/eslint-parser": "^7.0.0",
+    "eslint": "^7.14.0",
     "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-quasar": "^1.0.0",
+    "eslint-plugin-vue": "^7.0.0",
     "eslint-config-prettier": "^6.9.0",
-    "eslint-loader": "^3.0.3",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-vue": "^6.1.2"
+    "eslint-webpack-plugin": "^2.4.0",
+    "eslint-plugin-import": "^2.20.2"
   },
   "browserslist": [
     "last 10 Chrome versions",
