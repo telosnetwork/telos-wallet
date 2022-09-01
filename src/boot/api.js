@@ -1,3 +1,4 @@
+import { boot } from 'quasar/wrappers';
 import { Api, JsonRpc } from "eosjs";
 
 const signTransaction = async function (actions, detail = null) {
@@ -14,42 +15,6 @@ const signTransaction = async function (actions, detail = null) {
   let transaction = null;
   try {
     if (this.$type === "ual") {
-      // if (this.$idx === 0) {
-      //   if (!this.$account.privateKey) {
-      //     this.$account.needAuth = true;
-      //     return "needAuth";
-      //   }
-      //   if (!this.$account.confirmed || this.$account.confirmed <= 0) {
-      //     this.$account.needConfirm = true;
-      //     this.$account.actions = actions;
-      //     this.$account.detail = detail;
-      //   }
-      //   for (; ;) {
-      //     if (this.$account.confirmed === 2) {
-      //       this.$account.confirmed = 0;
-      //       break;
-      //     }
-      //     if (this.$account.confirmed === -1) {
-      //       this.$account.confirmed = 0;
-      //       return "cancelled";
-      //     }
-      //     await new Promise(res => setTimeout(res, 100));
-      //   }
-      //   transaction = await this.$blockchain.transact({
-      //     account: this.$account.account,
-      //     password: this.$account.privateKey,
-      //     params: [
-      //       {
-      //         actions
-      //       },
-      //       {
-      //         blocksBehind: 3,
-      //         broadcast: true,
-      //         expireSeconds: 30
-      //       }
-      //     ]
-      //   });
-      // } else {
         transaction = await this.$ualUser.signTransaction(
           {
             actions
@@ -60,7 +25,6 @@ const signTransaction = async function (actions, detail = null) {
           }
         );
       }
-    // }
   } catch (e) {
     console.log(actions, e.cause.message);
     throw e.cause.message;
@@ -85,7 +49,7 @@ const getAccount = async function (accountName) {
   return await rpc.get_account(accountName);
 };
 
-export default ({ store }) => {
+export default boot(async ({ store }) => {
   const rpc = new JsonRpc(
     `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`
   );
@@ -105,4 +69,4 @@ export default ({ store }) => {
     getRpc: getRpc.bind(store)
   };
   window.$api = store["$api"];
-};
+});

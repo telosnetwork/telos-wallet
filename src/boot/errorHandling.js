@@ -1,4 +1,4 @@
-// import something here
+import { boot } from 'quasar/wrappers';
 
 
 const errorNotification = function(error) {
@@ -12,7 +12,7 @@ const errorNotification = function(error) {
   } else {
     errorStr = "Cancelled transaction";
   }
-  
+
   this.$q.notify({
     type: "negative",
     icon: "warning",
@@ -21,7 +21,7 @@ const errorNotification = function(error) {
 };
 
 
-export default ({ Vue, store }) => {
-  Vue.prototype.$errorNotification = errorNotification;
+export default boot(({ app, store }) => {
+  app.config.globalProperties.$errorNotification = errorNotification;
   store["$errorNotification"] = errorNotification;
-};
+});

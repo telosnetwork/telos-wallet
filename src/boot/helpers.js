@@ -1,3 +1,5 @@
+import { boot } from "quasar/wrappers";
+
 const charToSymbol = function(c) {
   if (typeof c == "string") c = c.charCodeAt(0);
 
@@ -29,7 +31,7 @@ const nameToUint64 = function(name) {
   return n.toString();
 };
 
-export default ({ Vue, store }) => {
-  Vue.prototype.$nameToUint64 = nameToUint64;
+export default boot(({ app, store }) => {
+  app.config.globalProperties.$nameToUint64 = nameToUint64;
   store["$nameToUint64"] = nameToUint64;
-};
+});
