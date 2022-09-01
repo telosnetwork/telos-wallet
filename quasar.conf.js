@@ -8,6 +8,7 @@
 /* eslint-env node */
 
 const ESLintPlugin = require('eslint-webpack-plugin')
+const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
 const env = require("./env");
 
 module.exports = function(/* ctx */) {
@@ -47,8 +48,9 @@ module.exports = function(/* ctx */) {
       chainWebpack (chain) {
         chain
           .plugin('eslint-webpack-plugin')
-          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
-      }
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
+        chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin);
+      },
 
       // transpile: false,
 
