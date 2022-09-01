@@ -544,7 +544,7 @@ export default {
       });
     },
     signOut() {
-      this.$root.$emit("signOut");
+      this.$emitter.emit("signOut");
     },
     manageResources() {
       this.showManageResourcesDlg = true;

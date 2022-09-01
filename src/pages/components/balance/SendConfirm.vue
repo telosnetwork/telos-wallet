@@ -246,7 +246,7 @@ export default {
           type: "primary",
           message: `${quantityStr} is sent to ${this.toAddress}`
         });
-        this.$root.$emit("successfully_sent", this.sendAmount, this.toAddress);
+        this.$emitter.emit("successfully_sent", this.sendAmount, this.toAddress);
       } catch (error) {
         this.$errorNotification(error);
       }

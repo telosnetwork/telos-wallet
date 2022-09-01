@@ -957,11 +957,11 @@ export default {
   },
   async mounted() {
     this.loadUserProfile();
-    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
+    this.$emitter.on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
     });
-    this.$root.$on(
+    this.$emitter.on(
       "qrcode_scanned",
       ({ accountName, coinName, networkType }) => {
         if (!this.selectedCoin) {
@@ -972,7 +972,7 @@ export default {
         }
       }
     );
-    this.$root.$on("show_qrscanner", () => {
+    this.$emitter.on("show_qrscanner", () => {
       this.showQRScannerDlg = true;
     });
     if (this.isAuthenticated) {

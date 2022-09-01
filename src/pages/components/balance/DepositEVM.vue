@@ -250,7 +250,7 @@ export default {
         this.depositOwnAddress = false;
         this.recipientAddress = "";
         this.recipientAddressExists = true;
-        this.$root.$emit("successfully_deposited", quantityStr);
+        this.$emitter.emit("successfully_deposited", quantityStr);
 
         this.showDlg = false;
       } catch (error) {

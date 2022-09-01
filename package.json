@@ -24,6 +24,7 @@
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "jdenticon": "^3.1.1",
+    "mitt": "^3.0.0",
     "moment": "^2.27.0",
     "numeral": "^2.0.6",
     "ptokens": "^0.14.0",

@@ -320,7 +320,7 @@ export default {
         if (transaction) this.cpuLow = false;
         if (transaction) this.netLow = false;
         if (transaction) this.resLow = false;
-        this.$root.$emit("resources_bought");
+        this.$emitter.emit("resources_bought");
       } catch (error) {
         this.$errorNotification(error);
       }
@@ -372,7 +372,7 @@ export default {
         this.showAuth = true;
       }
     }, 500);
-    this.$root.$on("signOut", () => {
+    this.$emitter.on("signOut", () => {
       this.signOut();
     });
   },
