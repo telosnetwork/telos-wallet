@@ -1,10 +1,12 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import BigNumber from 'bignumber.js';
+import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes'
+
+
+/**** TODO: move plugin and update implementation */
+import Vue from 'vue'
+import BigNumber from 'bignumber.js';
 import CryptoJS from 'crypto-js'
 
-Vue.use(VueRouter)
 Vue.mixin({
   data() {
     return {
@@ -44,7 +46,7 @@ Vue.mixin({
         case 'purple':
           return '#8946DF';
         default:
-          return '#571AFF';    
+          return '#571AFF';
       }
     }
   },
@@ -66,21 +68,31 @@ Vue.mixin({
   },
 })
 
-export default function (/* { store, ssrContext } */) {
-  const Router = new VueRouter({
-    scrollBehavior: () => ({ x: 0, y: 0 }),
-    routes,
-
-    mode: process.env.VUE_ROUTER_MODE,
-    base: process.env.VUE_ROUTER_BASE
-  })
-
-  return Router
-}
-
+/*** TODO: remove if not being used */
 export const defaultModule = "tlos";
 const PREFERRED_SERVICE = "preferredService";
 
 const setPreferredService = (service) => {
   localStorage.setItem(PREFERRED_SERVICE, service);
 };
+/*********************************** */
+
+
+import { createRouter, createWebHistory } from 'vue-router'
+import routes from './routes'
+
+export default function (/* { store, ssrContext } */) {
+  const createHistory =  createWebHistory;
+
+  const Router = createRouter({
+    scrollBehavior: () => ({ left: 0, top: 0 }),
+    routes,
+
+    // Leave this as is and make changes in quasar.config.js instead!
+    // quasar.config.js -> build -> vueRouterMode
+    // quasar.config.js -> build -> publicPath
+    history: createHistory(process.env.VUE_ROUTER_BASE)
+  })
+
+  return Router
+}
