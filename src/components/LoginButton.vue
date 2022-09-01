@@ -154,12 +154,6 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
-// import Authenticate from "../pages/components/auth/Authenticate";
-// var window_1 = require("../utils/telos-keycatjs/utils/window");
-// var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
-var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
-var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
-
 
 export default {
   data() {
@@ -217,12 +211,7 @@ export default {
       "setLoadingWallet"
     ]),
     async signUp() {
-      // this.signPopup('/create'); // enable this to open signup popup
-      // this.onLogin(1)
       this.openUrl("https://app.telos.net/accounts/add");
-    },
-    async signIn() {
-      // this.signPopup("/signin");
     },
     async signOut() {
       if (gapi) {
@@ -237,42 +226,6 @@ export default {
       this.$emit("update:loadedCoins", []);
       this.logout();
     },
-    async signPopup(type) {
-      const keycat = this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ];
-      var url = window_1.makeWindowUrl(
-        keycat.keycatOrigin,
-        type,
-        keycat.makeUrlData()
-      );
-      const users = await this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].spawnWindow(url);
-      if (users) {
-        const accountName = users.accountName;
-        const permission = users.permission;
-        const publicKey = users.publicKey;
-        const nowTimestamp = Math.floor(new Date().getTime() / 1000);
-        const expiration = 604800 + nowTimestamp;
-        this.$ualUser = users;
-        this.$type = "ual";
-        this.setAccountName(accountName);
-        window.localStorage.setItem("expiration", expiration);
-        window.localStorage.setItem("accountName", accountName);
-        window.localStorage.setItem("permission", permission);
-        window.localStorage.setItem("publicKey", publicKey);
-        window.localStorage.setItem("account", accountName);
-        window.localStorage.setItem("returning", true);
-        window.localStorage.setItem(
-          "autoLogin",
-          this.$ual.authenticators[0].constructor.name
-        );
-        this.getUserProfile();
-        this.setLoadingWallet();
-        await this.createEvmApi();
-      }
-    },
     async onLogin(idx) {
         const error = await this.login({ idx });
         if (!error) {
@@ -280,7 +233,6 @@ export default {
         } else {
           this.error = error;
         }
-      // }
     },
     openUrl(url) {
       window.open(url);
@@ -394,11 +346,11 @@ export default {
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (account.ram_usage / account.ram_quota > this.ramThres || this.ramAvail < this.ramMinimum) 
+      if (account.ram_usage / account.ram_quota > this.ramThres || this.ramAvail < this.ramMinimum)
         this.ramLow = true;
-      if (1 - this.netAvail / account.net_limit.max > this.netThres || this.netAvail < this.netMinimum) 
+      if (1 - this.netAvail / account.net_limit.max > this.netThres || this.netAvail < this.netMinimum)
         this.netLow = true;
-      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres || this.cpuAvail < this.cpuMinimum) 
+      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres || this.cpuAvail < this.cpuMinimum)
         this.cpuLow = true;
       this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }

@@ -78,9 +78,6 @@ const setPreferredService = (service) => {
 /*********************************** */
 
 
-import { createRouter, createWebHistory } from 'vue-router'
-import routes from './routes'
-
 export default function (/* { store, ssrContext } */) {
   const createHistory =  createWebHistory;
 
