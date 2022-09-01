@@ -27,7 +27,7 @@
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "jdenticon": "^3.1.1",
-    "moment": "^2.27.0",
+    "moment": "^2.29.4",
     "numeral": "^2.0.6",
     "ptokens": "^0.14.0",
     "qrcanvas-vue": "^2.1.0",
