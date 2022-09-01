@@ -12,9 +12,7 @@
   "dependencies": {
     "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",
     "@quasar/extras": "^1.0.0",
-    "@smontero/ual-sqrl": "^0.1.22",
     "@telosnetwork/telosevm-js": "0.2.6",
-    "@telosnetwork/ual-telos-keycat": "1.11.1",
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
     "bignumber.js": "^9.0.1",
@@ -23,7 +21,6 @@
     "decimal.js": "^10.2.1",
     "dotenv": "^8.2.0",
     "eos-common": "^0.8.0",
-    "eos-transit-keycat-provider": "^4.0.1",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
     "jdenticon": "^3.1.1",
@@ -34,7 +31,6 @@
     "quasar": "^1.0.0",
     "ual-anchor": "^1.1.2",
     "ual-ledger": "^0.3.0",
-    "ual-scatter": "^0.3.0",
     "ual-wombat": "^0.3.3",
     "universal-authenticator-library": "^0.3.0",
     "vue-qrcode-reader": "^2.3.16",
@@ -45,10 +41,10 @@
     "@quasar/app": "^2.0.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-config-prettier": "^6.9.0",
     "eslint-loader": "^3.0.3",
+    "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^6.1.2"
   },
   "browserslist": [
