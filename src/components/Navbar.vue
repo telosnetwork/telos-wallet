@@ -44,7 +44,7 @@
         </li>
       </ul>
     </nav>
-    <RexStaking :showRexStakeDlg.sync="showRexStakeDlg" />
+    <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
   </div>
 </template>
 

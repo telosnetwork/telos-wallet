@@ -214,7 +214,7 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
-    <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
+    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
   </div>
 </template>
 

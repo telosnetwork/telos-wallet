@@ -195,7 +195,7 @@
       </div>
     </div>
     <SendToAddress
-      :showSendToAddressDlg.sync="showSendToAddressDlg"
+      v-model:showSendToAddressDlg="showSendToAddressDlg"
       :selectedCoin="selectedCoin"
       :sendAmount="sendCoinAmount"
     />

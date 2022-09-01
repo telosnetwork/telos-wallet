@@ -237,7 +237,7 @@
       </div>
     </div>
     <SendConfirm
-      :showSendConfirmDlg.sync="showSendConfirmDlg"
+      v-model:showSendConfirmDlg="showSendConfirmDlg"
       :selectedCoin="selectedCoin"
       :sendAmount="sendAmount"
       :toAddress="toAddress"

@@ -130,12 +130,12 @@
               flat
               :coins="coins"
               :coinLoadedAll="coinLoadedAll"
-              :showHistoryDlg.sync="showHistoryDlg"
-              :showDepositEVMDlg.sync="showDepositEVMDlg"
-              :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-              :showExchangeDlg.sync="showExchangeDlg"
-              :showBuyAmountDlg.sync="showBuyAmountDlg"
-              :selectedCoin.sync="selectedCoin"
+              v-model:showHistoryDlg="showHistoryDlg"
+              v-model:showDepositEVMDlg="showDepositEVMDlg"
+              v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+              v-model:showExchangeDlg="showExchangeDlg"
+              v-model:showBuyAmountDlg="showBuyAmountDlg"
+              v-model:selectedCoin="selectedCoin"
               :suggestTokens="suggestTokens"
             />
           </q-tab-panel>
@@ -162,62 +162,60 @@
       </div>
     </div>
     <History
-      :showHistoryDlg.sync="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
-      :showSendAmountDlg.sync="showSendAmountDlg"
-      :showShareAddressDlg.sync="showShareAddressDlg"
-      :showBuyAmountDlg.sync="showBuyAmountDlg"
-      :showExchangeDlg.sync="showExchangeDlg"
-      :showRexStakeDlg.sync="showRexStakeDlg"
+      v-model:showHistoryDlg="showHistoryDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
+      v-model:showShareAddressDlg="showShareAddressDlg"
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
+      v-model:showExchangeDlg="showExchangeDlg"
+      v-model:showRexStakeDlg="showRexStakeDlg"
     />
     <Exchange
-      :showExchangeDlg.sync="showExchangeDlg"
-      :selectedConvertCoin.sync="selectedCoin"
+      v-model:showExchangeDlg="showExchangeDlg"
+      v-model:selectedConvertCoin="selectedCoin"
       :coins="coins"
     />
     <Send
-      :showSendDlg.sync="showSendDlg"
+      v-model:showSendDlg="showSendDlg"
       :coins="coins"
-      :selectedCoin.sync="selectedCoin"
-      :showSendAmountDlg.sync="showSendAmountDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
     />
     <DepositEVM
-      :showDepositEVMDlg.sync="showDepositEVMDlg"
-      :nativeTLOSBalance.sync="coins[0].amount"
-      :haveEVMAccount.sync="
-        this.$root.tEVMAccount && this.$root.tEVMAccount.address
-      "
+      v-model:showDepositEVMDlg="showDepositEVMDlg"
+      v-model:nativeTLOSBalance="coins[0].amount"
+      v-model:haveEVMAccount="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
       @addEvmNetwork="addEvmNetwork()"
     />
     <WithdrawEVM
-      :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-      :evmTLOSBalance.sync="coins[1].amount"
+    v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+    v-model:evmTLOSBalance="coins[1].amount"
     />
     <Receive
-      :showReceiveDlg.sync="showReceiveDlg"
+      v-model:showReceiveDlg="showReceiveDlg"
       :coins="coins"
-      :selectedCoin.sync="selectedCoin"
-      :showShareAddressDlg.sync="showShareAddressDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showShareAddressDlg="showShareAddressDlg"
     />
     <SendAmount
-      :showSendAmountDlg.sync="showSendAmountDlg"
+      v-model:showSendAmountDlg="showSendAmountDlg"
       :showHistoryDlg="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
     />
     <BuyAmount
-      :showBuyAmountDlg.sync="showBuyAmountDlg"
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
       :showHistoryDlg="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
     />
     <ShareAddress
-      :showShareAddressDlg.sync="showShareAddressDlg"
+      v-model:showShareAddressDlg="showShareAddressDlg"
       :selectedCoin="selectedCoin"
     />
-    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
+    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
     <RexStaking
       v-if="selectedCoin"
-      :selectedCoin.sync="selectedCoin"
-      :showRexStakeDlg.sync="showRexStakeDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showRexStakeDlg="showRexStakeDlg"
     />
 
     <q-dialog v-model="showEVMWarning">

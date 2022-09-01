@@ -347,9 +347,9 @@
       </div>
     </div>
     <SelectCoin
-      :showSelectCoinDlg.sync="showSelectCoinDlg"
+      v-model:showSelectCoinDlg="showSelectCoinDlg"
       :coins="coins"
-      :selectedCoin.sync="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
       :type="dlgType"
     />
     <div
