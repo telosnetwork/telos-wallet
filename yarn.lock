@@ -7893,10 +7893,10 @@ pushdata-bitcoin@^1.0.1:
   dependencies:
     bitcoin-ops "^1.3.0"
 
-qrcanvas-vue@^2.1.0:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/qrcanvas-vue/-/qrcanvas-vue-2.1.1.tgz#27b449f99eaf46f324b300215469bfdf8ef77d88"
-  integrity sha512-86NMjOJ5XJGrrqrD2t+zmZxZKNuW1Is7o88UOiM8qFxDBjuTyfq9VJE9/2rN5XxThsjBuY4bRrQqL9blVwnI9w==
+qrcanvas-vue@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/qrcanvas-vue/-/qrcanvas-vue-3.0.0.tgz#4bdba09b8050bcc0880d8859b5835cc4b2919248"
+  integrity sha512-B7LgAyOEJWf8Bz0y2J8M0OXE77uNWcH7PWr6q8ihyuQE5NP9zopY9wJGTZIT6Mu7oEOczPHMLDedZqFCT2Qxdw==
   dependencies:
     "@babel/runtime" "^7.16.0"
     qrcanvas "^3.1.2"

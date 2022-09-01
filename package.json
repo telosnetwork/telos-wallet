@@ -27,7 +27,7 @@
     "moment": "^2.27.0",
     "numeral": "^2.0.6",
     "ptokens": "^0.14.0",
-    "qrcanvas-vue": "^2.1.0",
+    "qrcanvas-vue": "^3.0.0",
     "quasar": "2",
     "ual-anchor": "^1.1.2",
     "ual-ledger": "^0.3.0",

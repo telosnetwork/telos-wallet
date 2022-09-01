@@ -1,3 +1,4 @@
+import { boot } from 'quasar/wrappers';
 import BigNumber from 'bignumber.js';
 import CryptoJS from 'crypto-js'
 
