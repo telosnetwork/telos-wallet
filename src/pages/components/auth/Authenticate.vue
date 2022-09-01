@@ -782,7 +782,7 @@ export default {
       });
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.authInterval) clearInterval(this.authInterval);
   },
   watch: {

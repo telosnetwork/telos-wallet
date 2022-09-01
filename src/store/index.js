@@ -24,7 +24,7 @@ export default store(function (/* { ssrContext } */) {
         resources,
         evm,
         rex,
-        ...modeuleStore.modules
+        ...moduleStore.modules
       },
 
       // enable strict mode (adds overhead!)
@@ -36,7 +36,7 @@ export default store(function (/* { ssrContext } */) {
 });
 
 // TODO: refactor this
-export const modeuleStore = createStore({
+export const moduleStore = createStore({
   modules: Object.assign(
     Object.assign(
       Object.assign(

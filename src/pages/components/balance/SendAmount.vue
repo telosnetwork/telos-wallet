@@ -271,6 +271,7 @@ export default {
     ...mapActions("evm", ["getGasPrice"]),
     selectCoin(coin) {
       this.showShareAddressDlg = true;
+      // eslint-disable-next-line vue/no-mutating-props
       this.selectedCoin = coin;
     },
     changeCoinInput() {

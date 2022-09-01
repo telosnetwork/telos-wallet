@@ -376,7 +376,7 @@ export default {
       this.signOut();
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.authInterval) clearInterval(this.authInterval);
   }
 };

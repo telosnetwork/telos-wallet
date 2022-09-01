@@ -184,7 +184,7 @@
     <DepositEVM
       v-model:showDepositEVMDlg="showDepositEVMDlg"
       v-model:nativeTLOSBalance="coins[0].amount"
-      v-model:haveEVMAccount="this.$root.tEVMAccount && this.$root.tEVMAccount.address"
+      v-model:haveEVMAccount="hasEVMAddress"
       @addEvmNetwork="addEvmNetwork()"
     />
     <WithdrawEVM
@@ -363,7 +363,9 @@ export default {
       "suggestTokens",
       "pTokenNetworks",
     ]),
-
+    hasEVMAddress() {
+      return this.$root.tEVMAccount && this.$root.tEVMAccount.address
+    },
     totalAmount() {
       return this.coins
         .map(
@@ -947,10 +949,6 @@ export default {
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {}
       window.time = Date.now() / 1000;
-      // if (!window.location.href.includes("localhost")) {
-      //   console.clear();
-      //   console.log("Don't try to use Inspector!");
-      // }
     }, 5000);
   },
   beforeMount() {
@@ -983,7 +981,7 @@ export default {
       this.loadNftTokenTags();
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.interval) {
       clearInterval(this.interval);
     }

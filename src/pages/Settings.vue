@@ -571,7 +571,7 @@ export default {
     //   }, 5000);
     // }
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     if (this.checkInterval) clearInterval(this.checkInterval);
     if (this.clearInterval) clearInterval(this.clearInterval);
   },
