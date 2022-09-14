@@ -16,7 +16,7 @@
           <a @click="switchTab('nft')"> <img :src="srcNft" />NFTs </a>
         </li>
         <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />Earn </a>
+          <a @click="switchTab('earn')"> <img :src="srcEarn" />Staking (REX)</a>
         </li>
       </ul>
     </nav>
