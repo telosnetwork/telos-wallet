@@ -18,7 +18,7 @@
       </div>
       <div class="popupHeading">
         <div />
-        <div class="text-h5 text-weight-medium text-center q-mt-lg">REX</div>
+        <div class="text-h5 text-weight-medium text-center q-mt-lg">Staking (REX)</div>
         <div />
       </div>
       <div class="text-center">
