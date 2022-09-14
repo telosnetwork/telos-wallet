@@ -34,8 +34,8 @@
           rounded
           no-caps
           :options="[
-            { label: 'Start Earning', value: true },
-            { label: 'Return Funds', value: false },
+            { label: 'Stake', value: true },
+            { label: 'Unstake', value: false },
           ]"
         />
         <div v-if="staking" @click="amount = tokenAmount" class="q-mt-md">
@@ -111,7 +111,7 @@
             class="purpleGradient depositBtn"
             no-caps
             rounded
-            :label="staking ? 'Start Earning' : 'Return Funds'"
+            :label="staking ? 'Stake Now' : 'Unstake Now'"
             @click="staking ? tryStake() : tryUnstake()"
           />
         </div>
