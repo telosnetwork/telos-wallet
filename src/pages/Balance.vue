@@ -101,6 +101,7 @@
         <q-tabs
           :value="balanceTab"
           v-model="tab"
+          @click="switchTab"
           content-class="coinTabs"
           class="shadow-2 no-shadow"
           style="width: 100%"
@@ -111,7 +112,6 @@
         <q-tab-panels
           flat
           v-model="tab"
-          @input="switchTab($event)"
           class="coinTabPanels"
         >
           <q-tab-panel
@@ -263,19 +263,6 @@ import { copyToClipboard } from "quasar";
 const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
 const TSWAPS_URL = "https://tswaps.com/";
 
-const tabsData = [
-  {
-    title: "Coins",
-    caption: "Coins",
-    label: "Coins",
-  },
-  {
-    title: "Collectables",
-    caption: "Collectables",
-    label: "Collectables",
-  },
-];
-
 export default {
   props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
   components: {
@@ -325,7 +312,6 @@ export default {
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tabs: tabsData,
       tab: "coins",
       interval: null,
       tokenInterval: null,
@@ -434,8 +420,8 @@ export default {
 
       this.avatar = accountProfile.avatar;
     },
-    async switchTab(val) {
-      this.$emit("update:balanceTab", val);
+    async switchTab() {
+      this.$emit("update:balanceTab", this.tab);
       if (
         this.isAuthenticated &&
         val === "collectables" &&

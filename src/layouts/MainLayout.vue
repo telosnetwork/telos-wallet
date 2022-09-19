@@ -99,7 +99,7 @@ export default {
       profileAccountName: null,
       accountHasProfile: false,
       accountHistory: [{}],
-      balanceTab: "Coins",
+      balanceTab: "coins",
       pages: pagesData,
       coins: [],
       nftTokens: [],

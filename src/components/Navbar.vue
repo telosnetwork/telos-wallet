@@ -108,11 +108,11 @@ export default {
           break;
         case "coins":
           this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Coins");
+          this.$emit("update:balanceTab", "coins");
           break;
         case "nft":
           this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Collectables");
+          this.$emit("update:balanceTab", "collectables");
           break;
         case "settings":
           this.$router.push("/settings", () => {});
@@ -128,7 +128,7 @@ export default {
   },
   watch: {
     balanceTab() {
-      if (this.balanceTab === "Coins") this.switchTab("coins");
+      if (this.balanceTab === "coins") this.switchTab("coins");
       else this.switchTab("nft");
     },
   },
