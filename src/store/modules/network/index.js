@@ -1,7 +1,7 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, action } from "vuex-class-component";
 import { vxm } from "../../../store";
-import { store } from "../../../store";
+import { moduleStore } from "../../../store"
 const VuexModule = createModule({
     strict: false
 });
@@ -11,7 +11,7 @@ export class NetworkModule extends VuexModule.With({ namespaced: "network/" }) {
         this.chains = ["tlos", "usds", "xchain"];
     }
     get currentNetwork() {
-        return store.state.routeModule.params.service;
+        return moduleStore.state.routeModule.params.service;
     }
     get balances() {
         return vxm[`${this.currentNetwork}Network`]["balances"];

@@ -93,6 +93,7 @@
         </div>
         <div class="row justify-center">
           <q-btn
+            :disabled="noDepositInputAmount || !recipientAddress"
             class="purpleGradient depositBtn"
             no-caps
             rounded
@@ -102,11 +103,9 @@
         </div>
         <div class="row justify-center q-mt-sm">
           <div
+            :disabled="noDepositInputAmount"
             class="lightBlue depositAddressToggle"
-            @click="
-              depositOwnAddress = true;
-              deposit();
-            "
+            @click="handleGeneratedAddressDeposit"
           >
             Deposit to my generated address
           </div>
@@ -171,6 +170,9 @@ export default {
         this.$emit("update:showDepositEVMDlg", value);
       },
     },
+    noDepositInputAmount(){
+      return (parseFloat(this.depositAmount) > 0) ? null: true;
+    }
   },
   methods: {
     inputBlur() {
@@ -185,6 +187,12 @@ export default {
         this.recipientAddressExists = true;
       } catch (error) {
         this.recipientAddressExists = false;
+      }
+    },
+    async handleGeneratedAddressDeposit(){
+      if (!this.noDepositInput){
+        depositOwnAddress = true;
+        await deposit();
       }
     },
     async deposit() {
@@ -250,7 +258,7 @@ export default {
         this.depositOwnAddress = false;
         this.recipientAddress = "";
         this.recipientAddressExists = true;
-        this.$root.$emit("successfully_deposited", quantityStr);
+        this.$emitter.emit("successfully_deposited", quantityStr);
 
         this.showDlg = false;
       } catch (error) {

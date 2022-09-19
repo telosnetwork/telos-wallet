@@ -44,7 +44,7 @@
         </li>
       </ul>
     </nav>
-    <RexStaking :showRexStakeDlg.sync="showRexStakeDlg" />
+    <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
   </div>
 </template>
 
@@ -108,11 +108,11 @@ export default {
           break;
         case "coins":
           this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Coins");
+          this.$emit("update:balanceTab", "coins");
           break;
         case "nft":
           this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Collectables");
+          this.$emit("update:balanceTab", "collectables");
           break;
         case "settings":
           this.$router.push("/settings", () => {});
@@ -127,8 +127,8 @@ export default {
     },
   },
   watch: {
-    balanceTab() {
-      if (this.balanceTab === "Coins") this.switchTab("coins");
+    balanceTab(val) {
+      if (val === "coins") this.switchTab(val);
       else this.switchTab("nft");
     },
   },

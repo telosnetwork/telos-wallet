@@ -189,15 +189,6 @@ export default {
       },
     },
     qrcodeData() {
-      // if (this.networkType === "telos") {
-      //   return `${this.accountName}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "tevm") {
-      //   return `${this.$root.tEVMAccount.address}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "ethereum") {
-      //   return `${this.accountName}(${this.selectedCoin.name})`;
-      // } else if (this.networkType === "ptoken") {
-      //   return `${this.depositAddress}(${this.selectedCoin.name})`;
-      // }
       if (this.networkType === "telos") {
         return `${this.accountName}`;
       } else if (this.networkType === "tevm") {
@@ -266,7 +257,7 @@ export default {
       const networks = {};
       for (const key in this.pTokenNetworks[this.tSymbol]) {
         // if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
-        if (key !== "ethereum" || this.chainName !== "telos") {
+        if (key !== "ethereum" || (this.chainName !== "telos" && this.chainName !== "telos-testnet")) {
           networks[key] = this.pTokenNetworks[this.tSymbol][key];
         }
       }

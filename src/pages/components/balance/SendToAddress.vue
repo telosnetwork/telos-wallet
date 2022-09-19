@@ -237,7 +237,7 @@
       </div>
     </div>
     <SendConfirm
-      :showSendConfirmDlg.sync="showSendConfirmDlg"
+      v-model:showSendConfirmDlg="showSendConfirmDlg"
       :selectedCoin="selectedCoin"
       :sendAmount="sendAmount"
       :toAddress="toAddress"
@@ -384,14 +384,14 @@ export default {
       this.showSendConfirmDlg = true;
     },
     showQRScanner() {
-      this.$root.$emit("show_qrscanner");
+      this.$emitter.emit("show_qrscanner");
     },
   },
   mounted() {
-    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
+    this.$emitter.on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendConfirmDlg = false;
     });
-    this.$root.$on(
+    this.$emitter.on(
       "qrcode_scanned",
       ({ accountName, coinName, networkType }) => {
         if (this.showSendToAddressDlg) {

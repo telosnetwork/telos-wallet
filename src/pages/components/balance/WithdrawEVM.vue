@@ -46,6 +46,7 @@
         </div>
         <div class="row justify-center q-mt-md q-mb-lg">
           <q-btn
+            :disabled="!(parseFloat(withdrawAmount) > 0)"
             class="purpleGradient withdrawBtn"
             no-caps
             rounded
@@ -116,7 +117,7 @@ export default {
           type: "primary",
           message: `${quantityStr} is withdrawn from the EVM`
         });
-        this.$root.$emit("successfully_withdrew", quantityStr);
+        this.$emitter.emit("successfully_withdrew", quantityStr);
         this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);

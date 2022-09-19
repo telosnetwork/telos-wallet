@@ -214,7 +214,7 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
-    <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
+    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
   </div>
 </template>
 
@@ -544,7 +544,7 @@ export default {
       });
     },
     signOut() {
-      this.$root.$emit("signOut");
+      this.$emitter.emit("signOut");
     },
     manageResources() {
       this.showManageResourcesDlg = true;
@@ -571,7 +571,7 @@ export default {
     //   }, 5000);
     // }
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     if (this.checkInterval) clearInterval(this.checkInterval);
     if (this.clearInterval) clearInterval(this.clearInterval);
   },

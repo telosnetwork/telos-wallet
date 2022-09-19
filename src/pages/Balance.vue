@@ -100,29 +100,24 @@
 
         <q-tabs
           :value="balanceTab"
-          @input="switchTab($event)"
+          v-model="tab"
+          @click="switchTab"
           content-class="coinTabs"
           class="shadow-2 no-shadow"
           style="width: 100%"
         >
-          <q-tab
-            no-caps
-            v-for="tab in tabs"
-            :name="tab.title"
-            :label="tab.label"
-            :key="tab.title"
-            style="width: 50%; background: #00000000"
-          />
+          <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
+          <q-tab no-caps name="collectables" label="Collectables" key="coins" style="width: 50%; background: #00000000"></q-tab>
         </q-tabs>
         <q-tab-panels
           flat
-          :value="balanceTab"
-          @input="switchTab($event)"
+          v-model="tab"
           class="coinTabPanels"
         >
           <q-tab-panel
             flat
-            name="Coins"
+            name="coins"
+            label="Coins"
             class="no-padding"
             :style="' border:0px;'"
           >
@@ -130,16 +125,16 @@
               flat
               :coins="coins"
               :coinLoadedAll="coinLoadedAll"
-              :showHistoryDlg.sync="showHistoryDlg"
-              :showDepositEVMDlg.sync="showDepositEVMDlg"
-              :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-              :showExchangeDlg.sync="showExchangeDlg"
-              :showBuyAmountDlg.sync="showBuyAmountDlg"
-              :selectedCoin.sync="selectedCoin"
+              v-model:showHistoryDlg="showHistoryDlg"
+              v-model:showDepositEVMDlg="showDepositEVMDlg"
+              v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+              v-model:showExchangeDlg="showExchangeDlg"
+              v-model:showBuyAmountDlg="showBuyAmountDlg"
+              v-model:selectedCoin="selectedCoin"
               :suggestTokens="suggestTokens"
             />
           </q-tab-panel>
-          <q-tab-panel name="Collectables" :style="'background:  #00000000'">
+          <q-tab-panel name="collectables" label="Collectables" :style="'background:  #00000000'">
             <Collectables
               :nftTokenTags="nftTokenTags"
               :nftTokenLoadedAll="nftTokenLoadedAll"
@@ -162,62 +157,60 @@
       </div>
     </div>
     <History
-      :showHistoryDlg.sync="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
-      :showSendAmountDlg.sync="showSendAmountDlg"
-      :showShareAddressDlg.sync="showShareAddressDlg"
-      :showBuyAmountDlg.sync="showBuyAmountDlg"
-      :showExchangeDlg.sync="showExchangeDlg"
-      :showRexStakeDlg.sync="showRexStakeDlg"
+      v-model:showHistoryDlg="showHistoryDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
+      v-model:showShareAddressDlg="showShareAddressDlg"
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
+      v-model:showExchangeDlg="showExchangeDlg"
+      v-model:showRexStakeDlg="showRexStakeDlg"
     />
     <Exchange
-      :showExchangeDlg.sync="showExchangeDlg"
-      :selectedConvertCoin.sync="selectedCoin"
+      v-model:showExchangeDlg="showExchangeDlg"
+      v-model:selectedConvertCoin="selectedCoin"
       :coins="coins"
     />
     <Send
-      :showSendDlg.sync="showSendDlg"
+      v-model:showSendDlg="showSendDlg"
       :coins="coins"
-      :selectedCoin.sync="selectedCoin"
-      :showSendAmountDlg.sync="showSendAmountDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
     />
     <DepositEVM
-      :showDepositEVMDlg.sync="showDepositEVMDlg"
-      :nativeTLOSBalance.sync="coins[0].amount"
-      :haveEVMAccount.sync="
-        this.$root.tEVMAccount && this.$root.tEVMAccount.address
-      "
+      v-model:showDepositEVMDlg="showDepositEVMDlg"
+      v-model:nativeTLOSBalance="coins[0].amount"
+      v-model:haveEVMAccount="hasEVMAddress"
       @addEvmNetwork="addEvmNetwork()"
     />
     <WithdrawEVM
-      :showWithdrawEVMDlg.sync="showWithdrawEVMDlg"
-      :evmTLOSBalance.sync="coins[1].amount"
+    v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+    v-model:evmTLOSBalance="coins[1].amount"
     />
     <Receive
-      :showReceiveDlg.sync="showReceiveDlg"
+      v-model:showReceiveDlg="showReceiveDlg"
       :coins="coins"
-      :selectedCoin.sync="selectedCoin"
-      :showShareAddressDlg.sync="showShareAddressDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showShareAddressDlg="showShareAddressDlg"
     />
     <SendAmount
-      :showSendAmountDlg.sync="showSendAmountDlg"
+      v-model:showSendAmountDlg="showSendAmountDlg"
       :showHistoryDlg="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
     />
     <BuyAmount
-      :showBuyAmountDlg.sync="showBuyAmountDlg"
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
       :showHistoryDlg="showHistoryDlg"
-      :selectedCoin.sync="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
     />
     <ShareAddress
-      :showShareAddressDlg.sync="showShareAddressDlg"
+      v-model:showShareAddressDlg="showShareAddressDlg"
       :selectedCoin="selectedCoin"
     />
-    <QRScanner :showQRScannerDlg.sync="showQRScannerDlg" :coins="coins" />
+    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
     <RexStaking
       v-if="selectedCoin"
-      :selectedCoin.sync="selectedCoin"
-      :showRexStakeDlg.sync="showRexStakeDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showRexStakeDlg="showRexStakeDlg"
     />
 
     <q-dialog v-model="showEVMWarning">
@@ -267,21 +260,8 @@ import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
-const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
-const TSWAPS_URL = "https://tswaps.com/";
-
-const tabsData = [
-  {
-    title: "Coins",
-    caption: "Coins",
-    label: "Coins",
-  },
-  {
-    title: "Collectables",
-    caption: "Collectables",
-    label: "Collectables",
-  },
-];
+const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
+const TSWAPS_URL = "https://tswaps.com/swap";
 
 export default {
   props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
@@ -332,8 +312,7 @@ export default {
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tabs: tabsData,
-      tab: "Coins",
+      tab: "coins",
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
@@ -365,7 +344,9 @@ export default {
       "suggestTokens",
       "pTokenNetworks",
     ]),
-
+    hasEVMAddress() {
+      return this.$root.tEVMAccount && this.$root.tEVMAccount.address
+    },
     totalAmount() {
       return this.coins
         .map(
@@ -439,11 +420,11 @@ export default {
 
       this.avatar = accountProfile.avatar;
     },
-    async switchTab(val) {
-      this.$emit("update:balanceTab", val);
+    async switchTab() {
+      this.$emit("update:balanceTab", this.tab);
       if (
         this.isAuthenticated &&
-        val === "Collectables" &&
+        this.tab === "collectables" &&
         this.nftTokenTags.size == 0
       ) {
         this.loadUserProfile();
@@ -453,7 +434,7 @@ export default {
     },
     clickPurchase() {
       this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
-      window.open(KUCOIN_BUY_URL);
+      window.open(GETTING_STARTED_URL);
       //this.showBuyAmountDlg = true;
     },
     clickExchange() {
@@ -949,10 +930,6 @@ export default {
         this.tEVMBalance = this.getCurrenttEVMBalance();
       } catch {}
       window.time = Date.now() / 1000;
-      // if (!window.location.href.includes("localhost")) {
-      //   console.clear();
-      //   console.log("Don't try to use Inspector!");
-      // }
     }, 5000);
   },
   beforeMount() {
@@ -961,11 +938,11 @@ export default {
   },
   async mounted() {
     this.loadUserProfile();
-    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
+    this.$emitter.on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendAmountDlg = false;
       this.showSendDlg = false;
     });
-    this.$root.$on(
+    this.$emitter.on(
       "qrcode_scanned",
       ({ accountName, coinName, networkType }) => {
         if (!this.selectedCoin) {
@@ -976,7 +953,7 @@ export default {
         }
       }
     );
-    this.$root.$on("show_qrscanner", () => {
+    this.$emitter.on("show_qrscanner", () => {
       this.showQRScannerDlg = true;
     });
     if (this.isAuthenticated) {
@@ -985,7 +962,7 @@ export default {
       this.loadNftTokenTags();
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.interval) {
       clearInterval(this.interval);
     }
@@ -1002,6 +979,9 @@ export default {
         this.loadNftTokenTags();
       }
     },
+    balanceTab(val){
+      this.tab = val;
+    }
   },
 };
 </script>

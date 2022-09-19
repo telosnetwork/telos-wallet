@@ -318,7 +318,7 @@ export default {
         this.accountInfo = await this.$store.$api.getAccount(
           this.accountName.toLowerCase()
         );
-        this.$root.$emit("resources_bought");
+        this.$emitter.emit("resources_bought");
       } catch (error) {
         this.$errorNotification(error);
       }

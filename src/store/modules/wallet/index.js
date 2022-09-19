@@ -1,7 +1,7 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, action } from "vuex-class-component";
 import { vxm } from "../../../store/index";
-import { store } from "../../../store";
+import { moduleStore } from "../../../store";
 const VuexModule = createModule({
     strict: false
 });
@@ -10,7 +10,7 @@ export class WalletModule extends VuexModule.With({ namespaced: "wallet/" }) {
         return vxm.bancor.wallet;
     }
     get currentNetwork() {
-        return store.state.routeModule.params.service;
+        return moduleStore.state.routeModule.params.service;
     }
     get isAuthenticated() {
         return vxm[`${vxm.bancor.wallet}Wallet`].isAuthenticated;
