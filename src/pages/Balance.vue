@@ -424,7 +424,7 @@ export default {
       this.$emit("update:balanceTab", this.tab);
       if (
         this.isAuthenticated &&
-        val === "collectables" &&
+        this.tab === "collectables" &&
         this.nftTokenTags.size == 0
       ) {
         this.loadUserProfile();
