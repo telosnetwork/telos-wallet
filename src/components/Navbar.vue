@@ -127,8 +127,8 @@ export default {
     },
   },
   watch: {
-    balanceTab() {
-      if (this.balanceTab === "coins") this.switchTab("coins");
+    balanceTab(val) {
+      if (val === "coins") this.switchTab(val);
       else this.switchTab("nft");
     },
   },

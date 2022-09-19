@@ -979,6 +979,9 @@ export default {
         this.loadNftTokenTags();
       }
     },
+    balanceTab(val){
+      this.tab = val;
+    }
   },
 };
 </script>
