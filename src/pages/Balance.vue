@@ -100,29 +100,24 @@
 
         <q-tabs
           :value="balanceTab"
-          @input="switchTab($event)"
+          v-model="tab"
           content-class="coinTabs"
           class="shadow-2 no-shadow"
           style="width: 100%"
         >
-          <q-tab
-            no-caps
-            v-for="tab in tabs"
-            :name="tab.title"
-            :label="tab.label"
-            :key="tab.title"
-            style="width: 50%; background: #00000000"
-          />
+          <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
+          <q-tab no-caps name="collectables" label="Collectables" key="coins" style="width: 50%; background: #00000000"></q-tab>
         </q-tabs>
         <q-tab-panels
           flat
-          :value="balanceTab"
+          v-model="tab"
           @input="switchTab($event)"
           class="coinTabPanels"
         >
           <q-tab-panel
             flat
-            name="Coins"
+            name="coins"
+            label="Coins"
             class="no-padding"
             :style="' border:0px;'"
           >
@@ -139,7 +134,7 @@
               :suggestTokens="suggestTokens"
             />
           </q-tab-panel>
-          <q-tab-panel name="Collectables" :style="'background:  #00000000'">
+          <q-tab-panel name="collectables" label="Collectables" :style="'background:  #00000000'">
             <Collectables
               :nftTokenTags="nftTokenTags"
               :nftTokenLoadedAll="nftTokenLoadedAll"
@@ -331,7 +326,7 @@ export default {
       panning: false,
       coinViewHeight: 0,
       tabs: tabsData,
-      tab: "Coins",
+      tab: "coins",
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
@@ -443,7 +438,7 @@ export default {
       this.$emit("update:balanceTab", val);
       if (
         this.isAuthenticated &&
-        val === "Collectables" &&
+        val === "collectables" &&
         this.nftTokenTags.size == 0
       ) {
         this.loadUserProfile();

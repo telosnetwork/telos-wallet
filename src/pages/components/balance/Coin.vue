@@ -177,17 +177,17 @@ export default {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
 }
-// .display-grid {
-//   display: grid;
-// }
-// .h-20 {
-//   height: 20px;
-// }
-// .wraplabel {
-//   white-space: nowrap;
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-// }
+.display-grid {
+  display: grid;
+}
+.h-20 {
+  height: 20px;
+}
+.wraplabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .tevmBtnWrapper {
   justify-self: center;
