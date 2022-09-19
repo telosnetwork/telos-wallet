@@ -93,7 +93,7 @@
         </div>
         <div class="row justify-center">
           <q-btn
-            :disabled="noDepositInput"
+            :disabled="noDepositInputAmount || !recipientAddress"
             class="purpleGradient depositBtn"
             no-caps
             rounded
@@ -103,7 +103,7 @@
         </div>
         <div class="row justify-center q-mt-sm">
           <div
-            :disabled="noDepositInput"
+            :disabled="noDepositInputAmount"
             class="lightBlue depositAddressToggle"
             @click="handleGeneratedAddressDeposit"
           >
@@ -170,7 +170,7 @@ export default {
         this.$emit("update:showDepositEVMDlg", value);
       },
     },
-    noDepositInput(){
+    noDepositInputAmount(){
       return (parseFloat(this.depositAmount) > 0) ? null: true;
     }
   },
