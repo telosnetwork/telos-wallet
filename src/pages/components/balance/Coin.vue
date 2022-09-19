@@ -113,7 +113,7 @@
 import { mapGetters, mapActions } from "vuex";
 import tokenAvatar from "src/components/TokenAvatar";
 
-const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
+const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
 
 export default {
   components: {
@@ -143,7 +143,7 @@ export default {
   },
   methods: {
     clickPurchase() {
-      window.open(KUCOIN_BUY_URL);
+      window.open(GETTING_STARTED_URL);
       /*
       this.$emit(
         "update:selectedCoin",

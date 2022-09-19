@@ -260,8 +260,8 @@ import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
-const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
-const TSWAPS_URL = "https://tswaps.com/";
+const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
+const TSWAPS_URL = "https://tswaps.com/swap";
 
 export default {
   props: ["loadedCoins", "loadedNftTokens", "balanceTab"],
@@ -434,7 +434,7 @@ export default {
     },
     clickPurchase() {
       this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
-      window.open(KUCOIN_BUY_URL);
+      window.open(GETTING_STARTED_URL);
       //this.showBuyAmountDlg = true;
     },
     clickExchange() {
