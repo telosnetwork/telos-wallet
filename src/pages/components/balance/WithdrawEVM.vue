@@ -46,6 +46,7 @@
         </div>
         <div class="row justify-center q-mt-md q-mb-lg">
           <q-btn
+            :disabled="!(parseFloat(withdrawAmount) > 0)"
             class="purpleGradient withdrawBtn"
             no-caps
             rounded
