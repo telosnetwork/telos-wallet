@@ -257,7 +257,7 @@ export default {
       const networks = {};
       for (const key in this.pTokenNetworks[this.tSymbol]) {
         // if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
-        if (key !== "ethereum" || this.chainName !== "telos") {
+        if (key !== "ethereum" || (this.chainName !== "telos" && this.chainName !== "telos-testnet")) {
           networks[key] = this.pTokenNetworks[this.tSymbol][key];
         }
       }
