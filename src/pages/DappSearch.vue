@@ -176,6 +176,6 @@ div::-webkit-scrollbar-thumb {
 
 
 @media only screen and (max-width: 1000px) {
-  
+
 }
 </style>
