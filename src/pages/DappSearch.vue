@@ -4,7 +4,7 @@
       <div
         class="q-pb-lg q-pt-xl text-subtitle1 text-weight-medium text-center"
       >
-        dApps
+        Telos Native dApps
       </div>
       <div class="q-px-md">
         <q-input
@@ -101,7 +101,7 @@ const dappsTemp =  [
       },{
           "name": "Buy TLOS",
           "description": "Purchase your first Telos Tokens",
-          "link": "https://buy.telos.net",
+          "link": "https://telos.net",
           "icon": "https://dl.airtable.com/.attachmentThumbnails/988c7e547419f91f24e0322bdfac02e6/e97caf0c",
           "category": "finance",
           "tags": [
