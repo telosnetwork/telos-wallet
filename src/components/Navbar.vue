@@ -67,7 +67,6 @@ export default {
   computed: {
     ...mapGetters("account", ["isAuthenticated"]),
     srcWallet() {
-      debugger;
       if (this.selectedTab === "coins")
         return this.srcDir + "wallet_selected.svg";
       else return this.srcDir + "wallet.svg";
