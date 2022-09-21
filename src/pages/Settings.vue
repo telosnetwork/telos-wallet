@@ -47,12 +47,6 @@
           </q-item>
         </div>
 
-        <q-item class="row justify-center q-mt-md">
-          <q-btn rounded class="settingBtn" @click="manageResources()">
-            Manage Resources
-          </q-btn>
-        </q-item>
-
         <!-- Upload Image Button -->
 
         <div class="profileInformation">
@@ -214,18 +208,13 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
-    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import LoginButton from "components/LoginButton.vue";
-import ManageResources from "components/ManageResources.vue";
-import { accountName } from "src/store/account/getters";
 
 export default {
-  components: { ManageResources },
   data() {
     return {
       accountHasProfile: false,
@@ -243,7 +232,6 @@ export default {
       connected: false,
       confirm: false,
       keyView: false,
-      showManageResourcesDlg: false,
     };
   },
   computed: {
@@ -545,9 +533,6 @@ export default {
     },
     signOut() {
       this.$emitter.emit("signOut");
-    },
-    manageResources() {
-      this.showManageResourcesDlg = true;
     },
   },
   created: async function () {

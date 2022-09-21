@@ -4,26 +4,26 @@
       <img src="~assets/telosLogo.svg" class="telosLogo" />
       <ul>
         <li>
-          <a @click="switchTab('wallet')"> <img :src="srcWallet" />Wallet </a>
+          <a @click="switchTab('coins')"> <img :src="srcWallet" />Wallet </a>
         </li>
         <li>
-          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
+          <a @click="switchTab('earn')"> <img :src="srcEarn" />Staking (REX)</a>
         </li>
         <li>
-          <a @click="switchTab('coins')"> <img :src="srcCoins" />Coin </a>
+          <a @click="switchTab('resources')"> <img :src="srcResources" />Resource Management</a>
         </li>
         <li>
           <a @click="switchTab('nft')"> <img :src="srcNft" />NFTs </a>
         </li>
         <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />Staking (REX)</a>
+          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
         </li>
       </ul>
     </nav>
     <nav class="bottomNavBar">
       <ul>
         <li>
-          <a @click="switchTab('wallet')">
+          <a @click="switchTab('coins')">
             <img :src="srcWallet" />
           </a>
         </li>
@@ -45,26 +45,30 @@
       </ul>
     </nav>
     <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
+    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import RexStaking from "../pages/components/balance/RexStaking.vue";
+import RexStaking from "src/pages/components/balance/RexStaking.vue";
+import ManageResources from "src/components/ManageResources.vue";
 export default {
   props: ["balanceTab"],
-  components: { RexStaking },
+  components: { RexStaking, ManageResources },
   data() {
     return {
       srcDir: "/nav/",
-      selectedTab: "wallet",
+      selectedTab: "coins",
       showRexStakeDlg: false,
+      showManageResourcesDlg: false
     };
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated"]),
     srcWallet() {
-      if (this.selectedTab === "wallet")
+      debugger;
+      if (this.selectedTab === "coins")
         return this.srcDir + "wallet_selected.svg";
       else return this.srcDir + "wallet.svg";
     },
@@ -89,10 +93,18 @@ export default {
     },
     srcEarn() {
       if (this.selectedTab === "earn" && this.showRexStakeDlg == false) {
-        this.switchTab("wallet");
+        this.switchTab("coins");
         return this.srcDir + "earn.svg";
       }
       if (this.selectedTab === "earn") return this.srcDir + "earn_selected.svg";
+      else return this.srcDir + "earn.svg";
+    },
+    srcResources() {
+      if (this.selectedTab === "resources" && this.showManageResourcesDlg == false) {
+        this.switchTab("coins");
+        return this.srcDir + "earn.svg";
+      }
+      if (this.selectedTab === "resources") return this.srcDir + "earn_selected.svg";
       else return this.srcDir + "earn.svg";
     },
   },
@@ -100,15 +112,12 @@ export default {
     switchTab(val) {
       this.selectedTab = val;
       switch (val) {
-        case "wallet":
-          this.$router.push("/balance", () => {});
-          break;
-        case "dapps":
-          this.$router.push("/dappsearch", () => {});
-          break;
         case "coins":
           this.$router.push("/balance", () => {});
           this.$emit("update:balanceTab", "coins");
+          break;
+        case "dapps":
+          this.$router.push("/dappsearch", () => {});
           break;
         case "nft":
           this.$router.push("/balance", () => {});
@@ -119,7 +128,9 @@ export default {
           break;
         case "earn":
           this.showRexStakeDlg = true;
-          //   this.$router.push("/earn");
+          break;
+        case "resources":
+          this.showManageResourcesDlg = true;
           break;
         default:
           break;

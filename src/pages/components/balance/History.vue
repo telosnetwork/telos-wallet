@@ -191,7 +191,7 @@
                 >
                   <div class="column">
                     <img src="/nav/earn_selected.svg" />
-                    Earn
+                    Stake
                   </div>
                 </q-btn>
               </div>
