@@ -44,7 +44,8 @@ export class TlosNetworkModule extends VuexModule.With({
         };
     }
     get isAuthenticated() {
-        return this.$store.rootGetters["tlosWallet/isAuthenticated"];
+      debugger;
+        return this.$store.getters["tlosWallet/isAuthenticated"];
     }
     get networkId() {
         return "4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11";

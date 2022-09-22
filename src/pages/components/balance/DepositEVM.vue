@@ -40,14 +40,6 @@
             />
             <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
-          <!-- <q-input
-            bg-color="secondary"
-            rounded
-            outlined
-            v-model="depositAmount"
-            label="Deposit amount"
-            placeholder="0.0000"
-          /> -->
           <div
             @click="depositAmount = nativeTLOSBalance"
             class="depositAddressToggle"
@@ -55,22 +47,6 @@
             Max: {{ nativeTLOSBalance }}
           </div>
         </div>
-        <!-- <div class="q-mt-md row justify-center">
-          <div
-            class="lightBlue depositAddressToggle q-mb-md"
-            v-if="depositOwnAddress"
-            @click="depositOwnAddress = false"
-          >
-            Deposit to a different address
-          </div>
-          <div
-            class="lightBlue depositAddressToggle"
-            v-else
-            @click="depositOwnAddress = true"
-          >
-            Deposit to myself
-          </div>
-        </div> -->
         <div class="depositInput row justify-center">
           <q-input
             v-model="recipientAddress"
@@ -101,25 +77,25 @@
             @click="deposit"
           />
         </div>
-        <div class="row justify-center q-mt-sm">
-          <div
-            :disabled="noDepositInputAmount"
-            class="lightBlue depositAddressToggle"
-            @click="handleGeneratedAddressDeposit"
-          >
-            Deposit to my generated address
-          </div>
+        <div class="row justify-center" v-if="!recipientAddress">
+          <q-btn
+            class="purpleGradient depositBtn"
+            no-caps
+            rounded
+            label="Generate Linked EVM address"
+            @click="generateAddress"
+          />
         </div>
         <div class="row justify-center">
           <div
             class="lightBlue depositAddressToggle q-mt-xs"
-            @click="$emit('addEvmNetwork')"
+            @click="addEvmNetwork"
           >
             Add EVM Network
           </div>
         </div>
         <div class="row justify-center q-mt-md">
-          <div v-if="!haveEVMAccount && depositOwnAddress" class="note">
+          <div v-if="!evmAddress && depositOwnAddress" class="note">
             NOTE: This is your first deposit so an additional “create” action
             will be included
           </div>
@@ -149,9 +125,10 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
+import { generateAddress } from "ethereumjs-util";
 
 export default {
-  props: ["showDepositEVMDlg", "nativeTLOSBalance", "haveEVMAccount"],
+  props: ["showDepositEVMDlg", "nativeTLOSBalance"],
   data() {
     return {
       depositAmount: "0",
@@ -161,7 +138,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress"]),
     showDlg: {
       get() {
         return this.showDepositEVMDlg;
@@ -175,6 +152,43 @@ export default {
     }
   },
   methods: {
+    addEvmNetwork() {
+      let params = [];
+      if (this.chainName !== "telos") {
+        params = [
+          {
+            chainId: "0x29",
+            chainName: "Telos EVM Testnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4,
+            },
+            rpcUrls: ["https://testnet.telos.net/evm"],
+            blockExplorerUrls: ["https://testnet.teloscan.io"],
+          },
+        ];
+      } else {
+        params = [
+          {
+            chainId: "0x28",
+            chainName: "Telos EVM Mainnet",
+            nativeCurrency: {
+              name: "Telos",
+              symbol: "TLOS",
+              decimals: 4,
+            },
+            rpcUrls: ["https://mainnet.telos.net/evm"],
+            blockExplorerUrls: ["https://teloscan.io"],
+          },
+        ];
+      }
+
+      window.ethereum
+        .request({ method: "wallet_addEthereumChain", params })
+        .then(() => console.log("Success"))
+        .catch((error) => console.log("Error", error.message));
+    },
     inputBlur() {
       if (isNaN(this.depositAmount)) this.depositAmount = "0";
       else this.depositAmount = Number(this.depositAmount).toString();
@@ -189,13 +203,46 @@ export default {
         this.recipientAddressExists = false;
       }
     },
+    async generateAddress(){
+      //TODO set generated address in store
+      actions = [];
+      if (!this.evmAddress) {
+          actions.push({
+            account: "eosio.evm",
+            name: "create",
+            data: {
+              account: this.accountName.toLowerCase(),
+              data: "create",
+            },
+          });
+        }
+      try {
+        const transaction = await this.$store.$api.signTransaction(
+          actions,
+          `Create EVM address for ${this.accountName}`
+        );
+        this.$q.notify({
+          type: "primary",
+          message: `EVM address created for ${this.accountName}`,
+        });
+        this.depositAmount = "0";
+        this.depositOwnAddress = false;
+        this.recipientAddress = "";
+        this.recipientAddressExists = true;
+
+      } catch (error) {
+        this.$errorNotification(error);
+      }
+    },
+    //TODO remove
     async handleGeneratedAddressDeposit(){
       if (!this.noDepositInput){
-        depositOwnAddress = true;
-        await deposit();
+        this.depositOwnAddress = true;
+        await this.deposit();
       }
     },
     async deposit() {
+      debugger;
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
         this.$q.notify({
@@ -209,7 +256,7 @@ export default {
       let actions = [];
       let memo = "";
       if (this.depositOwnAddress) {
-        if (!this.haveEVMAccount) {
+        if (!this.evmAddress) {
           actions.push({
             account: "eosio.evm",
             name: "create",
@@ -272,12 +319,19 @@ export default {
         this.$emit("addEvmNetwork");
       }
     },
+    evmAddress(val){
+      debugger;
+      if (val){
+        this.recipientAddress = val;
+      }
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .depositAddressToggle {
+  font-size: .8rem;
   cursor: pointer;
 }
 .lightBlue {
@@ -289,12 +343,15 @@ export default {
 .depositBtn {
   flex-basis: 15rem;
   height: 3rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
-// .popupCard {
-//   position: relative;
-// }
+
 .exitBtn {
   position: absolute;
-  // right: 0px;
+}
+
+.q-input{
+  font-size: .75rem;
 }
 </style>

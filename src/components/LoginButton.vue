@@ -207,6 +207,7 @@ export default {
     ]),
     ...mapMutations("account", [
       "setAccountName",
+      "setEvmAddress",
       "getAccountProfile",
       "setLoadingWallet"
     ]),
@@ -254,12 +255,15 @@ export default {
           telosPrivateKeys: []
         });
         try {
-          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
+          if (evmAccount && evmAccount.address){
+            this.setEvmAddress(evmAccount.address);
+          }
         } catch (e) {
           console.log(e);
-          this.$root.tEVMAccount = null;
+          this.setEvmAddress(null);
         }
       } catch (e) {
         console.log(e);

@@ -179,8 +179,6 @@
     <DepositEVM
       v-model:showDepositEVMDlg="showDepositEVMDlg"
       v-model:nativeTLOSBalance="coins[0].amount"
-      v-model:haveEVMAccount="hasEVMAddress"
-      @addEvmNetwork="addEvmNetwork()"
     />
     <WithdrawEVM
     v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
@@ -344,9 +342,11 @@ export default {
       "suggestTokens",
       "pTokenNetworks",
     ]),
-    hasEVMAddress() {
-      return this.$root.tEVMAccount && this.$root.tEVMAccount.address
-    },
+    // hasEVMAddress() {
+    //   console.dir(this.$root);
+    //   debugger;
+    //   return this.$root.tEVMAccount && this.$root.tEVMAccount.address
+    // },
     totalAmount() {
       return this.coins
         .map(
@@ -836,44 +836,6 @@ export default {
       } catch (error) {
         this.$errorNotification(error);
       }
-    },
-
-    addEvmNetwork() {
-      let params = [];
-      if (this.chainName !== "telos") {
-        params = [
-          {
-            chainId: "0x29",
-            chainName: "Telos EVM Testnet",
-            nativeCurrency: {
-              name: "Telos",
-              symbol: "TLOS",
-              decimals: 4,
-            },
-            rpcUrls: ["https://testnet.telos.net/evm"],
-            blockExplorerUrls: ["https://testnet.teloscan.io"],
-          },
-        ];
-      } else {
-        params = [
-          {
-            chainId: "0x28",
-            chainName: "Telos EVM Mainnet",
-            nativeCurrency: {
-              name: "Telos",
-              symbol: "TLOS",
-              decimals: 4,
-            },
-            rpcUrls: ["https://mainnet.telos.net/evm"],
-            blockExplorerUrls: ["https://teloscan.io"],
-          },
-        ];
-      }
-
-      window.ethereum
-        .request({ method: "wallet_addEthereumChain", params })
-        .then(() => console.log("Success"))
-        .catch((error) => console.log("Error", error.message));
     },
   },
   created: async function () {

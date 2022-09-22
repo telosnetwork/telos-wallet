@@ -6,6 +6,10 @@ export const setAccountName = (state, accountName) => {
   state.accountName = accountName;
 };
 
+export const setEvmAddress = (state, address) => {
+  state.evmAddress = address;
+}
+
 export const setAutoLogin = (state, status) => {
   state.autoLogin = status;
 };

@@ -1,7 +1,7 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, action, mutation } from "vuex-class-component";
 import { vxm } from "../../../store";
-import { moduleStore } from "../../../store";
+import { store } from "../../../store";
 import { compareString, updateArray } from "../../../api/helpers";
 import { fetchUsdPriceOfTlos } from "../../../api/helpers";
 import { defaultModule } from "../../../router";
@@ -37,11 +37,11 @@ export class BancorModule extends VuexModule.With({
     }
     get currentNetwork() {
         if (
-            moduleStore.state.routeModule &&
-            moduleStore.state.routeModule.params &&
-            moduleStore.state.routeModule.params.service
+            store.state.routeModule &&
+            store.state.routeModule.params &&
+            store.state.routeModule.params.service
         ) {
-            return moduleStore.state.routeModule.params.service;
+            return store.state.routeModule.params.service;
         } else {
             return defaultModule;
         }
