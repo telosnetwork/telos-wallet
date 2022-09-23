@@ -66,87 +66,6 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 
-// TODO remove this after updating api, using another solution
-const dappsTemp =  [
-      {
-        "name": "Telos Swap",
-        "description": "Swap Telos based assets simply",
-        "link": "https://tswaps.com",
-        "icon": "https://dl.airtable.com/.attachmentThumbnails/00628edf400e95828dd8d2eacda60b3c/f81e5968",
-        "category": "finance",
-        "tags": [
-            "Live Apps",
-            "defi",
-            "Exchange"
-        ]
-      },{
-          "name": "AreaX NFT",
-          "description": "Popular NFT/Collectable Marketplace on Telos",
-          "link": "https://areaxnft.com",
-          "icon": "https://dl.airtable.com/.attachmentThumbnails/631bc8200b5d76e8687851452b2003dc/2a99e103",
-          "category": "marketplaces",
-          "tags": [
-              "NFT",
-              "Collectables"
-          ]
-      },{
-          "name": "Bridge (PTokens)",
-          "description": "Deposit and Withdraw TLOS between Telos, Ethereum and BSC",
-          "link": "https://dapp.ptokens.io/pbtc-on-telos",
-          "icon": "https://dl.airtable.com/.attachmentThumbnails/ba1646520eda710d6b5dccf05a435ec9/93a13700",
-          "category": "finance",
-          "tags": [
-              "defi"
-          ]
-      },{
-          "name": "Buy TLOS",
-          "description": "Purchase your first Telos Tokens",
-          "link": "https://telos.net",
-          "icon": "https://dl.airtable.com/.attachmentThumbnails/988c7e547419f91f24e0322bdfac02e6/e97caf0c",
-          "category": "finance",
-          "tags": [
-              "defi"
-          ]
-      },{
-          "name": "Explore Telos Dapps",
-          "description": "Explore the entire Telos Ecosystem",
-          "link": "https://telos.net/explore",
-          "icon": "https://dl.airtable.com/.attachmentThumbnails/7aaf44093122d02d5f44191db5ceaf51/d1998654",
-          "category": "marketplaces",
-          "tags": [
-              "Developers",
-              "Hardware Wallet",
-              "Coming Soon",
-              "Network explorer",
-              "Development tool",
-              "Market system",
-              "Service",
-              "Utility",
-              "Digital Goods",
-              "Wallets",
-              "Educational",
-              "Account Tool",
-              "Live Apps",
-              "Information",
-              "B2B",
-              "Plugin",
-              "Payments System",
-              "Games",
-              "defi",
-              "Exchange",
-              "Development Tool"
-          ]
-      },{
-          "name": "Telos Staking Rewards",
-          "description": "Earn a high APR just for Staking your TLOS to the network resource pool",
-          "link": "https://telos.staker.one/rewards",
-          "icon": "https://dl.airtable.com/.attachmentThumbnails/aa1a3b26fa92f34d97665bbbb3f8a276/09c47ff0",
-          "category": "finance",
-          "tags": [
-              "defi"
-          ]
-      }];
-
 export default {
   data() {
     return {
@@ -193,7 +112,6 @@ export default {
           tags: app.fields.Tags
         };
       });
-      json = dappsTemp; // TODO remove after updating api
       this.dapps.push(...json);
       this.page += 1;
       this.loadedAll = true;

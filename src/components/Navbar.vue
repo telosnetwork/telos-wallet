@@ -18,6 +18,9 @@
         <li>
           <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
         </li>
+        <li>
+          <a @click="switchTab('profile')"> <img :src="srcProfile" />Profile </a>
+        </li>
       </ul>
     </nav>
     <nav class="bottomNavBar">
@@ -103,8 +106,12 @@ export default {
         this.switchTab("coins");
         return this.srcDir + "earn.svg";
       }
-      if (this.selectedTab === "resources") return this.srcDir + "earn_selected.svg";
-      else return this.srcDir + "earn.svg";
+      if (this.selectedTab === "resources") return this.srcDir + "resources_selected.svg";
+      else return this.srcDir + "resources.svg";
+    },
+    srcProfile() {
+      if (this.selectedTab === "profile") return this.srcDir + "profile_selected.svg";
+      else return this.srcDir + "profile.svg";
     },
   },
   methods: {
