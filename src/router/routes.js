@@ -15,7 +15,7 @@ const routes = [
         children: [{ path: "", component: () => import("pages/DappSearch.vue") }]
     },
     {
-        path: "/settings",
+        path: "/profile",
         component: () => import("layouts/MainLayout.vue"),
         children: [{ path: "", component: () => import("pages/Settings.vue") }]
     },

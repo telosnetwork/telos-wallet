@@ -45,7 +45,7 @@
       <q-avatar
         v-if="$route.path === '/balance'"
         class="profileImg"
-        @click="$router.push('/settings')"
+        @click="$router.push('/profile')"
       >
         <img :src="userAvatar" />
       </q-avatar>

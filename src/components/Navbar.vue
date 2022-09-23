@@ -110,8 +110,12 @@ export default {
       else return this.srcDir + "resources.svg";
     },
     srcProfile() {
-      if (this.selectedTab === "profile") return this.srcDir + "profile_selected.svg";
-      else return this.srcDir + "profile.svg";
+      if (this.selectedTab === "profile"){
+        this.switchTab("profile");
+        return this.srcDir + "profile_selected.svg";
+      }else{
+        return this.srcDir + "profile.svg";
+      }
     },
   },
   methods: {
@@ -129,8 +133,8 @@ export default {
           this.$router.push("/balance", () => {});
           this.$emit("update:balanceTab", "collectables");
           break;
-        case "settings":
-          this.$router.push("/settings", () => {});
+        case "profile":
+          this.$router.push("/profile", () => {});
           break;
         case "earn":
           this.showRexStakeDlg = true;
