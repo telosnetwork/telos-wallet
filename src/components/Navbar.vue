@@ -36,13 +36,23 @@
           </a>
         </li>
         <li>
+          <a @click="switchTab('resources')">
+            <img style="width: 35px" :src="srcResources" />
+          </a>
+        </li>
+        <li>
+          <a @click="switchTab('nft')">
+            <img style="width: 35px" :src="srcNft" />
+          </a>
+        </li>
+        <li>
           <a @click="switchTab('dapps')">
             <img :src="srcDapps" />
           </a>
         </li>
         <li>
-          <a @click="switchTab('settings')">
-            <img :src="srcSettings" />
+          <a @click="switchTab('profile')">
+            <img :src="srcProfile" />
           </a>
         </li>
       </ul>
