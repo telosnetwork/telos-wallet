@@ -123,7 +123,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import moment from "moment";
 import { generateAddress } from "ethereumjs-util";
 
@@ -152,6 +152,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations("account", [
+      "setEvmAddress"
+    ]),
     addEvmNetwork() {
       let params = [];
       if (this.chainName !== "telos") {
@@ -205,7 +208,7 @@ export default {
     },
     async generateAddress(){
       //TODO set generated address in store
-      actions = [];
+      const actions = [];
       if (!this.evmAddress) {
           actions.push({
             account: "eosio.evm",
@@ -221,6 +224,12 @@ export default {
           actions,
           `Create EVM address for ${this.accountName}`
         );
+        const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+        if (evmAccount && evmAccount.address){
+            this.setEvmAddress(evmAccount.address);
+        }
         this.$q.notify({
           type: "primary",
           message: `EVM address created for ${this.accountName}`,
@@ -234,15 +243,7 @@ export default {
         this.$errorNotification(error);
       }
     },
-    //TODO remove
-    async handleGeneratedAddressDeposit(){
-      if (!this.noDepositInput){
-        this.depositOwnAddress = true;
-        await this.deposit();
-      }
-    },
     async deposit() {
-      debugger;
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
         this.$q.notify({
@@ -320,7 +321,6 @@ export default {
       }
     },
     evmAddress(val){
-      debugger;
       if (val){
         this.recipientAddress = val;
       }

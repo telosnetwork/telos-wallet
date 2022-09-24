@@ -388,8 +388,6 @@ export class TlosBancorModule extends VuexModule.With({
     }
     get isAuthenticated() {
       const test = this.$store;
-      console.dir(test);
-      debugger;
         return this.$store.getters[`${this.wallet}Wallet/isAuthenticated`];
     }
     get wallet() {

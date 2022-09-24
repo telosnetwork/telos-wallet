@@ -824,6 +824,7 @@ export default {
           actions,
           `Create a new EVM address`
         );
+        debugger;
         this.$q.notify({
           type: "primary",
           message: `A new address is successfully created`,

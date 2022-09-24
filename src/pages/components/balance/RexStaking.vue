@@ -186,7 +186,6 @@ export default {
     async unstakeRex() {
       let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
       let accountInfo = await this.$store.$api.getAccount(this.accountName);
-      //   console.log(accountInfo);
       let totalRex = Number(accountInfo.rex_info.rex_balance.split(" ")[0]);
       let portionToUnstake = Number(this.amount) / this.tokenRexBalance;
       let rexToUnstake = (totalRex * portionToUnstake).toFixed(4);
