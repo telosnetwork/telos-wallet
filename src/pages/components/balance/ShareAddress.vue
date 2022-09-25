@@ -61,7 +61,7 @@
                 <q-btn
                   v-if="
                     networkType === 'ptoken' ||
-                    (networkType === 'tevm' && !$root.tEVMAccount)
+                    (networkType === 'tevm' && !evmAddress)
                   "
                   class="purpleGradient q-mt-lg text-weight-medium text-caption"
                   push
@@ -138,10 +138,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
+import { mapGetters } from "vuex";
 import { QRCanvas } from "qrcanvas-vue";
-import { pERC20 } from "ptokens-perc20";
 import pTokens from "ptokens";
 import { copyToClipboard } from "quasar";
 
@@ -167,7 +165,7 @@ export default {
     QRCanvas,
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress"]),
     ...mapGetters("global", ["pTokens", "pTokenNetworks"]),
     searchCoins() {
       return this.coins.filter((coin) => {
@@ -192,7 +190,7 @@ export default {
       if (this.networkType === "telos") {
         return `${this.accountName}`;
       } else if (this.networkType === "tevm") {
-        return `${this.$root.tEVMAccount.address}`;
+        return `${this.evmAddress}`;
       } else if (this.networkType === "ethereum") {
         return `${this.accountName}`;
       } else if (this.networkType === "ptoken") {
@@ -206,8 +204,8 @@ export default {
       } else if (this.networkType === "ethereum") {
         return this.accountName;
       } else if (this.networkType === "tevm") {
-        if (this.$root.tEVMAccount) {
-          return this.$root.tEVMAccount.address;
+        if (this.evmAddress) {
+          return this.evmAddress;
         } else {
           return "Please Generate New Address";
         }
@@ -221,7 +219,7 @@ export default {
       return "";
     },
     isAddressAvailable() {
-      if (this.networkType === "tevm" && this.$root.tEVMAccount) {
+      if (this.networkType === "tevm" && this.evmAddress) {
         return true;
       }
       if (this.networkType === "ptoken" && this.depositAddress.length > 0) {
@@ -284,17 +282,23 @@ export default {
           type: "primary",
           message: `A new address is successfully created`,
         });
-        this.$root.tEVMAccount =
+        const evmAccount =
           await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
         this.networkType = "tevm";
+        if (evmAccount && evmAccount.address){
+          this.setEvmAddress(evmAccount.address);
+          this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+            .div(1e18)
+            .toFixed(4));
+        }
       } catch (error) {
         this.$errorNotification(error);
       }
     },
-    getImgUrl(pic) {
-      return require("src/assets/evm/ethereumLogo.svg"); //+pic);
+    getImgUrl() {
+      return require("src/assets/evm/ethereumLogo.svg");
     },
     async generateDepositAddress() {
       this.awaiting = false;

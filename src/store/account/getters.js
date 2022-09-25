@@ -1,6 +1,7 @@
 export const isAuthenticated = ({ accountName }) => !!accountName;
 export const accountName = ({ accountName }) => accountName;
 export const evmAddress = ({ evmAddress }) => evmAddress;
+export const evmBalance = ({evmBalance}) => evmBalance;
 export const loading = ({ loading }) => loading;
 export const isAutoLoading = ({ autoLogin }) => autoLogin;
 export const hasProfile = ({ profiles, accountName }) => profiles.hasOwnProperty(accountName);

@@ -269,7 +269,7 @@ export default {
     tokenAvatar,
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress"]),
     ...mapGetters("global", ["pTokens", "pTokenNetworks"]),
     showDlg: {
       get() {
@@ -430,7 +430,7 @@ export default {
       if (val === "telos") {
         this.toAddress = this.toAddress.toLowerCase();
       } else if (val === "tevm") {
-        if (!this.$root.tEVMAccount) {
+        if (!this.evmAddress) {
           this.$q.notify({
             type: "dark",
             message: `Please generate your tEVM address`,

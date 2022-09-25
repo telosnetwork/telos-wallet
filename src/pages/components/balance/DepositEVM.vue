@@ -124,8 +124,6 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import moment from "moment";
-import { generateAddress } from "ethereumjs-util";
 
 export default {
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
@@ -153,7 +151,7 @@ export default {
   },
   methods: {
     ...mapMutations("account", [
-      "setEvmAddress"
+      "setEvmAddress", "setEvmBalance"
     ]),
     addEvmNetwork() {
       let params = [];
@@ -207,7 +205,6 @@ export default {
       }
     },
     async generateAddress(){
-      //TODO set generated address in store
       const actions = [];
       if (!this.evmAddress) {
           actions.push({
@@ -229,6 +226,9 @@ export default {
           );
         if (evmAccount && evmAccount.address){
             this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+            .div(1e18)
+            .toFixed(4));
         }
         this.$q.notify({
           type: "primary",

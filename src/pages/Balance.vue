@@ -26,42 +26,6 @@
             </div>
           </div>
 
-          <!-- EVM address -->
-          <!-- <div class="text-caption q-pt-sm">
-            <q-btn
-              v-if="!$root.tEVMAccount"
-              no-caps
-              rounded
-              outline
-              style="width: 12rem;"
-              :label="'Generate EVM Address'"
-              @click="generateEVMAddress()"
-            />
-            <q-btn
-              v-else
-              rounded
-              outline
-              no-caps
-              @click="copyStrToClipboard($root.tEVMAccount.address)"
-            >
-              <div v-if="!showEVMAddress" @click="showEVMWarning = true">
-                Show EVM address
-              </div>
-              <div v-if="showEVMAddress" class="lt-md">
-                {{ shortenedEvmAddress }}
-              </div>
-              <div v-if="showEVMAddress" class="gt-sm">{{ $root.tEVMAccount.address }}</div>
-            </q-btn>
-            <q-icon
-              class="q-ml-sm"
-              @click="addEvmNetwork()"
-              name="fas fa-external-link-alt"
-              size="1.3rem"
-            >
-              <q-tooltip>Add EVM network to wallet</q-tooltip></q-icon
-            >
-          </div> -->
-
           <!-- Action Buttons -->
           <div class="row q-mt-lg q-mb-md">
             <q-btn
@@ -240,9 +204,7 @@
 
 <script>
 import BigNumber from "bignumber.js";
-import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
-import LoginButton from "components/LoginButton.vue";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 import Coin from "./components/balance/Coin";
 import Collectables from "./components/balance/Collectables";
 import Send from "./components/balance/Send";
@@ -257,6 +219,7 @@ import DepositEVM from "./components/balance/DepositEVM";
 import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
+import { evmBalance } from 'src/store/account/getters';
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
 const TSWAPS_URL = "https://tswaps.com/swap";
@@ -327,13 +290,12 @@ export default {
       showEVMWarning: false,
       showEVMAddress: false,
       showRexStakeDlg: false,
-      tEVMBalance: 0,
       tEVMWithdrawing: false,
       avatar: "",
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress", "evmBalance"]),
     ...mapGetters("global", [
       "footerHeight",
       "minSpace",
@@ -342,11 +304,6 @@ export default {
       "suggestTokens",
       "pTokenNetworks",
     ]),
-    // hasEVMAddress() {
-    //   console.dir(this.$root);
-    //   debugger;
-    //   return this.$root.tEVMAccount && this.$root.tEVMAccount.address
-    // },
     totalAmount() {
       return this.coins
         .map(
@@ -391,13 +348,17 @@ export default {
       }
     },
     shortenedEvmAddress() {
-      const address = this.$root.tEVMAccount.address;
+      const address = this.evmAddress;
       return `${address.slice(0, 12)}..${address.slice(-12)}`;
     },
   },
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile"]),
     ...mapActions("rex", ["getRexBalance"]),
+    ...mapMutations("account", [
+      "setEvmAddress",
+      "setEvmBalance"
+    ]),
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
         this.$q.notify({
@@ -435,12 +396,9 @@ export default {
     clickPurchase() {
       this.selectedCoin = this.coins.find((coin) => coin.symbol === "TLOS");
       window.open(GETTING_STARTED_URL);
-      //this.showBuyAmountDlg = true;
     },
     clickExchange() {
       window.open(TSWAPS_URL);
-      // this.$emit('update:showExchangeDlg', true); // not working anymore
-      //   this.showExchangeDlg = true;
     },
     handlePan({ evt, ...info }) {
       this.coinViewHeight -= info.delta.y;
@@ -559,13 +517,7 @@ export default {
 
       this.coins.forEach(async (coin) => {
         if (coin.network === "tevm") {
-          const evmAccount =
-            await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-              this.accountName
-            );
-          coin.amount = BigNumber(evmAccount.balance.toString())
-            .div(1e18)
-            .toFixed(4);
+          coin.amount = this.evmBalance;
         }
       });
 
@@ -772,8 +724,8 @@ export default {
       this.nftTagLoading = false;
     },
     getCurrenttEVMBalance() {
-      if (this.$root.tEVMAccount) {
-        const balanceStr = this.$root.tEVMAccount.balance.toString();
+      if (this.evmBalance) {
+        const balanceStr = this.evmBalance.toString();
         return parseFloat(BigNumber(balanceStr).div(1e18).toFixed(4)) || 0;
       }
       return 0;
@@ -796,48 +748,18 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Withdraw ${quantityStr} from ${this.$root.tEVMAccount.address}`
+          `Withdraw ${quantityStr} from ${this.evmAddress}`
         );
         this.$q.notify({
           type: "primary",
-          message: `Successfully withdrew ${quantityStr} from ${this.$root.tEVMAccount.address}`,
+          message: `Successfully withdrew ${quantityStr} from ${this.evmAddress}`,
         });
-        this.oldtEVMBalance = this.getCurrenttEVMBalance();
       } catch (error) {
         this.$errorNotification(error);
       }
 
       this.tEVMWithdrawing = false;
-    },
-    async generateEVMAddress() {
-      let actions = [];
-      actions.push({
-        account: process.env.EVM_CONTRACT,
-        name: "create",
-        data: {
-          account: this.accountName,
-          data: "test",
-        },
-      });
-      try {
-        const transaction = await this.$store.$api.signTransaction(
-          actions,
-          `Create a new EVM address`
-        );
-        debugger;
-        this.$q.notify({
-          type: "primary",
-          message: `A new address is successfully created`,
-        });
-        this.$root.tEVMAccount =
-          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-        this.networkType = "tevm";
-      } catch (error) {
-        this.$errorNotification(error);
-      }
-    },
+    }
   },
   created: async function () {
     this.interval = setInterval(() => {
@@ -884,14 +806,22 @@ export default {
         this.loadUserTokens();
         await this.loadPrices();
       }
-
-      try {
-        this.$root.tEVMAccount =
-          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-        this.tEVMBalance = this.getCurrenttEVMBalance();
-      } catch {}
+      if (!this.evmAddress){
+        try {
+          const evmAccount =
+            await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+              this.accountName
+            );
+          if (evmAccount && evmAccount.address){
+            this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+              .div(1e18)
+              .toFixed(4));
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
       window.time = Date.now() / 1000;
     }, 5000);
   },

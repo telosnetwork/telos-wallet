@@ -245,7 +245,6 @@ export default {
       }
     },
     async createEvmApi() {
-      this.$root.oldtEVMBalance = 0;
       try {
         this.$root.tEVMApi = new TelosEvmApi({
           endpoint: process.env.HYPERION_ENDPOINT,
@@ -260,10 +259,12 @@ export default {
           );
           if (evmAccount && evmAccount.address){
             this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(evmAccount.balance);
           }
         } catch (e) {
           console.log(e);
           this.setEvmAddress(null);
+          this.setEvmBalance(null);
         }
       } catch (e) {
         console.log(e);
