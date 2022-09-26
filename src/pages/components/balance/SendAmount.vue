@@ -195,7 +195,7 @@
       </div>
     </div>
     <SendToAddress
-      :showSendToAddressDlg.sync="showSendToAddressDlg"
+      v-model:showSendToAddressDlg="showSendToAddressDlg"
       :selectedCoin="selectedCoin"
       :sendAmount="sendCoinAmount"
     />
@@ -271,6 +271,7 @@ export default {
     ...mapActions("evm", ["getGasPrice"]),
     selectCoin(coin) {
       this.showShareAddressDlg = true;
+      // eslint-disable-next-line vue/no-mutating-props
       this.selectedCoin = coin;
     },
     changeCoinInput() {
@@ -341,7 +342,7 @@ export default {
     },
   },
   async mounted() {
-    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
+    this.$emitter.on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendToAddressDlg = false;
     });
     this.gasPrice = new BigNumber("0x" + (await this.getGasPrice()));

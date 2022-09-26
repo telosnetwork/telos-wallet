@@ -47,12 +47,6 @@
           </q-item>
         </div>
 
-        <q-item class="row justify-center q-mt-md">
-          <q-btn rounded class="settingBtn" @click="manageResources()">
-            Manage Resources
-          </q-btn>
-        </q-item>
-
         <!-- Upload Image Button -->
 
         <div class="profileInformation">
@@ -148,12 +142,6 @@
             @click="save"
             :disable="display_name.length === 0"
           />
-          <q-btn
-            class="settingBtn col"
-            rounded
-            label="LOGOUT"
-            @click="signOut"
-          />
         </q-item>
       </q-list>
 
@@ -214,18 +202,13 @@
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
       </div>
     </div>
-    <ManageResources :showManageResourcesDlg.sync="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import LoginButton from "components/LoginButton.vue";
-import ManageResources from "components/ManageResources.vue";
-import { accountName } from "src/store/account/getters";
 
 export default {
-  components: { ManageResources },
   data() {
     return {
       accountHasProfile: false,
@@ -243,7 +226,6 @@ export default {
       connected: false,
       confirm: false,
       keyView: false,
-      showManageResourcesDlg: false,
     };
   },
   computed: {
@@ -543,12 +525,6 @@ export default {
         message: "Copied it to the clipboard successfully",
       });
     },
-    signOut() {
-      this.$root.$emit("signOut");
-    },
-    manageResources() {
-      this.showManageResourcesDlg = true;
-    },
   },
   created: async function () {
     this.loadUserProfile();
@@ -564,14 +540,8 @@ export default {
       this.account = this.$store.$account.account;
       this.privateKey = this.$store.$account.privateKey;
     }, 50);
-    // if (!window.location.href.includes("localhost")) {
-    //   this.clearInterval = setInterval(async () => {
-    //     console.clear();
-    //     console.log("Don't try to use Inspector!");
-    //   }, 5000);
-    // }
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     if (this.checkInterval) clearInterval(this.checkInterval);
     if (this.clearInterval) clearInterval(this.clearInterval);
   },

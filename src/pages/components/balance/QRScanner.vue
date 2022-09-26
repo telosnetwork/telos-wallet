@@ -108,7 +108,7 @@ export default {
         }
 
         this.$emit('update:showQRScannerDlg', false);
-        this.$root.$emit('qrcode_scanned', { accountName, coinName, networkType});
+        this.$emitter.emit('qrcode_scanned', { accountName, coinName, networkType});
       }
     }
   },

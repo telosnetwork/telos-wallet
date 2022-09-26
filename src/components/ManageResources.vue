@@ -155,7 +155,7 @@
             rounded
             class="purpleGradient"
             size="lg"
-            :label="selectedResource === 'RAM' ? 'Buy' : 'Stake'"
+            :label="selectedResource === 'RAM' ? 'Buy' : 'Add'"
             style="width: 15em"
           />
         </div>
@@ -318,7 +318,7 @@ export default {
         this.accountInfo = await this.$store.$api.getAccount(
           this.accountName.toLowerCase()
         );
-        this.$root.$emit("resources_bought");
+        this.$emitter.emit("resources_bought");
       } catch (error) {
         this.$errorNotification(error);
       }

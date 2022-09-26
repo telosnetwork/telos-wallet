@@ -4,7 +4,7 @@
       <div
         class="q-pb-lg q-pt-xl text-subtitle1 text-weight-medium text-center"
       >
-        dApps
+        Telos Native dApps
       </div>
       <div class="q-px-md">
         <q-input
@@ -65,12 +65,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-// import moment from 'moment';
 
 export default {
   data() {
     return {
-      dapps: [],
+      dapps:[],
       searchDappName: "",
       page: 1,
       loadedAll: false
@@ -176,6 +175,6 @@ div::-webkit-scrollbar-thumb {
 
 
 @media only screen and (max-width: 1000px) {
-  
+
 }
 </style>

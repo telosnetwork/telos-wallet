@@ -90,8 +90,6 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
-import { networkInterfaces } from "os";
 import BigNumber from "bignumber.js";
 
 export default {
@@ -138,6 +136,7 @@ export default {
   },
   methods: {
     ...mapActions("evm", ["getGasPrice"]),
+    ...mapGetters("account", ["evmAddress"]),
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
@@ -163,7 +162,7 @@ export default {
           if (this.selectedCoin.name === "Telos EVM") {
             const rawTrx = await this.$root.tEVMApi.transfer({
               account: this.accountName,
-              sender: this.$root.tEVMAccount.address,
+              sender: this.evmAddress,
               to: this.toAddress,
               quantity: quantityStr,
               returnRaw: true
@@ -177,7 +176,7 @@ export default {
                 ram_payer: this.accountName.toLowerCase(),
                 tx: rawTrx,
                 estimate_gas: false,
-                sender: this.$root.tEVMAccount.address.substring(2)
+                sender: this.evmAddress.substring(2)
               }
             });
           } else {
@@ -246,7 +245,7 @@ export default {
           type: "primary",
           message: `${quantityStr} is sent to ${this.toAddress}`
         });
-        this.$root.$emit("successfully_sent", this.sendAmount, this.toAddress);
+        this.$emitter.emit("successfully_sent", this.sendAmount, this.toAddress);
       } catch (error) {
         this.$errorNotification(error);
       }

@@ -1,6 +1,4 @@
-import Vue from "vue";
-import Vuex from "vuex";
-
+import { createStore } from 'vuex';
 import account from "./account";
 import general from "./general";
 import global from "./global";
@@ -16,10 +14,9 @@ import { NetworkModule } from "./modules/network/index";
 import { TlosNetworkModule } from "./modules/network/tlosNetwork";
 import { createProxy, extractVuexModule } from "vuex-class-component";
 
-Vue.use(Vuex);
 
 export default function() {
-  const Store = new Vuex.Store({
+  const Store = createStore({
     modules: {
       general,
       account,
@@ -35,7 +32,7 @@ export default function() {
   return Store;
 }
 
-export const store = new Vuex.Store({
+export const store = createStore({
   modules: Object.assign(
     Object.assign(
       Object.assign(

@@ -237,7 +237,7 @@
       </div>
     </div>
     <SendConfirm
-      :showSendConfirmDlg.sync="showSendConfirmDlg"
+      v-model:showSendConfirmDlg="showSendConfirmDlg"
       :selectedCoin="selectedCoin"
       :sendAmount="sendAmount"
       :toAddress="toAddress"
@@ -269,7 +269,7 @@ export default {
     tokenAvatar,
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress"]),
     ...mapGetters("global", ["pTokens", "pTokenNetworks"]),
     showDlg: {
       get() {
@@ -384,14 +384,14 @@ export default {
       this.showSendConfirmDlg = true;
     },
     showQRScanner() {
-      this.$root.$emit("show_qrscanner");
+      this.$emitter.emit("show_qrscanner");
     },
   },
   mounted() {
-    this.$root.$on("successfully_sent", (sendAmount, toAddress) => {
+    this.$emitter.on("successfully_sent", (sendAmount, toAddress) => {
       this.showSendConfirmDlg = false;
     });
-    this.$root.$on(
+    this.$emitter.on(
       "qrcode_scanned",
       ({ accountName, coinName, networkType }) => {
         if (this.showSendToAddressDlg) {
@@ -430,7 +430,7 @@ export default {
       if (val === "telos") {
         this.toAddress = this.toAddress.toLowerCase();
       } else if (val === "tevm") {
-        if (!this.$root.tEVMAccount) {
+        if (!this.evmAddress) {
           this.$q.notify({
             type: "dark",
             message: `Please generate your tEVM address`,

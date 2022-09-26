@@ -387,14 +387,15 @@ export class TlosBancorModule extends VuexModule.With({
         };
     }
     get isAuthenticated() {
-        return this.$store.rootGetters[`${this.wallet}Wallet/isAuthenticated`];
+      const test = this.$store;
+        return this.$store.getters[`${this.wallet}Wallet/isAuthenticated`];
     }
     get wallet() {
         return "tlos";
     }
     get balance() {
         return token => {
-            return this.$store.rootGetters[`${this.wallet}Network/balance`](token);
+            return this.$store.getters[`${this.wallet}Network/balance`](token);
         };
     }
     get newPoolTokenChoices() {

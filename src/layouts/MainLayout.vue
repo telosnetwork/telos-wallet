@@ -23,7 +23,7 @@
     <div class="videoOverlay" />
     <div class="videoOverlay shadedOverlay" />
 
-    <nav-bar :balanceTab.sync="balanceTab" v-if="isAuthenticated" />
+    <nav-bar v-model:balanceTab="balanceTab" v-if="isAuthenticated" />
     <q-page-container
       :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
     >
@@ -45,14 +45,14 @@
       <q-avatar
         v-if="$route.path === '/balance'"
         class="profileImg"
-        @click="$router.push('/settings')"
+        @click="$router.push('/profile')"
       >
         <img :src="userAvatar" />
       </q-avatar>
       <router-view
-        :loadedCoins.sync="coins"
-        :loadedNftTokens.sync="nftTokens"
-        :balanceTab.sync="balanceTab"
+        v-model:loadedCoins="coins"
+        v-model:loadedNftTokens="nftTokens"
+        v-model:balanceTab="balanceTab"
       />
     </q-page-container>
   </q-layout>
@@ -99,7 +99,7 @@ export default {
       profileAccountName: null,
       accountHasProfile: false,
       accountHistory: [{}],
-      balanceTab: "Coins",
+      balanceTab: "coins",
       pages: pagesData,
       coins: [],
       nftTokens: [],

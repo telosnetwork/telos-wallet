@@ -70,7 +70,7 @@
       <q-table
         class="history-table"
         title="Account action history"
-        :data="accountHistory"
+        :rows="accountHistory"
         :columns="accountHistoryColumns"
         row-key="name"
         :pagination="{ rowsPerPage: 10 }"

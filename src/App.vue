@@ -1,7 +1,5 @@
 <template>
-  <div id="q-app">
     <router-view />
-  </div>
 </template>
 <script>
 import { vxm } from "./store/index.js";

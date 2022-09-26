@@ -7,9 +7,9 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 
-require("dotenv").config();
+const ESLintPlugin = require('eslint-webpack-plugin')
+const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
 const env = require("./env");
-
 
 module.exports = function(/* ctx */) {
   return {
@@ -22,7 +22,7 @@ module.exports = function(/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
-    boot: ["ual", "hyperion", "api", "errorHandling", "helpers"],
+    boot: ["ual", "hyperion", "api", "errorHandling", "helpers", "mixin", "emitter"],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.scss"],
@@ -45,6 +45,12 @@ module.exports = function(/* ctx */) {
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
       env,
+      chainWebpack (chain) {
+        chain
+          .plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
+        chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin);
+      },
 
       // transpile: false,
 
@@ -63,14 +69,6 @@ module.exports = function(/* ctx */) {
       // extractCSS: false,
 
       // https://quasar.dev/quasar-cli/handling-webpack
-      extendWebpack(cfg) {
-        cfg.module.rules.push({
-          enforce: "pre",
-          test: /\.(js|vue)$/,
-          loader: "eslint-loader",
-          exclude: /node_modules/
-        });
-      }
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
@@ -83,7 +81,7 @@ module.exports = function(/* ctx */) {
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
       iconSet: "material-icons", // Quasar icon set
-      lang: "en-us", // Quasar language pack
+      lang: "en-US", // Quasar language pack
       config: {},
 
       // Possible values for "importStrategy":

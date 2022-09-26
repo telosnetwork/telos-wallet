@@ -15,7 +15,7 @@ const routes = [
         children: [{ path: "", component: () => import("pages/DappSearch.vue") }]
     },
     {
-        path: "/settings",
+        path: "/profile",
         component: () => import("layouts/MainLayout.vue"),
         children: [{ path: "", component: () => import("pages/Settings.vue") }]
     },
@@ -23,7 +23,7 @@ const routes = [
     // Always leave this as last one,
     // but you can also remove it
     {
-        path: "*",
+        path: '/(.*)*',
         component: () => import("pages/Error404.vue")
     }
 ];

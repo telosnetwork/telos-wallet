@@ -18,7 +18,7 @@
       </div>
       <div class="popupHeading">
         <div />
-        <div class="text-h5 text-weight-medium text-center q-mt-lg">REX</div>
+        <div class="text-h5 text-weight-medium text-center q-mt-lg">Staking (REX)</div>
         <div />
       </div>
       <div class="text-center">
@@ -34,8 +34,8 @@
           rounded
           no-caps
           :options="[
-            { label: 'Start Earning', value: true },
-            { label: 'Return Funds', value: false },
+            { label: 'Stake', value: true },
+            { label: 'Unstake', value: false },
           ]"
         />
         <div v-if="staking" @click="amount = tokenAmount" class="q-mt-md">
@@ -111,7 +111,7 @@
             class="purpleGradient depositBtn"
             no-caps
             rounded
-            :label="staking ? 'Start Earning' : 'Return Funds'"
+            :label="staking ? 'Stake Now' : 'Unstake Now'"
             @click="staking ? tryStake() : tryUnstake()"
           />
         </div>
@@ -186,7 +186,6 @@ export default {
     async unstakeRex() {
       let quantityStr = `${Number(this.amount).toFixed(4)} TLOS`;
       let accountInfo = await this.$store.$api.getAccount(this.accountName);
-      //   console.log(accountInfo);
       let totalRex = Number(accountInfo.rex_info.rex_balance.split(" ")[0]);
       let portionToUnstake = Number(this.amount) / this.tokenRexBalance;
       let rexToUnstake = (totalRex * portionToUnstake).toFixed(4);

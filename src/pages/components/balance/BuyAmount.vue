@@ -213,6 +213,7 @@ export default {
   },
   methods: {
     selectCoin(coin) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.selectedCoin = coin;
       this.$emit("update:selectedCoin", coin);
       this.$emit("update:showHistoryDlg", true);

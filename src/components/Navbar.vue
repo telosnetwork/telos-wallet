@@ -4,26 +4,32 @@
       <img src="~assets/telosLogo.svg" class="telosLogo" />
       <ul>
         <li>
-          <a @click="switchTab('wallet')"> <img :src="srcWallet" />Wallet </a>
+          <a @click="switchTab('coins')"> <img :src="srcWallet" />Wallet </a>
         </li>
         <li>
-          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
+          <a @click="switchTab('earn')"> <img :src="srcEarn" />Staking (REX)</a>
         </li>
         <li>
-          <a @click="switchTab('coins')"> <img :src="srcCoins" />Coin </a>
+          <a @click="switchTab('resources')"> <img :src="srcResources" />Resource Management</a>
         </li>
         <li>
           <a @click="switchTab('nft')"> <img :src="srcNft" />NFTs </a>
         </li>
         <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />Earn </a>
+          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
+        </li>
+        <li>
+          <a @click="switchTab('profile')"> <img :src="srcProfile" />Profile </a>
+        </li>
+        <li>
+          <a @click="signOut"> <img :src="srcLogout" />Log Out </a>
         </li>
       </ul>
     </nav>
     <nav class="bottomNavBar">
       <ul>
         <li>
-          <a @click="switchTab('wallet')">
+          <a @click="switchTab('coins')">
             <img :src="srcWallet" />
           </a>
         </li>
@@ -33,38 +39,56 @@
           </a>
         </li>
         <li>
+          <a @click="switchTab('resources')">
+            <img style="width: 35px" :src="srcResources" />
+          </a>
+        </li>
+        <li>
+          <a @click="switchTab('nft')">
+            <img style="width: 35px" :src="srcNft" />
+          </a>
+        </li>
+        <li>
           <a @click="switchTab('dapps')">
             <img :src="srcDapps" />
           </a>
         </li>
         <li>
-          <a @click="switchTab('settings')">
-            <img :src="srcSettings" />
+          <a @click="switchTab('profile')">
+            <img :src="srcProfile" />
+          </a>
+        </li>
+        <li>
+          <a @click="signOut">
+            <img :src="srcLogout" />
           </a>
         </li>
       </ul>
     </nav>
-    <RexStaking :showRexStakeDlg.sync="showRexStakeDlg" />
+    <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
+    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import RexStaking from "../pages/components/balance/RexStaking.vue";
+import RexStaking from "src/pages/components/balance/RexStaking.vue";
+import ManageResources from "src/components/ManageResources.vue";
 export default {
   props: ["balanceTab"],
-  components: { RexStaking },
+  components: { RexStaking, ManageResources },
   data() {
     return {
       srcDir: "/nav/",
-      selectedTab: "wallet",
+      selectedTab: "coins",
       showRexStakeDlg: false,
+      showManageResourcesDlg: false
     };
   },
   computed: {
     ...mapGetters("account", ["isAuthenticated"]),
     srcWallet() {
-      if (this.selectedTab === "wallet")
+      if (this.selectedTab === "coins")
         return this.srcDir + "wallet_selected.svg";
       else return this.srcDir + "wallet.svg";
     },
@@ -89,46 +113,80 @@ export default {
     },
     srcEarn() {
       if (this.selectedTab === "earn" && this.showRexStakeDlg == false) {
-        this.switchTab("wallet");
+        this.switchTab("coins");
         return this.srcDir + "earn.svg";
       }
       if (this.selectedTab === "earn") return this.srcDir + "earn_selected.svg";
       else return this.srcDir + "earn.svg";
     },
+    srcResources() {
+      if (this.selectedTab === "resources" && this.showManageResourcesDlg == false) {
+        this.switchTab("coins");
+        return this.srcDir + "settings.svg";
+      }
+      if (this.selectedTab === "resources") return this.srcDir + "settings_selected.svg";
+      else return this.srcDir + "settings.svg";
+    },
+    srcProfile() {
+      if (this.selectedTab === "profile"){
+        this.switchTab("profile");
+        return this.srcDir + "profile_selected.svg";
+      }else{
+        return this.srcDir + "profile.svg";
+      }
+    },
+    srcLogout() {
+        return this.srcDir + "resources.svg";
+    },
   },
   methods: {
+    ...mapActions("account", [
+      "logout"
+    ]),
     switchTab(val) {
       this.selectedTab = val;
       switch (val) {
-        case "wallet":
+        case "coins":
           this.$router.push("/balance", () => {});
+          this.$emit("update:balanceTab", "coins");
           break;
         case "dapps":
           this.$router.push("/dappsearch", () => {});
           break;
-        case "coins":
-          this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Coins");
-          break;
         case "nft":
           this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "Collectables");
+          this.$emit("update:balanceTab", "collectables");
           break;
-        case "settings":
-          this.$router.push("/settings", () => {});
+        case "profile":
+          this.$router.push("/profile", () => {});
           break;
         case "earn":
           this.showRexStakeDlg = true;
-          //   this.$router.push("/earn");
+          break;
+        case "resources":
+          this.showManageResourcesDlg = true;
           break;
         default:
           break;
       }
     },
+    async signOut() {
+      if (gapi) {
+        const auth2 = gapi.auth2.getAuthInstance();
+        if (auth2) {
+          auth2.signOut().then(function() {
+            auth2.disconnect();
+            console.log("User signed out.");
+          });
+        }
+      }
+      this.$emit("update:loadedCoins", []);
+      this.logout();
+    },
   },
   watch: {
-    balanceTab() {
-      if (this.balanceTab === "Coins") this.switchTab("coins");
+    balanceTab(val) {
+      if (val === "coins") this.switchTab(val);
       else this.switchTab("nft");
     },
   },

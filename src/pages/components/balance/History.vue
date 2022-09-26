@@ -191,7 +191,7 @@
                 >
                   <div class="column">
                     <img src="/nav/earn_selected.svg" />
-                    Earn
+                    Stake
                   </div>
                 </q-btn>
               </div>
@@ -286,8 +286,8 @@ import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 
-const KUCOIN_BUY_URL = "https://www.kucoin.com/trade/TLOS-USDT";
-const TSWAPS_URL = "https://tswaps.com/";
+const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
+const TSWAPS_URL = "https://tswaps.com/swap";
 
 export default {
   components: {
@@ -362,7 +362,7 @@ export default {
       this.$emit("update:showShareAddressDlg", true);
     },
     buy() {
-      window.open(KUCOIN_BUY_URL);
+      window.open(GETTING_STARTED_URL);
       //this.$emit("update:showBuyAmountDlg", true);
     },
     convert() {

@@ -25,21 +25,6 @@
         />
       </div>
     </div>
-
-    <!-- Logout -->
-    <div v-if="isAuthenticated" class="row absolute full-width">
-      <q-btn
-        @click="signOut"
-        icon="power_settings_new"
-        size="md"
-        padding="3px 3px 3px 15px"
-        no-caps
-        rounded
-        flat
-        class="q-pa-none logout-btn"
-      />
-    </div>
-
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
       <div class="column showLoginPopup q-pa-lg popupCard">
@@ -154,12 +139,6 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
-// import Authenticate from "../pages/components/auth/Authenticate";
-// var window_1 = require("../utils/telos-keycatjs/utils/window");
-// var Blockchain_1 = require("../utils/telos-keycatjs/Blockchain");
-var window_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/utils/window");
-var Blockchain_1 = require("@telosnetwork/telos-keycatjs/dist/cjs/Blockchain");
-
 
 export default {
   data() {
@@ -213,65 +192,12 @@ export default {
     ]),
     ...mapMutations("account", [
       "setAccountName",
+      "setEvmAddress",
       "getAccountProfile",
       "setLoadingWallet"
     ]),
     async signUp() {
-      // this.signPopup('/create'); // enable this to open signup popup
-      // this.onLogin(1)
       this.openUrl("https://app.telos.net/accounts/add");
-    },
-    async signIn() {
-      // this.signPopup("/signin");
-    },
-    async signOut() {
-      if (gapi) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.signOut().then(function() {
-            auth2.disconnect();
-            console.log("User signed out.");
-          });
-        }
-      }
-      this.$emit("update:loadedCoins", []);
-      this.logout();
-    },
-    async signPopup(type) {
-      const keycat = this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ];
-      var url = window_1.makeWindowUrl(
-        keycat.keycatOrigin,
-        type,
-        keycat.makeUrlData()
-      );
-      const users = await this.$ual.authenticators[0].keycatMap[
-        this.$ual.authenticators[0].selectedChainId
-      ].spawnWindow(url);
-      if (users) {
-        const accountName = users.accountName;
-        const permission = users.permission;
-        const publicKey = users.publicKey;
-        const nowTimestamp = Math.floor(new Date().getTime() / 1000);
-        const expiration = 604800 + nowTimestamp;
-        this.$ualUser = users;
-        this.$type = "ual";
-        this.setAccountName(accountName);
-        window.localStorage.setItem("expiration", expiration);
-        window.localStorage.setItem("accountName", accountName);
-        window.localStorage.setItem("permission", permission);
-        window.localStorage.setItem("publicKey", publicKey);
-        window.localStorage.setItem("account", accountName);
-        window.localStorage.setItem("returning", true);
-        window.localStorage.setItem(
-          "autoLogin",
-          this.$ual.authenticators[0].constructor.name
-        );
-        this.getUserProfile();
-        this.setLoadingWallet();
-        await this.createEvmApi();
-      }
     },
     async onLogin(idx) {
         const error = await this.login({ idx });
@@ -280,7 +206,6 @@ export default {
         } else {
           this.error = error;
         }
-      // }
     },
     openUrl(url) {
       window.open(url);
@@ -292,7 +217,6 @@ export default {
       }
     },
     async createEvmApi() {
-      this.$root.oldtEVMBalance = 0;
       try {
         this.$root.tEVMApi = new TelosEvmApi({
           endpoint: process.env.HYPERION_ENDPOINT,
@@ -302,12 +226,17 @@ export default {
           telosPrivateKeys: []
         });
         try {
-          this.$root.tEVMAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
+          if (evmAccount && evmAccount.address){
+            this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(evmAccount.balance);
+          }
         } catch (e) {
           console.log(e);
-          this.$root.tEVMAccount = null;
+          this.setEvmAddress(null);
+          this.setEvmBalance(null);
         }
       } catch (e) {
         console.log(e);
@@ -368,7 +297,7 @@ export default {
         if (transaction) this.cpuLow = false;
         if (transaction) this.netLow = false;
         if (transaction) this.resLow = false;
-        this.$root.$emit("resources_bought");
+        this.$emitter.emit("resources_bought");
       } catch (error) {
         this.$errorNotification(error);
       }
@@ -394,11 +323,11 @@ export default {
       this.ramAvail = account.ram_quota - account.ram_usage;
       this.cpuAvail = account.cpu_limit.available;
       this.netAvail = account.net_limit.available;
-      if (account.ram_usage / account.ram_quota > this.ramThres || this.ramAvail < this.ramMinimum) 
+      if (account.ram_usage / account.ram_quota > this.ramThres || this.ramAvail < this.ramMinimum)
         this.ramLow = true;
-      if (1 - this.netAvail / account.net_limit.max > this.netThres || this.netAvail < this.netMinimum) 
+      if (1 - this.netAvail / account.net_limit.max > this.netThres || this.netAvail < this.netMinimum)
         this.netLow = true;
-      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres || this.cpuAvail < this.cpuMinimum) 
+      if (1 - this.cpuAvail / account.cpu_limit.max > this.cpuThres || this.cpuAvail < this.cpuMinimum)
         this.cpuLow = true;
       this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }
@@ -420,24 +349,14 @@ export default {
         this.showAuth = true;
       }
     }, 500);
-    this.$root.$on("signOut", () => {
-      this.signOut();
-    });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.authInterval) clearInterval(this.authInterval);
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.logout-btn {
-  /* // margin-left: auto; */
-  left: -15px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
 
 .showLoginPopup {
   width: 30rem;
