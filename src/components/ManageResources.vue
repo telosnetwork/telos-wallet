@@ -155,7 +155,7 @@
             rounded
             class="purpleGradient"
             size="lg"
-            :label="selectedResource === 'RAM' ? 'Buy' : 'Stake'"
+            :label="selectedResource === 'RAM' ? 'Buy' : 'Add'"
             style="width: 15em"
           />
         </div>
