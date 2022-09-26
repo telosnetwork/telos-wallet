@@ -63,11 +63,6 @@
             <img :src="srcLogout" />
           </a>
         </li>
-        <li>
-          <a @click="signOut">
-            <img :src="srcLogout" />
-          </a>
-        </li>
       </ul>
     </nav>
     <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
@@ -127,10 +122,10 @@ export default {
     srcResources() {
       if (this.selectedTab === "resources" && this.showManageResourcesDlg == false) {
         this.switchTab("coins");
-        return this.srcDir + "earn.svg";
+        return this.srcDir + "settings.svg";
       }
-      if (this.selectedTab === "resources") return this.srcDir + "resources_selected.svg";
-      else return this.srcDir + "resources.svg";
+      if (this.selectedTab === "resources") return this.srcDir + "settings_selected.svg";
+      else return this.srcDir + "settings.svg";
     },
     srcProfile() {
       if (this.selectedTab === "profile"){
