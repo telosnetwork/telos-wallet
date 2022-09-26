@@ -63,6 +63,11 @@
             <img :src="srcLogout" />
           </a>
         </li>
+        <li>
+          <a @click="signOut">
+            <img :src="srcLogout" />
+          </a>
+        </li>
       </ul>
     </nav>
     <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
