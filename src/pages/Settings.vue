@@ -142,12 +142,6 @@
             @click="save"
             :disable="display_name.length === 0"
           />
-          <q-btn
-            class="settingBtn col"
-            rounded
-            label="LOGOUT"
-            @click="signOut"
-          />
         </q-item>
       </q-list>
 
@@ -531,9 +525,6 @@ export default {
         message: "Copied it to the clipboard successfully",
       });
     },
-    signOut() {
-      this.$emitter.emit("signOut");
-    },
   },
   created: async function () {
     this.loadUserProfile();
@@ -549,12 +540,6 @@ export default {
       this.account = this.$store.$account.account;
       this.privateKey = this.$store.$account.privateKey;
     }, 50);
-    // if (!window.location.href.includes("localhost")) {
-    //   this.clearInterval = setInterval(async () => {
-    //     console.clear();
-    //     console.log("Don't try to use Inspector!");
-    //   }, 5000);
-    // }
   },
   async beforeUnmount() {
     if (this.checkInterval) clearInterval(this.checkInterval);

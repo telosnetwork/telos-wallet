@@ -25,21 +25,6 @@
         />
       </div>
     </div>
-
-    <!-- Logout -->
-    <div v-if="isAuthenticated" class="row absolute full-width">
-      <q-btn
-        @click="signOut"
-        icon="power_settings_new"
-        size="md"
-        padding="3px 3px 3px 15px"
-        no-caps
-        rounded
-        flat
-        class="q-pa-none logout-btn"
-      />
-    </div>
-
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
       <div class="column showLoginPopup q-pa-lg popupCard">
@@ -214,19 +199,6 @@ export default {
     async signUp() {
       this.openUrl("https://app.telos.net/accounts/add");
     },
-    async signOut() {
-      if (gapi) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.signOut().then(function() {
-            auth2.disconnect();
-            console.log("User signed out.");
-          });
-        }
-      }
-      this.$emit("update:loadedCoins", []);
-      this.logout();
-    },
     async onLogin(idx) {
         const error = await this.login({ idx });
         if (!error) {
@@ -377,9 +349,6 @@ export default {
         this.showAuth = true;
       }
     }, 500);
-    this.$emitter.on("signOut", () => {
-      this.signOut();
-    });
   },
   beforeUnmount() {
     if (this.authInterval) clearInterval(this.authInterval);
@@ -388,13 +357,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.logout-btn {
-  /* // margin-left: auto; */
-  left: -15px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
 
 .showLoginPopup {
   width: 30rem;
