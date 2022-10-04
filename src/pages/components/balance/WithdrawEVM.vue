@@ -117,6 +117,7 @@ export default {
           type: "primary",
           message: `${quantityStr} is withdrawn from the EVM`
         });
+        debugger;
         this.$emitter.emit("successfully_withdrew", quantityStr);
         this.showDlg = false;
       } catch (error) {

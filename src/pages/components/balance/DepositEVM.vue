@@ -225,6 +225,7 @@ export default {
             this.accountName
           );
         if (evmAccount && evmAccount.address){
+          debugger;
             this.setEvmAddress(evmAccount.address);
             this.setEvmBalance(BigNumber(evmAccount.balance.toString())
             .div(1e18)
@@ -256,30 +257,18 @@ export default {
       let quantityStr = `${amount.toFixed(4)} TLOS`;
       let actions = [];
       let memo = "";
-      if (this.depositOwnAddress) {
-        if (!this.evmAddress) {
-          actions.push({
-            account: "eosio.evm",
-            name: "create",
-            data: {
-              account: this.accountName.toLowerCase(),
-              data: "create",
-            },
-          });
-        }
-      } else {
-        memo = this.recipientAddress.toLowerCase();
-        await this.checkRecipientExist();
-        if (!this.recipientAddressExists) {
-          actions.push({
-            account: process.env.EVM_CONTRACT,
-            name: "openwallet",
-            data: {
-              account: this.accountName.toLowerCase(),
-              address: this.recipientAddress.slice(2),
-            },
-          });
-        }
+      debugger;
+      memo = this.recipientAddress.toLowerCase();
+      await this.checkRecipientExist();
+      if (!this.recipientAddressExists) {
+        actions.push({
+          account: process.env.EVM_CONTRACT,
+          name: "openwallet",
+          data: {
+            account: this.accountName.toLowerCase(),
+            address: this.recipientAddress.slice(2),
+          },
+        });
       }
 
       actions.push({
@@ -294,6 +283,7 @@ export default {
       });
 
       try {
+        debugger;
         const transaction = await this.$store.$api.signTransaction(
           actions,
           `Deposit ${quantityStr} to the EVM`
@@ -302,12 +292,22 @@ export default {
           type: "primary",
           message: `${quantityStr} is deposited to the EVM`,
         });
+        debugger;
         this.depositAmount = "0";
         this.depositOwnAddress = false;
         this.recipientAddress = "";
         this.recipientAddressExists = true;
-        this.$emitter.emit("successfully_deposited", quantityStr);
-
+        //TODO refactor: move repeated fetch and set block to util method
+        const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+        if (evmAccount && evmAccount.address){
+          debugger;
+            this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+            .div(1e18)
+            .toFixed(4));
+        }
         this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);
