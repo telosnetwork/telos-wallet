@@ -225,7 +225,6 @@ export default {
             this.accountName
           );
         if (evmAccount && evmAccount.address){
-          debugger;
             this.setEvmAddress(evmAccount.address);
             this.setEvmBalance(BigNumber(evmAccount.balance.toString())
             .div(1e18)
@@ -257,7 +256,6 @@ export default {
       let quantityStr = `${amount.toFixed(4)} TLOS`;
       let actions = [];
       let memo = "";
-      debugger;
       memo = this.recipientAddress.toLowerCase();
       await this.checkRecipientExist();
       if (!this.recipientAddressExists) {
@@ -283,20 +281,16 @@ export default {
       });
 
       try {
-        debugger;
         const transaction = await this.$store.$api.signTransaction(
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
-
-        debugger;
 
         //TODO refactor: move repeated fetch and set block to util method
         const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
         if (evmAccount && evmAccount.address){
-          debugger;
             this.setEvmAddress(evmAccount.address);
             this.setEvmBalance(BigNumber(evmAccount.balance.toString())
             .div(1e18)

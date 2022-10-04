@@ -121,7 +121,6 @@ export default {
             this.accountName
           );
         if (evmAccount && evmAccount.address){
-          debugger;
             this.setEvmAddress(evmAccount.address);
             this.setEvmBalance(BigNumber(evmAccount.balance.toString()));
         }
@@ -130,9 +129,7 @@ export default {
           type: "primary",
           message: `${quantityStr} is withdrawn from the EVM`
         });
-        debugger;
       } catch (error) {
-        debugger;
         this.$errorNotification(error);
       }
     }

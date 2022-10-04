@@ -11,7 +11,6 @@ export const setEvmAddress = (state, address) => {
 }
 
 export const setEvmBalance = (state, balance) => {
-  debugger;
   state.evmBalance = balance;
 }
 
