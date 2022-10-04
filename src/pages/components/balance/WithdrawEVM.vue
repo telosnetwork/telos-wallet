@@ -122,7 +122,8 @@ export default {
           );
         if (evmAccount && evmAccount.address){
             this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString()));
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString()).div(1e18)
+            .toFixed(4));
         }
         this.showDlg = false;
         this.$q.notify({
