@@ -118,7 +118,17 @@ export default {
           message: `${quantityStr} is withdrawn from the EVM`
         });
         debugger;
-        this.$emitter.emit("successfully_withdrew", quantityStr);
+        //TODO refactor: move repeated fetch and set block to util method
+        const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+            this.accountName
+          );
+        if (evmAccount && evmAccount.address){
+          debugger;
+            this.setEvmAddress(evmAccount.address);
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+            .div(1e18)
+            .toFixed(4));
+        }
         this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);
