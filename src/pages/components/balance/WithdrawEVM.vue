@@ -60,8 +60,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
@@ -82,6 +81,10 @@ export default {
     }
   },
   methods: {
+    ...mapMutations("account", [
+      "setEvmAddress",
+      "setEvmBalance"
+    ]),
     inputBlur() {
       if (isNaN(this.withdrawAmount)) this.withdrawAmount = "0";
       else this.withdrawAmount = Number(this.withdrawAmount).toString();
@@ -113,11 +116,6 @@ export default {
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
-        this.$q.notify({
-          type: "primary",
-          message: `${quantityStr} is withdrawn from the EVM`
-        });
-        debugger;
         //TODO refactor: move repeated fetch and set block to util method
         const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
@@ -125,12 +123,16 @@ export default {
         if (evmAccount && evmAccount.address){
           debugger;
             this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-            .div(1e18)
-            .toFixed(4));
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString()));
         }
         this.showDlg = false;
+        this.$q.notify({
+          type: "primary",
+          message: `${quantityStr} is withdrawn from the EVM`
+        });
+        debugger;
       } catch (error) {
+        debugger;
         this.$errorNotification(error);
       }
     }

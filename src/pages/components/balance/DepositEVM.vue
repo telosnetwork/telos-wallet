@@ -288,15 +288,9 @@ export default {
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
-        this.$q.notify({
-          type: "primary",
-          message: `${quantityStr} is deposited to the EVM`,
-        });
+
         debugger;
-        this.depositAmount = "0";
-        this.depositOwnAddress = false;
-        this.recipientAddress = "";
-        this.recipientAddressExists = true;
+
         //TODO refactor: move repeated fetch and set block to util method
         const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
             this.accountName
@@ -308,7 +302,16 @@ export default {
             .div(1e18)
             .toFixed(4));
         }
+        this.depositAmount = "0";
+        this.depositOwnAddress = false;
+        this.recipientAddress = "";
+        this.recipientAddressExists = true;
         this.showDlg = false;
+
+        this.$q.notify({
+          type: "primary",
+          message: `${quantityStr} is deposited to the EVM`,
+        });
       } catch (error) {
         this.$errorNotification(error);
       }
