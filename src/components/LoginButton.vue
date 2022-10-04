@@ -193,6 +193,7 @@ export default {
     ...mapMutations("account", [
       "setAccountName",
       "setEvmAddress",
+      "setEvmBalance",
       "getAccountProfile",
       "setLoadingWallet"
     ]),

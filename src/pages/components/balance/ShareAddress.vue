@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import { QRCanvas } from "qrcanvas-vue";
 import pTokens from "ptokens";
 import { copyToClipboard } from "quasar";
@@ -263,6 +263,10 @@ export default {
     },
   },
   methods: {
+    ...mapMutations("account", [
+      "setEvmAddress",
+      "setEvmBalance"
+    ]),
     async generateEVMAddress() {
       let actions = [];
       actions.push({
