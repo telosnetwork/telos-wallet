@@ -232,7 +232,9 @@ export default {
           );
           if (evmAccount && evmAccount.address){
             this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(evmAccount.balance);
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+              .div(1e18)
+              .toFixed(4));
           }
         } catch (e) {
           console.log(e);
