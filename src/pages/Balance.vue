@@ -204,7 +204,7 @@
 
 <script>
 import BigNumber from "bignumber.js";
-import { mapGetters, mapActions, mapMutations } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import Coin from "./components/balance/Coin";
 import Collectables from "./components/balance/Collectables";
 import Send from "./components/balance/Send";
@@ -219,7 +219,6 @@ import DepositEVM from "./components/balance/DepositEVM";
 import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
-import { evmBalance } from 'src/store/account/getters';
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
 const TSWAPS_URL = "https://tswaps.com/swap";
@@ -805,6 +804,7 @@ export default {
       }
       if (!this.evmAddress){
         try {
+          debugger;
           await this.setEvmState()
         } catch(e) {
           console.error(e);
