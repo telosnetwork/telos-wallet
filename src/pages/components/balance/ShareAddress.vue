@@ -142,6 +142,7 @@ import { mapGetters, mapMutations } from "vuex";
 import { QRCanvas } from "qrcanvas-vue";
 import pTokens from "ptokens";
 import { copyToClipboard } from "quasar";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showShareAddressDlg", "selectedCoin"],
@@ -287,7 +288,7 @@ export default {
           message: `A new address is successfully created`,
         });
         const evmAccount =
-          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          await this.$evmApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
         this.networkType = "tevm";

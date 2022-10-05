@@ -353,12 +353,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions("account", ["accountExists", "getUserProfile"]),
+    ...mapActions("account", ["accountExists", "getUserProfile", "setEvmState"]),
     ...mapActions("rex", ["getRexBalance"]),
-    ...mapMutations("account", [
-      "setEvmAddress",
-      "setEvmBalance"
-    ]),
+
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
         this.$q.notify({
@@ -808,16 +805,7 @@ export default {
       }
       if (!this.evmAddress){
         try {
-          const evmAccount =
-            await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-              this.accountName
-            );
-          if (evmAccount && evmAccount.address){
-            this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-              .div(1e18)
-              .toFixed(4));
-          }
+          await this.setEvmState()
         } catch(e) {
           console.error(e);
         }

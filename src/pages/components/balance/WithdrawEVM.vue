@@ -61,7 +61,6 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import BigNumber from "bignumber.js";
 
 export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
@@ -117,16 +116,7 @@ export default {
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
-        //TODO refactor: move repeated fetch and set block to util method
-        const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-        if (evmAccount && evmAccount.address){
-            this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-              .div(1e18)
-              .toFixed(4));
-        }
+        await this.setEvmState();
         this.showDlg = false;
         this.$q.notify({
           type: "primary",
