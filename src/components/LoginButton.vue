@@ -138,7 +138,6 @@
 
 <script>
 import { mapGetters, mapActions, mapMutations } from "vuex";
-import { TelosEvmApi } from "@telosnetwork/telosevm-js";
 
 export default {
   data() {
@@ -177,6 +176,7 @@ export default {
       "loading",
       "isAutoLoading"
     ]),
+    //TODO remove
     chainName() {
       return process.env.CHAIN_NAME;
     }
@@ -188,12 +188,11 @@ export default {
       "login",
       "logout",
       "autoLogin",
-      "getUserProfile"
+      "getUserProfile",
+      "setEvmState"
     ]),
     ...mapMutations("account", [
       "setAccountName",
-      "setEvmAddress",
-      "setEvmBalance",
       "getAccountProfile",
       "setLoadingWallet"
     ]),
@@ -218,32 +217,11 @@ export default {
       }
     },
     async createEvmApi() {
-      try {
-        this.$root.tEVMApi = new TelosEvmApi({
-          endpoint: process.env.HYPERION_ENDPOINT,
-          chainId: this.chainName === "telos" ? 40 : 41,
-          ethPrivateKeys: [],
-          telosContract: process.env.EVM_CONTRACT,
-          telosPrivateKeys: []
-        });
         try {
-          const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-          if (evmAccount && evmAccount.address){
-            this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-              .div(1e18)
-              .toFixed(4));
-          }
+          await this.setEvmState()
         } catch (e) {
           console.log(e);
-          this.setEvmAddress(null);
-          this.setEvmBalance(null);
         }
-      } catch (e) {
-        console.log(e);
-      }
     },
 
     async buyResources() {

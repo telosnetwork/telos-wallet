@@ -160,7 +160,7 @@ export default {
       } else if (this.networkType === "tevm") {
         try {
           if (this.selectedCoin.name === "Telos EVM") {
-            const rawTrx = await this.$root.tEVMApi.transfer({
+            const rawTrx = await this.$evmApi.transfer({
               account: this.accountName,
               sender: this.evmAddress,
               to: this.toAddress,
@@ -181,7 +181,7 @@ export default {
             });
           } else {
             try {
-              const accountAddress = await this.$root.tEVMApi.telos.getEthAccount(
+              const accountAddress = await this.$evmApi.telos.getEthAccount(
                 this.toAddress.toLowerCase()
               );
             } catch (error) {
