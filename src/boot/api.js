@@ -45,16 +45,6 @@ const getTableRows = async function (options) {
   });
 };
 
-const getTelosEvmApi = function () {
-  return new TelosEvmApi({
-    endpoint: process.env.HYPERION_ENDPOINT,
-    chainId: process.env.CHAIN_NAME === "telos" ? 40 : 41,
-    ethPrivateKeys: [],
-    telosContract: process.env.EVM_CONTRACT,
-    telosPrivateKeys: []
-  })
-};
-
 const getAccount = async function (accountName) {
   const rpc = this.$api.getRpc();
   return await rpc.get_account(accountName);
@@ -73,7 +63,13 @@ export default boot(async ({ store }) => {
     textEncoder: new TextEncoder()
   });
 
-  store["$evmApi"] = getTelosEvmApi();
+  store["$evmApi"] = new TelosEvmApi({
+    endpoint: process.env.HYPERION_ENDPOINT,
+    chainId: process.env.CHAIN_NAME === "telos" ? 40 : 41,
+    ethPrivateKeys: [],
+    telosContract: process.env.EVM_CONTRACT,
+    telosPrivateKeys: []
+  });
 
   store["$api"] = {
     signTransaction: signTransaction.bind(store),
