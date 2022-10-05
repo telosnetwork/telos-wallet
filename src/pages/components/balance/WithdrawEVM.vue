@@ -61,6 +61,7 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
@@ -122,8 +123,9 @@ export default {
           );
         if (evmAccount && evmAccount.address){
             this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString()).div(1e18)
-            .toFixed(4));
+            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
+              .div(1e18)
+              .toFixed(4));
         }
         this.showDlg = false;
         this.$q.notify({
@@ -131,6 +133,7 @@ export default {
           message: `${quantityStr} is withdrawn from the EVM`
         });
       } catch (error) {
+        console.dir(error)
         this.$errorNotification(error);
       }
     }

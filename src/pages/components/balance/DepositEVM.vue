@@ -124,6 +124,7 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
