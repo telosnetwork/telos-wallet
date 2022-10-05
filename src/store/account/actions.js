@@ -131,8 +131,12 @@ export const accountExists = async function({ commit, dispatch }, accountName) {
 };
 
 export const setEvmState = async function({ commit, dispatch }) {
+  if (!this.state.account.accountName) {
+    return;
+  }
+
   const evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
-    this.accountName
+    this.state.account.accountName
   );
 
   if (evmAccount && evmAccount.address){
