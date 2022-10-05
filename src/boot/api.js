@@ -45,7 +45,7 @@ const getTableRows = async function (options) {
   });
 };
 
-const getTelosEvmApi = async function () {
+const getTelosEvmApi = function () {
   return new TelosEvmApi({
     endpoint: process.env.HYPERION_ENDPOINT,
     chainId: process.env.CHAIN_NAME === "telos" ? 40 : 41,

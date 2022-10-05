@@ -123,7 +123,6 @@ export default {
           message: `${quantityStr} is withdrawn from the EVM`
         });
       } catch (error) {
-        console.dir(error)
         this.$errorNotification(error);
       }
     }
