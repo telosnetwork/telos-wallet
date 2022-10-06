@@ -175,11 +175,7 @@ export default {
       "accountName",
       "loading",
       "isAutoLoading"
-    ]),
-    //TODO remove
-    chainName() {
-      return process.env.CHAIN_NAME;
-    }
+    ])
   },
   components: {
   },
