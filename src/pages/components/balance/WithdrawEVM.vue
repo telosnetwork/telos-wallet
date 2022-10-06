@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
@@ -81,9 +81,8 @@ export default {
     }
   },
   methods: {
-    ...mapMutations("account", [
-      "setEvmAddress",
-      "setEvmBalance"
+    ...mapActions("account", [
+      "setEvmState"
     ]),
     inputBlur() {
       if (isNaN(this.withdrawAmount)) this.withdrawAmount = "0";
