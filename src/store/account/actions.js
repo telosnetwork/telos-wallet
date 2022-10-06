@@ -140,13 +140,13 @@ export const setEvmState = async function({ commit, dispatch }) {
   );
 
   if (evmAccount && evmAccount.address){
-    commit("account/setEvmAddress", evmAccount.address);
-    commit("account/setEvmBalance", BigNumber(evmAccount.balance.toString())
+    commit("setEvmAddress", evmAccount.address);
+    commit("setEvmBalance", BigNumber(evmAccount.balance.toString())
     .div(1e18)
     .toFixed(4));
   }else{
-    commit("account/setEvmAddress", null);
-    commit("account/setEvmBalance", null)
+    commit("setEvmAddress", null);
+    commit("setEvmBalance", null)
   }
 };
 
