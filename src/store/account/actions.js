@@ -131,6 +131,7 @@ export const accountExists = async function({ commit, dispatch }, accountName) {
 };
 
 export const setEvmState = async function({ commit, dispatch }) {
+  debugger;
   if (!this.state.account.accountName) {
     return;
   }

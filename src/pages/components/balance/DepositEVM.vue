@@ -197,7 +197,7 @@ export default {
     },
     async checkRecipientExist() {
       try {
-        _ = await this.$evmApi.telos.getEthAccount(
+        _ = await this.$store.$evmApi.telos.getEthAccount(
           this.recipientAddress.toLowerCase()
         );
         this.recipientAddressExists = true;
