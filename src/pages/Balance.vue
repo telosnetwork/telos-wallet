@@ -804,7 +804,6 @@ export default {
       }
       if (!this.evmAddress){
         try {
-          debugger;
           await this.setEvmState()
         } catch(e) {
           console.error(e);
