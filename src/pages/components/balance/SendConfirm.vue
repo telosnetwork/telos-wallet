@@ -141,7 +141,6 @@ export default {
     },
     async confirm() {
       this.sending = true;
-      debugger;
       let actions = [];
       const quantityStr = `${parseFloat(this.sendAmount).toFixed(
         this.selectedCoin.precision
