@@ -199,6 +199,7 @@ export default {
         const error = await this.login({ idx });
         if (!error) {
           this.showLogin = false;
+          await this.$router.push({ path: "/balance" });
         } else {
           this.error = error;
         }
