@@ -163,7 +163,6 @@ export default {
       this.accountHistory = actionHistory.data.actions || [];
     },
     logOut() {
-      debugger;
       if (gapi) {
         const auth2 = gapi.auth2.getAuthInstance();
         if (auth2) {

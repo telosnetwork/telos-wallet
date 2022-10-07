@@ -77,7 +77,7 @@ const getAuthenticator = function(ual, wallet = null) {
   };
 };
 
-export const logout = async function({ commit, dispatch }) {
+export const logout = async function({ commit }) {
   const { authenticator } = getAuthenticator(this.$ual);
   try {
     authenticator && (await authenticator.logout());
