@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 import RexStaking from "src/pages/components/balance/RexStaking.vue";
 import ManageResources from "src/components/ManageResources.vue";
 export default {
@@ -140,9 +140,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions("account", [
-      "logout"
-    ]),
     switchTab(val) {
       this.selectedTab = val;
       switch (val) {
