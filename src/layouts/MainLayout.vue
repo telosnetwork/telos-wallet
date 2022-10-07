@@ -23,7 +23,7 @@
     <div class="videoOverlay" />
     <div class="videoOverlay shadedOverlay" />
 
-    <nav-bar v-model:balanceTab="balanceTab" v-if="isAuthenticated" />
+    <nav-bar v-model:balanceTab="balanceTab" v-if="isAuthenticated" @logOut="logOut"/>
     <q-page-container
       :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
     >
@@ -121,7 +121,6 @@ export default {
   },
   methods: {
     ...mapActions("account", [
-      "login",
       "logout",
       "autoLogin",
       "getUserProfile",
@@ -163,14 +162,28 @@ export default {
       );
       this.accountHistory = actionHistory.data.actions || [];
     },
+    logOut() {
+      debugger;
+      if (gapi) {
+        const auth2 = gapi.auth2.getAuthInstance();
+        if (auth2) {
+          auth2.signOut().then(function() {
+            auth2.disconnect();
+            console.log("User signed out.");
+          });
+        }
+      }
+      this.resetTokens();
+      this.logout();
+    },
+    resetTokens() {
+      this.coins = [];
+      this.nftTokens = [];
+    },
   },
   async mounted() {
-    console.log("As iron sharpens iron, so one person sharpens another.");
     await this.autoLogin(this.$route.query.returnUrl);
     this.loadUserProfile();
-    this.checkPath();
-  },
-  beforeUpdate() {
     this.checkPath();
   },
 };
