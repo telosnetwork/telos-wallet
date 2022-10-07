@@ -22,7 +22,7 @@
           <a @click="switchTab('profile')"> <img :src="srcProfile" />Profile </a>
         </li>
         <li>
-          <a @click="signOut"> <img :src="srcLogout" />Log Out </a>
+          <a @click="$emit('log-out')"> <img :src="srcLogout" />Log Out </a>
         </li>
       </ul>
     </nav>
@@ -171,17 +171,20 @@ export default {
       }
     },
     async signOut() {
-      if (gapi) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.signOut().then(function() {
-            auth2.disconnect();
-            console.log("User signed out.");
-          });
-        }
-      }
-      this.$emit("update:loadedCoins", []);
-      this.logout();
+      // if (gapi) {
+      //   const auth2 = gapi.auth2.getAuthInstance();
+      //   if (auth2) {
+      //     auth2.signOut().then(function() {
+      //       auth2.disconnect();
+      //       console.log("User signed out.");
+      //     });
+      //   }
+      // }
+      // debugger;
+      // this.$emit("logOut");
+      // this.$emit("loadedNftTokens", []);
+      // debugger;
+      // this.logout();
     },
   },
   watch: {
