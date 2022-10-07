@@ -59,7 +59,7 @@
           </a>
         </li>
         <li>
-          <a @click="signOut">
+          <a @click="$emit('log-out')">
             <img :src="srcLogout" />
           </a>
         </li>
@@ -169,22 +169,6 @@ export default {
         default:
           break;
       }
-    },
-    async signOut() {
-      // if (gapi) {
-      //   const auth2 = gapi.auth2.getAuthInstance();
-      //   if (auth2) {
-      //     auth2.signOut().then(function() {
-      //       auth2.disconnect();
-      //       console.log("User signed out.");
-      //     });
-      //   }
-      // }
-      // debugger;
-      // this.$emit("logOut");
-      // this.$emit("loadedNftTokens", []);
-      // debugger;
-      // this.logout();
     },
   },
   watch: {
