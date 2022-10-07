@@ -272,7 +272,7 @@ export default {
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tab: "coins",
+      tab: this.balanceTab,
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
