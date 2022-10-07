@@ -266,11 +266,8 @@ export default {
       this.upload(files[0], this);
     },
     async loadUserProfile() {
-      if (
-        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
-      ) {
-        await this.getUserProfile(this.accountName);
-      }
+      await this.getUserProfile(this.accountName);
+
       const accountProfile =
         this.$store.state.account.profiles[this.accountName];
       if (!accountProfile) {
@@ -527,7 +524,7 @@ export default {
     },
   },
   created: async function () {
-    this.loadUserProfile();
+    await this.loadUserProfile();
   },
   async mounted() {
     await this.loadUserProfile();
