@@ -98,7 +98,7 @@
               :suggestTokens="suggestTokens"
             />
           </q-tab-panel>
-          <q-tab-panel name="collectables" label="Collectables" :style="'background:  #00000000'">
+          <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
             <Collectables
               :nftTokenTags="nftTokenTags"
               :nftTokenLoadedAll="nftTokenLoadedAll"
@@ -272,7 +272,7 @@ export default {
       nftTokenLoadedAll: false,
       panning: false,
       coinViewHeight: 0,
-      tab: "coins",
+      tab: this.balanceTab,
       interval: null,
       tokenInterval: null,
       selectedCoin: null,
