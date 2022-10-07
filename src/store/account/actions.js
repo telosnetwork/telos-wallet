@@ -77,7 +77,7 @@ const getAuthenticator = function(ual, wallet = null) {
   };
 };
 
-export const logout = async function({ commit }) {
+export const logout = async function({ commit, dispatch }) {
   const { authenticator } = getAuthenticator(this.$ual);
   try {
     authenticator && (await authenticator.logout());
@@ -85,9 +85,11 @@ export const logout = async function({ commit }) {
     console.log("Authenticator logout error", error);
   }
   this.$account = {};
+
+  localStorage.removeItem("autoLogin");
+
   commit("setProfile", undefined);
   commit("setAccountName");
-  localStorage.removeItem("autoLogin");
 
   if (this.$router.currentRoute.path !== "/") {
     this.$router.push({ path: "/" });
