@@ -300,9 +300,6 @@ export default {
       }
       return `${this.pTokenNetworks[this.tSymbol][this.networkType]} address`;
     },
-    chainName() {
-      return process.env.CHAIN_NAME;
-    },
     coinpTokenNetworks() {
       if (this.selectedCoin.network) {
         return {
@@ -312,9 +309,7 @@ export default {
       }
       const networks = {};
       for (const key in this.pTokenNetworks[this.tSymbol]) {
-        // if (key !== 'tevm' || this.chainName !== 'telos') {
         networks[key] = this.pTokenNetworks[this.tSymbol][key];
-        // }
       }
       return networks;
     },

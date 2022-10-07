@@ -1,5 +1,6 @@
 import { boot } from 'quasar/wrappers';
 import { Api, JsonRpc } from "eosjs";
+import { TelosEvmApi } from "@telosnetwork/telosevm-js";
 
 const signTransaction = async function (actions, detail = null) {
   actions.forEach(action => {
@@ -60,6 +61,14 @@ export default boot(async ({ store }) => {
     rpc,
     textDecoder: new TextDecoder(),
     textEncoder: new TextEncoder()
+  });
+
+  store["$evmApi"] = new TelosEvmApi({
+    endpoint: process.env.HYPERION_ENDPOINT,
+    chainId: process.env.CHAIN_NAME === "telos" ? 40 : 41,
+    ethPrivateKeys: [],
+    telosContract: process.env.EVM_CONTRACT,
+    telosPrivateKeys: []
   });
 
   store["$api"] = {

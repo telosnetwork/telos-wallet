@@ -108,7 +108,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
+    ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress"]),
     showDlg: {
       get() {
         return this.showSendConfirmDlg;
@@ -136,7 +136,6 @@ export default {
   },
   methods: {
     ...mapActions("evm", ["getGasPrice"]),
-    ...mapGetters("account", ["evmAddress"]),
     amountFontSize() {
       return Math.min(50, window.innerWidth / (this.sendAmount.length + 1));
     },
@@ -160,7 +159,7 @@ export default {
       } else if (this.networkType === "tevm") {
         try {
           if (this.selectedCoin.name === "Telos EVM") {
-            const rawTrx = await this.$root.tEVMApi.transfer({
+            const rawTrx = await this.$store.$evmApi.transfer({
               account: this.accountName,
               sender: this.evmAddress,
               to: this.toAddress,
@@ -181,7 +180,7 @@ export default {
             });
           } else {
             try {
-              const accountAddress = await this.$root.tEVMApi.telos.getEthAccount(
+              const accountAddress = await this.$store.$evmApi.telos.getEthAccount(
                 this.toAddress.toLowerCase()
               );
             } catch (error) {
@@ -206,7 +205,7 @@ export default {
               }
             });
           }
-        } catch {
+        } catch (e) {
           this.$q.notify({
             type: "negative",
             message: `Failed to send ${quantityStr} to ${this.toAddress}`

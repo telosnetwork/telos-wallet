@@ -138,10 +138,11 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import { QRCanvas } from "qrcanvas-vue";
 import pTokens from "ptokens";
 import { copyToClipboard } from "quasar";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showShareAddressDlg", "selectedCoin"],
@@ -254,7 +255,6 @@ export default {
       }
       const networks = {};
       for (const key in this.pTokenNetworks[this.tSymbol]) {
-        // if ((key !== 'tevm' && key !== 'ethereum') || this.chainName !== 'telos') {
         if (key !== "ethereum" || (this.chainName !== "telos" && this.chainName !== "telos-testnet")) {
           networks[key] = this.pTokenNetworks[this.tSymbol][key];
         }
@@ -263,6 +263,10 @@ export default {
     },
   },
   methods: {
+    ...mapMutations("account", [
+      "setEvmAddress",
+      "setEvmBalance"
+    ]),
     async generateEVMAddress() {
       let actions = [];
       actions.push({
@@ -283,7 +287,7 @@ export default {
           message: `A new address is successfully created`,
         });
         const evmAccount =
-          await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
+          await this.$evmApi.telos.getEthAccountByTelosAccount(
             this.accountName
           );
         this.networkType = "tevm";

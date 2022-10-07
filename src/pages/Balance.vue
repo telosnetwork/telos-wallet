@@ -204,7 +204,7 @@
 
 <script>
 import BigNumber from "bignumber.js";
-import { mapGetters, mapActions, mapMutations } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import Coin from "./components/balance/Coin";
 import Collectables from "./components/balance/Collectables";
 import Send from "./components/balance/Send";
@@ -219,7 +219,6 @@ import DepositEVM from "./components/balance/DepositEVM";
 import WithdrawEVM from "./components/balance/WithdrawEVM";
 import RexStaking from "./components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
-import { evmBalance } from 'src/store/account/getters';
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
 const TSWAPS_URL = "https://tswaps.com/swap";
@@ -353,12 +352,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions("account", ["accountExists", "getUserProfile"]),
+    ...mapActions("account", ["accountExists", "getUserProfile", "setEvmState"]),
     ...mapActions("rex", ["getRexBalance"]),
-    ...mapMutations("account", [
-      "setEvmAddress",
-      "setEvmBalance"
-    ]),
+
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
         this.$q.notify({
@@ -808,16 +804,7 @@ export default {
       }
       if (!this.evmAddress){
         try {
-          const evmAccount =
-            await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-              this.accountName
-            );
-          if (evmAccount && evmAccount.address){
-            this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-              .div(1e18)
-              .toFixed(4));
-          }
+          await this.setEvmState()
         } catch(e) {
           console.error(e);
         }

@@ -123,7 +123,8 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapActions } from "vuex";
+import BigNumber from "bignumber.js";
 
 export default {
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
@@ -150,8 +151,8 @@ export default {
     }
   },
   methods: {
-    ...mapMutations("account", [
-      "setEvmAddress", "setEvmBalance"
+    ...mapActions("account", [
+      "setEvmState"
     ]),
     addEvmNetwork() {
       let params = [];
@@ -196,7 +197,7 @@ export default {
     },
     async checkRecipientExist() {
       try {
-        _ = await this.$root.tEVMApi.telos.getEthAccount(
+        _ = await this.$store.$evmApi.telos.getEthAccount(
           this.recipientAddress.toLowerCase()
         );
         this.recipientAddressExists = true;
@@ -221,15 +222,7 @@ export default {
           actions,
           `Create EVM address for ${this.accountName}`
         );
-        const evmAccount = await this.$root.tEVMApi.telos.getEthAccountByTelosAccount(
-            this.accountName
-          );
-        if (evmAccount && evmAccount.address){
-            this.setEvmAddress(evmAccount.address);
-            this.setEvmBalance(BigNumber(evmAccount.balance.toString())
-            .div(1e18)
-            .toFixed(4));
-        }
+        await this.setEvmState();
         this.$q.notify({
           type: "primary",
           message: `EVM address created for ${this.accountName}`,
@@ -256,30 +249,17 @@ export default {
       let quantityStr = `${amount.toFixed(4)} TLOS`;
       let actions = [];
       let memo = "";
-      if (this.depositOwnAddress) {
-        if (!this.evmAddress) {
-          actions.push({
-            account: "eosio.evm",
-            name: "create",
-            data: {
-              account: this.accountName.toLowerCase(),
-              data: "create",
-            },
-          });
-        }
-      } else {
-        memo = this.recipientAddress.toLowerCase();
-        await this.checkRecipientExist();
-        if (!this.recipientAddressExists) {
-          actions.push({
-            account: process.env.EVM_CONTRACT,
-            name: "openwallet",
-            data: {
-              account: this.accountName.toLowerCase(),
-              address: this.recipientAddress.slice(2),
-            },
-          });
-        }
+      memo = this.recipientAddress.toLowerCase();
+      await this.checkRecipientExist();
+      if (!this.recipientAddressExists) {
+        actions.push({
+          account: process.env.EVM_CONTRACT,
+          name: "openwallet",
+          data: {
+            account: this.accountName.toLowerCase(),
+            address: this.recipientAddress.slice(2),
+          },
+        });
       }
 
       actions.push({
@@ -298,17 +278,19 @@ export default {
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
-        this.$q.notify({
-          type: "primary",
-          message: `${quantityStr} is deposited to the EVM`,
-        });
+
+        await this.setEvmState();
+
         this.depositAmount = "0";
         this.depositOwnAddress = false;
         this.recipientAddress = "";
         this.recipientAddressExists = true;
-        this.$emitter.emit("successfully_deposited", quantityStr);
-
         this.showDlg = false;
+
+        this.$q.notify({
+          type: "primary",
+          message: `${quantityStr} is deposited to the EVM`,
+        });
       } catch (error) {
         this.$errorNotification(error);
       }

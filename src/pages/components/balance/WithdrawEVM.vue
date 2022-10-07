@@ -61,7 +61,6 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
 
 export default {
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
@@ -82,6 +81,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions("account", [
+      "setEvmState"
+    ]),
     inputBlur() {
       if (isNaN(this.withdrawAmount)) this.withdrawAmount = "0";
       else this.withdrawAmount = Number(this.withdrawAmount).toString();
@@ -113,12 +115,12 @@ export default {
           actions,
           `Deposit ${quantityStr} to the EVM`
         );
+        await this.setEvmState();
+        this.showDlg = false;
         this.$q.notify({
           type: "primary",
           message: `${quantityStr} is withdrawn from the EVM`
         });
-        this.$emitter.emit("successfully_withdrew", quantityStr);
-        this.showDlg = false;
       } catch (error) {
         this.$errorNotification(error);
       }

@@ -1,4 +1,5 @@
 import { vxm } from "../../store";
+import BigNumber from "bignumber.js";
 
 export const login = async function(
   { commit, dispatch },
@@ -128,3 +129,25 @@ export const accountExists = async function({ commit, dispatch }, accountName) {
     return false;
   }
 };
+
+export const setEvmState = async function({ commit, dispatch }) {
+  if (!this.state.account.accountName) {
+    return;
+  }
+
+  const evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
+    this.state.account.accountName
+  );
+
+  if (evmAccount && evmAccount.address){
+    commit("setEvmAddress", evmAccount.address);
+    commit("setEvmBalance", BigNumber(evmAccount.balance.toString())
+    .div(1e18)
+    .toFixed(4));
+  }else{
+    commit("setEvmAddress", null);
+    commit("setEvmBalance", null)
+  }
+};
+
+
