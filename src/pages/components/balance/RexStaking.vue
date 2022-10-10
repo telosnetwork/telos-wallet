@@ -125,8 +125,6 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
-import { stakeRex } from "src/store/rex/actions";
 
 export default {
   props: ["showRexStakeDlg", "haveEVMAccount", "selectedCoin"],
@@ -136,6 +134,7 @@ export default {
       staking: true,
       tokenAmount: 0,
       tokenRexBalance: 0,
+      rpc: null,
     };
   },
   computed: {
@@ -151,6 +150,14 @@ export default {
   },
   methods: {
     ...mapActions("rex", ["getRexBalance"]),
+
+    async getTokenAmount() {
+      return Number(
+        (
+          await this.rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
+        )[0].split(" ")[0]
+      );
+    },
 
     inputBlur() {
       if (isNaN(this.amount)) this.amount = "0";
@@ -218,13 +225,12 @@ export default {
     async tryStake() {
       try {
         await this.stakeRex();
+        this.tokenAmount = await this.getTokenAmount();
         this.$q.notify({
           type: "primary",
           message: `${this.amount} TLOS is staked to REX`,
         });
         this.amount = "0";
-        this.staking = true;
-        this.showDlg = false;
       } catch (error) {
         console.error(error);
         this.$errorNotification(error);
@@ -234,39 +240,29 @@ export default {
     async tryUnstake() {
       try {
         await this.unstakeRex();
+        this.tokenRexBalance = await this.getRexBalance(this.accountName);
         this.$q.notify({
           type: "primary",
           message: `${this.amount} TLOS is withdrawn from REX`,
         });
         this.amount = "0";
-        this.staking = true;
-        this.showDlg = false;
       } catch (error) {
         console.error(error);
         this.$errorNotification(error);
       }
     },
   },
-  watch: {},
+  watch: {
+    showRexStakeDlg(val){
+      if (val){
+        this.staking = true;
+      }
+    }
+  },
   async mounted() {
-    //   TODO get rex apr from api, cors issues
-    //       fetch("https://api.staker.one/v1/telos/apr", {
-    //   mode: 'cors',
-    //   headers: {
-    //     'Access-Control-Allow-Origin':'*'
-    //   }})
-    //     .then(res => res.json())
-    //     .then(json => {
-    //       console.log(json);
-    //     });
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
-
-    const rpc = this.$store.$api.getRpc();
-    this.tokenAmount = Number(
-      (
-        await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
-      )[0].split(" ")[0]
-    );
+    this.rpc = this.$store.$api.getRpc();
+    this.tokenAmount = await this.getTokenAmount();
   },
 };
 </script>
@@ -285,11 +281,8 @@ export default {
   flex-basis: 15rem;
   height: 3rem;
 }
-// .popupCard {
-//   position: relative;
-// }
+
 .exitBtn {
   position: absolute;
-  // right: 0px;
 }
 </style>
