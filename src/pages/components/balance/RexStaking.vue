@@ -125,8 +125,6 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import moment from "moment";
-import { stakeRex } from "src/store/rex/actions";
 
 export default {
   props: ["showRexStakeDlg", "haveEVMAccount", "selectedCoin"],
@@ -159,7 +157,6 @@ export default {
           await this.rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
         )[0].split(" ")[0]
       );
-      debugger;
     },
 
     inputBlur() {
@@ -248,16 +245,21 @@ export default {
           type: "primary",
           message: `${this.amount} TLOS is withdrawn from REX`,
         });
+        this.tokenRexBalance = await this.getRexBalance(this.accountName);
         this.amount = "0";
-        this.staking = true;
-        this.showDlg = false;
       } catch (error) {
         console.error(error);
         this.$errorNotification(error);
       }
     },
   },
-  watch: {},
+  watch: {
+    showRexStakeDlg(val){
+      if (val){
+        this.staking = true;
+      }
+    }
+  },
   async mounted() {
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
     this.rpc = this.$store.$api.getRpc();
@@ -280,11 +282,8 @@ export default {
   flex-basis: 15rem;
   height: 3rem;
 }
-// .popupCard {
-//   position: relative;
-// }
+
 .exitBtn {
   position: absolute;
-  // right: 0px;
 }
 </style>
