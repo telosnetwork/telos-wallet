@@ -224,7 +224,6 @@ export default {
         });
         this.amount = "0";
         this.staking = true;
-        this.showDlg = false;
       } catch (error) {
         console.error(error);
         this.$errorNotification(error);
