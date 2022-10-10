@@ -6,10 +6,6 @@ https://wallet.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badge
 
 https://wallet-dev.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
-## CI/CD NOTE
-
-Push to `develop` branch always first, this will auto-deploy wallet-dev.telos.net & wallet-stage.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
-
 ## Install the dependencies
 
 ```bash
