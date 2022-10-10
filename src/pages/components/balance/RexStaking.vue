@@ -136,6 +136,7 @@ export default {
       staking: true,
       tokenAmount: 0,
       tokenRexBalance: 0,
+      rpc: null,
     };
   },
   computed: {
@@ -151,6 +152,15 @@ export default {
   },
   methods: {
     ...mapActions("rex", ["getRexBalance"]),
+
+    async getTokenAmount() {
+      this.tokenAmount = Number(
+        (
+          await this.rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
+        )[0].split(" ")[0]
+      );
+      debugger;
+    },
 
     inputBlur() {
       if (isNaN(this.amount)) this.amount = "0";
@@ -218,6 +228,7 @@ export default {
     async tryStake() {
       try {
         await this.stakeRex();
+        await this.getTokenAmount();
         this.$q.notify({
           type: "primary",
           message: `${this.amount} TLOS is staked to REX`,
@@ -248,24 +259,9 @@ export default {
   },
   watch: {},
   async mounted() {
-    //   TODO get rex apr from api, cors issues
-    //       fetch("https://api.staker.one/v1/telos/apr", {
-    //   mode: 'cors',
-    //   headers: {
-    //     'Access-Control-Allow-Origin':'*'
-    //   }})
-    //     .then(res => res.json())
-    //     .then(json => {
-    //       console.log(json);
-    //     });
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
-
-    const rpc = this.$store.$api.getRpc();
-    this.tokenAmount = Number(
-      (
-        await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
-      )[0].split(" ")[0]
-    );
+    this.rpc = this.$store.$api.getRpc();
+    await this.getTokenAmount();
   },
 };
 </script>
