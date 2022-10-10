@@ -2,12 +2,13 @@
 
 Running at:
 
-https://wallet.telos.net (mainnet)
-https://wallet-dev.telos.net (testnet)
+https://wallet.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/94bdf507-97aa-4569-8ce0-dd9313048e14/deploy-status)](https://app.netlify.com/sites/wallet-mainnet/deploys)
+
+https://wallet-dev.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
 ## CI/CD NOTE
 
-Push to `developer` branch always first, this will auto-deploy wallet-dev.telos.net & wallet-stage.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
+Push to `develop` branch always first, this will auto-deploy wallet-dev.telos.net & wallet-stage.telos.net and once changes look good and are reviewed merge into master which will auto-deploy to wallet.telos.net
 
 ## Install the dependencies
 
@@ -41,38 +42,22 @@ See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
 
 ### Creating testnet account
 
-1. Generate private and public keys. (Anchor/https://app.telos.net/accounts/add)
-2. Go to: https://app.telos.net/testnet/developers
-3. Enter information and create account
+1. Generate private and public keys in [Anchor](https://greymass.com/en/anchor/) or at [app.telos.net/accounts/add](https://app.telos.net/accounts/add)
+2. Go to [app.telos.net/testnet/developers](https://app.telos.net/testnet/developers)
+3. Enter information and create account, optionally seed account from test net faucet
 
 ### Links
 
-**Mainnet Block Explorer**
-https://eosauthority.com/dashboard?network=telos
+**Main Net Block Explorer**
 
-**testnet Block Explorer**
-https://eosauthority.com/dashboard?network=telostest
+[explorer.telos.net](https://explorer.telos.net)
 
-**Telos Quasar Template**
-A template for using Vue+Quasar to build a Telos webapp
+**Test Net Block Explorer**
 
-https://template.telos.net
+[explorer-test.telos.net](https://explorer-test.telos.net)
 
-**telosnetwork/ui-template**
-Telos UI Template in Vue/Quasar. Contribute to telosnetwork/ui-template development by creating an account on GitHub.
 
-https://github.com/telosnetwork/ui-template
+**Documentation**
 
-**Testnet Faucet**
-https://app.telos.net/testnet/developers
+[docs.telos.net](https://docs.telos.net/)
 
-**transfer example**
-https://template.telos.net/transfer
-
-**Courses**
-https://training.eos.io/collections
-
-**APIs**
-http://api.telos.net/v1/docs/index.html
-
-https://hyperion.docs.eosrio.io/endpoint/#telos
