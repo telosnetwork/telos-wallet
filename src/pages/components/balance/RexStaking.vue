@@ -152,7 +152,7 @@ export default {
     ...mapActions("rex", ["getRexBalance"]),
 
     async getTokenAmount() {
-      this.tokenAmount = Number(
+      return Number(
         (
           await this.rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
         )[0].split(" ")[0]
@@ -225,7 +225,7 @@ export default {
     async tryStake() {
       try {
         await this.stakeRex();
-        await this.getTokenAmount();
+        this.tokenAmount = await this.getTokenAmount();
         this.$q.notify({
           type: "primary",
           message: `${this.amount} TLOS is staked to REX`,
@@ -241,11 +241,11 @@ export default {
     async tryUnstake() {
       try {
         await this.unstakeRex();
+        this.tokenRexBalance = await this.getRexBalance(this.accountName);
         this.$q.notify({
           type: "primary",
           message: `${this.amount} TLOS is withdrawn from REX`,
         });
-        this.tokenRexBalance = await this.getRexBalance(this.accountName);
         this.amount = "0";
       } catch (error) {
         console.error(error);
@@ -263,7 +263,7 @@ export default {
   async mounted() {
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
     this.rpc = this.$store.$api.getRpc();
-    await this.getTokenAmount();
+    this.tokenAmount = await this.getTokenAmount();
   },
 };
 </script>
