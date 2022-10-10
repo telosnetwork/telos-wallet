@@ -231,7 +231,6 @@ export default {
           message: `${this.amount} TLOS is staked to REX`,
         });
         this.amount = "0";
-        this.staking = true;
       } catch (error) {
         console.error(error);
         this.$errorNotification(error);
