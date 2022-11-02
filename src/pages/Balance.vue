@@ -472,16 +472,32 @@ export default {
               coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
               coin.account === token.contract
             ) {
-              // get REX balance here and add to amount
-              if (token.contract === "eosio.token" && token.symbol === "TLOS") {
-                coin.amount = token.amount || 0;
-                coin.rexBalance =
-                  (await this.getRexBalance(this.accountName)) || 0;
-                coin.totalAmount = coin.amount + coin.rexBalance;
-              } else {
-                coin.amount = token.amount || 0;
-                coin.totalAmount = coin.amount || 0;
-              }
+
+                // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
+                const rpc = this.$store.$api.getRpc();
+                if (coin.account === "eosio.token" && coin.symbol === "TLOS" && coin.name == "Telos") {
+                    coin.amount = Number(
+                      (
+                        await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
+                      )[0].split(" ")[0]
+                    );
+                    coin.rexBalance =
+                      (await this.getRexBalance(this.accountName)) || 0;
+                    coin.totalAmount = coin.amount || 0;
+                }
+
+
+
+              // // get REX balance here and add to amount
+              // if (token.contract === "eosio.token" && token.symbol === "TLOS") {
+              //   coin.amount = token.amount || 0;
+              //   coin.rexBalance =
+              //     (await this.getRexBalance(this.accountName)) || 0;
+              //   coin.totalAmount = coin.amount + coin.rexBalance;
+              // } else {
+              //   coin.amount = token.amount || 0;
+              //   coin.totalAmount = coin.amount || 0;
+              // }
               coin.precision = token.precision;
             }
           });
@@ -514,22 +530,6 @@ export default {
       this.coins.forEach(async (coin) => {
         if (coin.network === "tevm") {
           coin.amount = this.evmBalance;
-        }
-      });
-
-      // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
-      const rpc = this.$store.$api.getRpc();
-      this.coins.forEach(async (coin) => {
-        console.log(coin.account, coin);
-        if (coin.account === "eosio.token" && coin.symbol === "TLOS" && coin.name == "Telos") {
-            coin.amount = Number(
-              (
-                await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
-              )[0].split(" ")[0]
-            );
-            coin.rexBalance =
-              (await this.getRexBalance(this.accountName)) || 0;
-            coin.totalAmount = coin.amount;
         }
       });
 
