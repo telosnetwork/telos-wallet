@@ -483,10 +483,8 @@ export default {
                     );
                     coin.rexBalance =
                       (await this.getRexBalance(this.accountName)) || 0;
-                    coin.totalAmount = coin.amount || 0;
+                    coin.totalAmount = coin.amount + coin.rexBalance;
                 }
-
-
 
               // // get REX balance here and add to amount
               // if (token.contract === "eosio.token" && token.symbol === "TLOS") {
