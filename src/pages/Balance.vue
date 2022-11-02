@@ -517,6 +517,22 @@ export default {
         }
       });
 
+      // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
+      const rpc = this.$store.$api.getRpc();
+      this.coins.forEach(async (coin) => {
+        console.log(coin.account, coin);
+        if (coin.account === "eosio.token" && coin.symbol === "TLOS" && coin.name == "Telos") {
+            coin.amount = Number(
+              (
+                await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
+              )[0].split(" ")[0]
+            );
+            coin.rexBalance =
+              (await this.getRexBalance(this.accountName)) || 0;
+            coin.totalAmount = coin.amount;
+        }
+      });
+
       const sortCoin = function (suggestTokens) {
         return function (a, b) {
           const aSymbol = a.symbol.toLowerCase();
