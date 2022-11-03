@@ -23,7 +23,7 @@
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-          Earn up to 13% APR.
+          Earn up to {{ apy }}% APY.
         </div>
         <q-btn-toggle
           v-model="staking"
@@ -135,6 +135,7 @@ export default {
       tokenAmount: 0,
       tokenRexBalance: 0,
       rpc: null,
+      apy: 13,
     };
   },
   computed: {
@@ -263,6 +264,7 @@ export default {
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
     this.rpc = this.$store.$api.getRpc();
     this.tokenAmount = await this.getTokenAmount();
+    this.apy = await this.$telosApi.get('apy/native');
   },
 };
 </script>
