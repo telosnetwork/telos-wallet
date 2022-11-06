@@ -270,10 +270,10 @@ export default {
     }
   },
   async mounted() {
+    await this.setApy()
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
     this.rpc = this.$store.$api.getRpc();
     this.tokenAmount = await this.getTokenAmount();
-    await this.setApy()
   },
 };
 </script>
