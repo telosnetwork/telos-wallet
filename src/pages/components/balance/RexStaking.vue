@@ -23,7 +23,7 @@
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-          Earn up to 13% APR.
+          {{ apyString }}
         </div>
         <q-btn-toggle
           v-model="staking"
@@ -135,6 +135,7 @@ export default {
       tokenAmount: 0,
       tokenRexBalance: 0,
       rpc: null,
+      apyString: 'Earn up to 13% APY',
     };
   },
   computed: {
@@ -222,6 +223,15 @@ export default {
       );
     },
 
+    async setApy() {
+      try{
+        const apy = (await this.$telosApi.get('apy/native')).data;
+        this.apyString = `Earn ${apy}% APY`;
+      }catch(e) {
+        console.error(e);
+      }
+    },
+
     async tryStake() {
       try {
         await this.stakeRex();
@@ -260,6 +270,7 @@ export default {
     }
   },
   async mounted() {
+    await this.setApy()
     this.tokenRexBalance = await this.getRexBalance(this.accountName);
     this.rpc = this.$store.$api.getRpc();
     this.tokenAmount = await this.getTokenAmount();
