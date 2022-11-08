@@ -1,5 +1,7 @@
 # Telos web wallet
 
+![Alt](https://repobeats.axiom.co/api/embed/5f8947a293178e9e8998c1327f9d71f9bc6a123c.svg "Repobeats analytics image")
+
 Running at:
 
 https://wallet.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/94bdf507-97aa-4569-8ce0-dd9313048e14/deploy-status)](https://app.netlify.com/sites/wallet-mainnet/deploys)
