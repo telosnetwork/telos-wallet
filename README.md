@@ -1,4 +1,4 @@
-# Telos web wallet
+# Telos Web Wallet
 
 ![Alt](https://repobeats.axiom.co/api/embed/5f8947a293178e9e8998c1327f9d71f9bc6a123c.svg "Repobeats analytics image")
 
@@ -9,9 +9,9 @@ https://wallet.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badge
 https://wallet-dev.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
 ## Native Features
+- Account Creation
 - Tokens, Balances, NFTs 
 - Transfer TLOS to and from EVM
-- Generate linked EVM address for native account
 - Profile Management (avatar, name, status, bio)
 - Staking/Unstaking REX
 - Buy Resources (CPU/NET/RAM)
