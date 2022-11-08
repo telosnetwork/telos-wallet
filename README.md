@@ -8,6 +8,15 @@ https://wallet.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badge
 
 https://wallet-dev.telos.net [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
+## Native Features
+- Tokens, Balances, NFTs 
+- Transfer TLOS to and from EVM
+- Generate linked EVM address for native account
+- Profile Management (avatar, name, status, bio)
+- Staking/Unstaking REX
+- Buy Resources (CPU/NET/RAM)
+- dApp List
+
 ## Install the dependencies
 
 ```bash
