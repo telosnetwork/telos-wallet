@@ -13,6 +13,8 @@ Test Net: [wallet-dev.telos.net](https://wallet-dev.telos.net) [![Netlify Status
 - Buy Resources (CPU/NET/RAM)
 - dApp List
 
+## Recent Contributions
+
 ![Alt](https://repobeats.axiom.co/api/embed/5f8947a293178e9e8998c1327f9d71f9bc6a123c.svg "Repobeats analytics image")
 
 ## Install the dependencies
