@@ -10,6 +10,7 @@
 const ESLintPlugin = require('eslint-webpack-plugin')
 const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
 const env = require("./env");
+const path = require('path');
 
 module.exports = function(/* ctx */) {
   return {
@@ -50,6 +51,16 @@ module.exports = function(/* ctx */) {
           .plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['js', 'vue'] }]);
         chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin);
+      },
+
+      // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
+      extendWebpack(cfg) {
+
+        cfg.resolve.alias = {
+          ...cfg.resolve.alias,
+          '~': path.resolve(__dirname, 'src'),
+        };
+
       },
 
       // transpile: false,
