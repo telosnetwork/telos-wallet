@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './routes'
+import routes from '~/router/routes'
 
 
 /*** TODO: remove if not being used */

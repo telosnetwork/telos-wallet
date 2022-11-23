@@ -1,10 +1,10 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, action, mutation } from "vuex-class-component";
-import { vxm } from "../../../store";
-import { store } from "../../../store";
-import { compareString, updateArray } from "../../../api/helpers";
-import { fetchUsdPriceOfTlos } from "../../../api/helpers";
-import { defaultModule } from "../../../router";
+import { vxm } from "~/store";
+import { store } from "~/store";
+import { compareString, updateArray } from "~/api/helpers";
+import { fetchUsdPriceOfTlos } from "~/api/helpers";
+import { defaultModule } from "~/router";
 const VuexModule = createModule({
     strict: false
 });

@@ -1,7 +1,7 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, action } from "vuex-class-component";
-import { vxm } from "../../../store";
-import { store } from "../../../store";
+import { vxm } from "~/store";
+import { store } from "~/store";
 const VuexModule = createModule({
     strict: false
 });

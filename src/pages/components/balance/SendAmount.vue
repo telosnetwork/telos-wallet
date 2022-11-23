@@ -205,7 +205,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import SendToAddress from "./SendToAddress";
+import SendToAddress from "~/pages/components/balance/SendToAddress";
 import { setInterval } from "timers";
 import { isNumber } from "util";
 import BigNumber from "bignumber.js";

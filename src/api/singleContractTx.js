@@ -1,4 +1,4 @@
-import { composeMemo } from "./eosBancorCalc";
+import { composeMemo } from "~/api/eosBancorCalc";
 export const liquidateAction = (smartTokenAmount, smartTokenContract, expectedReserve, relayContract, userAccount) => ({
     account: smartTokenContract,
     name: "transfer",

@@ -2,7 +2,7 @@ import { __awaiter } from "tslib";
 import { Decimal } from "decimal.js";
 import { Asset, asset_to_number, asset } from "eos-common";
 import _ from "lodash";
-import { compareString } from "./helpers";
+import { compareString } from "~/api/helpers";
 export function calculateReturn(balanceFrom, balanceTo, amount) {
     if (!balanceFrom.symbol.isEqual(amount.symbol))
         throw new Error("From symbol does not match amount symbol");

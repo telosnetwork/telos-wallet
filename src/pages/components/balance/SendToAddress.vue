@@ -250,7 +250,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import SendConfirm from "./SendConfirm";
+import SendConfirm from "~/pages/components/balance/SendConfirm";
 import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
