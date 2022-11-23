@@ -1,6 +1,6 @@
 import { __awaiter, __decorate } from "tslib";
 import { createModule, mutation, action } from "vuex-class-component";
-import { vxm } from "../../../store";
+import { vxm } from "~/store";
 export var Chain;
 (function (Chain) {
     Chain[(Chain["telos"] = 0)] = "telos";

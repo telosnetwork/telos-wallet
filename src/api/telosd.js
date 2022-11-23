@@ -1,6 +1,6 @@
 import { __awaiter } from "tslib";
 import { asset, check, symbol_code, number_to_asset, SymbolCode, asset_to_number, Asset, Sym, Name } from "eos-common";
-import { compareString } from "./helpers";
+import { compareString } from "~/api/helpers";
 export function get_bancor_output(base_reserve, quote_reserve, quantity) {
     const out = (quantity * quote_reserve) / (base_reserve + quantity);
     if (out < 0)

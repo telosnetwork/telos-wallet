@@ -125,7 +125,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { vxm } from "../../../store";
+import { vxm } from "~/store";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 

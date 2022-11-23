@@ -365,8 +365,8 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import SelectCoin from "./SelectCoin";
-import { vxm } from "../../../store";
+import SelectCoin from "~/pages/components/balance/SelectCoin";
+import { vxm } from "~/store";
 import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
