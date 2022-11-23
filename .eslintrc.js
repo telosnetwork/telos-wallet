@@ -38,7 +38,7 @@ module.exports = {
     // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-file
     // required to lint *.vue files
     'vue',
-
+    'no-relative-import-paths'
     // https://github.com/typescript-eslint/typescript-eslint/issues/389#issuecomment-509292674
     // Prettier has not been included as plugin to avoid performance impact
     // add it as an extension for your IDE
@@ -57,6 +57,9 @@ module.exports = {
   rules: {
     'prefer-promise-reject-errors': 'off',
 
+    'no-relative-import-paths/no-relative-import-paths': [
+      'error', { 'allowSameFolder': false, 'rootDir': 'src', 'prefix': '~' }
+    ],
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'

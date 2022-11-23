@@ -6,9 +6,10 @@
   "author": "Ryuhei Matsuda <ryuheimat3@gmail.com>",
   "private": true,
   "scripts": {
-    "dev" : "quasar dev",
+    "dev": "quasar dev",
     "build": "quasar build",
     "lint": "eslint --ext .js,.vue ./",
+    "lint:fix": "eslint --fix --ext .js,.vue src",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-no-relative-import-paths": "^1.5.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-quasar": "^1.0.0",
