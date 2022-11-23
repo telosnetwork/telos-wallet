@@ -1,4 +1,4 @@
-import { vxm } from "../../store";
+import { vxm } from "~/store";
 import BigNumber from "bignumber.js";
 
 export const login = async function(

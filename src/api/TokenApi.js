@@ -1,5 +1,5 @@
 import { __awaiter } from "tslib";
-import RequestApi from "./RequestApi";
+import RequestApi from "~/api/RequestApi";
 class TokenApi {
     constructor() {
         console.log("Token Api created");

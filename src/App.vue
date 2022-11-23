@@ -2,7 +2,7 @@
     <router-view />
 </template>
 <script>
-import { vxm } from "./store/index.js";
+import { vxm } from "~/store/index.js";
 
 export default {
   name: "App",

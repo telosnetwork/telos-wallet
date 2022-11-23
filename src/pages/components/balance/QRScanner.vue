@@ -37,7 +37,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import { QrcodeStream } from 'vue-qrcode-reader'
-import { accountName } from '../../../store/account/getters';
+import { accountName } from '~/store/account/getters';
 
 export default {
   props: ['showQRScannerDlg', 'coins'],

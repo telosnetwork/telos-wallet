@@ -86,7 +86,7 @@ export default {
       console.log("Connected to Hyperion Stream!");
     });
   },
-  destroyed() {
+  unmounted() {
     if (this.client) this.client.disconnect();
 
     this.client = null;

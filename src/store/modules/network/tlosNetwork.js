@@ -5,12 +5,12 @@ import {
     getTokenBalances,
     compareString,
     compareToken
-} from "../../../api/helpers";
-import { vxm } from "../../../store";
+} from "~/api/helpers";
+import { vxm } from "~/store";
 import _ from "lodash";
-import { multiContract } from "../../../api/multiContractTx";
+import { multiContract } from "~/api/multiContractTx";
 import { Asset, asset_to_number, number_to_asset, Sym } from "eos-common";
-import { Chain } from "../../../store/modules/wallet/tlosWallet";
+import { Chain } from "~/store/modules/wallet/tlosWallet";
 const requiredProps = ["balance", "contract", "symbol"];
 const pickBalanceReturn = data => {
     const res = _.pick(data, requiredProps);

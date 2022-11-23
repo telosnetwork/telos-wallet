@@ -1,17 +1,17 @@
 import { createStore } from 'vuex';
-import account from "./account";
-import general from "./general";
-import global from "./global";
-import resources from "./resources";
-import evm from "./evm";
-import rex from "./rex";
-import { GeneralModule } from "./modules/general";
-import { EosTransitModule } from "./modules/wallet/tlosWallet";
-import { TlosBancorModule } from "./modules/swap/tlosBancor";
-import { BancorModule } from "./modules/swap/index";
-import { WalletModule } from "./modules/wallet/index";
-import { NetworkModule } from "./modules/network/index";
-import { TlosNetworkModule } from "./modules/network/tlosNetwork";
+import account from "~/store/account";
+import general from "~/store/general";
+import global from "~/store/global";
+import resources from "~/store/resources";
+import evm from "~/store/evm";
+import rex from "~/store/rex";
+import { GeneralModule } from "~/store/modules/general";
+import { EosTransitModule } from "~/store/modules/wallet/tlosWallet";
+import { TlosBancorModule } from "~/store/modules/swap/tlosBancor";
+import { BancorModule } from "~/store/modules/swap/index";
+import { WalletModule } from "~/store/modules/wallet/index";
+import { NetworkModule } from "~/store/modules/network/index";
+import { TlosNetworkModule } from "~/store/modules/network/tlosNetwork";
 import { createProxy, extractVuexModule } from "vuex-class-component";
 
 

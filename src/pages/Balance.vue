@@ -205,19 +205,19 @@
 <script>
 import BigNumber from "bignumber.js";
 import { mapGetters, mapActions } from "vuex";
-import Coin from "./components/balance/Coin";
-import Collectables from "./components/balance/Collectables";
-import Send from "./components/balance/Send";
-import SendAmount from "./components/balance/SendAmount";
-import Receive from "./components/balance/Receive";
-import BuyAmount from "./components/balance/BuyAmount";
-import ShareAddress from "./components/balance/ShareAddress";
-import QRScanner from "./components/balance/QRScanner";
-import History from "./components/balance/History";
-import Exchange from "./components/balance/Exchange";
-import DepositEVM from "./components/balance/DepositEVM";
-import WithdrawEVM from "./components/balance/WithdrawEVM";
-import RexStaking from "./components/balance/RexStaking";
+import Coin from "~/pages/components/balance/Coin";
+import Collectables from "~/pages/components/balance/Collectables";
+import Send from "~/pages/components/balance/Send";
+import SendAmount from "~/pages/components/balance/SendAmount";
+import Receive from "~/pages/components/balance/Receive";
+import BuyAmount from "~/pages/components/balance/BuyAmount";
+import ShareAddress from "~/pages/components/balance/ShareAddress";
+import QRScanner from "~/pages/components/balance/QRScanner";
+import History from "~/pages/components/balance/History";
+import Exchange from "~/pages/components/balance/Exchange";
+import DepositEVM from "~/pages/components/balance/DepositEVM";
+import WithdrawEVM from "~/pages/components/balance/WithdrawEVM";
+import RexStaking from "~/pages/components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
