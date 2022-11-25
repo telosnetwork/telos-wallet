@@ -1,6 +1,7 @@
 import { boot } from 'quasar/wrappers';
 import { Api, JsonRpc } from "eosjs";
 import { TelosEvmApi } from "@telosnetwork/telosevm-js";
+import { CosignAuthorityProvider, cosign_noop } from 'src/boot/fuel';
 
 const signTransaction = async function (actions, detail = null) {
   actions.forEach(action => {
@@ -15,6 +16,10 @@ const signTransaction = async function (actions, detail = null) {
   });
   let transaction = null;
   try {
+
+    // Greymass fuell noop action at first to delegate resource costs
+    actions.unshift(cosign_noop);
+
     if (this.$type === "ual") {
         transaction = await this.$ualUser.signTransaction(
           {
@@ -51,13 +56,17 @@ const getAccount = async function (accountName) {
 };
 
 export default boot(async ({ store }) => {
-  const rpc = new JsonRpc(
-    `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`
-  );
+
+  // const rpc = new JsonRpc(
+  //   `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`
+  // );
+  // TODO: this is a quick snippet to see if it works. We need to handle getting this endpoint from somewhere else.
+  const rpc = new JsonRpc('https://telos.greymass.com');
 
   store["$account"] = {};
 
   store["$defaultApi"] = new Api({
+    authorityProvider: new CosignAuthorityProvider(),
     rpc,
     textDecoder: new TextDecoder(),
     textEncoder: new TextEncoder()
