@@ -22,9 +22,9 @@
           <div class="column" :style="`height: ${cardHeight}px;`">
             <q-space/>
             <q-space/>
-            <div class="text-center text-white text-h5">Scan QR code</div>
-            <div class="text-center text-white text-subtitle1">Send money or connect</div>
-            <div class="text-center text-white text-subtitle1">to a desktop website</div>
+            <div class="text-center text-white text-h5">{{$t('components.scan_qr')}}</div>
+            <div class="text-center text-white text-subtitle1">{{$t('components.send_or_connect')}}</div>
+            <div class="text-center text-white text-subtitle1">{{$t('components.to_a_desktop_website')}}</div>
             <q-space/>
           </div>
         </q-page-container>
@@ -73,7 +73,7 @@ export default {
             if (accountName.length !== 42 || !accountName.startsWith('0x')) {
               this.$q.notify({
                 type: 'negative',
-                message: `Address ${accountName} does not exist`,
+                message: $this.$t('components.address_not_exist',{account:accountName}),
               });
               return;
             }
@@ -84,7 +84,7 @@ export default {
             if (!data.success) {
               this.$q.notify({
                 type: 'negative',
-                message: `Address ${accountName} does not exist`,
+                message: $this.$t('components.address_not_exist',{account:accountName}),
               });
               return;
             }
@@ -93,7 +93,7 @@ export default {
             if (accountName.length !== 42 || !accountName.startsWith('0x')) {
               this.$q.notify({
                 type: 'negative',
-                message: `Address ${accountName} does not exist`,
+                message: $this.$t('components.address_not_exist',{account:accountName}),
               });
               return;
             }
@@ -102,7 +102,7 @@ export default {
         } else if (!(await this.accountExists(accountName))) {
           this.$q.notify({
             type: 'negative',
-            message: `Account ${accountName} does not exist`,
+            message: $this.$t('components.account_not_exist',{account:accountName}),
           });
           return;
         }

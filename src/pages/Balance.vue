@@ -53,10 +53,10 @@
           <div class="row justify-between q-mb-md">
             <div class="convertBtn" @click="clickExchange()">
               <img src="~assets/coin/Convert.svg" class="q-mr-xs" />
-              Convert
+              {{$t('balance.convert')}}
             </div>
             <div class="purchaceBtn" @click="clickPurchase()">
-              Purchase
+              {{$t('balance.purchase')}}
               <img src="~assets/coin/Purchase.svg" class="q-ml-xs" />
             </div>
           </div>
@@ -178,12 +178,11 @@
     <q-dialog v-model="showEVMWarning">
       <q-card class="popupCard">
         <q-card-section>
-          <div class="text-h6">WARNING!</div>
+          <div class="text-h6">{{$t('balance.warning')}}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          DO NOT USE THIS ANYWHERE EXCEPT TELOS EVM OR ELSE IT COULD RESULT IN A
-          LOSS OF FUNDS. THIS PRIVATE KEY IS NOT AVAILABLE.
+          {{$t('balance.warning_msg')}}
         </q-card-section>
 
         <q-card-actions align="right">
@@ -191,7 +190,7 @@
             @click="showEVMAddress = true"
             flat
             no-caps
-            label="I Understand"
+            :label="$t('balance.i_understand')"
             color="white"
             v-close-popup
             class="purpleGradient"
@@ -359,7 +358,7 @@ export default {
       copyToClipboard(str).then(() => {
         this.$q.notify({
           type: "primary",
-          message: "Copied to clipboard",
+          message: this.$t('copied_ok'),
         });
       });
     },

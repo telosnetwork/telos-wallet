@@ -21,13 +21,13 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Send
+              {{$t('components.send')}}
             </div>
             <div />
           </div>
           <div class="">
             <div class="text-subtitle2 text-grey-4 text-center q-pb-md">
-              Select a coin
+              {{$t('components.select_a_coin')}}
             </div>
             <div class="text-center">
               <q-input
@@ -56,7 +56,7 @@
                   header
                   class="text-subtitle1 q-pt-lg q-pb-xs"
                 >
-                  Suggested
+                {{$t('components.suggested')}}
                 </div>
                 <q-item-label
                   v-if="
@@ -87,8 +87,7 @@
                             width: 50%;
                             height: 50%;
                             margin-right: -10%;
-                            margin-bottom: -5%;
-                          "
+                            margin-bottom: -5%;"
                         />
                       </div>
                     </q-avatar>
