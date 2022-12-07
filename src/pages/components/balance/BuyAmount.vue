@@ -23,7 +23,7 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Buy {{ selectedCoin.symbol }}
+              {{ $t('components.buy') }}  {{ selectedCoin.symbol }}
             </div>
             <div />
           </div>
@@ -94,7 +94,7 @@
                 </div>
                 <div v-else>
                   <label class="text-subtitle1 text-weight-medium text-white">
-                    Rate:
+                    {{$t('components.rate')}}:
                     {{
                       coinInput
                         ? `$ ${getFixed(
@@ -107,7 +107,7 @@
                     }} </label
                   ><br />
                   <label class="text-subtitle1 text-weight-medium text-white">
-                    Total:
+                    {{$t('components.total')}}:
                     {{
                       coinInput
                         ? `$ ${getFixed(
@@ -143,9 +143,7 @@
                   icon="fas fa-info-circle"
                 >
                   <div class="col text-justify q-pa-md ">
-                    By Clicking 'Next' you will be taken to Moonpay to purchase Telos (TLOS) with card.
-                    Do not alter the 'TO' or 'MEMO' field or risk losing your
-                    funds.
+                    {{$t('components.to_moonpay_text')}}
                   </div>
                 </q-expansion-item>
               </div>

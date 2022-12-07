@@ -21,7 +21,7 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Confirm Send
+              {{$t('components.confirm_send')}}
             </div>
             <div />
           </div>
@@ -44,7 +44,7 @@
                 <div v-if="networkType !== 'telos'">
                   {{ `$ ${getFixed(gasFee * selectedCoin.price, 8)}` }}
                 </div>
-                <div class="text-weight-bold">Total</div>
+                <div class="text-weight-bold">{{$t('components.total')}}</div>
                 <div>
                   {{ `$ ${getFixed(sendAmount * selectedCoin.price, 8)}` }}
                 </div>
@@ -58,9 +58,7 @@
                   copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')
                 "
               >
-                Ethereum Wallet users: to view TLOS balance in wallet, add TLOS
-                with contract address:
-                0x7825e833D495F3d1c28872415a4aee339D26AC88
+              {{$t('components.for_ethereum_wallet_users')}}
               </div>
               <div class="text-center">
                 <q-btn
@@ -208,7 +206,10 @@ export default {
         } catch (e) {
           this.$q.notify({
             type: "negative",
-            message: `Failed to send ${quantityStr} to ${this.toAddress}`
+            message: this.$t('components.failed_to_send', {
+              quantity: quantityStr,
+              address: this.toAddress
+            })
           });
           this.sending = false;
           return;
@@ -242,7 +243,10 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `${quantityStr} is sent to ${this.toAddress}`
+          message: this.$t('components.is_sent_to', {
+            quantity: quantityStr,
+            address: this.toAddress
+          })
         });
         this.$emitter.emit("successfully_sent", this.sendAmount, this.toAddress);
       } catch (error) {
@@ -262,7 +266,7 @@ export default {
 
       this.$q.notify({
         type: "primary",
-        message: "Copied it to the clipboard successfully"
+        message: this.$t('balance.copied_ok')
       });
     }
   },
