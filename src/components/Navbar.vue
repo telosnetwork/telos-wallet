@@ -4,25 +4,25 @@
       <img src="~assets/telosLogo.svg" class="telosLogo" />
       <ul>
         <li>
-          <a @click="switchTab('coins')"> <img :src="srcWallet" />Wallet </a>
+          <a @click="switchTab('coins')"> <img :src="srcWallet" />{{$t('navbar.wallet')}} </a>
         </li>
         <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />Staking (REX)</a>
+          <a @click="switchTab('earn')"> <img :src="srcEarn" />{{$t('navbar.staking')}}</a>
         </li>
         <li>
-          <a @click="switchTab('resources')"> <img :src="srcResources" />Resource Management</a>
+          <a @click="switchTab('resources')"> <img :src="srcResources" />{{$t('navbar.resources')}}</a>
         </li>
         <li>
-          <a @click="switchTab('nft')"> <img :src="srcNft" />NFTs </a>
+          <a @click="switchTab('nft')"> <img :src="srcNft" />{{$t('navbar.nfts')}} </a>
         </li>
         <li>
-          <a @click="switchTab('dapps')"> <img :src="srcDapps" />dApps </a>
+          <a @click="switchTab('dapps')"> <img :src="srcDapps" />{{$t('navbar.dapps')}} </a>
         </li>
         <li>
-          <a @click="switchTab('profile')"> <img :src="srcProfile" />Profile </a>
+          <a @click="switchTab('profile')"> <img :src="srcProfile" />{{$t('navbar.profile')}} </a>
         </li>
         <li>
-          <a @click="$emit('log-out')"> <img :src="srcLogout" />Log Out </a>
+          <a @click="$emit('log-out')"> <img :src="srcLogout" />{{$t('navbar.logout')}} </a>
         </li>
       </ul>
     </nav>

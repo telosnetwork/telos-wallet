@@ -34,7 +34,7 @@
               <!-- <div v-if="isPToken" class="list-item q-pb-sm"> -->
               <div v-if="isPToken" class="q-py-md">
                 <label class="text-center full-width text-white"
-                  >From Network</label
+                  > {{$t('components.from_network')}}</label
                 >
               </div>
               <div v-if="isPToken" class="">
@@ -112,22 +112,22 @@
               <div class="text-white">({{ selectedCoin.name }} address)</div>
               <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
                 <q-spinner color="primary" size="2em" :thickness="5" />
-                Awaiting New Deposits...
+                {{$t('components.awaiting_deposits')}}
               </div>
               <q-space />
               <div v-if="networkType === 'tevm'" class="text-caption text-red">
-                WARNING! This a a Telos EVM address only. Do not send funds to
-                this address on any other network!
+                {{$t('components.telos_evm_only')}}
               </div>
               <div
                 v-else-if="networkType === 'ptoken'"
                 class="text-caption text-grey-8"
               >
-                Any {{ selectedCoin.symbol.slice(1) }} deposit sent to this
-                address will mint an equal number of p{{
-                  selectedCoin.symbol.slice(1)
-                }}
-                tokens on the TELOS address: {{ accountName }}
+
+                {{ $t('components.telos_evm_only', {
+                  sym: selectedCoin.symbol.slice(1),
+                  account: accountName
+                }) }}
+                
               </div>
             </q-card>
           </div>
@@ -214,7 +214,7 @@ export default {
         if (this.depositAddress.length > 0) {
           return this.depositAddress;
         } else {
-          return "Please Generate New Deposit Address";
+          return this.$t('components.generate_new_address');
         }
       }
       return "";
@@ -284,7 +284,7 @@ export default {
         );
         this.$q.notify({
           type: "primary",
-          message: `A new address is successfully created`,
+          message: this.$t('components.new_address_created'),
         });
         const evmAccount =
           await this.$evmApi.telos.getEthAccountByTelosAccount(
@@ -332,7 +332,7 @@ export default {
         window.localStorage.setItem("metaData", JSON.stringify(this.metaData));
         this.$q.notify({
           type: "primary",
-          message: "New Deposit Address is generated successfully",
+          message: this.$t('components.address_is_generated'),
         });
 
         newAddress
@@ -345,7 +345,7 @@ export default {
           .then((res) => {
             this.$q.notify({
               type: "primary",
-              message: "New Deposit is confirmed successfully",
+              message: this.$t('components.deposit_confirmed'),
             });
             this.awaiting = false;
           });
@@ -355,7 +355,7 @@ export default {
       copyToClipboard(str).then(() => {
         this.$q.notify({
           type: "primary",
-          message: "Copied to clipboard",
+          message: this.$t('balance.copied_ok'),
         });
       });
     },

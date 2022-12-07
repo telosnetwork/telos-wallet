@@ -18,14 +18,13 @@
       <div class="popupHeading">
         <div />
         <div class="text-h5 text-weight-medium text-center q-mt-lg ">
-          EVM Withdraw
+          {{$t('components.evm_withdraw')}}
         </div>
         <div />
       </div>
       <div class="popupBody text-center">
         <div class="text-center text-subtitle2 text-grey-4">
-          Withdraw your TLOS from the EVM,<br />
-          fast, free and instant.
+          {{$t('components.withdraw_1')}}<br />{{$t('components.withdraw_2')}}
         </div>
         <div class="text-center q-mt-md">
           <div class="inputAmount row items-center ">
@@ -50,7 +49,7 @@
             class="purpleGradient withdrawBtn"
             no-caps
             rounded
-            label="Withdraw"
+            :label="$t('components.withdraw')"
             @click="withdraw"
           />
         </div>
@@ -93,7 +92,7 @@ export default {
       if (amount > parseFloat(this.evmTLOSBalance)) {
         this.$q.notify({
           type: "negative",
-          message: `Cannot withdraw more than EVM TLOS balance: ${this.evmTLOSBalance}`
+          message: this.$t('components.cannot_withdraw', {balance:this.evmTLOSBalance})
         });
         return;
       }
@@ -113,13 +112,13 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Deposit ${quantityStr} to the EVM`
+          this.$t('components.deposit_to_evm', {quantity:quantityStr})
         );
         await this.setEvmState();
         this.showDlg = false;
         this.$q.notify({
           type: "primary",
-          message: `${quantityStr} is withdrawn from the EVM`
+          message: this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr})
         });
       } catch (error) {
         this.$errorNotification(error);

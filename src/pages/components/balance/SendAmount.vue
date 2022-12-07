@@ -21,7 +21,7 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Send Amount
+              {{$t('components.send_amount')}}
             </div>
             <div />
           </div>
@@ -40,8 +40,7 @@
                     width: 50%;
                     height: 50%;
                     margin-right: -10%;
-                    margin-top: 60%;
-                  "
+                    margin-top: 60%;"
                 />
               </div>
             </q-avatar>

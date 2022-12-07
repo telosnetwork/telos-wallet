@@ -86,7 +86,7 @@
                 />
               </div>
               <label class="text-subtitle1 text-center text-white">
-                Equivalent to
+                {{$t('components.equivalent_to')}}
               </label>
             </div>
             <div
@@ -130,7 +130,7 @@
                     />
                   </div>
                   <div class="text-center">
-                    {{ toCoin ? toCoin.name : "Choose coin" }}
+                    {{ toCoin ? toCoin.name : $t('components.choose_coin') }}
                   </div>
                 </div>
               </div>
@@ -149,7 +149,7 @@
                 <q-item-section>
                   <div class="text-white display-grid">
                     <label class="text-subtitle1 text-weight-medium wrap"
-                      >Convert</label
+                      >{{$t('components.convert') }}</label
                     >
                   </div>
                 </q-item-section>
@@ -332,13 +332,13 @@
               class="purpleGradient text-white text-subtitle2 nextBtn flex-center q-mt-md"
               flat
               no-caps
-              label="Convert"
+              :label="$t('components.convert')"
               :disable="!convertButtonEnabled || true"
               @click="convertPressed()"
             />
           </div>
           <div class="text-center q-mt-sm" style="color: red">
-            Swapping has temporarily been disabled. Please go to
+            {{$t('components.swap_disabled_goto')}}
             <a style="color: blue" href="http://tswaps.com/" target="_blank">
               tswaps.com
             </a>
@@ -579,24 +579,30 @@ export default {
           if (result === "needAuth") {
             this.$q.notify({
               type: "negative",
-              message: `Authentication is required`,
+              message: this.$t('components.auth_required'),
             });
           } else if (result === "error") {
             this.$q.notify({
               type: "negative",
-              message: `Conversion failed. Make sure authentication is done correctly.`,
+              message: this.$t('components.conversion_failed'),
             });
           } else if (result !== "cancelled") {
             this.$q.notify({
               type: "primary",
-              message: `${this.convertCoin.symbol} is converted into ${this.toCoin.symbol}`,
+              message: this.$t('components.is_converted_into', {
+                from: this.convertCoin.symbol,
+                to: this.toCoin.symbol
+              }),
             });
             this.showDlg = false;
           }
         } else {
           this.$q.notify({
             type: "negative",
-            message: `${this.convertCoin.symbol} is not converted into ${this.toCoin.symbol}`,
+            message: this.$t('components.is_not_converted_into', {
+              from: this.convertCoin.symbol,
+              to: this.toCoin.symbol
+            }),
           });
         }
       } catch (e) {

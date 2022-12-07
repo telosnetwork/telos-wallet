@@ -19,7 +19,7 @@
     </q-input>
     <q-item v-if="!accountHasProfile">
       <div class="text-h6">
-        Profile not found
+        {{$t('account.profile_not_found')}}
       </div>
     </q-item>
     <q-card
@@ -27,7 +27,7 @@
       class="row justify-center q-py-md full-width"
     >
       <div class="text-h6">
-        Account profile
+        {{$t('account.account_profile')}}
       </div>
       <q-avatar size="300px">
         <img :src="userAvatar" />

@@ -19,13 +19,13 @@
       <div class="popupHeading">
         <div />
         <div class="text-h5 text-weight-medium text-center q-mt-lg">
-          EVM Deposit
+          {{$t('components.evm_deposit')}}
         </div>
         <div />
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center">
-          Deposit your TLOS into the EVM,<br />fast, free and instant.
+          {{$t('components.deposit_1')}}<br />{{$t('components.deposit_2')}}
         </div>
         <div class="text-center q-mt-md">
           <div class="inputAmount row items-center">
@@ -44,7 +44,7 @@
             @click="depositAmount = nativeTLOSBalance"
             class="depositAddressToggle"
           >
-            Max: {{ nativeTLOSBalance }}
+          {{$t('components.max')}}: {{ nativeTLOSBalance }}
           </div>
         </div>
         <div class="depositInput row justify-center">
@@ -91,13 +91,12 @@
             class="lightBlue depositAddressToggle q-mt-xs"
             @click="addEvmNetwork"
           >
-            Add EVM Network
+          {{$t('components.add_evm_network')}}
           </div>
         </div>
         <div class="row justify-center q-mt-md">
           <div v-if="!evmAddress && depositOwnAddress" class="note">
-            NOTE: This is your first deposit so an additional “create” action
-            will be included
+            {{$t('components.first_deposit')}}
           </div>
           <div
             v-if="
@@ -107,14 +106,11 @@
             "
             class="note"
           >
-            NOTE: The recipient address does not exist so an additional “create”
-            action will be included
+            {{$t('components.address_not_exist')}}
           </div>
 
           <q-card-section class="q-pt-sm text-warning">
-            DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS
-            WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN METAMASK
-            ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.
+            {{$t('components.dont_send_to_exchanges')}}
           </q-card-section>
         </div>
       </div>
@@ -220,12 +216,12 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Create EVM address for ${this.accountName}`
+          this.$t('components.create_evm_for', {account: this.accountName})
         );
         await this.setEvmState();
         this.$q.notify({
           type: "primary",
-          message: `EVM address created for ${this.accountName}`,
+          message: this.$t('components.created_evm_for', {account: this.accountName}),
         });
         this.depositAmount = "0";
         this.depositOwnAddress = false;
@@ -241,7 +237,7 @@ export default {
       if (amount > parseFloat(this.nativeTLOSBalance)) {
         this.$q.notify({
           type: "negative",
-          message: `Cannot deposit more than native TLOS balance: ${this.nativeTLOSBalance}`,
+          message: this.$t('components.cant_deposit_more', {balance: this.nativeTLOSBalance}),
         });
         return;
       }
@@ -276,7 +272,7 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Deposit ${quantityStr} to the EVM`
+          this.$t('components.deposit_to_evm', {quantity: quantityStr})
         );
 
         await this.setEvmState();
@@ -289,7 +285,7 @@ export default {
 
         this.$q.notify({
           type: "primary",
-          message: `${quantityStr} is deposited to the EVM`,
+          message: this.$t('components.deposited_to_evm', {quantity: quantityStr}),
         });
       } catch (error) {
         this.$errorNotification(error);

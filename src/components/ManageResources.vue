@@ -19,14 +19,13 @@
       <div class="popupHeading">
         <div />
         <div class="text-h5 text-weight-medium text-center q-mt-lg">
-          Network Resources
+          {{$t('resources.title')}}
         </div>
         <div />
       </div>
       <div class="text-center">
         <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-          Stake CPU and NET for processing transactions. RAM is used for storing
-          data on the blockchain.
+          {{$t('resources.intro')}}
         </div>
         <div class="fit row wrap justify-center items-start content-center">
           <!-- CPU -->
@@ -47,12 +46,12 @@
                 <div v-if="(usedCPU / totalCPU) * 100 > 1">
                   <div class="col">
                     <div>{{ ((usedCPU / totalCPU) * 100).toFixed(0) }}%</div>
-                    <div>Used</div>
+                    <div>{{$t('resources.used')}}</div>
                   </div>
                 </div>
                 <div v-else>
                   &lt; 1%
-                  <div>Used</div>
+                  <div>{{$t('resources.used')}}</div>
                 </div>
               </q-circular-progress>
 
@@ -61,7 +60,7 @@
                 {{ formatSec(usedCPU) }} /
                 {{ formatSec(totalCPU) }}
               </div>
-              <div class="q-mt-sm">Total Staked:</div>
+              <div class="q-mt-sm">{{$t('resources.total_staked')}}:</div>
               <div>{{ stakedTotalCPU }}</div>
             </div>
           </div>
@@ -83,12 +82,12 @@
                 <div v-if="(usedNET / totalNET) * 100 > 1">
                   <div class="col">
                     <div>{{ ((usedNET / totalNET) * 100).toFixed(0) }}%</div>
-                    <div>Used</div>
+                    <div>{{$t('resources.used')}}</div>
                   </div>
                 </div>
                 <div v-else>
                   &lt; 1%
-                  <div>Used</div>
+                  <div>{{$t('resources.used')}}</div>
                 </div>
               </q-circular-progress>
 
@@ -97,7 +96,7 @@
                 {{ formatBytes(usedNET) }} / {{ formatBytes(totalNET) }}
               </div>
 
-              <div class="q-mt-sm">Total Staked:</div>
+              <div class="q-mt-sm">{{$t('resources.total_staked')}}:</div>
               <div>{{ stakedTotalNET }}</div>
             </div>
           </div>
@@ -118,7 +117,7 @@
               >
                 <div class="col">
                   <div>{{ ((usedRAM / totalRAM) * 100).toFixed(0) }}%</div>
-                  <div>Used</div>
+                  <div>{{$t('resources.used')}}</div>
                 </div>
               </q-circular-progress>
 
@@ -155,7 +154,7 @@
             rounded
             class="purpleGradient"
             size="lg"
-            :label="selectedResource === 'RAM' ? 'Buy' : 'Add'"
+            :label="selectedResource === 'RAM' ? $t('resources.buy') : $t('resources.add')"
             style="width: 15em"
           />
         </div>
@@ -309,11 +308,11 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Buying resources`
+          this.$t('resources.buying_resources')
         );
         this.$q.notify({
           type: "primary",
-          message: `Resources bought`,
+          message: this.$t('resources.resources_bought'),
         });
         this.accountInfo = await this.$store.$api.getAccount(
           this.accountName.toLowerCase()

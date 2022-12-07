@@ -50,8 +50,7 @@
                             width: 50%;
                             height: 50%;
                             margin-right: -10%;
-                            margin-bottom: -5%;
-                          "
+                            margin-bottom: -5%;"
                         />
                       </div>
                     </q-avatar>
@@ -80,7 +79,7 @@
                   class="fit column wrap justify-end items-end content-center"
                 >
                   <label class="text-caption text-white">
-                    Total:
+                    {{$t('components.total')}}:
                     {{
                       `${getFixed(
                         !selectedCoin.totalAmount
@@ -91,7 +90,7 @@
                     }}</label
                   >
                   <label class="text-caption text-white"
-                    >Liquid:
+                    >{{$t('components.liquid')}}:
                     {{
                       `${getFixed(
                         selectedCoin.amount,
@@ -100,7 +99,7 @@
                     }}</label
                   >
                   <label class="text-caption text-white q-ml-sm">
-                    Rex:
+                    REX:
                     {{
                       `${getFixed(
                         selectedCoin.rexBalance,
@@ -125,7 +124,7 @@
                 >
                   <div class="column">
                     <img src="~assets/coin/send.svg" />
-                    Send
+                    {{$t('components.send')}}
                   </div>
                 </q-btn>
 
@@ -140,7 +139,7 @@
                 >
                   <div class="column">
                     <img src="~assets/coin/receive.svg" />
-                    Receive
+                    {{$t('components.receive')}}
                   </div>
                 </q-btn>
 
@@ -156,7 +155,7 @@
                 >
                   <div class="column">
                     <img src="~assets/coin/Purchase.svg" />
-                    Buy
+                    {{$t('components.buy')}}
                   </div>
                 </q-btn>
 
@@ -172,7 +171,7 @@
                 >
                   <div class="column">
                     <img src="~assets/coin/Convert.svg" />
-                    Convert
+                    {{$t('components.convert')}}
                   </div>
                 </q-btn>
 
@@ -191,7 +190,7 @@
                 >
                   <div class="column">
                     <img src="/nav/earn_selected.svg" />
-                    Stake
+                    {{$t('components.stake')}}
                   </div>
                 </q-btn>
               </div>

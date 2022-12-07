@@ -1,7 +1,7 @@
 <template>
   <q-page class="column justify-center items-center content-center">
-    <div class="text-center q-pb-md text-h1">Telos Wallet</div>
-    <div class="text-h5 text-center q-pb-lg">It's Crypto Made Easy</div>
+    <div class="text-center q-pb-md text-h1">{{$t('home.title')}}</div>
+    <div class="text-h5 text-center q-pb-lg">{{$t('home.subtitle')}}</div>
     <div v-if="!isAuthenticated" class="text-center">
       <login-button />
     </div>
@@ -14,7 +14,7 @@
               target="_blank"
               class="text-white"
             >
-              Terms of Service
+            {{$t('home.terms')}}
             </a>
           </div>
           <div>
@@ -23,7 +23,7 @@
               target="_blank"
               class="text-white"
             >
-              Privacy Policy
+            {{$t('home.privacy')}}
             </a>
           </div>
         </div>
