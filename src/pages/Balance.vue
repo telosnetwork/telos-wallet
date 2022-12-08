@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-center">
     <div style="width: 600px">
-      <div style="height: 100%; overflow: auto">
+      <div>
         <div class="text-center">
           <!-- Account Name -->
           <div
@@ -33,7 +33,7 @@
               flat
               rounded
               no-caps
-              label="Send"
+              :label="$t('components.send')"
               @click="showSendDlg = true"
             />
             <div @click="showQRScannerDlg = true" class="qrBtn q-mx-xs">
@@ -44,7 +44,7 @@
               flat
               rounded
               no-caps
-              label="Receive"
+              :label="$t('components.receive')"
               @click="showReceiveDlg = true"
             />
           </div>
@@ -66,8 +66,8 @@
           :value="balanceTab"
           v-model="tab"
           @click="switchTab"
-          content-class="coinTabs"
-          class="shadow-2 no-shadow"
+          content-class="balance-tabs--content"
+          class="shadow-2 no-shadow balance-tabs"
           style="width: 100%"
         >
           <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
@@ -76,14 +76,13 @@
         <q-tab-panels
           flat
           v-model="tab"
-          class="coinTabPanels"
+          class="balance-tabs--panels"
         >
           <q-tab-panel
             flat
             name="coins"
             label="Coins"
-            class="no-padding"
-            :style="' border:0px;'"
+            class="no-padding balance-tabs--coins-panel"
           >
             <Coin
               flat
@@ -882,7 +881,55 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
+.balance-tabs--content {
+  .q-tab__indicator {
+    background: linear-gradient(45deg, $positive, $primary);
+    padding: 0.1rem;
+  }
+  .q-tab:first-child {
+    border-top-left-radius: 2.5rem;
+  }
+  .q-tab:last-child {
+    border-top-right-radius: 2.5rem;
+  }
+
+  border-top-left-radius: 2.5rem !important;
+  border-top-right-radius: 2.5rem !important;
+  background: rgba($white, 0.08);
+}
+.balance-tabs--panels {
+  background: rgba($white, 0.08);
+}
+
+@media only screen and (min-width: 1000px) {
+  .balance-tabs--content {
+    border-radius: initial;
+    background: #00000000;
+  }
+  .balance-tabs--panels {
+    background: none;
+  }
+}
+
+.balance-tabs--panels > .q-panel {
+  overflow: hidden;
+}
+.balance-tabs--coins-panel {
+  border: 0px;
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+}
+
+@media only screen and (min-width: 1000px) {
+  .balance-tabs--coins-panel {
+    max-height: calc(100vh - 50px);
+  }
+}
+
+
+// --------------
 .balance-div {
   background-color: #00000000;
   display: inline-flex;
