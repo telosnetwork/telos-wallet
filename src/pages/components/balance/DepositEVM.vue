@@ -214,7 +214,6 @@ export default {
           });
         }
       try {
-        debugger;
         const transaction = await this.$store.$api.signTransaction(
           actions,
           this.$t('components.create_evm_for', {account: this.accountName})
