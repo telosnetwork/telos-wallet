@@ -14,14 +14,38 @@ const errorNotification = function(error) {
   }
 
   this.$q.notify({
-    type: "negative",
-    icon: "warning",
+    color: "negative",
+    icon: "error",
     message: `${errorStr}`
   });
 };
+
+const unexpectedErrorNotification = function(error) {
+  this.$q.notify({
+    color: "dark",
+    icon: "warning",
+    message: `${error}`
+  });
+};
+
+const successNotification = function(message) {
+  this.$q.notify({
+    color: "primary",
+    icon: "done",
+    message: `${message}`
+  });
+};
+
 
 
 export default boot(({ app, store }) => {
   app.config.globalProperties.$errorNotification = errorNotification;
   store["$errorNotification"] = errorNotification;
+  app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification;
+  store["$unexpectedErrorNotification"] = unexpectedErrorNotification;
+  app.config.globalProperties.$successNotification = successNotification;
+  store["$successNotification"] = successNotification;
 });
+
+
+

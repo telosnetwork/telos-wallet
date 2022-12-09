@@ -344,14 +344,11 @@ export default {
             actions,
             `${!accountProfile ? this.$t('settings.create_profile') : this.$t('settings.update_profile')}`
           );
-          this.$q.notify({
-            type: "primary",
-            message: `${
-              !accountProfile
-                ? this.$t('settings.create_profile_ok')
-                : this.$t('settings.update_profile_ok')
-            }`,
-          });
+          this.$successNotification(`${
+            !accountProfile
+              ? this.$t('settings.create_profile_ok')
+              : this.$t('settings.update_profile_ok')
+          }`);
         } catch (error) {
           this.$errorNotification(error);
         }
@@ -511,10 +508,7 @@ export default {
       document.execCommand("copy");
       document.body.removeChild(el);
 
-      this.$q.notify({
-        type: "primary",
-        message: this.$t('settings.copied_ok'),
-      });
+      this.$successNotification(this.$t('settings.copied_ok'));
     },
   },
   created: async function () {

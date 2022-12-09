@@ -90,10 +90,7 @@ export default {
     async withdraw() {
       let amount = parseFloat(this.withdrawAmount);
       if (amount > parseFloat(this.evmTLOSBalance)) {
-        this.$q.notify({
-          type: "negative",
-          message: this.$t('components.cannot_withdraw', {balance:this.evmTLOSBalance})
-        });
+        this.$errorNotification(this.$t('components.cannot_withdraw', {balance:this.evmTLOSBalance}));
         return;
       }
 
@@ -116,10 +113,7 @@ export default {
         );
         await this.setEvmState();
         this.showDlg = false;
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr})
-        });
+        this.$successNotification(this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr}));
       } catch (error) {
         this.$errorNotification(error);
       }

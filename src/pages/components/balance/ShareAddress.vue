@@ -282,10 +282,7 @@ export default {
           actions,
           `Create a new EVM address`
         );
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.new_address_created'),
-        });
+        this.$successNotification(this.$t('components.new_address_created'));
         const evmAccount =
           await this.$evmApi.telos.getEthAccountByTelosAccount(
             this.accountName
@@ -330,10 +327,7 @@ export default {
         this.depositAddress = newAddress.value;
         this.metaData[this.selectedCoin.symbol] = this.depositAddress;
         window.localStorage.setItem("metaData", JSON.stringify(this.metaData));
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.address_is_generated'),
-        });
+        this.$successNotification(this.$t('components.address_is_generated'));
 
         newAddress
           .waitForDeposit()
@@ -343,20 +337,14 @@ export default {
           .once("nodeBroadcastedTx", (tx) => {})
           .once("hostTxConfirmed", (tx) => {})
           .then((res) => {
-            this.$q.notify({
-              type: "primary",
-              message: this.$t('components.deposit_confirmed'),
-            });
+            this.$successNotification(this.$t('components.deposit_confirmed'));
             this.awaiting = false;
           });
       }
     },
     copyToClipboard(str) {
       copyToClipboard(str).then(() => {
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('balance.copied_ok'),
-        });
+        this.$successNotification(this.$t('components.copied_ok'));
       });
     },
   },

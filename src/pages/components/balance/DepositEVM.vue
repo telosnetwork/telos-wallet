@@ -219,10 +219,7 @@ export default {
           this.$t('components.create_evm_for', {account: this.accountName})
         );
         await this.setEvmState();
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.created_evm_for', {account: this.accountName}),
-        });
+        this.$successNotification( this.$t('components.created_evm_for', {account: this.accountName}));
         this.depositAmount = "0";
         this.depositOwnAddress = false;
         this.recipientAddress = "";
@@ -235,10 +232,7 @@ export default {
     async deposit() {
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
-        this.$q.notify({
-          type: "negative",
-          message: this.$t('components.cant_deposit_more', {balance: this.nativeTLOSBalance}),
-        });
+        this.$errorNotification(this.$t('components.cant_deposit_more', {balance: this.nativeTLOSBalance}));
         return;
       }
 
@@ -283,10 +277,7 @@ export default {
         this.recipientAddressExists = true;
         this.showDlg = false;
 
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.deposited_to_evm', {quantity: quantityStr}),
-        });
+        this.$successNotification(this.$t('components.deposited_to_evm', {quantity: quantityStr}));
       } catch (error) {
         this.$errorNotification(error);
       }

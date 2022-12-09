@@ -267,10 +267,7 @@ export default {
           actions,
           this.$t('resources.buying_resources')
         );
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('resources.resources_bought')
-        });
+        this.$successNotification(this.$t('resources.resources_bought'));
         if (transaction) this.ramLow = false;
         if (transaction) this.cpuLow = false;
         if (transaction) this.netLow = false;

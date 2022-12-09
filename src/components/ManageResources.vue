@@ -310,10 +310,7 @@ export default {
           actions,
           this.$t('resources.buying_resources')
         );
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('resources.resources_bought'),
-        });
+        this.$successNotification(this.$t('resources.resources_bought'));
         this.accountInfo = await this.$store.$api.getAccount(
           this.accountName.toLowerCase()
         );
