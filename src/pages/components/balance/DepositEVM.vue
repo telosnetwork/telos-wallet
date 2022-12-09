@@ -214,6 +214,7 @@ export default {
           });
         }
       try {
+        debugger;
         const transaction = await this.$store.$api.signTransaction(
           actions,
           this.$t('components.create_evm_for', {account: this.accountName})
@@ -225,7 +226,7 @@ export default {
         });
         this.depositAmount = "0";
         this.depositOwnAddress = false;
-        this.recipientAddress = "";
+        this.recipientAddress = this.evmAddress;
         this.recipientAddressExists = true;
 
       } catch (error) {
