@@ -77,7 +77,7 @@
             @click="deposit"
           />
         </div>
-        <div class="row justify-center" v-if="!recipientAddress">
+        <div class="row justify-center" v-if="!recipientAddress && !evmAddress">
           <q-btn
             class="purpleGradient depositBtn"
             no-caps
@@ -297,13 +297,11 @@ export default {
     showDepositEVMDlg() {
       if (this.showDlg) {
         this.$emit("addEvmNetwork");
+      };
+      if (this.evmAddress){
+        this.recipientAddress = this.evmAddress
       }
     },
-    evmAddress(val){
-      if (val){
-        this.recipientAddress = val;
-      }
-    }
   },
 };
 </script>
