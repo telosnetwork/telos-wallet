@@ -77,7 +77,7 @@
             @click="deposit"
           />
         </div>
-        <div class="row justify-center" v-if="!recipientAddress">
+        <div class="row justify-center" v-if="!recipientAddress && !evmAddress">
           <q-btn
             class="purpleGradient depositBtn"
             no-caps
@@ -222,7 +222,7 @@ export default {
         this.$successNotification( this.$t('components.created_evm_for', {account: this.accountName}));
         this.depositAmount = "0";
         this.depositOwnAddress = false;
-        this.recipientAddress = "";
+        this.recipientAddress = this.evmAddress;
         this.recipientAddressExists = true;
 
       } catch (error) {
@@ -287,13 +287,11 @@ export default {
     showDepositEVMDlg() {
       if (this.showDlg) {
         this.$emit("addEvmNetwork");
+      };
+      if (this.evmAddress){
+        this.recipientAddress = this.evmAddress
       }
     },
-    evmAddress(val){
-      if (val){
-        this.recipientAddress = val;
-      }
-    }
   },
 };
 </script>

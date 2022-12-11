@@ -47,7 +47,7 @@ export default {
         save: "SAVE",
         warning: "Warning!",
         warning_msg: "Are you sure you want to show your Telos private keys? Be sure you " +
-        "are in a private location and no one can see your screen. Anyone " + 
+        "are in a private location and no one can see your screen. Anyone " +
         "viewing your private keys can steal your funds.",
         private_key: "Private Key",
         create_profile: "Created new profile",
@@ -148,7 +148,7 @@ export default {
         add_evm_network: "Add EVM Network",
         first_deposit: "NOTE: This is your first deposit so an additional “create” action " +
         "will be included",
-        address_not_exist: "NOTE: The recipient address does not exist so an additional “create” " + 
+        address_not_exist: "NOTE: The recipient address does not exist so an additional “create” " +
         "action will be included",
         dont_send_to_exchanges: "DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS " +
         "WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN METAMASK " +
@@ -200,9 +200,9 @@ export default {
         awaiting_deposits: "Awaiting New Deposits...",
         telos_evm_only: "WARNING! This a a Telos EVM address only. Do not send funds to " +
         "this address on any other network!",
-        any_sym_will_mint_psym: "Any { sym}} deposit sent to this " +
-        "address will mint an equal number of p{ sym}} " +
-        "tokens on the TELOS address: { account}} ",
+        any_sym_will_mint_psym: "Any { sym } deposit sent to this " +
+        "address will mint an equal number of p{ sym } " +
+        "tokens on the TELOS address: { account } ",
         generate_new_address: "Please Generate New Deposit Address",
         new_address_created: "A new address is successfully created",
         address_is_generated: "New Deposit Address is generated successfully",

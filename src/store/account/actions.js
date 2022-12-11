@@ -90,6 +90,8 @@ export const logout = async function({ commit }) {
 
   commit("setProfile", undefined);
   commit("setAccountName");
+  commit("setEvmAddress", null);
+  commit("setEvmBalance", null)
 
   if (this.$router.currentRoute.path !== "/") {
     this.$router.push({ path: "/" });
