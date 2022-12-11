@@ -52,7 +52,7 @@
                   v-if="index === 0 && coin.suggested"
                   header
                   style="color: white"
-                  >Suggested</q-item-label
+                  >{{$t('components.suggested')}}</q-item-label
                 >
                 <q-item-label
                   v-if="
@@ -60,7 +60,7 @@
                     !coin.suggested
                   "
                   header
-                  >All coins</q-item-label
+                  >{{$t('components.all_coins')}}</q-item-label
                 >
                 <q-item
                   clickable
@@ -83,8 +83,7 @@
                             width: 50%;
                             height: 50%;
                             margin-right: -10%;
-                            margin-bottom: -5%;
-                          "
+                            margin-bottom: -5%;"
                         />
                       </div>
                     </q-avatar>
@@ -125,7 +124,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { vxm } from "../../../store";
+import { vxm } from "~/store";
 import moment from "moment";
 import tokenAvatar from "src/components/TokenAvatar";
 

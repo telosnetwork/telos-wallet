@@ -1,19 +1,18 @@
 <template>
   <q-page class="column justify-center items-center">
     <div class="text-h4">
-      Live Streaming Example
+      {{$t('streaming.title')}}
     </div>
     <div style="text-align: center">
-      This is the "cpu" action on the "eosmechanics" contract,<br />
-      which benchmarks CPU performance of active BPs
+      {{$t('streaming.intro1')}}<br/>{{$t('streaming.intro2')}}
     </div>
     <q-markup-table flat bordered>
       <thead class="background: primary">
         <tr>
-          <th class="text-left">Block</th>
-          <th class="text-right">Timestamp</th>
-          <th class="text-right">Producer</th>
-          <th class="text-right">Billed CPU</th>
+          <th class="text-left">{{$t('streaming.block')}}</th>
+          <th class="text-right">{{$t('streaming.timestamp')}}</th>
+          <th class="text-right">{{$t('streaming.producer')}}</th>
+          <th class="text-right">{{$t('streaming.billed_cpu')}}</th>
         </tr>
       </thead>
       <tbody>
@@ -24,7 +23,7 @@
               moment
                 .utc(benchmark["@timestamp"])
                 .local()
-                .format("dddd, MMMM Do YYYY, h:mm:ss a")
+                .format($t('streaming.local_format'))
             }}
           </td>
           <td class="text-right">{{ benchmark.producer }}</td>
@@ -86,7 +85,7 @@ export default {
       console.log("Connected to Hyperion Stream!");
     });
   },
-  destroyed() {
+  unmounted() {
     if (this.client) this.client.disconnect();
 
     this.client = null;

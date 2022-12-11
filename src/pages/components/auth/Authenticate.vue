@@ -6,7 +6,7 @@
     <q-list v-if="type === 'signin'" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img width="120px" alt="Telos Sign" src="~assets/telos-sign.png" />
-        <label style="font-size: 20px;">Sign-in</label>
+        <label style="font-size: 20px;">{{$t('components.sign_in')}}</label>
       </q-item>
       <q-item>
         <q-input
@@ -18,7 +18,7 @@
           maxlength="12"
           counter
           label="Account"
-          :rules="[val => !!val || 'This field is required']"
+          :rules="[val => !!val || $t('components.errors.required')]"
         />
       </q-item>
       <q-item>
@@ -37,14 +37,14 @@
           no-caps
           text-color="white"
           :style="`height: 35px; background: ${themeColor}; margin-left: 1rem;`"
-          label="Login"
+          :label="$t('components.login')"
           @click="login"
           :disable="account.length < 12 || privateKey.length === 0"
         />
         <q-btn
           no-caps
           :style="`height: 35px; color: ${themeColor}; margin-left: 1rem;`"
-          label="Close"
+          :label="$t('components.close')"
           @click="() => this.$emit('update:showAuth', false)"
         />
       </q-item>
@@ -53,7 +53,7 @@
     <q-list v-else-if="type === 'auth'" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img width="120px" alt="Telos Sign" src="~assets/telos-sign.png" />
-        <label style="font-size: 20px;">Authentication</label>
+        <label style="font-size: 20px;">{{$t('components.authentication')}}</label>
       </q-item>
       <q-item>
         <q-input
@@ -65,7 +65,7 @@
           counter
           label="Account"
           :value="this.accountName"
-          :rules="[val => !!val || 'This field is required']"
+          :rules="[val => !!val || $t('forms.errors.required')]"
           disable
         />
       </q-item>
@@ -106,7 +106,7 @@
     <q-list v-else-if="type === 'confirm'" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img width="120px" alt="Telos Sign" src="~assets/telos-sign.png" />
-        <label style="font-size: 20px;">Transaction Request</label>
+        <label style="font-size: 20px;">{{ $('components.transaction_request') }}</label>
       </q-item>
       <q-item class="flex items-center justify-center text-weight-medium">
         <label class="text-center">{{ this.$store.$account.detail }}</label>
@@ -121,7 +121,7 @@
             }
           "
         >
-          {{ showDetail ? "Hide Details" : "Show Details" }}
+          {{ showDetail ? $('components.hide_details')  : $('components.show_details') }}
         </label>
       </q-item>
       <q-item
@@ -194,7 +194,7 @@
     <q-list v-else-if="type === 'signup' && signUpStep === 0" class="q-py-md">
       <q-item class="items-center justify-center text-center column">
         <q-img width="120px" alt="Telos Sign" src="~assets/telos-sign.png" />
-        <label style="font-size: 20px;">Create Telos Account</label>
+        <label style="font-size: 20px;">{{$('components.create_account')}}</label>
       </q-item>
       <q-item>
         <q-input
@@ -206,7 +206,7 @@
           maxlength="12"
           counter
           label="Account"
-          :rules="[val => !!val || 'This field is required']"
+          :rules="[val => !!val || $('forms.errors.required')]"
         />
       </q-item>
       <q-item class="justify-center">
@@ -243,8 +243,8 @@
 
     <q-list v-else-if="type === 'signup' && signUpStep === 1" class="q-py-md">
       <q-item class="justify-center text-center">
-        The following is your critical Telos info, please copy and paste these
-        values into the fields below, and store them in a safe place:
+        {{$('components.critical_telos_info')}}
+        
       </q-item>
       <q-item class="text-center items-end q-pb-none item-min-height">
         <b>Account (all lowercase):</b>
@@ -290,8 +290,8 @@
           class="round-sm full-width"
           maxlength="12"
           counter
-          label="Account (lowercase)"
-          :rules="[val => !!val || 'This field is required']"
+          :label="$t('components.account_lowercase')"
+          :rules="[val => !!val || $t('components.errors.required')]"
         />
       </q-item>
       <q-item>
@@ -303,18 +303,17 @@
           filled
           class="round-sm full-width"
           label="Private Key"
-          :rules="[val => !!val || 'This field is required']"
+          :rules="[val => !!val || $t('components.errors.required')]"
         />
       </q-item>
       <q-item
         class="justify-center text-center q-py-none item-min-height text-red"
       >
         <label v-if="confirmAccount !== account"
-          >Inputs do not match account info. Be sure to use all-lowercase
-          account name</label
+          >{{$t('components.dont_match_account')}}</label
         >
         <label v-else-if="confirmPrivateKey !== privateKey"
-          >Inputs do not match private key info.</label
+          >{{$t('components.dont_match_key')}}</label
         >
       </q-item>
       <q-item class="q-py-none">
@@ -330,7 +329,7 @@
           class="full-width"
           text-color="white"
           :style="`height: 35px; background: ${themeColor};`"
-          label="Save"
+          :label="$t('components.save')"
           @click="save"
           :disable="
             confirmAccount !== account ||
@@ -344,7 +343,7 @@
     <q-dialog v-model="selecting">
       <q-card style="width: 300px;">
         <q-card-section>
-          <div class="text-h6 text-center">Your Accounts</div>
+          <div class="text-h6 text-center">{{$t('components.your_accounts')}}</div>
         </q-card-section>
         <q-card-section
           class="q-pt-none text-center"
@@ -364,7 +363,7 @@
           </q-btn>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
+          <q-btn flat :label="$t('components.close')" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -443,7 +442,7 @@ export default {
         } else {
           this.$q.notify({
             type: "negative",
-            message: `This Google Account isn't used for any account`
+            message: this.$t('components.account_not_used')
           });
         }
       }
@@ -459,7 +458,7 @@ export default {
         } else {
           this.$q.notify({
             type: "negative",
-            message: `This Google Account isn't used for any account`
+            message: $t('components.account_not_used')
           });
         }
       } else if (this.type === "signup") {
@@ -492,7 +491,7 @@ export default {
         } else {
           this.$q.notify({
             type: "negative",
-            message: `This Google Account is already used for ${this.driveData.account}`
+            message: $t('components.account_used_for', {account: this.driveData.account})
           });
         }
       }
@@ -509,7 +508,7 @@ export default {
       } catch (e) {
         this.$q.notify({
           type: "negative",
-          message: `Invalid account or private key`
+          message: $t('components.invalid_acc_or_key')
         });
       }
 
@@ -538,7 +537,7 @@ export default {
       } else {
         this.$q.notify({
           type: "negative",
-          message: `Invalid account or private key`
+          message: $t('components.invalid_acc_or_key')
         });
       }
     },
@@ -549,7 +548,7 @@ export default {
         if (this.accountName !== this.account) {
           this.$q.notify({
             type: "negative",
-            message: `Invalid account or private key`
+            message: $t('components.invalid_acc_or_key')
           });
         } else {
           this.creating = true;
@@ -564,7 +563,7 @@ export default {
       } catch (e) {
         this.$q.notify({
           type: "negative",
-          message: `Invalid account or private key`
+          message: $t('components.invalid_acc_or_key')
         });
       }
       window.expierTime = 0;
@@ -578,7 +577,7 @@ export default {
       if (accountExists) {
         this.$q.notify({
           type: "negative",
-          message: `Account ${this.account} already exists`
+          message: $t('components.account_exists', {account: this.account})
         });
         this.creating = false;
         return;
@@ -631,7 +630,7 @@ export default {
         console.log(error);
         this.$q.notify({
           type: "negative",
-          message: "Sorry, we can't create an account now"
+          message:  $t('components.cant_create_acc')
         });
       }
       this.creating = false;
@@ -648,7 +647,7 @@ export default {
 
       this.$q.notify({
         type: "primary",
-        message: "Copied it to the clipboard successfully"
+        message: this.$t('balance.copied_ok')
       });
     },
     async loadFromGoogleDrive() {
@@ -749,7 +748,7 @@ export default {
           p.$q.notify({
             type: "primary",
             message:
-              "Account is saved on your google drive. Please login with your Google Account"
+            this.$t('components.account_saved')
           });
         }
       };

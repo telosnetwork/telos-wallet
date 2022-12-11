@@ -87,7 +87,7 @@
               input-class="text-white"
               class="round-sm full-width"
               label="Name"
-              :rules="[(val) => !!val || 'This field is required']"
+              :rules="[(val) => !!val || $t('forms.errors.required')]"
               hide-bottom-space
             />
           </q-item>
@@ -108,7 +108,7 @@
               color="white"
               input-class="text-white"
               class="round-sm full-width"
-              label="Status"
+              :label="$t('settings.status')"
             />
           </q-item>
 
@@ -128,7 +128,7 @@
               color="white"
               input-class="text-white"
               class="round-sm full-width"
-              label="Bio"
+              :label="$t('settings.bio')"
             />
           </q-item>
         </div>
@@ -138,7 +138,7 @@
           <q-btn
             class="settingBtn col"
             rounded
-            label="SAVE"
+            :label="$t('settings.save')"
             @click="save"
             :disable="display_name.length === 0"
           />
@@ -148,11 +148,9 @@
       <q-dialog v-model="confirm" persistent>
         <q-card class="popupCard">
           <q-card-section class="row items-center">
-            <span class="q-mx-auto text-h5">Warning!</span>
+            <span class="q-mx-auto text-h5">{{$t('settings.warning')}}</span>
             <span class="q-mx-auto text-center">
-              Are you sure you want to show your Telos private keys? Be sure you
-              are in a private location and no one can see your screen. Anyone
-              viewing your private keys can steal your funds.
+              {{$t('settings.warning_msg')}}
             </span>
           </q-card-section>
           <q-card-actions align="right">
@@ -173,7 +171,7 @@
       <q-dialog v-model="keyView">
         <q-card class="popupCard">
           <q-card-section>
-            <div class="text-h6">Private Key</div>
+            <div class="text-h6">{{$t('settings.private_key')}}</div>
           </q-card-section>
           <q-card-section
             class="q-pt-none text-center"
@@ -344,14 +342,14 @@ export default {
         try {
           const transaction = await this.$store.$api.signTransaction(
             actions,
-            `${!accountProfile ? "Created new profile" : "Updated profile"}`
+            `${!accountProfile ? this.$t('settings.create_profile') : this.$t('settings.update_profile')}`
           );
           this.$q.notify({
             type: "primary",
             message: `${
               !accountProfile
-                ? "New profile is created successfully"
-                : "Profile is updated successfully"
+                ? this.$t('settings.create_profile_ok')
+                : this.$t('settings.update_profile_ok')
             }`,
           });
         } catch (error) {
@@ -362,7 +360,6 @@ export default {
     },
     async onGoogleSignIn(user) {
       if (!user && !this.privateKey) {
-        console.log("No user");
         this.$store.$account.needAuth = true;
       }
       while (!this.privateKey) {
@@ -371,7 +368,6 @@ export default {
       let driveData = null;
       const { result } = await this.loadFromGoogleDrive();
       if (result) {
-        console.log("Drive data", result);
         const accounts = Object.keys(result);
         if (accounts.length > 0) {
           driveData = result;
@@ -383,10 +379,8 @@ export default {
           (acc) => driveData[acc].privateKey === this.privateKey
         ) >= 0
       ) {
-        console.log("Private key found");
         this.connected = true;
       } else if (user) {
-        console.log("Private key not found");
         this.saveToGoogleDrive();
       }
     },
@@ -487,7 +481,7 @@ export default {
         } else {
           p.$q.notify({
             type: "primary",
-            message: "Account is saved on your google drive",
+            message: this.$t('settings.account_saved'),
           });
         }
       };
@@ -519,7 +513,7 @@ export default {
 
       this.$q.notify({
         type: "primary",
-        message: "Copied it to the clipboard successfully",
+        message: this.$t('settings.copied_ok'),
       });
     },
   },

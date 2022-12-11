@@ -21,7 +21,7 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Send Amount
+              {{$t('components.send_amount')}}
             </div>
             <div />
           </div>
@@ -40,8 +40,7 @@
                     width: 50%;
                     height: 50%;
                     margin-right: -10%;
-                    margin-top: 60%;
-                  "
+                    margin-top: 60%;"
                 />
               </div>
             </q-avatar>
@@ -205,7 +204,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import SendToAddress from "./SendToAddress";
+import SendToAddress from "~/pages/components/balance/SendToAddress";
 import { setInterval } from "timers";
 import { isNumber } from "util";
 import BigNumber from "bignumber.js";

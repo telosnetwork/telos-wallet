@@ -1,6 +1,6 @@
 import { __awaiter } from "tslib";
-import { vxm } from "../store/";
-import { multiContractAction } from "../contracts/multi";
+import { vxm } from "~/store";
+import { multiContractAction } from "~/contracts/multi";
 class MultiContractTx {
     constructor(contractName, getAuth) {
         this.contractName = contractName;

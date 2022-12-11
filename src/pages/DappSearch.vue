@@ -4,7 +4,7 @@
       <div
         class="q-pb-lg q-pt-xl text-subtitle1 text-weight-medium text-center"
       >
-        Telos Native dApps
+      {{$t('dapps.title')}}
       </div>
       <div class="q-px-md">
         <q-input
@@ -12,7 +12,7 @@
           borderless
           label-color="white"
           color="white"
-          placeholder="Search dApp"
+          :placeholder="$t('dapps.placeholder')"
           dense
           input-style="color: white"
           input-class="text-white"

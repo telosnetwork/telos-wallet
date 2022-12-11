@@ -1,4 +1,4 @@
-import { networkTokens, compareString } from "./helpers";
+import { networkTokens, compareString } from "~/api/helpers";
 export const sortByNetworkTokens = (arr, selector, order = networkTokens) => {
     const allTokenSymbols = arr.map(selector);
     const atLeastOneNetworkTokenIncluded = order.some(networkSymbol => allTokenSymbols.includes(networkSymbol));

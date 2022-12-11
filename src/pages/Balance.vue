@@ -53,10 +53,10 @@
           <div class="row justify-between q-mb-md">
             <div class="convertBtn" @click="clickExchange()">
               <img src="~assets/coin/Convert.svg" class="q-mr-xs" />
-              Convert
+              {{$t('balance.convert')}}
             </div>
             <div class="purchaceBtn" @click="clickPurchase()">
-              Purchase
+              {{$t('balance.purchase')}}
               <img src="~assets/coin/Purchase.svg" class="q-ml-xs" />
             </div>
           </div>
@@ -178,12 +178,11 @@
     <q-dialog v-model="showEVMWarning">
       <q-card class="popupCard">
         <q-card-section>
-          <div class="text-h6">WARNING!</div>
+          <div class="text-h6">{{$t('balance.warning')}}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          DO NOT USE THIS ANYWHERE EXCEPT TELOS EVM OR ELSE IT COULD RESULT IN A
-          LOSS OF FUNDS. THIS PRIVATE KEY IS NOT AVAILABLE.
+          {{$t('balance.warning_msg')}}
         </q-card-section>
 
         <q-card-actions align="right">
@@ -191,7 +190,7 @@
             @click="showEVMAddress = true"
             flat
             no-caps
-            label="I Understand"
+            :label="$t('balance.i_understand')"
             color="white"
             v-close-popup
             class="purpleGradient"
@@ -205,19 +204,19 @@
 <script>
 import BigNumber from "bignumber.js";
 import { mapGetters, mapActions } from "vuex";
-import Coin from "./components/balance/Coin";
-import Collectables from "./components/balance/Collectables";
-import Send from "./components/balance/Send";
-import SendAmount from "./components/balance/SendAmount";
-import Receive from "./components/balance/Receive";
-import BuyAmount from "./components/balance/BuyAmount";
-import ShareAddress from "./components/balance/ShareAddress";
-import QRScanner from "./components/balance/QRScanner";
-import History from "./components/balance/History";
-import Exchange from "./components/balance/Exchange";
-import DepositEVM from "./components/balance/DepositEVM";
-import WithdrawEVM from "./components/balance/WithdrawEVM";
-import RexStaking from "./components/balance/RexStaking";
+import Coin from "~/pages/components/balance/Coin";
+import Collectables from "~/pages/components/balance/Collectables";
+import Send from "~/pages/components/balance/Send";
+import SendAmount from "~/pages/components/balance/SendAmount";
+import Receive from "~/pages/components/balance/Receive";
+import BuyAmount from "~/pages/components/balance/BuyAmount";
+import ShareAddress from "~/pages/components/balance/ShareAddress";
+import QRScanner from "~/pages/components/balance/QRScanner";
+import History from "~/pages/components/balance/History";
+import Exchange from "~/pages/components/balance/Exchange";
+import DepositEVM from "~/pages/components/balance/DepositEVM";
+import WithdrawEVM from "~/pages/components/balance/WithdrawEVM";
+import RexStaking from "~/pages/components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
@@ -359,7 +358,7 @@ export default {
       copyToClipboard(str).then(() => {
         this.$q.notify({
           type: "primary",
-          message: "Copied to clipboard",
+          message: this.$t('copied_ok'),
         });
       });
     },

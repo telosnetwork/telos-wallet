@@ -21,14 +21,14 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Send
+              {{$t('components.send')}}
             </div>
             <div />
           </div>
           <div class="">
             <q-item v-if="isPToken" class="list-item q-pt-lg q-pb-none">
               <label class="text-center full-width text-white"
-                >To Network</label
+                >{{$t('components.to_network')}}</label
               >
             </q-item>
             <div class="row q-gutter-x-md items-center justify-center q-pt-md">
@@ -48,8 +48,7 @@
                       width: 50%;
                       height: 50%;
                       margin-right: -10%;
-                      margin-bottom: -5%;
-                    "
+                      margin-bottom: -5%;"
                   />
                 </div>
               </q-avatar>
@@ -163,7 +162,7 @@
                   side
                   class="col-1"
                   style="width: 50px; color: white"
-                  >Memo:</q-item-section
+                  >{{$t('components.memo')}}:</q-item-section
                 >
                 <q-item-section>
                   <q-input
@@ -189,7 +188,7 @@
                 class="list-item items-center text-center text-red-5 text-weight-bold"
               >
                 <div>
-                  Minimum of $100 for mainnet TLOS to Ethereum Transfers
+                  {{$t('components.minimun_to_transfer')}}
                 </div>
               </q-item>
               <q-item>
@@ -200,7 +199,7 @@
                     size="2em"
                     :thickness="5"
                   /><br />
-                  Checking {{ networkType === "telos" ? "Account" : "Address" }}
+                  {{$t('components.checking')}} {{ networkType === "telos" ? "Account" : "Address" }}
                 </div>
               </q-item>
               <q-item
@@ -208,9 +207,7 @@
                 class="list-item items-center text-center text-red-5 text-weight-bold"
               >
                 <div>
-                  DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.).
-                  THIS WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN
-                  METAMASK ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.
+                  {{$t('components.dont_send_to_exchanges')}}
                 </div>
               </q-item>
             </q-list>
@@ -250,7 +247,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import moment from "moment";
-import SendConfirm from "./SendConfirm";
+import SendConfirm from "~/pages/components/balance/SendConfirm";
 import tokenAvatar from "src/components/TokenAvatar";
 
 export default {
@@ -330,7 +327,9 @@ export default {
         if (!(await this.accountExists(this.toAddress))) {
           this.$q.notify({
             type: "negative",
-            message: `Account ${this.toAddress} does not exist`,
+            message: this.$t('components.account_not_valid',{
+              account: this.toAddress
+            }),
           });
           this.checking = false;
           return;
@@ -342,7 +341,9 @@ export default {
         if (this.toAddress.length !== 42 || !this.toAddress.startsWith("0x")) {
           this.$q.notify({
             type: "negative",
-            message: `Address ${this.toAddress} is not valid`,
+            message: this.$t('components.address_not_valid',{
+              address: this.toAddress
+            }),
           });
           this.checking = false;
           return;
@@ -355,7 +356,9 @@ export default {
           ) {
             this.$q.notify({
               type: "negative",
-              message: `Address ${this.toAddress} is not valid`,
+              message: this.$t('components.address_not_valid',{
+                address: this.toAddress
+              }),
             });
             this.checking = false;
             return;
@@ -367,7 +370,9 @@ export default {
           if (!data.success) {
             this.$q.notify({
               type: "negative",
-              message: `Address ${this.toAddress} is not valid`,
+              message: this.$t('components.address_not_valid',{
+                address: this.toAddress
+              }),
             });
             this.checking = false;
             return;
@@ -393,7 +398,7 @@ export default {
           if (this.selectedCoin && coinName !== this.selectedCoin.name) {
             this.$q.notify({
               type: "dark",
-              message: `Please scan with correct token`,
+              message: this.$t('components.scan_correct_token'),
             });
           } else {
             this.toAddress = accountName;
@@ -428,7 +433,7 @@ export default {
         if (!this.evmAddress) {
           this.$q.notify({
             type: "dark",
-            message: `Please generate your tEVM address`,
+            message: this.$t('components.generate_your_address'),
           });
         }
       }

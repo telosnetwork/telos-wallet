@@ -12,7 +12,7 @@ import {
     getBalance,
     getTokenMeta,
     updateArray
-} from "../../../api/helpers";
+} from "~/api/helpers";
 import {
     Asset,
     asset_to_number,
@@ -20,9 +20,9 @@ import {
     Sym as Symbol,
     Sym
 } from "eos-common";
-import { multiContract } from "../../../api/multiContractTx";
-import { vxm } from "../../../store";
-import { rpc } from "../../../api/rpc";
+import { multiContract } from "~/api/multiContractTx";
+import { vxm } from "~/store";
+import { rpc } from "~/api/rpc";
 import {
     calculateFundReturn,
     composeMemo,
@@ -30,11 +30,11 @@ import {
     findNewPath,
     findReturn,
     relaysToConvertPaths
-} from "../../../api/eosBancorCalc";
+} from "~/api/eosBancorCalc";
 import _ from "lodash";
-import { getHardCodedRelays } from "./staticRelays";
-import { sortByNetworkTokens } from "../../../api/sortByNetworkTokens";
-import { liquidateAction, hydrateAction } from "../../../api/singleContractTx";
+import { getHardCodedRelays } from "~/store/modules/swap/staticRelays";
+import { sortByNetworkTokens } from "~/api/sortByNetworkTokens";
+import { liquidateAction, hydrateAction } from "~/api/singleContractTx";
 const compareAgnosticToBalanceParam = (agnostic, balance) =>
     compareString(balance.contract, agnostic.contract) &&
     compareString(agnostic.symbol, balance.symbol);

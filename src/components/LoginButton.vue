@@ -28,7 +28,7 @@
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
       <div class="column showLoginPopup q-pa-lg popupCard">
-        <div class="text-subtitle1">Connect Wallet</div>
+        <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
         <q-list class="" dark separator>
           <q-item
             class="q-my-sm"
@@ -59,7 +59,7 @@
                 size="12px"
               >
                 <q-tooltip>
-                  Get app
+                  {{$t('login.get_app')}}
                 </q-tooltip>
               </q-btn>
             </q-item-section>
@@ -105,15 +105,15 @@
             />
           </div>
           <div class="text-subtitle1 text-weight-medium text-center ">
-            Your resources are low
+            {{$t('login.resources_low')}}
           </div>
           <div />
         </div>
         <div class="text-center">
           <div class="q-pb-md">
-            We recommend you buy more for 1 TLOS
+            {{$t('login.recommend_bying')}}
           </div>
-          <div class="">Proceed?</div>
+          <div class="">{{$t('login.proceed_q')}}</div>
           <div class="text-center q-gutter-x-sm q-pt-sm">
             <q-btn
               no-caps
@@ -265,11 +265,11 @@ export default {
       try {
         const transaction = await this.$store.$api.signTransaction(
           actions,
-          `Buying resources`
+          this.$t('resources.buying_resources')
         );
         this.$q.notify({
           type: "primary",
-          message: `Resources bought`
+          message: this.$t('resources.resources_bought')
         });
         if (transaction) this.ramLow = false;
         if (transaction) this.cpuLow = false;

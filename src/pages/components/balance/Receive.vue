@@ -21,12 +21,12 @@
               />
             </div>
             <div class="text-subtitle1 text-weight-medium text-center">
-              Receive
+              {{$t('components.receive')}}
             </div>
             <div />
           </div>
           <div class="text-subtitle2 text-grey-4 text-center q-pb-md">
-            Select a coin
+            {{$t('components.select_a_coin')}}
           </div>
           <div class="q-pa-md">
             <q-input
@@ -50,7 +50,7 @@
             :key="`${coin.name}_${index}`"
           >
             <q-item-label v-if="index === 0 && coin.suggested" header style=""
-              >Suggested</q-item-label
+              >{{$t('components.suggested')}}</q-item-label
             >
             <q-item-label
               v-if="
@@ -58,7 +58,7 @@
                 !coin.suggested
               "
               header
-              >All coins</q-item-label
+              >{{$t('components.all_coins')}}</q-item-label
             >
             <q-item
               clickable
@@ -81,8 +81,7 @@
                         width: 50%;
                         height: 50%;
                         margin-right: -10%;
-                        margin-bottom: -5%;
-                      "
+                        margin-bottom: -5%;"
                     />
                   </div>
                 </q-avatar>

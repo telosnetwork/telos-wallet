@@ -18,7 +18,7 @@
       </div>
       <div class="popupHeading">
         <div />
-        <div class="text-h5 text-weight-medium text-center q-mt-lg">Staking (REX)</div>
+        <div class="text-h5 text-weight-medium text-center q-mt-lg">{{$t('components.staking_rex')}}</div>
         <div />
       </div>
       <div class="text-center">
@@ -39,11 +39,11 @@
           ]"
         />
         <div v-if="staking" @click="amount = tokenAmount" class="q-mt-md">
-          Available: {{ tokenAmount }}
+          {{$t('components.available')}}: {{ tokenAmount }}
           {{ "TLOS" }}
         </div>
         <div v-if="!staking" @click="amount = tokenRexBalance" class="q-mt-md">
-          Deposited: {{ tokenRexBalance }}
+          {{$t('components.deposited')}}: {{ tokenRexBalance }}
           {{ "TLOS" }}
         </div>
         <div class="text-center q-mt-md">
@@ -116,7 +116,7 @@
           />
         </div>
         <div v-if="staking" class="q-mt-sm">
-          This will lock your tokens for 4 days
+          {{$t('components.lock_4_days')}}
         </div>
       </div>
     </div>
@@ -219,14 +219,15 @@ export default {
       ];
       const transaction = await this.$store.$api.signTransaction(
         actions,
-        `Withdraw ${this.amount} TLOS from REX`
+        this.$t('components.withdraw_from_rex')
       );
     },
 
     async setApy() {
       try{
         const apy = (await this.$telosApi.get('apy/native')).data;
-        this.apyString = `Earn ${apy}% APY`;
+        const earn = this.$t('components.earn');
+        this.apyString = `${earn} ${apy}% APY`;
       }catch(e) {
         console.error(e);
       }
@@ -238,7 +239,7 @@ export default {
         this.tokenAmount = await this.getTokenAmount();
         this.$q.notify({
           type: "primary",
-          message: `${this.amount} TLOS is staked to REX`,
+          message: this.$t('components.is_staked_to_REX', {ammount:this.amount}),
         });
         this.amount = "0";
       } catch (error) {
@@ -253,7 +254,7 @@ export default {
         this.tokenRexBalance = await this.getRexBalance(this.accountName);
         this.$q.notify({
           type: "primary",
-          message: `${this.amount} TLOS is withdrawn from REX`,
+          message: this.$t('components.is_withdrawn_from_REX', {ammount:this.amount}),
         });
         this.amount = "0";
       } catch (error) {
