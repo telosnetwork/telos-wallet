@@ -4,6 +4,8 @@ Main Net: [wallet.telos.net](https://wallet.telos.net) [![Netlify Status](https:
 
 Test Net: [wallet-dev.telos.net](https://wallet-dev.telos.net) [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
+Development : [staging](https://63963e7a7696c8548b664783--wallet-staging.netlify.app/) [![Netlify Status](https://api.netlify.com/api/v1/badges/b568365c-3e5e-4ebf-8c9b-5bc64c15de6e/deploy-status)](https://app.netlify.com/sites/wallet-staging/deploys)
+
 ## Native Features
 - Account Creation
 - Tokens, Balances, NFTs 
