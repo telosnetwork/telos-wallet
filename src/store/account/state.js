@@ -1,5 +1,6 @@
 export default function() {
   return {
+    justViewer: false,
     accountName: null,
     evmAddress: null,
     evmBalance: null,

@@ -12,6 +12,19 @@
         />
       </div>
 
+      <!-- View any account -->
+      <div class="q-mt-md">
+        <q-btn
+          @click="loginAsJustViewer()"
+          text-color="white"
+          no-caps
+          outline
+          rounded
+          label="View any account"
+          class=" q-pa-sm"
+        />
+      </div>
+
       <!-- Signup Button -->
       <div class="q-mt-md">
         <q-btn
@@ -192,11 +205,15 @@ export default {
       "getAccountProfile",
       "setLoadingWallet"
     ]),
+    async loginAsJustViewer() {
+      let idx = this.$ual.authenticators.map(a => a.getName()).indexOf('cleos');
+      this.onLogin(idx, true);
+    },
     async signUp() {
       this.openUrl("https://app.telos.net/accounts/add");
     },
-    async onLogin(idx) {
-        const error = await this.login({ idx });
+    async onLogin(idx, justViewer = false) {
+        const error = await this.login({ idx, justViewer });
         if (!error) {
           this.showLogin = false;
           await this.$router.push({ path: "/balance" });
@@ -296,6 +313,7 @@ export default {
     },
 
     async checkResources() {
+      if (!accountName) return;
       await this.getRamPrice();
       let account = await this.$store.$api.getAccount(this.accountName);
       this.ramAvail = account.ram_quota - account.ram_usage;
@@ -310,26 +328,13 @@ export default {
       this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }
   },
-  async mounted() {
-    await this.autoLogin(this.$route.query.returnUrl);
-    if (this.isAuthenticated) {
-      await this.createEvmApi();
-      await this.checkResources();
-    }
-    this.authInterval = setInterval(() => {
-      if (this.$store.$account.needAuth) {
-        this.$store.$account.needAuth = false;
-        this.authType = "auth";
-        this.showAuth = true;
-      } else if (this.$store.$account.needConfirm) {
-        this.$store.$account.needConfirm = false;
-        this.authType = "confirm";
-        this.showAuth = true;
+  whatch: {
+    async isAuthenticated() {
+      if (this.isAuthenticated) {
+        await this.createEvmApi();
+        await this.checkResources();
       }
-    }, 500);
-  },
-  beforeUnmount() {
-    if (this.authInterval) clearInterval(this.authInterval);
+    }
   }
 };
 </script>

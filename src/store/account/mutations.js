@@ -18,6 +18,10 @@ export const setAutoLogin = (state, status) => {
   state.autoLogin = status;
 };
 
+export const setJustViewer = (state, status) => {
+  state.justViewer = status;
+};
+
 export const setProfile = (state, profile = undefined) => {
   if (!profile) {
     return;

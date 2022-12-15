@@ -122,7 +122,7 @@ export default {
   methods: {
     ...mapActions("account", [
       "logout",
-      "autoLogin",
+      "memoryAutoLogin",
       "getUserProfile",
     ]),
     checkPath() {
@@ -181,7 +181,8 @@ export default {
     },
   },
   async mounted() {
-    await this.autoLogin(this.$route.query.returnUrl);
+    console.log("MainLayout.mounted()");
+    await this.memoryAutoLogin();// this.autoLogin(this.$route.query.returnUrl);
     this.loadUserProfile();
     this.checkPath();
   },
