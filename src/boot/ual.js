@@ -28,7 +28,7 @@ export default boot(async ({ app, store }) => {
         Dialog.create({
           class: 'cleos-auth-dialog',
           color: 'primary',
-          title: store.state.account.justViewer ? 'Connect as viewer' : 'Connect to cleos',
+          title: store.state.account.justViewer ? 'Navigate as viewer' : 'Connect to cleos',
           message: 'Account name',
           prompt: {
             model: '',
