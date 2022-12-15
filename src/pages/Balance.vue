@@ -940,7 +940,7 @@ export default {
 
 /* scrollbar itself */
 .balance-tabs--coins-panel::-webkit-scrollbar-thumb {
-  background-color: $primary;
+  background-color: rgba($primary, .3);
   border-radius: 16px;
   border: 4px solid rgba(255,255,255,0.3);
 }
