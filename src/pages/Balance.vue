@@ -927,7 +927,28 @@ export default {
     max-height: calc(100vh - 50px);
   }
 }
+/* total width */
+.balance-tabs--coins-panel::-webkit-scrollbar {
+  background-color: transparent;
+  width: 8px;
+}
 
+/* background of the scrollbar except button or resizer */
+.balance-tabs--coins-panel::-webkit-scrollbar-track {
+  background-color: rgba(0,0,0,0.2);
+}
+
+/* scrollbar itself */
+.balance-tabs--coins-panel::-webkit-scrollbar-thumb {
+  background-color: $primary;
+  border-radius: 16px;
+  border: 4px solid rgba(255,255,255,0.3);
+}
+
+/* set button(top and bottom of the scrollbar) */
+.balance-tabs--coins-panel::-webkit-scrollbar-button {
+  display:none;
+}
 
 // --------------
 .balance-div {
@@ -962,4 +983,5 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
+
 </style>
