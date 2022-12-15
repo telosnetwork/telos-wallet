@@ -440,10 +440,7 @@ export default {
           this.privateKey = this.decrypt(this.driveData.privateKey);
           await this.login();
         } else {
-          this.$q.notify({
-            type: "negative",
-            message: this.$t('components.account_not_used')
-          });
+          this.$errorNotification(this.$t('components.account_not_used'));
         }
       }
       if (this.type === "auth") {
@@ -456,10 +453,7 @@ export default {
           this.privateKey = this.decrypt(this.driveData.privateKey);
           await this.authenticate();
         } else {
-          this.$q.notify({
-            type: "negative",
-            message: $t('components.account_not_used')
-          });
+          this.$errorNotification(this.$t('components.account_not_used'));
         }
       } else if (this.type === "signup") {
         let name = this.googleProfile
@@ -489,10 +483,9 @@ export default {
         if (!this.driveData) {
           this.create();
         } else {
-          this.$q.notify({
-            type: "negative",
-            message: $t('components.account_used_for', {account: this.driveData.account})
-          });
+          this.$errorNotification(this.$t('components.account_used_for', {
+            account: this.driveData.account
+          }));
         }
       }
     },
@@ -506,10 +499,7 @@ export default {
         this.$store.$account.account = this.account;
         this.$store.$account.privateKey = this.privateKey;
       } catch (e) {
-        this.$q.notify({
-          type: "negative",
-          message: $t('components.invalid_acc_or_key')
-        });
+        this.$errorNotification(this.$t('components.invalid_acc_or_key'));
       }
 
       if (users) {
@@ -535,10 +525,7 @@ export default {
         this.setLoadingWallet();
         this.$router.push("/balance");
       } else {
-        this.$q.notify({
-          type: "negative",
-          message: $t('components.invalid_acc_or_key')
-        });
+        this.$errorNotification(this.$t('components.invalid_acc_or_key'));
       }
     },
     async authenticate() {
@@ -546,10 +533,7 @@ export default {
       let users = null;
       try {
         if (this.accountName !== this.account) {
-          this.$q.notify({
-            type: "negative",
-            message: $t('components.invalid_acc_or_key')
-          });
+          this.$errorNotification(this.$t('components.invalid_acc_or_key'));
         } else {
           this.creating = true;
           users = await this.$blockchain.signin({
@@ -561,10 +545,7 @@ export default {
           this.$emit("update:showAuth", false);
         }
       } catch (e) {
-        this.$q.notify({
-          type: "negative",
-          message: $t('components.invalid_acc_or_key')
-        });
+        this.$errorNotification(this.$t('components.invalid_acc_or_key'));
       }
       window.expierTime = 0;
       this.creating = false;
@@ -575,10 +556,7 @@ export default {
     async create() {
       const accountExists = await this.accountExists(this.account);
       if (accountExists) {
-        this.$q.notify({
-          type: "negative",
-          message: $t('components.account_exists', {account: this.account})
-        });
+        this.$errorNotification(this.$t('components.account_exists', {account: this.account}));
         this.creating = false;
         return;
       }
@@ -609,10 +587,7 @@ export default {
         );
         const createAccountData = await createAccountResponse.json();
         if (!createAccountResponse.ok) {
-          this.$q.notify({
-            type: "negative",
-            message: createAccountData.message
-          });
+          this.$errorNotification(createAccountData.message);
           this.creating = false;
           return;
         }
@@ -628,10 +603,7 @@ export default {
         this.signUpStep = 1;
       } catch (error) {
         console.log(error);
-        this.$q.notify({
-          type: "negative",
-          message:  $t('components.cant_create_acc')
-        });
+        this.$errorNotification(this.$t('components.cant_create_acc'));
       }
       this.creating = false;
     },
@@ -645,10 +617,7 @@ export default {
       document.execCommand("copy");
       document.body.removeChild(el);
 
-      this.$q.notify({
-        type: "primary",
-        message: this.$t('balance.copied_ok')
-      });
+      this.$successNotification(this.$t('balance.copied_ok'));
     },
     async loadFromGoogleDrive() {
       let result = null;

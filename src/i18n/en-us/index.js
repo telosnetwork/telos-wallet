@@ -211,6 +211,10 @@ export default {
         cannot_withdraw: "Cannot withdraw more than EVM TLOS balance: {balance}",
         deposit_to_evm: "Deposit {quantity} to the EVM",
         is_withdrawn_from_evm: "{quantity} is withdrawn from the EVM",
+        please_fill_the_field: "Please fill the {field}",
+        failed_to_send: "Failed to send {quantity} to {address}",
+        withdrew_from_evm: "Successfully withdrew {quantity} from {address}",
+        minimum_amount: "Minimum amount is $20"
     },
     account: {
         profile_not_found: "Profile not found",

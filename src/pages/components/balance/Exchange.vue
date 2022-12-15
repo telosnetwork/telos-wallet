@@ -505,10 +505,7 @@ export default {
           this.reward = this.toAmountValue / this.convertAmountValue;
           this.convertible = true;
         } catch (e) {
-          this.$q.notify({
-            type: "dark",
-            message: e.message,
-          });
+          this.$unexpectedErrorNotification(e.message);
           this.convertible = false;
         }
       }
@@ -547,10 +544,7 @@ export default {
           this.reward = this.toAmountValue / this.convertAmountValue;
           this.convertible = true;
         } catch (e) {
-          this.$q.notify({
-            type: "dark",
-            message: e.message,
-          });
+          this.$unexpectedErrorNotification(e.message);
           this.convertible = false;
         }
       }
@@ -577,39 +571,24 @@ export default {
         });
         if (result) {
           if (result === "needAuth") {
-            this.$q.notify({
-              type: "negative",
-              message: this.$t('components.auth_required'),
-            });
+            this.$errorNotification(this.$t('components.auth_required'));
           } else if (result === "error") {
-            this.$q.notify({
-              type: "negative",
-              message: this.$t('components.conversion_failed'),
-            });
+            this.$errorNotification(this.$t('components.conversion_failed'));
           } else if (result !== "cancelled") {
-            this.$q.notify({
-              type: "primary",
-              message: this.$t('components.is_converted_into', {
-                from: this.convertCoin.symbol,
-                to: this.toCoin.symbol
-              }),
-            });
+            this.$successNotification(this.$t('components.is_converted_into', {
+              from: this.convertCoin.symbol,
+              to: this.toCoin.symbol
+            }));
             this.showDlg = false;
           }
         } else {
-          this.$q.notify({
-            type: "negative",
-            message: this.$t('components.is_not_converted_into', {
-              from: this.convertCoin.symbol,
-              to: this.toCoin.symbol
-            }),
-          });
+          this.$errorNotification(this.$t('components.is_not_converted_into', {
+            from: this.convertCoin.symbol,
+            to: this.toCoin.symbol
+          }));
         }
       } catch (e) {
-        this.$q.notify({
-          type: "negative",
-          message: e.message,
-        });
+        this.$unexpectedErrorNotification(e.message);
       }
       this.converting = false;
     },

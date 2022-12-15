@@ -59,6 +59,7 @@
 </template>
 
 <script>
+
 import { mapGetters, mapActions } from "vuex";
 import navBar from "components/Navbar.vue";
 import LoginButton from "components/LoginButton.vue";
@@ -236,12 +237,11 @@ export default {
 .profileImg {
   height: 4rem;
   width: 4rem;
-  // margin: 1rem;
   cursor: pointer;
   background: no-repeat;
-  left: 92%;
+  right: 1.5rem;
   top: 1.5rem;
-  // position: absolute;
+  position: fixed;
   display: none;
   @media only screen and (min-width: 1000px) {
     display: block;
