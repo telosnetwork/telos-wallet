@@ -59,6 +59,7 @@
 </template>
 
 <script>
+
 import { mapGetters, mapActions } from "vuex";
 import navBar from "components/Navbar.vue";
 import LoginButton from "components/LoginButton.vue";

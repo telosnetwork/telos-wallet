@@ -355,10 +355,7 @@ export default {
 
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('copied_ok'),
-        });
+        this.$successNotification(this.$t('balance.copied_ok'));
       });
     },
     async loadUserProfile() {
@@ -761,10 +758,10 @@ export default {
           actions,
           `Withdraw ${quantityStr} from ${this.evmAddress}`
         );
-        this.$q.notify({
-          type: "primary",
-          message: `Successfully withdrew ${quantityStr} from ${this.evmAddress}`,
-        });
+        this.$successNotification(this.$t('components.withdrew_from_evm', {
+          quantity: quantityStr,
+          address: this.evmAddress
+        }));
       } catch (error) {
         this.$errorNotification(error);
       }
