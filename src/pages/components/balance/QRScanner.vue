@@ -71,10 +71,7 @@ export default {
         if (coin && this.pTokens.includes(coin.symbol.toLowerCase()) && accountName.length > 12) {
           if (coinName === 'Telos') {
             if (accountName.length !== 42 || !accountName.startsWith('0x')) {
-              this.$q.notify({
-                type: 'negative',
-                message: $this.$t('components.address_not_exist',{account:accountName}),
-              });
+              this.$errorNotification(this.$t('components.address_not_exist',{account:accountName}));
               return;
             }
             networkType = 'tevm';
@@ -82,28 +79,19 @@ export default {
             const data = await fetch(`https://api.smartbit.com.au/v1/blockchain/address/${accountName}`)
               .then(resp => resp.json());
             if (!data.success) {
-              this.$q.notify({
-                type: 'negative',
-                message: $this.$t('components.address_not_exist',{account:accountName}),
-              });
+              this.$errorNotification(this.$t('components.address_not_exist',{account:accountName}));
               return;
             }
             networkType = 'ptoken';
           } else if (coinName === 'pTokens ETH') {
             if (accountName.length !== 42 || !accountName.startsWith('0x')) {
-              this.$q.notify({
-                type: 'negative',
-                message: $this.$t('components.address_not_exist',{account:accountName}),
-              });
+              this.$errorNotification(this.$t('components.address_not_exist',{account:accountName}));
               return;
             }
             networkType = 'ptoken';
           }
         } else if (!(await this.accountExists(accountName))) {
-          this.$q.notify({
-            type: 'negative',
-            message: $this.$t('components.account_not_exist',{account:accountName}),
-          });
+          this.$errorNotification(this.$t('components.account_not_exist',{account:accountName}));
           return;
         }
 

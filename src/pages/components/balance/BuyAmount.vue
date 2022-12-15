@@ -242,11 +242,7 @@ export default {
     async buyPressed() {
       if (!this.inputCoin) {
         if (this.buyAmountValue < 20) {
-          this.$q.notify({
-            type: "primary",
-            message: `Minimum amount is $20`,
-            position: "top"
-          });
+          this.$successNotification(this.$t('components.minimum_amount'));
         } else {
           this.goToMoonpayPage();
         }

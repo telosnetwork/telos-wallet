@@ -315,22 +315,18 @@ export default {
     ...mapActions("account", ["accountExists"]),
     async nextPressed() {
       if (this.toAddress.length === 0) {
-        this.$q.notify({
-          type: "dark",
-          message: `Please fill the ${this.toPlaceHolder}`,
-        });
+        this.$errorNotification(this.$t('components.please_fill_the_field',{
+          field: this.toPlaceHolder
+        }));
         return;
       }
 
       this.checking = true;
       if (this.networkType === "telos") {
         if (!(await this.accountExists(this.toAddress))) {
-          this.$q.notify({
-            type: "negative",
-            message: this.$t('components.account_not_valid',{
-              account: this.toAddress
-            }),
-          });
+          this.$errorNotification(this.$t('components.account_not_valid',{
+            account: this.toAddress
+          }));
           this.checking = false;
           return;
         }
@@ -339,12 +335,9 @@ export default {
         this.networkType === "ethereum"
       ) {
         if (this.toAddress.length !== 42 || !this.toAddress.startsWith("0x")) {
-          this.$q.notify({
-            type: "negative",
-            message: this.$t('components.address_not_valid',{
-              address: this.toAddress
-            }),
-          });
+          this.$errorNotification(this.$t('components.address_not_valid',{
+            address: this.toAddress
+          }));
           this.checking = false;
           return;
         }
@@ -354,12 +347,9 @@ export default {
             this.toAddress.length !== 42 ||
             !this.toAddress.startsWith("0x")
           ) {
-            this.$q.notify({
-              type: "negative",
-              message: this.$t('components.address_not_valid',{
-                address: this.toAddress
-              }),
-            });
+            this.$errorNotification(this.$t('components.address_not_valid',{
+              address: this.toAddress
+            }));
             this.checking = false;
             return;
           }
@@ -368,12 +358,9 @@ export default {
             `https://api.smartbit.com.au/v1/blockchain/address/${this.toAddress}`
           ).then((resp) => resp.json());
           if (!data.success) {
-            this.$q.notify({
-              type: "negative",
-              message: this.$t('components.address_not_valid',{
-                address: this.toAddress
-              }),
-            });
+            this.$errorNotification(this.$t('components.address_not_valid',{
+              address: this.toAddress
+            }));
             this.checking = false;
             return;
           }
@@ -396,10 +383,7 @@ export default {
       ({ accountName, coinName, networkType }) => {
         if (this.showSendToAddressDlg) {
           if (this.selectedCoin && coinName !== this.selectedCoin.name) {
-            this.$q.notify({
-              type: "dark",
-              message: this.$t('components.scan_correct_token'),
-            });
+            this.$errorNotification(this.$t('components.scan_correct_token'));
           } else {
             this.toAddress = accountName;
             this.networkType = networkType;
@@ -431,10 +415,7 @@ export default {
         this.toAddress = this.toAddress.toLowerCase();
       } else if (val === "tevm") {
         if (!this.evmAddress) {
-          this.$q.notify({
-            type: "dark",
-            message: this.$t('components.generate_your_address'),
-          });
+          this.$errorNotification(this.$t('components.generate_your_address'));
         }
       }
     },
