@@ -204,13 +204,10 @@ export default {
             });
           }
         } catch (e) {
-          this.$q.notify({
-            type: "negative",
-            message: this.$t('components.failed_to_send', {
-              quantity: quantityStr,
-              address: this.toAddress
-            })
-          });
+          this.$errorNotification(this.$t('components.failed_to_send', {
+            quantity: quantityStr,
+            address: this.toAddress
+          }));
           this.sending = false;
           return;
         }
@@ -241,13 +238,10 @@ export default {
           actions,
           `Send ${quantityStr} to ${this.toAddress}`
         );
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.is_sent_to', {
-            quantity: quantityStr,
-            address: this.toAddress
-          })
-        });
+        this.$successNotification(this.$t('components.is_sent_to', {
+          quantity: quantityStr,
+          address: this.toAddress
+        }));
         this.$emitter.emit("successfully_sent", this.sendAmount, this.toAddress);
       } catch (error) {
         this.$errorNotification(error);
@@ -264,10 +258,7 @@ export default {
       document.execCommand("copy");
       document.body.removeChild(el);
 
-      this.$q.notify({
-        type: "primary",
-        message: this.$t('balance.copied_ok')
-      });
+      this.$successNotification(this.$t('balance.copied_ok'));
     }
   },
   async mounted() {
