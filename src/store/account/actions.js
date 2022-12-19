@@ -17,6 +17,7 @@ export const login = async function(
         return;
       }
     }
+    commit("setJustViewer", justViewer);
     const users = await authenticator.login(account);
     if (users.length) {
       const account = users[0];
