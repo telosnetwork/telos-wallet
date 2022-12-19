@@ -182,8 +182,7 @@ export default {
     },
   },
   async mounted() {
-    console.log("MainLayout.mounted()");
-    await this.memoryAutoLogin();// this.autoLogin(this.$route.query.returnUrl);
+    await this.memoryAutoLogin();
     this.loadUserProfile();
     this.checkPath();
   },
