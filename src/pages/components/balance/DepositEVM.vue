@@ -270,7 +270,7 @@ export default {
           this.$t('components.deposit_to_evm', {quantity: quantityStr})
         );
 
-        await this.setEvmState();
+        this.$emit("updateBalances");
 
         this.depositAmount = "0";
         this.depositOwnAddress = false;

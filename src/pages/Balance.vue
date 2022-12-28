@@ -142,10 +142,12 @@
     <DepositEVM
       v-model:showDepositEVMDlg="showDepositEVMDlg"
       v-model:nativeTLOSBalance="coins[0].amount"
+      @updateBalances="updateBalances"
     />
     <WithdrawEVM
     v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
     v-model:evmTLOSBalance="coins[1].amount"
+      @updateBalances="updateBalances"
     />
     <Receive
       v-model:showReceiveDlg="showReceiveDlg"
@@ -445,6 +447,7 @@ export default {
         `/v2/state/get_tokens?account=${this.accountName}&limit=1000`
       );
       if (userCoins.status === 200) {
+        // discard all duplicate tokens (except for TLOS in eosio.token)
         const tokens = userCoins.data.tokens.filter((token) => {
           if (
             userCoins.data.tokens.filter((t) => t.symbol === token.symbol)
@@ -765,8 +768,16 @@ export default {
       } catch (error) {
         this.$errorNotification(error);
       }
-
+      this.updateBalances();
       this.tEVMWithdrawing = false;
+    },
+    async updateBalances() {
+      if (!this.isAuthenticated) return;
+      this.loadUserTokens();
+      this.loadUserProfile();
+      this.setEvmState();
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
     }
   },
   created: async function () {
@@ -810,17 +821,7 @@ export default {
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      if (this.isAuthenticated) {
-        this.loadUserTokens();
-        await this.loadPrices();
-      }
-      if (!this.evmAddress){
-        try {
-          await this.setEvmState()
-        } catch(e) {
-          console.error(e);
-        }
-      }
+      this.updateBalances();
       window.time = Date.now() / 1000;
     }, 5000);
   },
@@ -866,9 +867,7 @@ export default {
   watch: {
     async accountName() {
       if (this.isAuthenticated) {
-        this.loadUserProfile();
-        await this.loadNftTokenItems();
-        this.loadNftTokenTags();
+        this.updateBalances();
       }
     },
     balanceTab(val){
