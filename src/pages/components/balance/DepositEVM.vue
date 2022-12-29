@@ -124,6 +124,8 @@ import { mapGetters, mapActions } from "vuex";
 import BigNumber from "bignumber.js";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances','addEvmNetwork'],
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
   data() {
     return {

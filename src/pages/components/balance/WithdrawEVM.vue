@@ -63,6 +63,8 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances'],
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
   data() {
     return {
