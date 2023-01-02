@@ -343,4 +343,6 @@ export default {
   height: auto;
   margin-bottom: 5rem;
 }
+
+
 </style>
