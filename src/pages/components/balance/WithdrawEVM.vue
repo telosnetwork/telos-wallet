@@ -63,6 +63,8 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances'],
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
   data() {
     return {
@@ -112,7 +114,7 @@ export default {
           actions,
           this.$t('components.deposit_to_evm', {quantity:quantityStr})
         );
-        await this.setEvmState();
+        this.$emit("updateBalances");
         this.showDlg = false;
         this.$successNotification(this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr}));
       } catch (error) {
