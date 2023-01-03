@@ -36,6 +36,7 @@
                 withdrawAmount = withdrawAmount === '0' ? '' : withdrawAmount
               "
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-regular q-ml-sm text-left">
               TLOS

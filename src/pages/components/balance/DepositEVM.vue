@@ -37,6 +37,7 @@
                 depositAmount = depositAmount === '0' ? '' : depositAmount
               "
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
