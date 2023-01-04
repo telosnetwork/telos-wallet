@@ -28,3 +28,7 @@ export const setProfile = (state, profile = undefined) => {
   }
   state.profiles[profile.account_name] = profile;
 };
+
+export const setData = (state, status) => {
+  state.data = status;
+};
