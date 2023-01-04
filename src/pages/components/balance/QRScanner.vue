@@ -72,7 +72,7 @@ export default {
   watch: {
     showDlg() {
       if (this.showDlg) {
-        setTimeout(async () => { this.activateQR = true; }, 250);
+        setTimeout(() => { this.activateQR = true; }, 250);
       } else {
         this.activateQR = false;
       }
