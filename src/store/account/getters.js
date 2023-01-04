@@ -8,3 +8,4 @@ export const isJustViewer = ({ justViewer }) => justViewer;
 export const hasProfile = ({ profiles, accountName }) => profiles.hasOwnProperty(accountName);
 export const myProfile = ({ profiles, accountName }) => profiles[accountName];
 export const profiles = ({ profiles }) => profiles;
+export const data = ({ data }) => data;

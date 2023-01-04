@@ -354,6 +354,7 @@ export default {
   methods: {
     ...mapActions("account", ["accountExists", "getUserProfile", "setEvmState"]),
     ...mapActions("rex", ["getRexBalance"]),
+    ...mapActions("resources", ["getTotalResources"]),
 
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
@@ -442,6 +443,30 @@ export default {
       this.coins[0].price = tlosPrice;
       this.coins[1].price = tlosPrice;
     },
+    async updateTelosCoin(coin) {
+      const rpc = this.$store.$api.getRpc();
+      console.assert(coin.account === "eosio.token", coin);
+      console.assert(coin.symbol === "TLOS", coin);
+      console.assert(coin.name == "Telos", coin);
+      rpc.get_currency_balance("eosio.token", this.accountName, "TLOS").then(raw => {
+        try {
+          coin.amount = Number(raw[0].split(" ")[0]);
+          coin.totalAmount = coin.amount + coin.rexBalance + coin.resources;
+        } catch (e) {
+          console.log("error: ", e);
+        }
+      });
+
+      this.getRexBalance(this.accountName).then(value => {
+        coin.rexBalance = value || 0;
+        coin.totalAmount = coin.amount + coin.rexBalance + coin.resources;
+      });
+
+      this.getTotalResources(this.accountName).then(value => {
+        coin.resources = value || 0;
+        coin.totalAmount = coin.amount + coin.rexBalance + coin.resources;
+      });
+    },
     async loadUserTokens() {
       const userCoins = await this.$hyperion.get(
         `/v2/state/get_tokens?account=${this.accountName}&limit=1000`
@@ -472,32 +497,17 @@ export default {
             ) {
 
                 // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
-                const rpc = this.$store.$api.getRpc();
                 if (coin.account === "eosio.token" && coin.symbol === "TLOS" && coin.name == "Telos") {
-                    coin.amount = Number(
-                      (
-                        await rpc.get_currency_balance("eosio.token", this.accountName, "TLOS")
-                      )[0].split(" ")[0]
-                    );
-                    coin.rexBalance =
-                      (await this.getRexBalance(this.accountName)) || 0;
-                    coin.totalAmount = coin.amount + coin.rexBalance;
-                }else {
+                    coin.rexBalance = coin.rexBalance || 0;
+                    coin.resources = coin.resources || 0;
+                    coin.amount = coin.amount || 0;
+                    coin.totalAmount = coin.totalAmount || 0;
+                    this.updateTelosCoin(coin);
+                } else {
                   coin.amount = token.amount || 0;
                   coin.totalAmount = coin.amount || 0;
                 }
                 coin.precision = token.precision;
-
-              // // get REX balance here and add to amount
-              // if (token.contract === "eosio.token" && token.symbol === "TLOS") {
-              //   coin.amount = token.amount || 0;
-              //   coin.rexBalance =
-              //     (await this.getRexBalance(this.accountName)) || 0;
-              //   coin.totalAmount = coin.amount + coin.rexBalance;
-              // } else {
-              //   coin.amount = token.amount || 0;
-              //   coin.totalAmount = coin.amount || 0;
-              // }
             }
           });
           // if token not in coins, add it
