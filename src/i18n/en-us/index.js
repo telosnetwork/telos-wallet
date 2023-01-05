@@ -214,7 +214,13 @@ export default {
         please_fill_the_field: "Please fill the {field}",
         failed_to_send: "Failed to send {quantity} to {address}",
         withdrew_from_evm: "Successfully withdrew {quantity} from {address}",
-        minimum_amount: "Minimum amount is $20"
+        minimum_amount: "Minimum amount is $20",
+        cammera_access_error_1: "You need to approve access to the camera",
+        cammera_access_error_2: "No suitable camera device installed",
+        cammera_access_error_3: "Page is not served over HTTPS (or localhost)",
+        cammera_access_error_4: "Can't access the camera. Maybe it is already in use",
+        cammera_access_error_5: "Can't access the camera.",
+        cammera_access_error_6: "Can't access the camera. Try using another browser.",
     },
     account: {
         profile_not_found: "Profile not found",
