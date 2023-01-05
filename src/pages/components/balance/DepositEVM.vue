@@ -37,6 +37,7 @@
                 depositAmount = depositAmount === '0' ? '' : depositAmount
               "
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
@@ -123,6 +124,8 @@ import { mapGetters, mapActions } from "vuex";
 import BigNumber from "bignumber.js";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances','addEvmNetwork'],
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
   data() {
     return {
@@ -269,7 +272,7 @@ export default {
           this.$t('components.deposit_to_evm', {quantity: quantityStr})
         );
 
-        await this.setEvmState();
+        this.$emit("updateBalances");
 
         this.depositAmount = "0";
         this.depositOwnAddress = false;
