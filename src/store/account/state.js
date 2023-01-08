@@ -7,6 +7,7 @@ export default function() {
     hasProfile: false,
     profiles: {},
     autoLogin: false,
-    loading: {}
+    loading: {},
+    data: null
   };
 }
