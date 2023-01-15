@@ -111,7 +111,7 @@ export default {
         buy: "Buy",
         total: "Total",
         rate: "rate",
-        max: "Max",
+        max: "Max Available (liquid)",
         send: "Send",
         receive: "Receive",
         liquid: "Liquid",
