@@ -37,6 +37,7 @@
                 depositAmount = depositAmount === '0' ? '' : depositAmount
               "
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
@@ -123,6 +124,8 @@ import { mapGetters, mapActions } from "vuex";
 import BigNumber from "bignumber.js";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances','addEvmNetwork'],
   props: ["showDepositEVMDlg", "nativeTLOSBalance"],
   data() {
     return {
@@ -219,10 +222,7 @@ export default {
           this.$t('components.create_evm_for', {account: this.accountName})
         );
         await this.setEvmState();
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.created_evm_for', {account: this.accountName}),
-        });
+        this.$successNotification( this.$t('components.created_evm_for', {account: this.accountName}));
         this.depositAmount = "0";
         this.depositOwnAddress = false;
         this.recipientAddress = this.evmAddress;
@@ -235,10 +235,7 @@ export default {
     async deposit() {
       let amount = parseFloat(this.depositAmount);
       if (amount > parseFloat(this.nativeTLOSBalance)) {
-        this.$q.notify({
-          type: "negative",
-          message: this.$t('components.cant_deposit_more', {balance: this.nativeTLOSBalance}),
-        });
+        this.$errorNotification(this.$t('components.cant_deposit_more', {balance: this.nativeTLOSBalance}));
         return;
       }
 
@@ -275,7 +272,7 @@ export default {
           this.$t('components.deposit_to_evm', {quantity: quantityStr})
         );
 
-        await this.setEvmState();
+        this.$emit("updateBalances");
 
         this.depositAmount = "0";
         this.depositOwnAddress = false;
@@ -283,10 +280,7 @@ export default {
         this.recipientAddressExists = true;
         this.showDlg = false;
 
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.deposited_to_evm', {quantity: quantityStr}),
-        });
+        this.$successNotification(this.$t('components.deposited_to_evm', {quantity: quantityStr}));
       } catch (error) {
         this.$errorNotification(error);
       }

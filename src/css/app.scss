@@ -18,6 +18,10 @@ body {
   color: $white;
 }
 
+div.cleos-auth-dialog {
+  color: $blackDark;
+}
+
 .main-div {
   background-color: #00000000;
   display: flex;
@@ -164,35 +168,7 @@ body {
     background: rgba($white, 0.2);
   }
 }
-.coinTabs {
-  .q-tab__indicator {
-    background: linear-gradient(45deg, $positive, $primary);
-    padding: 0.1rem;
-  }
-  .q-tab:first-child {
-    border-top-left-radius: 2.5rem;
-  }
-  .q-tab:last-child {
-    border-top-right-radius: 2.5rem;
-  }
 
-  border-top-left-radius: 2.5rem !important;
-  border-top-right-radius: 2.5rem !important;
-  background: rgba($white, 0.08);
-}
-.coinTabPanels {
-  background: rgba($white, 0.08);
-}
-
-@media only screen and (min-width: 1000px) {
-  .coinTabs {
-    border-radius: initial;
-    background: #00000000;
-  }
-  .coinTabPanels {
-    background: none;
-  }
-}
 
 .keypad {
   display: grid;

@@ -39,7 +39,7 @@ const signTransaction = async function (actions, detail = null) {
 };
 
 const getRpc = function () {
-  return this.$type === "ual" ? this.$ualUser.rpc : this.$defaultApi.rpc;
+  return this.$defaultApi.rpc;
 };
 
 const getTableRows = async function (options) {

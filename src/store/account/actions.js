@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 
 export const login = async function(
   { commit, dispatch },
-  { idx, account, returnUrl }
+  { idx, account, returnUrl, justViewer }
 ) {
   const authenticator = this.$ual.authenticators[idx];
   try {
@@ -17,6 +17,7 @@ export const login = async function(
         return;
       }
     }
+    commit("setJustViewer", justViewer);
     const users = await authenticator.login(account);
     if (users.length) {
       const account = users[0];
@@ -25,7 +26,7 @@ export const login = async function(
       this.$type = "ual";
       this.$idx = idx;
       commit("setAccountName", accountName);
-      localStorage.setItem("autoLogin", authenticator.constructor.name);
+      localStorage.setItem('autoLogin', authenticator.getName());
       localStorage.setItem("account", accountName);
       localStorage.setItem("returning", true);
       if (this.$router.currentRoute.path === "/") {
@@ -52,6 +53,20 @@ export const login = async function(
   }
 };
 
+export const memoryAutoLogin = async function ({
+  dispatch,
+  rootState,
+}) {
+  const account = localStorage.getItem('account');
+  if (account) {
+      if (!rootState.account.accountName) {
+          await dispatch('autoLogin', location.pathname);
+      }
+  } else {
+      return null;
+  }
+};
+
 export const autoLogin = async function({ dispatch, commit }, returnUrl) {
   const { authenticator, idx } = getAuthenticator(this.$ual);
   if (authenticator) {
@@ -69,7 +84,7 @@ export const autoLogin = async function({ dispatch, commit }, returnUrl) {
 const getAuthenticator = function(ual, wallet = null) {
   wallet = wallet || localStorage.getItem("autoLogin");
   const idx = ual.authenticators.findIndex(
-    auth => auth.constructor.name === wallet
+    auth => auth.getName() === wallet
   );
   return {
     authenticator: ual.authenticators[idx],
@@ -87,6 +102,7 @@ export const logout = async function({ commit }) {
   this.$account = {};
 
   localStorage.removeItem("autoLogin");
+  localStorage.removeItem("account");
 
   commit("setProfile", undefined);
   commit("setAccountName");
@@ -99,6 +115,7 @@ export const logout = async function({ commit }) {
 };
 
 export const getUserProfile = async function({ commit }, accountName) {
+  console.log("getUserProfile() accountName:", accountName);
   try {
     const profileResult = await this.$api.getTableRows({
       code: "profiles",

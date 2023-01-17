@@ -36,6 +36,7 @@
                 withdrawAmount = withdrawAmount === '0' ? '' : withdrawAmount
               "
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-regular q-ml-sm text-left">
               TLOS
@@ -62,6 +63,8 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
+  name: 'WithdrawEVM',
+  emits: ['updateBalances'],
   props: ["showWithdrawEVMDlg", "evmTLOSBalance"],
   data() {
     return {
@@ -90,10 +93,7 @@ export default {
     async withdraw() {
       let amount = parseFloat(this.withdrawAmount);
       if (amount > parseFloat(this.evmTLOSBalance)) {
-        this.$q.notify({
-          type: "negative",
-          message: this.$t('components.cannot_withdraw', {balance:this.evmTLOSBalance})
-        });
+        this.$errorNotification(this.$t('components.cannot_withdraw', {balance:this.evmTLOSBalance}));
         return;
       }
 
@@ -114,12 +114,9 @@ export default {
           actions,
           this.$t('components.deposit_to_evm', {quantity:quantityStr})
         );
-        await this.setEvmState();
+        this.$emit("updateBalances");
         this.showDlg = false;
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr})
-        });
+        this.$successNotification(this.$t('components.is_withdrawn_from_evm', {quantity:quantityStr}));
       } catch (error) {
         this.$errorNotification(error);
       }

@@ -54,6 +54,7 @@
               v-model="amount"
               @focus="amount = amount === '0' ? '' : amount"
               @blur="inputBlur"
+              autofocus="true"
             />
             <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
           </div>
@@ -219,7 +220,9 @@ export default {
       ];
       const transaction = await this.$store.$api.signTransaction(
         actions,
-        this.$t('components.withdraw_from_rex')
+        this.$t('components.withdraw_from_rex', {
+          amount: quantityStr
+        })
       );
     },
 
@@ -237,10 +240,7 @@ export default {
       try {
         await this.stakeRex();
         this.tokenAmount = await this.getTokenAmount();
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.is_staked_to_REX', {ammount:this.amount}),
-        });
+        this.$successNotification(this.$t('components.is_staked_to_REX', {amount:this.amount}));
         this.amount = "0";
       } catch (error) {
         console.error(error);
@@ -252,10 +252,8 @@ export default {
       try {
         await this.unstakeRex();
         this.tokenRexBalance = await this.getRexBalance(this.accountName);
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('components.is_withdrawn_from_REX', {ammount:this.amount}),
-        });
+        this.$successNotification(this.$t('components.is_withdrawn_from_REX', {amount:this.amount}));
+        this.amount = "0";
         this.amount = "0";
       } catch (error) {
         console.error(error);

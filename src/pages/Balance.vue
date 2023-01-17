@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-center">
     <div style="width: 600px">
-      <div style="height: 100%; overflow: auto">
+      <div>
         <div class="text-center">
           <!-- Account Name -->
           <div
@@ -33,7 +33,7 @@
               flat
               rounded
               no-caps
-              label="Send"
+              :label="$t('components.send')"
               @click="showSendDlg = true"
             />
             <div @click="showQRScannerDlg = true" class="qrBtn q-mx-xs">
@@ -44,7 +44,7 @@
               flat
               rounded
               no-caps
-              label="Receive"
+              :label="$t('components.receive')"
               @click="showReceiveDlg = true"
             />
           </div>
@@ -66,8 +66,8 @@
           :value="balanceTab"
           v-model="tab"
           @click="switchTab"
-          content-class="coinTabs"
-          class="shadow-2 no-shadow"
+          content-class="balance-tabs--content"
+          class="shadow-2 no-shadow balance-tabs"
           style="width: 100%"
         >
           <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
@@ -76,14 +76,13 @@
         <q-tab-panels
           flat
           v-model="tab"
-          class="coinTabPanels"
+          class="balance-tabs--panels"
         >
           <q-tab-panel
             flat
             name="coins"
             label="Coins"
-            class="no-padding"
-            :style="' border:0px;'"
+            class="no-padding balance-tabs--coins-panel"
           >
             <Coin
               flat
@@ -143,10 +142,12 @@
     <DepositEVM
       v-model:showDepositEVMDlg="showDepositEVMDlg"
       v-model:nativeTLOSBalance="coins[0].amount"
+      @updateBalances="updateBalances"
     />
     <WithdrawEVM
     v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
     v-model:evmTLOSBalance="coins[1].amount"
+      @updateBalances="updateBalances"
     />
     <Receive
       v-model:showReceiveDlg="showReceiveDlg"
@@ -356,10 +357,7 @@ export default {
 
     copyStrToClipboard(str) {
       copyToClipboard(str).then(() => {
-        this.$q.notify({
-          type: "primary",
-          message: this.$t('copied_ok'),
-        });
+        this.$successNotification(this.$t('balance.copied_ok'));
       });
     },
     async loadUserProfile() {
@@ -449,6 +447,7 @@ export default {
         `/v2/state/get_tokens?account=${this.accountName}&limit=1000`
       );
       if (userCoins.status === 200) {
+        // discard all duplicate tokens (except for TLOS in eosio.token)
         const tokens = userCoins.data.tokens.filter((token) => {
           if (
             userCoins.data.tokens.filter((t) => t.symbol === token.symbol)
@@ -762,15 +761,23 @@ export default {
           actions,
           `Withdraw ${quantityStr} from ${this.evmAddress}`
         );
-        this.$q.notify({
-          type: "primary",
-          message: `Successfully withdrew ${quantityStr} from ${this.evmAddress}`,
-        });
+        this.$successNotification(this.$t('components.withdrew_from_evm', {
+          quantity: quantityStr,
+          address: this.evmAddress
+        }));
       } catch (error) {
         this.$errorNotification(error);
       }
-
+      this.updateBalances();
       this.tEVMWithdrawing = false;
+    },
+    async updateBalances() {
+      if (!this.isAuthenticated) return;
+      this.loadUserTokens();
+      this.loadUserProfile();
+      this.setEvmState();
+      await this.loadNftTokenItems();
+      this.loadNftTokenTags();
     }
   },
   created: async function () {
@@ -814,17 +821,7 @@ export default {
 
     this.coinLoadedAll = true;
     this.tokenInterval = setInterval(async () => {
-      if (this.isAuthenticated) {
-        this.loadUserTokens();
-        await this.loadPrices();
-      }
-      if (!this.evmAddress){
-        try {
-          await this.setEvmState()
-        } catch(e) {
-          console.error(e);
-        }
-      }
+      this.updateBalances();
       window.time = Date.now() / 1000;
     }, 5000);
   },
@@ -870,9 +867,7 @@ export default {
   watch: {
     async accountName() {
       if (this.isAuthenticated) {
-        this.loadUserProfile();
-        await this.loadNftTokenItems();
-        this.loadNftTokenTags();
+        this.updateBalances();
       }
     },
     balanceTab(val){
@@ -882,7 +877,76 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
+.balance-tabs--content {
+  .q-tab__indicator {
+    background: linear-gradient(45deg, $positive, $primary);
+    padding: 0.1rem;
+  }
+  .q-tab:first-child {
+    border-top-left-radius: 2.5rem;
+  }
+  .q-tab:last-child {
+    border-top-right-radius: 2.5rem;
+  }
+
+  border-top-left-radius: 2.5rem !important;
+  border-top-right-radius: 2.5rem !important;
+  background: rgba($white, 0.08);
+}
+.balance-tabs--panels {
+  background: rgba($white, 0.08);
+}
+
+@media only screen and (min-width: 1000px) {
+  .balance-tabs--content {
+    border-radius: initial;
+    background: #00000000;
+  }
+  .balance-tabs--panels {
+    background: none;
+  }
+}
+
+.balance-tabs--panels > .q-panel {
+  overflow: hidden;
+}
+.balance-tabs--coins-panel {
+  border: 0px;
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+}
+
+@media only screen and (min-width: 1000px) {
+  .balance-tabs--coins-panel {
+    max-height: calc(100vh - 50px);
+  }
+}
+/* total width */
+.balance-tabs--coins-panel::-webkit-scrollbar {
+  background-color: transparent;
+  width: 8px;
+}
+
+/* background of the scrollbar except button or resizer */
+.balance-tabs--coins-panel::-webkit-scrollbar-track {
+  background-color: rgba(0,0,0,0.2);
+}
+
+/* scrollbar itself */
+.balance-tabs--coins-panel::-webkit-scrollbar-thumb {
+  background-color: rgba($primary, .3);
+  border-radius: 16px;
+  border: 4px solid rgba(255,255,255,0.3);
+}
+
+/* set button(top and bottom of the scrollbar) */
+.balance-tabs--coins-panel::-webkit-scrollbar-button {
+  display:none;
+}
+
+// --------------
 .balance-div {
   background-color: #00000000;
   display: inline-flex;
@@ -915,4 +979,5 @@ export default {
 .convertBtn {
   margin-right: 3rem;
 }
+
 </style>
