@@ -119,6 +119,7 @@ export const logout = async function({ commit }) {
 
 export const getAccountData = async function({ commit, dispatch }) {
   if (!this.state.account.accountName) {
+    commit("setData", undefined);
     return;
   }
 
