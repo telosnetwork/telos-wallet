@@ -32,6 +32,7 @@ export const login = async function(
       if (this.$router.currentRoute.path === "/") {
         await this.$router.push({ path: "/balance" });
       }
+      dispatch("getAccountData");
       dispatch("getAccountProfile");
       vxm.tlosWallet.wallet = {
         auth: {
@@ -105,6 +106,7 @@ export const logout = async function({ commit }) {
   localStorage.removeItem("account");
 
   commit("setProfile", undefined);
+  commit("setData", undefined);
   commit("setAccountName");
   commit("setEvmAddress", null);
   commit("setEvmBalance", null)
@@ -112,6 +114,17 @@ export const logout = async function({ commit }) {
   if (this.$router.currentRoute.path !== "/") {
     this.$router.push({ path: "/" });
   }
+};
+
+
+export const getAccountData = async function({ commit, dispatch }) {
+  if (!this.state.account.accountName) {
+    commit("setData", undefined);
+    return;
+  }
+
+  const data = await this.$api.getAccount(this.state.account.accountName);
+  commit("setData", data);
 };
 
 export const getUserProfile = async function({ commit }, accountName) {
