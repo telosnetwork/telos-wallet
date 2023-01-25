@@ -27,8 +27,8 @@ const signTransaction = async function (actions, detail = null) {
         );
       }
   } catch (e) {
-    console.log(actions, e.cause.message);
-    throw e.cause.message;
+    console.log(actions, e);
+    throw e;
   }
   return transaction;
 };
@@ -45,9 +45,24 @@ const getTableRows = async function (options) {
   });
 };
 
+const getAbi = async function (accountName) {
+  const rpc = this.$api.getRpc();
+  return await rpc.get_abi(accountName);
+};
+
+const getInfo = async function () {
+  const rpc = this.$api.getRpc();
+  return await rpc.get_info();
+};
+
 const getAccount = async function (accountName) {
   const rpc = this.$api.getRpc();
   return await rpc.get_account(accountName);
+};
+
+const pushTransaction = async function (trx) {
+  const rpc = this.$api.getRpc();
+  return await rpc.push_transaction(accountName);
 };
 
 export default boot(async ({ store }) => {
@@ -72,6 +87,8 @@ export default boot(async ({ store }) => {
   });
 
   store["$api"] = {
+    getInfo: getInfo.bind(store),
+    getAbi: getAbi.bind(store),
     signTransaction: signTransaction.bind(store),
     getTableRows: getTableRows.bind(store),
     getAccount: getAccount.bind(store),

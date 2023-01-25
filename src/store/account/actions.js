@@ -1,5 +1,6 @@
 import { vxm } from "~/store";
 import BigNumber from "bignumber.js";
+import { FuelUserWrapper } from "src/api/fuel";
 
 export const login = async function(
   { commit, dispatch },
@@ -20,7 +21,7 @@ export const login = async function(
     commit("setJustViewer", justViewer);
     const users = await authenticator.login(account);
     if (users.length) {
-      const account = users[0];
+      const account = new FuelUserWrapper(users[0]);
       const accountName = await account.getAccountName();
       this.$ualUser = account;
       this.$type = "ual";
