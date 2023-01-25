@@ -1,20 +1,14 @@
 /* eslint-disable quotes */
 // Most of this code was taken and addapted from https://gist.github.com/aaroncox/d74a73b3d9fbc20836c32ea9deda5d70
 import {
-  SignTransactionConfig,
-  SignTransactionResponse,
   User
 } from 'universal-authenticator-library';
 import {
-  AnyTransaction,
   APIClient,
   Name,
-  NameType,
   PackedTransaction,
   PermissionLevel,
   Serializer,
-  Signature,
-  SignedTransaction,
   Transaction
 } from '@greymass/eosio';
 import { Dialog } from 'quasar';
@@ -46,7 +40,6 @@ export class FuelUserWrapper extends User {
   constructor(user/*: User*/) {
     super();
     this.user = user;
-    console.log("------ FuelUserWrapper constructor ------");
   }
 
   async signTransaction(
@@ -54,13 +47,9 @@ export class FuelUserWrapper extends User {
     originalconfig/*: SignTransactionConfig*/
   )/*: Promise<SignTransactionResponse>*/ {
     try {
-      console.log("------ FuelUserWrapper signTransaction ------");
-
       // Retrieve transaction headers
       const info = await client.v1.chain.get_info();
       const header = info.getTransactionHeader(expireSeconds);
-
-      console.log(" check-point 1");
 
       // collect all contract abis
       const abi_promises = originalTransaction.actions.map((a) =>
@@ -72,8 +61,6 @@ export class FuelUserWrapper extends User {
         contract: x.account,
         abi: abis[i]
       }));
-
-      console.log(" check-point 2");
 
       // create complete well formed transaction
       const transaction = Transaction.from(
@@ -96,8 +83,6 @@ export class FuelUserWrapper extends User {
         permission: this.requestPermission
       });
 
-      console.log(" check-point 3 - fetch");
-
       // Submit the transaction to the resource provider endpoint
       const cosigned = await fetch(resourceProviderEndpoint, {
         body: JSON.stringify({
@@ -110,7 +95,6 @@ export class FuelUserWrapper extends User {
       // Interpret the resulting JSON
       const rpResponse = await cosigned.json(); /*as ResourceProviderResponse*/
 
-      console.log(" check-point 4 - rpResponse", rpResponse.code);
 
       switch (rpResponse.code) {
         case 402: {
@@ -136,8 +120,6 @@ export class FuelUserWrapper extends User {
             data.costs
           );
 
-          console.log(" check-point 5 - fees", fees);
-
           // validate with the user whether to use the service at all
           try {
             await confirmWithUser(this.user, fees);
@@ -145,8 +127,6 @@ export class FuelUserWrapper extends User {
             // The user refuseed to use the service
             break;
           }
-
-          console.log(" check-point 6 - confirmWithUser");
 
           modifiedTransaction.signatures = [...data.signatures];
           // Sign the modified transaction
@@ -274,6 +254,7 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
   let mymodel/*: string[]*/ = [];
   mymodel = [];
 
+
   return new Promise((resolve, reject) => {
     // Try and see if the user already answer (remembered)
     if (
@@ -296,27 +277,18 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     };
 
     // this are the normal texts for random wallet.
-    const cancel/*: string | boolean*/ = 'Reject';
-    const ok = 'Confirm';
-    let message =
-      "Your account doesn't have sufficient resources (CPU, NET, or RAM) to pay for your next transaction. " +
-      'Don\'t worry! Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", allowing you to continue for free.<br/><br/>' +
-      'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account';
+    const cancel/*: string | boolean*/ = GreymassFuelService.globals.$t('api.reject');
+    const ok = GreymassFuelService.globals.$t('api.confirm');
+    let message = GreymassFuelService.globals.$t('api.greymass_fuel_message');
 
-    // If the wallet is Greymass Anchor is not possible to avoid Fuel service (it is incorporated)
     try {
       if (typeof fees == 'string') {
-        message =
-          "Your account doesn't have sufficient resources (CPU, NET, or RAM) to pay for your next transaction and it can not be processed without fees. " +
-          'Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", reducing cost significantly.<br/><br/>' +
-          'Please confirm fees below to proceed.<br/><br/>' +
-          `<div><center><h5><b>${fees}</b></h5></center><div><br/>` +
-          'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account';
+        message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
       }
     } catch (e) {}
 
     Dialog.create({
-      title: 'Resource Warning!',
+      title: GreymassFuelService.globals.$t('api.greymass_dialog_title'), 
       message,
       html: true,
       cancel,
@@ -333,7 +305,10 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
           return true;
         },
         items: [
-          { label: 'Remember my decision', value: 'remember', color: 'primary' }
+          {
+            label: GreymassFuelService.globals.$t('api.remember_my_decision'),
+            value: 'remember',
+            color: 'primary' }
         ]
       }
     })
