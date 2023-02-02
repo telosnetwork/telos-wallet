@@ -15,4 +15,4 @@
 [context.develop.environment]
   APP_NAME = "Telos Web Wallet"
   NODE_VERSION = "14"
-  NETWORK="mainnet"
+  NETWORK="testnet"
