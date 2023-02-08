@@ -1,4 +1,3 @@
-/* eslint-disable quotes */
 // Most of this code was taken and addapted from https://gist.github.com/aaroncox/d74a73b3d9fbc20836c32ea9deda5d70
 import {
   User
@@ -280,13 +279,11 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     const cancel/*: string | boolean*/ = GreymassFuelService.globals.$t('api.reject');
     const ok = GreymassFuelService.globals.$t('api.confirm');
     let message = GreymassFuelService.globals.$t('api.greymass_fuel_message');
-
-    try {
-      if (typeof fees == 'string') {
-        message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
-      }
-    } catch (e) {}
-
+    
+    if (typeof fees == 'string') {
+      message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
+    }
+    
     Dialog.create({
       title: GreymassFuelService.globals.$t('api.greymass_dialog_title'), 
       message,
