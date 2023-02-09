@@ -12,6 +12,7 @@ const sharedEnv = {
 
 const TESTNET = {
   ...sharedEnv,
+  fuelrpc: null, // no Fuel support for Test-net yet
   APP_NAME: "Telos Web Wallet (testnet)",
   NETWORK_HOST: "testnet.telos.net",
   NETWORK_CHAIN_ID:
@@ -24,6 +25,11 @@ const TESTNET = {
 
 const MAINNET = {
   ...sharedEnv,
+  fuelrpc: {
+    protocol: "https",
+    host: "telos.greymass.com",
+    port: 443
+  },
   APP_NAME: "Telos Web Wallet",
   NETWORK_HOST: "mainnet.telos.net",
   NETWORK_CHAIN_ID:
