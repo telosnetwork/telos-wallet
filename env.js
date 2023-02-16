@@ -39,4 +39,3 @@ const MAINNET = {
 const env = process.env.NETWORK === "mainnet" ? MAINNET : TESTNET;
 
 module.exports = env;
-console.log("----------------------------------");
