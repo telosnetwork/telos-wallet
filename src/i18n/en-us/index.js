@@ -1,4 +1,20 @@
 export default {
+    api: {
+        confirm: "Confirm",
+        reject: "Reject",
+        remember_my_decision: "Remember my decision",
+        greymass_dialog_title: 'Resource Warning!',
+        greymass_fuel_message: 
+            "Your account doesn't have sufficient resources (CPU, NET, or RAM) to pay for your next transaction. " +
+            'Don\'t worry! Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", allowing you to continue for free.<br/><br/>' +
+            'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account',
+        greymass_fuel_message_fees: 
+            "Your account doesn't have sufficient resources (CPU, NET, or RAM) to pay for your next transaction and it can not be processed without fees. " +
+            'Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", reducing cost significantly.<br/><br/>' +
+            'Please confirm fees below to proceed.<br/><br/>' +
+            '<div><center><h5><b>{fees}</b></h5></center><div><br/>' +
+            'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account',        
+    },
     navbar: {
         wallet: "Wallet",
         staking: "Staking (REX)",

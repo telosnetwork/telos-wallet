@@ -1344,7 +1344,7 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@greymass/eosio@^0.6.0":
+"@greymass/eosio@^0.6.0", "@greymass/eosio@^0.6.8":
   version "0.6.8"
   resolved "https://registry.yarnpkg.com/@greymass/eosio/-/eosio-0.6.8.tgz#6f24071eaec6e0df33e3c35ca0704a53146c00d2"
   integrity sha512-niWrUjCzQR9bJsl5IhrJIoi9fWCL4gEAOOaBdTmJuUFpOISQYe4zir5TjNlvlfpCC9ajy7o0pUNpDZuVrNaijQ==
@@ -5714,9 +5714,9 @@ htmlparser2@^6.1.0:
     entities "^2.0.0"
 
 http-cache-semantics@^4.0.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-4.1.0.tgz#49e91c5cbf36c9b94bcfcd71c23d5249ec74e390"
-  integrity sha512-carPklcUh7ROWRK7Cv27RPtdhYhUsela/ue5/jKzjegVvXDqM2ILE9Q2BGn9JZJh1g87cp56su/FgQSzcWS8cQ==
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-4.1.1.tgz#abe02fcb2985460bf0323be664436ec3476a6d5a"
+  integrity sha512-er295DKPVsV82j5kw1Gjt+ADA/XYHsajl82cGNQG2eyoPkvgUhX+nDIyelzhIWbbsXP39EHcI6l5tYs2FYqYXQ==
 
 http-deceiver@^1.2.7:
   version "1.2.7"
