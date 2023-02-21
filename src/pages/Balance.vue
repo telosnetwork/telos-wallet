@@ -549,7 +549,9 @@ export default {
           const aContract = a.account.toLowerCase();
           const bContract = b.account.toLowerCase();
 
+          // both native and evm have same symbol and account name
           if ((aSymbol === bSymbol) && (aContract === bContract)) {
+            // if evm
             if (a.network) {
               return 1;
             } else {
