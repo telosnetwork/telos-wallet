@@ -14,8 +14,17 @@ import { Dialog } from 'quasar';
 
 // this simulates the getChain function from OBE
 const getChain = () => ({
-  getHyperionEndpoint: () => (process.env.HYPERION_ENDPOINT),
-  getFuelRPCEndpoint: () => { return process.env.fuelrpc; },
+  getHyperionEndpoint: () => {
+    console.log("getHyperionEndpoint() process.env.HYPERION_ENDPOINT:", process.env.HYPERION_ENDPOINT);
+    return (process.env.HYPERION_ENDPOINT);
+  },
+  getFuelRPCEndpoint: () => {
+    if (typeof process.env.FUEL_RPC === "string") {
+      return process.env.FUEL_RPC;
+    } else {
+      return "";
+    }
+  },
 });
 
 // The maximum fee per transaction this script is willing to accept
@@ -30,8 +39,7 @@ const client = new APIClient({
 });
 
 const fuelrpc = chain.getFuelRPCEndpoint();
-const resourceProviderEndpoint = `${fuelrpc?.protocol}://${fuelrpc?.host}:${fuelrpc?.port}/v1/resource_provider/request_transaction`;
-
+const resourceProviderEndpoint = `https://${fuelrpc}/v1/resource_provider/request_transaction`;
 
 // Wrapper for the user to intersect the signTransaction call
 export class FuelUserWrapper extends User {
@@ -46,6 +54,11 @@ export class FuelUserWrapper extends User {
     originalconfig/*: SignTransactionConfig*/
   )/*: Promise<SignTransactionResponse>*/ {
     try {
+      // if fuel is not supported, just let the normal implementation to perform
+      if (!fuelrpc) {
+        return this.user.signTransaction(originalTransaction, originalconfig);
+      }
+
       // Retrieve transaction headers
       const info = await client.v1.chain.get_info();
       const header = info.getTransactionHeader(expireSeconds);
