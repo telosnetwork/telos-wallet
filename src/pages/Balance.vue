@@ -549,7 +549,7 @@ export default {
           const aContract = a.account.toLowerCase();
           const bContract = b.account.toLowerCase();
 
-          if (aSymbol === bSymbol) {
+          if ((aSymbol === bSymbol) && (aContract === bContract)) {
             if (a.network) {
               return 1;
             } else {
