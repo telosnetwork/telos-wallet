@@ -549,7 +549,9 @@ export default {
           const aContract = a.account.toLowerCase();
           const bContract = b.account.toLowerCase();
 
-          if (aSymbol === bSymbol) {
+          // eosio.token
+          if (aContract === bContract) {
+            // if evm
             if (a.network) {
               return 1;
             } else {
