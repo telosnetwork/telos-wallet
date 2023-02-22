@@ -1344,7 +1344,7 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@greymass/eosio@^0.6.0":
+"@greymass/eosio@^0.6.0", "@greymass/eosio@^0.6.8":
   version "0.6.8"
   resolved "https://registry.yarnpkg.com/@greymass/eosio/-/eosio-0.6.8.tgz#6f24071eaec6e0df33e3c35ca0704a53146c00d2"
   integrity sha512-niWrUjCzQR9bJsl5IhrJIoi9fWCL4gEAOOaBdTmJuUFpOISQYe4zir5TjNlvlfpCC9ajy7o0pUNpDZuVrNaijQ==
