@@ -550,7 +550,7 @@ export default {
           const bContract = b.account.toLowerCase();
 
           // eosio.token
-          if (aContract === bContract) {
+          if (aContract === bContract && aContract === "eosio.token") {
             // if evm
             if (a.network) {
               return 1;
