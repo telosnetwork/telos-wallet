@@ -226,12 +226,6 @@ export default defineComponent({
     openUrl(url: string) {
       window.open(url);
     },
-    goToAccountPage() {
-      const accountPath = `/account/${this.accountName}`;
-      if ((this.$router.currentRoute as any).path !== accountPath) {
-        this.$router.push({ path: accountPath });
-      }
-    },
     async createEvmApi() {
         try {
           await this.setEvmState()
