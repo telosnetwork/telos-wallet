@@ -5,7 +5,7 @@ module.exports = {
   root: true,
 
   parserOptions: {
-    parser: '@babel/eslint-parser',
+    parser: '@typescript-eslint/parser',
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module' // Allows for the use of imports
   },
@@ -69,17 +69,16 @@ module.exports = {
         'files': ['**/*.ts', '**/*.tsx', '**/*/.vue'],
         'env': { 'browser': true, 'es6': true, 'node': true },
         'extends': [
-            'eslint:recommended',
             'plugin:@typescript-eslint/eslint-recommended',
             'plugin:@typescript-eslint/recommended',
             'plugin:vue/vue3-essential',
         ],
-        'parser': '@typescript-eslint/parser',
         'parserOptions': {
             'ecmaFeatures': { 'jsx': true },
             'ecmaVersion': 2018,
             'sourceType': 'module',
             'project': './tsconfig.json',
+            'parser': '@typescript-eslint/parser',
         },
         'plugins': ['vue', '@typescript-eslint'],
         'rules': {

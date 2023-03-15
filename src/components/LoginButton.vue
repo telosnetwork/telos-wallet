@@ -45,7 +45,7 @@
         <q-list class="" dark separator>
           <q-item
             class="q-my-sm"
-            v-for="(wallet, idx) in $ual.authenticators"
+            v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
             :key="wallet.getStyle().text"
             v-ripple
           >
@@ -149,10 +149,12 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
 import { mapGetters, mapActions, mapMutations } from "vuex";
 
-export default {
+export default defineComponent({
+  name: 'LoginButton',
   data() {
     return {
       showLogin: false,
@@ -206,13 +208,13 @@ export default {
       "setLoadingWallet"
     ]),
     async loginAsJustViewer() {
-      let idx = this.$ual.authenticators.map(a => a.getName()).indexOf('cleos');
+      let idx = this.$ual.getAuthenticators().availableAuthenticators.map(a => a.getName()).indexOf('cleos');
       this.onLogin(idx, true);
     },
     async signUp() {
       this.openUrl("https://app.telos.net/accounts/add");
     },
-    async onLogin(idx, justViewer = false) {
+    async onLogin(idx: number, justViewer = false) {
         const error = await this.login({ idx, justViewer });
         if (!error) {
           this.showLogin = false;
@@ -221,12 +223,12 @@ export default {
           this.error = error;
         }
     },
-    openUrl(url) {
+    openUrl(url: string) {
       window.open(url);
     },
     goToAccountPage() {
       const accountPath = `/account/${this.accountName}`;
-      if (this.$router.currentRoute.path !== accountPath) {
+      if ((this.$router.currentRoute as any).path !== accountPath) {
         this.$router.push({ path: accountPath });
       }
     },
@@ -258,7 +260,7 @@ export default {
             payer: this.accountName.toLowerCase(),
             receiver: this.accountName.toLowerCase(),
             quant:
-              String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(" TLOS")
+              String(this.RAMtoBuy.toFixed(4)) + String(" TLOS")
           }
         });
       }
@@ -271,9 +273,9 @@ export default {
             from: this.accountName.toLowerCase(),
             receiver: this.accountName.toLowerCase(),
             stake_net_quantity:
-              String(parseFloat(this.NETtoBuy).toFixed(4)) + String(" TLOS"),
+              String(this.NETtoBuy.toFixed(4)) + String(" TLOS"),
             stake_cpu_quantity:
-              String(parseFloat(this.CPUtoBuy).toFixed(4)) + String(" TLOS"),
+              String(this.CPUtoBuy.toFixed(4)) + String(" TLOS"),
             transfer: false
           }
         });
@@ -310,7 +312,7 @@ export default {
     },
 
     async checkResources() {
-      if (!accountName) return;
+      if (!this.accountName) return;
       await this.getRamPrice();
       let account = await this.$store.$api.getAccount(this.accountName);
       this.ramAvail = account.ram_quota - account.ram_usage;
@@ -325,15 +327,15 @@ export default {
       this.resLow = this.ramLow || this.cpuLow || this.netLow;
     }
   },
-  whatch: {
-    async isAuthenticated() {
+  watch: {
+    async isAuthenticated(): Promise<void> {
       if (this.isAuthenticated) {
         await this.createEvmApi();
         await this.checkResources();
       }
     }
   }
-};
+});
 </script>
 
 <style lang="scss" scoped>
