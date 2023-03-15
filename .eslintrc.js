@@ -63,5 +63,28 @@ module.exports = {
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  }
+  },
+  overrides:[
+    {
+        'files': ['**/*.ts', '**/*.tsx', '**/*/.vue'],
+        'env': { 'browser': true, 'es6': true, 'node': true },
+        'extends': [
+            'eslint:recommended',
+            'plugin:@typescript-eslint/eslint-recommended',
+            'plugin:@typescript-eslint/recommended',
+            'plugin:vue/vue3-essential',
+        ],
+        'parser': '@typescript-eslint/parser',
+        'parserOptions': {
+            'ecmaFeatures': { 'jsx': true },
+            'ecmaVersion': 2018,
+            'sourceType': 'module',
+            'project': './tsconfig.json',
+        },
+        'plugins': ['vue', '@typescript-eslint'],
+        'rules': {
+            '@typescript-eslint/no-explicit-any': 1,
+        },
+    },
+  ],
 }
