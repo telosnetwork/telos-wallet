@@ -123,7 +123,6 @@ export default {
     "coins",
     "coinLoadedAll",
     "showHistoryDlg",
-    "showExchangeDlg",
     "showBuyAmountDlg",
     "showDepositEVMDlg",
     "showWithdrawEVMDlg",
@@ -151,9 +150,6 @@ export default {
       );
       this.$emit("update:showBuyAmountDlg", true);
        */
-    },
-    clickExchange() {
-      this.$emit("update:showExchangeDlg", true);
     },
     selectCoin(coin) {
       this.$emit("update:selectedCoin", coin);

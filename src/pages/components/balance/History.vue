@@ -298,7 +298,6 @@ export default {
     "showSendAmountDlg",
     "showBuyAmountDlg",
     "showShareAddressDlg",
-    "showExchangeDlg",
     "showRexStakeDlg",
   ],
   data() {
@@ -366,7 +365,6 @@ export default {
     },
     convert() {
       window.open(TSWAPS_URL);
-      //   this.$emit("update:showExchangeDlg", true);
     },
     sell() {
       // this.$emit('update:showShareAddressDlg', true);
