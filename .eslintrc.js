@@ -5,7 +5,7 @@ module.exports = {
   root: true,
 
   parserOptions: {
-    parser: '@babel/eslint-parser',
+    parser: '@typescript-eslint/parser',
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module' // Allows for the use of imports
   },
@@ -63,5 +63,27 @@ module.exports = {
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  }
+  },
+  overrides:[
+    {
+        'files': ['**/*.ts', '**/*.tsx', '**/*/.vue'],
+        'env': { 'browser': true, 'es6': true, 'node': true },
+        'extends': [
+            'plugin:@typescript-eslint/eslint-recommended',
+            'plugin:@typescript-eslint/recommended',
+            'plugin:vue/vue3-essential',
+        ],
+        'parserOptions': {
+            'ecmaFeatures': { 'jsx': true },
+            'ecmaVersion': 2018,
+            'sourceType': 'module',
+            'project': './tsconfig.json',
+            'parser': '@typescript-eslint/parser',
+        },
+        'plugins': ['vue', '@typescript-eslint'],
+        'rules': {
+            '@typescript-eslint/no-explicit-any': 1,
+        },
+    },
+  ],
 }

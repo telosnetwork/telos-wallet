@@ -19,7 +19,7 @@
                 class="text-white items-center"
                 :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
               >
-                $ {{ getFixed(parseInt(displayAmount), 0) }}.{{
+                $ {{ getFixed(displayAmount, 0) }}.{{
                   displayAmount.toFixed(2).slice(-2)
                 }}
               </label>
