@@ -3,7 +3,7 @@
     <div class="text-center q-pb-md text-h1">{{$t('home.title')}}</div>
     <div class="text-h5 text-center q-pb-lg">{{$t('home.subtitle')}}</div>
     <div v-if="!isAuthenticated" class="text-center">
-      <login-button />
+      <LoginButton />
     </div>
     <q-footer bordered>
       <q-toolbar class="bg-dark">
