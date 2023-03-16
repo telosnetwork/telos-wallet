@@ -60,11 +60,6 @@ const getAccount = async function (accountName) {
   return await rpc.get_account(accountName);
 };
 
-const pushTransaction = async function (trx) {
-  const rpc = this.$api.getRpc();
-  return await rpc.push_transaction(accountName);
-};
-
 export default boot(async ({ store }) => {
   const rpc = new JsonRpc(
     `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`

@@ -1,19 +1,5 @@
 import { boot } from "quasar/wrappers";
 
-const charToSymbol = function(c) {
-  if (typeof c == "string") c = c.charCodeAt(0);
-
-  if (c >= "a".charCodeAt(0) && c <= "z".charCodeAt(0)) {
-    return c - "a".charCodeAt(0) + 6;
-  }
-
-  if (c >= "1".charCodeAt(0) && c <= "5".charCodeAt(0)) {
-    return c - "1".charCodeAt(0) + 1;
-  }
-
-  return 0;
-};
-
 const nameToUint64 = function(name) {
   let n = BigInt(0);
 
@@ -30,6 +16,7 @@ const nameToUint64 = function(name) {
 
   return n.toString();
 };
+
 
 export default boot(({ app, store }) => {
   app.config.globalProperties.$nameToUint64 = nameToUint64;

@@ -195,7 +195,6 @@ export default {
       else this.depositAmount = Number(this.depositAmount).toString();
     },
     async checkRecipientExist() {
-      debugger;
       try {
         _ = await this.$store.$evmApi.telos.getEthAccount(
           this.recipientAddress.toLowerCase()
