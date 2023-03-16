@@ -164,15 +164,6 @@ export default {
       this.accountHistory = actionHistory.data.actions || [];
     },
     logOut() {
-      if (gapi) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.signOut().then(function() {
-            auth2.disconnect();
-            console.log("User signed out.");
-          });
-        }
-      }
       this.resetTokens();
       this.logout();
     },
