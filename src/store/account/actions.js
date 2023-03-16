@@ -121,7 +121,6 @@ export const getAccountData = async function({ commit, dispatch }) {
 };
 
 export const getUserProfile = async function({ commit }, accountName) {
-  console.log("getUserProfile() accountName:", accountName);
   try {
     const profileResult = await this.$api.getTableRows({
       code: "profiles",
