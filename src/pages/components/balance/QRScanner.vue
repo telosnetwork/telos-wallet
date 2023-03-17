@@ -1,54 +1,3 @@
-<template>
-<q-dialog
-    v-model="showDlg"
-    persistent
-    :maximized="true"
-    transition-show="slide-left"
-    transition-hide="slide-right"
->
-    <div v-if="loading" class="q-qr-spinner-container ">
-        <q-spinner size="64px" color="secondary" />
-    </div>
-    <QrcodeStream
-        v-if="activateQR"
-        :camera="camera"
-        @init="onInit"
-        @decode="onDecode"
-    />
-    <q-card class="full-height main-card absolute transparent" style="max-width: 800px; margin: auto;">
-        <q-layout
-            view="hHh Lpr fff"
-            container
-            class="shadow-4 coinview"
-        >
-            <q-header class="bg-white text-grey-8 q-pa-sm transparent">
-                <q-toolbar class="no-padding">
-                    <q-btn
-                        v-close-popup
-                        round
-                        flat
-                        dense
-                        class="text-white bg-grey-8"
-                        icon="close"
-                    />
-                </q-toolbar>
-            </q-header>
-            <q-page-container>
-                <div class="column" :style="`height: ${cardHeight}px;`">
-                    <q-space/>
-                    <q-space/>
-                    <div class="text-center text-white text-h5">{{$t('components.scan_qr')}}</div>
-                    <div class="text-center text-white text-subtitle1">{{$t('components.send_or_connect')}}</div>
-                    <div class="text-center text-white text-subtitle1">{{$t('components.to_a_desktop_website')}}</div>
-                    <q-space/>
-                </div>
-            </q-page-container>
-        </q-layout>
-    </q-card>
-
-</q-dialog>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
@@ -167,21 +116,74 @@ export default {
 };
 </script>
 
+<template>
+<q-dialog
+    v-model="showDlg"
+    persistent
+    :maximized="true"
+    transition-show="slide-left"
+    transition-hide="slide-right"
+>
+    <div v-if="loading" class="q-qr-spinner-container ">
+        <q-spinner size="64px" color="secondary" />
+    </div>
+    <QrcodeStream
+        v-if="activateQR"
+        :camera="camera"
+        @init="onInit"
+        @decode="onDecode"
+    />
+    <q-card class="full-height main-card absolute transparent">
+        <q-layout
+            view="hHh Lpr fff"
+            container
+            class="shadow-4 coinview"
+        >
+            <q-header class="bg-white text-grey-8 q-pa-sm transparent">
+                <q-toolbar class="no-padding">
+                    <q-btn
+                        v-close-popup
+                        round
+                        flat
+                        dense
+                        class="text-white bg-grey-8"
+                        icon="close"
+                    />
+                </q-toolbar>
+            </q-header>
+            <q-page-container>
+                <div class="column" :style="`height: ${cardHeight}px;`">
+                    <q-space/>
+                    <q-space/>
+                    <div class="text-center text-white text-h5">{{$t('components.scan_qr')}}</div>
+                    <div class="text-center text-white text-subtitle1">{{$t('components.send_or_connect')}}</div>
+                    <div class="text-center text-white text-subtitle1">{{$t('components.to_a_desktop_website')}}</div>
+                    <q-space/>
+                </div>
+            </q-page-container>
+        </q-layout>
+    </q-card>
+
+</q-dialog>
+</template>
+
 <style scoped>
 
 .main-card {
-  background-image: linear-gradient(white, #f0f0f0);
+    background-image: linear-gradient(white, #f0f0f0);
+    max-width: 800px;
+    margin: auto;
 }
 
 .q-qr-spinner-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 </style>
