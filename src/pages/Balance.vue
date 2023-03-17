@@ -138,7 +138,7 @@
         v-model:showBuyAmountDlg="showBuyAmountDlg"
         v-model:showRexStakeDlg="showRexStakeDlg"
     />
-    <Send
+    <SendCoins
         v-model:showSendDlg="showSendDlg"
         v-model:selectedCoin="selectedCoin"
         v-model:showSendAmountDlg="showSendAmountDlg"
@@ -212,7 +212,7 @@ import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
 import Coin from '~/pages/components/balance/Coin';
 import Collectables from '~/pages/components/balance/Collectables';
-import Send from '~/pages/components/balance/Send';
+import SendCoins from '~/pages/components/balance/SendCoins';
 import SendAmount from '~/pages/components/balance/SendAmount';
 import Receive from '~/pages/components/balance/Receive';
 import BuyAmount from '~/pages/components/balance/BuyAmount';
@@ -232,7 +232,7 @@ export default {
     components: {
         Coin,
         Collectables,
-        Send,
+        SendCoins,
         SendAmount,
         Receive,
         BuyAmount,
