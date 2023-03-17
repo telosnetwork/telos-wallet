@@ -1,3 +1,186 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import BigNumber from 'bignumber.js';
+
+export default {
+    name: 'WithdrawEVM',
+    emits: ['updateBalances', 'addEvmNetwork'],
+    props: ['showDepositEVMDlg', 'nativeTLOSBalance'],
+    data() {
+        return {
+            depositAmount: '0',
+            depositOwnAddress: false,
+            recipientAddress: '',
+            recipientAddressExists: true,
+        };
+    },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName', 'evmAddress']),
+        showDlg: {
+            get() {
+                return this.showDepositEVMDlg;
+            },
+            set(value) {
+                this.$emit('update:showDepositEVMDlg', value);
+            },
+        },
+        noDepositInputAmount(){
+            return (parseFloat(this.depositAmount) > 0) ? null: true;
+        },
+    },
+    methods: {
+        ...mapActions('account', [
+            'setEvmState',
+        ]),
+        addEvmNetwork() {
+            let params = [];
+            if (this.chainName !== 'telos') {
+                params = [
+                    {
+                        chainId: '0x29',
+                        chainName: 'Telos EVM Testnet',
+                        nativeCurrency: {
+                            name: 'Telos',
+                            symbol: 'TLOS',
+                            decimals: 4,
+                        },
+                        rpcUrls: ['https://testnet.telos.net/evm'],
+                        blockExplorerUrls: ['https://testnet.teloscan.io'],
+                    },
+                ];
+            } else {
+                params = [
+                    {
+                        chainId: '0x28',
+                        chainName: 'Telos EVM Mainnet',
+                        nativeCurrency: {
+                            name: 'Telos',
+                            symbol: 'TLOS',
+                            decimals: 4,
+                        },
+                        rpcUrls: ['https://mainnet.telos.net/evm'],
+                        blockExplorerUrls: ['https://teloscan.io'],
+                    },
+                ];
+            }
+
+            window.ethereum
+                .request({ method: 'wallet_addEthereumChain', params })
+                .then(() => console.log('Success'))
+                .catch(error => console.log('Error', error.message));
+        },
+        inputBlur() {
+            if (isNaN(this.depositAmount)) {
+                this.depositAmount = '0';
+            } else {
+                this.depositAmount = Number(this.depositAmount).toString();
+            }
+        },
+        async checkRecipientExist() {
+            try {
+                const _ = await this.$store.$evmApi.telos.getEthAccount(
+                    this.recipientAddress.toLowerCase(),
+                );
+                this.recipientAddressExists = true;
+            } catch (error) {
+                this.recipientAddressExists = false;
+            }
+        },
+        async generateAddress(){
+            const actions = [];
+            if (!this.evmAddress) {
+                actions.push({
+                    account: 'eosio.evm',
+                    name: 'create',
+                    data: {
+                        account: this.accountName.toLowerCase(),
+                        data: 'create',
+                    },
+                });
+            }
+            try {
+                const transaction = await this.$store.$api.signTransaction(
+                    actions,
+                    this.$t('components.create_evm_for', { account: this.accountName }),
+                );
+                await this.setEvmState();
+                this.$successNotification(this.$t('components.created_evm_for', { account: this.accountName }));
+                this.depositAmount = '0';
+                this.depositOwnAddress = false;
+                this.recipientAddress = this.evmAddress;
+                this.recipientAddressExists = true;
+
+            } catch (error) {
+                this.$errorNotification(error);
+            }
+        },
+        async deposit() {
+            let amount = parseFloat(this.depositAmount);
+            if (amount > parseFloat(this.nativeTLOSBalance)) {
+                this.$errorNotification(this.$t('components.cant_deposit_more', { balance: this.nativeTLOSBalance }));
+                return;
+            }
+
+            let quantityStr = `${amount.toFixed(4)} TLOS`;
+            let actions = [];
+            let memo = '';
+            memo = this.recipientAddress.toLowerCase();
+            await this.checkRecipientExist();
+            if (!this.recipientAddressExists) {
+                actions.push({
+                    account: process.env.EVM_CONTRACT,
+                    name: 'openwallet',
+                    data: {
+                        account: this.accountName.toLowerCase(),
+                        address: this.recipientAddress.slice(2),
+                    },
+                });
+            }
+
+            actions.push({
+                account: 'eosio.token',
+                name: 'transfer',
+                data: {
+                    from: this.accountName.toLowerCase(),
+                    to: 'eosio.evm',
+                    quantity: quantityStr,
+                    memo: memo,
+                },
+            });
+
+            try {
+                const transaction = await this.$store.$api.signTransaction(
+                    actions,
+                    this.$t('components.deposit_to_evm', { quantity: quantityStr }),
+                );
+
+                this.$emit('updateBalances');
+
+                this.depositAmount = '0';
+                this.depositOwnAddress = false;
+                this.recipientAddress = '';
+                this.recipientAddressExists = true;
+                this.showDlg = false;
+
+                this.$successNotification(this.$t('components.deposited_to_evm', { quantity: quantityStr }));
+            } catch (error) {
+                this.$errorNotification(error);
+            }
+        },
+    },
+    watch: {
+        showDepositEVMDlg() {
+            if (this.showDlg) {
+                this.$emit('addEvmNetwork');
+            };
+            if (this.evmAddress){
+                this.recipientAddress = this.evmAddress;
+            }
+        },
+    },
+};
+</script>
+
 <template>
 <q-dialog
     v-model="showDlg"
@@ -119,188 +302,6 @@
 </q-dialog>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import BigNumber from 'bignumber.js';
-
-export default {
-    name: 'WithdrawEVM',
-    emits: ['updateBalances', 'addEvmNetwork'],
-    props: ['showDepositEVMDlg', 'nativeTLOSBalance'],
-    data() {
-        return {
-            depositAmount: '0',
-            depositOwnAddress: false,
-            recipientAddress: '',
-            recipientAddressExists: true,
-        };
-    },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName', 'evmAddress']),
-        showDlg: {
-            get() {
-                return this.showDepositEVMDlg;
-            },
-            set(value) {
-                this.$emit('update:showDepositEVMDlg', value);
-            },
-        },
-        noDepositInputAmount(){
-            return (parseFloat(this.depositAmount) > 0) ? null: true;
-        },
-    },
-    methods: {
-        ...mapActions('account', [
-            'setEvmState',
-        ]),
-        addEvmNetwork() {
-            let params = [];
-            if (this.chainName !== 'telos') {
-                params = [
-                    {
-                        chainId: '0x29',
-                        chainName: 'Telos EVM Testnet',
-                        nativeCurrency: {
-                            name: 'Telos',
-                            symbol: 'TLOS',
-                            decimals: 4,
-                        },
-                        rpcUrls: ['https://testnet.telos.net/evm'],
-                        blockExplorerUrls: ['https://testnet.teloscan.io'],
-                    },
-                ];
-            } else {
-                params = [
-                    {
-                        chainId: '0x28',
-                        chainName: 'Telos EVM Mainnet',
-                        nativeCurrency: {
-                            name: 'Telos',
-                            symbol: 'TLOS',
-                            decimals: 4,
-                        },
-                        rpcUrls: ['https://mainnet.telos.net/evm'],
-                        blockExplorerUrls: ['https://teloscan.io'],
-                    },
-                ];
-            }
-
-            window.ethereum
-                .request({ method: 'wallet_addEthereumChain', params })
-                .then(() => console.log('Success'))
-                .catch(error => console.log('Error', error.message));
-        },
-        inputBlur() {
-            if (isNaN(this.depositAmount)) {
-                this.depositAmount = '0';
-            } else {
-                this.depositAmount = Number(this.depositAmount).toString();
-            }
-        },
-        async checkRecipientExist() {
-            try {
-                _ = await this.$store.$evmApi.telos.getEthAccount(
-                    this.recipientAddress.toLowerCase(),
-                );
-                this.recipientAddressExists = true;
-            } catch (error) {
-                this.recipientAddressExists = false;
-            }
-        },
-        async generateAddress(){
-            const actions = [];
-            if (!this.evmAddress) {
-                actions.push({
-                    account: 'eosio.evm',
-                    name: 'create',
-                    data: {
-                        account: this.accountName.toLowerCase(),
-                        data: 'create',
-                    },
-                });
-            }
-            try {
-                const transaction = await this.$store.$api.signTransaction(
-                    actions,
-                    this.$t('components.create_evm_for', { account: this.accountName }),
-                );
-                await this.setEvmState();
-                this.$successNotification(this.$t('components.created_evm_for', { account: this.accountName }));
-                this.depositAmount = '0';
-                this.depositOwnAddress = false;
-                this.recipientAddress = this.evmAddress;
-                this.recipientAddressExists = true;
-
-            } catch (error) {
-                this.$errorNotification(error);
-            }
-        },
-        async deposit() {
-            let amount = parseFloat(this.depositAmount);
-            if (amount > parseFloat(this.nativeTLOSBalance)) {
-                this.$errorNotification(this.$t('components.cant_deposit_more', { balance: this.nativeTLOSBalance }));
-                return;
-            }
-
-            let quantityStr = `${amount.toFixed(4)} TLOS`;
-            let actions = [];
-            let memo = '';
-            memo = this.recipientAddress.toLowerCase();
-            await this.checkRecipientExist();
-            if (!this.recipientAddressExists) {
-                actions.push({
-                    account: process.env.EVM_CONTRACT,
-                    name: 'openwallet',
-                    data: {
-                        account: this.accountName.toLowerCase(),
-                        address: this.recipientAddress.slice(2),
-                    },
-                });
-            }
-
-            actions.push({
-                account: 'eosio.token',
-                name: 'transfer',
-                data: {
-                    from: this.accountName.toLowerCase(),
-                    to: 'eosio.evm',
-                    quantity: quantityStr,
-                    memo: memo,
-                },
-            });
-
-            try {
-                const transaction = await this.$store.$api.signTransaction(
-                    actions,
-                    this.$t('components.deposit_to_evm', { quantity: quantityStr }),
-                );
-
-                this.$emit('updateBalances');
-
-                this.depositAmount = '0';
-                this.depositOwnAddress = false;
-                this.recipientAddress = '';
-                this.recipientAddressExists = true;
-                this.showDlg = false;
-
-                this.$successNotification(this.$t('components.deposited_to_evm', { quantity: quantityStr }));
-            } catch (error) {
-                this.$errorNotification(error);
-            }
-        },
-    },
-    watch: {
-        showDepositEVMDlg() {
-            if (this.showDlg) {
-                this.$emit('addEvmNetwork');
-            };
-            if (this.evmAddress){
-                this.recipientAddress = this.evmAddress;
-            }
-        },
-    },
-};
-</script>
 
 <style lang="scss" scoped>
 .depositAddressToggle {
