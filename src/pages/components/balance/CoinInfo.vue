@@ -1,8 +1,62 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import tokenAvatar from 'src/components/TokenAvatar';
+
+const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
+
+export default {
+    components: {
+        TokenAvatar: tokenAvatar,
+    },
+    props: [
+        'coins',
+        'coinLoadedAll',
+        'showHistoryDlg',
+        'showBuyAmountDlg',
+        'showDepositEVMDlg',
+        'showWithdrawEVMDlg',
+        'selectedCoin',
+        'suggestTokens',
+    ],
+    computed: {
+        availableCoins() {
+            return this.coins.filter(
+                coin =>
+                    coin.amount > 0 ||
+          this.suggestTokens
+              .map(t => t.sym)
+              .includes(coin.symbol.toLowerCase()),
+            );
+        },
+    },
+    methods: {
+        clickPurchase() {
+            window.open(GETTING_STARTED_URL);
+            /*
+      this.$emit(
+        "update:selectedCoin",
+        this.coins.find((coin) => coin.symbol === "TLOS")
+      );
+      this.$emit("update:showBuyAmountDlg", true);
+       */
+        },
+        selectCoin(coin) {
+            this.$emit('update:selectedCoin', coin);
+            this.$emit('update:showHistoryDlg', true);
+        },
+        depositEvm() {
+            this.$emit('update:showDepositEVMDlg', true);
+        },
+        withdrawEvm() {
+            this.$emit('update:showWithdrawEVMDlg', true);
+        },
+    },
+};
+</script>
+
 <template>
-<div style="margin: auto">
-    <q-infinite-scroll
-        style="display: grid; grid-template-rows: auto auto; margin: auto"
-    >
+<div class="page-container">
+    <q-infinite-scroll class="grid-container">
         <q-item
             v-for="(coin, index) in availableCoins"
             :key="`${coin.name}_${index}`"
@@ -21,24 +75,18 @@
                         >
                         <TokenAvatar :token="coin.icon" :avatarSize="45" />
                         <div
-                            v-if="coin.network == 'tevm'"
+                            v-if="coin.network === 'tevm'"
                             class="flex absolute full-width full-height"
                         >
                             <img
-                                class="flex q-ml-auto q-mt-auto"
+                                class="flex q-ml-auto q-mt-auto evm-logo"
                                 alt="tEVM"
                                 src="~assets/evm/evm_logo.png"
-                                style="
-                      width: 50%;
-                      height: 50%;
-                      margin-right: -10%;
-                      margin-bottom: -5%;
-                    "
                             >
                         </div>
                     </q-avatar>
                 </q-item-section>
-                <q-item-section style="justify-content: start; display: grid">
+                <q-item-section class="coin-grid">
                     <div class="text-white text-left display-grid">
                         <label
                             class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
@@ -109,63 +157,29 @@
 </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import tokenAvatar from 'src/components/TokenAvatar';
-
-const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
-
-export default {
-    components: {
-        TokenAvatar: tokenAvatar,
-    },
-    props: [
-        'coins',
-        'coinLoadedAll',
-        'showHistoryDlg',
-        'showBuyAmountDlg',
-        'showDepositEVMDlg',
-        'showWithdrawEVMDlg',
-        'selectedCoin',
-        'suggestTokens',
-    ],
-    computed: {
-        availableCoins() {
-            return this.coins.filter(
-                coin =>
-                    coin.amount > 0 ||
-          this.suggestTokens
-              .map(t => t.sym)
-              .includes(coin.symbol.toLowerCase()),
-            );
-        },
-    },
-    methods: {
-        clickPurchase() {
-            window.open(GETTING_STARTED_URL);
-            /*
-      this.$emit(
-        "update:selectedCoin",
-        this.coins.find((coin) => coin.symbol === "TLOS")
-      );
-      this.$emit("update:showBuyAmountDlg", true);
-       */
-        },
-        selectCoin(coin) {
-            this.$emit('update:selectedCoin', coin);
-            this.$emit('update:showHistoryDlg', true);
-        },
-        depositEvm() {
-            this.$emit('update:showDepositEVMDlg', true);
-        },
-        withdrawEvm() {
-            this.$emit('update:showWithdrawEVMDlg', true);
-        },
-    },
-};
-</script>
-
 <style lang="scss" scoped>
+.page-container {
+    margin: auto;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-rows: auto auto;
+    margin: auto
+}
+
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-bottom: -5%;
+}
+
+.coin-grid {
+    justify-content: start;
+    display: grid
+}
+
 .list-item {
   border: 1px solid #fafafa00;
   border-left: none;
