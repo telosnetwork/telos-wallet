@@ -1,182 +1,185 @@
 <template>
-  <q-layout view="hHh Lpr fFf" class="">
-    <login-button v-if="isAuthenticated" style="display: none" />
+<q-layout view="hHh Lpr fFf" class="">
+    <LoginButton v-if="isAuthenticated" style="display: none" />
     <div class="videoWrapper">
-      <video
-        playsinline
-        autoplay
-        muted
-        loop
-        poster="~/assets/background/Video-top_compressed-poster-00001.jpg"
-        id="bgvid"
-      >
-        <source
-          src="~/assets/background/Video-top_compressed-transcode.webm"
-          type="video/webm"
-        />
-        <source
-          src="~/assets/background/Video-top_compressed-transcode.mp4"
-          type="video/mp4"
-        />
-      </video>
+        <video
+            id="bgvid"
+            playsinline
+            autoplay
+            muted
+            loop
+            poster="~/assets/background/Video-top_compressed-poster-00001.jpg"
+        >
+            <source
+                src="~/assets/background/Video-top_compressed-transcode.webm"
+                type="video/webm"
+            >
+            <source
+                src="~/assets/background/Video-top_compressed-transcode.mp4"
+                type="video/mp4"
+            >
+        </video>
     </div>
-    <div class="videoOverlay" />
-    <div class="videoOverlay shadedOverlay" />
+    <div class="videoOverlay" ></div>
+    <div class="videoOverlay shadedOverlay" ></div>
 
-    <nav-bar v-model:balanceTab="balanceTab" v-if="isAuthenticated" @logOut="logOut"/>
+    <NavBar v-if="isAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
     <q-page-container
-      :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
+        :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
     >
-      <div v-if="warningShow">
-        <q-banner inline-actions dark class="warningSign text-white">
-          {{ warningText }}
+        <div v-if="warningShow">
+            <q-banner inline-actions dark class="warningSign text-white">
+                {{ warningText }}
 
-          <template v-slot:action>
-            <q-icon
-              name="fas fa-times-circle"
-              style="font-size: 1.3rem"
-              color="text-white"
-              @click="warningShow = false"
-            />
-          </template>
-        </q-banner>
-      </div>
-      <!-- Profile Image top right -->
-      <q-avatar
-        v-if="$route.path === '/balance'"
-        class="profileImg"
-        @click="$router.push('/profile')"
-      >
-        <img :src="userAvatar" />
-      </q-avatar>
-      <router-view
-        v-model:loadedCoins="coins"
-        v-model:loadedNftTokens="nftTokens"
-        v-model:balanceTab="balanceTab"
-      />
+                <template v-slot:action>
+                    <q-icon
+                        name="fas fa-times-circle"
+                        style="font-size: 1.3rem"
+                        color="text-white"
+                        @click="warningShow = false"
+                    />
+                </template>
+            </q-banner>
+        </div>
+        <!-- Profile Image top right -->
+        <q-avatar
+            v-if="$route.path === '/balance'"
+            class="profileImg"
+            @click="$router.push('/profile')"
+        >
+            <img :src="userAvatar" >
+        </q-avatar>
+        <router-view
+            v-model:loadedCoins="coins"
+            v-model:loadedNftTokens="nftTokens"
+            v-model:balanceTab="balanceTab"
+        />
     </q-page-container>
-  </q-layout>
+</q-layout>
 </template>
 
 <script>
 
-import { mapGetters, mapActions } from "vuex";
-import navBar from "components/Navbar.vue";
-import LoginButton from "components/LoginButton.vue";
+import { mapGetters, mapActions } from 'vuex';
+import navBar from 'components/Navbar.vue';
+import LoginButton from 'components/LoginButton.vue';
 
 const pagesData = [
-  {
-    title: "Balance",
-    caption: "Balance",
-    icon: "fas fa-wallet",
-    path: "/balance",
-    available: true,
-  },
-  {
-    title: "DappSearch",
-    caption: "DappSearch",
-    icon: "fas fa-th-large",
-    path: "/dappsearch",
-    available: true,
-  },
-  {
-    title: "Settings",
-    caption: "Settings",
-    icon: "fas fa-cog",
-    path: "/settings",
-    available: true,
-  },
+    {
+        title: 'Balance',
+        caption: 'Balance',
+        icon: 'fas fa-wallet',
+        path: '/balance',
+        available: true,
+    },
+    {
+        title: 'DappSearch',
+        caption: 'DappSearch',
+        icon: 'fas fa-th-large',
+        path: '/dappsearch',
+        available: true,
+    },
+    {
+        title: 'Settings',
+        caption: 'Settings',
+        icon: 'fas fa-cog',
+        path: '/settings',
+        available: true,
+    },
 ];
 
 export default {
-  name: "MainLayout",
-  components: { navBar, LoginButton },
-  data() {
-    return {
-      avatar: null,
-      bio: null,
-      displayName: null,
-      status: null,
-      profileAccountName: null,
-      accountHasProfile: false,
-      accountHistory: [{}],
-      balanceTab: "coins",
-      pages: pagesData,
-      coins: [],
-      nftTokens: [],
-      warningShow: false,
-      warningText: "",
-    };
-  },
-  computed: {
-    ...mapGetters("account", ["isAuthenticated", "accountName"]),
-    ...mapGetters("global", ["footerHeight"]),
-    containerHeight() {
-      return window.innerHeight;
+    name: 'MainLayout',
+    components: { NavBar: navBar, LoginButton },
+    data() {
+        return {
+            avatar: null,
+            bio: null,
+            displayName: null,
+            status: null,
+            profileAccountName: null,
+            accountHasProfile: false,
+            accountHistory: [{}],
+            balanceTab: 'coins',
+            pages: pagesData,
+            coins: [],
+            nftTokens: [],
+            warningShow: false,
+            warningText: '',
+        };
     },
-    userAvatar() {
-      if (this.avatar) return this.avatar;
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        ...mapGetters('global', ['footerHeight']),
+        containerHeight() {
+            return window.innerHeight;
+        },
+        userAvatar() {
+            if (this.avatar) {
+                return this.avatar;
+            }
 
-      return "/profile/default_avatar.svg";
+            return '/profile/default_avatar.svg';
+        },
     },
-  },
-  methods: {
-    ...mapActions("account", [
-      "logout",
-      "memoryAutoLogin",
-      "getUserProfile",
-    ]),
-    checkPath() {
-      if (!this.isAuthenticated) {
-        if (!["/", "/dappsearch"].includes(this.$route.path))
-          window.location = "/";
-      } else if (this.$route.path === "/") {
-        window.location = "/balance";
-      }
-    },
-    async loadUserProfile() {
-      this.loadAccountHistory();
-      if (
-        !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
-      ) {
-        await this.getUserProfile(this.accountName);
-      }
-      const accountProfile =
+    methods: {
+        ...mapActions('account', [
+            'logout',
+            'memoryAutoLogin',
+            'getUserProfile',
+        ]),
+        checkPath() {
+            if (!this.isAuthenticated) {
+                if (!['/', '/dappsearch'].includes(this.$route.path)) {
+                    window.location = '/';
+                }
+            } else if (this.$route.path === '/') {
+                window.location = '/balance';
+            }
+        },
+        async loadUserProfile() {
+            this.loadAccountHistory();
+            if (
+                !this.$store.state.account.profiles.hasOwnProperty(this.accountName)
+            ) {
+                await this.getUserProfile(this.accountName);
+            }
+            const accountProfile =
         this.$store.state.account.profiles[this.accountName];
-      if (!accountProfile) {
-        return;
-      }
+            if (!accountProfile) {
+                return;
+            }
 
-      this.accountHasProfile = true;
-      this.profileAccountName = this.accountName;
-      this.avatar = accountProfile.avatar;
-      this.bio = accountProfile.bio;
-      this.status = accountProfile.status;
-      this.displayName = accountProfile.display_name;
+            this.accountHasProfile = true;
+            this.profileAccountName = this.accountName;
+            this.avatar = accountProfile.avatar;
+            this.bio = accountProfile.bio;
+            this.status = accountProfile.status;
+            this.displayName = accountProfile.display_name;
+        },
+        search() {
+            this.loadUserProfile();
+        },
+        async loadAccountHistory() {
+            const actionHistory = await this.$hyperion.get(
+                `/v2/history/get_actions?limit=20&account=${this.accountName}`,
+            );
+            this.accountHistory = actionHistory.data.actions || [];
+        },
+        logOut() {
+            this.resetTokens();
+            this.logout();
+        },
+        resetTokens() {
+            this.coins = [];
+            this.nftTokens = [];
+        },
     },
-    search() {
-      this.loadUserProfile();
+    async mounted() {
+        await this.memoryAutoLogin();
+        this.loadUserProfile();
+        this.checkPath();
     },
-    async loadAccountHistory() {
-      const actionHistory = await this.$hyperion.get(
-        `/v2/history/get_actions?limit=20&account=${this.accountName}`
-      );
-      this.accountHistory = actionHistory.data.actions || [];
-    },
-    logOut() {
-      this.resetTokens();
-      this.logout();
-    },
-    resetTokens() {
-      this.coins = [];
-      this.nftTokens = [];
-    },
-  },
-  async mounted() {
-    await this.memoryAutoLogin();
-    this.loadUserProfile();
-    this.checkPath();
-  },
 };
 </script>
 

@@ -2,9 +2,9 @@
 export const getRexBalance = async function ({ commit, dispatch }, account) {
     try {
         const rexbalRows = await this.$api.getTableRows({
-            code: "eosio", // Contract that we target
-            scope: "eosio", // Account that owns the data
-            table: "rexbal", // Table name
+            code: 'eosio', // Contract that we target
+            scope: 'eosio', // Account that owns the data
+            table: 'rexbal', // Table name
             lower_bound: account, // Lower bound of data
             upper_bound: account, // Upper bound of data
             reverse: false, // Optional: Get reversed data
@@ -17,7 +17,7 @@ export const getRexBalance = async function ({ commit, dispatch }, account) {
             scope: 'eosio',
             table: 'rexpool',
             json: true,
-            reverse: false
+            reverse: false,
         });
         const rexpool = rexpoolRows.rows[0];
 
@@ -39,12 +39,12 @@ export const getRexBalance = async function ({ commit, dispatch }, account) {
             const tlosRexRatio = totalRex > 0 ? totalLendable / totalRex : 1;
             const rexBalance =
                 rexbal && rexbal.rex_balance
-                ? parseFloat(rexbal.rex_balance.split(' ')[0])
-                : 0;
+                    ? parseFloat(rexbal.rex_balance.split(' ')[0])
+                    : 0;
             const rexFundBalance =
                 rexfund && rexfund.balance
-                ? Number(rexfund.balance.split(' ')[0])
-                : 0.0;
+                    ? Number(rexfund.balance.split(' ')[0])
+                    : 0.0;
             let coreBalance = totalRex > 0 ? tlosRexRatio * rexBalance : 0.0;
             coreBalance += rexFundBalance;
 
@@ -54,7 +54,7 @@ export const getRexBalance = async function ({ commit, dispatch }, account) {
         }
 
     } catch (error) {
-        console.error("getRexBalance", error);
-        commit("general/setErrorMsg", error.message || error, { root: true });
+        console.error('getRexBalance', error);
+        commit('general/setErrorMsg', error.message || error, { root: true });
     }
 };
