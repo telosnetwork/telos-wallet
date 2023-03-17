@@ -155,7 +155,7 @@ export default {
     width: 50%;
     height: 50%;
     margin-right: -10%;
-    margin-bottom: -5%;"
+    margin-bottom: -5%;
 }
 
 .coin-info {

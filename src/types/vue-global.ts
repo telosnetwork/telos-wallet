@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UAL } from "universal-authenticator-library";
+import { UAL } from 'universal-authenticator-library';
 import { Emitter, EventType } from 'mitt';
-import { Router } from "vue-router";
+import { Router } from 'vue-router';
 
 declare module '@vue/runtime-core' {
 
