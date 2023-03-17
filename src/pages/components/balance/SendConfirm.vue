@@ -259,8 +259,7 @@ export default {
     </div>
     <div
         v-if="sending"
-        class="justify-center absolute flex"
-        style="background: rgba(0, 0, 0, 0.4);"
+        class="justify-center absolute flex spinner"
     >
         <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
     </div>
@@ -271,5 +270,9 @@ export default {
 .confirmGrid {
   display: grid;
   grid-template-columns: 7rem auto;
+}
+
+.spinner {
+    background: rgba(0, 0, 0, 0.4);
 }
 </style>
