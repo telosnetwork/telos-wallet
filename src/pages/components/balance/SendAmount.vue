@@ -158,7 +158,7 @@ export default {
                 this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
             }, 1);
 
-            if (this.sendAmount != oldVal) {
+            if (this.sendAmount !== oldVal) {
                 if (this.coinInput && this.sendAmountValue > this.selectedCoin.amount) {
                     this.sendAmount = this.selectedCoin.amount.toString();
                 } else if (
@@ -218,14 +218,9 @@ export default {
                             class="flex absolute full-width full-height"
                         >
                             <img
-                                class="flex q-ml-auto"
+                                class="flex q-ml-auto evm-logo"
                                 alt="tEVM"
                                 src="~assets/evm/evm_logo.png"
-                                style="
-                                    width: 50%;
-                                    height: 50%;
-                                    margin-right: -10%;
-                                    margin-top: 60%;"
                             >
                         </div>
                     </q-avatar>
@@ -407,5 +402,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-top: 60%;
 }
 </style>
