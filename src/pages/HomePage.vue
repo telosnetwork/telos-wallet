@@ -1,3 +1,21 @@
+<script>
+import { mapGetters } from 'vuex';
+import LoginButton from 'components/LoginButton.vue';
+
+export default {
+    name: 'HomePage',
+    data() {
+        return {
+            slide: 'slide1',
+        };
+    },
+    components: { LoginButton },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated']),
+    },
+};
+</script>
+
 <template>
 <q-page class="column justify-center items-center content-center">
     <div class="text-center q-pb-md text-h1">{{$t('home.title')}}</div>
@@ -31,24 +49,6 @@
     </q-footer>
 </q-page>
 </template>
-
-<script>
-import { mapGetters } from 'vuex';
-import LoginButton from 'components/LoginButton.vue';
-
-export default {
-    name: 'Home',
-    data() {
-        return {
-            slide: 'slide1',
-        };
-    },
-    components: { LoginButton },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated']),
-    },
-};
-</script>
 
 <style scoped>
 a {
