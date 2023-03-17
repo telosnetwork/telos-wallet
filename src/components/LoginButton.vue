@@ -1,154 +1,3 @@
-<template>
-<div>
-    <!-- Login Button -->
-    <div v-if="!isAuthenticated" class="q-px-md">
-        <div class="q-mt-md q-mb-sm">
-            <q-btn
-                no-caps
-                label="Connect Wallet"
-                class="purpleGradient q-pa-sm"
-                rounded
-                @click="showLogin = true"
-            />
-        </div>
-
-        <!-- View any account -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                no-caps
-                outline
-                rounded
-                label="View any account"
-                class=" q-pa-sm"
-                @click="loginAsJustViewer()"
-            />
-        </div>
-
-        <!-- Signup Button -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                no-caps
-                outline
-                rounded
-                label="Create New Account"
-                class=" q-pa-sm"
-                @click="signUp"
-            />
-        </div>
-    </div>
-    <!-- Show Login -->
-    <q-dialog v-model="showLogin">
-        <div class="column showLoginPopup q-pa-lg popupCard">
-            <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
-            <q-list class="" dark separator>
-                <q-item
-                    v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
-                    :key="wallet.getStyle().text"
-                    v-ripple
-                    class="q-my-sm"
-                >
-                    <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
-                        <img :src="wallet.getStyle().icon" width="30" >
-                    </q-item-section>
-                    <q-item-section class="cursor-pointer" @click="onLogin(idx)">
-                        {{ wallet.getStyle().text }}
-                    </q-item-section>
-                    <q-item-section class="flex" avatar>
-                        <q-spinner
-                            v-if="loading === wallet.getStyle().text"
-                            :color="wallet.getStyle().textColor"
-                            size="2em"
-                        />
-                        <q-btn
-                            v-else
-                            :color="wallet.getStyle().textColor"
-                            icon="get_app"
-                            target="_blank"
-                            dense
-                            flat
-                            size="12px"
-                            @click="openUrl(wallet.getOnboardingLink())"
-                        >
-                            <q-tooltip>
-                                {{$t('login.get_app')}}
-                            </q-tooltip>
-                        </q-btn>
-                    </q-item-section>
-                </q-item>
-            </q-list>
-
-            <!-- Close Button -->
-            <q-btn
-                v-close-popup
-                size="md"
-                no-caps
-                rounded
-                flat
-                class="self-center flex-center"
-                label="Close"
-                :style="`display:flex;`"
-                @click="close"
-            />
-            <q-item
-                v-if="error"
-                :active="!!error"
-                active-class="bg-red-1 text-grey-8"
-            >
-                <q-item-section>
-                    {{ error }}
-                </q-item-section>
-            </q-item>
-        </div>
-    </q-dialog>
-
-    <!-- RAM low dialog -->
-    <q-dialog v-model="resLow" persistent>
-        <q-card class="popupCard">
-            <div class="popupHeading">
-                <div>
-                    <q-btn
-                        v-close-popup
-                        round
-                        flat
-                        dense
-                        class="text-grey-6"
-                        icon="close"
-                    />
-                </div>
-                <div class="text-subtitle1 text-weight-medium text-center ">
-                    {{$t('login.resources_low')}}
-                </div>
-                <div ></div>
-            </div>
-            <div class="text-center">
-                <div class="q-pb-md">
-                    {{$t('login.recommend_bying')}}
-                </div>
-                <div class="">{{$t('login.proceed_q')}}</div>
-                <div class="text-center q-gutter-x-sm q-pt-sm">
-                    <q-btn
-                        v-close-popup
-                        no-caps
-                        rounded
-                        class="purpleGradient"
-                        label="Deny"
-                    />
-                    <q-btn
-                        no-caps
-                        rounded
-                        label="Approve"
-                        class="purpleGradient"
-                        @click="buyResources()"
-                    />
-                </div>
-            </div>
-        </q-card>
-    </q-dialog>
-</div>
-</template>
-
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
@@ -344,6 +193,157 @@ export default defineComponent({
     },
 });
 </script>
+
+<template>
+<div>
+    <!-- Login Button -->
+    <div v-if="!isAuthenticated" class="q-px-md">
+        <div class="q-mt-md q-mb-sm">
+            <q-btn
+                no-caps
+                label="Connect Wallet"
+                class="purpleGradient q-pa-sm"
+                rounded
+                @click="showLogin = true"
+            />
+        </div>
+
+        <!-- View any account -->
+        <div class="q-mt-md">
+            <q-btn
+                text-color="white"
+                no-caps
+                outline
+                rounded
+                label="View any account"
+                class=" q-pa-sm"
+                @click="loginAsJustViewer()"
+            />
+        </div>
+
+        <!-- Signup Button -->
+        <div class="q-mt-md">
+            <q-btn
+                text-color="white"
+                no-caps
+                outline
+                rounded
+                label="Create New Account"
+                class=" q-pa-sm"
+                @click="signUp"
+            />
+        </div>
+    </div>
+    <!-- Show Login -->
+    <q-dialog v-model="showLogin">
+        <div class="column showLoginPopup q-pa-lg popupCard">
+            <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
+            <q-list class="" dark separator>
+                <q-item
+                    v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
+                    :key="wallet.getStyle().text"
+                    v-ripple
+                    class="q-my-sm"
+                >
+                    <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
+                        <img :src="wallet.getStyle().icon" width="30" >
+                    </q-item-section>
+                    <q-item-section class="cursor-pointer" @click="onLogin(idx)">
+                        {{ wallet.getStyle().text }}
+                    </q-item-section>
+                    <q-item-section class="flex" avatar>
+                        <q-spinner
+                            v-if="loading === wallet.getStyle().text"
+                            :color="wallet.getStyle().textColor"
+                            size="2em"
+                        />
+                        <q-btn
+                            v-else
+                            :color="wallet.getStyle().textColor"
+                            icon="get_app"
+                            target="_blank"
+                            dense
+                            flat
+                            size="12px"
+                            @click="openUrl(wallet.getOnboardingLink())"
+                        >
+                            <q-tooltip>
+                                {{$t('login.get_app')}}
+                            </q-tooltip>
+                        </q-btn>
+                    </q-item-section>
+                </q-item>
+            </q-list>
+
+            <!-- Close Button -->
+            <q-btn
+                v-close-popup
+                size="md"
+                no-caps
+                rounded
+                flat
+                class="self-center flex-center"
+                label="Close"
+                :style="`display:flex;`"
+                @click="close"
+            />
+            <q-item
+                v-if="error"
+                :active="!!error"
+                active-class="bg-red-1 text-grey-8"
+            >
+                <q-item-section>
+                    {{ error }}
+                </q-item-section>
+            </q-item>
+        </div>
+    </q-dialog>
+
+    <!-- RAM low dialog -->
+    <q-dialog v-model="resLow" persistent>
+        <q-card class="popupCard">
+            <div class="popupHeading">
+                <div>
+                    <q-btn
+                        v-close-popup
+                        round
+                        flat
+                        dense
+                        class="text-grey-6"
+                        icon="close"
+                    />
+                </div>
+                <div class="text-subtitle1 text-weight-medium text-center ">
+                    {{$t('login.resources_low')}}
+                </div>
+                <div ></div>
+            </div>
+            <div class="text-center">
+                <div class="q-pb-md">
+                    {{$t('login.recommend_bying')}}
+                </div>
+                <div class="">{{$t('login.proceed_q')}}</div>
+                <div class="text-center q-gutter-x-sm q-pt-sm">
+                    <q-btn
+                        v-close-popup
+                        no-caps
+                        rounded
+                        class="purpleGradient"
+                        label="Deny"
+                    />
+                    <q-btn
+                        no-caps
+                        rounded
+                        label="Approve"
+                        class="purpleGradient"
+                        @click="buyResources()"
+                    />
+                </div>
+            </div>
+        </q-card>
+    </q-dialog>
+</div>
+</template>
 
 <style lang="scss" scoped>
 
