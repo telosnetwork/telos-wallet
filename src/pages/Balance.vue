@@ -130,7 +130,7 @@
             <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
         </div>
     </div>
-    <History
+    <CoinHistory
         v-model:showHistoryDlg="showHistoryDlg"
         v-model:selectedCoin="selectedCoin"
         v-model:showSendAmountDlg="showSendAmountDlg"
@@ -218,7 +218,7 @@ import ReceiveCoins from '~/pages/components/balance/ReceiveCoins';
 import BuyAmount from '~/pages/components/balance/BuyAmount';
 import ShareAddress from '~/pages/components/balance/ShareAddress';
 import QRScanner from '~/pages/components/balance/QRScanner';
-import History from '~/pages/components/balance/History';
+import CoinHistory from '~/pages/components/balance/CoinHistory';
 import DepositEVM from '~/pages/components/balance/DepositEVM';
 import WithdrawEVM from '~/pages/components/balance/WithdrawEVM';
 import RexStaking from '~/pages/components/balance/RexStaking';
@@ -238,7 +238,7 @@ export default {
         BuyAmount,
         ShareAddress,
         QRScanner,
-        History,
+        CoinHistory,
         DepositEVM,
         WithdrawEVM,
         RexStaking,
