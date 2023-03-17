@@ -1,7 +1,7 @@
 <script>
 
 import { mapGetters, mapActions } from 'vuex';
-import navBar from 'components/Navbar.vue';
+import navBar from 'components/NavBar.vue';
 import LoginButton from 'components/LoginButton.vue';
 
 const pagesData = [
