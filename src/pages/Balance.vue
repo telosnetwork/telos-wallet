@@ -154,7 +154,7 @@
         v-model:evmTLOSBalance="coins[1].amount"
         @updateBalances="updateBalances"
     />
-    <Receive
+    <ReceiveCoins
         v-model:showReceiveDlg="showReceiveDlg"
         v-model:selectedCoin="selectedCoin"
         v-model:showShareAddressDlg="showShareAddressDlg"
@@ -214,7 +214,7 @@ import Coin from '~/pages/components/balance/Coin';
 import Collectables from '~/pages/components/balance/Collectables';
 import SendCoins from '~/pages/components/balance/SendCoins';
 import SendAmount from '~/pages/components/balance/SendAmount';
-import Receive from '~/pages/components/balance/Receive';
+import ReceiveCoins from '~/pages/components/balance/ReceiveCoins';
 import BuyAmount from '~/pages/components/balance/BuyAmount';
 import ShareAddress from '~/pages/components/balance/ShareAddress';
 import QRScanner from '~/pages/components/balance/QRScanner';
@@ -234,7 +234,7 @@ export default {
         Collectables,
         SendCoins,
         SendAmount,
-        Receive,
+        ReceiveCoins,
         BuyAmount,
         ShareAddress,
         QRScanner,
