@@ -1,75 +1,3 @@
-<template>
-<div>
-    <nav class="leftNavBar">
-        <img src="~assets/telosLogo.svg" class="telosLogo" >
-        <ul>
-            <li>
-                <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
-            </li>
-            <li>
-                <a @click="switchTab('earn')"> <img :src="srcEarn" >{{$t('navbar.staking')}}</a>
-            </li>
-            <li>
-                <a @click="switchTab('resources')"> <img :src="srcResources" >{{$t('navbar.resources')}}</a>
-            </li>
-            <li>
-                <a @click="switchTab('nft')"> <img :src="srcNft" >{{$t('navbar.nfts')}} </a>
-            </li>
-            <li>
-                <a @click="switchTab('dapps')"> <img :src="srcDapps" >{{$t('navbar.dapps')}} </a>
-            </li>
-            <li>
-                <a @click="switchTab('profile')"> <img :src="srcProfile" >{{$t('navbar.profile')}} </a>
-            </li>
-            <li>
-                <a @click="$emit('log-out')"> <img :src="srcLogout" >{{$t('navbar.logout')}} </a>
-            </li>
-        </ul>
-    </nav>
-    <nav class="bottomNavBar">
-        <ul>
-            <li>
-                <a @click="switchTab('coins')">
-                    <img :src="srcWallet" >
-                </a>
-            </li>
-            <li>
-                <a @click="switchTab('earn')">
-                    <img style="width: 35px" :src="srcEarn" >
-                </a>
-            </li>
-            <li>
-                <a @click="switchTab('resources')">
-                    <img style="width: 35px" :src="srcResources" >
-                </a>
-            </li>
-            <li>
-                <a @click="switchTab('nft')">
-                    <img style="width: 35px" :src="srcNft" >
-                </a>
-            </li>
-            <li>
-                <a @click="switchTab('dapps')">
-                    <img :src="srcDapps" >
-                </a>
-            </li>
-            <li>
-                <a @click="switchTab('profile')">
-                    <img :src="srcProfile" >
-                </a>
-            </li>
-            <li>
-                <a @click="$emit('log-out')">
-                    <img :src="srcLogout" >
-                </a>
-            </li>
-        </ul>
-    </nav>
-    <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
-    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
-</div>
-</template>
-
 <script>
 import { mapGetters } from 'vuex';
 import RexStaking from 'src/pages/components/balance/RexStaking.vue';
@@ -123,7 +51,7 @@ export default {
             }
         },
         srcEarn() {
-            if (this.selectedTab === 'earn' && this.showRexStakeDlg == false) {
+            if (this.selectedTab === 'earn' && this.showRexStakeDlg === false) {
                 this.switchTab('coins');
                 return this.srcDir + 'earn.svg';
             }
@@ -134,7 +62,7 @@ export default {
             }
         },
         srcResources() {
-            if (this.selectedTab === 'resources' && this.showManageResourcesDlg == false) {
+            if (this.selectedTab === 'resources' && this.showManageResourcesDlg === false) {
                 this.switchTab('coins');
                 return this.srcDir + 'settings.svg';
             }
@@ -197,7 +125,83 @@ export default {
 };
 </script>
 
+<template>
+<div>
+    <nav class="leftNavBar">
+        <img src="~assets/telosLogo.svg" class="telosLogo" >
+        <ul>
+            <li>
+                <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('earn')"> <img :src="srcEarn" >{{$t('navbar.staking')}}</a>
+            </li>
+            <li>
+                <a @click="switchTab('resources')"> <img :src="srcResources" >{{$t('navbar.resources')}}</a>
+            </li>
+            <li>
+                <a @click="switchTab('nft')"> <img :src="srcNft" >{{$t('navbar.nfts')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('dapps')"> <img :src="srcDapps" >{{$t('navbar.dapps')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('profile')"> <img :src="srcProfile" >{{$t('navbar.profile')}} </a>
+            </li>
+            <li>
+                <a @click="$emit('log-out')"> <img :src="srcLogout" >{{$t('navbar.logout')}} </a>
+            </li>
+        </ul>
+    </nav>
+    <nav class="bottomNavBar">
+        <ul>
+            <li>
+                <a @click="switchTab('coins')">
+                    <img :src="srcWallet" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('earn')">
+                    <img class="tab-icon" :src="srcEarn" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('resources')">
+                    <img class="tab-icon" :src="srcResources" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('nft')">
+                    <img class="tab-icon" :src="srcNft" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('dapps')">
+                    <img :src="srcDapps" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('profile')">
+                    <img :src="srcProfile" >
+                </a>
+            </li>
+            <li>
+                <a @click="$emit('log-out')">
+                    <img :src="srcLogout" >
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
+    <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
+</div>
+</template>
+
 <style lang="scss" scoped>
+.tab-icon {
+    width: 35px;
+}
+
 nav ul li a:hover {
   background: #e6e6e611;
   opacity: 100%;
