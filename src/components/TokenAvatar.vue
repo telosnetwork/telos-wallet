@@ -1,27 +1,3 @@
-<template>
-<q-avatar :size="`${avatarSize}px`">
-    <q-spinner-puff
-        v-if="src === 'Loading'"
-        :style="avatarStyle"
-        color="primary"
-    />
-    <q-img
-        v-else-if="src"
-        :src="src"
-        alt="Avatar"
-        :style="avatarStyle"
-    >
-        <template v-slot:error>
-            <div class="transparent" style="padding: 0" v-html="identicon" ></div>
-        </template>
-        <template v-slot:loading>
-            <q-spinner-puff color="primary" :style="avatarStyle" />
-        </template>
-    </q-img>
-    <div v-else v-html="identicon" ></div>
-</q-avatar>
-</template>
-
 <script>
 import { toSvg } from 'jdenticon';
 import { mapGetters } from 'vuex';
@@ -51,10 +27,9 @@ export default {
         src() {
             if (this.token === '' || this.token === undefined) {
                 return '';
-            } else if (this.token.includes('/')) {
+            } else if (this.token.includes('/')) { // If link provided
                 return this.token;
-            } // If link provided
-            else {
+            } else {
                 // If no link provided
                 return '';
             }
@@ -63,7 +38,35 @@ export default {
 };
 </script>
 
+<template>
+<q-avatar :size="`${avatarSize}px`">
+    <q-spinner-puff
+        v-if="src === 'Loading'"
+        :style="avatarStyle"
+        color="primary"
+    />
+    <q-img
+        v-else-if="src"
+        :src="src"
+        alt="Avatar"
+        :style="avatarStyle"
+    >
+        <template v-slot:error>
+            <div class="transparent token-no-padding" v-html="identicon" ></div>
+        </template>
+        <template v-slot:loading>
+            <q-spinner-puff color="primary" :style="avatarStyle" />
+        </template>
+    </q-img>
+    <div v-else v-html="identicon" ></div>
+</q-avatar>
+</template>
+
 <style lang="scss">
+.token-no-padding {
+    padding: 0;
+}
+
 .grayscale {
   filter: grayscale(100%);
 }
