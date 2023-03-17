@@ -1,6 +1,8 @@
 import { boot } from 'quasar/wrappers';
 
-const charToSymbol = function(c) {
+const charToSymbol = function(char) {
+    let c = char;
+
     if (typeof c === 'string') {
         c = c.charCodeAt(0);
     }
@@ -26,7 +28,7 @@ const nameToUint64 = function(name) {
       BigInt(64 - 5 * (i + 1));
     }
 
-    if (i == 12) {
+    if (i === 12) {
         n |= BigInt(charToSymbol(name.charCodeAt(i)) & 0x0f);
     }
 
