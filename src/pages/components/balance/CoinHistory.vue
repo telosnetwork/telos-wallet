@@ -1,3 +1,156 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
+import tokenAvatar from 'src/components/TokenAvatar';
+
+const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
+const TSWAPS_URL = 'https://tswaps.com/swap';
+
+export default {
+    components: {
+        TokenAvatar: tokenAvatar,
+    },
+    props: [
+        'showHistoryDlg',
+        'selectedCoin',
+        'showSendAmountDlg',
+        'showBuyAmountDlg',
+        'showShareAddressDlg',
+        'showRexStakeDlg',
+    ],
+    data() {
+        return {
+            searchHistory: '',
+            accountHistory: [],
+            page: 0,
+            pageLimit: 10,
+            loadedAll: false,
+        };
+    },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        showDlg: {
+            get() {
+                return this.showHistoryDlg;
+            },
+            set(value) {
+                this.$emit('update:showHistoryDlg', value);
+            },
+        },
+        searchHistories() {
+            return this.accountHistory.filter((history) => {
+                const historyData = this.historyData(history);
+                return (
+                    historyData.actionName
+                        .toLowerCase()
+                        .includes(this.searchHistory.toLowerCase()) ||
+          historyData.actionDetail
+              .toLowerCase()
+              .includes(this.searchHistory.toLowerCase())
+                );
+            });
+        },
+        convertEnabled() {
+            return true;
+        },
+    },
+    methods: {
+        async loadMoreHistory(index, done) {
+            if (this.loadedAll) {
+                return;
+            }
+            const actionHistory = await this.$hyperion.get(
+                `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`,
+            );
+            this.accountHistory.push(...(actionHistory.data.actions.
+                filter(a => 'quantity' in a.act.data &&
+           a.act.data.quantity.split(' ')[1] ===this.selectedCoin.symbol) || []));
+            this.page += this.pageLimit;
+            if (actionHistory.data.actions.length === 0) {
+                this.loadedAll = true;
+            }
+            done();
+        },
+        send() {
+            this.$emit('update:showSendAmountDlg', true);
+        },
+        receive() {
+            this.$emit('update:showShareAddressDlg', true);
+        },
+        buy() {
+            window.open(GETTING_STARTED_URL);
+            //this.$emit("update:showBuyAmountDlg", true);
+        },
+        convert() {
+            window.open(TSWAPS_URL);
+        },
+        sell() {
+            // this.$emit('update:showShareAddressDlg', true);
+        },
+        stakeRex() {
+            this.$emit('update:showRexStakeDlg', true);
+        },
+        openExplorer(history) {
+            var url = `${process.env.NETWORK_EXPLORER}/transaction/${history.trx_id}`;
+            var win = window.open(url, '_blank');
+            win.focus();
+        },
+
+        historyData(history) {
+            let actionName = '';
+            let actionDetail = '';
+            let coinAmount = 0;
+            let usdAmount = 0;
+
+            if (history.act.name === 'transfer') {
+                if (history.act.data.from === this.accountName) {
+                    actionName = `Sent ${this.selectedCoin.name}`;
+                    actionDetail = `To ${history.act.data.to}`;
+                } else {
+                    actionName = `Received ${this.selectedCoin.name}`;
+                    actionDetail = `From ${history.act.data.from}`;
+                }
+                coinAmount = history.act.data.amount;
+            } else if (history.act.name === 'redeem') {
+                actionName = `Withdraw ${this.selectedCoin.name}`;
+                actionDetail = `To ${history.act.data.memo}`;
+                coinAmount = Number(
+                    history.act.data.quantity.split(this.selectedCoin.symbol)[0],
+                );
+            } else if (history.act.name === 'sellram') {
+                actionName = 'Sold Ram';
+                actionDetail = `${history.act.data.bytes} bytes`;
+            } else {
+                actionName = history.act.name;
+                coinAmount = Number(
+                    history.act.data.quantity.split(this.selectedCoin.symbol)[0],
+                );
+            }
+            usdAmount = this.getFixed(coinAmount * this.selectedCoin.price, 2);
+
+            return {
+                actionName,
+                actionDetail,
+                coinAmount,
+                usdAmount,
+            };
+        },
+    },
+    watch: {
+        showHistoryDlg: function (val, oldVal) {
+            if (val) {
+                this.searchHistoryName = '';
+                this.page = 0;
+                this.accountHistory = [];
+                this.loadedAll = false;
+            } else {
+                this.$emit('update:selectedCoin', null);
+            }
+        },
+    },
+};
+</script>
+
 <template>
 <q-dialog
     v-model="showDlg"
@@ -31,7 +184,7 @@
                     <q-page-container>
                         <div class="text-white text-center display-grid">
                             <!-- Crypto Image -->
-                            <div class="absolute" style="left: 50%; margin-left: -3rem">
+                            <div class="absolute crypto-image-container">
                                 <q-item-section avatar class="cryptoImg">
                                     <q-avatar size="6rem">
                                         <TokenAvatar
@@ -39,18 +192,13 @@
                                             :avatarSize="100"
                                         />
                                         <div
-                                            v-if="selectedCoin.name == 'Telos EVM'"
+                                            v-if="selectedCoin.name === 'Telos EVM'"
                                             class="flex absolute full-width full-height"
                                         >
                                             <img
-                                                class="flex q-ml-auto q-mt-auto"
+                                                class="flex q-ml-auto q-mt-auto evm-logo"
                                                 alt="tEVM"
                                                 src="~assets/evm/evm_logo.png"
-                                                style="
-                            width: 50%;
-                            height: 50%;
-                            margin-right: -10%;
-                            margin-bottom: -5%;"
                                             >
                                         </div>
                                     </q-avatar>
@@ -233,9 +381,7 @@
                                         </q-avatar>
                                     </q-item-section>
 
-                                    <q-item-section
-                                        style="justify-content: start; display: grid"
-                                    >
+                                    <q-item-section class="history-grid">
                                         <div class="text-white text-left display-grid">
                                             <label
                                                 class="text-subtitle2 text-weight-medium text-white h-20 self-end wraplabel"
@@ -277,159 +423,6 @@
     </div>
 </q-dialog>
 </template>
-
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import tokenAvatar from 'src/components/TokenAvatar';
-
-const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
-const TSWAPS_URL = 'https://tswaps.com/swap';
-
-export default {
-    components: {
-        TokenAvatar: tokenAvatar,
-    },
-    props: [
-        'showHistoryDlg',
-        'selectedCoin',
-        'showSendAmountDlg',
-        'showBuyAmountDlg',
-        'showShareAddressDlg',
-        'showRexStakeDlg',
-    ],
-    data() {
-        return {
-            searchHistory: '',
-            accountHistory: [],
-            page: 0,
-            pageLimit: 10,
-            loadedAll: false,
-        };
-    },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName']),
-        showDlg: {
-            get() {
-                return this.showHistoryDlg;
-            },
-            set(value) {
-                this.$emit('update:showHistoryDlg', value);
-            },
-        },
-        searchHistories() {
-            return this.accountHistory.filter((history) => {
-                const historyData = this.historyData(history);
-                return (
-                    historyData.actionName
-                        .toLowerCase()
-                        .includes(this.searchHistory.toLowerCase()) ||
-          historyData.actionDetail
-              .toLowerCase()
-              .includes(this.searchHistory.toLowerCase())
-                );
-            });
-        },
-        convertEnabled() {
-            return true;
-        },
-    },
-    methods: {
-        async loadMoreHistory(index, done) {
-            if (this.loadedAll) {
-                return;
-            }
-            const actionHistory = await this.$hyperion.get(
-                `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`,
-            );
-            this.accountHistory.push(...(actionHistory.data.actions.
-                filter(a => 'quantity' in a.act.data &&
-           a.act.data.quantity.split(' ')[1] ===this.selectedCoin.symbol) || []));
-            this.page += this.pageLimit;
-            if (actionHistory.data.actions.length === 0) {
-                this.loadedAll = true;
-            }
-            done();
-        },
-        send() {
-            this.$emit('update:showSendAmountDlg', true);
-        },
-        receive() {
-            this.$emit('update:showShareAddressDlg', true);
-        },
-        buy() {
-            window.open(GETTING_STARTED_URL);
-            //this.$emit("update:showBuyAmountDlg", true);
-        },
-        convert() {
-            window.open(TSWAPS_URL);
-        },
-        sell() {
-            // this.$emit('update:showShareAddressDlg', true);
-        },
-        stakeRex() {
-            this.$emit('update:showRexStakeDlg', true);
-        },
-        openExplorer(history) {
-            var url = `${process.env.NETWORK_EXPLORER}/transaction/${history.trx_id}`;
-            var win = window.open(url, '_blank');
-            win.focus();
-        },
-
-        historyData(history) {
-            let actionName = '';
-            let actionDetail = '';
-            let coinAmount = 0;
-            let usdAmount = 0;
-
-            if (history.act.name === 'transfer') {
-                if (history.act.data.from === this.accountName) {
-                    actionName = `Sent ${this.selectedCoin.name}`;
-                    actionDetail = `To ${history.act.data.to}`;
-                } else {
-                    actionName = `Received ${this.selectedCoin.name}`;
-                    actionDetail = `From ${history.act.data.from}`;
-                }
-                coinAmount = history.act.data.amount;
-            } else if (history.act.name === 'redeem') {
-                actionName = `Withdraw ${this.selectedCoin.name}`;
-                actionDetail = `To ${history.act.data.memo}`;
-                coinAmount = Number(
-                    history.act.data.quantity.split(this.selectedCoin.symbol)[0],
-                );
-            } else if (history.act.name === 'sellram') {
-                actionName = 'Sold Ram';
-                actionDetail = `${history.act.data.bytes} bytes`;
-            } else {
-                actionName = history.act.name;
-                coinAmount = Number(
-                    history.act.data.quantity.split(this.selectedCoin.symbol)[0],
-                );
-            }
-            usdAmount = this.getFixed(coinAmount * this.selectedCoin.price, 2);
-
-            return {
-                actionName,
-                actionDetail,
-                coinAmount,
-                usdAmount,
-            };
-        },
-    },
-    watch: {
-        showHistoryDlg: function (val, oldVal) {
-            if (val) {
-                this.searchHistoryName = '';
-                this.page = 0;
-                this.accountHistory = [];
-                this.loadedAll = false;
-            } else {
-                this.$emit('update:selectedCoin', null);
-            }
-        },
-    },
-};
-</script>
 
 <style lang="scss" scoped>
 .sendActions {
@@ -496,5 +489,22 @@ export default {
 
 .dialogPage {
   background-image: none;
+}
+
+.crypto-image-container {
+    left: 50%;
+    margin-left: -3rem
+}
+
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-bottom: -5%;
+}
+
+.history-grid {
+    justify-content: start;
+    display: grid
 }
 </style>
