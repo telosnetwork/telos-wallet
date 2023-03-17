@@ -330,8 +330,7 @@ export default {
                                     ? 'text-h6'
                                     : 'text-caption'
                             "
-                            class="text-white"
-                            style="word-break: break-word"
+                            class="text-white account-name"
                         >
                             {{ displayAccountName }}
                         </div>
@@ -364,6 +363,10 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.account-name {
+    word-break: break-word;
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
