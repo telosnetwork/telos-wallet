@@ -109,7 +109,7 @@
                     />
                 </q-tab-panel>
                 <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
-                    <Collectables
+                    <CollectablesGallery
                         :nftTokenTags="nftTokenTags"
                         :nftTokenLoadedAll="nftTokenLoadedAll"
                         :coinViewHeight="coinViewHeight"
@@ -211,7 +211,7 @@
 import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
 import Coin from '~/pages/components/balance/Coin';
-import Collectables from '~/pages/components/balance/Collectables';
+import CollectablesGallery from '~/pages/components/balance/CollectablesGallery';
 import SendCoins from '~/pages/components/balance/SendCoins';
 import SendAmount from '~/pages/components/balance/SendAmount';
 import ReceiveCoins from '~/pages/components/balance/ReceiveCoins';
@@ -231,7 +231,7 @@ export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],
     components: {
         Coin,
-        Collectables,
+        CollectablesGallery,
         SendCoins,
         SendAmount,
         ReceiveCoins,
