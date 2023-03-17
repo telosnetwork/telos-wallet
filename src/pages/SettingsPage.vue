@@ -1,224 +1,3 @@
-<template>
-<div class="pageContainer row justify-center">
-    <!-- <login-button v-if="isAuthenticated" style="display: none" /> -->
-    <div class="text-center">
-        <q-list
-            round
-            flat
-            dense
-            class="text-white"
-            icon="west"
-        >
-            <!-- <div class="profile text-white flex-center desktop-only">
-          <label style="height: 10px">Profile</label>
-        </div> -->
-            <!-- User Avatar -->
-            <div class="row flex-center relative q-mt-xl">
-                <!-- <video
-            autoplay
-            loop
-            class="userAvatar"
-            style="width: 400px; background: #00000000"
-          >
-            <source
-              class="flex-center"
-              src="~assets/Telos-template.mp4"
-              type="video/mp4"
-              style="width: 300px; background: #00000000"
-            />
-          </video>
-          <div class="overlay" style="width: 100%; height: 100%;"></div> -->
-
-                <div class="userAvatar">
-                    <img :src="userAvatar" >
-                    <!-- <q-avatar size="10rem" color="transparent" text-color="white">
-            </q-avatar> -->
-                </div>
-
-                <!-- </q-container> -->
-                <q-item class="justify-center uploadImage">
-                    <q-btn
-                        :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
-                        @click="onPickFile"
-                    >
-                        <q-icon name="add_a_photo" color="white" />
-                    </q-btn>
-                    <input
-                        ref="fileInput"
-                        type="file"
-                        accept="image/*"
-                        style="display: none"
-                        @change="onFilePicked"
-                    >
-                </q-item>
-            </div>
-
-            <!-- Upload Image Button -->
-
-            <div class="profileInformation">
-                <!-- Avatar Name -->
-                <q-item>
-                    <div avatar>
-                        <img
-                            class="profileInformationIcons"
-                            src="~assets/profile/avatarImg.svg"
-                        >
-                    </div>
-                    <q-input
-                        v-model="avatar"
-                        dense
-                        standout="bg-transparent text-white"
-                        label-color="white"
-                        color="white"
-                        input-class="text-white"
-                        class="round-sm full-width"
-                        label="Avatar URL"
-                    />
-                </q-item>
-
-                <!-- Name -->
-                <q-item>
-                    <div avatar>
-                        <img
-                            class="profileInformationIcons"
-                            src="~assets/profile/nameImg.svg"
-                        >
-                    </div>
-                    <q-input
-                        v-model="display_name"
-                        dense
-                        standout="bg-transparent text-white"
-                        label-color="white"
-                        color="white"
-                        input-class="text-white"
-                        class="round-sm full-width"
-                        label="Name"
-                        :rules="[(val) => !!val || $t('forms.errors.required')]"
-                        hide-bottom-space
-                    />
-                </q-item>
-
-                <!-- Status -->
-                <q-item>
-                    <div avatar>
-                        <img
-                            class="profileInformationIcons"
-                            src="~assets/profile/statusImg.svg"
-                        >
-                    </div>
-                    <q-input
-                        v-model="status"
-                        dense
-                        standout="bg-transparent text-white"
-                        label-color="white"
-                        color="white"
-                        input-class="text-white"
-                        class="round-sm full-width"
-                        :label="$t('settings.status')"
-                    />
-                </q-item>
-
-                <!-- Bio -->
-                <q-item>
-                    <div avatar>
-                        <img
-                            class="profileInformationIcons"
-                            src="~assets/profile/bioImg.svg"
-                        >
-                    </div>
-                    <q-input
-                        v-model="bio"
-                        dense
-                        standout="bg-transparent text-white"
-                        label-color="white"
-                        color="white"
-                        input-class="text-white"
-                        class="round-sm full-width"
-                        :label="$t('settings.bio')"
-                    />
-                </q-item>
-            </div>
-
-            <!-- Save Button -->
-            <q-item class="row q-gutter-x-sm">
-                <q-btn
-                    class="settingBtn col"
-                    rounded
-                    :label="$t('settings.save')"
-                    :disable="display_name.length === 0"
-                    @click="save"
-                />
-            </q-item>
-        </q-list>
-
-        <q-dialog v-model="confirm" persistent>
-            <q-card class="popupCard">
-                <q-card-section class="row items-center">
-                    <span class="q-mx-auto text-h5">{{$t('settings.warning')}}</span>
-                    <span class="q-mx-auto text-center">
-                        {{$t('settings.warning_msg')}}
-                    </span>
-                </q-card-section>
-                <q-card-actions align="right">
-                    <q-btn
-                        v-close-popup
-                        flat
-                        label="Cancel"
-                        color="white"
-                    />
-                    <q-btn
-                        flat
-                        label="Yes, I'm sure"
-                        color="white"
-                        @click="
-                            confirm = false;
-                            keyView = true;
-                        "
-                    />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-
-        <q-dialog v-model="keyView">
-            <q-card class="popupCard">
-                <q-card-section>
-                    <div class="text-h6">{{$t('settings.private_key')}}</div>
-                </q-card-section>
-                <q-card-section
-                    class="q-pt-none text-center"
-                    style="word-break: break-all"
-                >
-                    {{ privateKey }}
-                    <q-btn
-                        flat
-                        dense
-                        size="sm"
-                        icon="far fa-copy"
-                        @click="copyToClipboard(privateKey)"
-                    />
-                </q-card-section>
-                <q-card-actions align="right">
-                    <q-btn
-                        v-close-popup
-                        flat
-                        label="Close"
-                        color="white"
-                    />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-
-        <div
-            v-if="saving"
-            class="justify-center absolute flex full-width full-height"
-            style="top: 0; left: 0; background: rgba(0, 0, 0, 0.4)"
-        >
-            <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-        </div>
-    </div>
-</div>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
@@ -413,7 +192,238 @@ export default {
 };
 </script>
 
+<template>
+<div class="pageContainer row justify-center">
+    <!-- <login-button v-if="isAuthenticated" style="display: none" /> -->
+    <div class="text-center">
+        <q-list
+            round
+            flat
+            dense
+            class="text-white"
+            icon="west"
+        >
+            <!-- <div class="profile text-white flex-center desktop-only">
+          <label style="height: 10px">Profile</label>
+        </div> -->
+            <!-- User Avatar -->
+            <div class="row flex-center relative q-mt-xl">
+                <!-- <video
+            autoplay
+            loop
+            class="userAvatar"
+            style="width: 400px; background: #00000000"
+          >
+            <source
+              class="flex-center"
+              src="~assets/Telos-template.mp4"
+              type="video/mp4"
+              style="width: 300px; background: #00000000"
+            />
+          </video>
+          <div class="overlay" style="width: 100%; height: 100%;"></div> -->
+
+                <div class="userAvatar">
+                    <img :src="userAvatar" >
+                    <!-- <q-avatar size="10rem" color="transparent" text-color="white">
+            </q-avatar> -->
+                </div>
+
+                <!-- </q-container> -->
+                <q-item class="justify-center uploadImage">
+                    <q-btn
+                        :style="`height: 2.5rem; width: 2.5rem; border-radius: 10rem; border: 0.010rem solid white;`"
+                        @click="onPickFile"
+                    >
+                        <q-icon name="add_a_photo" color="white" />
+                    </q-btn>
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        accept="image/*"
+                        class="file-input"
+                        @change="onFilePicked"
+                    >
+                </q-item>
+            </div>
+
+            <!-- Upload Image Button -->
+
+            <div class="profileInformation">
+                <!-- Avatar Name -->
+                <q-item>
+                    <div avatar>
+                        <img
+                            class="profileInformationIcons"
+                            src="~assets/profile/avatarImg.svg"
+                        >
+                    </div>
+                    <q-input
+                        v-model="avatar"
+                        dense
+                        standout="bg-transparent text-white"
+                        label-color="white"
+                        color="white"
+                        input-class="text-white"
+                        class="round-sm full-width"
+                        label="Avatar URL"
+                    />
+                </q-item>
+
+                <!-- Name -->
+                <q-item>
+                    <div avatar>
+                        <img
+                            class="profileInformationIcons"
+                            src="~assets/profile/nameImg.svg"
+                        >
+                    </div>
+                    <q-input
+                        v-model="display_name"
+                        dense
+                        standout="bg-transparent text-white"
+                        label-color="white"
+                        color="white"
+                        input-class="text-white"
+                        class="round-sm full-width"
+                        label="Name"
+                        :rules="[(val) => !!val || $t('forms.errors.required')]"
+                        hide-bottom-space
+                    />
+                </q-item>
+
+                <!-- Status -->
+                <q-item>
+                    <div avatar>
+                        <img
+                            class="profileInformationIcons"
+                            src="~assets/profile/statusImg.svg"
+                        >
+                    </div>
+                    <q-input
+                        v-model="status"
+                        dense
+                        standout="bg-transparent text-white"
+                        label-color="white"
+                        color="white"
+                        input-class="text-white"
+                        class="round-sm full-width"
+                        :label="$t('settings.status')"
+                    />
+                </q-item>
+
+                <!-- Bio -->
+                <q-item>
+                    <div avatar>
+                        <img
+                            class="profileInformationIcons"
+                            src="~assets/profile/bioImg.svg"
+                        >
+                    </div>
+                    <q-input
+                        v-model="bio"
+                        dense
+                        standout="bg-transparent text-white"
+                        label-color="white"
+                        color="white"
+                        input-class="text-white"
+                        class="round-sm full-width"
+                        :label="$t('settings.bio')"
+                    />
+                </q-item>
+            </div>
+
+            <!-- Save Button -->
+            <q-item class="row q-gutter-x-sm">
+                <q-btn
+                    class="settingBtn col"
+                    rounded
+                    :label="$t('settings.save')"
+                    :disable="display_name.length === 0"
+                    @click="save"
+                />
+            </q-item>
+        </q-list>
+
+        <q-dialog v-model="confirm" persistent>
+            <q-card class="popupCard">
+                <q-card-section class="row items-center">
+                    <span class="q-mx-auto text-h5">{{$t('settings.warning')}}</span>
+                    <span class="q-mx-auto text-center">
+                        {{$t('settings.warning_msg')}}
+                    </span>
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn
+                        v-close-popup
+                        flat
+                        label="Cancel"
+                        color="white"
+                    />
+                    <q-btn
+                        flat
+                        label="Yes, I'm sure"
+                        color="white"
+                        @click="
+                            confirm = false;
+                            keyView = true;
+                        "
+                    />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+
+        <q-dialog v-model="keyView">
+            <q-card class="popupCard">
+                <q-card-section>
+                    <div class="text-h6">{{$t('settings.private_key')}}</div>
+                </q-card-section>
+                <q-card-section class="q-pt-none text-center private-key">
+                    {{ privateKey }}
+                    <q-btn
+                        flat
+                        dense
+                        size="sm"
+                        icon="far fa-copy"
+                        @click="copyToClipboard(privateKey)"
+                    />
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn
+                        v-close-popup
+                        flat
+                        label="Close"
+                        color="white"
+                    />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+
+        <div
+            v-if="saving"
+            class="justify-center absolute flex full-width full-height spinner"
+        >
+            <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+        </div>
+    </div>
+</div>
+</template>
+
 <style lang="scss" scoped>
+.file-input {
+    display: none;
+}
+
+.private-key {
+    word-break: break-all;
+}
+
+.spinner {
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
 .settingBtn {
   background: #2e1f4f;
   padding: 0.5rem;

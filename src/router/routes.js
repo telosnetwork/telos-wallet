@@ -17,7 +17,7 @@ const routes = [
     {
         path: '/profile',
         component: () => import('layouts/MainLayout.vue'),
-        children: [{ path: '', component: () => import('pages/Settings.vue') }],
+        children: [{ path: '', component: () => import('pages/SettingsPage.vue') }],
     },
 
     // Always leave this as last one,
