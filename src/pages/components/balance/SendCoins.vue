@@ -132,19 +132,14 @@ export default {
                                             class="flex absolute full-width full-height"
                                         >
                                             <img
-                                                class="flex q-ml-auto q-mt-auto"
+                                                class="flex q-ml-auto q-mt-auto evm-logo"
                                                 alt="tEVM"
                                                 src="~assets/evm/evm_logo.png"
-                                                style="
-                        width: 50%;
-                        height: 50%;
-                        margin-right: -10%;
-                        margin-bottom: -5%;"
                                             >
                                         </div>
                                     </q-avatar>
                                 </q-item-section>
-                                <q-item-section style="justify-content: start; display: grid">
+                                <q-item-section class="coin-info">
                                     <div class="text-white text-left display-grid">
                                         <label
                                             class="text-subtitle1 text-weight-medium text-white h-20 self-end wraplabel"
@@ -177,6 +172,18 @@ export default {
 </template>
 
 <style scoped>
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-bottom: -5%;
+}
+
+.coin-info {
+    justify-content: start;
+    display: grid
+}
+
 /* .list-item {
   border-left: none;
   border-right: none;
