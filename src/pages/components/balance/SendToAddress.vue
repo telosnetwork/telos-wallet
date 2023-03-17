@@ -215,19 +215,14 @@ export default {
                             <TokenAvatar :token="selectedCoin.icon" :avatarSize="95" />
                             <div
                                 v-if="
-                                    networkType == 'tevm' && selectedCoin.name == 'Telos EVM'
+                                    networkType === 'tevm' && selectedCoin.name === 'Telos EVM'
                                 "
                                 class="flex absolute full-width full-height"
                             >
                                 <img
-                                    class="flex q-ml-auto q-mt-auto"
+                                    class="flex q-ml-auto q-mt-auto evm-logo"
                                     alt="tEVM"
                                     src="~assets/evm/evm_logo.png"
-                                    style="
-                  width: 50%;
-                  height: 50%;
-                  margin-right: -10%;
-                  margin-bottom: -5%;"
                                 >
                             </div>
                         </q-avatar>
@@ -239,39 +234,27 @@ export default {
                                 :avatarSize="95"
                             />
                             <div
-                                v-if="networkType == 'tevm'"
+                                v-if="networkType === 'tevm'"
                                 class="flex absolute full-width full-height"
                             >
                                 <img
-                                    class="flex q-ml-auto q-mt-auto"
+                                    class="flex q-ml-auto q-mt-auto evm-logo"
                                     alt="tEVM"
                                     src="~assets/evm/evm_logo.png"
-                                    style="
-                  width: 50%;
-                  height: 50%;
-                  margin-right: -10%;
-                  margin-bottom: -5%;
-                "
                                 >
                             </div>
                             <img
-                                v-if="networkType == 'ethereum'"
+                                v-if="networkType === 'ethereum'"
                                 src="~assets/tokens/pTLOS.svg"
                             >
                             <div
-                                v-if="networkType == 'ethereum'"
+                                v-if="networkType === 'ethereum'"
                                 class="flex absolute full-width full-height"
                             >
                                 <img
-                                    class="flex q-ml-auto q-mt-auto"
+                                    class="flex q-ml-auto q-mt-auto eth-logo"
                                     alt="tEVM"
                                     src="~assets/evm/ETH.svg"
-                                    style="
-                  width: 50%;
-                  height: 35%;
-                  margin-right: 0%;
-                  margin-bottom: -5%;
-                "
                                 >
                             </div>
                         </q-avatar>
@@ -299,10 +282,10 @@ export default {
                             push
                             no-caps
                             :label="pTokenNetwork"
-                            :style="`background: ${
-                                networkType === key ? '#FFFFFF55' : '#FFFFFF22'
-                            };
-                color: ${networkType === 'key' ? 'grey' : 'white'};`"
+                            :class="{
+                                'crypto-button': true,
+                                'crypto-button--key-type': networkType === 'key',
+                            }"
                             @click="networkType = key"
                         />
                     </q-btn-group>
@@ -312,7 +295,7 @@ export default {
                 <div class="row justify-center">
                     <q-list class="q-pt-md">
                         <q-item class="list-item">
-                            <q-item-section side style="color: white"> To: </q-item-section>
+                            <q-item-section side class="to-label"> To: </q-item-section>
                             <q-item-section>
                                 <q-input
                                     v-model="toAddress"
@@ -339,8 +322,7 @@ export default {
                             <q-item-section
                                 text-white
                                 side
-                                class="col-1"
-                                style="width: 50px; color: white"
+                                class="col-1 memo"
                             >{{$t('components.memo')}}:</q-item-section>
                             <q-item-section>
                                 <q-input
@@ -422,9 +404,41 @@ export default {
 </q-dialog>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 /* .list-item {
   border-left: none;
   border-right: none;
 } */
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-bottom: -5%;
+}
+
+.eth-logo {
+    width: 50%;
+    height: 35%;
+    margin-right: 0%;
+    margin-bottom: -5%;
+}
+
+.crypto-button {
+    background: #FFFFFF22;
+    color: white;
+
+    &--key-type {
+        background: #FFFFFF55;
+        color: gray;
+    }
+}
+
+.to-label {
+    color: white;
+}
+
+.memo {
+    width: 50px;
+    color: white
+}
 </style>
