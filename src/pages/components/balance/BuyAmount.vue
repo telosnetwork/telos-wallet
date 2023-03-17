@@ -1,3 +1,202 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
+import { setInterval } from 'timers';
+import { isNumber } from 'util';
+
+export default {
+    props: ['showBuyAmountDlg', 'showHistoryDlg', 'selectedCoin', 'coins'],
+    data() {
+        return {
+            keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
+            buyAmount: '0',
+            exchangeRate: 0,
+            getAmount: 0,
+            coinInput: false,
+            inputWidth: 50,
+            calculating: 0,
+        };
+    },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        showDlg: {
+            get() {
+                return this.showBuyAmountDlg;
+            },
+            set(value) {
+                this.$emit('update:showBuyAmountDlg', value);
+            },
+        },
+        cardHeight() {
+            return window.innerHeight - 70;
+        },
+        amountFontSize() {
+            return Math.min(50, window.innerWidth / (this.buyAmount.length + 1));
+        },
+        buyAmountValue() {
+            return Number(this.buyAmount);
+        },
+        availbleCoins() {
+            return this.coins.filter(
+                coin =>
+                    coin.amount > 0 ||
+          this.suggestTokens.map(t => t.sym).includes(coin.symbol.toLowerCase()),
+            );
+        },
+    },
+    methods: {
+        selectCoin(coin) {
+            // eslint-disable-next-line vue/no-mutating-props
+            this.selectedCoin = coin;
+            this.$emit('update:selectedCoin', coin);
+            this.$emit('update:showHistoryDlg', true);
+        },
+        buttonClicked(key) {
+            if (key === '.') {
+                if (!this.buyAmount.includes('.')) {
+                    this.buyAmount += '.';
+                }
+            } else if (key === '←') {
+                if (this.buyAmount.length > 1) {
+                    this.buyAmount = this.buyAmount.slice(0, -1);
+                } else {
+                    this.buyAmount = '0';
+                }
+            } else {
+                if (this.buyAmount === '0') {
+                    this.buyAmount = key;
+                } else {
+                    this.buyAmount += key;
+                }
+            }
+
+            if (this.coinInput && this.buyAmountValue > this.selectedCoin.amount) {
+                this.buyAmount = this.selectedCoin.amount.toString();
+            }
+        },
+        async buyPressed() {
+            if (!this.inputCoin) {
+                if (this.buyAmountValue < 20) {
+                    this.$successNotification(this.$t('components.minimum_amount'));
+                } else {
+                    this.goToMoonpayPage();
+                }
+            }
+        },
+        async goToMoonpayPage() {
+            const urlToSign = `https://buy.moonpay.io?apiKey=pk_live_bLNjJYoA2bwYMs7ir72Tgb5jLyHrK&currencyCode=eos&walletAddress=tradefortlos&baseCurrencyCode=usd&walletAddressTag=${this.accountName}&baseCurrencyAmount=${this.buyAmountValue}`;
+            var signatureRequest = new XMLHttpRequest();
+            signatureRequest.open(
+                'POST',
+                'https://api.telos.net/v1/trading/getMoonpaySwapUrl',
+            );
+
+            signatureRequest.setRequestHeader(
+                'Content-type',
+                'application/json;charset=UTF-8',
+            );
+            var requestBody = JSON.stringify({ urlToSign: urlToSign });
+
+            signatureRequest.send(requestBody);
+
+            signatureRequest.onload = function() {
+                if (
+                    +signatureRequest.readyState === 4 && +signatureRequest.status === 200
+                ) {
+                    window.open(signatureRequest.responseText);
+                } else {
+                    console.error(signatureRequest.responseText);
+                }
+            };
+        },
+        async getMoonpayQuote() {
+            await fetch(
+                `https://api.moonpay.io/v3/currencies/eos/buy_quote/?apiKey=pk_live_bLNjJYoA2bwYMs7ir72Tgb5jLyHrK&baseCurrencyAmount=${this.buyAmountValue}&extraFeePercentage=0&baseCurrencyCode=usd&enabledPaymentMethods=credit_debit_card,sepa_bank_transfer,gbp_bank_transfer,apple_pay`,
+            )
+                .then(res => res.json())
+                .then((data) => {
+                    this.getNewdexQuote(parseFloat(data.quoteCurrencyAmount));
+                });
+        },
+        async getNewdexQuote(eosAmount) {
+            await fetch('https://api.newdex.io/v1/depth?symbol=eosio.token-tlos-eos')
+                .then(res => res.json())
+                .then((data) => {
+                    var asks = data.data.asks;
+                    asks.sort((a, b) => {
+                        if (a[0] < b[0]) {
+                            return -1;
+                        }
+
+                        return 1;
+                    });
+                    var tlosTotal = 0;
+                    var eosLeft = eosAmount;
+                    for (var i = 0; i < asks.length; i++) {
+                        var eosPrice = asks[i][0];
+                        var tlosAmount = asks[i][1];
+                        var eosSpendable = eosPrice * tlosAmount;
+                        var toSpend = eosLeft < eosSpendable ? eosLeft : eosSpendable;
+                        tlosTotal += toSpend / eosPrice;
+                        eosLeft -= toSpend;
+                        if (eosLeft < 0) {
+                            throw new Error('Overspend!!!');
+                        }
+
+                        if (eosLeft === 0) {
+                            break;
+                        }
+                    }
+                    this.getAmount = tlosTotal.toFixed(4);
+                    this.exchangeRate = (
+                        parseFloat(this.buyAmountValue) / tlosTotal
+                    ).toFixed(4);
+                    this.calculating -= 1;
+                });
+        },
+    },
+    watch: {
+        showBuyAmountDlg: function(val, oldVal) {
+            if (val) {
+                this.coinInput = false;
+                this.buyAmount = '0';
+            } else if (!this.showHistoryDlg) {
+                this.$emit('update:selectedCoin', null);
+            }
+        },
+        buyAmount: function(val, oldVal) {
+            setInterval(() => {
+                const widthElement = this.$refs.widthElement;
+                this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
+            }, 1);
+
+            if (this.buyAmount !== oldVal) {
+                if (this.coinInput && this.buyAmountValue > this.selectedCoin.amount) {
+                    this.buyAmount = this.selectedCoin.amount.toString();
+                } else if (val.charAt(val.length - 1) !== '.') {
+                    const cleanStr = val.replace(/\s/g, '');
+                    const num = parseFloat(cleanStr) || 0;
+                    const maxValue = Math.max(0, num);
+                    if (this.buyAmountValue !== maxValue) {
+                        this.buyAmount = Math.max(0, num).toString();
+                    }
+                }
+
+                if (!this.coinInput) {
+                    if (this.buyAmountValue >= 20) {
+                        this.calculating += 1;
+                        this.getMoonpayQuote();
+                    } else {
+                        this.exchangeRate = 0;
+                        this.getAmount = 0;
+                    }
+                }
+            }
+        },
+    },
+};
+</script>
+
 <template>
 <q-dialog
     v-model="showDlg"
@@ -161,206 +360,6 @@
     </div>
 </q-dialog>
 </template>
-
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import { setInterval } from 'timers';
-import { isNumber } from 'util';
-
-export default {
-    props: ['showBuyAmountDlg', 'showHistoryDlg', 'selectedCoin', 'coins'],
-    data() {
-        return {
-            keyboard: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'],
-            buyAmount: '0',
-            exchangeRate: 0,
-            getAmount: 0,
-            coinInput: false,
-            inputWidth: 50,
-            calculating: 0,
-        };
-    },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName']),
-        showDlg: {
-            get() {
-                return this.showBuyAmountDlg;
-            },
-            set(value) {
-                this.$emit('update:showBuyAmountDlg', value);
-            },
-        },
-        cardHeight() {
-            return window.innerHeight - 70;
-        },
-        amountFontSize() {
-            return Math.min(50, window.innerWidth / (this.buyAmount.length + 1));
-        },
-        buyAmountValue() {
-            return Number(this.buyAmount);
-        },
-        availbleCoins() {
-            return this.coins.filter(
-                coin =>
-                    coin.amount > 0 ||
-          this.suggestTokens.map(t => t.sym).includes(coin.symbol.toLowerCase()),
-            );
-        },
-    },
-    methods: {
-        selectCoin(coin) {
-            // eslint-disable-next-line vue/no-mutating-props
-            this.selectedCoin = coin;
-            this.$emit('update:selectedCoin', coin);
-            this.$emit('update:showHistoryDlg', true);
-        },
-        buttonClicked(key) {
-            if (key === '.') {
-                if (!this.buyAmount.includes('.')) {
-                    this.buyAmount += '.';
-                }
-            } else if (key === '←') {
-                if (this.buyAmount.length > 1) {
-                    this.buyAmount = this.buyAmount.slice(0, -1);
-                } else {
-                    this.buyAmount = '0';
-                }
-            } else {
-                if (this.buyAmount === '0') {
-                    this.buyAmount = key;
-                } else {
-                    this.buyAmount += key;
-                }
-            }
-
-            if (this.coinInput && this.buyAmountValue > this.selectedCoin.amount) {
-                this.buyAmount = this.selectedCoin.amount.toString();
-            }
-        },
-        async buyPressed() {
-            if (!this.inputCoin) {
-                if (this.buyAmountValue < 20) {
-                    this.$successNotification(this.$t('components.minimum_amount'));
-                } else {
-                    this.goToMoonpayPage();
-                }
-            }
-        },
-        async goToMoonpayPage() {
-            const urlToSign = `https://buy.moonpay.io?apiKey=pk_live_bLNjJYoA2bwYMs7ir72Tgb5jLyHrK&currencyCode=eos&walletAddress=tradefortlos&baseCurrencyCode=usd&walletAddressTag=${this.accountName}&baseCurrencyAmount=${this.buyAmountValue}`;
-            var signatureRequest = new XMLHttpRequest();
-            signatureRequest.open(
-                'POST',
-                'https://api.telos.net/v1/trading/getMoonpaySwapUrl',
-            );
-
-            signatureRequest.setRequestHeader(
-                'Content-type',
-                'application/json;charset=UTF-8',
-            );
-            var requestBody = JSON.stringify({ urlToSign: urlToSign });
-
-            signatureRequest.send(requestBody);
-
-            signatureRequest.onload = function() {
-                if (
-                    signatureRequest.readyState == 4 &&
-          signatureRequest.status == 200
-                ) {
-                    window.open(signatureRequest.responseText);
-                } else {
-                    console.error(signatureRequest.responseText);
-                }
-            };
-        },
-        async getMoonpayQuote() {
-            await fetch(
-                `https://api.moonpay.io/v3/currencies/eos/buy_quote/?apiKey=pk_live_bLNjJYoA2bwYMs7ir72Tgb5jLyHrK&baseCurrencyAmount=${this.buyAmountValue}&extraFeePercentage=0&baseCurrencyCode=usd&enabledPaymentMethods=credit_debit_card,sepa_bank_transfer,gbp_bank_transfer,apple_pay`,
-            )
-                .then(res => res.json())
-                .then((data) => {
-                    this.getNewdexQuote(parseFloat(data.quoteCurrencyAmount));
-                });
-        },
-        async getNewdexQuote(eosAmount) {
-            await fetch('https://api.newdex.io/v1/depth?symbol=eosio.token-tlos-eos')
-                .then(res => res.json())
-                .then((data) => {
-                    var asks = data.data.asks;
-                    asks.sort((a, b) => {
-                        if (a[0] < b[0]) {
-                            return -1;
-                        }
-
-                        return 1;
-                    });
-                    var tlosTotal = 0;
-                    var eosLeft = eosAmount;
-                    for (var i = 0; i < asks.length; i++) {
-                        var eosPrice = asks[i][0];
-                        var tlosAmount = asks[i][1];
-                        var eosSpendable = eosPrice * tlosAmount;
-                        var toSpend = eosLeft < eosSpendable ? eosLeft : eosSpendable;
-                        tlosTotal += toSpend / eosPrice;
-                        eosLeft -= toSpend;
-                        if (eosLeft < 0) {
-                            throw new Error('Overspend!!!');
-                        }
-
-                        if (eosLeft == 0) {
-                            break;
-                        }
-                    }
-                    this.getAmount = tlosTotal.toFixed(4);
-                    this.exchangeRate = (
-                        parseFloat(this.buyAmountValue) / tlosTotal
-                    ).toFixed(4);
-                    this.calculating -= 1;
-                });
-        },
-    },
-    watch: {
-        showBuyAmountDlg: function(val, oldVal) {
-            if (val) {
-                this.coinInput = false;
-                this.buyAmount = '0';
-            } else if (!this.showHistoryDlg) {
-                this.$emit('update:selectedCoin', null);
-            }
-        },
-        buyAmount: function(val, oldVal) {
-            setInterval(() => {
-                const widthElement = this.$refs.widthElement;
-                this.inputWidth = widthElement ? widthElement.clientWidth + 5 : 50;
-            }, 1);
-
-            if (this.buyAmount != oldVal) {
-                if (this.coinInput && this.buyAmountValue > this.selectedCoin.amount) {
-                    this.buyAmount = this.selectedCoin.amount.toString();
-                } else if (val.charAt(val.length - 1) !== '.') {
-                    const cleanStr = val.replace(/\s/g, '');
-                    const num = parseFloat(cleanStr) || 0;
-                    const maxValue = Math.max(0, num);
-                    if (this.buyAmountValue !== maxValue) {
-                        this.buyAmount = Math.max(0, num).toString();
-                    }
-                }
-
-                if (!this.coinInput) {
-                    if (this.buyAmountValue >= 20) {
-                        this.calculating += 1;
-                        this.getMoonpayQuote();
-                    } else {
-                        this.exchangeRate = 0;
-                        this.getAmount = 0;
-                    }
-                }
-            }
-        },
-    },
-};
-</script>
 
 <style scoped>
 
