@@ -96,7 +96,7 @@
                     label="Coins"
                     class="no-padding balance-tabs--coins-panel"
                 >
-                    <Coin
+                    <CoinInfo
                         v-model:showHistoryDlg="showHistoryDlg"
                         v-model:showDepositEVMDlg="showDepositEVMDlg"
                         v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
@@ -210,7 +210,7 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
-import Coin from '~/pages/components/balance/Coin';
+import CoinInfo from '~/pages/components/balance/CoinInfo';
 import CollectablesGallery from '~/pages/components/balance/CollectablesGallery';
 import SendCoins from '~/pages/components/balance/SendCoins';
 import SendAmount from '~/pages/components/balance/SendAmount';
@@ -230,7 +230,7 @@ const TSWAPS_URL = 'https://tswaps.com/swap';
 export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],
     components: {
-        Coin,
+        CoinInfo,
         CollectablesGallery,
         SendCoins,
         SendAmount,
