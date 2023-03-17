@@ -1,212 +1,3 @@
-<template>
-<div class="row justify-center">
-    <div style="width: 600px">
-        <div>
-            <div class="text-center">
-                <!-- Account Name -->
-                <div
-                    class="text-white q-mt-xl"
-                    :style="`opacity: ${accountNameStyle.opacity};`"
-                >
-                    {{ accountName }}
-                </div>
-
-                <!-- Account Amount -->
-                <div class="full-width items-center balance-div row">
-                    <div class="full-width"></div>
-                    <div class="full-width">
-                        <label
-                            class="text-white items-center"
-                            :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
-                        >
-                            $ {{ getFixed(displayAmount, 0) }}.{{
-                                displayAmount.toFixed(2).slice(-2)
-                            }}
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="row q-mt-lg q-mb-md">
-                    <q-btn
-                        class="col balanceBtn purpleGradient text-subtitle2 flex-center"
-                        flat
-                        rounded
-                        no-caps
-                        :label="$t('components.send')"
-                        @click="showSendDlg = true"
-                    />
-                    <div class="qrBtn q-mx-xs" @click="showQRScannerDlg = true">
-                        <img src="~assets/icons/qr_scan.svg" >
-                    </div>
-                    <q-btn
-                        class="col balanceBtn purpleGradient text-subtitle2 flex-center"
-                        flat
-                        rounded
-                        no-caps
-                        :label="$t('components.receive')"
-                        @click="showReceiveDlg = true"
-                    />
-                </div>
-
-                <!-- Convert and Purchace -->
-                <div class="row justify-between q-mb-md">
-                    <div class="convertBtn" @click="clickExchange()">
-                        <img src="~assets/coin/Convert.svg" class="q-mr-xs" >
-                        {{$t('balance.convert')}}
-                    </div>
-                    <div class="purchaceBtn" @click="clickPurchase()">
-                        {{$t('balance.purchase')}}
-                        <img src="~assets/coin/Purchase.svg" class="q-ml-xs" >
-                    </div>
-                </div>
-            </div>
-
-            <q-tabs
-                v-model="tab"
-                :value="balanceTab"
-                content-class="balance-tabs--content"
-                class="shadow-2 no-shadow balance-tabs"
-                style="width: 100%"
-                @click="switchTab"
-            >
-                <q-tab
-                    key="coins"
-                    no-caps
-                    name="coins"
-                    label="Coins"
-                    style="width: 50%; background: #00000000"
-                />
-                <q-tab
-                    key="coins"
-                    no-caps
-                    name="collectables"
-                    label="Collectables"
-                    style="width: 50%; background: #00000000"
-                />
-            </q-tabs>
-            <q-tab-panels
-                v-model="tab"
-                flat
-                class="balance-tabs--panels"
-            >
-                <q-tab-panel
-                    flat
-                    name="coins"
-                    label="Coins"
-                    class="no-padding balance-tabs--coins-panel"
-                >
-                    <CoinInfo
-                        v-model:showHistoryDlg="showHistoryDlg"
-                        v-model:showDepositEVMDlg="showDepositEVMDlg"
-                        v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
-                        v-model:showBuyAmountDlg="showBuyAmountDlg"
-                        v-model:selectedCoin="selectedCoin"
-                        flat
-                        :coins="coins"
-                        :coinLoadedAll="coinLoadedAll"
-                        :suggestTokens="suggestTokens"
-                    />
-                </q-tab-panel>
-                <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
-                    <CollectablesGallery
-                        :nftTokenTags="nftTokenTags"
-                        :nftTokenLoadedAll="nftTokenLoadedAll"
-                        :coinViewHeight="coinViewHeight"
-                        :loadNftTokenTags="loadNftTokenTags"
-                    />
-                </q-tab-panel>
-            </q-tab-panels>
-        </div>
-        <div
-            class="q-pr-none text-white absolute full-width"
-            :style="`bottom: ${footerHeight}px;`"
-        ></div>
-        <div
-            v-if="tEVMWithdrawing"
-            class="justify-center absolute flex full-width full-height"
-            style="background: rgba(0, 0, 0, 0.4)"
-        >
-            <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-        </div>
-    </div>
-    <CoinHistory
-        v-model:showHistoryDlg="showHistoryDlg"
-        v-model:selectedCoin="selectedCoin"
-        v-model:showSendAmountDlg="showSendAmountDlg"
-        v-model:showShareAddressDlg="showShareAddressDlg"
-        v-model:showBuyAmountDlg="showBuyAmountDlg"
-        v-model:showRexStakeDlg="showRexStakeDlg"
-    />
-    <SendCoins
-        v-model:showSendDlg="showSendDlg"
-        v-model:selectedCoin="selectedCoin"
-        v-model:showSendAmountDlg="showSendAmountDlg"
-        :coins="coins"
-    />
-    <DepositEVM
-        v-model:showDepositEVMDlg="showDepositEVMDlg"
-        v-model:nativeTLOSBalance="coins[0].amount"
-        @updateBalances="updateBalances"
-    />
-    <WithdrawEVM
-        v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
-        v-model:evmTLOSBalance="coins[1].amount"
-        @updateBalances="updateBalances"
-    />
-    <ReceiveCoins
-        v-model:showReceiveDlg="showReceiveDlg"
-        v-model:selectedCoin="selectedCoin"
-        v-model:showShareAddressDlg="showShareAddressDlg"
-        :coins="coins"
-    />
-    <SendAmount
-        v-model:showSendAmountDlg="showSendAmountDlg"
-        v-model:selectedCoin="selectedCoin"
-        :showHistoryDlg="showHistoryDlg"
-    />
-    <BuyAmount
-        v-model:showBuyAmountDlg="showBuyAmountDlg"
-        v-model:selectedCoin="selectedCoin"
-        :showHistoryDlg="showHistoryDlg"
-    />
-    <ShareAddress
-        v-model:showShareAddressDlg="showShareAddressDlg"
-        :selectedCoin="selectedCoin"
-    />
-    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
-    <RexStaking
-        v-if="selectedCoin"
-        v-model:selectedCoin="selectedCoin"
-        v-model:showRexStakeDlg="showRexStakeDlg"
-    />
-
-    <q-dialog v-model="showEVMWarning">
-        <q-card class="popupCard">
-            <q-card-section>
-                <div class="text-h6">{{$t('balance.warning')}}</div>
-            </q-card-section>
-
-            <q-card-section class="q-pt-none">
-                {{$t('balance.warning_msg')}}
-            </q-card-section>
-
-            <q-card-actions align="right">
-                <q-btn
-                    v-close-popup
-                    flat
-                    no-caps
-                    :label="$t('balance.i_understand')"
-                    color="white"
-                    class="purpleGradient"
-                    @click="showEVMAddress = true"
-                />
-            </q-card-actions>
-        </q-card>
-    </q-dialog>
-</div>
-</template>
-
 <script>
 import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
@@ -381,8 +172,8 @@ export default {
             this.$emit('update:balanceTab', this.tab);
             if (
                 this.isAuthenticated &&
-        this.tab === 'collectables' &&
-        this.nftTokenTags.size == 0
+                this.tab === 'collectables' &&
+                this.nftTokenTags.size === 0
             ) {
                 this.loadUserProfile();
                 await this.loadNftTokenItems();
@@ -415,7 +206,7 @@ export default {
             coins.rows.forEach((token) => {
                 const [precision, symbol] = token.token_symbol.split(',');
                 const account = token.contract_account;
-                if (account == 'eosio.token' && symbol == 'TLOS') {
+                if (account === 'eosio.token' && symbol === 'TLOS') {
                     return;
                 }
 
@@ -451,7 +242,7 @@ export default {
             const rpc = this.$store.$api.getRpc();
             console.assert(coin.account === 'eosio.token', coin);
             console.assert(coin.symbol === 'TLOS', coin);
-            console.assert(coin.name == 'Telos', coin);
+            console.assert(coin.name === 'Telos', coin);
             rpc.get_currency_balance('eosio.token', this.accountName, 'TLOS').then((raw) => {
                 try {
                     coin.amount = Number(raw[0].split(' ')[0]);
@@ -501,7 +292,7 @@ export default {
                         ) {
 
                             // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
-                            if (coin.account === 'eosio.token' && coin.symbol === 'TLOS' && coin.name == 'Telos') {
+                            if (coin.account === 'eosio.token' && coin.symbol === 'TLOS' && coin.name === 'Telos') {
                                 coin.rexBalance = coin.rexBalance || 0;
                                 coin.resources = coin.resources || 0;
                                 coin.amount = coin.amount || 0;
@@ -678,7 +469,7 @@ export default {
                     table_key: '',
                     upper_bound: null,
                 });
-                if (tagData.rows.length == 0) {
+                if (tagData.rows.length === 0) {
                     if (foundFirstData) {
                         break;
                     }
@@ -816,7 +607,7 @@ export default {
                     this.availableHeight - this.minSpace,
                     Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight),
                 );
-                if (this.coinViewHeight != approxViewHeight) {
+                if (this.coinViewHeight !== approxViewHeight) {
                 }
             }
             this.displayAmount =
@@ -897,7 +688,230 @@ export default {
 };
 </script>
 
+<template>
+<div class="row justify-center">
+    <div class="balance-info-page-container">
+        <div>
+            <div class="text-center">
+                <!-- Account Name -->
+                <div
+                    class="text-white q-mt-xl"
+                    :style="`opacity: ${accountNameStyle.opacity};`"
+                >
+                    {{ accountName }}
+                </div>
+
+                <!-- Account Amount -->
+                <div class="full-width items-center balance-div row">
+                    <div class="full-width"></div>
+                    <div class="full-width">
+                        <label
+                            class="text-white items-center"
+                            :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
+                        >
+                            $ {{ getFixed(displayAmount, 0) }}.{{
+                                displayAmount.toFixed(2).slice(-2)
+                            }}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row q-mt-lg q-mb-md">
+                    <q-btn
+                        class="col balanceBtn purpleGradient text-subtitle2 flex-center"
+                        flat
+                        rounded
+                        no-caps
+                        :label="$t('components.send')"
+                        @click="showSendDlg = true"
+                    />
+                    <div class="qrBtn q-mx-xs" @click="showQRScannerDlg = true">
+                        <img src="~assets/icons/qr_scan.svg" >
+                    </div>
+                    <q-btn
+                        class="col balanceBtn purpleGradient text-subtitle2 flex-center"
+                        flat
+                        rounded
+                        no-caps
+                        :label="$t('components.receive')"
+                        @click="showReceiveDlg = true"
+                    />
+                </div>
+
+                <!-- Convert and Purchace -->
+                <div class="row justify-between q-mb-md">
+                    <div class="convertBtn" @click="clickExchange()">
+                        <img src="~assets/coin/Convert.svg" class="q-mr-xs" >
+                        {{$t('balance.convert')}}
+                    </div>
+                    <div class="purchaceBtn" @click="clickPurchase()">
+                        {{$t('balance.purchase')}}
+                        <img src="~assets/coin/Purchase.svg" class="q-ml-xs" >
+                    </div>
+                </div>
+            </div>
+
+            <q-tabs
+                v-model="tab"
+                :value="balanceTab"
+                content-class="balance-tabs--content"
+                class="shadow-2 no-shadow balance-tabs"
+                @click="switchTab"
+            >
+                <q-tab
+                    key="coins"
+                    no-caps
+                    name="coins"
+                    label="Coins"
+                    class="coin-tab"
+                />
+                <q-tab
+                    key="coins"
+                    no-caps
+                    name="collectables"
+                    label="Collectables"
+                    class="coin-tab"
+                />
+            </q-tabs>
+            <q-tab-panels
+                v-model="tab"
+                flat
+                class="balance-tabs--panels"
+            >
+                <q-tab-panel
+                    flat
+                    name="coins"
+                    label="Coins"
+                    class="no-padding balance-tabs--coins-panel"
+                >
+                    <CoinInfo
+                        v-model:showHistoryDlg="showHistoryDlg"
+                        v-model:showDepositEVMDlg="showDepositEVMDlg"
+                        v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+                        v-model:showBuyAmountDlg="showBuyAmountDlg"
+                        v-model:selectedCoin="selectedCoin"
+                        flat
+                        :coins="coins"
+                        :coinLoadedAll="coinLoadedAll"
+                        :suggestTokens="suggestTokens"
+                    />
+                </q-tab-panel>
+                <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
+                    <CollectablesGallery
+                        :nftTokenTags="nftTokenTags"
+                        :nftTokenLoadedAll="nftTokenLoadedAll"
+                        :coinViewHeight="coinViewHeight"
+                        :loadNftTokenTags="loadNftTokenTags"
+                    />
+                </q-tab-panel>
+            </q-tab-panels>
+        </div>
+        <div
+            class="q-pr-none text-white absolute full-width"
+            :style="`bottom: ${footerHeight}px;`"
+        ></div>
+        <div
+            v-if="tEVMWithdrawing"
+            class="justify-center absolute flex full-width full-height spinner"
+        >
+            <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+        </div>
+    </div>
+    <CoinHistory
+        v-model:showHistoryDlg="showHistoryDlg"
+        v-model:selectedCoin="selectedCoin"
+        v-model:showSendAmountDlg="showSendAmountDlg"
+        v-model:showShareAddressDlg="showShareAddressDlg"
+        v-model:showBuyAmountDlg="showBuyAmountDlg"
+        v-model:showRexStakeDlg="showRexStakeDlg"
+    />
+    <SendCoins
+        v-model:showSendDlg="showSendDlg"
+        v-model:selectedCoin="selectedCoin"
+        v-model:showSendAmountDlg="showSendAmountDlg"
+        :coins="coins"
+    />
+    <DepositEVM
+        v-model:showDepositEVMDlg="showDepositEVMDlg"
+        v-model:nativeTLOSBalance="coins[0].amount"
+        @updateBalances="updateBalances"
+    />
+    <WithdrawEVM
+        v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+        v-model:evmTLOSBalance="coins[1].amount"
+        @updateBalances="updateBalances"
+    />
+    <ReceiveCoins
+        v-model:showReceiveDlg="showReceiveDlg"
+        v-model:selectedCoin="selectedCoin"
+        v-model:showShareAddressDlg="showShareAddressDlg"
+        :coins="coins"
+    />
+    <SendAmount
+        v-model:showSendAmountDlg="showSendAmountDlg"
+        v-model:selectedCoin="selectedCoin"
+        :showHistoryDlg="showHistoryDlg"
+    />
+    <BuyAmount
+        v-model:showBuyAmountDlg="showBuyAmountDlg"
+        v-model:selectedCoin="selectedCoin"
+        :showHistoryDlg="showHistoryDlg"
+    />
+    <ShareAddress
+        v-model:showShareAddressDlg="showShareAddressDlg"
+        :selectedCoin="selectedCoin"
+    />
+    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
+    <RexStaking
+        v-if="selectedCoin"
+        v-model:selectedCoin="selectedCoin"
+        v-model:showRexStakeDlg="showRexStakeDlg"
+    />
+
+    <q-dialog v-model="showEVMWarning">
+        <q-card class="popupCard">
+            <q-card-section>
+                <div class="text-h6">{{$t('balance.warning')}}</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+                {{$t('balance.warning_msg')}}
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn
+                    v-close-popup
+                    flat
+                    no-caps
+                    :label="$t('balance.i_understand')"
+                    color="white"
+                    class="purpleGradient"
+                    @click="showEVMAddress = true"
+                />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+</div>
+</template>
+
 <style lang="scss">
+.balance-info-page-container {
+    width: 600px;
+}
+
+.balance-tabs {
+    width: 100%;
+}
+
+.coin-tab {
+    width: 50%;
+    background: #00000000
+}
+
+.spinner {
+    background: rgba(0, 0, 0, 0.4)
+}
 
 .balance-tabs--content {
   .q-tab__indicator {
