@@ -1,13 +1,19 @@
+<script>
+export default {
+    name: 'Error404Page',
+};
+</script>
+
 <template>
 <div
     class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center"
 >
     <div>
-        <div style="font-size: 30vh">
+        <div class="main-text">
             404
         </div>
 
-        <div class="text-h2" style="opacity:.4">
+        <div class="text-h2 oops">
             {{$t('error404.opps')}}
         </div>
 
@@ -24,8 +30,12 @@
 </div>
 </template>
 
-<script>
-export default {
-    name: 'Error404',
-};
-</script>
+<style lang="scss" scoped>
+.main-text {
+    font-size: 30vh;
+}
+
+.oops {
+    opacity: 0.4;
+}
+</style>
