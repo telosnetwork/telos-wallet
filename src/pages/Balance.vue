@@ -1,200 +1,3 @@
-<template>
-  <div class="row justify-center">
-    <div style="width: 600px">
-      <div>
-        <div class="text-center">
-          <!-- Account Name -->
-          <div
-            class="text-white q-mt-xl"
-            :style="`opacity: ${accountNameStyle.opacity};`"
-          >
-            {{ accountName }}
-          </div>
-
-          <!-- Account Amount -->
-          <div class="full-width items-center balance-div row">
-            <div class="full-width"></div>
-            <div class="full-width">
-              <label
-                class="text-white items-center"
-                :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
-              >
-                $ {{ getFixed(displayAmount, 0) }}.{{
-                  displayAmount.toFixed(2).slice(-2)
-                }}
-              </label>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="row q-mt-lg q-mb-md">
-            <q-btn
-              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
-              flat
-              rounded
-              no-caps
-              :label="$t('components.send')"
-              @click="showSendDlg = true"
-            />
-            <div @click="showQRScannerDlg = true" class="qrBtn q-mx-xs">
-              <img src="~assets/icons/qr_scan.svg" />
-            </div>
-            <q-btn
-              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
-              flat
-              rounded
-              no-caps
-              :label="$t('components.receive')"
-              @click="showReceiveDlg = true"
-            />
-          </div>
-
-          <!-- Convert and Purchace -->
-          <div class="row justify-between q-mb-md">
-            <div class="convertBtn" @click="clickExchange()">
-              <img src="~assets/coin/Convert.svg" class="q-mr-xs" />
-              {{$t('balance.convert')}}
-            </div>
-            <div class="purchaceBtn" @click="clickPurchase()">
-              {{$t('balance.purchase')}}
-              <img src="~assets/coin/Purchase.svg" class="q-ml-xs" />
-            </div>
-          </div>
-        </div>
-
-        <q-tabs
-          :value="balanceTab"
-          v-model="tab"
-          @click="switchTab"
-          content-class="balance-tabs--content"
-          class="shadow-2 no-shadow balance-tabs"
-          style="width: 100%"
-        >
-          <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
-          <q-tab no-caps name="collectables" label="Collectables" key="coins" style="width: 50%; background: #00000000"></q-tab>
-        </q-tabs>
-        <q-tab-panels
-          flat
-          v-model="tab"
-          class="balance-tabs--panels"
-        >
-          <q-tab-panel
-            flat
-            name="coins"
-            label="Coins"
-            class="no-padding balance-tabs--coins-panel"
-          >
-            <Coin
-              flat
-              :coins="coins"
-              :coinLoadedAll="coinLoadedAll"
-              v-model:showHistoryDlg="showHistoryDlg"
-              v-model:showDepositEVMDlg="showDepositEVMDlg"
-              v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
-              v-model:showBuyAmountDlg="showBuyAmountDlg"
-              v-model:selectedCoin="selectedCoin"
-              :suggestTokens="suggestTokens"
-            />
-          </q-tab-panel>
-          <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
-            <Collectables
-              :nftTokenTags="nftTokenTags"
-              :nftTokenLoadedAll="nftTokenLoadedAll"
-              :coinViewHeight="coinViewHeight"
-              :loadNftTokenTags="loadNftTokenTags"
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-      </div>
-      <div
-        class="q-pr-none text-white absolute full-width"
-        :style="`bottom: ${footerHeight}px;`"
-      ></div>
-      <div
-        v-if="tEVMWithdrawing"
-        class="justify-center absolute flex full-width full-height"
-        style="background: rgba(0, 0, 0, 0.4)"
-      >
-        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-      </div>
-    </div>
-    <History
-      v-model:showHistoryDlg="showHistoryDlg"
-      v-model:selectedCoin="selectedCoin"
-      v-model:showSendAmountDlg="showSendAmountDlg"
-      v-model:showShareAddressDlg="showShareAddressDlg"
-      v-model:showBuyAmountDlg="showBuyAmountDlg"
-      v-model:showRexStakeDlg="showRexStakeDlg"
-    />
-    <Send
-      v-model:showSendDlg="showSendDlg"
-      :coins="coins"
-      v-model:selectedCoin="selectedCoin"
-      v-model:showSendAmountDlg="showSendAmountDlg"
-    />
-    <DepositEVM
-      v-model:showDepositEVMDlg="showDepositEVMDlg"
-      v-model:nativeTLOSBalance="coins[0].amount"
-      @updateBalances="updateBalances"
-    />
-    <WithdrawEVM
-    v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
-    v-model:evmTLOSBalance="coins[1].amount"
-      @updateBalances="updateBalances"
-    />
-    <Receive
-      v-model:showReceiveDlg="showReceiveDlg"
-      :coins="coins"
-      v-model:selectedCoin="selectedCoin"
-      v-model:showShareAddressDlg="showShareAddressDlg"
-    />
-    <SendAmount
-      v-model:showSendAmountDlg="showSendAmountDlg"
-      :showHistoryDlg="showHistoryDlg"
-      v-model:selectedCoin="selectedCoin"
-    />
-    <BuyAmount
-      v-model:showBuyAmountDlg="showBuyAmountDlg"
-      :showHistoryDlg="showHistoryDlg"
-      v-model:selectedCoin="selectedCoin"
-    />
-    <ShareAddress
-      v-model:showShareAddressDlg="showShareAddressDlg"
-      :selectedCoin="selectedCoin"
-    />
-    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
-    <RexStaking
-      v-if="selectedCoin"
-      v-model:selectedCoin="selectedCoin"
-      v-model:showRexStakeDlg="showRexStakeDlg"
-    />
-
-    <q-dialog v-model="showEVMWarning">
-      <q-card class="popupCard">
-        <q-card-section>
-          <div class="text-h6">{{$t('balance.warning')}}</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          {{$t('balance.warning_msg')}}
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
-            @click="showEVMAddress = true"
-            flat
-            no-caps
-            :label="$t('balance.i_understand')"
-            color="white"
-            v-close-popup
-            class="purpleGradient"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-  </div>
-</template>
-
 <script>
 import BigNumber from "bignumber.js";
 import { mapGetters, mapActions } from "vuex";
@@ -211,6 +14,8 @@ import DepositEVM from "~/pages/components/balance/DepositEVM";
 import WithdrawEVM from "~/pages/components/balance/WithdrawEVM";
 import RexStaking from "~/pages/components/balance/RexStaking";
 import { copyToClipboard } from "quasar";
+import { mapStores } from "pinia";
+import { useGlobalStore } from "src/stores/global";
 
 const GETTING_STARTED_URL = "https://www.telos.net/#getting-started";
 const TSWAPS_URL = "https://tswaps.com/swap";
@@ -284,9 +89,9 @@ export default {
     };
   },
   computed: {
+    ...mapStores(useGlobalStore),
     ...mapGetters("account", ["isAuthenticated", "accountName", "evmAddress", "evmBalance"]),
     ...mapGetters("global", [
-      "footerHeight",
       "minSpace",
       "maxSpace",
       "supportTokens",
@@ -304,7 +109,7 @@ export default {
     },
     availableHeight() {
       return (
-        window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0)
+        window.innerHeight - (this.isAuthenticated ? this.globalStore.footerHeight : 0)
       );
     },
     coinViewMargin() {
@@ -829,7 +634,7 @@ export default {
   },
   beforeMount() {
     this.coinViewHeight =
-      window.innerHeight - this.footerHeight - this.maxSpace;
+      window.innerHeight - this.globalStore.footerHeight - this.maxSpace;
   },
   async mounted() {
     this.loadUserProfile();
@@ -878,6 +683,204 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div class="row justify-center">
+    <div style="width: 600px">
+      <div>
+        <div class="text-center">
+          <!-- Account Name -->
+          <div
+            class="text-white q-mt-xl"
+            :style="`opacity: ${accountNameStyle.opacity};`"
+          >
+            {{ accountName }}
+          </div>
+
+          <!-- Account Amount -->
+          <div class="full-width items-center balance-div row">
+            <div class="full-width"></div>
+            <div class="full-width">
+              <label
+                class="text-white items-center"
+                :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
+              >
+                $ {{ getFixed(displayAmount, 0) }}.{{
+                  displayAmount.toFixed(2).slice(-2)
+                }}
+              </label>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="row q-mt-lg q-mb-md">
+            <q-btn
+              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
+              flat
+              rounded
+              no-caps
+              :label="$t('components.send')"
+              @click="showSendDlg = true"
+            />
+            <div @click="showQRScannerDlg = true" class="qrBtn q-mx-xs">
+              <img src="~assets/icons/qr_scan.svg" />
+            </div>
+            <q-btn
+              class="col balanceBtn purpleGradient text-subtitle2 flex-center"
+              flat
+              rounded
+              no-caps
+              :label="$t('components.receive')"
+              @click="showReceiveDlg = true"
+            />
+          </div>
+
+          <!-- Convert and Purchace -->
+          <div class="row justify-between q-mb-md">
+            <div class="convertBtn" @click="clickExchange()">
+              <img src="~assets/coin/Convert.svg" class="q-mr-xs" />
+              {{$t('balance.convert')}}
+            </div>
+            <div class="purchaceBtn" @click="clickPurchase()">
+              {{$t('balance.purchase')}}
+              <img src="~assets/coin/Purchase.svg" class="q-ml-xs" />
+            </div>
+          </div>
+        </div>
+
+        <q-tabs
+          :value="balanceTab"
+          v-model="tab"
+          @click="switchTab"
+          content-class="balance-tabs--content"
+          class="shadow-2 no-shadow balance-tabs"
+          style="width: 100%"
+        >
+          <q-tab no-caps name="coins" label="Coins" key="coins" style="width: 50%; background: #00000000"></q-tab>
+          <q-tab no-caps name="collectables" label="Collectables" key="coins" style="width: 50%; background: #00000000"></q-tab>
+        </q-tabs>
+        <q-tab-panels
+          flat
+          v-model="tab"
+          class="balance-tabs--panels"
+        >
+          <q-tab-panel
+            flat
+            name="coins"
+            label="Coins"
+            class="no-padding balance-tabs--coins-panel"
+          >
+            <Coin
+              flat
+              :coins="coins"
+              :coinLoadedAll="coinLoadedAll"
+              v-model:showHistoryDlg="showHistoryDlg"
+              v-model:showDepositEVMDlg="showDepositEVMDlg"
+              v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+              v-model:showBuyAmountDlg="showBuyAmountDlg"
+              v-model:selectedCoin="selectedCoin"
+              :suggestTokens="suggestTokens"
+            />
+          </q-tab-panel>
+          <q-tab-panel name="collectables" label="Collectibles" :style="'background:  #00000000'">
+            <Collectables
+              :nftTokenTags="nftTokenTags"
+              :nftTokenLoadedAll="nftTokenLoadedAll"
+              :coinViewHeight="coinViewHeight"
+              :loadNftTokenTags="loadNftTokenTags"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
+      </div>
+      <div
+        class="q-pr-none text-white absolute full-width"
+        :style="`bottom: ${globalStore.footerHeight}px; color: blue`"
+      ></div>
+      <div
+        v-if="tEVMWithdrawing"
+        class="justify-center absolute flex full-width full-height"
+        style="background: rgba(0, 0, 0, 0.4)"
+      >
+        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+      </div>
+    </div>
+    <History
+      v-model:showHistoryDlg="showHistoryDlg"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
+      v-model:showShareAddressDlg="showShareAddressDlg"
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
+      v-model:showRexStakeDlg="showRexStakeDlg"
+    />
+    <Send
+      v-model:showSendDlg="showSendDlg"
+      :coins="coins"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showSendAmountDlg="showSendAmountDlg"
+    />
+    <DepositEVM
+      v-model:showDepositEVMDlg="showDepositEVMDlg"
+      v-model:nativeTLOSBalance="coins[0].amount"
+      @updateBalances="updateBalances"
+    />
+    <WithdrawEVM
+    v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
+    v-model:evmTLOSBalance="coins[1].amount"
+      @updateBalances="updateBalances"
+    />
+    <Receive
+      v-model:showReceiveDlg="showReceiveDlg"
+      :coins="coins"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showShareAddressDlg="showShareAddressDlg"
+    />
+    <SendAmount
+      v-model:showSendAmountDlg="showSendAmountDlg"
+      :showHistoryDlg="showHistoryDlg"
+      v-model:selectedCoin="selectedCoin"
+    />
+    <BuyAmount
+      v-model:showBuyAmountDlg="showBuyAmountDlg"
+      :showHistoryDlg="showHistoryDlg"
+      v-model:selectedCoin="selectedCoin"
+    />
+    <ShareAddress
+      v-model:showShareAddressDlg="showShareAddressDlg"
+      :selectedCoin="selectedCoin"
+    />
+    <QRScanner v-model:showQRScannerDlg="showQRScannerDlg" :coins="coins" />
+    <RexStaking
+      v-if="selectedCoin"
+      v-model:selectedCoin="selectedCoin"
+      v-model:showRexStakeDlg="showRexStakeDlg"
+    />
+
+    <q-dialog v-model="showEVMWarning">
+      <q-card class="popupCard">
+        <q-card-section>
+          <div class="text-h6">{{$t('balance.warning')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          {{$t('balance.warning_msg')}}
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            @click="showEVMAddress = true"
+            flat
+            no-caps
+            :label="$t('balance.i_understand')"
+            color="white"
+            v-close-popup
+            class="purpleGradient"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
+</template>
+
 
 <style lang="scss">
 
