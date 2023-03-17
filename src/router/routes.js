@@ -7,7 +7,7 @@ const routes = [
     {
         path: '/balance',
         component: () => import('layouts/MainLayout.vue'),
-        children: [{ path: '', component: () => import('pages/Balance.vue') }],
+        children: [{ path: '', component: () => import('pages/BalanceInfo.vue') }],
     },
     {
         path: '/dappsearch',
