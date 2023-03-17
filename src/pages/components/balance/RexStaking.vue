@@ -1,129 +1,3 @@
-<template>
-<q-dialog
-    v-model="showDlg"
-    :full-height="false"
-    transition-show="slide-up"
-    transition-hide="slide-down"
->
-    <div class="popupCard">
-        <div class="exitBtn">
-            <q-btn
-                v-close-popup
-                round
-                flat
-                dense
-                class="text-grey-6"
-                icon="close"
-            />
-        </div>
-        <div class="popupHeading">
-            <div ></div>
-            <div class="text-h5 text-weight-medium text-center q-mt-lg">{{$t('components.staking_rex')}}</div>
-            <div ></div>
-        </div>
-        <div class="text-center">
-            <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-                {{ apyString }}
-            </div>
-            <q-btn-toggle
-                v-model="staking"
-                color="dark"
-                toggle-color="dark"
-                toggle-text-color="white"
-                text-color="grey-7"
-                rounded
-                no-caps
-                :options="[
-                    { label: 'Stake', value: true },
-                    { label: 'Unstake', value: false },
-                ]"
-            />
-            <div v-if="staking" class="q-mt-md" @click="amount = tokenAmount">
-                {{$t('components.available')}}: {{ tokenAmount }}
-                {{ "TLOS" }}
-            </div>
-            <div v-if="!staking" class="q-mt-md" @click="amount = tokenRexBalance">
-                {{$t('components.deposited')}}: {{ tokenRexBalance }}
-                {{ "TLOS" }}
-            </div>
-            <div class="text-center q-mt-md">
-                <div class="inputAmount row items-center">
-                    <input
-                        v-model="amount"
-                        type="text"
-                        class="col text-weight-regular text-right no-border no-outline transparent text-white"
-                        autofocus="true"
-                        @focus="amount = amount === '0' ? '' : amount"
-                        @blur="inputBlur"
-                    >
-                    <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
-                </div>
-            </div>
-            <div class="q-my-md">
-                <q-btn
-                    class="q-mx-xs"
-                    color="secondary"
-                    outline
-                    rounded
-                    label="25%"
-                    @click="
-                        amount = (
-                            staking ? tokenAmount * 0.25 : tokenRexBalance * 0.25
-                        ).toFixed(4)
-                    "
-                />
-                <q-btn
-                    class="q-mx-xs"
-                    color="secondary"
-                    outline
-                    rounded
-                    label="50%"
-                    @click="
-                        amount = (
-                            staking ? tokenAmount * 0.5 : tokenRexBalance * 0.5
-                        ).toFixed(4)
-                    "
-                />
-                <q-btn
-                    class="q-mx-xs"
-                    color="secondary"
-                    outline
-                    rounded
-                    label="75%"
-                    @click="
-                        amount = (
-                            staking ? tokenAmount * 0.75 : tokenRexBalance * 0.75
-                        ).toFixed(4)
-                    "
-                />
-                <q-btn
-                    class="q-mx-xs"
-                    color="secondary"
-                    outline
-                    rounded
-                    label="100%"
-                    @click="
-                        amount = (staking ? tokenAmount : tokenRexBalance * 1).toFixed(4)
-                    "
-                />
-            </div>
-            <div class="row justify-center">
-                <q-btn
-                    class="purpleGradient depositBtn"
-                    no-caps
-                    rounded
-                    :label="staking ? 'Stake Now' : 'Unstake Now'"
-                    @click="staking ? tryStake() : tryUnstake()"
-                />
-            </div>
-            <div v-if="staking" class="q-mt-sm">
-                {{$t('components.lock_4_days')}}
-            </div>
-        </div>
-    </div>
-</q-dialog>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
@@ -279,6 +153,132 @@ export default {
     },
 };
 </script>
+
+<template>
+<q-dialog
+    v-model="showDlg"
+    :full-height="false"
+    transition-show="slide-up"
+    transition-hide="slide-down"
+>
+    <div class="popupCard">
+        <div class="exitBtn">
+            <q-btn
+                v-close-popup
+                round
+                flat
+                dense
+                class="text-grey-6"
+                icon="close"
+            />
+        </div>
+        <div class="popupHeading">
+            <div ></div>
+            <div class="text-h5 text-weight-medium text-center q-mt-lg">{{$t('components.staking_rex')}}</div>
+            <div ></div>
+        </div>
+        <div class="text-center">
+            <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
+                {{ apyString }}
+            </div>
+            <q-btn-toggle
+                v-model="staking"
+                color="dark"
+                toggle-color="dark"
+                toggle-text-color="white"
+                text-color="grey-7"
+                rounded
+                no-caps
+                :options="[
+                    { label: 'Stake', value: true },
+                    { label: 'Unstake', value: false },
+                ]"
+            />
+            <div v-if="staking" class="q-mt-md" @click="amount = tokenAmount">
+                {{$t('components.available')}}: {{ tokenAmount }}
+                {{ "TLOS" }}
+            </div>
+            <div v-if="!staking" class="q-mt-md" @click="amount = tokenRexBalance">
+                {{$t('components.deposited')}}: {{ tokenRexBalance }}
+                {{ "TLOS" }}
+            </div>
+            <div class="text-center q-mt-md">
+                <div class="inputAmount row items-center">
+                    <input
+                        v-model="amount"
+                        type="text"
+                        class="col text-weight-regular text-right no-border no-outline transparent text-white"
+                        autofocus="true"
+                        @focus="amount = amount === '0' ? '' : amount"
+                        @blur="inputBlur"
+                    >
+                    <label class="text-weight-medium q-ml-sm text-left"> TLOS </label>
+                </div>
+            </div>
+            <div class="q-my-md">
+                <q-btn
+                    class="q-mx-xs"
+                    color="secondary"
+                    outline
+                    rounded
+                    label="25%"
+                    @click="
+                        amount = (
+                            staking ? tokenAmount * 0.25 : tokenRexBalance * 0.25
+                        ).toFixed(4)
+                    "
+                />
+                <q-btn
+                    class="q-mx-xs"
+                    color="secondary"
+                    outline
+                    rounded
+                    label="50%"
+                    @click="
+                        amount = (
+                            staking ? tokenAmount * 0.5 : tokenRexBalance * 0.5
+                        ).toFixed(4)
+                    "
+                />
+                <q-btn
+                    class="q-mx-xs"
+                    color="secondary"
+                    outline
+                    rounded
+                    label="75%"
+                    @click="
+                        amount = (
+                            staking ? tokenAmount * 0.75 : tokenRexBalance * 0.75
+                        ).toFixed(4)
+                    "
+                />
+                <q-btn
+                    class="q-mx-xs"
+                    color="secondary"
+                    outline
+                    rounded
+                    label="100%"
+                    @click="
+                        amount = (staking ? tokenAmount : tokenRexBalance * 1).toFixed(4)
+                    "
+                />
+            </div>
+            <div class="row justify-center">
+                <q-btn
+                    class="purpleGradient depositBtn"
+                    no-caps
+                    rounded
+                    :label="staking ? 'Stake Now' : 'Unstake Now'"
+                    @click="staking ? tryStake() : tryUnstake()"
+                />
+            </div>
+            <div v-if="staking" class="q-mt-sm">
+                {{$t('components.lock_4_days')}}
+            </div>
+        </div>
+    </div>
+</q-dialog>
+</template>
 
 <style lang="scss" scoped>
 .depositAddressToggle {
