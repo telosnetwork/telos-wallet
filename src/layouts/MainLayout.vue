@@ -1,63 +1,3 @@
-<template>
-<q-layout view="hHh Lpr fFf" class="">
-    <LoginButton v-if="isAuthenticated" style="display: none" />
-    <div class="videoWrapper">
-        <video
-            id="bgvid"
-            playsinline
-            autoplay
-            muted
-            loop
-            poster="~/assets/background/Video-top_compressed-poster-00001.jpg"
-        >
-            <source
-                src="~/assets/background/Video-top_compressed-transcode.webm"
-                type="video/webm"
-            >
-            <source
-                src="~/assets/background/Video-top_compressed-transcode.mp4"
-                type="video/mp4"
-            >
-        </video>
-    </div>
-    <div class="videoOverlay" ></div>
-    <div class="videoOverlay shadedOverlay" ></div>
-
-    <NavBar v-if="isAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
-    <q-page-container
-        :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
-    >
-        <div v-if="warningShow">
-            <q-banner inline-actions dark class="warningSign text-white">
-                {{ warningText }}
-
-                <template v-slot:action>
-                    <q-icon
-                        name="fas fa-times-circle"
-                        style="font-size: 1.3rem"
-                        color="text-white"
-                        @click="warningShow = false"
-                    />
-                </template>
-            </q-banner>
-        </div>
-        <!-- Profile Image top right -->
-        <q-avatar
-            v-if="$route.path === '/balance'"
-            class="profileImg"
-            @click="$router.push('/profile')"
-        >
-            <img :src="userAvatar" >
-        </q-avatar>
-        <router-view
-            v-model:loadedCoins="coins"
-            v-model:loadedNftTokens="nftTokens"
-            v-model:balanceTab="balanceTab"
-        />
-    </q-page-container>
-</q-layout>
-</template>
-
 <script>
 
 import { mapGetters, mapActions } from 'vuex';
@@ -183,7 +123,75 @@ export default {
 };
 </script>
 
+<template>
+<q-layout view="hHh Lpr fFf" class="">
+    <LoginButton v-if="isAuthenticated" class="login-button" />
+    <div class="videoWrapper">
+        <video
+            id="bgvid"
+            playsinline
+            autoplay
+            muted
+            loop
+            poster="~/assets/background/Video-top_compressed-poster-00001.jpg"
+        >
+            <source
+                src="~/assets/background/Video-top_compressed-transcode.webm"
+                type="video/webm"
+            >
+            <source
+                src="~/assets/background/Video-top_compressed-transcode.mp4"
+                type="video/mp4"
+            >
+        </video>
+    </div>
+    <div class="videoOverlay" ></div>
+    <div class="videoOverlay shadedOverlay" ></div>
+
+    <NavBar v-if="isAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
+    <q-page-container
+        :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
+    >
+        <div v-if="warningShow">
+            <q-banner inline-actions dark class="warningSign text-white">
+                {{ warningText }}
+
+                <template v-slot:action>
+                    <q-icon
+                        name="fas fa-times-circle"
+                        class="warning-icon"
+                        color="text-white"
+                        @click="warningShow = false"
+                    />
+                </template>
+            </q-banner>
+        </div>
+        <!-- Profile Image top right -->
+        <q-avatar
+            v-if="$route.path === '/balance'"
+            class="profileImg"
+            @click="$router.push('/profile')"
+        >
+            <img :src="userAvatar" >
+        </q-avatar>
+        <router-view
+            v-model:loadedCoins="coins"
+            v-model:loadedNftTokens="nftTokens"
+            v-model:balanceTab="balanceTab"
+        />
+    </q-page-container>
+</q-layout>
+</template>
+
 <style lang="scss" scoped>
+.login-button {
+    display: none;
+}
+
+.warning-icon {
+    font-size: 1.3rem;
+}
+
 .pageContainer {
   padding-bottom: 65px; // for mobile nav-bar
   @media only screen and (min-width: 1000px) {
