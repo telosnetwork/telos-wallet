@@ -1,3 +1,44 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
+import tokenAvatar from 'src/components/TokenAvatar';
+
+export default {
+    props: ['showReceiveDlg', 'coins', 'selectedCoin', 'showShareAddressDlg'],
+    components: {
+        TokenAvatar: tokenAvatar,
+    },
+    data() {
+        return {
+            searchCoinName: '',
+        };
+    },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        searchCoins() {
+            return this.coins.filter(coin => (
+                coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
+                coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
+            ));
+        },
+        showDlg: {
+            get() {
+                return this.showReceiveDlg;
+            },
+            set(value) {
+                this.$emit('update:showReceiveDlg', value);
+            },
+        },
+    },
+    methods: {
+        selectCoin(coin) {
+            this.$emit('update:showShareAddressDlg', true);
+            this.$emit('update:selectedCoin', coin);
+        },
+    },
+};
+</script>
+
 <template>
 <q-dialog
     v-model="showDlg"
@@ -52,7 +93,6 @@
                     <q-item-label
                         v-if="index === 0 && coin.suggested"
                         header
-                        style=""
                     >{{$t('components.suggested')}}</q-item-label>
                     <q-item-label
                         v-if="
@@ -71,23 +111,18 @@
                             <q-avatar size="45px" class="q-my-sm">
                                 <TokenAvatar :token="coin.icon" :avatarSize="45" />
                                 <div
-                                    v-if="coin.network == 'tevm'"
+                                    v-if="coin.network === 'tevm'"
                                     class="flex absolute full-width full-height"
                                 >
                                     <img
-                                        class="flex q-ml-auto q-mt-auto"
+                                        class="flex q-ml-auto q-mt-auto evm-logo"
                                         alt="tEVM"
                                         src="~assets/evm/evm_logo.png"
-                                        style="
-                        width: 50%;
-                        height: 50%;
-                        margin-right: -10%;
-                        margin-bottom: -5%;"
                                     >
                                 </div>
                             </q-avatar>
                         </q-item-section>
-                        <q-item-section style="justify-content: start; display: grid">
+                        <q-item-section class="coin-info">
                             <div class="text-white text-left display-grid">
                                 <label
                                     class="text-subtitle1 text-weight-small text-white h-20 self-end wraplabel"
@@ -115,48 +150,19 @@
 </q-dialog>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import tokenAvatar from 'src/components/TokenAvatar';
-
-export default {
-    props: ['showReceiveDlg', 'coins', 'selectedCoin', 'showShareAddressDlg'],
-    components: {
-        TokenAvatar: tokenAvatar,
-    },
-    data() {
-        return {
-            searchCoinName: '',
-        };
-    },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName']),
-        searchCoins() {
-            return this.coins.filter(coin => (
-                coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
-            ));
-        },
-        showDlg: {
-            get() {
-                return this.showReceiveDlg;
-            },
-            set(value) {
-                this.$emit('update:showReceiveDlg', value);
-            },
-        },
-    },
-    methods: {
-        selectCoin(coin) {
-            this.$emit('update:showShareAddressDlg', true);
-            this.$emit('update:selectedCoin', coin);
-        },
-    },
-};
-</script>
-
 <style scoped>
+.evm-logo {
+    width: 50%;
+    height: 50%;
+    margin-right: -10%;
+    margin-bottom: -5%;"
+}
+
+.coin-info {
+    justify-content: start;
+    display: grid
+}
+
 /* .list-item {
   border: 1px solid #fafafa00;
   border-left: none;
