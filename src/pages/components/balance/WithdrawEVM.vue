@@ -1,64 +1,3 @@
-<template>
-<q-dialog
-    v-model="showDlg"
-    transition-show="slide-up"
-    transition-hide="slide-down"
->
-    <div class="popupCard">
-        <div class="exitBtn">
-            <q-btn
-                v-close-popup
-                round
-                flat
-                dense
-                class="text-grey-6"
-                icon="close"
-            />
-        </div>
-        <div class="popupHeading">
-            <div ></div>
-            <div class="text-h5 text-weight-medium text-center q-mt-lg ">
-                {{$t('components.evm_withdraw')}}
-            </div>
-            <div ></div>
-        </div>
-        <div class="popupBody text-center">
-            <div class="text-center text-subtitle2 text-grey-4">
-                {{$t('components.withdraw_1')}}<br >{{$t('components.withdraw_2')}}
-            </div>
-            <div class="text-center q-mt-md">
-                <div class="inputAmount row items-center ">
-                    <input
-                        v-model="withdrawAmount"
-                        type="text"
-                        class="col text-weight-regular text-right no-border no-outline transparent text-white"
-                        autofocus="true"
-                        @focus="
-                            withdrawAmount = withdrawAmount === '0' ? '' : withdrawAmount
-                        "
-                        @blur="inputBlur"
-                    >
-                    <label class="text-weight-regular q-ml-sm text-left">
-                        TLOS
-                    </label>
-                </div>
-                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance }}</div>
-            </div>
-            <div class="row justify-center q-mt-md q-mb-lg">
-                <q-btn
-                    :disabled="!(parseFloat(withdrawAmount) > 0)"
-                    class="purpleGradient withdrawBtn"
-                    no-caps
-                    rounded
-                    :label="$t('components.withdraw')"
-                    @click="withdraw"
-                />
-            </div>
-        </div>
-    </div>
-</q-dialog>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
@@ -129,13 +68,72 @@ export default {
 };
 </script>
 
+<template>
+<q-dialog
+    v-model="showDlg"
+    transition-show="slide-up"
+    transition-hide="slide-down"
+>
+    <div class="popupCard">
+        <div class="exitBtn">
+            <q-btn
+                v-close-popup
+                round
+                flat
+                dense
+                class="text-grey-6"
+                icon="close"
+            />
+        </div>
+        <div class="popupHeading">
+            <div ></div>
+            <div class="text-h5 text-weight-medium text-center q-mt-lg ">
+                {{$t('components.evm_withdraw')}}
+            </div>
+            <div ></div>
+        </div>
+        <div class="popupBody text-center">
+            <div class="text-center text-subtitle2 text-grey-4">
+                {{$t('components.withdraw_1')}}<br >{{$t('components.withdraw_2')}}
+            </div>
+            <div class="text-center q-mt-md">
+                <div class="inputAmount row items-center ">
+                    <input
+                        v-model="withdrawAmount"
+                        type="text"
+                        class="col text-weight-regular text-right no-border no-outline transparent text-white"
+                        autofocus="true"
+                        @focus="withdrawAmount = withdrawAmount === '0' ? '' : withdrawAmount"
+                        @blur="inputBlur"
+                    >
+                    <label class="text-weight-regular q-ml-sm text-left">
+                        TLOS
+                    </label>
+                </div>
+                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance }}</div>
+            </div>
+            <div class="row justify-center q-mt-md q-mb-lg">
+                <q-btn
+                    :disabled="!(parseFloat(withdrawAmount) > 0)"
+                    class="purpleGradient withdrawBtn"
+                    no-caps
+                    rounded
+                    :label="$t('components.withdraw')"
+                    @click="withdraw"
+                />
+            </div>
+        </div>
+    </div>
+</q-dialog>
+</template>
+
 <style lang="scss" scoped>
 
 .exitBtn {
-  position: absolute;
+    position: absolute;
 }
 .withdrawBtn {
-  flex-basis: 15rem;
-  height: 3rem;
+    flex-basis: 15rem;
+    height: 3rem;
 }
 </style>

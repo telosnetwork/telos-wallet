@@ -1,3 +1,56 @@
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
+import tokenAvatar from 'src/components/TokenAvatar';
+
+export default {
+    props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendAmountDlg'],
+    components: {
+        TokenAvatar: tokenAvatar,
+    },
+    data() {
+        return {
+            searchCoinName: '',
+        };
+    },
+    computed: {
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        searchCoins() {
+            return this.availableCoins.filter(coin => (
+                coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
+          coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
+            ));
+        },
+        availableCoins() {
+            return this.coins.filter(coin => coin.amount > 0);
+        },
+        showDlg: {
+            get() {
+                return this.showSendDlg;
+            },
+            set(value) {
+                this.$emit('update:showSendDlg', value);
+            },
+        },
+    },
+    methods: {
+        selectCoin(coin) {
+            this.$emit('update:showSendAmountDlg', true);
+            this.$emit('update:selectedCoin', coin);
+        },
+    },
+    watch: {
+        showSendDlg: function (val, oldVal) {
+            if (val) {
+                this.searchCoinName = '';
+            } else {
+                this.$emit('update:selectedCoin', null);
+            }
+        },
+    },
+};
+</script>
+
 <template>
 <q-dialog
     v-model="showDlg"
@@ -83,10 +136,10 @@
                                                 alt="tEVM"
                                                 src="~assets/evm/evm_logo.png"
                                                 style="
-                            width: 50%;
-                            height: 50%;
-                            margin-right: -10%;
-                            margin-bottom: -5%;"
+                        width: 50%;
+                        height: 50%;
+                        margin-right: -10%;
+                        margin-bottom: -5%;"
                                             >
                                         </div>
                                     </q-avatar>
@@ -122,59 +175,6 @@
     </div>
 </q-dialog>
 </template>
-
-<script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import tokenAvatar from 'src/components/TokenAvatar';
-
-export default {
-    props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendAmountDlg'],
-    components: {
-        TokenAvatar: tokenAvatar,
-    },
-    data() {
-        return {
-            searchCoinName: '',
-        };
-    },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName']),
-        searchCoins() {
-            return this.availableCoins.filter(coin => (
-                coin.name.toLowerCase().includes(this.searchCoinName.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(this.searchCoinName.toLowerCase())
-            ));
-        },
-        availableCoins() {
-            return this.coins.filter(coin => coin.amount > 0);
-        },
-        showDlg: {
-            get() {
-                return this.showSendDlg;
-            },
-            set(value) {
-                this.$emit('update:showSendDlg', value);
-            },
-        },
-    },
-    methods: {
-        selectCoin(coin) {
-            this.$emit('update:showSendAmountDlg', true);
-            this.$emit('update:selectedCoin', coin);
-        },
-    },
-    watch: {
-        showSendDlg: function (val, oldVal) {
-            if (val) {
-                this.searchCoinName = '';
-            } else {
-                this.$emit('update:selectedCoin', null);
-            }
-        },
-    },
-};
-</script>
 
 <style scoped>
 /* .list-item {
