@@ -310,7 +310,7 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
                 model: mymodel,
                 isValid: (model/*: string | string[]*/) => {
                     GreymassFuelService.setPreferences(username, {
-                        remember: model.length == 1,
+                        remember: model.length === 1,
                     });
                     return true;
                 },
