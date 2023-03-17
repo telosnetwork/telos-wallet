@@ -1,73 +1,73 @@
 <template>
-  <div
+<div
     :style="
-      `max-width: 800px; margin: auto auto; height: ${coinViewHeight -
-        footerHeight -
-        30}px;`
+        `max-width: 800px; margin: auto auto; height: ${coinViewHeight -
+            footerHeight -
+            30}px;`
     "
-  >
+>
     <q-infinite-scroll
-      @load="loadMoreNftTokens"
-      :offset="20"
-      style="display: grid; grid-template-columns: 1fr 1fr;"
+        :offset="20"
+        style="display: grid; grid-template-columns: 1fr 1fr;"
+        @load="loadMoreNftTokens"
     >
-      <q-item
-        v-for="(token, index) in availableTokenTags"
-        :key="`${token.name}_${index}`"
-        clickable
-        v-ripple
-        class="imgContainer"
-        @click="selectNftToken(token)"
-      >
-        <img :src="token.image" />
-        <div
-          class="collectablesName absolute-bottom text-subtitle2 text-center text-white"
-          style=""
+        <q-item
+            v-for="(token, index) in availableTokenTags"
+            :key="`${token.name}_${index}`"
+            v-ripple
+            clickable
+            class="imgContainer"
+            @click="selectNftToken(token)"
         >
-          {{ token.title }}
-        </div>
-      </q-item>
-      <template v-slot:loading>
-        <div class="row justify-center q-my-md">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-      </template>
+            <img :src="token.image" >
+            <div
+                class="collectablesName absolute-bottom text-subtitle2 text-center text-white"
+                style=""
+            >
+                {{ token.title }}
+            </div>
+        </q-item>
+        <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+            </div>
+        </template>
     </q-infinite-scroll>
-  </div>
+</div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  props: [
-    "nftTokenTags",
-    "nftTokenLoadedAll",
-    "coinViewHeight",
-    "loadNftTokenTags"
-  ],
-  data() {
-    return {
-      showCount: 20
-    };
-  },
-  computed: {
-    ...mapGetters("global", ["footerHeight"]),
-    itemSize() {
-      return Math.min(350, (window.innerWidth - 120) / 2);
+    props: [
+        'nftTokenTags',
+        'nftTokenLoadedAll',
+        'coinViewHeight',
+        'loadNftTokenTags',
+    ],
+    data() {
+        return {
+            showCount: 20,
+        };
     },
-    availableTokenTags() {
-      return this.nftTokenTags;
-    }
-  },
-  methods: {
-    selectNftToken(token) {},
-    async loadMoreNftTokens(index, done) {
-      await this.loadNftTokenTags();
-      done();
-    }
-  },
-  async mounted() {}
+    computed: {
+        ...mapGetters('global', ['footerHeight']),
+        itemSize() {
+            return Math.min(350, (window.innerWidth - 120) / 2);
+        },
+        availableTokenTags() {
+            return this.nftTokenTags;
+        },
+    },
+    methods: {
+        selectNftToken(token) {},
+        async loadMoreNftTokens(index, done) {
+            await this.loadNftTokenTags();
+            done();
+        },
+    },
+    async mounted() {},
 };
 </script>
 
@@ -81,10 +81,10 @@ export default {
   img {
     max-width: 100%;
     max-height: 100%;
-    
+
   }
 .collectablesName{
-  
+
   background-color: #0005;
   pointer-events: none;
 }

@@ -1,179 +1,199 @@
 <template>
-  <div>
+<div>
     <nav class="leftNavBar">
-      <img src="~assets/telosLogo.svg" class="telosLogo" />
-      <ul>
-        <li>
-          <a @click="switchTab('coins')"> <img :src="srcWallet" />{{$t('navbar.wallet')}} </a>
-        </li>
-        <li>
-          <a @click="switchTab('earn')"> <img :src="srcEarn" />{{$t('navbar.staking')}}</a>
-        </li>
-        <li>
-          <a @click="switchTab('resources')"> <img :src="srcResources" />{{$t('navbar.resources')}}</a>
-        </li>
-        <li>
-          <a @click="switchTab('nft')"> <img :src="srcNft" />{{$t('navbar.nfts')}} </a>
-        </li>
-        <li>
-          <a @click="switchTab('dapps')"> <img :src="srcDapps" />{{$t('navbar.dapps')}} </a>
-        </li>
-        <li>
-          <a @click="switchTab('profile')"> <img :src="srcProfile" />{{$t('navbar.profile')}} </a>
-        </li>
-        <li>
-          <a @click="$emit('log-out')"> <img :src="srcLogout" />{{$t('navbar.logout')}} </a>
-        </li>
-      </ul>
+        <img src="~assets/telosLogo.svg" class="telosLogo" >
+        <ul>
+            <li>
+                <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('earn')"> <img :src="srcEarn" >{{$t('navbar.staking')}}</a>
+            </li>
+            <li>
+                <a @click="switchTab('resources')"> <img :src="srcResources" >{{$t('navbar.resources')}}</a>
+            </li>
+            <li>
+                <a @click="switchTab('nft')"> <img :src="srcNft" >{{$t('navbar.nfts')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('dapps')"> <img :src="srcDapps" >{{$t('navbar.dapps')}} </a>
+            </li>
+            <li>
+                <a @click="switchTab('profile')"> <img :src="srcProfile" >{{$t('navbar.profile')}} </a>
+            </li>
+            <li>
+                <a @click="$emit('log-out')"> <img :src="srcLogout" >{{$t('navbar.logout')}} </a>
+            </li>
+        </ul>
     </nav>
     <nav class="bottomNavBar">
-      <ul>
-        <li>
-          <a @click="switchTab('coins')">
-            <img :src="srcWallet" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('earn')">
-            <img style="width: 35px" :src="srcEarn" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('resources')">
-            <img style="width: 35px" :src="srcResources" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('nft')">
-            <img style="width: 35px" :src="srcNft" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('dapps')">
-            <img :src="srcDapps" />
-          </a>
-        </li>
-        <li>
-          <a @click="switchTab('profile')">
-            <img :src="srcProfile" />
-          </a>
-        </li>
-        <li>
-          <a @click="$emit('log-out')">
-            <img :src="srcLogout" />
-          </a>
-        </li>
-      </ul>
+        <ul>
+            <li>
+                <a @click="switchTab('coins')">
+                    <img :src="srcWallet" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('earn')">
+                    <img style="width: 35px" :src="srcEarn" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('resources')">
+                    <img style="width: 35px" :src="srcResources" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('nft')">
+                    <img style="width: 35px" :src="srcNft" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('dapps')">
+                    <img :src="srcDapps" >
+                </a>
+            </li>
+            <li>
+                <a @click="switchTab('profile')">
+                    <img :src="srcProfile" >
+                </a>
+            </li>
+            <li>
+                <a @click="$emit('log-out')">
+                    <img :src="srcLogout" >
+                </a>
+            </li>
+        </ul>
     </nav>
     <RexStaking v-model:showRexStakeDlg="showRexStakeDlg" />
     <ManageResources v-model:showManageResourcesDlg="showManageResourcesDlg" />
-  </div>
+</div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import RexStaking from "src/pages/components/balance/RexStaking.vue";
-import ManageResources from "src/components/ManageResources.vue";
+import { mapGetters } from 'vuex';
+import RexStaking from 'src/pages/components/balance/RexStaking.vue';
+import ManageResources from 'src/components/ManageResources.vue';
 export default {
-  props: ["balanceTab"],
-  components: { RexStaking, ManageResources },
-  data() {
-    return {
-      srcDir: "/nav/",
-      selectedTab: "coins",
-      showRexStakeDlg: false,
-      showManageResourcesDlg: false
-    };
-  },
-  computed: {
-    ...mapGetters("account", ["isAuthenticated"]),
-    srcWallet() {
-      if (this.selectedTab === "coins")
-        return this.srcDir + "wallet_selected.svg";
-      else return this.srcDir + "wallet.svg";
+    props: ['balanceTab'],
+    components: { RexStaking, ManageResources },
+    data() {
+        return {
+            srcDir: '/nav/',
+            selectedTab: 'coins',
+            showRexStakeDlg: false,
+            showManageResourcesDlg: false,
+        };
     },
-    srcDapps() {
-      if (this.selectedTab === "dapps")
-        return this.srcDir + "dapps_selected.svg";
-      else return this.srcDir + "dapps.svg";
+    computed: {
+        ...mapGetters('account', ['isAuthenticated']),
+        srcWallet() {
+            if (this.selectedTab === 'coins') {
+                return this.srcDir + 'wallet_selected.svg';
+            } else {
+                return this.srcDir + 'wallet.svg';
+            }
+        },
+        srcDapps() {
+            if (this.selectedTab === 'dapps') {
+                return this.srcDir + 'dapps_selected.svg';
+            } else {
+                return this.srcDir + 'dapps.svg';
+            }
+        },
+        srcCoins() {
+            if (this.selectedTab === 'coins') {
+                return this.srcDir + 'coins_selected.svg';
+            } else {
+                return this.srcDir + 'coins.svg';
+            }
+        },
+        srcNft() {
+            if (this.selectedTab === 'nft') {
+                return this.srcDir + 'nft_selected.svg';
+            } else {
+                return this.srcDir + 'nft.svg';
+            }
+        },
+        srcSettings() {
+            if (this.selectedTab === 'settings') {
+                return this.srcDir + 'settings_selected.svg';
+            } else {
+                return this.srcDir + 'settings.svg';
+            }
+        },
+        srcEarn() {
+            if (this.selectedTab === 'earn' && this.showRexStakeDlg == false) {
+                this.switchTab('coins');
+                return this.srcDir + 'earn.svg';
+            }
+            if (this.selectedTab === 'earn') {
+                return this.srcDir + 'earn_selected.svg';
+            } else {
+                return this.srcDir + 'earn.svg';
+            }
+        },
+        srcResources() {
+            if (this.selectedTab === 'resources' && this.showManageResourcesDlg == false) {
+                this.switchTab('coins');
+                return this.srcDir + 'settings.svg';
+            }
+            if (this.selectedTab === 'resources') {
+                return this.srcDir + 'settings_selected.svg';
+            } else {
+                return this.srcDir + 'settings.svg';
+            }
+        },
+        srcProfile() {
+            if (this.selectedTab === 'profile'){
+                this.switchTab('profile');
+                return this.srcDir + 'profile_selected.svg';
+            }else{
+                return this.srcDir + 'profile.svg';
+            }
+        },
+        srcLogout() {
+            return this.srcDir + 'resources.svg';
+        },
     },
-    srcCoins() {
-      if (this.selectedTab === "coins")
-        return this.srcDir + "coins_selected.svg";
-      else return this.srcDir + "coins.svg";
+    methods: {
+        switchTab(val) {
+            this.selectedTab = val;
+            switch (val) {
+            case 'coins':
+                this.$router.push('/balance', () => {});
+                this.$emit('update:balanceTab', 'coins');
+                break;
+            case 'dapps':
+                this.$router.push('/dappsearch', () => {});
+                break;
+            case 'nft':
+                this.$router.push('/balance', () => {});
+                this.$emit('update:balanceTab', 'collectables');
+                break;
+            case 'profile':
+                this.$router.push('/profile', () => {});
+                break;
+            case 'earn':
+                this.showRexStakeDlg = true;
+                break;
+            case 'resources':
+                this.showManageResourcesDlg = true;
+                break;
+            default:
+                break;
+            }
+        },
     },
-    srcNft() {
-      if (this.selectedTab === "nft") return this.srcDir + "nft_selected.svg";
-      else return this.srcDir + "nft.svg";
+    watch: {
+        balanceTab(val) {
+            if (val === 'coins') {
+                this.switchTab(val);
+            } else {
+                this.switchTab('nft');
+            }
+        },
     },
-    srcSettings() {
-      if (this.selectedTab === "settings")
-        return this.srcDir + "settings_selected.svg";
-      else return this.srcDir + "settings.svg";
-    },
-    srcEarn() {
-      if (this.selectedTab === "earn" && this.showRexStakeDlg == false) {
-        this.switchTab("coins");
-        return this.srcDir + "earn.svg";
-      }
-      if (this.selectedTab === "earn") return this.srcDir + "earn_selected.svg";
-      else return this.srcDir + "earn.svg";
-    },
-    srcResources() {
-      if (this.selectedTab === "resources" && this.showManageResourcesDlg == false) {
-        this.switchTab("coins");
-        return this.srcDir + "settings.svg";
-      }
-      if (this.selectedTab === "resources") return this.srcDir + "settings_selected.svg";
-      else return this.srcDir + "settings.svg";
-    },
-    srcProfile() {
-      if (this.selectedTab === "profile"){
-        this.switchTab("profile");
-        return this.srcDir + "profile_selected.svg";
-      }else{
-        return this.srcDir + "profile.svg";
-      }
-    },
-    srcLogout() {
-        return this.srcDir + "resources.svg";
-    },
-  },
-  methods: {
-    switchTab(val) {
-      this.selectedTab = val;
-      switch (val) {
-        case "coins":
-          this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "coins");
-          break;
-        case "dapps":
-          this.$router.push("/dappsearch", () => {});
-          break;
-        case "nft":
-          this.$router.push("/balance", () => {});
-          this.$emit("update:balanceTab", "collectables");
-          break;
-        case "profile":
-          this.$router.push("/profile", () => {});
-          break;
-        case "earn":
-          this.showRexStakeDlg = true;
-          break;
-        case "resources":
-          this.showManageResourcesDlg = true;
-          break;
-        default:
-          break;
-      }
-    },
-  },
-  watch: {
-    balanceTab(val) {
-      if (val === "coins") this.switchTab(val);
-      else this.switchTab("nft");
-    },
-  },
 };
 </script>
 
