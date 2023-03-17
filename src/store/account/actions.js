@@ -1,4 +1,3 @@
-import { vxm } from "~/store";
 import BigNumber from "bignumber.js";
 import { FuelUserWrapper } from "src/api/fuel";
 
@@ -35,13 +34,6 @@ export const login = async function(
       }
       dispatch("getAccountData");
       dispatch("getAccountProfile");
-      vxm.tlosWallet.wallet = {
-        auth: {
-          accountName: accountName,
-          permission: "active"
-        },
-        eosApi: this.$ualUser
-      };
     }
   } catch (e) {
     const error =
@@ -129,7 +121,6 @@ export const getAccountData = async function({ commit, dispatch }) {
 };
 
 export const getUserProfile = async function({ commit }, accountName) {
-  console.log("getUserProfile() accountName:", accountName);
   try {
     const profileResult = await this.$api.getTableRows({
       code: "profiles",

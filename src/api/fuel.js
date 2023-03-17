@@ -15,7 +15,6 @@ import { Dialog } from 'quasar';
 // this simulates the getChain function from OBE
 const getChain = () => ({
   getHyperionEndpoint: () => {
-    console.log("getHyperionEndpoint() process.env.HYPERION_ENDPOINT:", process.env.HYPERION_ENDPOINT);
     return (process.env.HYPERION_ENDPOINT);
   },
   getFuelRPCEndpoint: () => {
@@ -232,7 +231,7 @@ export default class GreymassFuelService {
   }
   static drop() {
     localStorage.removeItem('fuel_preferences');
-  }  
+  }
   static load() {
     try {
       GreymassFuelService.preferences = GreymassFuelService.preferences || {};
@@ -292,13 +291,13 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     const cancel/*: string | boolean*/ = GreymassFuelService.globals.$t('api.reject');
     const ok = GreymassFuelService.globals.$t('api.confirm');
     let message = GreymassFuelService.globals.$t('api.greymass_fuel_message');
-    
+
     if (typeof fees == 'string') {
       message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
     }
-    
+
     Dialog.create({
-      title: GreymassFuelService.globals.$t('api.greymass_dialog_title'), 
+      title: GreymassFuelService.globals.$t('api.greymass_dialog_title'),
       message,
       html: true,
       cancel,

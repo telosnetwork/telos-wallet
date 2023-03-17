@@ -91,7 +91,6 @@
               v-model:showHistoryDlg="showHistoryDlg"
               v-model:showDepositEVMDlg="showDepositEVMDlg"
               v-model:showWithdrawEVMDlg="showWithdrawEVMDlg"
-              v-model:showExchangeDlg="showExchangeDlg"
               v-model:showBuyAmountDlg="showBuyAmountDlg"
               v-model:selectedCoin="selectedCoin"
               :suggestTokens="suggestTokens"
@@ -125,13 +124,7 @@
       v-model:showSendAmountDlg="showSendAmountDlg"
       v-model:showShareAddressDlg="showShareAddressDlg"
       v-model:showBuyAmountDlg="showBuyAmountDlg"
-      v-model:showExchangeDlg="showExchangeDlg"
       v-model:showRexStakeDlg="showRexStakeDlg"
-    />
-    <Exchange
-      v-model:showExchangeDlg="showExchangeDlg"
-      v-model:selectedConvertCoin="selectedCoin"
-      :coins="coins"
     />
     <Send
       v-model:showSendDlg="showSendDlg"
@@ -214,7 +207,6 @@ import BuyAmount from "~/pages/components/balance/BuyAmount";
 import ShareAddress from "~/pages/components/balance/ShareAddress";
 import QRScanner from "~/pages/components/balance/QRScanner";
 import History from "~/pages/components/balance/History";
-import Exchange from "~/pages/components/balance/Exchange";
 import DepositEVM from "~/pages/components/balance/DepositEVM";
 import WithdrawEVM from "~/pages/components/balance/WithdrawEVM";
 import RexStaking from "~/pages/components/balance/RexStaking";
@@ -235,7 +227,6 @@ export default {
     ShareAddress,
     QRScanner,
     History,
-    Exchange,
     DepositEVM,
     WithdrawEVM,
     RexStaking,
@@ -283,7 +274,6 @@ export default {
       showBuyAmountDlg: false,
       showQRScannerDlg: false,
       showHistoryDlg: false,
-      showExchangeDlg: false,
       showDepositEVMDlg: false,
       showWithdrawEVMDlg: false,
       showEVMWarning: false,
