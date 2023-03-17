@@ -1,142 +1,3 @@
-<template>
-<q-dialog
-    v-if="selectedCoin"
-    v-model="showDlg"
-    persistent
-    maximized
-    transition-show="slide-left"
-    transition-hide="slide-right"
->
-    <div class="main-background">
-        <div class="dialogPage">
-            <div class="dialogPageContent">
-                <div class="dialogPageHeading">
-                    <div>
-                        <q-btn
-                            v-close-popup
-                            round
-                            flat
-                            dense
-                            class="closebBtn"
-                            icon="west"
-                        />
-                    </div>
-                    <div class="text-subtitle1 text-weight-medium text-center">
-                        {{ `Receive ${selectedCoin.symbol}` }}
-                    </div>
-                    <div ></div>
-                </div>
-                <div>
-                    <!-- <q-card
-              class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow bg-transparent q-gutter-md"
-            > -->
-                    <q-card class="bg-transparent no-shadow text-center">
-                        <!-- <div v-if="isPToken" class="list-item q-pb-sm"> -->
-                        <div v-if="isPToken" class="q-py-md">
-                            <label
-                                class="text-center full-width text-white"
-                            > {{$t('components.from_network')}}</label>
-                        </div>
-                        <div v-if="isPToken" class="">
-                            <q-btn-group
-                                class="full-width justify-center q-pb-md"
-                                push
-                                unelevated
-                                rounded
-                            >
-                                <q-btn
-                                    v-for="(pTokenNetwork, key) of coinpTokenNetworks"
-                                    :key="pTokenNetwork"
-                                    class="q-px-md"
-                                    push
-                                    no-caps
-                                    :label="pTokenNetwork"
-                                    :style="`background: ${
-                                        networkType === key ? '#FFFFFF55' : '#FFFFFF22'
-                                    };
-                            color: ${networkType === key ? 'white' : 'grey'};`"
-                                    @click="networkType = key"
-                                />
-                            </q-btn-group>
-                            <q-btn
-                                v-if="
-                                    networkType === 'ptoken' ||
-                                        (networkType === 'tevm' && !evmAddress)
-                                "
-                                class="purpleGradient q-mt-lg text-weight-medium text-caption"
-                                push
-                                no-caps
-                                :label="
-                                    networkType === 'ptoken'
-                                        ? 'Generate New Deposit Address'
-                                        : 'Generate New Address'
-                                "
-                                :style="`visibility: ${
-                                    networkType === 'telos' ? 'hidden' : ''
-                                }`"
-                                @click="
-                                    networkType === 'ptoken'
-                                        ? generateDepositAddress()
-                                        : generateEVMAddress()
-                                "
-                            />
-                        </div>
-                        <q-space />
-                        <div
-                            v-if="
-                                networkType === 'telos' ||
-                                    networkType === 'ethereum' ||
-                                    isAddressAvailable
-                            "
-                            class="cursor-pointer"
-                            @click="copyToClipboard(qrcodeData)"
-                        >
-                            <QRCanvas
-                                :options="{ data: qrcodeData, cellSize: 10 }"
-                                class="qrCanvas q-pa-lg bg-white"
-                            />
-                        </div>
-                        <div
-                            :class="
-                                networkType === 'telos' ||
-                                    networkType === 'ethereum' ||
-                                    !isAddressAvailable
-                                    ? 'text-h6'
-                                    : 'text-caption'
-                            "
-                            class="text-white"
-                            style="word-break: break-word"
-                        >
-                            {{ displayAccountName }}
-                        </div>
-                        <div class="text-white">({{ selectedCoin.name }} address)</div>
-                        <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
-                            <q-spinner color="primary" size="2em" :thickness="5" />
-                            {{$t('components.awaiting_deposits')}}
-                        </div>
-                        <q-space />
-                        <div v-if="networkType === 'tevm'" class="text-caption text-red">
-                            {{$t('components.telos_evm_only')}}
-                        </div>
-                        <div
-                            v-else-if="networkType === 'ptoken'"
-                            class="text-caption text-grey-8"
-                        >
-
-                            {{ $t('components.telos_evm_only', {
-                                sym: selectedCoin.symbol.slice(1),
-                                account: accountName
-                            }) }}
-
-                        </div>
-                    </q-card>
-                </div>
-            </div>
-        </div>
-    </div>
-</q-dialog>
-</template>
-
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { QRCanvas } from 'qrcanvas-vue';
@@ -362,6 +223,145 @@ export default {
     mounted() {},
 };
 </script>
+
+<template>
+<q-dialog
+    v-if="selectedCoin"
+    v-model="showDlg"
+    persistent
+    maximized
+    transition-show="slide-left"
+    transition-hide="slide-right"
+>
+    <div class="main-background">
+        <div class="dialogPage">
+            <div class="dialogPageContent">
+                <div class="dialogPageHeading">
+                    <div>
+                        <q-btn
+                            v-close-popup
+                            round
+                            flat
+                            dense
+                            class="closebBtn"
+                            icon="west"
+                        />
+                    </div>
+                    <div class="text-subtitle1 text-weight-medium text-center">
+                        {{ `Receive ${selectedCoin.symbol}` }}
+                    </div>
+                    <div ></div>
+                </div>
+                <div>
+                    <!-- <q-card
+              class="column qr-card text-center q-mx-auto q-my-md q-pa-sm no-shadow bg-transparent q-gutter-md"
+            > -->
+                    <q-card class="bg-transparent no-shadow text-center">
+                        <!-- <div v-if="isPToken" class="list-item q-pb-sm"> -->
+                        <div v-if="isPToken" class="q-py-md">
+                            <label
+                                class="text-center full-width text-white"
+                            > {{$t('components.from_network')}}</label>
+                        </div>
+                        <div v-if="isPToken" class="">
+                            <q-btn-group
+                                class="full-width justify-center q-pb-md"
+                                push
+                                unelevated
+                                rounded
+                            >
+                                <q-btn
+                                    v-for="(pTokenNetwork, key) of coinpTokenNetworks"
+                                    :key="pTokenNetwork"
+                                    class="q-px-md"
+                                    push
+                                    no-caps
+                                    :label="pTokenNetwork"
+                                    :style="`background: ${
+                                        networkType === key ? '#FFFFFF55' : '#FFFFFF22'
+                                    };
+                        color: ${networkType === key ? 'white' : 'grey'};`"
+                                    @click="networkType = key"
+                                />
+                            </q-btn-group>
+                            <q-btn
+                                v-if="
+                                    networkType === 'ptoken' ||
+                                        (networkType === 'tevm' && !evmAddress)
+                                "
+                                class="purpleGradient q-mt-lg text-weight-medium text-caption"
+                                push
+                                no-caps
+                                :label="
+                                    networkType === 'ptoken'
+                                        ? 'Generate New Deposit Address'
+                                        : 'Generate New Address'
+                                "
+                                :style="`visibility: ${
+                                    networkType === 'telos' ? 'hidden' : ''
+                                }`"
+                                @click="
+                                    networkType === 'ptoken'
+                                        ? generateDepositAddress()
+                                        : generateEVMAddress()
+                                "
+                            />
+                        </div>
+                        <q-space />
+                        <div
+                            v-if="
+                                networkType === 'telos' ||
+                                    networkType === 'ethereum' ||
+                                    isAddressAvailable
+                            "
+                            class="cursor-pointer"
+                            @click="copyToClipboard(qrcodeData)"
+                        >
+                            <QRCanvas
+                                :options="{ data: qrcodeData, cellSize: 10 }"
+                                class="qrCanvas q-pa-lg bg-white"
+                            />
+                        </div>
+                        <div
+                            :class="
+                                networkType === 'telos' ||
+                                    networkType === 'ethereum' ||
+                                    !isAddressAvailable
+                                    ? 'text-h6'
+                                    : 'text-caption'
+                            "
+                            class="text-white"
+                            style="word-break: break-word"
+                        >
+                            {{ displayAccountName }}
+                        </div>
+                        <div class="text-white">({{ selectedCoin.name }} address)</div>
+                        <div v-if="networkType === 'ptoken' && awaiting" class="q-pt-md">
+                            <q-spinner color="primary" size="2em" :thickness="5" />
+                            {{$t('components.awaiting_deposits')}}
+                        </div>
+                        <q-space />
+                        <div v-if="networkType === 'tevm'" class="text-caption text-red">
+                            {{$t('components.telos_evm_only')}}
+                        </div>
+                        <div
+                            v-else-if="networkType === 'ptoken'"
+                            class="text-caption text-grey-8"
+                        >
+
+                            {{ $t('components.telos_evm_only', {
+                                sym: selectedCoin.symbol.slice(1),
+                                account: accountName
+                            }) }}
+
+                        </div>
+                    </q-card>
+                </div>
+            </div>
+        </div>
+    </div>
+</q-dialog>
+</template>
 
 <style lang="scss" scoped>
 input[type="number"]::-webkit-outer-spin-button,

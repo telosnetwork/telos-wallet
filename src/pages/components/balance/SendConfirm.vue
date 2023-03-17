@@ -1,91 +1,3 @@
-<template>
-<q-dialog
-    v-model="showDlg"
-    persistent
-    maximized
-    transition-show="slide-left"
-    transition-hide="slide-right"
->
-    <div class="main-background">
-        <div class="dialogPage">
-            <div class="dialogPageContent">
-                <div class="dialogPageHeading">
-                    <div>
-                        <q-btn
-                            v-close-popup
-                            round
-                            flat
-                            dense
-                            class="closebBtn"
-                            icon="west"
-                        />
-                    </div>
-                    <div class="text-subtitle1 text-weight-medium text-center">
-                        {{$t('components.confirm_send')}}
-                    </div>
-                    <div ></div>
-                </div>
-                <div class="text-h5 text-center">
-                    {{
-                        `${getFixed(sendAmount, selectedCoin.precision)} ${
-                            selectedCoin.symbol
-                        }`
-                    }}
-                </div>
-                <div>
-                    <div class="column items-center ">
-                        <div class="confirmGrid q-py-lg q-gutter-y-sm">
-                            <div class="text-weight-bold">To</div>
-                            <div class="lt-md">{{ toAddressShort }}</div>
-                            <div class="gt-sm">{{ toAddress }}</div>
-                            <div v-if="networkType !== 'telos'" class="text-weight-bold">
-                                Network Fee
-                            </div>
-                            <div v-if="networkType !== 'telos'">
-                                {{ `$ ${getFixed(gasFee * selectedCoin.price, 8)}` }}
-                            </div>
-                            <div class="text-weight-bold">{{$t('components.total')}}</div>
-                            <div>
-                                {{ `$ ${getFixed(sendAmount * selectedCoin.price, 8)}` }}
-                            </div>
-                        </div>
-                        <div
-                            v-if="
-                                selectedCoin.symbol === 'TLOS' && networkType === 'ethereum'
-                            "
-                            class="text-caption text-grey-8 cursor-pointer text-center q-mt-xl"
-                            @click="
-                                copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')
-                            "
-                        >
-                            {{$t('components.for_ethereum_wallet_users')}}
-                        </div>
-                        <div class="text-center">
-                            <q-btn
-                                class="purpleGradient text-white text-subtitle2 nextBtn flex-center"
-                                flat
-                                no-caps
-                                label="Confirm send"
-                                :disable="sendAmount === 0"
-                                @click="confirm()"
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div ></div>
-            </div>
-        </div>
-    </div>
-    <div
-        v-if="sending"
-        class="justify-center absolute flex"
-        style="background: rgba(0, 0, 0, 0.4);"
-    >
-        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
-    </div>
-</q-dialog>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
@@ -266,6 +178,94 @@ export default {
     },
 };
 </script>
+
+<template>
+<q-dialog
+    v-model="showDlg"
+    persistent
+    maximized
+    transition-show="slide-left"
+    transition-hide="slide-right"
+>
+    <div class="main-background">
+        <div class="dialogPage">
+            <div class="dialogPageContent">
+                <div class="dialogPageHeading">
+                    <div>
+                        <q-btn
+                            v-close-popup
+                            round
+                            flat
+                            dense
+                            class="closebBtn"
+                            icon="west"
+                        />
+                    </div>
+                    <div class="text-subtitle1 text-weight-medium text-center">
+                        {{$t('components.confirm_send')}}
+                    </div>
+                    <div ></div>
+                </div>
+                <div class="text-h5 text-center">
+                    {{
+                        `${getFixed(sendAmount, selectedCoin.precision)} ${
+                            selectedCoin.symbol
+                        }`
+                    }}
+                </div>
+                <div>
+                    <div class="column items-center ">
+                        <div class="confirmGrid q-py-lg q-gutter-y-sm">
+                            <div class="text-weight-bold">To</div>
+                            <div class="lt-md">{{ toAddressShort }}</div>
+                            <div class="gt-sm">{{ toAddress }}</div>
+                            <div v-if="networkType !== 'telos'" class="text-weight-bold">
+                                Network Fee
+                            </div>
+                            <div v-if="networkType !== 'telos'">
+                                {{ `$ ${getFixed(gasFee * selectedCoin.price, 8)}` }}
+                            </div>
+                            <div class="text-weight-bold">{{$t('components.total')}}</div>
+                            <div>
+                                {{ `$ ${getFixed(sendAmount * selectedCoin.price, 8)}` }}
+                            </div>
+                        </div>
+                        <div
+                            v-if="
+                                selectedCoin.symbol === 'TLOS' && networkType === 'ethereum'
+                            "
+                            class="text-caption text-grey-8 cursor-pointer text-center q-mt-xl"
+                            @click="
+                                copyToClipboard('0x7825e833D495F3d1c28872415a4aee339D26AC88')
+                            "
+                        >
+                            {{$t('components.for_ethereum_wallet_users')}}
+                        </div>
+                        <div class="text-center">
+                            <q-btn
+                                class="purpleGradient text-white text-subtitle2 nextBtn flex-center"
+                                flat
+                                no-caps
+                                label="Confirm send"
+                                :disable="sendAmount === 0"
+                                @click="confirm()"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div ></div>
+            </div>
+        </div>
+    </div>
+    <div
+        v-if="sending"
+        class="justify-center absolute flex"
+        style="background: rgba(0, 0, 0, 0.4);"
+    >
+        <q-spinner-dots class="q-my-auto" color="primary" size="40px" />
+    </div>
+</q-dialog>
+</template>
 
 <style scoped>
 .confirmGrid {
