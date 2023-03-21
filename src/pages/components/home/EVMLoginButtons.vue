@@ -3,12 +3,20 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
+    methods: {
+        connectToMetaMask() {
+
+        },
+        viewAnyAccount() {
+
+        },
+    },
 });
 </script>
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient">
+    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="connectToMetaMask">
         <img
             src="~assets/logo--metamask.svg"
             class="q-mr-md"
@@ -23,6 +31,7 @@ export default defineComponent({
         text-color="white"
         outline
         :label="$t('home.view_any_account')"
+        @click="viewAnyAccount"
     />
 </div>
 </template>

@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
-    name: 'LoginButton',
+    name: 'NativeLoginButton',
     data() {
         return {
             showLogin: false,
@@ -197,13 +197,11 @@ export default defineComponent({
 <template>
 <div>
     <!-- Login Button -->
-    <div v-if="!isAuthenticated" class="q-px-md">
+    <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
         <div class="q-mt-md q-mb-sm">
             <q-btn
-                no-caps
-                label="Connect Wallet"
-                class="purpleGradient q-pa-sm"
-                rounded
+                label="Connect Your Wallet"
+                class="purpleGradient q-px-md q-py-sm"
                 @click="showLogin = true"
             />
         </div>
@@ -212,11 +210,9 @@ export default defineComponent({
         <div class="q-mt-md">
             <q-btn
                 text-color="white"
-                no-caps
                 outline
-                rounded
                 label="View any account"
-                class=" q-pa-sm"
+                class="q-px-md q-py-sm"
                 @click="loginAsJustViewer()"
             />
         </div>
@@ -225,11 +221,9 @@ export default defineComponent({
         <div class="q-mt-md">
             <q-btn
                 text-color="white"
-                no-caps
                 outline
-                rounded
                 label="Create New Account"
-                class=" q-pa-sm"
+                class="q-px-md q-py-sm"
                 @click="signUp"
             />
         </div>

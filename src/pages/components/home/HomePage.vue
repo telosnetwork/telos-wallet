@@ -1,13 +1,14 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
-import LoginButton from 'components/LoginButton.vue'; // eztodo move this to home dir
+
+import NativeLoginButton from 'src/pages/components/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'src/pages/components/home/EVMLoginButtons.vue';
 
 export default {
     name: 'HomePage',
     components: {
         EVMLoginButtons,
-        LoginButton,
+        NativeLoginButton,
     },
     data: (): {
         tab: 'left' | 'right'
@@ -62,7 +63,7 @@ export default {
                 </button>
             </div>
 
-            <LoginButton v-if="tab === 'right'" />
+            <NativeLoginButton v-if="tab === 'right'" />
 
             <EVMLoginButtons v-else-if="tab === 'left'" />
         </div>
@@ -110,6 +111,10 @@ export default {
     &__logo {
         width: 240px;
         margin: 0 auto 88px;
+
+        @media only screen and (min-width: $breakpoint-md-min) {
+            margin: 128px auto 88px;
+        }
     }
 
     &__button-container {
@@ -133,6 +138,7 @@ export default {
         background-color: rgba(white, 0.2);
         border: unset;
         color: white;
+        cursor: pointer;
 
         &:first-of-type {
             border-radius: 4px 0 0 4px;
