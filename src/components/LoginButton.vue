@@ -1,6 +1,9 @@
 <script lang="ts">
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { useAntelopeLib, setUseAntelopeLib } from 'src/api';
 
 export default defineComponent({
     name: 'LoginButton',
@@ -9,7 +12,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: null,
+            error: '',
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -31,6 +34,7 @@ export default defineComponent({
             NETtoBuy: 0,
             buyAmount: 1, // 1 TLOS
             resLow: false,
+            useAntelopeLib: useAntelopeLib(),
         };
     },
     computed: {
@@ -63,7 +67,39 @@ export default defineComponent({
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
         },
+        async loginEVM(network:string) {
+            // if prod use telos mainnet
+            // if dev use telos testnet
+            // console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+            // console.log('process.env', process.env);
+            // const network = process.env.NETWORK === 'mainnet' ? 'telos-evm' : 'telos-testnet-evm';
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+            accountStore.loginEVM({ network });
+        },
         async onLogin(idx: number, justViewer = false) {
+            if (useAntelopeLib()) {
+                return this.onLogin_pinia_version(idx, justViewer);
+            } else {
+                return this.onLogin_vuex_version(idx, justViewer);
+            }
+        },
+        async onLogin_pinia_version(idx: number, justViewer = false) {
+            const authenticator = this.$ual.getAuthenticators().availableAuthenticators[idx];
+            console.log('onLogin', [idx, justViewer, authenticator]);
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            const success = await accountStore.loginNative({ authenticator, network });
+            if (success) {
+                this.showLogin = false;
+                await this.$router.push({ path: '/balance' });
+            } else {
+                this.error = 'Login failed';
+            }
+        },
+        async onLogin_vuex_version(idx: number, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
@@ -190,6 +226,9 @@ export default defineComponent({
                 await this.checkResources();
             }
         },
+        useAntelopeLib() {
+            setUseAntelopeLib(this.useAntelopeLib);
+        },
     },
 });
 </script>
@@ -240,6 +279,33 @@ export default defineComponent({
             <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
             <q-list class="" dark separator>
                 <q-item
+                    v-ripple
+                    class="q-my-sm"
+                >
+                    <!-- EVM login button -->
+                    <q-item-section class="cursor-pointer" avatar @click="loginEVM('telos-evm')">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" width="30" >
+                    </q-item-section>
+                    <q-item-section class="cursor-pointer" avatar @click="loginEVM('telos-evm')">
+                        Login with MetaMask (Telos EVM Mainnet)
+                    </q-item-section>
+                </q-item>
+                <q-item
+                    v-ripple
+                    class="q-my-sm"
+                >
+                    <!-- EVM login button -->
+                    <q-item-section class="cursor-pointer" avatar @click="loginEVM('telos-testnet-evm')">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" width="30" >
+                    </q-item-section>
+                    <q-item-section class="cursor-pointer" avatar @click="loginEVM('telos-testnet-evm')">
+                        Login with MetaMask (Telos EVM Testnet)
+                    </q-item-section>
+                </q-item>
+                <div class="q-pr-md q-pb-md">
+                    <q-toggle v-model="useAntelopeLib" label="use Antelope lib"/>
+                </div>
+                <q-item
                     v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
                     :key="wallet.getStyle().text"
                     v-ripple
@@ -285,7 +351,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close"
+                @click="close = true"
             />
             <q-item
                 v-if="error"

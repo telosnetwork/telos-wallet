@@ -41,6 +41,7 @@ export default {
        */
         },
         selectCoin(coin) {
+            console.log('selectCoin', coin);
             this.$emit('update:selectedCoin', coin);
             this.$emit('update:showHistoryDlg', true);
         },

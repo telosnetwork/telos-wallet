@@ -1,0 +1,57 @@
+/**
+ * Resources: this store is responsible for obtaning and managing the resources of the
+ * accounts present in the Account store.
+ *
+ * For Antelope native chains, there are three types of resources: CPU, NET, and RAM.
+ * This store retrieves the resource data of the accounts and keeps them in memory while
+ * also providing pre-built transactions to obtain or release resources.
+ *
+ * Note: This store is specific to Telos Native and will not be available for EVM chains.
+ */
+
+
+import { defineStore } from 'pinia';
+import { AccountModel } from 'src/antelope/stores/account';
+import { errorToString } from 'src/antelope/config';
+import {
+    createInitFunction,
+    createTraceFunction,
+} from 'src/antelope/stores/feedback';
+
+
+export interface ResourcesState {
+    __: string;
+}
+
+const store_name = 'resources';
+
+export const useResourcesStore = defineStore(store_name, {
+    state: (): ResourcesState => (resourcesInitialState),
+    getters: {
+    },
+    actions: {
+        trace: createTraceFunction(store_name),
+        init: createInitFunction(store_name),
+        // Logged Handlers ----------------
+        handleAccountLoggedIn(logged: AccountModel) {
+            this.trace('handleAccountLoggedIn', logged);
+            try {
+                // TOOD: get resources data for the logged account
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+            }
+        },
+        handleAccountLoggedOut() {
+            this.trace('handleAccountLoggedOut');
+            try {
+                // TOOD: clear resources data
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+            }
+        },
+    },
+});
+
+const resourcesInitialState: ResourcesState = {
+    __: '',
+};
