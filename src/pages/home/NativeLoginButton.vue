@@ -4,6 +4,7 @@ import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { useAntelopeLib, setUseAntelopeLib } from 'src/api';
 
 export default defineComponent({
     name: 'NativeLoginButton',
@@ -12,7 +13,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: null,
+            error: '',
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -34,6 +35,7 @@ export default defineComponent({
             NETtoBuy: 0,
             buyAmount: 1, // 1 TLOS
             resLow: false,
+            useAntelopeLib: useAntelopeLib(),
         };
     },
     computed: {
@@ -203,6 +205,9 @@ export default defineComponent({
                 await this.checkResources();
             }
         },
+        useAntelopeLib() {
+            setUseAntelopeLib(this.useAntelopeLib);
+        },
     },
 });
 </script>
@@ -313,7 +318,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close"
+                @click="close = true"
             />
             <q-item
                 v-if="error"
