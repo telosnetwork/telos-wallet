@@ -3,6 +3,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/NavBar.vue';
 import LoginButton from 'components/LoginButton.vue';
+import { getAntelope } from 'src/antelope';
+import { useAntelopeLib } from 'src/api';
 
 const pagesData = [
     {
@@ -46,10 +48,20 @@ export default {
             nftTokens: [],
             warningShow: false,
             warningText: '',
+            ant: getAntelope(),
         };
     },
     computed: {
         ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        isUserAuthenticated() {
+            if (useAntelopeLib()) {
+                console.log('isUserAuthenticated() -> this.ant.stores.account.isAuthenticated');
+                return this.ant.stores.account.isAuthenticated;
+            } else {
+                console.log('isUserAuthenticated() -> this.isAuthenticated');
+                return this.isAuthenticated;
+            }
+        },
         ...mapGetters('global', ['footerHeight']),
         containerHeight() {
             return window.innerHeight;
@@ -69,7 +81,7 @@ export default {
             'getUserProfile',
         ]),
         checkPath() {
-            if (!this.isAuthenticated) {
+            if (!this.isUserAuthenticated) {
                 if (!['/', '/dappsearch'].includes(this.$route.path)) {
                     window.location = '/';
                 }
@@ -85,7 +97,7 @@ export default {
                 await this.getUserProfile(this.accountName);
             }
             const accountProfile =
-        this.$store.state.account.profiles[this.accountName];
+                this.$store.state.account.profiles[this.accountName];
             if (!accountProfile) {
                 return;
             }
@@ -108,7 +120,18 @@ export default {
         },
         logOut() {
             this.resetTokens();
-            this.logout();
+            if (useAntelopeLib()) {
+                this.ant.stores.account.logout();
+            } else {
+                this.logout();
+            }
+        },
+        debug() {
+            console.log('------ debug ------');
+            console.log('useAntelopeLib', [useAntelopeLib()]);
+            console.log('this.$store', [this.$store]);
+            console.log('getAntelope()', [this.ant]);
+            console.log('isAuthenticated', [this.ant.stores.account.isAuthenticated]);
         },
         resetTokens() {
             this.coins = [];
@@ -116,16 +139,20 @@ export default {
         },
     },
     async mounted() {
-        await this.memoryAutoLogin();
-        this.loadUserProfile();
-        this.checkPath();
+        if (useAntelopeLib()) {
+            await this.ant.stores.account.autoLogin();
+        } else {
+            await this.memoryAutoLogin();
+            this.loadUserProfile();
+            this.checkPath();
+        }
     },
 };
 </script>
 
 <template>
-<q-layout view="hHh Lpr fFf" class="">
-    <LoginButton v-if="isAuthenticated" class="login-button" />
+<q-layout view="hHh Lpr fFf" class="" @click="debug">
+    <LoginButton v-if="isUserAuthenticated" class="login-button" />
     <div class="videoWrapper">
         <video
             id="bgvid"
@@ -148,9 +175,9 @@ export default {
     <div class="videoOverlay" ></div>
     <div class="videoOverlay shadedOverlay" ></div>
 
-    <NavBar v-if="isAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
+    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
     <q-page-container
-        :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
+        :class="`pageContainer ${isUserAuthenticated ? 'authenticated' : ''}`"
     >
         <div v-if="warningShow">
             <q-banner inline-actions dark class="warningSign text-white">

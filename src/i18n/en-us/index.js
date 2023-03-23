@@ -258,4 +258,9 @@ export default {
     error404: {
         oops: 'Oops. Nothing here...',
     },
+    antelope: {
+        evm: {
+            error_support_provider_request: 'Error: Provider does not support request method',
+        },
+    },
 };

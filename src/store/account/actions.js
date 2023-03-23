@@ -37,9 +37,9 @@ export const login = async function(
         }
     } catch (e) {
         const error =
-      (authenticator.getError() && authenticator.getError().message) ||
-      e.message ||
-      e.reason;
+            (authenticator.getError() && authenticator.getError().message) ||
+            e.message ||
+            e.reason;
         commit('general/setErrorMsg', error, { root: true });
         console.log('Login error: ', error);
     } finally {
@@ -87,6 +87,7 @@ const getAuthenticator = function(ual, wlt = null) {
 };
 
 export const logout = async function({ commit }) {
+    console.error('account.logout() DEPRECATED!. use useAccountStore().logout() instead');
     const { authenticator } = getAuthenticator(this.$ual);
     try {
         authenticator && (await authenticator.logout());
