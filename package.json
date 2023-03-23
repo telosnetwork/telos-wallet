@@ -28,7 +28,10 @@
     "eos-common": "^0.8.0",
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
+<<<<<<< HEAD
     "erc-20-abi": "^1.0.0",
+=======
+>>>>>>> 5760172 (First approach to antelope lib)
     "ethers": "^5.5.1",
     "jdenticon": "^3.1.1",
     "mitt": "^3.0.0",
