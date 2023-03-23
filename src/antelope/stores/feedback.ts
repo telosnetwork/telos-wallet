@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 /**
  * Feedback: This store is ment to be used as a utility store to give feedback
  * to the user about the internal state of the app and that includes:

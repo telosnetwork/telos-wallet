@@ -79,7 +79,6 @@ export const useEVMStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-
             useFeedbackStore().setDebug(store_name, isTracingAll());
             const evm = useEVMStore();
 
