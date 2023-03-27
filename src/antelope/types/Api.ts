@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Checksum160,
     Checksum256,
@@ -110,7 +109,7 @@ export interface GetTableRowsParams<Index = TableIndexType | string> {
 }
 
 
-export interface GetTableRowsResponse<Index = TableIndexType, Row = any> {
+export interface GetTableRowsResponse<Index = TableIndexType, Row = unknown> {
   rows: Row[];
   more: boolean;
   ram_payers?: Name[];
@@ -121,7 +120,7 @@ export type ApiClient = {
   getAccount: (address: string) => Promise<API.v1.AccountObject>;
   getKeyAccounts: (key: PublicKey) => Promise<{ account_names: Name[] }>;
   getHyperionAccountData: (address: string) => Promise<AccountDetails>;
-  getCreator: (address: string) => Promise<any>;
+  getCreator: (address: string) => Promise<unknown>;
   getTokens: (address: string) => Promise<Token[]>;
   getTransactions: (filter: HyperionTransactionFilter) => Promise<Action[]>;
   getTransaction: (address: string) => Promise<ActionData>;
