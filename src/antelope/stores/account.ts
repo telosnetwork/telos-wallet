@@ -126,7 +126,7 @@ export const useAccountStore = defineStore(store_name, {
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
-                throw new Error('antelope.stores.account.error_login_native');
+                throw new Error('antelope.account.error_login_native');
             } finally {
                 useFeedbackStore().unsetLoading('account.login');
             }
@@ -160,7 +160,7 @@ export const useAccountStore = defineStore(store_name, {
                 } else {
                     // TODO: check when and how does this error happends if ever
                     console.error('Error: ', 'EVM login failed??');
-                    throw new Error('antelope.stores.account.error_login_evm');
+                    throw new Error('antelope.account.error_login_evm');
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -213,7 +213,7 @@ export const useAccountStore = defineStore(store_name, {
                         );
                         if (!authenticator) {
                             console.error(authenticators.map(a => a.getName()).join(', '));
-                            throw new Error('antelope.stores.account.error_auto_login');
+                            throw new Error('antelope.account.error_auto_login');
                         }
                         this.loginNative({
                             authenticator,

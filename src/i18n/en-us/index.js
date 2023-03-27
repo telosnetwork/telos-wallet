@@ -260,7 +260,23 @@ export default {
     },
     antelope: {
         evm: {
-            error_support_provider_request: 'Error: Provider does not support request method',
+            error_support_provider_request: 'Provider does not support request method',
+            error_login: 'Error in login proccess',
+            add_chain_rejected: 'User has rejected the request to add the chain',
+            connect_rejected: 'User has rejected the request to connect to the chain',
+            error_add_chain: 'Error in adding chain',
+            switch_chain_rejected: 'User has rejected the request to switch the chain',
+            error_switch_chain: 'Error in switching chain',
+            error_no_provider: 'No provider found',
+        },
+        chain: {
+            error_update_data: 'Error in updating data',
+            error_apy: 'Error in getting APY',
+        },
+        account: {
+            error_login_native: 'An error has occurred trying to login to the native chain',
+            error_login_evm: 'An error has occurred trying to login to the EVM chain',
+            error_auto_login: 'An error has occurred trying to auto login the user',
         },
     },
 };
