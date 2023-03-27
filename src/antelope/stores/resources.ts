@@ -11,8 +11,6 @@
 
 
 import { defineStore } from 'pinia';
-import { AccountModel } from 'src/antelope/stores/account';
-import { errorToString } from 'src/antelope/config';
 import {
     createInitFunction,
     createTraceFunction,
@@ -32,23 +30,6 @@ export const useResourcesStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: createInitFunction(store_name),
-        // Logged Handlers ----------------
-        handleAccountLoggedIn(logged: AccountModel) {
-            this.trace('handleAccountLoggedIn', logged);
-            try {
-                // TOOD: get resources data for the logged account
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
-        handleAccountLoggedOut() {
-            this.trace('handleAccountLoggedOut');
-            try {
-                // TOOD: clear resources data
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
     },
 });
 

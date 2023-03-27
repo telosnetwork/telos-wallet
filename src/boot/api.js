@@ -89,5 +89,6 @@ export default boot(async ({ store }) => {
         getAccount: getAccount.bind(store),
         getRpc: getRpc.bind(store),
     };
+
     window.$api = store['$api'];
 });

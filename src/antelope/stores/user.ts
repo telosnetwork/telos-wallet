@@ -16,10 +16,11 @@ import { defineStore } from 'pinia';
 import { errorToString } from 'src/antelope/config';
 import { AccountModel } from 'src/antelope/stores/account';
 import {
-    createInitFunction,
     createTraceFunction,
+    isTracingAll,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
+import { getAntelope } from '..';
 
 export type AccountList = Array<AccountId>;
 
@@ -60,7 +61,13 @@ export const useUserStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
+        init: () => {
+            useFeedbackStore().setDebug(store_name, isTracingAll());
+            const ant = getAntelope();
+            // we want to react when the logged account changes
+            ant.events.onLoggedIn.subscribe((acc: AccountModel) => useUserStore().handleAccountLoggedIn(acc));
+            ant.events.onLoggedOut.subscribe(() => useUserStore().handleAccountLoggedOut());
+        },
         async loadUsers(): Promise<void> {
             this.trace('loadUsers');
             try {
