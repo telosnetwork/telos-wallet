@@ -69,9 +69,7 @@ export const useEVMStore = defineStore(store_name, {
                 let checkProvider = new ethers.providers.Web3Provider(provider);
                 checkProvider = await this.ensureCorrectChain(checkProvider);
 
-                console.log('Evm.login() checkProvider', [checkProvider]);
                 const accounts = await checkProvider.listAccounts();
-                console.log('Evm.login() accounts', [accounts]);
                 if (accounts.length > 0) {
                     checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accounts[0];
@@ -119,7 +117,6 @@ export const useEVMStore = defineStore(store_name, {
                     throw new Error('antelope.evm.error_support_provider_request');
                 }
                 try {
-                    console.log('Evm.switchChainInjected() try switchEthereumChain', [chainIdParam]);
                     await provider.request({
                         method: 'wallet_switchEthereumChain',
                         params: [{ chainId: chainIdParam }],
@@ -153,7 +150,6 @@ export const useEVMStore = defineStore(store_name, {
                                     iconUrls: [chainSettings.getSmallLogoPath(), chainSettings.getLargeLogoPath()],
                                 }],
                             };
-                            console.log('Evm.switchChainInjected() payload', [payload]);
                             await provider.request(payload);
                             return true;
                         } catch (e) {

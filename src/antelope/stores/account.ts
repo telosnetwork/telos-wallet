@@ -183,7 +183,7 @@ export const useAccountStore = defineStore(store_name, {
                     try {
                         authenticator && (await authenticator.logout());
                     } catch (error) {
-                        console.log('Authenticator logout error', error);
+                        console.error('Authenticator logout error', error);
                     }
                 } else {
                     // useEVMStore().logout(); ?
@@ -212,7 +212,7 @@ export const useAccountStore = defineStore(store_name, {
                             a => a.getName() === autoLogin,
                         );
                         if (!authenticator) {
-                            console.log(authenticators.map(a => a.getName()).join(', '));
+                            console.error(authenticators.map(a => a.getName()).join(', '));
                             throw new Error('antelope.stores.account.error_auto_login');
                         }
                         this.loginNative({

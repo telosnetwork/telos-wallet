@@ -41,7 +41,7 @@ export const login = async function(
             e.message ||
             e.reason;
         commit('general/setErrorMsg', error, { root: true });
-        console.log('Login error: ', error);
+        console.erorr('Login error: ', error);
     } finally {
         commit('setLoadingWallet');
     }
@@ -87,12 +87,11 @@ const getAuthenticator = function(ual, wlt = null) {
 };
 
 export const logout = async function({ commit }) {
-    console.error('account.logout() DEPRECATED!. use useAccountStore().logout() instead');
     const { authenticator } = getAuthenticator(this.$ual);
     try {
         authenticator && (await authenticator.logout());
     } catch (error) {
-        console.log('Authenticator logout error', error);
+        console.error('Authenticator logout error', error);
     }
     this.$account = {};
 
