@@ -27,7 +27,7 @@ const signTransaction = async function (actions, detail = null) {
             );
         }
     } catch (e) {
-        console.log(actions, e);
+        console.error(actions, e);
         throw e;
     }
     return transaction;

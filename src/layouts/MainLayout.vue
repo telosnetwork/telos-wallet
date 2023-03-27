@@ -4,7 +4,6 @@ import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/NavBar.vue';
 import LoginButton from 'components/LoginButton.vue';
 import { getAntelope } from 'src/antelope';
-import { useAntelopeLib } from 'src/api';
 
 const pagesData = [
     {
@@ -54,13 +53,7 @@ export default {
     computed: {
         ...mapGetters('account', ['isAuthenticated', 'accountName']),
         isUserAuthenticated() {
-            if (useAntelopeLib()) {
-                console.log('isUserAuthenticated() -> this.ant.stores.account.isAuthenticated');
-                return this.ant.stores.account.isAuthenticated;
-            } else {
-                console.log('isUserAuthenticated() -> this.isAuthenticated');
-                return this.isAuthenticated;
-            }
+            return this.isAuthenticated;
         },
         ...mapGetters('global', ['footerHeight']),
         containerHeight() {
@@ -120,18 +113,7 @@ export default {
         },
         logOut() {
             this.resetTokens();
-            if (useAntelopeLib()) {
-                this.ant.stores.account.logout();
-            } else {
-                this.logout();
-            }
-        },
-        debug() {
-            console.log('------ debug ------');
-            console.log('useAntelopeLib', [useAntelopeLib()]);
-            console.log('this.$store', [this.$store]);
-            console.log('getAntelope()', [this.ant]);
-            console.log('isAuthenticated', [this.ant.stores.account.isAuthenticated]);
+            this.logout();
         },
         resetTokens() {
             this.coins = [];
@@ -139,19 +121,15 @@ export default {
         },
     },
     async mounted() {
-        if (useAntelopeLib()) {
-            await this.ant.stores.account.autoLogin();
-        } else {
-            await this.memoryAutoLogin();
-            this.loadUserProfile();
-            this.checkPath();
-        }
+        await this.memoryAutoLogin();
+        this.loadUserProfile();
+        this.checkPath();
     },
 };
 </script>
 
 <template>
-<q-layout view="hHh Lpr fFf" class="" @click="debug">
+<q-layout view="hHh Lpr fFf" class="">
     <LoginButton v-if="isUserAuthenticated" class="login-button" />
     <div class="videoWrapper">
         <video

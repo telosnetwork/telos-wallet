@@ -28,10 +28,7 @@ export default boot(({ app }) => {
     });
 
     // setting authenticators getter --
-    ant.config.setAuthenticatorsGetter(() => {
-        console.log('getting authenticators', app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators);
-        return app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators;
-    });
+    ant.config.setAuthenticatorsGetter(() => app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators);
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));

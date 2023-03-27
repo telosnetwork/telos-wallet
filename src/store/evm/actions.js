@@ -8,7 +8,6 @@ export const getGasPrice = async function({ commit, dispatch }) {
             reverse: false, // Optional: Get reversed data
             show_payer: false, // Optional: Show ram payer
         });
-        // console.log(this.$api.currentChain);
 
         return tableResults.rows[0].gas_price;
     } catch (error) {
