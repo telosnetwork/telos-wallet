@@ -24,14 +24,14 @@ import {
 import { ChainSettings } from 'src/types';
 
 // main native chains
-import EOS from 'src/antelope/chains//native/eos';
-import Telos from 'src/antelope/chains//native/telos';
-import UX from 'src/antelope/chains//native/ux';
-import Wax from 'src/antelope/chains//native/wax';
+import EOS from 'src/antelope/chains/native/eos';
+import Telos from 'src/antelope/chains/native/telos';
+import UX from 'src/antelope/chains/native/ux';
+import Wax from 'src/antelope/chains/native/wax';
 
 // test native chains
-import TelosTestnet from 'src/antelope/chains//native/telos-testnet';
-import Jungle from 'src/antelope/chains//native/jungle';
+import TelosTestnet from 'src/antelope/chains/native/telos-testnet';
+import Jungle from 'src/antelope/chains/native/jungle';
 
 // main evm chains
 import TelosEVM from 'src/antelope/chains/evm/telos-evm';
