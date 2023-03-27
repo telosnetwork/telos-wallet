@@ -34,7 +34,6 @@ export default {
             window.open(GETTING_STARTED_URL);
         },
         selectCoin(coin) {
-            console.log('selectCoin', coin);
             this.$emit('update:selectedCoin', coin);
             this.$emit('update:showHistoryDlg', true);
         },

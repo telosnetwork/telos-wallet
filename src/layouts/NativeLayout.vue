@@ -113,18 +113,7 @@ export default {
         },
         logOut() {
             this.resetTokens();
-            if (useAntelopeLib()) {
-                this.ant.stores.account.logout();
-            } else {
-                this.logout();
-            }
-        },
-        debug() {
-            console.log('------ debug ------');
-            console.log('useAntelopeLib', [useAntelopeLib()]);
-            console.log('this.$store', [this.$store]);
-            console.log('getAntelope()', [this.ant]);
-            console.log('isAuthenticated', [this.ant.stores.account.isAuthenticated]);
+            this.logout();
         },
         resetTokens() {
             this.coins = [];
@@ -132,13 +121,9 @@ export default {
         },
     },
     async mounted() {
-        if (useAntelopeLib()) {
-            await this.ant.stores.account.autoLogin();
-        } else {
-            await this.memoryAutoLogin();
-            this.loadUserProfile();
-            this.checkPath();
-        }
+        await this.memoryAutoLogin();
+        this.loadUserProfile();
+        this.checkPath();
     },
 };
 </script>
