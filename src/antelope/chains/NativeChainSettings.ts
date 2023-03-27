@@ -32,7 +32,7 @@ export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhla
 
 const abortController = new AbortController();
 
-export default abstract class NativeChain implements ChainSettings {
+export default abstract class NativeChainSettings implements ChainSettings {
     protected network: string;
 
     constructor(network: string) {

@@ -34,12 +34,12 @@ import TelosTestnet from 'src/antelope/chains//native/telos-testnet';
 import Jungle from 'src/antelope/chains//native/jungle';
 
 // main evm chains
-import TelosEVM from 'src/antelope/chains//evm/telos-evm';
+import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
-import TelosTestnetEVM from 'src/antelope/chains//evm/telos-testnet-evm';
+import TelosTestnetEVM from 'src/antelope/chains/evm/telos-testnet-evm';
 import { getAntelope } from '..';
-import NativeChain from 'src/antelope/chains/NativeChain';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 
 
 
@@ -108,7 +108,7 @@ export const useChainStore = defineStore(store_name, {
             const chain = this.getChain(label);
             try {
                 if (chain.settings.isNative()) {
-                    chain.apy = await (chain.settings as NativeChain).getApy();
+                    chain.apy = await (chain.settings as NativeChainSettings).getApy();
                 } else {
                     chain.apy = '';
                 }

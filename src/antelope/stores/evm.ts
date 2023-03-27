@@ -20,7 +20,7 @@ import {
 } from 'src/antelope/stores/feedback';
 import { errorToString } from 'src/antelope/config';
 import { useChainStore } from 'src/antelope/stores/chain';
-import EVMChain from 'src/antelope/chains//EVMChain';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { ExceptionError } from 'src/antelope/types/ExceptionError';
 
@@ -96,7 +96,7 @@ export const useEVMStore = defineStore(store_name, {
         async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
             this.trace('ensureCorrectChain', checkProvider);
             const { chainId } = await checkProvider.getNetwork();
-            const loggedChain = useChainStore().loggedChain.settings as unknown as EVMChain;
+            const loggedChain = useChainStore().loggedChain.settings as unknown as EVMChainSettings;
             if (Number(chainId).toString() !== loggedChain.getChainId()) {
                 await this.switchChainInjected();
                 const provider = this.__provider as ExternalProvider;
@@ -110,7 +110,7 @@ export const useEVMStore = defineStore(store_name, {
             const provider = this.__provider;
 
             if (provider) {
-                const chainSettings = useChainStore().loggedChain.settings as unknown as EVMChain;
+                const chainSettings = useChainStore().loggedChain.settings as unknown as EVMChainSettings;
                 const chainId = parseInt(chainSettings.getChainId(), 10);
                 const chainIdParam = `0x${chainId.toString(16)}`;
                 if (!provider.request) {

@@ -25,9 +25,9 @@ import {
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import { useEVMStore } from 'src/antelope/stores/evm';
-import NativeChain from 'src/antelope/chains/NativeChain';
 import { getAntelope } from '..';
 import { errorToString } from 'src/antelope/config';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -158,7 +158,6 @@ export const useAccountStore = defineStore(store_name, {
                     this.fetchAccountDataFor('logged', evmAccount);
                     getAntelope().events.onLoggedIn.next(evmAccount);
                 } else {
-                    // TODO: check when and how does this error happends if ever
                     console.error('Error: ', 'EVM login failed??');
                     throw new Error('antelope.account.error_login_evm');
                 }
@@ -235,7 +234,6 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('sendAction', account, data, name, actor, permission);
             try {
                 useFeedbackStore().setLoading('account.sendAction');
-                // TODO: creates a list of one transaction and use the sendTransaction() function
                 console.error('Account.sendAction() not implemented', account, data, name, actor, permission);
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -247,7 +245,6 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('sendTransaction', actions);
             try {
                 useFeedbackStore().setLoading('account.sendTransaction');
-                // TODO: creates a transaction with the actions and interacts with wallet and try to send a transaction
                 console.error('Account.sendTransaction() not implemented', actions);
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -259,7 +256,7 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('account.fetchAccountDataFor');
                 if (account.isNative) {
                     const nativeAccount = account as NativeAccountModel;
-                    const chain = useChainStore().getChain(label).settings as NativeChain;
+                    const chain = useChainStore().getChain(label).settings as NativeChainSettings;
                     const accountData = await chain.getAccount(nativeAccount.account);
                     nativeAccount.data = accountData;
                     if (label === 'logged') {
@@ -269,8 +266,7 @@ export const useAccountStore = defineStore(store_name, {
                         this.setCurrentAccount(nativeAccount);
                     }
                 } else {
-                    // TODO: implement EVM if there's a need
-                    console.error('Accounts.fetchAccountDataFor() not implemented for EVM');
+                    // There's no account data for EVM accounts
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -316,7 +312,6 @@ export const useAccountStore = defineStore(store_name, {
                 if (account) {
                     this.__logged_account = { ...this.__logged_account, ...account };
                     useChainStore().setLoggedChain(account.network);
-                    // TODO: this.setCurrentAccount(account);
                 } else {
                     this.__logged_account = null;
                 }

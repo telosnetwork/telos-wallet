@@ -15,7 +15,7 @@
  * a error messages or any notification to the user and can be used with custom
  * names for custom handlers. The app can set custom handlers for each error name
  *
- * Progress: this is ment to show a progress bar to the user. It will be used to
+ * Progress: this is meant to show a progress bar to the user. It will be used to
  * show the progress of a long running task, like a steps transaction (like a bridge
  * between blockchains) or a file upload, etc.
  *
@@ -103,7 +103,7 @@ export const createTraceFunction = (store_name: string) => function(action: stri
     }
 };
 
-export const isTracingAll = () => true;
+export const isTracingAll = () => false;
 export const createInitFunction = (store_name: string, debug?: boolean) => function() {
     useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
 };

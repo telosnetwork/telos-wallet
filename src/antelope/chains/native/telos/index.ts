@@ -1,4 +1,4 @@
-import NativeChain from 'src/antelope/chains//NativeChain';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { PriceChartData } from 'src/types/PriceChartData';
@@ -54,7 +54,7 @@ const THEME = {
     'color-select-box-background': '#e0dffb',
 };
 
-export default class Telos extends NativeChain {
+export default class Telos extends NativeChainSettings {
     getNetwork(): string {
         return NETWORK;
     }
