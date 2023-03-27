@@ -87,7 +87,6 @@ const getAuthenticator = function(ual, wlt = null) {
 };
 
 export const logout = async function({ commit }) {
-    console.error('account.logout() DEPRECATED!. use useAccountStore().logout() instead');
     const { authenticator } = getAuthenticator(this.$ual);
     try {
         authenticator && (await authenticator.logout());

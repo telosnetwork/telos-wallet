@@ -1,11 +1,7 @@
 
 <script>
 import { defineComponent } from 'vue';
-import { useAccountStore } from 'src/antelope/stores/account';
-import { useChainStore } from 'src/antelope/stores/chain';
-import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { useAntelopeLib, setUseAntelopeLib } from 'src/api';
 
 export default defineComponent({
     name: 'NativeLoginButton',
@@ -36,7 +32,6 @@ export default defineComponent({
             NETtoBuy: 0,
             buyAmount: 1, // 1 TLOS
             resLow: false,
-            useAntelopeLib: useAntelopeLib(),
         };
     },
     computed: {
@@ -51,12 +46,6 @@ export default defineComponent({
         this.setDefaultEVMChain();
     },
     methods: {
-        // antelope methods
-        setDefaultEVMChain() {
-            const network = process.env.CHAIN_NAME;
-            const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
-        },
         // end of antelope methods
         ...mapActions('account', [
             'login',
@@ -76,12 +65,6 @@ export default defineComponent({
         },
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
-        },
-        async loginEVM(network) {
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
-            accountStore.loginEVM({ network });
         },
         async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
@@ -215,9 +198,6 @@ export default defineComponent({
                 await this.createEvmApi();
                 await this.checkResources();
             }
-        },
-        useAntelopeLib() {
-            setUseAntelopeLib(this.useAntelopeLib);
         },
     },
 });
