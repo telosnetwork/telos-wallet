@@ -1,4 +1,4 @@
-import NativeChain from 'src/antelope/chains//NativeChain';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { PriceChartData } from 'src/types/PriceChartData';
@@ -33,7 +33,7 @@ const S3_PRODUCER_BUCKET = 'https://telos-producer-validation.s3.amazonaws.com';
 const DISPLAY_MAP = true;
 const THEME = {};
 
-export default class EOS extends NativeChain {
+export default class EOS extends NativeChainSettings {
     getNetwork(): string {
         return NETWORK;
     }

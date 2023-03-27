@@ -1,22 +1,4 @@
-/*
-NETWORK_CHAIN_ID=
-NETWORK_HOST=testnet.telos.caleos.io
-NETWORK_PORT=443
-NETWORK_PROTOCOL=https
-NETWORK_EVM_RPC=https://testnet.telos.net/evm
-NETWORK_EVM_ENDPOINT=https://testnet.telos.caleos.io
-NETWORK_EVM_CONTRACT=eosio.evm
-NETWORK_EVM_CHAIN_ID=41
-HYPERION_ENDPOINT=https://testnet.telos.caleos.io
-TELOS_API_ENDPOINT=https://api-dev.telos.net/v1
-
-# TELOS_API_ENDPOINT=localhost:9999/v1
-APP_NETWORK=OBE
-PRODUCER_BUCKET_URL=
-
- */
-
-import NativeChain from 'src/antelope/chains//NativeChain';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { PriceChartData } from 'src/types/PriceChartData';
 import { api } from 'src/api';
@@ -65,7 +47,7 @@ const THEME = {
     'color-select-box-background': '#e0dffb',
 };
 
-export default class TelosTestnet extends NativeChain {
+export default class TelosTestnet extends NativeChainSettings {
     getNetwork(): string {
         return NETWORK;
     }

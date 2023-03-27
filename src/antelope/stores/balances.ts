@@ -24,7 +24,7 @@ import { errorToString } from 'src/antelope/config';
 import { getAntelope } from '..';
 import { Token } from 'src/antelope/types/Actions';
 import { useChainStore } from 'src/antelope/stores/chain';
-import NativeChain from 'src/antelope/chains/NativeChain';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 
 
 export interface BalancesState {
@@ -60,7 +60,7 @@ export const useBalancesStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('updateTokensForAccount');
                 if (account) {
-                    const chain = useChainStore().getChain(label).settings as NativeChain;
+                    const chain = useChainStore().getChain(label).settings as NativeChainSettings;
                     const balances = await chain.getTokens(account.account);
                     this.__balances.set(label, balances);
                     const accountStore = useAccountStore();
