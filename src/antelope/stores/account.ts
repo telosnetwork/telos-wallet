@@ -184,8 +184,6 @@ export const useAccountStore = defineStore(store_name, {
                     } catch (error) {
                         console.error('Authenticator logout error', error);
                     }
-                } else {
-                    // useEVMStore().logout(); ?
                 }
                 this.setLoggedAccount(null);
                 getAntelope().events.onLoggedOut.next();
