@@ -1,10 +1,11 @@
 <script lang="ts">
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'src/pages/components/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'src/pages/components/home/EVMLoginButtons.vue';
 
-export default {
+export default defineComponent({
     name: 'HomePage',
     components: {
         EVMLoginButtons,
@@ -19,7 +20,7 @@ export default {
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
     },
-};
+});
 </script>
 
 <template>

@@ -17,14 +17,7 @@ export default defineComponent({
 <template>
 <div class="c-evm-login-buttons">
     <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="connectToMetaMask">
-        <img
-            src="~assets/logo--metamask.svg"
-            class="q-mr-md"
-            height="24"
-            width="24"
-            :alt="$t('home.metamask_logo_alt')"
-        >
-        {{ $t('home.connect_with_metamask') }}
+        {{ $t('home.connect_with_wallet') }}
     </q-btn>
 
     <q-btn
