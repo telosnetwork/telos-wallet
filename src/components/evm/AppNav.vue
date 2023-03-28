@@ -1,8 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import UserInfo from 'components/evm/UserInfo.vue';
+
 export default defineComponent({
     name: 'AppNav',
+    components: {
+        UserInfo,
+    },
     data: () => ({
         menuIsOpen: false,
     }),
@@ -18,7 +23,7 @@ export default defineComponent({
 
 <template>
 <q-header>
-    <q-toolbar class="bg-grey-2">
+    <q-toolbar class="c-app-nav__toolbar">
         <q-btn
             v-if="$q.screen.lt.lg"
             flat
@@ -29,6 +34,8 @@ export default defineComponent({
             color="black"
             @click="menuIsOpen = !menuIsOpen"
         />
+
+        <UserInfo />
     </q-toolbar>
 
     <div
@@ -82,6 +89,14 @@ export default defineComponent({
             width: 300px;
             transform: unset;
         }
+    }
+
+    &__toolbar {
+        display: flex;
+        justify-content: space-between;
+        color: black;
+        padding-top: 24px;
+        background-color: $page-header;
     }
 
     &__logo {

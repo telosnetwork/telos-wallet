@@ -31,6 +31,10 @@ export default {
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
     },
+    nav: {
+        copy_address: 'Copy address to clipboard',
+        overflow_menu: 'Open account overflow menu',
+    },
     global: {
         native: 'Native',
         telos_evm: 'Telos EVM',
