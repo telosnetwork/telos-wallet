@@ -2,8 +2,8 @@
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
-import NativeLoginButton from 'src/pages/components/home/NativeLoginButton.vue';
-import EVMLoginButtons from 'src/pages/components/home/EVMLoginButtons.vue';
+import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
+import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 
 export default defineComponent({
     name: 'HomePage',

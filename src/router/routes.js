@@ -1,7 +1,7 @@
 const routes = [
     {
         path: '/',
-        component: () => import('pages/components/home/HomePage.vue'),
+        component: () => import('pages/home/HomePage.vue'),
     },
     {
         path: '/native',
@@ -9,15 +9,24 @@ const routes = [
         children: [
             {
                 path: 'balance',
-                component: () => import('pages/BalanceInfo.vue'),
+                component: () => import('pages/native/BalanceInfo.vue'),
             },
             {
                 path: 'dappsearch',
-                component: () => import('pages/DappSearch.vue'),
+                component: () => import('pages/native/DappSearch.vue'),
             },
             {
                 path: 'profile',
-                component: () => import('pages/SettingsPage.vue'),
+                component: () => import('pages/native/SettingsPage.vue'),
+            },
+        ],
+    },
+    {
+        path: '/evm',
+        component: () => import('layouts/EVMLayout.vue'),
+        children: [
+            {
+                path: 'wallet',
             },
         ],
     },

@@ -158,7 +158,7 @@ export default {
             }
         },
         getImgUrl() {
-            return require('src/assets/evm/ethereumLogo.svg');
+            return require('assets/evm/ethereumLogo.svg');
         },
         async generateDepositAddress() {
             this.awaiting = false;

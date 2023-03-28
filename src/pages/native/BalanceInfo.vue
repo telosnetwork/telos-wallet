@@ -1,18 +1,18 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { mapGetters, mapActions } from 'vuex';
-import CoinInfo from '~/pages/components/balance/CoinInfo';
-import CollectablesGallery from '~/pages/components/balance/CollectablesGallery';
-import SendCoins from '~/pages/components/balance/SendCoins';
-import SendAmount from '~/pages/components/balance/SendAmount';
-import ReceiveCoins from '~/pages/components/balance/ReceiveCoins';
-import BuyAmount from '~/pages/components/balance/BuyAmount';
-import ShareAddress from '~/pages/components/balance/ShareAddress';
-import QRScanner from '~/pages/components/balance/QRScanner';
-import CoinHistory from '~/pages/components/balance/CoinHistory';
-import DepositEVM from '~/pages/components/balance/DepositEVM';
-import WithdrawEVM from '~/pages/components/balance/WithdrawEVM';
-import RexStaking from '~/pages/components/balance/RexStaking';
+import CoinInfo from '~/pages/native/balance/CoinInfo';
+import CollectablesGallery from '~/pages/native/balance/CollectablesGallery';
+import SendCoins from '~/pages/native/balance/SendCoins';
+import SendAmount from '~/pages/native/balance/SendAmount';
+import ReceiveCoins from '~/pages/native/balance/ReceiveCoins';
+import BuyAmount from '~/pages/native/balance/BuyAmount';
+import ShareAddress from '~/pages/native/balance/ShareAddress';
+import QRScanner from '~/pages/native/balance/QRScanner';
+import CoinHistory from '~/pages/native/balance/CoinHistory';
+import DepositEVM from '~/pages/native/balance/DepositEVM';
+import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
+import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';

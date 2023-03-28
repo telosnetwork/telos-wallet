@@ -1,11 +1,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
-import SendToAddress from '~/pages/components/balance/SendToAddress';
+import SendToAddress from '~/pages/native/balance/SendToAddress';
 import { setInterval } from 'timers';
 import { isNumber } from 'util';
 import BigNumber from 'bignumber.js';
-import tokenAvatar from 'src/components/TokenAvatar';
+import tokenAvatar from 'components/TokenAvatar.vue';
 
 export default {
     props: ['showSendAmountDlg', 'showHistoryDlg', 'selectedCoin'],

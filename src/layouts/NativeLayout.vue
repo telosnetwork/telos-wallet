@@ -2,7 +2,7 @@
 
 import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/NavBar.vue';
-import NativeLoginButton from 'pages/components/home/NativeLoginButton.vue';
+import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 
 const pagesData = [
     {
