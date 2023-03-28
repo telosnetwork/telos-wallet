@@ -1,8 +1,7 @@
 const routes = [
     {
         path: '/',
-        component: () => import('layouts/MainLayout.vue'),
-        children: [{ path: '', component: () => import('pages/components/home/HomePage.vue') }],
+        component: () => import('pages/components/home/HomePage.vue'),
     },
     {
         path: '/balance',

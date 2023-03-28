@@ -23,55 +23,55 @@ export default {
 </script>
 
 <template>
-<q-page class="c-home">
-    <div class="c-home__container">
-        <img
-            src="~assets/logo--telos-wallet.svg"
-            :alt="$t('home.wallet_logo_alt')"
-            class="c-home__logo"
-        >
-
-        <div class="c-home__button-container">
-
-
-            <div class="c-home__network-toggle-container" role="tablist">
-                <button
-                    :class="{
-                        'c-home__network-toggle-button': true,
-                        'c-home__network-toggle-button--activated': tab === 'left',
-                    }"
-                    role="tab"
-                    :aria-selected="tab === 'left'"
-                    @keydown.enter="tab = 'left'"
-                    @click="tab = 'left'"
+<q-layout>
+    <q-page-container class="c-home__page-container">
+        <div class="c-home">
+            <div class="c-home__container">
+                <img
+                    src="~assets/logo--telos-wallet.svg"
+                    :alt="$t('home.wallet_logo_alt')"
+                    class="c-home__logo"
                 >
 
-                    {{ $t('global.telos_evm') }}
-                </button>
-                <button
-                    :class="{
-                        'c-home__network-toggle-button': true,
-                        'c-home__network-toggle-button--activated': tab === 'right',
-                    }"
-                    role="tab"
-                    :aria-selected="tab === 'right'"
-                    @keydown.enter.space="tab = 'right'"
-                    @click="tab = 'right'"
-                >
+                <div class="c-home__button-container">
 
-                    {{ $t('global.native') }}
-                </button>
-            </div>
 
-            <NativeLoginButton v-if="tab === 'right'" />
+                    <div class="c-home__network-toggle-container" role="tablist">
+                        <button
+                            :class="{
+                                'c-home__network-toggle-button': true,
+                                'c-home__network-toggle-button--activated': tab === 'left',
+                            }"
+                            role="tab"
+                            :aria-selected="tab === 'left'"
+                            @keydown.enter="tab = 'left'"
+                            @click="tab = 'left'"
+                        >
 
-            <EVMLoginButtons v-else-if="tab === 'left'" />
-        </div>
+                            {{ $t('global.telos_evm') }}
+                        </button>
+                        <button
+                            :class="{
+                                'c-home__network-toggle-button': true,
+                                'c-home__network-toggle-button--activated': tab === 'right',
+                            }"
+                            role="tab"
+                            :aria-selected="tab === 'right'"
+                            @keydown.enter.space="tab = 'right'"
+                            @click="tab = 'right'"
+                        >
 
-        <q-footer bordered>
-            <q-toolbar class="bg-dark">
-                <div class="fit column wrap justify-center items-center content-center">
-                    <div>
+                            {{ $t('global.native') }}
+                        </button>
+                    </div>
+
+                    <NativeLoginButton v-if="tab === 'right'" />
+
+                    <EVMLoginButtons v-else-if="tab === 'left'" />
+                </div>
+
+                <q-footer bordered>
+                    <q-toolbar class="bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
@@ -79,8 +79,7 @@ export default {
                         >
                             {{$t('home.terms')}}
                         </a>
-                    </div>
-                    <div>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
                         <a
                             href="https://www.telos.net/privacy-policy"
                             target="_blank"
@@ -88,19 +87,26 @@ export default {
                         >
                             {{$t('home.privacy')}}
                         </a>
-                    </div>
-                </div>
-            </q-toolbar>
-        </q-footer>
-    </div>
+                    </q-toolbar>
+                </q-footer>
+            </div>
 
-</q-page>
+        </div>
+    </q-page-container>
+</q-layout>
+
 </template>
 
 <style lang="scss">
 .c-home {
     position: relative;
     background: linear-gradient(0.4turn, #071033, #6039A4);
+    height: 100vh;
+
+    &__page-container {
+        // override inline style of unknown origin
+        padding-bottom: 0 !important;
+    }
 
     &__container {
         display: flex;
