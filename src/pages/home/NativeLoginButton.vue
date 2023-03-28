@@ -41,8 +41,6 @@ export default defineComponent({
             'isAutoLoading',
         ]),
     },
-    components: {
-    },
     methods: {
         ...mapActions('account', [
             'login',
@@ -228,6 +226,27 @@ export default defineComponent({
             />
         </div>
     </div>
+
+    <div v-else class="q-px-md flex justify-center column">
+        <p class="q-mb-lg">Logged in as {{ accountName }}</p>
+
+        <q-btn
+            text-color="white"
+            outline
+            label="View Wallet"
+            class="q-px-md q-py-sm q-mb-lg"
+            @click="$router.push('/balance')"
+        />
+
+        <q-btn
+            text-color="white"
+            outline
+            label="Log Out"
+            class="q-px-md q-py-sm"
+            @click="logout"
+        />
+    </div>
+
     <!-- Show Login -->
     <q-dialog v-model="showLogin">
         <div class="column showLoginPopup q-pa-lg popupCard">
