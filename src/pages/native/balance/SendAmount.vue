@@ -5,7 +5,7 @@ import SendToAddress from '~/pages/native/balance/SendToAddress';
 import { setInterval } from 'timers';
 import { isNumber } from 'util';
 import BigNumber from 'bignumber.js';
-import tokenAvatar from 'components/TokenAvatar.vue';
+import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 export default {
     props: ['showSendAmountDlg', 'showHistoryDlg', 'selectedCoin'],

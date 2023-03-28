@@ -1,6 +1,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import tokenAvatar from 'components/TokenAvatar.vue';
+import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
 

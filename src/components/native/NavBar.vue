@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import RexStaking from 'src/pages/native/balance/RexStaking.vue';
-import ManageResources from 'src/components/ManageResources.vue';
+import RexStaking from 'pages/native/balance/RexStaking.vue';
+import ManageResources from 'components/native/ManageResources.vue';
 export default {
     props: ['balanceTab'],
     components: { RexStaking, ManageResources },

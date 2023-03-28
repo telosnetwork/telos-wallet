@@ -235,7 +235,7 @@ export default defineComponent({
             outline
             label="View Wallet"
             class="q-px-md q-py-sm q-mb-lg"
-            @click="$router.push('/balance')"
+            @click="$router.push('/native/balance')"
         />
 
         <q-btn

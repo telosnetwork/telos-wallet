@@ -1,7 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
-import tokenAvatar from 'components/TokenAvatar.vue';
+import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 export default {
     props: ['showSendDlg', 'coins', 'selectedCoin', 'showSendAmountDlg'],

@@ -2,7 +2,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import SendConfirm from '~/pages/native/balance/SendConfirm';
-import tokenAvatar from 'components/TokenAvatar.vue';
+import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 export default {
     props: ['showSendToAddressDlg', 'selectedCoin', 'sendAmount'],

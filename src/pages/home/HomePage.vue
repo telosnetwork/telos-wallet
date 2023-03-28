@@ -101,7 +101,7 @@ export default defineComponent({
 <style lang="scss">
 .c-home {
     position: relative;
-    background: linear-gradient(0.4turn, #071033, #6039A4);
+    background: $site-gradient;
     height: 100vh;
 
     &__page-container {

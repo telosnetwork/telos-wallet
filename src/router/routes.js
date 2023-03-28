@@ -1,6 +1,7 @@
 const routes = [
     {
         path: '/',
+        name: 'home',
         component: () => import('pages/home/HomePage.vue'),
     },
     {
@@ -27,6 +28,8 @@ const routes = [
         children: [
             {
                 path: 'wallet',
+                name: 'wallet',
+                component: () => import('pages/evm/WalletPage.vue'),
             },
         ],
     },
