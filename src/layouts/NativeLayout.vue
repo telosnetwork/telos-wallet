@@ -9,27 +9,27 @@ const pagesData = [
         title: 'Balance',
         caption: 'Balance',
         icon: 'fas fa-wallet',
-        path: '/balance',
+        path: '/native/balance',
         available: true,
     },
     {
         title: 'DappSearch',
         caption: 'DappSearch',
         icon: 'fas fa-th-large',
-        path: '/dappsearch',
+        path: '/native/dappsearch',
         available: true,
     },
     {
         title: 'Settings',
         caption: 'Settings',
         icon: 'fas fa-cog',
-        path: '/settings',
+        path: '/native/settings',
         available: true,
     },
 ];
 
 export default {
-    name: 'MainLayout',
+    name: 'NativeLayout',
     components: { NavBar: navBar, NativeLoginButton },
     data() {
         return {
@@ -70,11 +70,11 @@ export default {
         ]),
         checkPath() {
             if (!this.isAuthenticated) {
-                if (!['/', '/dappsearch'].includes(this.$route.path)) {
+                if (!['/', '/native/dappsearch'].includes(this.$route.path)) {
                     window.location = '/';
                 }
             } else if (this.$route.path === '/') {
-                window.location = '/balance';
+                window.location = '/native/balance';
             }
         },
         async loadUserProfile() {
@@ -168,9 +168,9 @@ export default {
         </div>
         <!-- Profile Image top right -->
         <q-avatar
-            v-if="$route.path === '/balance'"
+            v-if="$route.path === '/native/balance'"
             class="profileImg"
-            @click="$router.push('/profile')"
+            @click="$router.push('/native/profile')"
         >
             <img :src="userAvatar" >
         </q-avatar>

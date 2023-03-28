@@ -67,7 +67,7 @@ export default defineComponent({
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
-                await this.$router.push({ path: '/balance' });
+                await this.$router.push({ path: '/native/balance' });
             } else {
                 this.error = error;
             }
