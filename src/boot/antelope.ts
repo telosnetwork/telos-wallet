@@ -14,7 +14,7 @@ export default boot(({ app }) => {
         next: () => {
             const $router = app.config.globalProperties.$router;
             if ($router.currentRoute.value.path === '/') {
-                $router.push({ path: '/balance' });
+                $router.push({ path: '/evm-balance' });
             }
         },
     });
