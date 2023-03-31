@@ -2,11 +2,17 @@
 <script>
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
+<<<<<<< HEAD:src/pages/components/home/NativeLoginButton.vue
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
     name: 'NativeLoginButton',
+=======
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+
+export default {
+>>>>>>> 7dd54ca267068add4e57892e9389f76d50b04c6a:src/components/LoginButton.vue
     data() {
         return {
             showLogin: false,
@@ -204,7 +210,7 @@ export default defineComponent({
             }
         },
     },
-});
+};
 </script>
 
 <template>
@@ -213,8 +219,31 @@ export default defineComponent({
     <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
         <div class="q-mt-md q-mb-sm">
             <q-btn
+<<<<<<< HEAD:src/pages/components/home/NativeLoginButton.vue
                 :label="$t('home.connect_with_wallet')"
                 class="purpleGradient q-px-md q-py-sm"
+=======
+                no-caps
+                label="Metamask Prod"
+                class="purpleGradient q-pa-sm"
+                rounded
+                @click="loginEVM('telos-evm')"
+            />
+            <q-btn
+                no-caps
+                label="Metamask Testnet"
+                class="purpleGradient q-pa-sm"
+                rounded
+                @click="loginEVM('telos-testnet-evm')"
+            />
+        </div>
+        <div class="q-mt-md q-mb-sm">
+            <q-btn
+                no-caps
+                label="Connect Wallet"
+                class="purpleGradient q-pa-sm"
+                rounded
+>>>>>>> 7dd54ca267068add4e57892e9389f76d50b04c6a:src/components/LoginButton.vue
                 @click="showLogin = true"
             />
         </div>
