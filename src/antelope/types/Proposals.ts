@@ -40,6 +40,7 @@ export interface ProposalTableRow {
   proposer: string;
   isSigned?: boolean;
 }
+
 export interface ProposalForm {
   [x: string]: unknown;
   proposer: string;

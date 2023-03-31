@@ -1,7 +1,10 @@
 import axios from 'axios';
-import { PriceChartData } from 'src/types';
-import { PriceHistory } from 'src/types';
-import { PriceStats } from 'src/types';
+import {
+    PriceChartData,
+    PriceHistory,
+    PriceStats,
+} from 'src/antelope/types';
+
 
 
 export const getCoingeckoUsdPrice = async (

@@ -1,9 +1,7 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { PriceChartData } from 'src/types/PriceChartData';
-import { Theme } from 'src/types/Theme';
-import { Token } from 'src/types/Actions';
+import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   '8fc6dce7942189f842170de953932b1f66693ad3788f766e777b6f9d22335c02';
@@ -16,7 +14,7 @@ const TOKEN = {
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as Token;
+} as NativeToken;
 const HYPERION_ENDPOINT = 'https://ux.eosusa.io';
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -65,7 +63,7 @@ export default class UX extends NativeChainSettings {
         return api.getEmptyPriceChartData();
     }
 
-    getSystemToken(): Token {
+    getSystemToken(): NativeToken {
         return TOKEN;
     }
 
