@@ -10,7 +10,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: '',
+            error: null,
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -88,7 +88,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.error(e);
+                console.log(e);
             }
         },
 
@@ -309,7 +309,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close = true"
+                @click="close"
             />
             <q-item
                 v-if="error"

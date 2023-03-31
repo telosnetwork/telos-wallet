@@ -29,9 +29,13 @@
     "eosjs": "^21.0.3",
     "eosjs-ecc": "^4.0.7",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "erc-20-abi": "^1.0.0",
 =======
 >>>>>>> 5760172 (First approach to antelope lib)
+=======
+    "erc-20-abi": "^1.0.0",
+>>>>>>> 7dd54ca (evm and history stores, manu new types and contract parsing support)
     "ethers": "^5.5.1",
     "jdenticon": "^3.1.1",
     "mitt": "^3.0.0",
