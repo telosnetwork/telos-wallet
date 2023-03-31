@@ -3,6 +3,7 @@
 import { defineComponent } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
+import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
@@ -102,7 +103,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         },
 
