@@ -30,6 +30,10 @@ export default {
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
+        create_new_account: 'Create a New Account',
+        logged_as: 'Logged in as {account}',
+        view_wallet: 'View Wallet',
+        log_out: 'Log Out',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -284,15 +288,28 @@ export default {
             switch_chain_rejected: 'User has rejected the request to switch the chain',
             error_switch_chain: 'Error in switching chain',
             error_no_provider: 'No provider found',
+            error_getting_function_interface: 'Error trying to find event signature for function {prefix}',
+            error_getting_event_interface: 'Error trying to find event signature for event {hex}',
+            error_invalid_address: 'Invalid address',
+            error_getting_contract_creation: 'Error trying to get contract creation info',
+        },
+        history: {
+            error_fetching_trasactions: 'Error in fetching transactions',
         },
         chain: {
             error_update_data: 'Error in updating data',
             error_apy: 'Error in getting APY',
+            error_invalid_network: 'Invalid network',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
             error_login_evm: 'An error has occurred trying to login to the EVM chain',
             error_auto_login: 'An error has occurred trying to auto login the user',
+        },
+        utils: {
+            error_parsing_transaction: 'Failed to parse transaction data',
+            error_contract_instance: 'Failed to create contract instance',
+            error_parsing_log_event: 'Failed to parse log event',
         },
     },
 };

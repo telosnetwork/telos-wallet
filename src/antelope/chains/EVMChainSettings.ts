@@ -168,10 +168,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(results => results.data.tokens as unknown as {chainId:number}[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
             .then(tokens => tokens.map(t => t as unknown as EvmToken))
-            .then((tokens) => {
-                console.log('tokens', tokens);
-                return tokens;
-            });
+            .then(tokens => tokens);
 
 
         return this.tokenListPromise;

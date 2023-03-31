@@ -75,7 +75,6 @@ export default class EvmContract {
 
     getContractInstance(provider: ExternalProvider | null = null, createNew = false) {
         if (!this.abi){
-            console.log('Cannot create contract instance without ABI!');
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
 
@@ -91,19 +90,20 @@ export default class EvmContract {
             try {
                 return await this.iface.parseTransaction({ data });
             } catch (e) {
-                console.log(`Failed to parse transaction data ${data} using abi for ${this.address}`);
+                console.error(`Failed to parse transaction data ${data} using abi for ${this.address}`);
+            }
+        } else {
+            try {
+                // this functionIface is an interface for a single function signature as discovered via 4bytes.directory... only use it for this function
+                const functionIface = await this.manager.getFunctionIface(data);
+                if (functionIface) {
+                    return functionIface.parseTransaction({ data });
+                }
+            } catch (e) {
+                console.error(`Failed to parse transaction data ${data} using abi for ${this.address}`);
             }
         }
-        try {
-            // this functionIface is an interface for a single function signature as discovered via 4bytes.directory... only use it for this function
-            const functionIface = await this.manager.getFunctionIface(data);
-            if (functionIface) {
-                return functionIface.parseTransaction({ data });
-            }
-        } catch (e) {
-            console.error(`Failed to parse transaction data ${data} using abi for ${this.address}`);
-        }
-        throw new AntelopeError('antelope.utils.error_parsing_transaction', data);
+        throw new AntelopeError('antelope.utils.error_parsing_transaction');
     }
 
     async parseLogs(logs: EvmLogs): Promise<EvmFormatedLog[]> {
