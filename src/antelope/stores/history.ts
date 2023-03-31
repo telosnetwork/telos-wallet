@@ -37,7 +37,6 @@ import { getAntelope } from '..';
 
 
 export interface HistoryState {
-    __remember_transactions: boolean;
     __filter: HyperionActionsFilter;
     __transactions: { [label: Label]: EvmTransaction[] };
 }
@@ -49,7 +48,6 @@ export const useHistoryStore = defineStore(store_name, {
     getters: {
         getTransactions: state => (label: string) => state.__transactions[label],
         getFilter: state => state.__filter,
-        getRememberTransactions: state => state.__remember_transactions,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -166,7 +164,6 @@ export const useHistoryStore = defineStore(store_name, {
 });
 
 const historyInitialState: HistoryState = {
-    __remember_transactions: false,
     __transactions: {},
     __filter: {},
 };

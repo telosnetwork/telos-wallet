@@ -102,7 +102,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.error(e);
+                console.log(e);
             }
         },
 
