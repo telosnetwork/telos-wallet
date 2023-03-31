@@ -2,7 +2,7 @@
 
 import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/NavBar.vue';
-import LoginButton from 'components/LoginButton.vue';
+import NativeLoginButton from 'pages/components/home/NativeLoginButton.vue';
 import { getAntelope } from 'src/antelope';
 
 const pagesData = [
@@ -31,7 +31,7 @@ const pagesData = [
 
 export default {
     name: 'MainLayout',
-    components: { NavBar: navBar, LoginButton },
+    components: { NavBar: navBar, NativeLoginButton },
     data() {
         return {
             avatar: null,
@@ -130,7 +130,7 @@ export default {
 
 <template>
 <q-layout view="hHh Lpr fFf" class="">
-    <LoginButton v-if="isUserAuthenticated" class="login-button" />
+    <NativeLoginButton v-if="isUserAuthenticated" class="login-button" />
     <div class="videoWrapper">
         <video
             id="bgvid"

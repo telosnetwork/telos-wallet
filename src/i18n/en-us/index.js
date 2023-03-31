@@ -25,10 +25,15 @@ export default {
         logout: 'Log Out',
     },
     home: {
-        title: 'Telos Wallet',
-        subtitle: 'It\'s Crypto Made Easy',
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
+        wallet_logo_alt: 'Telos Wallet logo',
+        view_any_account: 'View Any Account',
+        connect_with_wallet: 'Connect Your Wallet',
+    },
+    global: {
+        native: 'Native',
+        telos_evm: 'Telos EVM',
     },
     resources: {
         title: 'Network Resources',
