@@ -1,4 +1,6 @@
 <script lang="ts">
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
@@ -9,7 +11,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: null,
+            error: '',
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -61,7 +63,29 @@ export default defineComponent({
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
         },
+        async loginEVM(network:string) {
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+            accountStore.loginEVM({ network });
+        },
         async onLogin(idx: number, justViewer = false) {
+            return this.onLogin_vuex_version(idx, justViewer);
+        },
+        async onLogin_pinia_version(idx: number, justViewer = false) {
+            const authenticator = this.$ual.getAuthenticators().availableAuthenticators[idx];
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            const success = await accountStore.loginNative({ authenticator, network });
+            if (success) {
+                this.showLogin = false;
+                await this.$router.push({ path: '/balance' });
+            } else {
+                this.error = 'Login failed';
+            }
+        },
+        async onLogin_vuex_version(idx: number, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
@@ -77,7 +101,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         },
 
@@ -298,7 +322,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close"
+                @click="close = true"
             />
             <q-item
                 v-if="error"

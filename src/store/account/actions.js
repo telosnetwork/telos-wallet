@@ -37,11 +37,11 @@ export const login = async function(
         }
     } catch (e) {
         const error =
-      (authenticator.getError() && authenticator.getError().message) ||
-      e.message ||
-      e.reason;
+            (authenticator.getError() && authenticator.getError().message) ||
+            e.message ||
+            e.reason;
         commit('general/setErrorMsg', error, { root: true });
-        console.log('Login error: ', error);
+        console.erorr('Login error: ', error);
     } finally {
         commit('setLoadingWallet');
     }
@@ -91,7 +91,7 @@ export const logout = async function({ commit }) {
     try {
         authenticator && (await authenticator.logout());
     } catch (error) {
-        console.log('Authenticator logout error', error);
+        console.error('Authenticator logout error', error);
     }
     this.$account = {};
 

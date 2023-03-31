@@ -27,7 +27,7 @@ const signTransaction = async function (actions, detail = null) {
             );
         }
     } catch (e) {
-        console.log(actions, e);
+        console.error(actions, e);
         throw e;
     }
     return transaction;
@@ -89,5 +89,6 @@ export default boot(async ({ store }) => {
         getAccount: getAccount.bind(store),
         getRpc: getRpc.bind(store),
     };
+
     window.$api = store['$api'];
 });

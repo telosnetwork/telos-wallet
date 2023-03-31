@@ -248,7 +248,7 @@ export default {
                     coin.amount = Number(raw[0].split(' ')[0]);
                     coin.totalAmount = coin.amount + coin.rexBalance + coin.resources;
                 } catch (e) {
-                    console.log('error: ', e);
+                    console.error('error: ', e);
                 }
             });
 

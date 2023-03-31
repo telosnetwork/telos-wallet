@@ -3,6 +3,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/native/NavBar.vue';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
+import { getAntelope } from 'src/antelope';
 
 const pagesData = [
     {
@@ -46,10 +47,14 @@ export default {
             nftTokens: [],
             warningShow: false,
             warningText: '',
+            ant: getAntelope(),
         };
     },
     computed: {
         ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        isUserAuthenticated() {
+            return this.isAuthenticated;
+        },
         ...mapGetters('global', ['footerHeight']),
         containerHeight() {
             return window.innerHeight;
@@ -69,7 +74,7 @@ export default {
             'getUserProfile',
         ]),
         checkPath() {
-            if (!this.isAuthenticated) {
+            if (!this.isUserAuthenticated) {
                 if (!['/', '/native/dappsearch'].includes(this.$route.path)) {
                     window.location = '/';
                 }
@@ -85,7 +90,7 @@ export default {
                 await this.getUserProfile(this.accountName);
             }
             const accountProfile =
-        this.$store.state.account.profiles[this.accountName];
+                this.$store.state.account.profiles[this.accountName];
             if (!accountProfile) {
                 return;
             }
@@ -125,7 +130,7 @@ export default {
 
 <template>
 <q-layout view="hHh Lpr fFf" class="">
-    <NativeLoginButton v-if="isAuthenticated" class="login-button" />
+    <NativeLoginButton v-if="isUserAuthenticated" class="login-button" />
     <div class="videoWrapper">
         <video
             id="bgvid"
@@ -148,9 +153,9 @@ export default {
     <div class="videoOverlay" ></div>
     <div class="videoOverlay shadedOverlay" ></div>
 
-    <NavBar v-if="isAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
+    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
     <q-page-container
-        :class="`pageContainer ${isAuthenticated ? 'authenticated' : ''}`"
+        :class="`pageContainer ${isUserAuthenticated ? 'authenticated' : ''}`"
     >
         <div v-if="warningShow">
             <q-banner inline-actions dark class="warningSign text-white">

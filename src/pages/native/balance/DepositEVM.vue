@@ -66,8 +66,8 @@ export default {
 
             window.ethereum
                 .request({ method: 'wallet_addEthereumChain', params })
-                .then(() => console.log('Success'))
-                .catch(error => console.log('Error', error.message));
+                .then(() => console.debug('Success'))
+                .catch(error => console.error('Error', error.message));
         },
         inputBlur() {
             if (isNaN(this.depositAmount)) {

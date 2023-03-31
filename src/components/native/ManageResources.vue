@@ -131,10 +131,8 @@ export default {
                     data: {
                         from: this.accountName.toLowerCase(),
                         receiver: this.accountName.toLowerCase(),
-                        stake_net_quantity:
-              String(parseFloat(NETtoBuy).toFixed(4)) + String(' TLOS'),
-                        stake_cpu_quantity:
-              String(parseFloat(CPUtoBuy).toFixed(4)) + String(' TLOS'),
+                        stake_net_quantity: String(parseFloat(NETtoBuy).toFixed(4)) + String(' TLOS'),
+                        stake_cpu_quantity: String(parseFloat(CPUtoBuy).toFixed(4)) + String(' TLOS'),
                         transfer: false,
                     },
                 });
