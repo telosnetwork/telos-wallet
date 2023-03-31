@@ -7,9 +7,12 @@ It is essential to note that Antelope is still a work in progress, and its archi
 ## External dependencies
 ```typescript
 import { App } from 'vue';
-import { Authenticator } from "universal-authenticator-library";
+import { Authenticator, RpcEndpoint } from "universal-authenticator-library";
 import { Subject } from 'rxjs';
 import { StoreCallback } from '@quasar/app-webpack';
 import { store } from 'quasar/wrappers';
-import { createPinia } from 'pinia';
+import { createPinia, defineStore } from 'pinia';
+import { ethers } from 'ethers';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { ExternalProvider } from '@ethersproject/providers';
 ```

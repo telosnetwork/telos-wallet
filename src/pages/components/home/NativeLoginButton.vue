@@ -1,7 +1,7 @@
-<script lang="ts">
+
+<script>
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
@@ -11,7 +11,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: '',
+            error: null,
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -57,35 +57,19 @@ export default defineComponent({
             'setLoadingWallet',
         ]),
         async loginAsJustViewer() {
-            let idx = this.$ual.getAuthenticators().availableAuthenticators.map(a => a.getName()).indexOf('cleos');
+            let idx = this.$ual.authenticators.map(a => a.getName()).indexOf('cleos');
             this.onLogin(idx, true);
         },
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
         },
-        async loginEVM(network:string) {
+        async loginEVM(network) {
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
             accountStore.loginEVM({ network });
         },
-        async onLogin(idx: number, justViewer = false) {
-            return this.onLogin_vuex_version(idx, justViewer);
-        },
-        async onLogin_pinia_version(idx: number, justViewer = false) {
-            const authenticator = this.$ual.getAuthenticators().availableAuthenticators[idx];
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            const network = chainStore.currentChain.settings.getNetwork();
-            const success = await accountStore.loginNative({ authenticator, network });
-            if (success) {
-                this.showLogin = false;
-                await this.$router.push({ path: '/balance' });
-            } else {
-                this.error = 'Login failed';
-            }
-        },
-        async onLogin_vuex_version(idx: number, justViewer = false) {
+        async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
@@ -94,14 +78,20 @@ export default defineComponent({
                 this.error = error;
             }
         },
-        openUrl(url: string) {
+        openUrl(url) {
             window.open(url);
+        },
+        goToAccountPage() {
+            const accountPath = `/account/${this.accountName}`;
+            if (this.$router.currentRoute.path !== accountPath) {
+                this.$router.push({ path: accountPath });
+            }
         },
         async createEvmApi() {
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.error(e);
+                console.log(e);
             }
         },
 
@@ -125,7 +115,7 @@ export default defineComponent({
                         payer: this.accountName.toLowerCase(),
                         receiver: this.accountName.toLowerCase(),
                         quant:
-              String(this.RAMtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(' TLOS'),
                     },
                 });
             }
@@ -138,9 +128,9 @@ export default defineComponent({
                         from: this.accountName.toLowerCase(),
                         receiver: this.accountName.toLowerCase(),
                         stake_net_quantity:
-              String(this.NETtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.NETtoBuy).toFixed(4)) + String(' TLOS'),
                         stake_cpu_quantity:
-              String(this.CPUtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.CPUtoBuy).toFixed(4)) + String(' TLOS'),
                         transfer: false,
                     },
                 });
@@ -180,12 +170,12 @@ export default defineComponent({
             });
             let ramInfo = res.rows[0];
             this.ramPrice =
-        ramInfo.quote.balance.split(' ')[0] /
-        ramInfo.base.balance.split(' ')[0];
+          ramInfo.quote.balance.split(' ')[0] /
+          ramInfo.base.balance.split(' ')[0];
         },
 
         async checkResources() {
-            if (!this.accountName) {
+            if (!accountName) {
                 return;
             }
             await this.getRamPrice();
@@ -205,8 +195,8 @@ export default defineComponent({
             this.resLow = this.ramLow || this.cpuLow || this.netLow;
         },
     },
-    watch: {
-        async isAuthenticated(): Promise<void> {
+    whatch: {
+        async isAuthenticated() {
             if (this.isAuthenticated) {
                 await this.createEvmApi();
                 await this.checkResources();
@@ -277,7 +267,7 @@ export default defineComponent({
             <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
             <q-list class="" dark separator>
                 <q-item
-                    v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
+                    v-for="(wallet, idx) in $ual.authenticators"
                     :key="wallet.getStyle().text"
                     v-ripple
                     class="q-my-sm"
@@ -322,7 +312,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close = true"
+                @click="close"
             />
             <q-item
                 v-if="error"
@@ -385,9 +375,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .showLoginPopup {
-  width: 30rem;
-  height: auto;
-  margin-bottom: 5rem;
+    width: 30rem;
+    height: auto;
+    margin-bottom: 5rem;
 }
 
 
