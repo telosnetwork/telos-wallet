@@ -55,6 +55,9 @@ export default defineComponent({
             <img
                 src="~assets/logo--telos-wallet.svg"
                 :alt="$t('home.wallet_logo_alt')"
+                tabindex="0"
+                role="link"
+                :aria-label="$t('nav.go_home')"
                 class="c-app-nav__logo"
                 @click="$router.push({ name: 'home' })"
             >
@@ -196,6 +199,7 @@ export default defineComponent({
         height: 56px;
         margin-top: 24px;
         margin-left: 12px;
+        cursor: pointer;
     }
 
     &__menu-items {

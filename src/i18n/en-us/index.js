@@ -37,6 +37,7 @@ export default {
         wallet: 'Wallet',
         staking: 'Staking',
         wrap_tlos: 'Wrap TLOS',
+        go_home: 'Go to home page',
     },
     global: {
         native: 'Native',
