@@ -32,13 +32,6 @@ export default {
     methods: {
         clickPurchase() {
             window.open(GETTING_STARTED_URL);
-            /*
-      this.$emit(
-        "update:selectedCoin",
-        this.coins.find((coin) => coin.symbol === "TLOS")
-      );
-      this.$emit("update:showBuyAmountDlg", true);
-       */
         },
         selectCoin(coin) {
             this.$emit('update:selectedCoin', coin);

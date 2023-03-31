@@ -38,8 +38,6 @@ const successNotification = function(message) {
     });
 };
 
-
-
 export default boot(({ app, store }) => {
     app.config.globalProperties.$errorNotification = errorNotification;
     store['$errorNotification'] = errorNotification;
