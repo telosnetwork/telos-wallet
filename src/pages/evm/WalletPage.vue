@@ -32,10 +32,10 @@ export default defineComponent({
 
 <style lang="scss">
 .c-wallet-page {
+    // used to demonstrate header space - to be removed on page implementation
     &__TEMPORARY {
         height: 300px;
         width: 100%;
-        border: 1px solid red;
         text-align: center;
         color: black;
     }

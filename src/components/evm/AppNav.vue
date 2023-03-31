@@ -61,14 +61,75 @@ export default defineComponent({
                 @click="menuIsOpen = !menuIsOpen"
             />
         </div>
-        <ul class="c-app-nav__menu-items">
-            <li class="c-app-nav__menu-item"></li>
 
-            <li class="c-app-nav__menu-item"></li>
+        <ul class="c-app-nav__menu-items" role="menu">
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                tabindex="0"
+                @click="$router.push('#')"
+                @keydown.space.enter="$router.push('#')"
+            >
+                <img
+                    src="~assets/icon--wallet.svg"
+                    height="24"
+                    width="24"
+                    :alt="$t('nav.alt_wallet')"
+                    aria-hidden="true"
+                >
+                {{ $t('nav.wallet') }}
+            </li>
 
-            <li class="c-app-nav__menu-item"></li>
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                tabindex="0"
+                @click="$router.push('#')"
+                @keydown.space.enter="$router.push('#')"
+            >
+                <img
+                    src="~assets/icon--acorn.svg"
+                    height="24"
+                    width="24"
+                    :alt="$t('nav.alt_acorn')"
+                    aria-hidden="true"
+                >
+                {{ $t('nav.staking') }}
+            </li>
 
-            <li class="c-app-nav__menu-item"></li>
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                tabindex="0"
+                @click="$router.push('#')"
+                @keydown.space.enter="$router.push('#')"
+            >
+                <img
+                    src="~assets/icon--wrap-tlos.svg"
+                    height="24"
+                    width="24"
+                    :alt="$t('nav.alt_wrap_tlos')"
+                    aria-hidden="true"
+                >
+                {{ $t('nav.wrap_tlos') }}
+            </li>
+
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                tabindex="0"
+                @click="$router.push('#')"
+                @keydown.space.enter="$router.push('#')"
+            >
+                <img
+                    src="~assets/icon--logout.svg"
+                    height="24"
+                    width="24"
+                    :alt="$t('nav.alt_logout')"
+                    aria-hidden="true"
+                >
+                {{ $t('global.sign_out') }}
+            </li>
 
         </ul>
     </div>
@@ -87,7 +148,6 @@ export default defineComponent({
         transition: 0.2s transform ease;
         background: $site-gradient;
         z-index: 999;
-
 
         &--open {
             transform: translateX(0);
@@ -119,11 +179,20 @@ export default defineComponent({
     }
 
     &__menu-items {
-
+        margin-top: 80px;
+        list-style: none;
     }
 
     &__menu-item {
-
+        cursor: pointer;
+        line-height: 20px;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        width: max-content;
     }
 }
 </style>
