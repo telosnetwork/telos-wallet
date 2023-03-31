@@ -12,6 +12,7 @@ export default defineComponent({
     },
     data: () => ({
         menuIsOpen: false,
+        showShadow: false,
     }),
     watch: {
         '$q.screen.lt.lg'(newValue, oldValue) {
@@ -21,6 +22,9 @@ export default defineComponent({
         },
     },
     methods: {
+        scrollHandler(info: { position: { top: number }}) {
+            this.showShadow = info.position.top !== 0;
+        },
         logout() {
             console.log('logged out');
         },
@@ -30,7 +34,14 @@ export default defineComponent({
 
 <template>
 <nav class="c-app-nav">
-    <div class="c-app-nav__toolbar">
+    <q-scroll-observer debounce="100" @scroll="scrollHandler" />
+
+    <div
+        :class="{
+            'c-app-nav__toolbar': true,
+            'shadow-3': showShadow,
+        }"
+    >
         <q-btn
             v-if="$q.screen.lt.lg"
             flat
@@ -184,13 +195,19 @@ export default defineComponent({
     }
 
     &__toolbar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
         display: flex;
         justify-content: space-between;
         color: black;
         padding: 16px 24px;
         background-color: $page-header;
+        z-index: 999;
 
         @media only screen and (min-width: $breakpoint-lg-min) {
+            left: 300px;
             justify-content: flex-end;
         }
     }

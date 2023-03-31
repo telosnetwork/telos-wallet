@@ -21,6 +21,9 @@ export default defineComponent({
 
 <style lang="scss">
 .c-evm-layout {
+    // offset content for fixed header
+    margin-top: 64px;
+
     @media only screen and (min-width: $breakpoint-lg-min) {
         // offset content for desktop menu
         margin-left: 300px;
