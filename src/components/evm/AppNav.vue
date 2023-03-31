@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 
@@ -7,6 +8,7 @@ export default defineComponent({
     name: 'AppNav',
     components: {
         UserInfo,
+        InlineSvg,
     },
     data: () => ({
         menuIsOpen: false,
@@ -16,6 +18,11 @@ export default defineComponent({
             if (newValue !== oldValue) {
                 this.menuIsOpen = false;
             }
+        },
+    },
+    methods: {
+        logout() {
+            console.log('logged out');
         },
     },
 });
@@ -67,16 +74,20 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 tabindex="0"
-                @click="$router.push('#')"
-                @keydown.space.enter="$router.push('#')"
+                @click="$router.push({ name: 'evm-wallet' })"
+                @keydown.space.enter="$router.push({ name: 'evm-wallet' })"
             >
-                <img
-                    src="~assets/icon--wallet.svg"
+                <InlineSvg
+                    :src="require('src/assets/icon--wallet.svg')"
+                    class=""
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-wallet',
+                    }"
                     height="24"
                     width="24"
-                    :alt="$t('nav.alt_wallet')"
                     aria-hidden="true"
-                >
+                />
                 {{ $t('nav.wallet') }}
             </li>
 
@@ -84,16 +95,20 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 tabindex="0"
-                @click="$router.push('#')"
-                @keydown.space.enter="$router.push('#')"
+                @click="$router.push({ name: 'evm-staking' })"
+                @keydown.space.enter="$router.push({ name: 'evm-staking' })"
             >
-                <img
-                    src="~assets/icon--acorn.svg"
+                <InlineSvg
+                    :src="require('src/assets/icon--acorn.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--acorn': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-staking',
+                    }"
                     height="24"
                     width="24"
-                    :alt="$t('nav.alt_acorn')"
                     aria-hidden="true"
-                >
+                />
                 {{ $t('nav.staking') }}
             </li>
 
@@ -101,16 +116,19 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 tabindex="0"
-                @click="$router.push('#')"
-                @keydown.space.enter="$router.push('#')"
+                @click="$router.push({ name: 'evm-wrap' })"
+                @keydown.space.enter="$router.push({ name: 'evm-wrap' })"
             >
-                <img
-                    src="~assets/icon--wrap-tlos.svg"
+                <InlineSvg
+                    :src="require('src/assets/icon--wrap-tlos.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-wrap',
+                    }"
                     height="24"
                     width="24"
-                    :alt="$t('nav.alt_wrap_tlos')"
                     aria-hidden="true"
-                >
+                />
                 {{ $t('nav.wrap_tlos') }}
             </li>
 
@@ -118,16 +136,16 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 tabindex="0"
-                @click="$router.push('#')"
-                @keydown.space.enter="$router.push('#')"
+                @click="logout"
+                @keydown.space.enter="logout"
             >
-                <img
-                    src="~assets/icon--logout.svg"
+                <InlineSvg
+                    :src="require('src/assets/icon--logout.svg')"
+                    class="c-app-nav__icon"
                     height="24"
                     width="24"
-                    :alt="$t('nav.alt_logout')"
                     aria-hidden="true"
-                >
+                />
                 {{ $t('global.sign_out') }}
             </li>
 
@@ -138,6 +156,8 @@ export default defineComponent({
 
 <style lang="scss">
 .c-app-nav {
+    $this: &;
+
     &__menu-container {
         position: fixed;
         top: 0;
@@ -184,15 +204,40 @@ export default defineComponent({
     }
 
     &__menu-item {
-        cursor: pointer;
-        line-height: 20px;
         font-size: 16px;
+        line-height: 20px;
         font-weight: 600;
+
+        cursor: pointer;
         display: flex;
         align-items: center;
         gap: 16px;
         margin-bottom: 32px;
         width: max-content;
+
+        &:hover {
+            color: $link-blue;
+
+            // svg color overrides
+            #{$this}__icon:not(#{$this}__icon--acorn) path {
+                fill: $link-blue;
+            }
+
+            #{$this}__icon--acorn path {
+                stroke: $link-blue;
+            }
+        }
+    }
+
+    &__icon {
+        // svg color overrides
+        &--current-route:not(#{$this}__icon--acorn) path {
+            fill: $link-blue;
+        }
+
+        &--current-route#{$this}__icon--acorn path {
+            stroke: $link-blue;
+        }
     }
 }
 </style>

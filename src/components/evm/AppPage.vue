@@ -47,7 +47,7 @@ export default defineComponent({
             v-model="selectedTab"
             inline-label
             no-caps
-            indicator-color="purple"
+            indicator-color="primary"
             class="c-app-page__tabs"
         >
             <q-route-tab
@@ -62,24 +62,28 @@ export default defineComponent({
         </q-tabs>
     </div>
 
-    <div class="c-app-page__body">
-        <!-- if a page has tabs, create a slot for each tab whose name is the same as the tab -->
-        <q-tab-panels
-            v-if="showTabs"
-            v-model="selectedTab"
-            animated
+    <!-- if a page has tabs, create a slot for each tab whose name is the same as the tab, e.g.
+        <template v-slot:balance>
+            <WalletBalanceTab />
+        </template>
+     -->
+    <q-tab-panels
+        v-if="showTabs"
+        v-model="selectedTab"
+        animated
+    >
+        <q-tab-panel
+            v-for="tab in tabs"
+            :key="tab"
+            :name="tab"
         >
-            <q-tab-panel
-                v-for="tab in tabs"
-                :key="tab"
-                :name="tab"
-            >
-                <slot :name="tab"></slot>
-            </q-tab-panel>
-        </q-tab-panels>
+            <slot :name="tab"></slot>
+        </q-tab-panel>
+    </q-tab-panels>
 
-        <!-- if a page has no tabs, render a generic slot for page content -->
-        <slot v-else></slot>
+    <!-- if a page has no tabs, render a generic slot for page content -->
+    <div v-else class="c-app-page__body">
+        <slot></slot>
     </div>
 </q-page>
 </template>
@@ -111,7 +115,11 @@ export default defineComponent({
     }
 
     &__body {
+        padding: 24px;
 
+        @media only screen and (min-width: $breakpoint-lg-min) {
+            padding: 32px;
+        }
     }
 }
 </style>

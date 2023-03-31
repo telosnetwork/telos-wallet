@@ -37,10 +37,6 @@ export default {
         wallet: 'Wallet',
         staking: 'Staking',
         wrap_tlos: 'Wrap TLOS',
-        alt_wallet: 'wallet icon',
-        alt_acorn: 'Telos acorn icon',
-        alt_wrap_tlos: 'wrap TLOS icon',
-        alt_logout: 'logout icon',
     },
     global: {
         native: 'Native',

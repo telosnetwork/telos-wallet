@@ -28,8 +28,18 @@ const routes = [
         children: [
             {
                 path: 'wallet',
-                name: 'wallet',
+                name: 'evm-wallet',
                 component: () => import('pages/evm/WalletPage.vue'),
+            },
+            {
+                path: 'staking',
+                name: 'evm-staking',
+                component: () => import('pages/evm/StakingPage.vue'),
+            },
+            {
+                path: 'wrap',
+                name: 'evm-wrap',
+                component: () => import('pages/evm/WrapPage.vue'),
             },
         ],
     },
