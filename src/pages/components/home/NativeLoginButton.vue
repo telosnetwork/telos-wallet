@@ -2,6 +2,7 @@
 <script>
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
+import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
@@ -91,7 +92,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         },
 
@@ -212,7 +213,7 @@ export default defineComponent({
     <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
         <div class="q-mt-md q-mb-sm">
             <q-btn
-                label="Connect Your Wallet"
+                :label="$t('home.connect_with_wallet')"
                 class="purpleGradient q-px-md q-py-sm"
                 @click="showLogin = true"
             />
@@ -223,7 +224,7 @@ export default defineComponent({
             <q-btn
                 text-color="white"
                 outline
-                label="View any account"
+                :label="$t('home.view_any_account')"
                 class="q-px-md q-py-sm"
                 @click="loginAsJustViewer()"
             />
@@ -234,7 +235,7 @@ export default defineComponent({
             <q-btn
                 text-color="white"
                 outline
-                label="Create New Account"
+                :label="$t('home.create_new_account')"
                 class="q-px-md q-py-sm"
                 @click="signUp"
             />
@@ -242,12 +243,12 @@ export default defineComponent({
     </div>
 
     <div v-else class="q-px-md flex justify-center column">
-        <p class="q-mb-lg">Logged in as {{ accountName }}</p>
+        <p class="q-mb-lg"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
 
         <q-btn
             text-color="white"
             outline
-            label="View Wallet"
+            :label="$t('home.view_wallet')"
             class="q-px-md q-py-sm q-mb-lg"
             @click="$router.push('/balance')"
         />
@@ -255,7 +256,7 @@ export default defineComponent({
         <q-btn
             text-color="white"
             outline
-            label="Log Out"
+            :label="$t('home.log_out')"
             class="q-px-md q-py-sm"
             @click="logout"
         />

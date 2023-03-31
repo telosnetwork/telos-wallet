@@ -225,7 +225,6 @@ export const useEVMStore = defineStore(store_name, {
                     return null;
                 }
             } catch (e) {
-                console.error(`Error trying to find event signature for function ${prefix}`, e);
                 throw new AntelopeError('antelope.evm.error_getting_function_interface', { prefix });
             }
         },
@@ -262,13 +261,13 @@ export const useEVMStore = defineStore(store_name, {
                     return null;
                 }
             } catch (e) {
-                console.error(`Error trying to find event signature for event ${hex}:`, e);
                 throw new AntelopeError('antelope.evm.error_getting_event_interface', { hex });
             }
         },
         async getContractCreation(address:string): Promise<EvmContractCreationInfo> {
             if (!address) {
-                throw new AntelopeError('antelope.evm.error_wrong_address', { address });
+                console.error('address is null', address);
+                throw new AntelopeError('antelope.evm.error_invalid_address', { address });
             }
             try {
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;

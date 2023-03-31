@@ -101,12 +101,10 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('processTransaction', transaction);
             const evm = useEVMStore();
             try {
-                console.log('transaction.value: ', typeof transaction.value, transaction.value);
                 if (typeof transaction.value === 'number') {
                     const num = transaction.value as number;
                     transaction.value = num.toLocaleString('en-US', { useGrouping: false });
                 }
-                console.log('transaction.value: ', typeof transaction.value, transaction.value);
                 const bn = ethers.BigNumber.from(transaction.value);
                 transaction.value = formatWei(bn, 18);
                 if (transaction.input_data === '0x') {

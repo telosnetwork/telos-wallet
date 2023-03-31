@@ -4,6 +4,11 @@ const routes = [
         component: () => import('pages/components/home/HomePage.vue'),
     },
     {
+        path: '/evm-balance',
+        component: () => import('layouts/EVMLayout.vue'),
+        children: [{ path: '', component: () => import('pages/BalanceInfo.vue') }],
+    },
+    {
         path: '/balance',
         component: () => import('layouts/MainLayout.vue'),
         children: [{ path: '', component: () => import('pages/BalanceInfo.vue') }],
