@@ -6,7 +6,7 @@ export default defineComponent({
     methods: {
         connectToMetaMask() {
             // https://github.com/telosnetwork/telos-wallet/issues/152
-            this.$router.push({ name: 'wallet' });
+            this.$router.push({ name: 'evm-wallet' });
         },
         viewAnyAccount() {
 

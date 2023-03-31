@@ -35,8 +35,6 @@ export default defineComponent({
                 >
 
                 <div class="c-home__button-container">
-
-
                     <div class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
