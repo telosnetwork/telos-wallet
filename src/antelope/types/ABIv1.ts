@@ -1,19 +1,19 @@
-export interface ABI {
+export interface ABIv1 {
   abi: {
-    actions: Action[];
-    structs: Struct[];
-    tables: Table[];
+    actions: ActionV1[];
+    structs: StructV1[];
+    tables: TableV1[];
   } | null;
   account_name: string;
 }
 
-interface Action {
+interface ActionV1 {
   name: string;
   ricardian_contract: string;
   type: string;
 }
 
-interface Table {
+interface TableV1 {
   index_type: string;
   key_names: unknown[];
   key_types: unknown[];
@@ -21,13 +21,13 @@ interface Table {
   type: string;
 }
 
-interface Struct {
+interface StructV1 {
   base: string;
-  fields: Field[];
+  fields: FieldV1[];
   name: string;
 }
 
-interface Field {
+interface FieldV1 {
   name: string;
   type: string;
 }
