@@ -119,16 +119,35 @@ export type AccountDetails = {
   tokens: Token[];
   total_actions: number;
 };
+
+
 export interface Token {
-  name?: string;
   symbol: string;
-  precision: number;
+  name?: string;
   amount?: number;
-  contract: string;
   logo?: string;
   isNative?: boolean;
   isSystem?: boolean;
 }
+
+export interface EvmToken extends Token {
+  address: string;
+  metadata?: string;
+  has_metadata?:boolean;
+  symbol: string;
+  name: string;
+  decimals: number;
+  type: string;
+  balance?: string;
+  fullBalance?: string;
+}
+
+export interface NativeToken extends Token {
+  precision: number;
+  contract: string;
+}
+
+
 interface Key {
   key: string;
   weight: number;

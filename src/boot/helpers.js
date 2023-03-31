@@ -20,6 +20,9 @@ const charToSymbol = function(char) {
 
 const nameToUint64 = function(name) {
     let n = BigInt(0);
+    if (!name) {
+        return n.toString();
+    }
 
     let i = 0;
     for (; i < 12 && name[i]; i++) {

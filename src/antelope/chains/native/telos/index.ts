@@ -1,9 +1,7 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { PriceChartData } from 'src/types/PriceChartData';
-import { Theme } from 'src/types/Theme';
-import { Token } from 'src/types/Actions';
+import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11';
@@ -16,7 +14,7 @@ const TOKEN = {
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as Token;
+} as NativeToken;
 
 const HYPERION_ENDPOINT = 'https://mainnet.telos.net';
 
@@ -91,7 +89,7 @@ export default class Telos extends NativeChainSettings {
         return api.getCoingeckoPriceChartData('telos');
     }
 
-    getSystemToken(): Token {
+    getSystemToken(): NativeToken {
         return TOKEN;
     }
 

@@ -1,16 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { AccountDetails, ChainSettings, PriceChartData, Token } from 'src/types';
-import { Theme } from 'src/types';
 import { RpcEndpoint } from 'universal-authenticator-library';
-import { Action, ActionData, Block, GetActionsResponse, PermissionLinks, PermissionLinksData, TableByScope } from 'src/antelope/types/Actions';
-import { Transaction } from 'src/antelope/types/Transaction';
-import { ChainInfo } from 'src/antelope/types/ChainInfo';
-import { ProducerSchedule } from 'src/antelope/types/ProducerSchedule';
-import { GetProposals, GetProposalsProps } from 'src/antelope/types/Proposal';
-import { GetProducers } from 'src/antelope/types/Producers';
-import { ABI } from 'src/antelope/types/ABI';
-import { ProducerScheduleData } from 'src/antelope/types/ProducerScheduleData';
-import { KeyAccounts } from 'src/antelope/types/KeyAccounts';
 import {
     Name,
     API,
@@ -21,19 +10,50 @@ import {
     Action as EosioAction,
 } from '@greymass/eosio';
 import {
+    ABIv1,
     AccountCreatorInfo,
+    AccountDetails,
+    Action,
+    ActionData,
+    Block,
+    ChainInfo,
+    ChainSettings,
+    GetActionsResponse,
+    GetProducers,
+    GetProposals,
+    GetProposalsProps,
     GetTableRowsParams,
     GetTableRowsResponse,
-    HyperionTransactionFilter,
+    HyperionActionsFilter,
+    KeyAccounts,
+    NativeToken,
+    PermissionLinks,
+    PermissionLinksData,
+    PriceChartData,
+    ProducerSchedule,
+    ProducerScheduleData,
+    TableByScope,
     TableIndexType,
-} from 'src/antelope/types/Api';
+    Theme,
+    TransactionV1,
+} from 'src/antelope/types';
 
 export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNyAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTgiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=';
 
 const abortController = new AbortController();
 
 export default abstract class NativeChainSettings implements ChainSettings {
+    // Short Name of the network
     protected network: string;
+
+    // External query API support
+    protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+
+    // External query API support
+    protected api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
+
+    // Core eosio
+    protected eosioCore: APIClient = new APIClient({ url: this.getHyperionEndpoint() })
 
     constructor(network: string) {
         this.network = network;
@@ -89,7 +109,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return `~/assets/${this.network}/logo_sm.svg`;
     }
 
-    abstract getSystemToken(): Token;
+    abstract getSystemToken(): NativeToken;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
@@ -103,12 +123,6 @@ export default abstract class NativeChainSettings implements ChainSettings {
     abstract getTheme(): Theme;
     abstract getFiltersSupported(prop: string): boolean;
 
-    // ----------------
-    api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
-    hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
-    eosioCore: APIClient = new APIClient({ url: this.getHyperionEndpoint() })
-    // ----------------
-    // api --
     async getApy(): Promise<string> {
         const response = await this.api.get('apy/native');
         return response.data as string;
@@ -129,13 +143,13 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return response.data as AccountCreatorInfo;
     }
 
-    async getTokenList(): Promise<Token[]> {
+    async getTokenList(): Promise<NativeToken[]> {
         const name = this.getNetwork();
         const url = `https://raw.githubusercontent.com/telosnetwork/token-list/main/tokens.${name}.json`;
         const response = fetch(url)
             .then(response => response.text())
             .then((fileContent: string) => JSON.parse(fileContent) as { account: string }[])
-            .then(originals => originals.map(token => token as unknown as Token))
+            .then(originals => originals.map(token => token as unknown as NativeToken))
             .catch((error) => {
                 console.error(error);
                 return [];
@@ -143,15 +157,15 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return response;
     }
 
-    async getTokens(address?: string): Promise<Token[]> {
+    async getTokens(address?: string): Promise<NativeToken[]> {
         if (address) {
             const response = await this.hyperion.get('v2/state/get_tokens', {
                 params: { account: address },
             });
             const tokens = await this.getTokenList();
-            const balances = (response.data as { tokens: Token[] }).tokens;
-            return balances.map((token: Token) => {
-                const tk = tokens.find((t: Token) => t.symbol === token.symbol) as Token;
+            const balances = (response.data as { tokens: NativeToken[] }).tokens;
+            return balances.map((token: NativeToken) => {
+                const tk = tokens.find((t: NativeToken) => t.symbol === token.symbol) as NativeToken;
                 if (tk && tk.logo) {
                     token.logo = tk?.logo;
                 } else {
@@ -163,7 +177,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return this.getTokenList();
     }
 
-    async getActions(filter: HyperionTransactionFilter): Promise<GetActionsResponse> {
+    async getActions(filter: HyperionActionsFilter): Promise<GetActionsResponse> {
         const account = filter.account || '';
         const page = filter.page || 1;
         const limit = filter.limit || 10;
@@ -172,6 +186,9 @@ export default abstract class NativeChainSettings implements ChainSettings {
         const sort = filter.sort || 'desc';
         const after = filter.after || '';
         const before = filter.before || '';
+        const address = filter.address || '';
+        const block = filter.block || '';
+        const hash = filter.hash || '';
 
         let aux = {};
         if (account) {
@@ -195,10 +212,18 @@ export default abstract class NativeChainSettings implements ChainSettings {
         if (before) {
             aux = { before, ...aux };
         }
+        if (address) {
+            aux = { address, ...aux };
+        }
+        if (block) {
+            aux = { block, ...aux };
+        }
+        if (hash) {
+            aux = { hash, ...aux };
+        }
         if (filter.extras) {
             aux = { 'act.name': '!onblock', ...aux, ...filter.extras };
         }
-
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
 
         return this.hyperion.get<ActionData>('v2/history/get_actions', { params });
@@ -214,8 +239,8 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return response.data;
     }
 
-    async getTransactionV1(id?: string): Promise<Transaction> {
-        const response = await this.hyperion.post<Transaction>(
+    async getTransactionV1(id?: string): Promise<TransactionV1> {
+        const response = await this.hyperion.post<TransactionV1>(
             'v1/history/get_transaction',
             {
                 id: id,
@@ -304,11 +329,11 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return response.data as GetProducers;
     }
 
-    async getABI(account: string): Promise<ABI> {
+    async getABI(account: string): Promise<ABIv1> {
         const response = await this.hyperion.post('v1/chain/get_abi', {
             account_name: account,
         });
-        return response.data as ABI;
+        return response.data as ABIv1;
     }
 
     async getHyperionKeyAccounts(key: string): Promise<KeyAccounts> {
@@ -336,7 +361,9 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return await this.eosioCore.v1.chain.get_currency_balance(contract, address);
     }
 
-    async getTableRows<Index extends TableIndexType = Name>(params: GetTableRowsParams<Index>): Promise<GetTableRowsResponse<Index>> {
+    async getTableRows<Index extends TableIndexType = Name>(
+        params: GetTableRowsParams<Index>,
+    ): Promise<GetTableRowsResponse<Index>> {
         return await this.eosioCore.v1.chain.get_table_rows(params);
     }
 

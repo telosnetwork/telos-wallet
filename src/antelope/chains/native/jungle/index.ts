@@ -1,9 +1,7 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
-import { PriceChartData } from 'src/types/PriceChartData';
 import { api } from 'src/api';
-import { Theme } from 'src/types/Theme';
-import { Token } from 'src/types/Actions';
+import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d';
@@ -16,7 +14,7 @@ const TOKEN = {
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as Token;
+} as NativeToken;
 const HYPERION_ENDPOINT = 'https://jungle.eosusa.news';
 const S3_PRODUCER_BUCKET = 'https://telos-producer-validation.s3.amazonaws.com';
 const RPC_ENDPOINT = {
@@ -65,7 +63,7 @@ export default class TelosTestnet extends NativeChainSettings {
         return api.getEmptyPriceChartData();
     }
 
-    getSystemToken(): Token {
+    getSystemToken(): NativeToken {
         return TOKEN;
     }
 

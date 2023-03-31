@@ -17,7 +17,6 @@ import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { Action } from 'src/types/Actions';
 import { FuelUserWrapper } from 'src/api/fuel';
 import {
     createInitFunction,
@@ -28,6 +27,7 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { getAntelope } from '..';
 import { errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
+import { Action, Label } from 'src/antelope/types';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -68,10 +68,8 @@ export interface EvmAccountModel extends AccountModel {
 
 
 export interface AccountState {
-    // reference to the logged account (authenticated with wallet or cleos)
-    __logged_account: AccountModel | null;
-    // reference to the current account (the one being explored in the app)
-    __current_account: AccountModel | null;
+    // accounts mapped by label
+    __accounts: { [label: Label]: AccountModel };
 }
 
 const store_name = 'account';
@@ -79,12 +77,12 @@ const store_name = 'account';
 export const useAccountStore = defineStore(store_name, {
     state: (): AccountState => (accountInitialState),
     getters: {
-        isAuthenticated: state => !!state.__logged_account,
-        loggedAccount: state => ({ ...state.__logged_account }),
-        currentAccount: state => ({ ...state.__current_account }),
+        isAuthenticated: state => !!state.__accounts['logged'],
+        loggedAccount: state => ({ ...state.__accounts['logged'] }),
+        currentAccount: state => ({ ...state.__accounts['current'] }),
         currentIsLogged: state =>
-            state.__logged_account?.account === state.__current_account?.account &&
-            state.__logged_account?.network === state.__current_account?.network,
+            state.__accounts['logged']?.account === state.__accounts['current']?.account &&
+            state.__accounts['logged']?.network === state.__accounts['current']?.network,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -176,8 +174,8 @@ export const useAccountStore = defineStore(store_name, {
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                if (this.__logged_account?.isNative) {
-                    const logged = this.__logged_account as NativeAccountModel;
+                if (this.__accounts['logged']?.isNative) {
+                    const logged = this.__accounts['logged'] as NativeAccountModel;
                     const { authenticator } = logged;
                     try {
                         authenticator && (await authenticator.logout());
@@ -197,12 +195,12 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('autoLogin');
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
-                const network = localStorage.getItem('network') ?? useChainStore().__current_Chain.settings.getNetwork();
+                const network = localStorage.getItem('network') ?? useChainStore().currentChain.settings.getNetwork();
                 const account = localStorage.getItem('account');
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
                 this.trace('autoLogin', account, isNative, autoLogin);
-                if (account && !this.__logged_account) {
+                if (account && !this.__accounts['logged']) {
                     if (isNative) {
                         const authenticators = getAntelope().config.authenticatorsGetter();
                         const authenticator = authenticators.find(
@@ -275,7 +273,8 @@ export const useAccountStore = defineStore(store_name, {
         // commits
         setCurrentAccount(account: AccountModel | null | string) {
             this.trace('setCurrentAccount', account);
-            const before = `${this.__current_account?.account ?? ''} ${this.__current_account?.network ?? ''}`;
+            const label = 'current';
+            const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
             try {
                 if (account) {
                     if (typeof account === 'string') {
@@ -285,43 +284,50 @@ export const useAccountStore = defineStore(store_name, {
                             isNative: true,
                             data: null,
                         };
-                        this.__current_account = { ...this.__current_account, ..._account };
+                        this.__accounts[label] = { ...this.__accounts[label], ..._account };
                     } else {
-                        this.__current_account = { ...this.__current_account, ...account };
+                        this.__accounts[label] = { ...this.__accounts[label], ...account };
                     }
                 } else {
-                    this.__current_account = null;
+                    delete this.__accounts[label];
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
-                const after = `${this.__current_account?.account ?? ''} ${this.__current_account?.network ?? ''}`;
+                const after = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
                 if (before !== after) {
                     getAntelope().events.onAccountChanged.next({
-                        label: 'current',
-                        account: this.currentAccount ? this.currentAccount as AccountModel : null,
+                        label, account: this.__accounts[label] as AccountModel,
                     });
                 }
             }
         },
         setLoggedAccount(account: AccountModel | null) {
             this.trace('setLoggedAccount', account);
+            const label = 'logged';
+            const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
             try {
                 if (account) {
-                    this.__logged_account = { ...this.__logged_account, ...account };
+                    this.__accounts[label] = { ...this.__accounts[label], ...account };
                     useChainStore().setLoggedChain(account.network);
                 } else {
-                    this.__logged_account = null;
+                    delete this.__accounts[label];
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+            } finally {
+                const after = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
+                if (before !== after) {
+                    getAntelope().events.onAccountChanged.next({
+                        label, account: this.__accounts[label] as AccountModel,
+                    });
+                }
             }
         },
     },
 });
 
 const accountInitialState: AccountState = {
-    __logged_account: null,
-    __current_account: null,
+    __accounts: {},
 };
 
