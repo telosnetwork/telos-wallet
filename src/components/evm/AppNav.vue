@@ -198,7 +198,7 @@ export default defineComponent({
     &__logo {
         height: 56px;
         margin-top: 24px;
-        margin-left: 12px;
+        margin-left: 32px;
         cursor: pointer;
     }
 
