@@ -58,8 +58,7 @@ interface AccountRamDelta {
 export interface Account {
   account: string;
   authorization: Authorization[];
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  data: any;
+  data: unknown;
   name: string;
 }
 
