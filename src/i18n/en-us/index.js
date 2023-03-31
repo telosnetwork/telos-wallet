@@ -34,10 +34,14 @@ export default {
     nav: {
         copy_address: 'Copy address to clipboard',
         overflow_menu: 'Open account overflow menu',
+        wallet: 'Wallet',
+        staking: 'Staking',
+        wrap_tlos: 'Wrap TLOS',
     },
     global: {
         native: 'Native',
         telos_evm: 'Telos EVM',
+        sign_out: 'Sign Out',
     },
     resources: {
         title: 'Network Resources',

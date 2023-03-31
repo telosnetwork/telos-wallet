@@ -15,13 +15,13 @@ export default defineComponent({
         icon="content_copy"
         color="purple"
         class="q-mr-sm"
-        :aria-label="$t('copy_address')"
+        :aria-label="$t('nav.copy_address')"
     />
     <q-btn
         flat
         dense
         icon="more_vert"
-        :aria-label="$t('overflow_menu')"
+        :aria-label="$t('nav.overflow_menu')"
     />
 </div>
 </template>
@@ -41,7 +41,6 @@ export default defineComponent({
         @media only screen and (min-width: $breakpoint-lg-min) {
             font-weight: 600;
         }
-
     }
 }
 </style>

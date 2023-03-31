@@ -24,7 +24,8 @@ export default defineComponent({
     @media only screen and (min-width: $breakpoint-lg-min) {
         // offset content for desktop menu
         margin-left: 300px;
-        width: calc(100vw - 300px);
+        width: calc(100% - 300px);
+        max-width: calc(100vw - 300px);
     }
 }
 </style>

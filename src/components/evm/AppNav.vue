@@ -22,21 +22,20 @@ export default defineComponent({
 </script>
 
 <template>
-<q-header>
-    <q-toolbar class="c-app-nav__toolbar">
+<nav class="c-app-nav">
+    <div class="c-app-nav__toolbar">
         <q-btn
             v-if="$q.screen.lt.lg"
             flat
             round
             dense
             icon="menu"
-            class="q-mr-sm"
             color="black"
             @click="menuIsOpen = !menuIsOpen"
         />
 
         <UserInfo />
-    </q-toolbar>
+    </div>
 
     <div
         :class="{
@@ -62,8 +61,18 @@ export default defineComponent({
                 @click="menuIsOpen = !menuIsOpen"
             />
         </div>
+        <ul class="c-app-nav__menu-items">
+            <li class="c-app-nav__menu-item"></li>
+
+            <li class="c-app-nav__menu-item"></li>
+
+            <li class="c-app-nav__menu-item"></li>
+
+            <li class="c-app-nav__menu-item"></li>
+
+        </ul>
     </div>
-</q-header>
+</nav>
 </template>
 
 <style lang="scss">
@@ -95,14 +104,26 @@ export default defineComponent({
         display: flex;
         justify-content: space-between;
         color: black;
-        padding-top: 24px;
+        padding: 16px 24px;
         background-color: $page-header;
+
+        @media only screen and (min-width: $breakpoint-lg-min) {
+            justify-content: flex-end;
+        }
     }
 
     &__logo {
         height: 56px;
         margin-top: 24px;
         margin-left: 12px;
+    }
+
+    &__menu-items {
+
+    }
+
+    &__menu-item {
+
     }
 }
 </style>
