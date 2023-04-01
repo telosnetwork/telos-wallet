@@ -196,7 +196,7 @@ export default defineComponent({
             this.resLow = this.ramLow || this.cpuLow || this.netLow;
         },
     },
-    whatch: {
+    watch: {
         async isAuthenticated() {
             if (this.isAuthenticated) {
                 await this.createEvmApi();
