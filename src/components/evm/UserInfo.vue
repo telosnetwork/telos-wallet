@@ -114,16 +114,6 @@ export default defineComponent({
                 tabindex="2"
                 @click="toggleDarkMode"
             >
-                <InlineSvg
-                    :src="require('src/assets/icon--logout.svg')"
-                    :class="{
-                        'c-user-info__icon': true,
-                        'c-user-info__icon--hide': true,
-                    }"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
                 <span class="c-user-info__dropdown-item-text">{{ isDarkMode ? $t('global.light_mode') : $t('global.dark_mode') }}</span>
             </li>
 
@@ -201,10 +191,6 @@ export default defineComponent({
         &#{$this}__icon--acorn path {
             stroke: var(--text-color);
         }
-
-        &#{$this}__icon--hide path {
-            opacity: 0;
-        }
     }
 
     &__dropdown-item-min-icon {
@@ -212,9 +198,6 @@ export default defineComponent({
         transform: scale(0.67);
         margin-left: 5px;
     }
-}
-.hide {
-    display: none;
 }
 </style>
 
