@@ -38,6 +38,8 @@ export default {
         staking: 'Staking',
         wrap_tlos: 'Wrap TLOS',
         go_home: 'Go to home page',
+        close_menu: 'Close menu',
+        open_menu: 'Open menu',
     },
     global: {
         native: 'Native',
