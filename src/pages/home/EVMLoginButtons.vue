@@ -7,7 +7,7 @@ export default defineComponent({
     name: 'EVMLoginButtons',
     methods: {
         setDefaultEVMChain() {
-            const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-testnet-evm' ;
+            const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet' ;
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
         },

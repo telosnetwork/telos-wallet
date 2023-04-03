@@ -29,7 +29,7 @@ const EXPLORER_URL = 'https://testnet.teloscan.io';
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.caleos.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
-export default class TelosTestnetEVM extends EVMChainSettings {
+export default class TelosEVMTestnet extends EVMChainSettings {
     getNetwork(): string {
         return NETWORK;
     }
