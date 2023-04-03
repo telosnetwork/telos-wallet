@@ -4,7 +4,7 @@ export interface HyperionAbiSignatureFilter {
 }
 
 export interface HyperionActionsFilter {
-    page?: number; 
+    page?: number;
     skip?: number; // skip overrides `page`
     limit?: number;
     account?: string;
