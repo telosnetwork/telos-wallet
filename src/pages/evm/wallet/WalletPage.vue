@@ -1,10 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
+import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 
 export default defineComponent({
     name: 'WalletPage',
     components: {
+        WalletPageHeader,
         AppPage,
     },
     data: () => ({
@@ -17,7 +19,7 @@ export default defineComponent({
 <template>
 <AppPage :tabs="tabs">
     <template v-slot:header>
-        <div class="c-wallet-page__TEMPORARY">wallet page header stuff</div>
+        <WalletPageHeader />
     </template>
 
     <template v-slot:balance>
@@ -32,12 +34,6 @@ export default defineComponent({
 
 <style lang="scss">
 .c-wallet-page {
-    // used to demonstrate header space - to be removed on page implementation
-    // replace with a component, something like <WalletPageHeader />
-    &__TEMPORARY {
-        height: 300px;
-        width: 100%;
-        text-align: center;
-    }
+
 }
 </style>
