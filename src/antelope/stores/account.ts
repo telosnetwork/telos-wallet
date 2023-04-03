@@ -62,6 +62,8 @@ export interface NativeAccountModel extends AccountModel {
 }
 
 export interface EvmAccountModel extends AccountModel {
+    address: string;
+    displayAddress: string;
     isNative: false;
     associatedNative: string;
 }
@@ -79,6 +81,11 @@ export const useAccountStore = defineStore(store_name, {
     getters: {
         isAuthenticated: state => !!state.__accounts['logged'],
         loggedAccount: state => ({ ...state.__accounts['logged'] }),
+        loggedIsNative: state => state.__accounts['logged']?.isNative,
+        loggedEvmAccount: state => (state.__accounts['logged']?.isNative ?
+            null : state.__accounts['logged']) as EvmAccountModel,
+        loggedNativeAccount: state => (state.__accounts['logged']?.isNative ?
+            state.__accounts['logged'] : null) as NativeAccountModel,
         currentAccount: state => ({ ...state.__accounts['current'] }),
         currentIsLogged: state =>
             state.__accounts['logged']?.account === state.__accounts['current']?.account &&
@@ -137,14 +144,19 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('account.login');
 
                 const address = await useEVMStore().login(network);
+
                 if (address) {
+                    const displayAddress = address.toUpperCase().replace(/^..(.{4})(.*)(.{4})$/, '0x$1...$3');
+
                     const account = address;
                     const evmAccount:EvmAccountModel = {
                         network,
+                        address,
                         account,
                         isNative: false,
                         associatedNative: '',
                         data: null,
+                        displayAddress,
                     };
                     this.setLoggedAccount(evmAccount);
 
@@ -191,16 +203,16 @@ export const useAccountStore = defineStore(store_name, {
                 getAntelope().events.onLoggedOut.next();
             }
         },
-        async autoLogin() {
+        autoLogin() {
             this.trace('autoLogin');
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
-                const network = localStorage.getItem('network') ?? useChainStore().currentChain.settings.getNetwork();
+                const network = localStorage.getItem('network');
                 const account = localStorage.getItem('account');
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
                 this.trace('autoLogin', account, isNative, autoLogin);
-                if (account && !this.__accounts['logged']) {
+                if (account && network && autoLogin && !this.__accounts['logged']) {
                     if (isNative) {
                         const authenticators = getAntelope().config.authenticatorsGetter();
                         const authenticator = authenticators.find(

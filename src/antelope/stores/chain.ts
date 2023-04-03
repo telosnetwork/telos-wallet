@@ -43,7 +43,9 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
     AntelopeError,
     ChainSettings,
+    EvmToken,
     Label,
+    NativeToken,
     Token,
 } from 'src/antelope/types';
 
@@ -68,6 +70,19 @@ export interface ChainModel {
     tokens: Token[];
 }
 
+export interface EvmChainModel {
+    apy: string;
+    settings: EVMChainSettings;
+    tokens: EvmToken[];
+}
+
+export interface NativeChainModel {
+    apy: string;
+    settings: NativeChainSettings;
+    tokens: NativeToken[];
+}
+
+
 export interface ChainState {
     // chains mapped by label
     __chains: { [label: Label]: ChainModel };
@@ -87,6 +102,10 @@ export const useChainStore = defineStore(store_name, {
     getters: {
         loggedChain: state => state.__chains['logged'],
         currentChain: state => state.__chains['current'],
+        loggedEvmChain: state => state.__chains['logged'].settings.isNative() ? undefined : state.__chains['logged'] as EvmChainModel,
+        currentEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
+        loggedNativeChain: state => state.__chains['logged'].settings.isNative() ? state.__chains['logged'] as NativeChainModel : undefined,
+        currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
     },

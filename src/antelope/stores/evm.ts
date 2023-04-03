@@ -14,6 +14,7 @@ import { ExternalProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
+import { BehaviorSubject, filter } from 'rxjs';
 
 import {
     createTraceFunction,
@@ -44,6 +45,14 @@ import {
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 
+export const evmEvents = {
+    onEvmReady: new BehaviorSubject<boolean>(false),
+};
+
+const whenReady = evmEvents.onEvmReady.asObservable().pipe(
+    filter(ready => ready),
+);
+
 export interface EVMState {
     __external_provider: ExternalProvider | null;
     __ethers_rpc_provider: ethers.providers.JsonRpcProvider | null;
@@ -70,6 +79,7 @@ export const useEVMStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+
             useFeedbackStore().setDebug(store_name, isTracingAll());
             const evm = useEVMStore();
 
@@ -85,6 +95,7 @@ export const useEVMStore = defineStore(store_name, {
                         evm.trace('provider.accountsChanged', accounts);
                     });
                 }
+                evmEvents.onEvmReady.next(true);
             });
         },
         async login (network: string): Promise<string | null> {
@@ -94,7 +105,7 @@ export const useEVMStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('evm.login');
                 chain.setLoggedChain(network);
                 chain.setCurrentChain(network);
-                const provider = this.__external_provider as ExternalProvider;
+                const provider = await this.ensureProvider();
 
                 let checkProvider = new ethers.providers.Web3Provider(provider);
                 checkProvider = await this.ensureCorrectChain(checkProvider);
@@ -125,6 +136,18 @@ export const useEVMStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('evm.login');
             }
         },
+        async ensureProvider(): Promise<ExternalProvider> {
+            return new Promise((resolve, reject) => {
+                whenReady.subscribe(async () => {
+                    const provider = this.__external_provider as ExternalProvider;
+                    if (provider) {
+                        resolve(provider);
+                    } else {
+                        reject(new AntelopeError('antelope.evm.error_no_provider'));
+                    }
+                });
+            });
+        },
         async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
             this.trace('ensureCorrectChain', checkProvider);
             let response = checkProvider;
@@ -132,7 +155,7 @@ export const useEVMStore = defineStore(store_name, {
             const currentChain = useChainStore().currentChain.settings as unknown as EVMChainSettings;
             if (Number(chainId).toString() !== currentChain.getChainId()) {
                 await this.switchChainInjected();
-                const provider = this.__external_provider as ExternalProvider;
+                const provider = await this.ensureProvider();
                 response = new ethers.providers.Web3Provider(provider);
             }
             this.setRpcProvider(response);
@@ -206,7 +229,7 @@ export const useEVMStore = defineStore(store_name, {
                 }
             } else {
                 useFeedbackStore().unsetLoading('evm.switchChainInjected');
-                throw new Error('antelope.evm.error_no_provider');
+                throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
         // Evm Contract Managment

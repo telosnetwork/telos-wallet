@@ -14,7 +14,7 @@ export default boot(({ app }) => {
         next: () => {
             const $router = app.config.globalProperties.$router;
             if ($router.currentRoute.value.path === '/') {
-                $router.push({ path: '/evm-balance' });
+                $router.push({ path: '/evm/wallet?tab=balance' });
             }
         },
     });
@@ -32,4 +32,7 @@ export default boot(({ app }) => {
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));
+
+    // autologin --
+    ant.stores.account.autoLogin();
 });

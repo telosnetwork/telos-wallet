@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers';
-
+import { Notify } from 'quasar';
 
 const errorNotification = function(error) {
     let errorStr;
@@ -15,7 +15,7 @@ const errorNotification = function(error) {
         errorStr = 'Cancelled transaction';
     }
 
-    this.$q.notify({
+    Notify.create({
         color: 'negative',
         icon: 'error',
         message: `${errorStr}`,
@@ -23,7 +23,7 @@ const errorNotification = function(error) {
 };
 
 const unexpectedErrorNotification = function(error) {
-    this.$q.notify({
+    Notify.create({
         color: 'dark',
         icon: 'warning',
         message: `${error}`,
@@ -31,7 +31,7 @@ const unexpectedErrorNotification = function(error) {
 };
 
 const successNotification = function(message) {
-    this.$q.notify({
+    Notify.create({
         color: 'primary',
         icon: 'done',
         message: `${message}`,
@@ -39,12 +39,12 @@ const successNotification = function(message) {
 };
 
 export default boot(({ app, store }) => {
-    app.config.globalProperties.$errorNotification = errorNotification;
-    store['$errorNotification'] = errorNotification;
-    app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification;
-    store['$unexpectedErrorNotification'] = unexpectedErrorNotification;
-    app.config.globalProperties.$successNotification = successNotification;
-    store['$successNotification'] = successNotification;
+    app.config.globalProperties.$errorNotification = errorNotification.bind(store);
+    store['$errorNotification'] = app.config.globalProperties.$errorNotification;
+    app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification.bind(store);
+    store['$unexpectedErrorNotification'] = app.config.globalProperties.$unexpectedErrorNotification;
+    app.config.globalProperties.$successNotification = successNotification.bind(store);
+    store['$successNotification'] = app.config.globalProperties.$successNotification;
 });
 
 

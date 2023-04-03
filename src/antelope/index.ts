@@ -1,10 +1,15 @@
 import { App } from 'vue';
+import { Subject } from 'rxjs';
+
 import { AntelopeConfig } from 'src/antelope/config/';
 import installPinia from 'src/antelope/stores';
 
+import { AccountModel } from 'src/antelope/stores/account';
+import { ChainModel } from 'src/antelope/stores/chain';
+
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
 import { useUserStore } from 'src/antelope/stores/user';
-import { ChainModel, useChainStore } from 'src/antelope/stores/chain';
-import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
 import { useProfileStore } from 'src/antelope/stores/profile';
 import { useResourcesStore } from 'src/antelope/stores/resources';
 import { useRexStore } from 'src/antelope/stores/rex';
@@ -15,7 +20,6 @@ import { useHistoryStore } from 'src/antelope/stores/history';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { useEVMStore } from 'src/antelope/stores/evm';
-import { Subject } from 'rxjs';
 
 const events = {
     onLoggedIn: new Subject<AccountModel>(),
@@ -24,6 +28,7 @@ const events = {
     onAccountChanged: new Subject<{label:string, account:AccountModel|null}>(),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };
+export const getEvents = () => events;
 
 export class Antelope {
     constructor(
@@ -93,3 +98,18 @@ export const installAntelope = (app: App) => {
     app.config.globalProperties.$antelope = antelope;
     return antelope;
 };
+
+export { useAccountStore } from 'src/antelope/stores/account';
+export { useChainStore } from 'src/antelope/stores/chain';
+export { useUserStore } from 'src/antelope/stores/user';
+export { useProfileStore } from 'src/antelope/stores/profile';
+export { useResourcesStore } from 'src/antelope/stores/resources';
+export { useRexStore } from 'src/antelope/stores/rex';
+export { useTokensStore } from 'src/antelope/stores/tokens';
+export { useContractStore } from 'src/antelope/stores/contract';
+export { useBalancesStore } from 'src/antelope/stores/balances';
+export { useHistoryStore } from 'src/antelope/stores/history';
+export { useFeedbackStore } from 'src/antelope/stores/feedback';
+export { usePlatformStore } from 'src/antelope/stores/platform';
+export { useEVMStore } from 'src/antelope/stores/evm';
+

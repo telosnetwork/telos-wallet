@@ -8,7 +8,7 @@ It is essential to note that Antelope is still a work in progress, and its archi
 ```typescript
 import { App } from 'vue';
 import { Authenticator, RpcEndpoint } from "universal-authenticator-library";
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject, filter } from 'rxjs';
 import { StoreCallback } from '@quasar/app-webpack';
 import { store } from 'quasar/wrappers';
 import { createPinia, defineStore } from 'pinia';

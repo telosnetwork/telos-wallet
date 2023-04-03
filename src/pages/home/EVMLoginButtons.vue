@@ -6,16 +6,23 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     name: 'EVMLoginButtons',
     methods: {
-        connectToMetaMask() {
-            const network: string = process.env.NETWORK === 'mainnet' ? 'telos-evm' : 'telos-testnet-evm' ;
-            const accountStore = useAccountStore();
+        setDefaultEVMChain() {
+            const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-testnet-evm' ;
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
+        },
+        connectToMetaMask() {
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
             accountStore.loginEVM({ network });
         },
         viewAnyAccount() {
 
         },
+    },
+    mounted() {
+        this.setDefaultEVMChain();
     },
 });
 </script>

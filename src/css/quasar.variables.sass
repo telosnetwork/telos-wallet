@@ -40,3 +40,45 @@ $white           : #FFFFFF
 $blackDark       : #130C3F
 $purple          : #8946DF
 $saveBtn         : #2e1f4f
+
+/***********************
+ *** Dark/Light Mode ***
+ ***********************
+
+// Light Mode
+.body--light
+    $page-header: #F7F5FF
+    
+    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
+
+    $ink: #000
+    $canvas: #fff
+    --text-color: #{$ink}
+    --text-color-hover: #{lighten($ink, 80%)}
+    --bg-color: #{$canvas}
+    --bg-color-hover: #{darken($canvas, 80%)}
+
+    --header-text-color: #{$ink}
+    --header-bg-color: #{$page-header}
+
+// Dark Mode
+.body--dark
+    $text-header: #F7F5FF
+    $page-header: #2b0f46
+    
+    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
+
+    $ink: #fff
+    $canvas: #313133
+    --text-color: #{$ink}
+    --text-color-hover: #{darken($ink, 80%)}
+    --bg-color: #{$canvas}
+    --bg-color-hover: #{lighten($canvas, 80%)}
+    --header-text-color: #{$text-header}
+    --header-bg-color: #{$page-header}
+
+body
+    color: var(--text-color)
+    background-color: var(--bg-color)
+
+

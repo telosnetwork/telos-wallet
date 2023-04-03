@@ -5,7 +5,7 @@ export default defineComponent({
     name: 'AppPage',
     props: {
         tabs: {
-            type: Array,
+            type: Array as () => string[],
             default: null,
             validator: (tabs: string[] | null) => tabs === null || tabs.every(tab => typeof tab === 'string'),
         },
@@ -15,7 +15,7 @@ export default defineComponent({
             return Array.isArray(this.tabs);
         },
         selectedTab() {
-            return this.$route.query.tab;
+            return (this.$route.query.tab ?? this.tabs[0] ?? '') as string;
         },
     },
     watch: {
@@ -71,6 +71,7 @@ export default defineComponent({
         v-if="showTabs"
         v-model="selectedTab"
         animated
+        class="c-app-page__tab-panels"
     >
         <q-tab-panel
             v-for="tab in tabs"
@@ -90,8 +91,16 @@ export default defineComponent({
 
 <style lang="scss">
 .c-app-page {
+    display: flex;
+    flex-direction: column;
+
+    &__tab-panels {
+        flex-grow: 1;
+    }
+
     &__header {
-        background: $page-header;
+        color: var(--header-text-color);
+        background: var(--header-bg-color);
     }
 
     &__header-content {
@@ -105,7 +114,8 @@ export default defineComponent({
     }
 
     &__tabs {
-        color: black;
+        flex-grow: 1;
+        color: var(--header-text-color);
 
         // quasar override
         .q-tab__indicator {
