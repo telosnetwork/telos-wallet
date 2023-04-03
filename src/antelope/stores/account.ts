@@ -146,7 +146,7 @@ export const useAccountStore = defineStore(store_name, {
                 const address = await useEVMStore().login(network);
 
                 if (address) {
-                    const displayAddress = address.toUpperCase().replace(/^..(.{4})(.*)(.{4})$/, '0x$1...$3');
+                    const displayAddress = address.replace(/^..(.{4})(.*)(.{4})$/, '0x$1...$3');
 
                     const account = address;
                     const evmAccount:EvmAccountModel = {

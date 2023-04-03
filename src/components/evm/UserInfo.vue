@@ -15,7 +15,7 @@ export default defineComponent({
         copyAddress() {
             if (!accountStore.loggedAccount.isNative && accountStore.isAuthenticated) {
                 const address = accountStore.loggedEvmAccount.account;
-                navigator.clipboard.writeText(address.toUpperCase());
+                navigator.clipboard.writeText(address);
                 ant.config.notifySuccessHandler(this.$t('settings.copied_ok'));
             }
         },
