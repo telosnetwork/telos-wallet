@@ -1,6 +1,11 @@
 
 <script>
 import { defineComponent } from 'vue';
+<<<<<<< HEAD
+=======
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
+>>>>>>> 2745c12fea2cac413d3c688fdce0823e4e63d604
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
 export default defineComponent({
@@ -43,12 +48,21 @@ export default defineComponent({
         ]),
     },
     mounted() {
+<<<<<<< HEAD
         this.setDefaultNativeChain();
     },
     methods: {
         // antelope methods
         setDefaultNativeChain() {
             const network = process.env.CHAIN_NAME || 'telos';
+=======
+        this.setDefaultEVMChain();
+    },
+    methods: {
+        // antelope methods
+        setDefaultEVMChain() {
+            const network = process.env.CHAIN_NAME;
+>>>>>>> 2745c12fea2cac413d3c688fdce0823e4e63d604
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
         },
@@ -72,6 +86,15 @@ export default defineComponent({
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
         },
+<<<<<<< HEAD
+=======
+        async loginEVM(network) {
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+            accountStore.loginEVM({ network });
+        },
+>>>>>>> 2745c12fea2cac413d3c688fdce0823e4e63d604
         async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
