@@ -79,8 +79,8 @@ export default class EvmContract {
         }
 
         if (!this.contract || createNew) {
-            const we3Provider = provider ? new ethers.providers.Web3Provider(provider) : this.manager.getRpcProvider();
-            this.contract = new ethers.Contract(this.address, this.abi, we3Provider);
+            const web3Provider = provider ? new ethers.providers.Web3Provider(provider) : this.manager.getRpcProvider();
+            this.contract = new ethers.Contract(this.address, this.abi, web3Provider);
         }
         return this.contract;
     }
