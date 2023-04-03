@@ -5,7 +5,7 @@ export default defineComponent({
     name: 'AppPage',
     props: {
         tabs: {
-            type: Array,
+            type: Array as () => string[],
             default: null,
             validator: (tabs: string[] | null) => tabs === null || tabs.every(tab => typeof tab === 'string'),
         },
@@ -15,7 +15,7 @@ export default defineComponent({
             return Array.isArray(this.tabs);
         },
         selectedTab() {
-            return this.$route.query.tab;
+            return this.$route.query.tab as string;
         },
     },
     watch: {
