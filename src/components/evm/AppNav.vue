@@ -14,6 +14,11 @@ export default defineComponent({
         menuIsOpen: false,
         showShadow: false,
     }),
+    computed: {
+        menuItemTabIndex() {
+            return this.menuIsOpen ? '0' : '-1';
+        },
+    },
     watch: {
         '$q.screen.lt.lg'(newValue, oldValue) {
             if (newValue !== oldValue) {
@@ -27,13 +32,23 @@ export default defineComponent({
         },
         logout() {
             console.log('logged out');
+            this.goTo('home');
+        },
+        goTo(routeName: string) {
+            this.$router.push({ name: routeName });
+            this.menuIsOpen = false;
         },
     },
 });
 </script>
 
 <template>
-<nav class="c-app-nav">
+<nav
+    class="c-app-nav"
+    role="menu"
+    aria-label="Nav menu container"
+    aria-orientation="vertical"
+>
     <q-scroll-observer debounce="100" @scroll="scrollHandler" />
 
     <div
@@ -49,7 +64,11 @@ export default defineComponent({
             dense
             icon="menu"
             color="black"
+            aria-haspopup="menu"
+            aria-label="Open Menu"
+            :tabindex="menuIsOpen ? '-1' : '0'"
             @click="menuIsOpen = !menuIsOpen"
+            @keydown.space.enter="menuIsOpen = !menuIsOpen"
         />
 
         <UserInfo />
@@ -70,7 +89,8 @@ export default defineComponent({
                 role="link"
                 :aria-label="$t('nav.go_home')"
                 class="c-app-nav__logo"
-                @click="$router.push({ name: 'home' })"
+                @click="goTo('home')"
+                @keydown.space.enter="goTo('home')"
             >
             <q-btn
                 v-if="$q.screen.lt.lg"
@@ -79,17 +99,21 @@ export default defineComponent({
                 dense
                 icon="menu_open"
                 class="q-ma-md self-start"
+                aria-haspopup="menu"
+                aria-label="Close menu"
+                :tabindex="menuItemTabIndex"
                 @click="menuIsOpen = !menuIsOpen"
+                @keydown.space.enter="menuIsOpen = !menuIsOpen"
             />
         </div>
 
-        <ul class="c-app-nav__menu-items" role="menu">
+        <ul class="c-app-nav__menu-items">
             <li
                 class="c-app-nav__menu-item"
                 role="menuitem"
-                tabindex="0"
-                @click="$router.push({ name: 'evm-wallet' })"
-                @keydown.space.enter="$router.push({ name: 'evm-wallet' })"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-wallet')"
+                @keydown.space.enter="goTo('evm-wallet')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wallet.svg')"
@@ -108,9 +132,9 @@ export default defineComponent({
             <li
                 class="c-app-nav__menu-item"
                 role="menuitem"
-                tabindex="0"
-                @click="$router.push({ name: 'evm-staking' })"
-                @keydown.space.enter="$router.push({ name: 'evm-staking' })"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-staking')"
+                @keydown.space.enter="goTo('evm-staking')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--acorn.svg')"
@@ -129,9 +153,9 @@ export default defineComponent({
             <li
                 class="c-app-nav__menu-item"
                 role="menuitem"
-                tabindex="0"
-                @click="$router.push({ name: 'evm-wrap' })"
-                @keydown.space.enter="$router.push({ name: 'evm-wrap' })"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-wrap')"
+                @keydown.space.enter="goTo('evm-wrap')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wrap-tlos.svg')"
@@ -149,7 +173,7 @@ export default defineComponent({
             <li
                 class="c-app-nav__menu-item"
                 role="menuitem"
-                tabindex="0"
+                :tabindex="menuItemTabIndex"
                 @click="logout"
                 @keydown.space.enter="logout"
             >
