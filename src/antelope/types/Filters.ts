@@ -13,7 +13,6 @@ export interface HyperionActionsFilter {
     after?: string;
     before?: string;
     extras?: { [key: string]: string };
-    //
     address?: string;
     block?: string;
     hash?: string;
