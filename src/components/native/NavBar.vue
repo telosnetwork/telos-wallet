@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import RexStaking from 'src/pages/components/balance/RexStaking.vue';
-import ManageResources from 'src/components/ManageResources.vue';
+import RexStaking from 'pages/native/balance/RexStaking.vue';
+import ManageResources from 'components/native/ManageResources.vue';
 export default {
     props: ['balanceTab'],
     components: { RexStaking, ManageResources },
@@ -89,18 +89,18 @@ export default {
             this.selectedTab = val;
             switch (val) {
             case 'coins':
-                this.$router.push('/balance', () => {});
+                this.$router.push('/native/balance', () => {});
                 this.$emit('update:balanceTab', 'coins');
                 break;
             case 'dapps':
-                this.$router.push('/dappsearch', () => {});
+                this.$router.push('/native/dappsearch', () => {});
                 break;
             case 'nft':
-                this.$router.push('/balance', () => {});
+                this.$router.push('/native/balance', () => {});
                 this.$emit('update:balanceTab', 'collectables');
                 break;
             case 'profile':
-                this.$router.push('/profile', () => {});
+                this.$router.push('/native/profile', () => {});
                 break;
             case 'earn':
                 this.showRexStakeDlg = true;

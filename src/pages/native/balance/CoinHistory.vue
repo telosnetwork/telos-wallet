@@ -1,7 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
-import tokenAvatar from 'src/components/TokenAvatar';
+import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
 const TSWAPS_URL = 'https://tswaps.com/swap';

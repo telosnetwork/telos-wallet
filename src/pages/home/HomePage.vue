@@ -2,8 +2,8 @@
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
-import NativeLoginButton from 'src/pages/components/home/NativeLoginButton.vue';
-import EVMLoginButtons from 'src/pages/components/home/EVMLoginButtons.vue';
+import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
+import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 
 export default defineComponent({
     name: 'HomePage',
@@ -35,8 +35,6 @@ export default defineComponent({
                 >
 
                 <div class="c-home__button-container">
-
-
                     <div class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
@@ -101,7 +99,7 @@ export default defineComponent({
 <style lang="scss">
 .c-home {
     position: relative;
-    background: linear-gradient(0.4turn, #071033, #6039A4);
+    background: $site-gradient;
     height: 100vh;
 
     &__page-container {

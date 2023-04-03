@@ -60,7 +60,7 @@ module.exports = function(/* ctx */) {
                 chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin);
             },
 
-            // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
+            // https://quasar.dev/quasar-cli-webpack/handling-webpack#adding-webpack-aliases
             extendWebpack(cfg) {
 
                 cfg.resolve.alias = {

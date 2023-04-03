@@ -30,7 +30,7 @@ export const login = async function(
             localStorage.setItem('account', accountName);
             localStorage.setItem('returning', true);
             if (this.$router.currentRoute.path === '/') {
-                await this.$router.push({ path: '/balance' });
+                await this.$router.push({ path: '/native/balance' });
             }
             dispatch('getAccountData');
             dispatch('getAccountProfile');

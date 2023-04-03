@@ -31,9 +31,20 @@ export default {
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
     },
+    nav: {
+        copy_address: 'Copy address to clipboard',
+        overflow_menu: 'Open account overflow menu',
+        wallet: 'Wallet',
+        staking: 'Staking',
+        wrap_tlos: 'Wrap TLOS',
+        go_home: 'Go to home page',
+        close_menu: 'Close menu',
+        open_menu: 'Open menu',
+    },
     global: {
         native: 'Native',
         telos_evm: 'Telos EVM',
+        sign_out: 'Sign Out',
     },
     resources: {
         title: 'Network Resources',

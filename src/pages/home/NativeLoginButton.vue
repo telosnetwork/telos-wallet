@@ -89,7 +89,7 @@ export default defineComponent({
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
-                await this.$router.push({ path: '/balance' });
+                await this.$router.push({ path: '/native/balance' });
             } else {
                 this.error = error;
             }
@@ -259,7 +259,7 @@ export default defineComponent({
             outline
             label="View Wallet"
             class="q-px-md q-py-sm q-mb-lg"
-            @click="$router.push('/balance')"
+            @click="$router.push('/native/balance')"
         />
 
         <q-btn
