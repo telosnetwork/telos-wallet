@@ -5,7 +5,7 @@ export default defineComponent({
     name: 'EVMLoginButtons',
     methods: {
         connectToMetaMask() {
-            // https://github.com/telosnetwork/telos-wallet/issues/152
+            // https://github.com/telosnetwork/telos-wallet/issues/203
             this.$router.push({ name: 'evm-wallet' });
         },
         viewAnyAccount() {
