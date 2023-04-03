@@ -36,7 +36,7 @@ import Jungle from 'src/antelope/chains/native/jungle';
 import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
-import TelosTestnetEVM from 'src/antelope/chains/evm/telos-testnet-evm';
+import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
 import { getAntelope } from '..';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -61,7 +61,7 @@ export const settings: { [key: string]: ChainSettings } = {
     'jungle': new Jungle('jungle'),
     // EVM chains
     'telos-evm': new TelosEVM('telos-evm'),
-    'telos-testnet-evm': new TelosTestnetEVM('telos-testnet-evm'),
+    'telos-evm-testnet': new TelosEVMTestnet('telos-evm-testnet'),
 };
 
 export interface ChainModel {
