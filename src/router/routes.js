@@ -5,7 +5,6 @@ const routes = [
         component: () => import('pages/home/HomePage.vue'),
     },
     {
-<<<<<<< HEAD
         path: '/native',
         component: () => import('layouts/NativeLayout.vue'),
         children: [
@@ -22,16 +21,6 @@ const routes = [
                 component: () => import('pages/native/SettingsPage.vue'),
             },
         ],
-=======
-        path: '/evm-balance',
-        component: () => import('layouts/EVMLayout.vue'),
-        children: [{ path: '', component: () => import('pages/BalanceInfo.vue') }],
-    },
-    {
-        path: '/balance',
-        component: () => import('layouts/MainLayout.vue'),
-        children: [{ path: '', component: () => import('pages/BalanceInfo.vue') }],
->>>>>>> 9aa6f34 (adding logged page - placeholder)
     },
     {
         path: '/evm',

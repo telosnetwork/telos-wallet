@@ -203,7 +203,7 @@ export const useAccountStore = defineStore(store_name, {
                 getAntelope().events.onLoggedOut.next();
             }
         },
-        autoLogin() {
+        async autoLogin(): Promise<boolean> {
             this.trace('autoLogin');
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
@@ -227,16 +227,15 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     } else {
-                        this.loginEVM({ network });
+                        return this.loginEVM({ network });
                     }
-                } else {
-                    return null;
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
                 useFeedbackStore().unsetLoading('account.autoLogin');
             }
+            return Promise.resolve(false);
         },
         async sendAction({ account, data, name, actor, permission }: SendActionData) {
             this.trace('sendAction', account, data, name, actor, permission);

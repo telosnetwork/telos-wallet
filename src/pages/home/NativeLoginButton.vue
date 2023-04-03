@@ -43,9 +43,15 @@ export default defineComponent({
         ]),
     },
     mounted() {
-        this.setDefaultEVMChain();
+        this.setDefaultNativeChain();
     },
     methods: {
+        // antelope methods
+        setDefaultNativeChain() {
+            const network = process.env.CHAIN_NAME || 'telos';
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+        },
         // end of antelope methods
         ...mapActions('account', [
             'login',
