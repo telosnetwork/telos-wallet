@@ -101,6 +101,8 @@ export default defineComponent({
     &__header {
         color: var(--header-text-color);
         background: var(--header-bg-color);
+
+        padding-top: 24px;
     }
 
     &__header-content {
@@ -114,6 +116,7 @@ export default defineComponent({
     }
 
     &__tabs {
+        margin-top: 48px;
         flex-grow: 1;
         color: var(--header-text-color);
 
