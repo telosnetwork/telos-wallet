@@ -18,19 +18,19 @@ export default defineComponent({
 <template>
 <AppPage :tabs="tabs">
     <template v-slot:header>
-        <p class="text-black">stake page header stuff</p>
+        <p>stake page header stuff</p>
     </template>
 
     <template v-slot:stake>
-        <p class="text-black">stake tab</p>
+        <p>stake tab</p>
     </template>
 
     <template v-slot:unstake>
-        <p class="text-black">unstake tab</p>
+        <p>unstake tab</p>
     </template>
 
     <template v-slot:withdraw>
-        <p class="text-black">withdraw tab</p>
+        <p>withdraw tab</p>
     </template>
 </AppPage>
 </template>

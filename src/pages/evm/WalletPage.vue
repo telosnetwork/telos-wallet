@@ -21,11 +21,11 @@ export default defineComponent({
     </template>
 
     <template v-slot:balance>
-        <p class="text-black">balance tab</p>
+        <p>balance tab</p>
     </template>
 
     <template v-slot:transactions>
-        <p class="text-black">txns tab</p>
+        <p>txns tab</p>
     </template>
 </AppPage>
 </template>
@@ -38,7 +38,6 @@ export default defineComponent({
         height: 300px;
         width: 100%;
         text-align: center;
-        color: black;
     }
 }
 </style>

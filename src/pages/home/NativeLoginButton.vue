@@ -1,5 +1,6 @@
 
 <script>
+import { defineComponent } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
@@ -43,7 +44,17 @@ export default defineComponent({
             'isAutoLoading',
         ]),
     },
+    mounted() {
+        this.setDefaultEVMChain();
+    },
     methods: {
+        // antelope methods
+        setDefaultEVMChain() {
+            const network = process.env.CHAIN_NAME;
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+        },
+        // end of antelope methods
         ...mapActions('account', [
             'login',
             'logout',
@@ -91,7 +102,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         },
 
@@ -255,7 +266,7 @@ export default defineComponent({
         <q-btn
             text-color="white"
             outline
-            :label="$t('home.log_out')"
+            :label="$t('home.logout')"
             class="q-px-md q-py-sm"
             @click="logout"
         />

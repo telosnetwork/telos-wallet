@@ -3,6 +3,9 @@ import { defineComponent } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
+import { getAntelope } from 'src/antelope';
+
+const accountStore = getAntelope().stores.account;
 
 export default defineComponent({
     name: 'AppNav',
@@ -26,7 +29,7 @@ export default defineComponent({
             this.showShadow = info.position.top !== 0;
         },
         logout() {
-            console.log('logged out');
+            accountStore.logout();
         },
     },
 });
@@ -48,7 +51,7 @@ export default defineComponent({
             round
             dense
             icon="menu"
-            color="black"
+            color="var(--header-text-color)"
             @click="menuIsOpen = !menuIsOpen"
         />
 
@@ -170,6 +173,7 @@ export default defineComponent({
 
 <style lang="scss">
 .c-app-nav {
+    color: white;
     $this: &;
 
     &__menu-container {
@@ -201,9 +205,9 @@ export default defineComponent({
         left: 0;
         display: flex;
         justify-content: space-between;
-        color: black;
+        color: var(--header-text-color);
         padding: 16px 24px;
-        background-color: $page-header;
+        background-color: var(--header-bg-color);
         z-index: 999;
 
         @media only screen and (min-width: $breakpoint-lg-min) {

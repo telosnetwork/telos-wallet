@@ -33,7 +33,7 @@ export default {
         create_new_account: 'Create a New Account',
         logged_as: 'Logged in as {account}',
         view_wallet: 'View Wallet',
-        log_out: 'Log Out',
+        logout: 'Log Out',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -42,11 +42,15 @@ export default {
         staking: 'Staking',
         wrap_tlos: 'Wrap TLOS',
         go_home: 'Go to home page',
+        logout: 'Log Out',
+        teloscan: 'Teloscan',
     },
     global: {
         native: 'Native',
         telos_evm: 'Telos EVM',
         sign_out: 'Sign Out',
+        dark_mode: 'Dark Mode',
+        light_mode: 'Light Mode',
     },
     resources: {
         title: 'Network Resources',
@@ -90,6 +94,7 @@ export default {
         update_profile_ok: 'Profile is updated successfully',
         account_saved: 'Account is saved on your google drive',
         copied_ok: 'Copied it to the clipboard successfully',
+        no_explorer: 'No explorer is set for network {network}',
     },
     common: {
         buttons: {

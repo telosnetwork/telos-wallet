@@ -17,15 +17,15 @@ export default defineComponent({
 <template>
 <AppPage :tabs="tabs">
     <template v-slot:header>
-        <p class="text-black">wrap page header stuff</p>
+        <p>wrap page header stuff</p>
     </template>
 
     <template v-slot:wrap>
-        <p class="text-black">wrap tab</p>
+        <p>wrap tab</p>
     </template>
 
     <template v-slot:unwrap>
-        <p class="text-black">unwrap tab</p>
+        <p>unwrap tab</p>
     </template>
 </AppPage>
 </template>
