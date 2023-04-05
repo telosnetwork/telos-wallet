@@ -21,6 +21,16 @@ export default defineComponent({
         showTooltip: false,
     }),
     computed: {
+        tokenLogo(): string {
+            if (this.token.logoURI) {
+                return this.token.logoURI;
+            } else {
+                return require('src/assets/logo--tlos.svg');
+            }
+        },
+        grayLogo() {
+            return !this.token.logoURI;
+        },
         tokenBalanceFiat() {
             // eztodo reference issue for api integration
 
@@ -166,6 +176,9 @@ export default defineComponent({
 
             return text;
         },
+        overflowMenuItems() {
+            return [];
+        },
     },
     methods: {
         toggleTooltip() {
@@ -182,10 +195,24 @@ export default defineComponent({
 <template>
 <div class="c-wallet-balance-row">
     <div class="c-wallet-balance-row__left-container">
-        <p class="q-mb-xs">
-            {{ token.symbol }}
-        </p>
-        {{ token.name }}
+        <!-- eztodo if -->
+        <img
+            :src="tokenLogo"
+            :class="{
+                'c-wallet-balance-row__logo': true,
+                'c-wallet-balance-row__logo--gray': grayLogo,
+            }"
+            height="40"
+            width="40"
+            aria-hidden="true"
+            :alt="$t('evm_wallet.token_logo_alt')"
+        >
+        <div>
+            <p class="q-mb-xs">
+                {{ token.symbol }}
+            </p>
+            {{ token.name }}
+        </div>
     </div>
 
     <div class="c-wallet-balance-row__right-container">
@@ -239,6 +266,10 @@ export default defineComponent({
     }
 
     &__left-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
         font-size: 16px;
         font-weight: 400;
         line-height: 24px;
@@ -262,6 +293,20 @@ export default defineComponent({
         flex-shrink: 1;
         text-align: right;
         min-width: 0;
+    }
+
+    &__logo {
+        height: 40px;
+        width: 40px;
+        display: none;
+
+        @media only screen and (min-width: $breakpoint-lg-min) {
+            display: block;
+        }
+
+        &--gray {
+            filter: grayscale(1);
+        }
     }
 
     &__primary-amount,

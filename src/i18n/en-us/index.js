@@ -51,6 +51,7 @@ export default {
         send_icon_alt: 'Send icon',
         receive_icon_alt: 'Receive icon',
         buy_icon_alt: 'Buy more tokens icon',
+        token_logo_alt: 'Token logo',
         send: 'Send',
         receive: 'Receive',
         buy: 'Buy',

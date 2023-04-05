@@ -44,7 +44,7 @@ export default defineComponent({
                 'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
                 'symbol': 'SHIB',
                 'name': 'Shiba',
-                'logoURI': 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+                'logoURI': '',
                 'decimals': 18,
                 'tags': [],
                 'balance': '555555786123.0032',
