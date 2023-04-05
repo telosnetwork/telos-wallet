@@ -52,7 +52,8 @@ export default defineComponent({
             tokens.push(chainToken);
 
             if (chainHasStlos) {
-                // eztodo add api integration reference
+                // https://github.com/telosnetwork/telos-wallet/issues/179
+                //     get stlos token info from store
                 tokens.push({
                     'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
                     'symbol': 'STLOS',
@@ -65,6 +66,8 @@ export default defineComponent({
             }
 
             if (chainHasWtlos) {
+                // https://github.com/telosnetwork/telos-wallet/issues/179
+                //     get wtlos token info from store
                 tokens.push({
                     'address': '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
                     'symbol': 'WTLOS',
@@ -79,8 +82,8 @@ export default defineComponent({
             return tokens;
         },
         nonChainTokens() {
-            // eztodo add api integration reference
-            //      tokens with no fiat balance should always be at the bottom of the list
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //      get all user tokens here. filter out tlos and stlos if they appear in this list.
             const allNonChainTokens = [{
                 'symbol': 'SHTA',
                 'name': 'Shitcoin Alpha',
@@ -128,8 +131,8 @@ export default defineComponent({
         // take all non-chain tokens and return a tuple of sorted arrays;
         // first is arrays with a fiat balance, second is those without
         splitTokensBasedOnHasFiatValue(tokens: EvmTokenInfo[]): [EvmTokenInfo[], EvmTokenInfo[]] {
-            // eztodo add reference to api issue
-            // replace tokenHasFiatValue and sortByFiatValue with real implementation which uses oracle
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //     replace tokenHasFiatValue and sortByFiatValue with real implementation which uses oracle
             let tokensWithFiatValue;
             let tokensWithNoFiatValue;
 

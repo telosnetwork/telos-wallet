@@ -31,8 +31,11 @@ export default defineComponent({
         grayLogo() {
             return !this.token.logoURI;
         },
-        tokenBalanceFiat() {
-            // eztodo reference issue for api integration
+        tokenBalanceFiat(): number | null {
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //     get this.token fiat balance; if no fiat balance available, return null
+            //     if tokenBalanceFiat cannot be computed / mapped from store getter, move to data and
+            //     set in async created()
             if (this.token.symbol === 'STLOS') {
                 return 456789123.67;
             } else if (this.token.symbol === 'TLOS') {
@@ -87,7 +90,7 @@ export default defineComponent({
             // on mobile, the top (only) value is the token balance iff token has no reliable fiat value.
             //            if there is a fiat value, the top number is the fiat amount
             if (this.tokenHasFiatValue && isMobile) {
-                return this.tokenBalanceFiat;
+                return this.tokenBalanceFiat as number;
             } else {
                 return this.token.balance;
             }
@@ -104,12 +107,12 @@ export default defineComponent({
                 if (this.tokenHasFiatValue) {
                     if (this.truncatePrimaryValue) {
                         const amount = abbreviateNumber(this.primaryAmount as number);
-                        const symbol = '$'; // eztodo add issue reference for api integration
+                        const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                         return `${symbol} ${amount}`;
                     } else {
                         const amount = formatFiatAmount(this.primaryAmount as number);
-                        const symbol = '$'; // eztodo add issue reference for api integration
+                        const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                         return `${symbol} ${amount}`;
                     }
@@ -131,8 +134,7 @@ export default defineComponent({
                 if (isMobile) {
                     return this.token.balance;
                 } else {
-                    // eztodo reference issue for api integration
-                    return this.tokenBalanceFiat;
+                    return this.tokenBalanceFiat as number;
                 }
             }
         },
@@ -155,12 +157,12 @@ export default defineComponent({
             } else {
                 if (this.truncateSecondaryValue) {
                     const amount = abbreviateNumber(this.secondaryAmount as number);
-                    const symbol = '$'; // eztodo add issue reference for api integration
+                    const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                     return `${symbol} ${amount}`;
                 } else {
                     const amount = formatFiatAmount(this.secondaryAmount as number);
-                    const symbol = '$'; // eztodo add issue reference for api integration
+                    const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                     return `${symbol} ${amount} ${this.fiatRateText}`;
                 }
@@ -174,8 +176,8 @@ export default defineComponent({
             }
 
             if (this.truncateSecondaryValue && this.tokenHasFiatValue) {
-                const symbol = '$'; // eztodo add issue reference for api integration
-                const formatted = commify(this.tokenBalanceFiat);
+                const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get from site settings
+                const formatted = commify(this.tokenBalanceFiat as number);
                 text += `${this.$t('evm_wallet.fiat_value')}:\n${symbol}${formatted}\n\n`;
             }
 
