@@ -6,6 +6,8 @@ import { EvmTokenInfo } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { useChainStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'WalletPage',
@@ -18,38 +20,142 @@ export default defineComponent({
         tabs: ['balance', 'transactions'],
     }),
     computed: {
-        tokens(): EvmTokenInfo[] {
-            return [{
-                'chainId': 41,
-                'address': '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
-                'symbol': 'WTLOS',
-                'name': 'Wrapped TLOS',
-                'logoURI': 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
+        chainTokens() {
+            const tokens = [];
+
+            const chainStore = useChainStore();
+            const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
+
+            const chainHasStlos = !!chainSettings.getStlosContractAddress();
+            const chainHasWtlos = !!chainSettings.getWtlosContractAddress();
+
+            const {
+                address,
+                symbol,
+                name,
+                decimals,
+                balance,
+                fullBalance,
+                logo,
+            } = chainSettings.getSystemToken();
+
+            const chainToken: EvmTokenInfo = {
+                address,
+                symbol,
+                name,
+                logoURI: logo,
+                decimals,
+                balance: balance ?? '0',
+                fullBalance: fullBalance ?? '0',
+            };
+
+            tokens.push(chainToken);
+
+            if (chainHasStlos) {
+                // eztodo add api integration reference
+                tokens.push({
+                    'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
+                    'symbol': 'STLOS',
+                    'name': 'Staked TLOS',
+                    'logoURI': 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+                    'decimals': 18,
+                    'balance': '3642.0243',
+                    'fullBalance': '3642.024318091460206147',
+                });
+            }
+
+            if (chainHasWtlos) {
+                tokens.push({
+                    'address': '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+                    'symbol': 'WTLOS',
+                    'name': 'Wrapped TLOS',
+                    'logoURI': 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
+                    'decimals': 18,
+                    'balance': '6.1',
+                    'fullBalance': '6.1',
+                });
+            }
+
+            return tokens;
+        },
+        nonChainTokens() {
+            // eztodo add api integration reference
+            //      tokens with no fiat balance should always be at the bottom of the list
+            const allNonChainTokens = [{
+                'symbol': 'SHTA',
+                'name': 'Shitcoin Alpha',
+                'logoURI': '',
                 'decimals': 18,
-                'tags': [],
-                'balance': '6.1',
-                'fullBalance': '6.1',
+                'balance': '350.0032',
+                'fullBalance': '350.0032',
             }, {
-                'chainId': 41,
-                'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
-                'symbol': 'STLOS',
-                'name': 'Staked TLOS',
-                'logoURI': 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+                'symbol': 'SHTB',
+                'name': 'Shitcoin Beta',
+                'logoURI': '',
                 'decimals': 18,
-                'tags': [],
-                'balance': '3642.0243',
-                'fullBalance': '3642.024318091460206147',
+                'balance': '870123',
+                'fullBalance': '870123',
             }, {
-                'chainId': 41,
+                'symbol': 'SHIB2',
+                'name': 'Shiba 2',
+                'logoURI': '',
+                'decimals': 18,
+                'balance': '10',
+                'fullBalance': '10',
+            }, {
                 'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
                 'symbol': 'SHIB',
                 'name': 'Shiba',
                 'logoURI': '',
                 'decimals': 18,
-                'tags': [],
                 'balance': '555555786123.0032',
                 'fullBalance': '555555786123.003241232',
             }];
+
+            const [tokensWithFiatValue, tokensWithoutFiatValue] =
+                this.splitTokensBasedOnHasFiatValue(allNonChainTokens);
+
+            return [...tokensWithFiatValue, ...tokensWithoutFiatValue];
+        },
+        allTokens() {
+            return [
+                ...this.chainTokens,
+                ...this.nonChainTokens,
+            ];
+        },
+    },
+    methods: {
+        // take all non-chain tokens and return a tuple of sorted arrays;
+        // first is arrays with a fiat balance, second is those without
+        splitTokensBasedOnHasFiatValue(tokens: EvmTokenInfo[]): [EvmTokenInfo[], EvmTokenInfo[]] {
+            // eztodo add reference to api issue
+            // replace tokenHasFiatValue and sortByFiatValue with real implementation which uses oracle
+            let tokensWithFiatValue;
+            let tokensWithNoFiatValue;
+
+            const tokenHasFiatValue = (token: EvmTokenInfo) => ['SHTB', 'SHTA'].includes(token.symbol);
+
+            const sortByFiatValue = (tokenOne: EvmTokenInfo, tokenTwo: EvmTokenInfo) => {
+                if (tokenOne.symbol === 'SHTB') {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            };
+
+            const sortByTokenBalance = (tokenOne: EvmTokenInfo, tokenTwo: EvmTokenInfo) => {
+                if (+tokenOne.balance > +tokenTwo.balance) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            };
+
+            tokensWithFiatValue = tokens.filter(token => tokenHasFiatValue(token)).sort(sortByFiatValue);
+            tokensWithNoFiatValue = tokens.filter(token => !tokenHasFiatValue(token)).sort(sortByTokenBalance);
+
+            // always show all tokens with fiat values before all tokens without
+            return [tokensWithFiatValue, tokensWithNoFiatValue];
         },
     },
 });
@@ -64,7 +170,7 @@ export default defineComponent({
     <template v-slot:balance>
         <div class="test">
             <WalletBalanceRow
-                v-for="(token, index) in tokens"
+                v-for="(token, index) in allTokens"
                 :key="`token-${index}`"
                 :token="token"
                 class="q-mb-xs"

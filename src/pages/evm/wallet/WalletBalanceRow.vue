@@ -33,15 +33,16 @@ export default defineComponent({
         },
         tokenBalanceFiat() {
             // eztodo reference issue for api integration
-
             if (this.token.symbol === 'STLOS') {
                 return 456789123.67;
+            } else if (this.token.symbol === 'TLOS') {
+                return 0;
             } else {
                 return 12345.67;
             }
         },
         tokenHasFiatValue(): boolean {
-            return this.token.name !== 'Shiba';
+            return !['SHIB', 'SHIB2'].includes(this.token.symbol);
         },
         truncatePrimaryValue(): boolean {
             const isMobile = this.$q.screen.lt.lg;
@@ -136,7 +137,8 @@ export default defineComponent({
             }
         },
         prettySecondaryAmount(): string {
-            if (!this.secondaryAmount || !this.tokenHasFiatValue) {
+            const noSecondaryAmount = typeof this.secondaryAmount === 'string' && !this.secondaryAmount;
+            if (noSecondaryAmount || !this.tokenHasFiatValue) {
                 return '';
             }
 
@@ -165,16 +167,23 @@ export default defineComponent({
             }
         },
         tooltipText(): string {
-            let text =  `${this.$t('evm_wallet.token_balance')}:\n${commify(this.token.balance)}`;
+            let text = '';
 
-
-            if (this.tokenHasFiatValue){
-                const symbol = '$'; // eztodo add issue reference for api integration
-                const formatted = commify(this.tokenBalanceFiat);
-                text += `\n\n${this.$t('evm_wallet.fiat_value')}\n${symbol}${formatted}`;
+            if (this.truncatePrimaryValue) {
+                text = `${this.$t('evm_wallet.token_balance')}:\n${commify(this.token.balance)}\n\n`;
             }
 
-            return text;
+            if (this.truncateSecondaryValue && this.tokenHasFiatValue) {
+                const symbol = '$'; // eztodo add issue reference for api integration
+                const formatted = commify(this.tokenBalanceFiat);
+                text += `${this.$t('evm_wallet.fiat_value')}:\n${symbol}${formatted}\n\n`;
+            }
+
+            if (!this.tokenHasFiatValue) {
+                text += `${this.$t('evm_wallet.no_fiat_value')}`;
+            }
+
+            return text.trim();
         },
         overflowMenuItems() {
             return [];
@@ -195,7 +204,6 @@ export default defineComponent({
 <template>
 <div class="c-wallet-balance-row">
     <div class="c-wallet-balance-row__left-container">
-        <!-- eztodo if -->
         <img
             :src="tokenLogo"
             :class="{
@@ -220,7 +228,7 @@ export default defineComponent({
             <div class="c-wallet-balance-row__primary-amount" @click="toggleTooltip">
                 {{ prettyPrimaryAmount }}
 
-                <template v-if="truncatePrimaryValue">
+                <template v-if="truncatePrimaryValue || truncateSecondaryValue || !tokenHasFiatValue">
                     <InlineSvg
                         :src="require('src/assets/icon--info.svg')"
                         class="c-wallet-balance-row__info-icon"
@@ -232,7 +240,7 @@ export default defineComponent({
                     </q-tooltip>
                 </template>
             </div>
-            <span v-if="secondaryAmount" class="c-wallet-balance-row__secondary-amount">
+            <span v-if="secondaryAmount !== ''" class="c-wallet-balance-row__secondary-amount">
                 {{ prettySecondaryAmount }}
             </span>
         </div>

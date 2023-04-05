@@ -61,6 +61,7 @@ export default {
         balance_row_actions_aria: 'Balance row actions',
         token_balance: 'Token Balance',
         fiat_value: 'Fiat Value',
+        no_fiat_value: 'No reliable fiat value found',
     },
     global: {
         native: 'Native',
