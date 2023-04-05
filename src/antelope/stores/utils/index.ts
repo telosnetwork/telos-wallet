@@ -17,7 +17,7 @@ export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals 
     const amount = BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
-    // Use string, do not convert to number so we never loose precision
+    // Use string, do not convert to number so we never lose precision
     if (displayDecimals > 0 && str.includes('.')) {
         const parts = str.split('.');
         return parts[0] + '.' + parts[1].slice(0, displayDecimals);
@@ -171,3 +171,44 @@ export function getFormattedUtcOffset(date: Date): string {
     return sign + hours + ':' + minutes;
 }
 
+/**
+ * Formats a number amount to a commified string with two places of precision
+ *
+ * @param {number} amount
+ *
+ * @return {string}
+ */
+export function formatFiatAmount(amount: number) {
+    let formatted = amount.toLocaleString('en-us');
+
+    if (formatted.indexOf('.') !== -1) {
+        const formattedInteger = formatted.split('.')[0];
+        const formattedFraction = amount.toFixed(2).split('.')[1];
+
+        formatted = `${formattedInteger}.${formattedFraction}`;
+
+    } else {
+        formatted = `${formatted}.00`;
+    }
+
+    return formatted;
+}
+
+
+/**
+ * Given a number, returns an abbreviated version for large values, such as 1.5B
+ * for small fractions like 0.12345, a 4-precision representation is returned
+ * @param {number} amount
+ *
+ * @return {string}
+ */
+export function abbreviateNumber(amount: number) {
+    if (amount < 1 && amount > 0) {
+        return amount.toFixed(4);
+    }
+
+    return Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+    }).format(amount);
+}

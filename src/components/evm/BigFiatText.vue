@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { formatFiatAmount } from 'src/antelope/stores/utils';
 
 export default defineComponent({
     name: 'BigFiatText',
@@ -16,17 +17,7 @@ export default defineComponent({
             return '$';
         },
         prettyAmount() {
-            let formatted = this.amount.toLocaleString('en-us');
-
-            if (formatted.indexOf('.') !== -1) {
-                const formattedInteger = formatted.split('.')[0];
-                const formattedFraction = this.amount.toFixed(2).split('.')[1];
-
-                formatted = `${formattedInteger}.${formattedFraction}`;
-
-            } else {
-                formatted = `${formatted}.00`;
-            }
+            let formatted = formatFiatAmount(this.amount);
 
             return `${this.symbol} ${formatted}`;
         },
@@ -45,6 +36,7 @@ export default defineComponent({
     line-height: 48px;
     font-weight: 600;
     font-size: 32px;
+    text-align: center;
 
     @media screen and (min-width: 360px) {
         font-size: 40px;
