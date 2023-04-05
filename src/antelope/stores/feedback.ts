@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /**
  * Feedback: This store is ment to be used as a utility store to give feedback
  * to the user about the internal state of the app and that includes:
@@ -19,7 +20,6 @@
  * show the progress of a long running task, like a steps transaction (like a bridge
  * between blockchains) or a file upload, etc.
  *
-
 */
 
 import { defineStore } from 'pinia';
@@ -99,9 +99,11 @@ const feedbackiInitialState: FeedbackState = {
 export const createTraceFunction = (store_name: string) => function(action: string, ...args: unknown[]) {
     if (useFeedbackStore().isDebugging(store_name)) {
         const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-        console.debug(`${titlecase(store_name)}.${action}()`, [...args]);
+        const eventName = `${titlecase(store_name)}.${action}()`;
+        console.debug(eventName, [...args]);
     }
 };
+
 
 export const isTracingAll = () => false;
 export const createInitFunction = (store_name: string, debug?: boolean) => function() {

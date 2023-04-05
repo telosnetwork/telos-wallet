@@ -1,6 +1,5 @@
-<script lang="ts">
-import { useAccountStore } from 'src/antelope/stores/account';
-import { useChainStore } from 'src/antelope/stores/chain';
+
+<script>
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
@@ -11,7 +10,7 @@ export default defineComponent({
             showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: '',
+            error: null,
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -43,7 +42,17 @@ export default defineComponent({
             'isAutoLoading',
         ]),
     },
+    mounted() {
+        this.setDefaultNativeChain();
+    },
     methods: {
+        // antelope methods
+        setDefaultNativeChain() {
+            const network = process.env.CHAIN_NAME || 'telos';
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+        },
+        // end of antelope methods
         ...mapActions('account', [
             'login',
             'logout',
@@ -57,35 +66,13 @@ export default defineComponent({
             'setLoadingWallet',
         ]),
         async loginAsJustViewer() {
-            let idx = this.$ual.getAuthenticators().availableAuthenticators.map(a => a.getName()).indexOf('cleos');
+            let idx = this.$ual.authenticators.map(a => a.getName()).indexOf('cleos');
             this.onLogin(idx, true);
         },
         async signUp() {
             this.openUrl('https://app.telos.net/accounts/add');
         },
-        async loginEVM(network:string) {
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
-            accountStore.loginEVM({ network });
-        },
-        async onLogin(idx: number, justViewer = false) {
-            return this.onLogin_vuex_version(idx, justViewer);
-        },
-        async onLogin_pinia_version(idx: number, justViewer = false) {
-            const authenticator = this.$ual.getAuthenticators().availableAuthenticators[idx];
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            const network = chainStore.currentChain.settings.getNetwork();
-            const success = await accountStore.loginNative({ authenticator, network });
-            if (success) {
-                this.showLogin = false;
-                await this.$router.push({ path: '/balance' });
-            } else {
-                this.error = 'Login failed';
-            }
-        },
-        async onLogin_vuex_version(idx: number, justViewer = false) {
+        async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
@@ -94,14 +81,20 @@ export default defineComponent({
                 this.error = error;
             }
         },
-        openUrl(url: string) {
+        openUrl(url) {
             window.open(url);
+        },
+        goToAccountPage() {
+            const accountPath = `/account/${this.accountName}`;
+            if (this.$router.currentRoute.path !== accountPath) {
+                this.$router.push({ path: accountPath });
+            }
         },
         async createEvmApi() {
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.error(e);
+                console.log(e);
             }
         },
 
@@ -125,7 +118,7 @@ export default defineComponent({
                         payer: this.accountName.toLowerCase(),
                         receiver: this.accountName.toLowerCase(),
                         quant:
-              String(this.RAMtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.RAMtoBuy).toFixed(4)) + String(' TLOS'),
                     },
                 });
             }
@@ -138,9 +131,9 @@ export default defineComponent({
                         from: this.accountName.toLowerCase(),
                         receiver: this.accountName.toLowerCase(),
                         stake_net_quantity:
-              String(this.NETtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.NETtoBuy).toFixed(4)) + String(' TLOS'),
                         stake_cpu_quantity:
-              String(this.CPUtoBuy.toFixed(4)) + String(' TLOS'),
+                String(parseFloat(this.CPUtoBuy).toFixed(4)) + String(' TLOS'),
                         transfer: false,
                     },
                 });
@@ -180,12 +173,12 @@ export default defineComponent({
             });
             let ramInfo = res.rows[0];
             this.ramPrice =
-        ramInfo.quote.balance.split(' ')[0] /
-        ramInfo.base.balance.split(' ')[0];
+          ramInfo.quote.balance.split(' ')[0] /
+          ramInfo.base.balance.split(' ')[0];
         },
 
         async checkResources() {
-            if (!this.accountName) {
+            if (!accountName) {
                 return;
             }
             await this.getRamPrice();
@@ -206,7 +199,7 @@ export default defineComponent({
         },
     },
     watch: {
-        async isAuthenticated(): Promise<void> {
+        async isAuthenticated() {
             if (this.isAuthenticated) {
                 await this.createEvmApi();
                 await this.checkResources();
@@ -222,7 +215,7 @@ export default defineComponent({
     <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
         <div class="q-mt-md q-mb-sm">
             <q-btn
-                label="Connect Your Wallet"
+                :label="$t('home.connect_with_wallet')"
                 class="purpleGradient q-px-md q-py-sm"
                 @click="showLogin = true"
             />
@@ -233,7 +226,7 @@ export default defineComponent({
             <q-btn
                 text-color="white"
                 outline
-                label="View any account"
+                :label="$t('home.view_any_account')"
                 class="q-px-md q-py-sm"
                 @click="loginAsJustViewer()"
             />
@@ -244,7 +237,7 @@ export default defineComponent({
             <q-btn
                 text-color="white"
                 outline
-                label="Create New Account"
+                :label="$t('home.create_new_account')"
                 class="q-px-md q-py-sm"
                 @click="signUp"
             />
@@ -252,12 +245,12 @@ export default defineComponent({
     </div>
 
     <div v-else class="q-px-md flex justify-center column">
-        <p class="q-mb-lg">Logged in as {{ accountName }}</p>
+        <p class="q-mb-lg"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
 
         <q-btn
             text-color="white"
             outline
-            label="View Wallet"
+            :label="$t('home.view_wallet')"
             class="q-px-md q-py-sm q-mb-lg"
             @click="$router.push('/native/balance')"
         />
@@ -265,7 +258,7 @@ export default defineComponent({
         <q-btn
             text-color="white"
             outline
-            label="Log Out"
+            :label="$t('home.logout')"
             class="q-px-md q-py-sm"
             @click="logout"
         />
@@ -277,7 +270,7 @@ export default defineComponent({
             <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
             <q-list class="" dark separator>
                 <q-item
-                    v-for="(wallet, idx) in $ual.getAuthenticators().availableAuthenticators"
+                    v-for="(wallet, idx) in $ual.authenticators"
                     :key="wallet.getStyle().text"
                     v-ripple
                     class="q-my-sm"
@@ -322,7 +315,7 @@ export default defineComponent({
                 class="self-center flex-center"
                 label="Close"
                 :style="`display:flex;`"
-                @click="close = true"
+                @click="close"
             />
             <q-item
                 v-if="error"
@@ -385,9 +378,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .showLoginPopup {
-  width: 30rem;
-  height: auto;
-  margin-bottom: 5rem;
+    width: 30rem;
+    height: auto;
+    margin-bottom: 5rem;
 }
 
 

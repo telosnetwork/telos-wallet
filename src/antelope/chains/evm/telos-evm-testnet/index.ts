@@ -1,8 +1,7 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { PriceChartData } from 'src/types/PriceChartData';
-import { Token } from 'src/types/Actions';
+import { EvmToken, PriceChartData } from 'src/antelope/types';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '41';
@@ -11,12 +10,12 @@ const DISPLAY = 'Telos EVM Testnet';
 const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
-    precision: 18,
-    contract: 'evm-native',
+    decimals: 18,
+    address: 'evm-native',
     logo: LOGO,
     isNative: false,
     isSystem: true,
-} as Token;
+} as EvmToken;
 
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -27,8 +26,10 @@ const RPC_ENDPOINT = {
 
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
+const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.caleos.io';
+const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
-export default class TelosTestnetEVM extends EVMChainSettings {
+export default class TelosEVMTestnet extends EVMChainSettings {
     getNetwork(): string {
         return NETWORK;
     }
@@ -41,6 +42,10 @@ export default class TelosTestnetEVM extends EVMChainSettings {
         return DISPLAY;
     }
 
+    getHyperionEndpoint(): string {
+        return NETWORK_EVM_ENDPOINT;
+    }
+
     getRPCEndpoint(): RpcEndpoint {
         return RPC_ENDPOINT;
     }
@@ -49,7 +54,7 @@ export default class TelosTestnetEVM extends EVMChainSettings {
         return api.getEmptyPriceChartData();
     }
 
-    getSystemToken(): Token {
+    getSystemToken(): EvmToken {
         return TOKEN;
     }
 
@@ -71,5 +76,9 @@ export default class TelosTestnetEVM extends EVMChainSettings {
 
     getExplorerUrl(): string {
         return EXPLORER_URL;
+    }
+
+    getTrustedContractsBucket(): string {
+        return CONTRACTS_BUCKET;
     }
 }

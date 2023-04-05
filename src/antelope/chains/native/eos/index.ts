@@ -1,9 +1,7 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { PriceChartData } from 'src/types/PriceChartData';
-import { Theme } from 'src/types/Theme';
-import { Token } from 'src/types/Actions';
+import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906';
@@ -16,7 +14,7 @@ const TOKEN = {
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as Token;
+} as NativeToken;
 const HYPERION_ENDPOINT = 'https://eos.hyperion.eosrio.io';
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -70,7 +68,7 @@ export default class EOS extends NativeChainSettings {
         return api.getCoingeckoPriceChartData('eos');
     }
 
-    getSystemToken(): Token {
+    getSystemToken(): NativeToken {
         return TOKEN;
     }
 

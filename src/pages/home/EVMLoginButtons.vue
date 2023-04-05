@@ -1,16 +1,28 @@
 <script lang="ts">
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
     methods: {
+        setDefaultEVMChain() {
+            const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet' ;
+            const chainStore = useChainStore();
+            chainStore.setCurrentChain(network);
+        },
         connectToMetaMask() {
-            // https://github.com/telosnetwork/telos-wallet/issues/203
-            this.$router.push({ name: 'evm-wallet' });
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            accountStore.loginEVM({ network });
         },
         viewAnyAccount() {
 
         },
+    },
+    mounted() {
+        this.setDefaultEVMChain();
     },
 });
 </script>

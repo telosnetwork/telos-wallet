@@ -1,4 +1,4 @@
-export interface Transaction {
+export interface TransactionV1 {
   id: string;
   trx: {
     receipt: {

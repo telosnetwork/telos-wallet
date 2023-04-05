@@ -12,17 +12,15 @@ export default boot(({ app }) => {
     // setting log in and out callbacks --
     ant.events.onLoggedIn.subscribe({
         next: () => {
-            const $router = app.config.globalProperties.$router;
-            if ($router.currentRoute.value.path === '/') {
-                $router.push({ path: '/balance' });
+            if (window.location.pathname === '/') {
+                app.config.globalProperties.$router.push({ path: '/evm/wallet?tab=balance' });
             }
         },
     });
     ant.events.onLoggedOut.subscribe({
         next: () => {
-            const $router = app.config.globalProperties.$router;
-            if ($router.currentRoute.value.path !== '/') {
-                $router.push({ path: '/' });
+            if (window.location.pathname !== '/') {
+                app.config.globalProperties.$router.push({ path: '/' });
             }
         },
     });
@@ -32,4 +30,13 @@ export default boot(({ app }) => {
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));
+
+    // autologin --
+    ant.stores.account.autoLogin().then((loggedIn) => {
+        if (!loggedIn) {
+            if (window.location.pathname !== '/') {
+                app.config.globalProperties.$router.push({ path: '/' });
+            }
+        }
+    });
 });

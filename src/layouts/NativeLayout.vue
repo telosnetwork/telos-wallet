@@ -130,7 +130,7 @@ export default {
 
 <template>
 <q-layout view="hHh Lpr fFf" class="">
-    <NativeLoginButton v-if="isUserAuthenticated" class="login-button" />
+    <NativeLoginButton v-if="isUserAuthenticated" class="login-button"/>
     <div class="videoWrapper">
         <video
             id="bgvid"

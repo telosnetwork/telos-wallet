@@ -21,7 +21,6 @@ import {
     createTraceFunction,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { ChainSettings } from 'src/types';
 
 // main native chains
 import EOS from 'src/antelope/chains/native/eos';
@@ -37,9 +36,18 @@ import Jungle from 'src/antelope/chains/native/jungle';
 import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
-import TelosTestnetEVM from 'src/antelope/chains/evm/telos-testnet-evm';
+import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
 import { getAntelope } from '..';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import {
+    AntelopeError,
+    ChainSettings,
+    EvmToken,
+    Label,
+    NativeToken,
+    Token,
+} from 'src/antelope/types';
 
 
 
@@ -53,24 +61,37 @@ export const settings: { [key: string]: ChainSettings } = {
     'jungle': new Jungle('jungle'),
     // EVM chains
     'telos-evm': new TelosEVM('telos-evm'),
-    'telos-testnet-evm': new TelosTestnetEVM('telos-testnet-evm'),
+    'telos-evm-testnet': new TelosEVMTestnet('telos-evm-testnet'),
 };
 
 export interface ChainModel {
     apy: string;
     settings: ChainSettings;
+    tokens: Token[];
 }
 
+export interface EvmChainModel {
+    apy: string;
+    settings: EVMChainSettings;
+    tokens: EvmToken[];
+}
+
+export interface NativeChainModel {
+    apy: string;
+    settings: NativeChainSettings;
+    tokens: NativeToken[];
+}
+
+
 export interface ChainState {
-    // reference to the chain in where the logged account is
-    __logged_Chain: ChainModel;
-    // reference to the chain in where the current explored account is
-    __current_Chain: ChainModel;
+    // chains mapped by label
+    __chains: { [label: Label]: ChainModel };
 }
 
 const newChainModel = (network: string): ChainModel => ({
     apy: '',
     settings: settings[network],
+    tokens: [],
 });
 
 
@@ -79,10 +100,14 @@ const store_name = 'chain';
 export const useChainStore = defineStore(store_name, {
     state: (): ChainState => (chainInitialState),
     getters: {
-        loggedChain: state => state.__logged_Chain,
-        currentChain: state => state.__current_Chain,
-        // get chain by label
-        getChain: state => (label: string) => label === 'logged' ? state.__logged_Chain : state.__current_Chain,
+        loggedChain: state => state.__chains['logged'],
+        currentChain: state => state.__chains['current'],
+        loggedEvmChain: state => state.__chains['logged'].settings.isNative() ? undefined : state.__chains['logged'] as EvmChainModel,
+        currentEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
+        loggedNativeChain: state => state.__chains['logged'].settings.isNative() ? state.__chains['logged'] as NativeChainModel : undefined,
+        currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
+        getChain: state => (label: string) => state.__chains[label],
+        getTokens: state => (label: string) => state.__chains[label].tokens,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -119,36 +144,48 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
-        // Commits ----
-        setLoggedChain(network: string) {
-            this.trace('setLoggedChain', network, settings[network]);
-            if (network in settings) {
-                this.__logged_Chain = newChainModel(network);
-                void this.updateChainData('logged');
-                getAntelope().events.onChainChanged.next(
-                    { label: 'logged', chain: this.__current_Chain },
-                );
-            } else {
-                throw new Error(`Invalid network: ${network}`);
+        async updateTokenList(label: string) {
+            useFeedbackStore().setLoading('updateTokenList');
+            this.trace('updateTokenList');
+            const chain = this.getChain(label);
+            try {
+                if (chain.settings.isNative()) {
+                    chain.tokens = await (chain.settings as NativeChainSettings).getTokenList();
+                } else {
+                    chain.tokens = await (chain.settings as EVMChainSettings).getTokenList();
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_token_list');
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokenList');
             }
         },
+        // Commits ----
+        setLoggedChain(network: string) {
+            this.setChain('logged', network);
+        },
         setCurrentChain(network: string) {
-            this.trace('setCurrentChain', network);
+            this.setChain('current', network);
+        },
+        setChain(label: string, network: string) {
+            this.trace('setChain', label, network);
             if (network in settings) {
-                this.__current_Chain = newChainModel(network);
-                void this.updateChainData('current');
-                getAntelope().events.onChainChanged.next(
-                    { label: 'current', chain: this.__current_Chain },
-                );
+                // make the change only if they are different
+                if (network !== this.__chains[label]?.settings.getNetwork()) {
+                    this.__chains[label] = newChainModel(network);
+                    void this.updateChainData(label);
+                    getAntelope().events.onChainChanged.next(
+                        { label, chain: this.__chains[label] },
+                    );
+                }
             } else {
-                throw new Error(`Invalid network: ${network}`);
+                throw new AntelopeError('antelope.chain.error_invalid_network', { network });
             }
         },
     },
 });
 
-const initial_chain = newChainModel(process.env.NETWORK ?? 'telos');
 const chainInitialState: ChainState = {
-    __logged_Chain: initial_chain,
-    __current_Chain: initial_chain,
+    __chains: {},
 };
