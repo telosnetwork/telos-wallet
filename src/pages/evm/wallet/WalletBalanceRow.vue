@@ -5,6 +5,15 @@ import InlineSvg from 'vue-inline-svg';
 
 import { formatFiatAmount, abbreviateNumber } from 'src/antelope/stores/utils';
 import { commify } from 'ethers/lib/utils';
+import { useChainStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+
+interface OverflowMenuItem {
+    label: string;
+    icon: string;
+    url: string | { name: string, query?: Record<string, string> };
+    strokeIcon?: boolean;
+}
 
 export default defineComponent({
     name: 'WalletBalanceRow',
@@ -192,8 +201,67 @@ export default defineComponent({
 
             return text.trim();
         },
-        overflowMenuItems() {
-            return [];
+        overflowMenuItems(): OverflowMenuItem[] {
+            const items: OverflowMenuItem[] = [];
+            const chainStore = useChainStore();
+            const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
+            const getExplorerUrl = (address: string) => `${process.env.EVM_NETWORK_EXPLORER}/address/${address}`;
+
+            const tokenIsTlos  = chainSettings.getSystemToken().address  === this.token.address;
+            const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
+            const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
+            const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
+
+            // eztodo use i18n
+            if (tokenIsTlos || tokenIsStlos) {
+                items.push({
+                    label: 'Stake',
+                    icon: require('src/assets/icon--acorn-outline.svg'),
+                    strokeIcon: true,
+                    url: { name: 'evm-staking' },
+                });
+            }
+
+            if (tokenIsTlos) {
+                items.push({
+                    label: 'Buy',
+                    icon: require('src/assets/icon--plus.svg'),
+                    url: buyMoreLink,
+                });
+            }
+
+            if (tokenIsTlos) {
+                items.push({
+                    label: 'Wrap',
+                    icon: require('src/assets/icon--wrap-tlos.svg'),
+                    url: { name: 'evm-wrap' },
+                });
+            }
+
+            if (tokenIsWtlos) {
+                items.push({
+                    label: 'Unwrap',
+                    icon: require('src/assets/icon--wrap-tlos.svg'),
+                    url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
+                });
+            }
+
+            if (!tokenIsTlos) {
+                items.push({
+                    label: 'Contract',
+                    icon: require('src/assets/icon--code.svg'),
+                    url: getExplorerUrl(this.token.address),
+                });
+            }
+
+
+            items.push({
+                label: 'Send',
+                icon: require('assets/icon--arrow-diagonal.svg'),
+                url:  { name: 'evm-send', query: { token: this.token.symbol } },
+            });
+
+            return items;
         },
     },
     methods: {
@@ -239,6 +307,7 @@ export default defineComponent({
                     <InlineSvg
                         :src="require('src/assets/icon--info.svg')"
                         class="c-wallet-balance-row__info-icon"
+                        aria-hidden="true"
                     />
                     <q-tooltip :model-value="showTooltip">
                         <span class="c-wallet-balance-row__tooltip">
@@ -259,7 +328,39 @@ export default defineComponent({
             dropdown-icon="more_vert"
             class="c-wallet-balance-row__overflow"
             :aria-label="$t('evm_wallet.balance_row_actions_aria')"
-        />
+        >
+            <ul class="c-wallet-balance-row__overflow-ul">
+                <li
+                    v-for="(item, index) in overflowMenuItems"
+                    :key="`overflow-item-${index}`"
+                    class="c-wallet-balance-row__overflow-li"
+                >
+                    <InlineSvg
+                        :src="item.icon"
+                        :class="{
+                            'c-wallet-balance-row__overflow-icon': true,
+                            'c-wallet-balance-row__overflow-icon--stroke': item.strokeIcon,
+                        }"
+                        aria-hidden="true"
+                    />
+                    <router-link
+                        v-if="typeof item.url === 'object'"
+                        :to="item.url"
+                        class="c-wallet-balance-row__overflow-text"
+                    >
+                        {{ item.label }}
+                    </router-link>
+                    <a
+                        v-else
+                        :href="item.url"
+                        target="_blank"
+                        class="c-wallet-balance-row__overflow-text"
+                    >
+                        {{ item.label }}
+                    </a>
+                </li>
+            </ul>
+        </q-btn-dropdown>
     </div>
 </div>
 </template>
@@ -359,6 +460,49 @@ export default defineComponent({
 
     &__overflow {
         flex-shrink: 0;
+    }
+
+    &__overflow-ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__overflow-li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: $grey-3;
+        }
+    }
+
+    &__overflow-text {
+        text-decoration: none;
+        color: black;
+        text-transform: uppercase;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 21px;
+    }
+
+    &__overflow-icon {
+        //height: 16px;
+        width: 16px;
+
+        path {
+            fill: black;
+        }
+
+        &--stroke {
+            path {
+                fill: transparent;
+                stroke: black;
+            }
+        }
     }
 }
 </style>

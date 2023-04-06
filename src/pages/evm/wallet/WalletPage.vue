@@ -55,13 +55,13 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get stlos token info from store
                 tokens.push({
-                    'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
-                    'symbol': 'STLOS',
-                    'name': 'Staked TLOS',
-                    'logoURI': 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
-                    'decimals': 18,
-                    'balance': '3642.0243',
-                    'fullBalance': '3642.024318091460206147',
+                    address: '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
+                    symbol: 'STLOS',
+                    name: 'Staked TLOS',
+                    logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+                    decimals: 18,
+                    balance: '3642.0243',
+                    fullBalance: '3642.024318091460206147',
                 });
             }
 
@@ -69,13 +69,13 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get wtlos token info from store
                 tokens.push({
-                    'address': '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
-                    'symbol': 'WTLOS',
-                    'name': 'Wrapped TLOS',
-                    'logoURI': 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
-                    'decimals': 18,
-                    'balance': '6.1',
-                    'fullBalance': '6.1',
+                    address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+                    symbol: 'WTLOS',
+                    name: 'Wrapped TLOS',
+                    logoURI: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
+                    decimals: 18,
+                    balance: '6.1',
+                    fullBalance: '6.1',
                 });
             }
 
@@ -85,34 +85,37 @@ export default defineComponent({
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //      get all user tokens here. filter out tlos and stlos if they appear in this list.
             const allNonChainTokens = [{
-                'symbol': 'SHTA',
-                'name': 'Shitcoin Alpha',
-                'logoURI': '',
-                'decimals': 18,
-                'balance': '350.0032',
-                'fullBalance': '350.0032',
+                address: '0x'.concat('0'.repeat(40)),
+                symbol: 'SHTA',
+                name: 'Shitcoin Alpha',
+                logoURI: '',
+                decimals: 18,
+                balance: '350.0032',
+                fullBalance: '350.0032',
             }, {
-                'symbol': 'SHTB',
-                'name': 'Shitcoin Beta',
-                'logoURI': '',
-                'decimals': 18,
-                'balance': '870123',
-                'fullBalance': '870123',
+                address: '0x'.concat('0'.repeat(40)),
+                symbol: 'SHTB',
+                name: 'Shitcoin Beta',
+                logoURI: '',
+                decimals: 18,
+                balance: '870123',
+                fullBalance: '870123',
             }, {
-                'symbol': 'SHIB2',
-                'name': 'Shiba 2',
-                'logoURI': '',
-                'decimals': 18,
-                'balance': '10',
-                'fullBalance': '10',
+                address: '0x'.concat('0'.repeat(40)),
+                symbol: 'SHIB2',
+                name: 'Shiba 2',
+                logoURI: '',
+                decimals: 18,
+                balance: '10',
+                fullBalance: '10',
             }, {
-                'address': '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
-                'symbol': 'SHIB',
-                'name': 'Shiba',
-                'logoURI': '',
-                'decimals': 18,
-                'balance': '555555786123.0032',
-                'fullBalance': '555555786123.003241232',
+                address: '0x'.concat('0'.repeat(40)),
+                symbol: 'SHIB',
+                name: 'Shiba',
+                logoURI: '',
+                decimals: 18,
+                balance: '555555786123.0032',
+                fullBalance: '555555786123.003241232',
             }];
 
             const [tokensWithFiatValue, tokensWithoutFiatValue] =
