@@ -30,7 +30,6 @@ export default defineComponent({
             const chainHasWtlos = !!chainSettings.getWtlosContractAddress();
 
             const {
-                address,
                 symbol,
                 name,
                 decimals,
@@ -40,7 +39,6 @@ export default defineComponent({
             } = chainSettings.getSystemToken();
 
             const chainToken: EvmTokenInfo = {
-                address,
                 symbol,
                 name,
                 logoURI: logo,
