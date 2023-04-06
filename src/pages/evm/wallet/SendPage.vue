@@ -23,6 +23,9 @@ export default defineComponent({
         viewTokenContract() {
             console.log('viewTokenContract');
         },
+        goBack() {
+            this.$router.back();
+        },
     },
 
 });
@@ -113,6 +116,7 @@ export default defineComponent({
                             color="primary"
                             :label="$t('evm_wallet.cancel')"
                             class="wallet-btn"
+                            @click="goBack"
                         />
                         <q-btn
                             color="primary"
