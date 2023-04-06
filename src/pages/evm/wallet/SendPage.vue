@@ -10,8 +10,25 @@ export default defineComponent({
     components: {
         AppPage,
     },
-    mounted() {
-        global.setHeaderBackBtn(true);
+    data: () => ({
+        address: '',
+        token: '',
+        amount: '',
+        amountInFiat: '0.00 USD',
+        gasFeeInTlos: '0.0058 TLOS',
+        gasFeeInFiat: '$0.00',
+        available: '12,845.1235 TLOS',
+    }),
+    methods: {
+        setAllBalance() {
+            this.amount = this.available;
+        },
+        viewTokenContract() {
+            console.log('viewTokenContract');
+        },
+        goBack() {
+            this.$router.back();
+        },
     },
 });
 </script>
@@ -101,6 +118,7 @@ export default defineComponent({
                             color="primary"
                             :label="$t('evm_wallet.cancel')"
                             class="wallet-btn"
+                            @click="goBack"
                         />
                         <q-btn
                             color="primary"
