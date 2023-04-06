@@ -96,8 +96,8 @@ export default defineComponent({
                 name: 'Shitcoin Beta',
                 logoURI: '',
                 decimals: 18,
-                balance: '870123',
-                fullBalance: '870123',
+                balance: '870123.0000',
+                fullBalance: '870123.0000',
             }, {
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB2',
