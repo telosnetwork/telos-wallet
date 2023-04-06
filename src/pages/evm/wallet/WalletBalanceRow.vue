@@ -54,7 +54,7 @@ export default defineComponent({
                 return false;
             } else {
                 const primaryAmountIsTooLarge =
-                    (typeof this.primaryAmount === 'number' && this.primaryAmount > 999999) ||
+                    (typeof this.primaryAmount === 'number' && this.primaryAmount.toString().length > 6) ||
                     (typeof this.primaryAmount === 'string' && this.primaryAmount.length > 6);
 
                 return primaryAmountIsTooLarge;
@@ -67,8 +67,8 @@ export default defineComponent({
                 return false;
             } else {
                 const secondaryAmountIsTooLarge =
-                    (typeof this.secondaryAmount === 'number' && this.secondaryAmount > 999999) ||
-                    (typeof this.secondaryAmount === 'string' && this.secondaryAmount.length > 8);
+                    (typeof this.secondaryAmount === 'number' && this.secondaryAmount.toString().length > 7) ||
+                    (typeof this.secondaryAmount === 'string' && this.secondaryAmount.length > 7);
 
                 return secondaryAmountIsTooLarge;
             }
