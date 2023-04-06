@@ -55,6 +55,9 @@ export default {
         send: 'Send',
         receive: 'Receive',
         buy: 'Buy',
+        unwrap: 'Unwrap',
+        wrap: 'Wrap',
+        stake: 'Stake',
         link_to_send_aria: 'Link to Send page',
         link_to_receive_aria: 'Link to Receive page',
         link_to_buy_aria: 'External link to buy tokens',
@@ -69,6 +72,7 @@ export default {
         sign_out: 'Sign Out',
         dark_mode: 'Dark Mode',
         light_mode: 'Light Mode',
+        contract: 'Contract',
     },
     resources: {
         title: 'Network Resources',

@@ -212,11 +212,10 @@ export default defineComponent({
             const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
-            // eztodo use i18n
             if (tokenIsTlos || tokenIsStlos) {
                 items.push({
-                    label: 'Stake',
-                    icon: require('src/assets/icon--acorn-outline.svg'),
+                    label: this.$t('evm_wallet.stake'),
+                    icon: require('src/assets/icon--acorn.svg'),
                     strokeIcon: true,
                     url: { name: 'evm-staking' },
                 });
@@ -224,7 +223,7 @@ export default defineComponent({
 
             if (tokenIsTlos) {
                 items.push({
-                    label: 'Buy',
+                    label: this.$t('evm_wallet.buy'),
                     icon: require('src/assets/icon--plus.svg'),
                     url: buyMoreLink,
                 });
@@ -232,7 +231,7 @@ export default defineComponent({
 
             if (tokenIsTlos) {
                 items.push({
-                    label: 'Wrap',
+                    label: this.$t('evm_wallet.wrap'),
                     icon: require('src/assets/icon--wrap-tlos.svg'),
                     url: { name: 'evm-wrap' },
                 });
@@ -240,7 +239,7 @@ export default defineComponent({
 
             if (tokenIsWtlos) {
                 items.push({
-                    label: 'Unwrap',
+                    label: this.$t('evm_wallet.unwrap'),
                     icon: require('src/assets/icon--wrap-tlos.svg'),
                     url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
                 });
@@ -248,7 +247,7 @@ export default defineComponent({
 
             if (!tokenIsTlos) {
                 items.push({
-                    label: 'Contract',
+                    label: this.$t('global.contract'),
                     icon: require('src/assets/icon--code.svg'),
                     url: getExplorerUrl(this.token.address),
                 });
@@ -256,7 +255,7 @@ export default defineComponent({
 
 
             items.push({
-                label: 'Send',
+                label: this.$t('evm_wallet.send'),
                 icon: require('assets/icon--arrow-diagonal.svg'),
                 url:  { name: 'evm-send', query: { token: this.token.symbol } },
             });
