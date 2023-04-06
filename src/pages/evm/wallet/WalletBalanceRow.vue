@@ -74,10 +74,15 @@ export default defineComponent({
             }
         },
         fiatRateText(): string {
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //     get actual conversion rate
             if (!this.tokenHasFiatValue) {
                 return '';
             }
 
+
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //     get actual symbol from site settings
             const fiatSymbol = '$';
             const fiatAmount = abbreviateNumber(0.7732);
 
