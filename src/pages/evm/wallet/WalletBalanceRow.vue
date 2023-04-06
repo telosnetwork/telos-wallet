@@ -271,6 +271,13 @@ export default defineComponent({
                 this.showTooltip = false;
             }, 2000);
         },
+        goToLink(url: string | { name: string, query?: Record<string, string> }) {
+            if (typeof url === 'object') {
+                this.$router.push(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        },
     },
 });
 </script>
@@ -333,6 +340,10 @@ export default defineComponent({
                     v-for="(item, index) in overflowMenuItems"
                     :key="`overflow-item-${index}`"
                     class="c-wallet-balance-row__overflow-li"
+                    tabindex="0"
+                    :aria-labelledby="`overflow-text-${index}`"
+                    @click="goToLink(item.url)"
+                    @keydown.enter.space="goToLink(item.url)"
                 >
                     <InlineSvg
                         :src="item.icon"
@@ -342,21 +353,9 @@ export default defineComponent({
                         }"
                         aria-hidden="true"
                     />
-                    <router-link
-                        v-if="typeof item.url === 'object'"
-                        :to="item.url"
-                        class="c-wallet-balance-row__overflow-text"
-                    >
+                    <span :id="`overflow-text-${index}`" class="c-wallet-balance-row__overflow-text">
                         {{ item.label }}
-                    </router-link>
-                    <a
-                        v-else
-                        :href="item.url"
-                        target="_blank"
-                        class="c-wallet-balance-row__overflow-text"
-                    >
-                        {{ item.label }}
-                    </a>
+                    </span>
                 </li>
             </ul>
         </q-btn-dropdown>
@@ -480,7 +479,6 @@ export default defineComponent({
     }
 
     &__overflow-text {
-        text-decoration: none;
         color: black;
         text-transform: uppercase;
         font-weight: 600;
