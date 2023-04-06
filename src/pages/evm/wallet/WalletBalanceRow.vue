@@ -271,7 +271,7 @@ export default defineComponent({
                 this.showTooltip = false;
             }, 2000);
         },
-        goToLink(url: string | { name: string, query?: Record<string, string> }) {
+        goToLink(url: string | object) {
             if (typeof url === 'object') {
                 this.$router.push(url);
             } else {
