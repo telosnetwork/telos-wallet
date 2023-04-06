@@ -32,6 +32,7 @@ import {
     Label,
     NativeTransactionResponse,
 } from 'src/antelope/types';
+import { getAccount, disconnect } from '@wagmi/core';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
