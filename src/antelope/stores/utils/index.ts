@@ -182,13 +182,25 @@ export function getFormattedUtcOffset(date: Date): string {
 export function prettyPrintCurrency(amount: number | string, decimals = 2) {
     const numberRegex = /^-?\d+(\.\d+)?$/;
 
-    if (typeof amount === 'string' && !numberRegex.test(amount)) {
+    const amountIsNumber = ['string', 'number'].includes(typeof amount);
+    const amountIsStringAndValid = typeof amount === 'string' && numberRegex.test(amount);
+    const decimalsIsValidInt = typeof decimals === 'number' && decimals > 0 && decimals % 1 === 0;
+
+    if (!amountIsNumber || !amountIsStringAndValid) {
         throw `String amount ${amount} does not represent a number`;
+    }
+
+    if (!decimalsIsValidInt) {
+        throw `Decimal precision ${decimals} is not a positive integer`;
     }
 
     const amountNumber = typeof amount === 'string' ? +amount : amount;
 
     let formatted = amountNumber.toLocaleString('en-us');
+
+    if (decimals === 0) {
+        return Math.floor(parseFloat(formatted.replace(/,/g, ''))).toString();
+    }
 
     if (formatted.indexOf('.') !== -1) {
         const formattedInteger = formatted.split('.')[0];
