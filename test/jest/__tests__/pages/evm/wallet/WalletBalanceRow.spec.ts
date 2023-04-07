@@ -98,6 +98,7 @@ describe('WalletBalanceRow.vue', () => {
 
         beforeAll(() => {
             window.open = jest.fn();
+            process.env.EVM_NETWORK_EXPLORER = 'fake-url';
         });
 
         beforeEach(() => {
@@ -106,6 +107,7 @@ describe('WalletBalanceRow.vue', () => {
 
         afterAll(() => {
             window.open = originalWindowOpen;
+            process.env.EVM_NETWORK_EXPLORER = undefined;
         });
 
         test('TLOS', async () => {
@@ -228,7 +230,7 @@ describe('WalletBalanceRow.vue', () => {
             }));
 
             expect(window.open).toHaveBeenCalledWith(
-                `undefined/address/${fakeStlosContractAddress}`,
+                `fake-url/address/${fakeStlosContractAddress}`,
                 '_blank',
             );
         });
@@ -290,7 +292,7 @@ describe('WalletBalanceRow.vue', () => {
             }));
 
             expect(window.open).toHaveBeenCalledWith(
-                `undefined/address/${fakeWtlosContractAddress}`,
+                `fake-url/address/${fakeWtlosContractAddress}`,
                 '_blank',
             );
         });
@@ -345,7 +347,7 @@ describe('WalletBalanceRow.vue', () => {
             }));
 
             expect(window.open).toHaveBeenCalledWith(
-                `undefined/address/${fakeTokenContractAddress}`,
+                `fake-url/address/${fakeTokenContractAddress}`,
                 '_blank',
             );
         });
