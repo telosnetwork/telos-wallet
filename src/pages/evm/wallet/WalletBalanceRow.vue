@@ -114,7 +114,6 @@ export default defineComponent({
 
             if (!isMobile) {
                 const formatted = prettyPrintCurrency(this.primaryAmount, 4);
-                // debugger;
 
                 return `${formatted} ${this.token.symbol}`;
             } else {
