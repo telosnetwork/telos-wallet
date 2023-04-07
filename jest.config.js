@@ -74,6 +74,7 @@ module.exports = {
         '^layouts/(.*)$': '<rootDir>/src/layouts/$1',
         '^pages/(.*)$': '<rootDir>/src/pages/$1',
         '^assets/(.*)$': '<rootDir>/src/assets/$1',
+        '^test/(.*)$': '<rootDir>/test/$1',
         '.*css$': '@quasar/quasar-app-extension-testing-unit-jest/stub.css',
     },
     transform: {

@@ -1,0 +1,302 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
+<div
+  class="c-wallet-balance-row"
+>
+  <div
+    class="c-wallet-balance-row__left-container"
+  >
+    <img
+      alt="evm_wallet.token_logo_alt"
+      aria-hidden="true"
+      class="c-wallet-balance-row__logo"
+      height="40"
+      src="https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png"
+      width="40"
+    />
+    <div>
+      <p
+        class="q-mb-xs"
+      >
+        STLOS
+      </p>
+       Staked TLOS
+    </div>
+  </div>
+  <div
+    class="c-wallet-balance-row__right-container"
+  >
+    <div
+      class="c-wallet-balance-row__balance-container"
+    >
+      <div
+        class="c-wallet-balance-row__primary-amount"
+      >
+        3,642.0243 STLOS 
+        <!--v-if-->
+      </div>
+      <span
+        class="c-wallet-balance-row__secondary-amount"
+      >
+        $ 456,789,123.67 (@ $0.7732 / STLOS)
+      </span>
+    </div>
+    <q-btn-dropdown-stub
+      aria-label="evm_wallet.balance_row_actions_aria"
+      class="c-wallet-balance-row__overflow"
+      dense=""
+      dropdown-icon="more_vert"
+      flat=""
+      no-icon-animation=""
+    >
+      
+      <ul
+        class="c-wallet-balance-row__overflow-ul"
+      >
+        
+        <li
+          aria-labelledby="overflow-text-0"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-0"
+          >
+            evm_wallet.stake
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-1"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-1"
+          >
+            evm_wallet.unwrap
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-2"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-2"
+          >
+            global.contract
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-3"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-3"
+          >
+            evm_wallet.send
+          </span>
+        </li>
+        
+      </ul>
+      
+    </q-btn-dropdown-stub>
+  </div>
+</div>
+`;
+
+exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
+<div
+  class="c-wallet-balance-row"
+>
+  <div
+    class="c-wallet-balance-row__left-container"
+  >
+    <img
+      alt="evm_wallet.token_logo_alt"
+      aria-hidden="true"
+      class="c-wallet-balance-row__logo"
+      height="40"
+      src="https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png"
+      width="40"
+    />
+    <div>
+      <p
+        class="q-mb-xs"
+      >
+        STLOS
+      </p>
+       Staked TLOS
+    </div>
+  </div>
+  <div
+    class="c-wallet-balance-row__right-container"
+  >
+    <div
+      class="c-wallet-balance-row__balance-container"
+    >
+      <div
+        class="c-wallet-balance-row__primary-amount"
+      >
+        $ 456.79M 
+        
+        <inline-svg-stub
+          aria-hidden="true"
+          class="c-wallet-balance-row__info-icon"
+          keepduringloading="true"
+          src=""
+          transformsource="[Function]"
+        />
+        <q-tooltip-stub
+          model-value="false"
+        >
+          
+          <span
+            class="c-wallet-balance-row__tooltip"
+          >
+            evm_wallet.token_balance:
+3,642.0243
+
+evm_wallet.fiat_value:
+$456,789,123.67
+          </span>
+          
+        </q-tooltip-stub>
+        
+      </div>
+      <span
+        class="c-wallet-balance-row__secondary-amount"
+      >
+        3.64K STLOS
+      </span>
+    </div>
+    <q-btn-dropdown-stub
+      aria-label="evm_wallet.balance_row_actions_aria"
+      class="c-wallet-balance-row__overflow"
+      dense=""
+      dropdown-icon="more_vert"
+      flat=""
+      no-icon-animation=""
+    >
+      
+      <ul
+        class="c-wallet-balance-row__overflow-ul"
+      >
+        
+        <li
+          aria-labelledby="overflow-text-0"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-0"
+          >
+            evm_wallet.stake
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-1"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-1"
+          >
+            evm_wallet.unwrap
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-2"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-2"
+          >
+            global.contract
+          </span>
+        </li>
+        <li
+          aria-labelledby="overflow-text-3"
+          class="c-wallet-balance-row__overflow-li"
+          tabindex="0"
+        >
+          <inline-svg-stub
+            aria-hidden="true"
+            class="c-wallet-balance-row__overflow-icon"
+            keepduringloading="true"
+            src=""
+            transformsource="[Function]"
+          />
+          <span
+            class="c-wallet-balance-row__overflow-text"
+            id="overflow-text-3"
+          >
+            evm_wallet.send
+          </span>
+        </li>
+        
+      </ul>
+      
+    </q-btn-dropdown-stub>
+  </div>
+</div>
+`;

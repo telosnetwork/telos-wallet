@@ -228,7 +228,7 @@ export function abbreviateNumber(amount: number, precision = 4) {
         throw 'Type of amount must be number';
     }
 
-    const precisionIsValid = typeof precision === 'number' && precision >= 0 && precision % 1 === 0
+    const precisionIsValid = typeof precision === 'number' && precision >= 0 && precision % 1 === 0;
 
     if (!precisionIsValid) {
         throw 'Type of precision must be a positive integer or zero';
