@@ -45,6 +45,7 @@ export default defineComponent({
     line-height: 48px;
     font-weight: 600;
     font-size: 32px;
+    text-align: center;
 
     @media screen and (min-width: 360px) {
         font-size: 40px;
