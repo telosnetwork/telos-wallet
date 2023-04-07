@@ -3,6 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 const fakeBuyMoreLink = 'fake';
 const fakeStlosContractAddress = '0x'.concat('9'.repeat(40));
 const fakeWtlosContractAddress = '0x'.concat('8'.repeat(40));
+const fakeTokenContractAddress = '0x'.concat('7'.repeat(40));
 const chainStoreMock = {
     useChainStore: () => ({
         currentChain: {
@@ -89,11 +90,30 @@ describe('WalletBalanceRow.vue', () => {
     });
 
     describe('should render the right overflow items when the token is', () => {
-        test('TLOS', () => {
+        const routerMock = {
+            push: jest.fn(),
+        };
+
+        const originalWindowOpen = window.open;
+
+        beforeAll(() => {
+            window.open = jest.fn();
+        });
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        afterAll(() => {
+            window.open = originalWindowOpen;
+        });
+
+        test('TLOS', async () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
                     mocks: {
+                        $router: routerMock,
                         $q: {
                             screen: {
                                 lt: {
@@ -118,13 +138,46 @@ describe('WalletBalanceRow.vue', () => {
 
             // snapshot contains c-wallet-balance-row__overflow-li for stake, buy, wrap, send
             expect(wrapper.element).toMatchSnapshot();
+
+            const [
+                stakeLink,
+                buyLink,
+                wrapLink,
+                sendLink,
+            ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
+
+            await stakeLink.trigger('click');
+            await buyLink.trigger('click');
+            await wrapLink.trigger('click');
+            await sendLink.trigger('click');
+
+            expect(window.open).toHaveBeenCalledTimes(1);
+            expect(routerMock.push).toHaveBeenCalledTimes(3);
+
+            expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+                name: 'evm-staking',
+            }));
+
+            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
+                name: 'evm-wrap',
+            }));
+
+            expect(routerMock.push.mock.calls[2][0]).toEqual(expect.objectContaining({
+                name: 'evm-send',
+                query: {
+                    token: 'TLOS',
+                },
+            }));
+
+            expect(window.open).toHaveBeenCalledWith(fakeBuyMoreLink, '_blank');
         });
 
-        test('STLOS', () => {
+        test('STLOS', async () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
                     mocks: {
+                        $router: routerMock,
                         $q: {
                             screen: {
                                 lt: {
@@ -149,13 +202,43 @@ describe('WalletBalanceRow.vue', () => {
 
             // snapshot contains c-wallet-balance-row__overflow-li for stake, contract, send
             expect(wrapper.element).toMatchSnapshot();
+
+            const [
+                stakeLink,
+                contractLink,
+                sendLink,
+            ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
+
+            await stakeLink.trigger('click');
+            await contractLink.trigger('click');
+            await sendLink.trigger('click');
+
+            expect(window.open).toHaveBeenCalledTimes(1);
+            expect(routerMock.push).toHaveBeenCalledTimes(2);
+
+            expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+                name: 'evm-staking',
+            }));
+
+            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
+                name: 'evm-send',
+                query: {
+                    token: fakeStlosContractAddress,
+                },
+            }));
+
+            expect(window.open).toHaveBeenCalledWith(
+                `undefined/address/${fakeStlosContractAddress}`,
+                '_blank',
+            );
         });
 
-        test('WTLOS', () => {
+        test('WTLOS', async () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
                     mocks: {
+                        $router: routerMock,
                         $q: {
                             screen: {
                                 lt: {
@@ -180,13 +263,44 @@ describe('WalletBalanceRow.vue', () => {
 
             // snapshot contains c-wallet-balance-row__overflow-li for unwrap, contract, send
             expect(wrapper.element).toMatchSnapshot();
+
+            const [
+                unwrapLink,
+                contractLink,
+                sendLink,
+            ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
+
+            await unwrapLink.trigger('click');
+            await contractLink.trigger('click');
+            await sendLink.trigger('click');
+
+            expect(window.open).toHaveBeenCalledTimes(1);
+            expect(routerMock.push).toHaveBeenCalledTimes(2);
+
+            expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+                name: 'evm-wrap',
+                query: { tab: 'unwrap' },
+            }));
+
+            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
+                name: 'evm-send',
+                query: {
+                    token: fakeWtlosContractAddress,
+                },
+            }));
+
+            expect(window.open).toHaveBeenCalledWith(
+                `undefined/address/${fakeWtlosContractAddress}`,
+                '_blank',
+            );
         });
 
-        test('not a system token', () => {
+        test('not a system token', async () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
                     mocks: {
+                        $router: routerMock,
                         $q: {
                             screen: {
                                 lt: {
@@ -198,7 +312,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
                 props: {
                     token: {
-                        address: '0x'.concat('1'.repeat(40)),
+                        address: fakeTokenContractAddress,
                         symbol: 'SHIB',
                         name: 'Shiba',
                         logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
@@ -211,6 +325,29 @@ describe('WalletBalanceRow.vue', () => {
 
             // snapshot contains c-wallet-balance-row__overflow-li for contract, send
             expect(wrapper.element).toMatchSnapshot();
+
+            const [
+                contractLink,
+                sendLink,
+            ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
+
+            await contractLink.trigger('click');
+            await sendLink.trigger('click');
+
+            expect(window.open).toHaveBeenCalledTimes(1);
+            expect(routerMock.push).toHaveBeenCalledTimes(1);
+
+            expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+                name: 'evm-send',
+                query: {
+                    token: fakeTokenContractAddress,
+                },
+            }));
+
+            expect(window.open).toHaveBeenCalledWith(
+                `undefined/address/${fakeTokenContractAddress}`,
+                '_blank',
+            );
         });
     });
 });

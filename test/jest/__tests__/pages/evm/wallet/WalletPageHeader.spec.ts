@@ -32,7 +32,7 @@ describe('WalletPageHeader.vue', () => {
         const wrapper = shallowMount(WalletPageHeader, {
             global: {
                 mocks: {
-                    '$router': routerMock,
+                    $router: routerMock,
                 },
             },
         });

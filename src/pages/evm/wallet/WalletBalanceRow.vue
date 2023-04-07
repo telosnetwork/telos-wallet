@@ -256,11 +256,17 @@ export default defineComponent({
                 });
             }
 
-
+            // https://github.com/telosnetwork/telos-wallet/issues/179
+            //     as TLOS has no address, need to handle deeplink to handle 'TLOS' or token address
             items.push({
                 label: this.$t('evm_wallet.send'),
                 icon: require('assets/icon--arrow-diagonal.svg'),
-                url:  { name: 'evm-send', query: { token: this.token.address } },
+                url:  {
+                    name: 'evm-send',
+                    query: {
+                        token: this.tokenIsTlos ? 'TLOS' : this.token.address,
+                    },
+                },
             });
 
             return items;
