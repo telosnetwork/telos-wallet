@@ -184,9 +184,9 @@ export function prettyPrintCurrency(amount: number | string, decimals = 2) {
 
     const amountIsNumber = ['string', 'number'].includes(typeof amount);
     const amountIsStringAndValid = typeof amount === 'string' && numberRegex.test(amount);
-    const decimalsIsValidInt = typeof decimals === 'number' && decimals > 0 && decimals % 1 === 0;
+    const decimalsIsValidInt = typeof decimals === 'number' && decimals >= 0 && decimals % 1 === 0;
 
-    if (!amountIsNumber || !amountIsStringAndValid) {
+    if (!amountIsNumber && !amountIsStringAndValid) {
         throw `String amount ${amount} does not represent a number`;
     }
 
@@ -224,17 +224,27 @@ export function prettyPrintCurrency(amount: number | string, decimals = 2) {
  * @return {string}
  */
 export function abbreviateNumber(amount: number, precision = 4) {
-    if (amount < 1 && amount > 0) {
-        return amount.toFixed(4);
+    if (typeof amount !== 'number') {
+        throw 'Type of amount must be number';
+    }
+
+    const precisionIsValid = typeof precision === 'number' && precision >= 0 && precision % 1 === 0
+
+    if (!precisionIsValid) {
+        throw 'Type of precision must be a positive integer or zero';
+    }
+
+    if (amount < 1000 && amount >= 0) {
+        return amount.toFixed(precision);
     }
 
     let abbreviated = Intl.NumberFormat('en-US', {
         notation: 'compact',
-        maximumFractionDigits: 1,
+        maximumFractionDigits: 2,
     }).format(amount);
 
     // retain fractional value for numbers under 1k, as the above expression will chop off fractions
-    if (amount % 1 !== 0 && amount < 1000) {
+    if (amount % 1 !== 0 && amount < 1000 && precision > 0) {
         const fraction = amount.toFixed(precision).split('.')[1];
         abbreviated += `.${fraction}`;
     }
