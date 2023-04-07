@@ -1,7 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
 
-import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
-
 const fakeBuyMoreLink = 'test';
 const chainStoreMock = {
     useChainStore: () => ({
@@ -13,6 +11,7 @@ const chainStoreMock = {
     }),
 };
 
+import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import * as antelope from 'src/antelope';
 
 jest.mock('src/antelope', () => chainStoreMock);
