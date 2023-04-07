@@ -88,6 +88,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getRPCEndpoint(): RpcEndpoint;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
+    abstract getBuyMoreOfTokenLink(): string;
+    abstract getStlosContractAddress(): string;
+    abstract getWtlosContractAddress(): string;
 
     // new methods
     abstract getWeiPrecision(): number;

@@ -81,4 +81,16 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     getTrustedContractsBucket(): string {
         return CONTRACTS_BUCKET;
     }
+
+    getBuyMoreOfTokenLink(): string {
+        return 'https://www.telos.net/#buy-tlos-simplex';
+    }
+
+    getStlosContractAddress() {
+        return '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905';
+    }
+
+    getWtlosContractAddress() {
+        return '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E';
+    }
 }

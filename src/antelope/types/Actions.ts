@@ -141,6 +141,18 @@ export interface EvmToken extends Token {
   fullBalance?: string;
 }
 
+export interface EvmTokenInfo {
+    chainId?: number;
+    address?: string;
+    symbol: string;
+    name: string;
+    logoURI?: string;
+    decimals: number;
+    tags?: string[];
+    balance: string;
+    fullBalance: string;
+}
+
 export interface NativeToken extends Token {
   precision: number;
   contract: string;

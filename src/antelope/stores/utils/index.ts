@@ -17,7 +17,7 @@ export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals 
     const amount = BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
-    // Use string, do not convert to number so we never loose precision
+    // Use string, do not convert to number so we never lose precision
     if (displayDecimals > 0 && str.includes('.')) {
         const parts = str.split('.');
         return parts[0] + '.' + parts[1].slice(0, displayDecimals);
@@ -171,3 +171,61 @@ export function getFormattedUtcOffset(date: Date): string {
     return sign + hours + ':' + minutes;
 }
 
+/**
+ * Formats a number amount to a commified string with a specified number of decimal places
+ *
+ * @param {number} amount - the amount of currency as a number or a string. If a string, amount should only contain numbers and up to a single '.'
+ * @param {number} decimals - the number of decimal places to show
+ *
+ * @return {string}
+ */
+export function prettyPrintCurrency(amount: number | string, decimals = 2) {
+    const numberRegex = /^-?\d+(\.\d+)?$/;
+
+    if (typeof amount === 'string' && !numberRegex.test(amount)) {
+        throw `String amount ${amount} does not represent a number`;
+    }
+
+    const amountNumber = typeof amount === 'string' ? +amount : amount;
+
+    let formatted = amountNumber.toLocaleString('en-us');
+
+    if (formatted.indexOf('.') !== -1) {
+        const formattedInteger = formatted.split('.')[0];
+        const formattedFraction = amountNumber.toFixed(decimals).split('.')[1];
+
+        formatted = `${formattedInteger}.${formattedFraction}`;
+    } else {
+        formatted = `${formatted}.`.concat('0'.repeat(decimals));
+    }
+
+    return formatted;
+}
+
+
+/**
+ * Given a number, returns an abbreviated version for large values, such as 1.5B
+ * for small fractions like 0.12345, a 4-precision representation is returned
+ * @param {number} amount - number to format
+ * @param {number} precision - number of decimals to display for small numbers with fractional values
+ *
+ * @return {string}
+ */
+export function abbreviateNumber(amount: number, precision = 4) {
+    if (amount < 1 && amount > 0) {
+        return amount.toFixed(4);
+    }
+
+    let abbreviated = Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+    }).format(amount);
+
+    // retain fractional value for numbers under 1k, as the above expression will chop off fractions
+    if (amount % 1 !== 0 && amount < 1000) {
+        const fraction = amount.toFixed(precision).split('.')[1];
+        abbreviated += `.${fraction}`;
+    }
+
+    return abbreviated;
+}
