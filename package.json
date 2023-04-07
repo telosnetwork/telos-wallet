@@ -10,7 +10,7 @@
     "build": "quasar build",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "lint:fix": "eslint --fix --ext .js,.vue src",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",
@@ -53,12 +53,15 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.0.0",
     "@quasar/app-webpack": "3",
+    "@quasar/quasar-app-extension-testing-unit-jest": "3.0.0-alpha.10",
+    "@types/jest": "^29.5.0",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
     "eslint": "^7.14.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-no-relative-import-paths": "^1.5.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^5.1.0",
