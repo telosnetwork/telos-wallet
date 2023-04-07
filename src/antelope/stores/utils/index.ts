@@ -172,23 +172,31 @@ export function getFormattedUtcOffset(date: Date): string {
 }
 
 /**
- * Formats a number amount to a commified string with two places of precision
+ * Formats a number amount to a commified string with a specified number of decimal places
  *
- * @param {number} amount
+ * @param {number} amount - the amount of currency as a number or a string. If a string, amount should only contain numbers and up to a single '.'
+ * @param {number} decimals - the number of decimal places to show
  *
  * @return {string}
  */
-export function formatFiatAmount(amount: number) {
-    let formatted = amount.toLocaleString('en-us');
+export function prettyPrintCurrency(amount: number | string, decimals = 2) {
+    const numberRegex = /^-?\d+(\.\d+)?$/;
+
+    if (typeof amount === 'string' && !numberRegex.test(amount)) {
+        throw `String amount ${amount} does not represent a number`;
+    }
+
+    const amountNumber = typeof amount === 'string' ? +amount : amount;
+
+    let formatted = amountNumber.toLocaleString('en-us');
 
     if (formatted.indexOf('.') !== -1) {
         const formattedInteger = formatted.split('.')[0];
-        const formattedFraction = amount.toFixed(2).split('.')[1];
+        const formattedFraction = amountNumber.toFixed(decimals).split('.')[1];
 
         formatted = `${formattedInteger}.${formattedFraction}`;
-
     } else {
-        formatted = `${formatted}.00`;
+        formatted = `${formatted}.`.concat('0'.repeat(decimals));
     }
 
     return formatted;
@@ -198,17 +206,26 @@ export function formatFiatAmount(amount: number) {
 /**
  * Given a number, returns an abbreviated version for large values, such as 1.5B
  * for small fractions like 0.12345, a 4-precision representation is returned
- * @param {number} amount
+ * @param {number} amount - number to format
+ * @param {number} precision - number of decimals to display for small numbers with fractional values
  *
  * @return {string}
  */
-export function abbreviateNumber(amount: number) {
+export function abbreviateNumber(amount: number, precision = 4) {
     if (amount < 1 && amount > 0) {
         return amount.toFixed(4);
     }
 
-    return Intl.NumberFormat('en-US', {
+    let abbreviated = Intl.NumberFormat('en-US', {
         notation: 'compact',
         maximumFractionDigits: 1,
     }).format(amount);
+
+    // retain fractional value for numbers under 1k, as the above expression will chop off fractions
+    if (amount % 1 !== 0 && amount < 1000) {
+        const fraction = amount.toFixed(precision).split('.')[1];
+        abbreviated += `.${fraction}`;
+    }
+
+    return abbreviated;
 }

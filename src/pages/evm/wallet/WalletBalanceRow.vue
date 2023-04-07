@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { formatFiatAmount, abbreviateNumber } from 'src/antelope/stores/utils';
+import { prettyPrintCurrency, abbreviateNumber } from 'src/antelope/stores/utils';
 import { commify } from 'ethers/lib/utils';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -100,7 +100,7 @@ export default defineComponent({
         primaryAmount(): number | string {
             const isMobile = this.$q.screen.lt.lg;
 
-            // on desktop, the top value is fiat
+            // on desktop, the top value is fiat if there is a fiat value for the token
             // on mobile, the top (only) value is the token balance iff token has no reliable fiat value.
             //            if there is a fiat value, the top number is the fiat amount
             if (this.tokenHasFiatValue && isMobile) {
@@ -113,10 +113,10 @@ export default defineComponent({
             const isMobile = this.$q.screen.lt.lg;
 
             if (!isMobile) {
-                const formatted = commify(this.primaryAmount);
-                const append = this.truncatePrimaryValue ? '' : ` ${this.token.symbol}`;
+                const formatted = prettyPrintCurrency(this.primaryAmount, 4);
+                // debugger;
 
-                return `${formatted}${append}`;
+                return `${formatted} ${this.token.symbol}`;
             } else {
                 if (this.tokenHasFiatValue) {
                     if (this.truncatePrimaryValue) {
@@ -125,7 +125,7 @@ export default defineComponent({
 
                         return `${symbol} ${amount}`;
                     } else {
-                        const amount = formatFiatAmount(this.primaryAmount as number);
+                        const amount = prettyPrintCurrency(this.primaryAmount);
                         const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                         return `${symbol} ${amount}`;
@@ -134,7 +134,7 @@ export default defineComponent({
                     if (this.truncatePrimaryValue) {
                         return abbreviateNumber(+this.primaryAmount);
                     } else {
-                        return commify(this.primaryAmount);
+                        return prettyPrintCurrency(this.primaryAmount, 4);
                     }
                 }
             }
@@ -148,7 +148,7 @@ export default defineComponent({
                 if (isMobile) {
                     return this.token.balance;
                 } else {
-                    return this.tokenBalanceFiat as number;
+                    return this.tokenBalanceFiat ?? 0;
                 }
             }
         },
@@ -164,9 +164,9 @@ export default defineComponent({
                 if (this.truncateSecondaryValue) {
                     return abbreviateNumber(+this.secondaryAmount).concat(` ${this.token.symbol}`);
                 } else {
-                    const formattedWei = commify(this.secondaryAmount);
+                    const formatted = prettyPrintCurrency(this.secondaryAmount, 4);
 
-                    return `${formattedWei} ${this.token.symbol}`;
+                    return `${formatted} ${this.token.symbol}`;
                 }
             } else {
                 if (this.truncateSecondaryValue) {
@@ -175,7 +175,7 @@ export default defineComponent({
 
                     return `${symbol} ${amount}`;
                 } else {
-                    const amount = formatFiatAmount(this.secondaryAmount as number);
+                    const amount = prettyPrintCurrency(this.secondaryAmount as number);
                     const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
 
                     return `${symbol} ${amount} ${this.fiatRateText}`;

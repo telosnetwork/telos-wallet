@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { formatFiatAmount } from 'src/antelope/stores/utils';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils';
 
 export default defineComponent({
     name: 'BigFiatText',
@@ -17,7 +17,7 @@ export default defineComponent({
             return '$';
         },
         prettyAmount() {
-            let formatted = formatFiatAmount(this.amount);
+            let formatted = prettyPrintCurrency(this.amount);
 
             return `${this.symbol} ${formatted}`;
         },
