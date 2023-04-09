@@ -4,17 +4,21 @@ import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
+import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
 
 export default defineComponent({
     name: 'HomePage',
     components: {
         EVMLoginButtons,
         NativeLoginButton,
+        ConnectWalletOptions,
     },
     data: (): {
+        showWalletOptions: boolean,
         tab: 'left' | 'right'
     } => ({
         tab: 'left',
+        showWalletOptions: false,
     }),
 
     computed: {
@@ -33,8 +37,7 @@ export default defineComponent({
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
-
-                <div class="c-home__button-container">
+                <div v-if="!showWalletOptions" class="c-home__button-container">
                     <div class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
@@ -66,9 +69,11 @@ export default defineComponent({
 
                     <NativeLoginButton v-if="tab === 'right'" />
 
-                    <EVMLoginButtons v-else-if="tab === 'left'" />
+                    <EVMLoginButtons v-else-if="tab === 'left'" @show-wallet-options="showWalletOptions = true"/>
                 </div>
-
+                <div>
+                    <ConnectWalletOptions v-if="showWalletOptions" @close-wallet-options="showWalletOptions = false"/>
+                </div>
                 <q-footer bordered>
                     <q-toolbar class="bg-dark flex-center">
                         <a

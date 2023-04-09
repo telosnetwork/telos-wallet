@@ -29,7 +29,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="connectToMetaMask">
+    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="$emit('showWalletOptions')">
         {{ $t('home.connect_with_wallet') }}
     </q-btn>
 
