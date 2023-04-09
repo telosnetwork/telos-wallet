@@ -2,10 +2,23 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useChainStore } from 'src/antelope/stores/chain';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
-    setup(props, { emit }){},
+    setup(){
+        const connectToMetaMask = () => {
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            accountStore.loginEVM({ network });
+        };
+
+        return {
+            connectToMetaMask,
+        };
+    },
 });
 </script>
 
@@ -23,7 +36,7 @@ export default defineComponent({
         <div class="wallet-options__header">
             Connect your wallet
         </div>
-        <div class="wallet-options__option">
+        <div class="wallet-options__option" @click="connectToMetaMask">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
@@ -83,6 +96,7 @@ export default defineComponent({
    font-weight: 600;
    padding-top: 14px;
    padding-left: 14px;
+   cursor: pointer;
 
    img {
         display: inline-block;
