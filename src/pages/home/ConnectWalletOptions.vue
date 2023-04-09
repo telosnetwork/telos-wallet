@@ -4,6 +4,10 @@
 import { computed, defineComponent, ref } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
+import { Web3Modal } from '@web3modal/html';
+import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
+import { telos, telosTestnet } from '@wagmi/core/chains';
+import { configureChains, createClient, getAccount,  prepareSendTransaction, sendTransaction } from '@wagmi/core';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -14,9 +18,49 @@ export default defineComponent({
             const network = chainStore.currentChain.settings.getNetwork();
             accountStore.loginEVM({ network });
         };
+        const connectToWalletConnect = async () => {
+            const projectId = process.env.PROJECT_ID || '';
+            const chains = [telos, telosTestnet];
+            const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
+
+            const wagmi = createClient({
+                autoConnect: false,
+                connectors: w3mConnectors({ projectId, version: 1, chains }),
+                provider,
+            });
+
+            const wagmiClient = new EthereumClient(wagmi, chains);
+            const web3modal = new Web3Modal({ projectId }, wagmiClient);
+
+            await web3modal.openModal();
+
+            web3modal.subscribeModal(async (newState) => {
+                if (newState.open === false) {
+                    await setWalletConnectAccount();
+                }
+            });
+        };
+        const setWalletConnectAccount = async () => {
+            const { address } = getAccount(); //wagmi
+            if (address){
+                // this.setLogin({
+                //     address,
+                // });
+                // mobile testing
+                const receipt = await prepareSendTransaction({
+                    request: {
+                        to: '0xD478589b68e162B1D5B3e57323d0b280A96896Bf',
+                        value: 1, // amount to transfer, in wei
+                    },
+                });
+                const { hash } = await sendTransaction(receipt);
+                alert(hash);
+            }
+        };
 
         return {
             connectToMetaMask,
+            connectToWalletConnect,
         };
     },
 });
@@ -45,7 +89,7 @@ export default defineComponent({
             >
             MetaMask
         </div>
-        <div class="wallet-options__option">
+        <div class="wallet-options__option" @click="connectToWalletConnect">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
