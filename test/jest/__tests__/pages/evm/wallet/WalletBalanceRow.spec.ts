@@ -28,6 +28,16 @@ describe('WalletBalanceRow.vue', () => {
         'q-btn': stubWithSlot('q-btn'),
     };
 
+    const qScreenMock = (lessThanMd: boolean) => ({
+        $q: {
+            screen: {
+                lt: {
+                    md: lessThanMd,
+                },
+            },
+        },
+    });
+
     it('should have the correct name', () => {
         expect(WalletBalanceRow.name).toBe('WalletBalanceRow');
     });
@@ -37,13 +47,7 @@ describe('WalletBalanceRow.vue', () => {
             global: {
                 stubs,
                 mocks: {
-                    $q: {
-                        screen: {
-                            lt: {
-                                md: false,
-                            },
-                        },
-                    },
+                    ...qScreenMock(false),
                 },
             },
             props: {
@@ -66,13 +70,7 @@ describe('WalletBalanceRow.vue', () => {
             global: {
                 stubs,
                 mocks: {
-                    $q: {
-                        screen: {
-                            lt: {
-                                md: true,
-                            },
-                        },
-                    },
+                    ...qScreenMock(true),
                 },
             },
             props: {
@@ -117,13 +115,7 @@ describe('WalletBalanceRow.vue', () => {
                     stubs,
                     mocks: {
                         $router: routerMock,
-                        $q: {
-                            screen: {
-                                lt: {
-                                    md: true,
-                                },
-                            },
-                        },
+                        ...qScreenMock(true),
                     },
                 },
                 props: {
@@ -179,13 +171,7 @@ describe('WalletBalanceRow.vue', () => {
                     stubs,
                     mocks: {
                         $router: routerMock,
-                        $q: {
-                            screen: {
-                                lt: {
-                                    md: true,
-                                },
-                            },
-                        },
+                        ...qScreenMock(true),
                     },
                 },
                 props: {
@@ -240,13 +226,7 @@ describe('WalletBalanceRow.vue', () => {
                     stubs,
                     mocks: {
                         $router: routerMock,
-                        $q: {
-                            screen: {
-                                lt: {
-                                    md: true,
-                                },
-                            },
-                        },
+                        ...qScreenMock(true),
                     },
                 },
                 props: {
@@ -302,13 +282,7 @@ describe('WalletBalanceRow.vue', () => {
                     stubs,
                     mocks: {
                         $router: routerMock,
-                        $q: {
-                            screen: {
-                                lt: {
-                                    md: true,
-                                },
-                            },
-                        },
+                        ...qScreenMock(true),
                     },
                 },
                 props: {
