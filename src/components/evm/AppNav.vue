@@ -23,7 +23,7 @@ export default defineComponent({
         },
     },
     watch: {
-        '$q.screen.lt.lg'(newValue, oldValue) {
+        '$q.screen.lt.md'(newValue, oldValue) {
             if (newValue !== oldValue) {
                 this.menuIsOpen = false;
             }
@@ -61,14 +61,14 @@ export default defineComponent({
         }"
     >
         <q-btn
-            v-if="$q.screen.lt.lg"
+            v-if="$q.screen.lt.md"
             flat
             round
             dense
             icon="menu"
             color="black"
             aria-haspopup="menu"
-            :aria-label="$t('open_menu')"
+            :aria-label="$t('nav.open_menu')"
             :tabindex="menuIsOpen ? '-1' : '0'"
             @click="menuIsOpen = !menuIsOpen"
             @keydown.space.enter="menuIsOpen = !menuIsOpen"
@@ -80,8 +80,8 @@ export default defineComponent({
     <div
         :class="{
             'c-app-nav__menu-container': true,
-            'c-app-nav__menu-container--open': menuIsOpen && $q.screen.lt.lg,
-            'c-app-nav__menu-container--desktop': $q.screen.gt.md,
+            'c-app-nav__menu-container--open': menuIsOpen && $q.screen.lt.md,
+            'c-app-nav__menu-container--desktop': $q.screen.gt.sm,
         }"
     >
         <div class="flex justify-between">
@@ -96,14 +96,14 @@ export default defineComponent({
                 @keydown.space.enter="goTo('home')"
             >
             <q-btn
-                v-if="$q.screen.lt.lg"
+                v-if="$q.screen.lt.md"
                 flat
                 round
                 dense
                 icon="menu_open"
                 class="q-ma-md self-start"
                 aria-haspopup="menu"
-                :aria-label="$t('close_menu')"
+                :aria-label="$t('nav.close_menu')"
                 :tabindex="menuItemTabIndex"
                 @click="menuIsOpen = !menuIsOpen"
                 @keydown.space.enter="menuIsOpen = !menuIsOpen"
@@ -234,7 +234,7 @@ export default defineComponent({
         background-color: var(--header-bg-color);
         z-index: 999;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
+        @media only screen and (min-width: $breakpoint-md-min) {
             left: 300px;
             justify-content: flex-end;
         }

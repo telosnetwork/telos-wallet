@@ -108,7 +108,7 @@ export default defineComponent({
         justify-content: center;
         padding: 0 24px 24px;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
+        @media only screen and (min-width: $breakpoint-md-min) {
             padding: 0 32px 32px;
         }
     }
@@ -127,7 +127,7 @@ export default defineComponent({
     &__body {
         padding: 24px;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
+        @media only screen and (min-width: $breakpoint-md-min) {
             padding: 32px;
         }
     }
