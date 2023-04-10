@@ -166,9 +166,7 @@ describe('WalletBalanceRow.vue', () => {
 
             expect(routerMock.push.mock.calls[2][0]).toEqual(expect.objectContaining({
                 name: 'evm-send',
-                query: {
-                    token: 'TLOS',
-                },
+                query: { },
             }));
 
             expect(window.open).toHaveBeenCalledWith(fakeBuyMoreLink, '_blank');
