@@ -42,80 +42,100 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
         $ 456,789,123.67 (@ $0.7732 / STLOS)
       </span>
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.stake
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              evm_wallet.stake
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            global.contract
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-2"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-2"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              global.contract
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
@@ -185,80 +205,100 @@ $456,789,123.67
         3.64K STLOS
       </span>
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.stake
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              evm_wallet.stake
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            global.contract
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-2"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-2"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              global.contract
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
@@ -328,80 +368,100 @@ $456,789,123.67
         3.64K STLOS
       </span>
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.stake
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              evm_wallet.stake
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            global.contract
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-2"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-2"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              global.contract
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
@@ -468,99 +528,123 @@ $0
         3.64K TLOS
       </span>
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.stake
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              evm_wallet.stake
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.buy
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-2"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-2"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              evm_wallet.buy
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.wrap
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-3"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-3"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.wrap
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-3"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-3"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
@@ -630,80 +714,100 @@ $12,345.67
         3.64K WTLOS
       </span>
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.unwrap
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              evm_wallet.unwrap
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            global.contract
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-2"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-2"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              global.contract
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
@@ -768,61 +872,77 @@ evm_wallet.no_fiat_value
       </div>
       <!--v-if-->
     </div>
-    <q-btn-dropdown-stub
+    <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
       class="c-wallet-balance-row__overflow"
       dense=""
-      dropdown-icon="more_vert"
       flat=""
+      icon="more_vert"
       no-icon-animation=""
     >
       
-      <ul
-        class="c-wallet-balance-row__overflow-ul"
+      <q-menu-stub
+        anchor="bottom end"
+        offset="0,16"
+        self="top right"
       >
         
-        <li
-          aria-labelledby="overflow-text-0"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
+        <ul
+          class="c-wallet-balance-row__overflow-ul"
         >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-0"
+          
+          <li
+            aria-labelledby="overflow-text-0"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            global.contract
-          </span>
-        </li>
-        <li
-          aria-labelledby="overflow-text-1"
-          class="c-wallet-balance-row__overflow-li"
-          tabindex="0"
-        >
-          <inline-svg-stub
-            aria-hidden="true"
-            class="c-wallet-balance-row__overflow-icon"
-            keepduringloading="true"
-            src=""
-            transformsource="[Function]"
-          />
-          <span
-            class="c-wallet-balance-row__overflow-text"
-            id="overflow-text-1"
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-0"
+            >
+              global.contract
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-1"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
           >
-            evm_wallet.send
-          </span>
-        </li>
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-1"
+            >
+              evm_wallet.send
+            </span>
+          </li>
+          
+        </ul>
         
-      </ul>
+      </q-menu-stub>
       
-    </q-btn-dropdown-stub>
+    </q-btn-stub>
   </div>
 </div>
 `;
