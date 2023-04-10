@@ -326,48 +326,55 @@ export default defineComponent({
             </span>
         </div>
 
-        <q-btn-dropdown
+        <q-btn
             flat
             dense
             no-icon-animation
-            dropdown-icon="more_vert"
+            icon="more_vert"
             class="c-wallet-balance-row__overflow"
             :aria-label="$t('evm_wallet.balance_row_actions_aria')"
         >
-            <ul class="c-wallet-balance-row__overflow-ul">
-                <li
-                    v-for="(item, index) in overflowMenuItems"
-                    :key="`overflow-item-${index}`"
-                    class="c-wallet-balance-row__overflow-li"
-                    tabindex="0"
-                    :aria-labelledby="`overflow-text-${index}`"
-                    @click="goToLink(item.url)"
-                    @keydown.enter.space="goToLink(item.url)"
-                >
-                    <InlineSvg
-                        :src="item.icon"
-                        :class="{
-                            'c-wallet-balance-row__overflow-icon': true,
-                            'c-wallet-balance-row__overflow-icon--stroke': item.strokeIcon,
-                        }"
-                        aria-hidden="true"
-                    />
-                    <span :id="`overflow-text-${index}`" class="c-wallet-balance-row__overflow-text">
-                        {{ item.label }}
-                    </span>
-                </li>
-            </ul>
-        </q-btn-dropdown>
+            <q-menu anchor="bottom end" self="top right" :offset="[0, 16]">
+                <ul class="c-wallet-balance-row__overflow-ul">
+                    <li
+                        v-for="(item, index) in overflowMenuItems"
+                        :key="`overflow-item-${index}`"
+                        class="c-wallet-balance-row__overflow-li"
+                        tabindex="0"
+                        :aria-labelledby="`overflow-text-${index}`"
+                        @click="goToLink(item.url)"
+                        @keydown.enter.space="goToLink(item.url)"
+                    >
+                        <div class="c-wallet-balance-row__overflow-icon-wrapper">
+                            <InlineSvg
+                                :src="item.icon"
+                                :class="{
+                                    'c-wallet-balance-row__overflow-icon': true,
+                                    'c-wallet-balance-row__overflow-icon--stroke': item.strokeIcon,
+                                }"
+                                aria-hidden="true"
+                            />
+                        </div>
+
+                        <span :id="`overflow-text-${index}`" class="c-wallet-balance-row__overflow-text">
+                            {{ item.label }}
+                        </span>
+                    </li>
+                </ul>
+            </q-menu>
+        </q-btn>
     </div>
 </div>
 </template>
 
 <style lang="scss">
 .c-wallet-balance-row {
+    $this: &;
+
     display: flex;
     justify-content: space-between;
     border-radius: 4px;
-    border-bottom: 2px solid #EEE8FF;
+    border-bottom: 2px solid var(--header-bg-color);
     padding: 24px 4px;
     overflow-x: hidden;
     max-width: 100%;
@@ -386,7 +393,7 @@ export default defineComponent({
         font-size: 16px;
         font-weight: 400;
         line-height: 24px;
-        color: $dark;
+        color: var(--text-color);
         white-space: nowrap;
     }
 
@@ -441,7 +448,7 @@ export default defineComponent({
     }
 
     &__secondary-amount {
-        color: $grey-7;
+        color: var(--text-color-muted);
     }
 
     &__info-icon {
@@ -471,14 +478,35 @@ export default defineComponent({
         gap: 12px;
         padding: 12px 16px;
         cursor: pointer;
+        color: var(--text-color);
+        transition: background-color 0.1s ease-in-out;
+        transition-property: background-color, color;
 
         &:hover {
-            background-color: $grey-3;
+            background-color: var(--bg-color-hover);
+            color: var(--text-color-hover);
+
+            #{$this}__overflow-icon {
+                &:not(#{$this}__overflow-icon--stroke) path {
+                    fill: var(--text-color-hover);
+                }
+
+                &#{$this}__overflow-icon--stroke path {
+                    stroke: var(--text-color-hover);
+                }
+            }
         }
     }
 
+    &__overflow-icon-wrapper {
+        height: 24px;
+        width: 24px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     &__overflow-text {
-        color: black;
         text-transform: uppercase;
         font-weight: 600;
         font-size: 14px;
@@ -486,17 +514,16 @@ export default defineComponent({
     }
 
     &__overflow-icon {
-        //height: 16px;
         width: 16px;
 
         path {
-            fill: black;
+            fill: var(--text-color);
         }
 
         &--stroke {
             path {
                 fill: transparent;
-                stroke: black;
+                stroke: var(--text-color);
             }
         }
     }
