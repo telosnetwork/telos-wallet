@@ -57,7 +57,7 @@ export default defineComponent({
             return !['SHIB', 'SHIB2'].includes(this.token.symbol);
         },
         truncatePrimaryValue(): boolean {
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             if (!isMobile) {
                 return false;
@@ -70,7 +70,7 @@ export default defineComponent({
             }
         },
         truncateSecondaryValue() {
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             if (!isMobile) {
                 return false;
@@ -98,7 +98,7 @@ export default defineComponent({
             return `(@ ${fiatSymbol}${fiatAmount} / ${this.token.symbol})`;
         },
         primaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             // on desktop, the top value is fiat if there is a fiat value for the token
             // on mobile, the top (only) value is the token balance iff token has no reliable fiat value.
@@ -110,7 +110,7 @@ export default defineComponent({
             }
         },
         prettyPrimaryAmount(): string {
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             if (!isMobile) {
                 const formatted = prettyPrintCurrency(this.primaryAmount, 4);
@@ -139,7 +139,7 @@ export default defineComponent({
             }
         },
         secondaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             if (!this.tokenHasFiatValue) {
                 return '';
@@ -157,7 +157,7 @@ export default defineComponent({
                 return '';
             }
 
-            const isMobile = this.$q.screen.lt.lg;
+            const isMobile = this.$q.screen.lt.md;
 
             if (isMobile) {
                 if (this.truncateSecondaryValue) {
