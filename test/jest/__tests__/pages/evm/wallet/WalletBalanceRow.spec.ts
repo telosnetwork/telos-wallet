@@ -40,7 +40,7 @@ describe('WalletBalanceRow.vue', () => {
                     $q: {
                         screen: {
                             lt: {
-                                lg: false,
+                                md: false,
                             },
                         },
                     },
@@ -69,7 +69,7 @@ describe('WalletBalanceRow.vue', () => {
                     $q: {
                         screen: {
                             lt: {
-                                lg: true,
+                                md: true,
                             },
                         },
                     },
@@ -120,7 +120,7 @@ describe('WalletBalanceRow.vue', () => {
                         $q: {
                             screen: {
                                 lt: {
-                                    lg: true,
+                                    md: true,
                                 },
                             },
                         },
@@ -182,7 +182,7 @@ describe('WalletBalanceRow.vue', () => {
                         $q: {
                             screen: {
                                 lt: {
-                                    lg: true,
+                                    md: true,
                                 },
                             },
                         },
@@ -243,7 +243,7 @@ describe('WalletBalanceRow.vue', () => {
                         $q: {
                             screen: {
                                 lt: {
-                                    lg: true,
+                                    md: true,
                                 },
                             },
                         },
@@ -305,7 +305,7 @@ describe('WalletBalanceRow.vue', () => {
                         $q: {
                             screen: {
                                 lt: {
-                                    lg: true,
+                                    md: true,
                                 },
                             },
                         },
