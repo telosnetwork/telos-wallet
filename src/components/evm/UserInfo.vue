@@ -75,7 +75,7 @@ export default defineComponent({
                 role="menuitem"
                 tabindex="0"
                 @click="gotoTeloscan()"
-                @keydown.space.enter="$router.push({ name: 'evm-staking' })"
+                @keypress.space.enter="$router.push({ name: 'evm-staking' })"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--acorn.svg')"
@@ -96,7 +96,7 @@ export default defineComponent({
                 role="menuitem"
                 tabindex="1"
                 @click="logout"
-                @keydown.space.enter="logout"
+                @keypress.space.enter="logout"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--logout.svg')"

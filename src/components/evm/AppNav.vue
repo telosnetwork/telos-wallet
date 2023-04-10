@@ -19,7 +19,11 @@ export default defineComponent({
     }),
     computed: {
         menuItemTabIndex() {
-            return this.menuIsOpen ? '0' : '-1';
+            if (this.$q.screen.lt.md && !this.menuIsOpen) {
+                return '-1';
+            }
+
+            return '0';
         },
     },
     watch: {
@@ -30,6 +34,16 @@ export default defineComponent({
         },
     },
     methods: {
+        openMenu() {
+            this.menuIsOpen = true;
+
+            this.$nextTick(() => {
+                (this.$refs['logo-image'] as HTMLElement)?.focus();
+            });
+        },
+        closeMenu() {
+            this.menuIsOpen = false;
+        },
         scrollHandler(info: { position: { top: number }}) {
             this.showShadow = info.position.top !== 0;
         },
@@ -40,6 +54,17 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
+        },
+        cycleFocus(event: Event, toFocus: 'first' | 'last') {
+            if (this.$q.screen.lt.md) {
+                event.preventDefault();
+
+                if (toFocus === 'first') {
+                    (this.$refs['logo-image'] as HTMLElement)?.focus();
+                } else {
+                    (this.$refs['last-link'] as HTMLElement)?.focus();
+                }
+            }
         },
     },
 });
@@ -70,8 +95,8 @@ export default defineComponent({
             aria-haspopup="menu"
             :aria-label="$t('nav.open_menu')"
             :tabindex="menuIsOpen ? '-1' : '0'"
-            @click="menuIsOpen = !menuIsOpen"
-            @keydown.space.enter="menuIsOpen = !menuIsOpen"
+            @click="openMenu"
+            @keypress.space.enter="openMenu"
         />
 
         <UserInfo />
@@ -86,6 +111,7 @@ export default defineComponent({
     >
         <div class="flex justify-between">
             <img
+                ref="logo-image"
                 src="~assets/logo--telos-wallet.svg"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
@@ -93,7 +119,8 @@ export default defineComponent({
                 :aria-label="$t('nav.go_home')"
                 class="c-app-nav__logo"
                 @click="goTo('home')"
-                @keydown.space.enter="goTo('home')"
+                @keypress.space.enter="goTo('home')"
+                @keydown.shift.tab="cycleFocus($event, 'last')"
             >
             <q-btn
                 v-if="$q.screen.lt.md"
@@ -105,8 +132,8 @@ export default defineComponent({
                 aria-haspopup="menu"
                 :aria-label="$t('nav.close_menu')"
                 :tabindex="menuItemTabIndex"
-                @click="menuIsOpen = !menuIsOpen"
-                @keydown.space.enter="menuIsOpen = !menuIsOpen"
+                @click="closeMenu"
+                @keypress.space.enter="closeMenu"
             />
         </div>
 
@@ -116,7 +143,7 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wallet')"
-                @keydown.space.enter="goTo('evm-wallet')"
+                @keypress.space.enter="goTo('evm-wallet')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wallet.svg')"
@@ -137,7 +164,7 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-staking')"
-                @keydown.space.enter="goTo('evm-staking')"
+                @keypress.space.enter="goTo('evm-staking')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--acorn.svg')"
@@ -158,7 +185,7 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wrap')"
-                @keydown.space.enter="goTo('evm-wrap')"
+                @keypress.space.enter="goTo('evm-wrap')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wrap-tlos.svg')"
@@ -174,11 +201,14 @@ export default defineComponent({
             </li>
 
             <li
+                ref="last-link"
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="logout"
-                @keydown.space.enter="logout"
+                @keypress.space.enter="logout"
+                @keyup.tab.stop.prevent="() => {}"
+                @keydown.tab.exact="cycleFocus($event, 'first')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--logout.svg')"
