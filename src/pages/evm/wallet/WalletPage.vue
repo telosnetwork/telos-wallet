@@ -20,7 +20,7 @@ export default defineComponent({
         tabs: ['balance', 'transactions'],
     }),
     computed: {
-        chainTokens() {
+        chainTokens(): EvmTokenInfo[] {
             const tokens = [];
 
             const chainStore = useChainStore();
@@ -53,7 +53,7 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get stlos token info from store
                 tokens.push({
-                    address: '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd',
+                    address: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
                     logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
@@ -67,7 +67,7 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get wtlos token info from store
                 tokens.push({
-                    address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+                    address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
                     symbol: 'WTLOS',
                     name: 'Wrapped TLOS',
                     logoURI: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
@@ -79,10 +79,10 @@ export default defineComponent({
 
             return tokens;
         },
-        nonChainTokens() {
+        nonChainTokens(): EvmTokenInfo[] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
-            //      get all user tokens here. filter out tlos and stlos if they appear in this list.
-            const allNonChainTokens = [{
+            //      get all user tokens here. filter out wlos and stlos if they appear in this list.
+            return [{
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTA',
                 name: 'Shitcoin Alpha',
@@ -114,23 +114,26 @@ export default defineComponent({
                 decimals: 18,
                 balance: '555555786123.0032',
                 fullBalance: '555555786123.003241232',
-            }];
-
-            const [tokensWithFiatValue, tokensWithoutFiatValue] =
-                this.splitTokensBasedOnHasFiatValue(allNonChainTokens);
-
-            return [...tokensWithFiatValue, ...tokensWithoutFiatValue];
+            }].filter(token => !!token.address); // the only token with no address is TLOS
         },
         allTokens() {
-            return [
+            const allTokens = [
                 ...this.chainTokens,
                 ...this.nonChainTokens,
+            ];
+
+            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(allTokens);
+
+            return [
+                ...tokensWithFiatValue,
+                ...tokensWithoutFiatValue,
             ];
         },
     },
     methods: {
         // take all non-chain tokens and return a tuple of sorted arrays;
         // first is arrays with a fiat balance, second is those without
+        // the first array is sorted based on fiat value, the second is sorted based on token balance
         splitTokensBasedOnHasFiatValue(tokens: EvmTokenInfo[]): [EvmTokenInfo[], EvmTokenInfo[]] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //     replace tokenHasFiatValue and sortByFiatValue with real implementation which uses oracle
@@ -155,7 +158,7 @@ export default defineComponent({
                 }
             };
 
-            tokensWithFiatValue = tokens.filter(token => tokenHasFiatValue(token)).sort(sortByFiatValue);
+            tokensWithFiatValue   = tokens.filter(token => tokenHasFiatValue(token)).sort(sortByFiatValue);
             tokensWithNoFiatValue = tokens.filter(token => !tokenHasFiatValue(token)).sort(sortByTokenBalance);
 
             // always show all tokens with fiat values before all tokens without

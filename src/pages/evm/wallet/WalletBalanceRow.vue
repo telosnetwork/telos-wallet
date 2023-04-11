@@ -206,14 +206,14 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${process.env.EVM_NETWORK_EXPLORER}/address/${address}`;
 
-            const tokenIsTlos  = chainSettings.getSystemToken().address  === this.token.address;
+            const tokenIsTlos  = !this.token.address; // TLOS is the only token with no address
             const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
             const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
             if (tokenIsTlos || tokenIsStlos) {
                 items.push({
-                    label: this.$t('evm_wallet.stake'),
+                    label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
                     icon: require('src/assets/icon--acorn.svg'),
                     strokeIcon: true,
                     url: { name: 'evm-staking' },
