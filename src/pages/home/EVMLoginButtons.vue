@@ -15,7 +15,6 @@ export default defineComponent({
 
         },
         toggleWalletOptions() {
-            console.log('toggleWalletOptions: isMobile', usePlatformStore().isMobile);
             usePlatformStore().isMobile ? this.$emit('toggleWalletConnect') : this.$emit('showWalletOptions');
         },
     },
