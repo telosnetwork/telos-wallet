@@ -25,6 +25,9 @@ export default defineComponent({
         },
     },
     methods: {
+        goToRoute(name: string) {
+            this.$router.push({ name });
+        },
         goToBuy() {
             window.open(this.buyMoreLink, '_blank')?.focus();
         },
@@ -42,8 +45,8 @@ export default defineComponent({
             tabindex="0"
             role="link"
             :aria-label="$t('evm_wallet.link_to_send_aria')"
-            @keydown.space.enter="$router.push({ name: 'evm-send' })"
-            @click="$router.push({ name: 'evm-send' })"
+            @keypress.space.enter="goToRoute('evm-send')"
+            @click="goToRoute('evm-send')"
         >
             <InlineSvg
                 :src="require('src/assets/icon--send.svg')"
@@ -61,8 +64,8 @@ export default defineComponent({
             tabindex="0"
             role="link"
             :aria-label="$t('evm_wallet.link_to_receive_aria')"
-            @keydown.space.enter="$router.push({ name: 'evm-receive' })"
-            @click="$router.push({ name: 'evm-receive' })"
+            @keypress.space.enter="goToRoute('evm-receive' )"
+            @click="goToRoute('evm-receive')"
         >
             <InlineSvg
                 :src="require('src/assets/icon--send.svg')"
