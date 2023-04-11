@@ -79,6 +79,8 @@ export const useUserStore = defineStore(store_name, {
         accounts: state => state.__user_accounts,
         allUsers: state => state.__all_users,
         currencyPreferences: state => state.__preferred_fiat_currency,
+        locale: state => state.__preferred_fiat_currency?.locale || '',
+        currency: state => state.__preferred_fiat_currency?.currency || '',
     },
     actions: {
         trace: createTraceFunction(store_name),
