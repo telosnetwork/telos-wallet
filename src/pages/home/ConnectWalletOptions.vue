@@ -35,33 +35,38 @@ export default defineComponent({
         };
 
         const connectToWalletConnect = async () => {
-            const projectId = process.env.PROJECT_ID || '';
-            const chains = [telos, telosTestnet];
+            debugger;
+            try{
+                const projectId = process.env.PROJECT_ID || '';
+                const chains = [telos, telosTestnet];
 
-            const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
+                const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
-            const wagmi = createClient({
-                autoConnect: true,
-                connectors: w3mConnectors({ projectId, version: 1, chains }),
-                provider,
-            });
+                const wagmi = createClient({
+                    autoConnect: true,
+                    connectors: w3mConnectors({ projectId, version: 1, chains }),
+                    provider,
+                });
 
-            const explorerDenyList = [
+                const explorerDenyList = [
                 // MetaMask
-                'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-            ];
+                    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+                ];
 
-            const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
-            const wagmiClient = new EthereumClient(wagmi, chains);
-            const web3modal = new Web3Modal(options, wagmiClient);
+                const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
+                const wagmiClient = new EthereumClient(wagmi, chains);
+                const web3modal = new Web3Modal(options, wagmiClient);
 
-            await web3modal.openModal();
+                await web3modal.openModal();
 
-            web3modal.subscribeModal(async (newState) => {
-                if (newState.open === false) {
-                    await setWalletConnectAccount();
-                }
-            });
+                web3modal.subscribeModal(async (newState) => {
+                    if (newState.open === false) {
+                        await setWalletConnectAccount();
+                    }
+                });
+            }catch(e) {
+                console.log(e);
+            }
         };
 
         const setWalletConnectAccount = async () => {
