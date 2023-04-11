@@ -18,10 +18,11 @@ export default defineComponent({
             type: Boolean,
         },
     },
-    setup(props){
+    setup(props, { emit }){
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
         watch(() => props.toggleWalletConnect, (newVal) => {
+            console.log('toggleFlag', newVal);
             if (newVal) {
                 connectToWalletConnect();
             };
@@ -59,6 +60,7 @@ export default defineComponent({
 
             web3modal.subscribeModal(async (newState) => {
                 if (newState.open === false) {
+                    emit('toggleWalletConnect');
                     //disable injected login for mobile
                     if (!usePlatformStore().isMobile){
                         await setWalletConnectAccount();

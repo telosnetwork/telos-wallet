@@ -71,10 +71,19 @@ export default defineComponent({
 
                     <NativeLoginButton v-if="tab === 'right'" />
 
-                    <EVMLoginButtons v-else-if="tab === 'left'" @toggle-wallet-connect="toggleWalletConnect = true" @show-wallet-options="showWalletOptions = true"/>
+                    <EVMLoginButtons
+                        v-else-if="tab === 'left'"
+                        @toggle-wallet-connect="toggleWalletConnect = true"
+                        @show-wallet-options="showWalletOptions = true"
+                    />
                 </div>
                 <div>
-                    <ConnectWalletOptions v-show="showWalletOptions" :toggleWalletConnect="toggleWalletConnect" @close-wallet-options="showWalletOptions = false"/>
+                    <ConnectWalletOptions
+                        v-show="showWalletOptions"
+                        :toggleWalletConnect="toggleWalletConnect"
+                        @toggle-wallet-connect="toggleWalletConnect = false"
+                        @close-wallet-options="showWalletOptions = false"
+                    />
                 </div>
                 <q-footer bordered>
                     <q-toolbar class="bg-dark flex-center">
