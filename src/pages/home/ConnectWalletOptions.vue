@@ -35,7 +35,7 @@ export default defineComponent({
         };
 
         const connectToWalletConnect = async () => {
-            debugger;
+            console.log('clicked');
             try{
                 const projectId = process.env.PROJECT_ID || '';
                 const chains = [telos, telosTestnet];
@@ -57,9 +57,12 @@ export default defineComponent({
                 const wagmiClient = new EthereumClient(wagmi, chains);
                 const web3modal = new Web3Modal(options, wagmiClient);
 
+                console.log('before open');
                 await web3modal.openModal();
+                console.log('after open');
 
                 web3modal.subscribeModal(async (newState) => {
+                    console.log('modal state:', newState);
                     if (newState.open === false) {
                         await setWalletConnectAccount();
                     }
