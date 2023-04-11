@@ -1,13 +1,14 @@
 
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 import { telos, telosTestnet } from '@wagmi/core/chains';
 import { configureChains, createClient, getAccount,  prepareSendTransaction, sendTransaction } from '@wagmi/core';
+import { useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -18,20 +19,25 @@ export default defineComponent({
         },
     },
     setup(props){
+        const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
+
         watch(() => props.toggleWalletConnect, (newVal) => {
             if (newVal) {
                 connectToWalletConnect();
             };
         });
+
         const connectToMetaMask = () => {
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();
             accountStore.loginEVM({ network });
         };
+
         const connectToWalletConnect = async () => {
             const projectId = process.env.PROJECT_ID || '';
             const chains = [telos, telosTestnet];
+
             const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
             const wagmi = createClient({
@@ -40,8 +46,14 @@ export default defineComponent({
                 provider,
             });
 
+            const explorerDenyList = [
+                // MetaMask
+                'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+            ];
+
+            const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
             const wagmiClient = new EthereumClient(wagmi, chains);
-            const web3modal = new Web3Modal({ projectId }, wagmiClient);
+            const web3modal = new Web3Modal(options, wagmiClient);
 
             await web3modal.openModal();
 
@@ -51,6 +63,7 @@ export default defineComponent({
                 }
             });
         };
+
         const setWalletConnectAccount = async () => {
             const { address } = getAccount(); // wagmi
             if (address){
@@ -63,9 +76,15 @@ export default defineComponent({
             }
         };
 
+        const redirectToMetamaskDownload = () => {
+            window.open('https://metamask.io/download/', '_blank');
+        };
+
         return {
+            supportsMetamask,
             connectToMetaMask,
             connectToWalletConnect,
+            redirectToMetamaskDownload,
         };
     },
 });
@@ -85,14 +104,14 @@ export default defineComponent({
         <div class="wallet-options__header">
             Connect your wallet
         </div>
-        <div class="wallet-options__option" @click="connectToMetaMask">
+        <div class="wallet-options__option" @click="supportsMetamask ? connectToMetaMask() : redirectToMetamaskDownload()">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
                 alt="MetaMask"
                 src="~assets/evm/metamask_fox.svg"
             >
-            MetaMask
+            {{ supportsMetamask ? 'MetaMask' : 'Install MetaMask' }}
         </div>
         <div class="wallet-options__option" @click="connectToWalletConnect">
             <img
