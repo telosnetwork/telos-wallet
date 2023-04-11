@@ -1,4 +1,5 @@
 <script lang="ts">
+import { usePlatformStore } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 
@@ -13,6 +14,9 @@ export default defineComponent({
         viewAnyAccount() {
 
         },
+        toggleWalletOptions() {
+            usePlatformStore().isMobile ? this.$emit('toggleWalletConnect') : this.$emit('showWalletOptions');
+        },
     },
     mounted() {
         this.setDefaultEVMChain();
@@ -22,7 +26,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="$emit('showWalletOptions')">
+    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
     </q-btn>
 

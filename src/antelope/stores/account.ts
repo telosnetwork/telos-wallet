@@ -28,6 +28,9 @@ import { getAntelope } from '..';
 import { errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { Action, Label } from 'src/antelope/types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { configureChains, createClient, getAccount, disconnect,  prepareSendTransaction, sendTransaction } from '@wagmi/core';
+
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
