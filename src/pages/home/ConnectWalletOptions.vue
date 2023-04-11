@@ -7,7 +7,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 import { telos, telosTestnet } from '@wagmi/core/chains';
-import { configureChains, createClient, getAccount,  prepareSendTransaction, sendTransaction } from '@wagmi/core';
+import { configureChains, createClient, getAccount } from '@wagmi/core';
 import { useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
@@ -23,7 +23,6 @@ export default defineComponent({
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
         watch(() => props.toggleWalletConnect, (newVal) => {
-            console.log('toggleFlag', newVal);
             if (newVal) {
                 connectToWalletConnect();
             };
@@ -37,38 +36,9 @@ export default defineComponent({
         };
 
         const connectToWalletConnect = async () => {
-            // const projectId = process.env.PROJECT_ID || '';
-            // const chains = [telos, telosTestnet];
-
-            // const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
-
-            // const wagmi = createClient({
-            //     autoConnect: true,
-            //     connectors: w3mConnectors({ projectId, version: 1, chains }),
-            //     provider,
-            // });
-
-            // const explorerDenyList = [
-            //     // MetaMask
-            //     'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-            // ];
-
-            // const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
-            // const wagmiClient = new EthereumClient(wagmi, chains);
-            // const web3modal = new Web3Modal(options, wagmiClient);
             if(web3Modal.value) {
                 await web3Modal.value.openModal();
             }
-
-            // web3modal.subscribeModal(async (newState) => {
-            //     if (newState.open === false) {
-            //         emit('toggleWalletConnect');
-            //         //disable injected login for mobile
-            //         if (!usePlatformStore().isMobile){
-            //             await setWalletConnectAccount();
-            //         }
-            //     }
-            // });
         };
 
         const setWalletConnectAccount = async () => {
