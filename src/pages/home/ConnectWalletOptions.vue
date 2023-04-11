@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
@@ -11,7 +11,18 @@ import { configureChains, createClient, getAccount,  prepareSendTransaction, sen
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
-    setup(){
+    props: {
+        toggleWalletConnect: {
+            required: true,
+            type: Boolean,
+        },
+    },
+    setup(props){
+        watch(() => props.toggleWalletConnect, (newVal) => {
+            if (newVal) {
+                connectToWalletConnect();
+            };
+        });
         const connectToMetaMask = () => {
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
@@ -24,7 +35,7 @@ export default defineComponent({
             const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
             const wagmi = createClient({
-                autoConnect: false,
+                autoConnect: true,
                 connectors: w3mConnectors({ projectId, version: 1, chains }),
                 provider,
             });
@@ -41,20 +52,14 @@ export default defineComponent({
             });
         };
         const setWalletConnectAccount = async () => {
-            const { address } = getAccount(); //wagmi
+            const { address } = getAccount(); // wagmi
             if (address){
-                // this.setLogin({
-                //     address,
-                // });
-                // mobile testing
-                const receipt = await prepareSendTransaction({
-                    request: {
-                        to: '0xD478589b68e162B1D5B3e57323d0b280A96896Bf',
-                        value: 1, // amount to transfer, in wei
-                    },
-                });
-                const { hash } = await sendTransaction(receipt);
-                alert(hash);
+                // temp login handling
+                const accountStore = useAccountStore();
+                const chainStore = useChainStore();
+                const network = chainStore.currentChain.settings.getNetwork();
+                accountStore.loginEVM({ network });
+
             }
         };
 
@@ -117,35 +122,36 @@ export default defineComponent({
     flex-direction: column;
     align-items: flex-start;
     padding-left: 42px;
-}
 
-.wallet-options__close{
-    margin-left: 265px;
-}
+    &__close{
+        margin-left: 265px;
+    }
 
-.wallet-options__header{
-    display: inline-block;
-    font-size: 16px;
-    margin-bottom: 16px;
-}
-
-.wallet-options__option{
-   width: 224px;
-   height: 54px;
-   border: solid $white;
-   border-width: 1px;
-   border-radius: 4px;
-   margin-top: 12px;
-   font-size: 16px;
-   font-weight: 600;
-   padding-top: 14px;
-   padding-left: 14px;
-   cursor: pointer;
-
-   img {
+    &__header{
         display: inline-block;
-        vertical-align:top;
-        margin-right: 8px;
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    &__option{
+        width: 224px;
+        height: 54px;
+        border: solid $white;
+        border-width: 1px;
+        border-radius: 4px;
+        margin-top: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        padding-top: 14px;
+        padding-left: 14px;
+        cursor: pointer;
+
+        img {
+            display: inline-block;
+            vertical-align:top;
+            margin-right: 8px;
+        }
     }
 }
+
 </style>

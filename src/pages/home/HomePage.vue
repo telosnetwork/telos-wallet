@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
@@ -14,11 +14,13 @@ export default defineComponent({
         ConnectWalletOptions,
     },
     data: (): {
-        showWalletOptions: boolean,
         tab: 'left' | 'right'
+        showWalletOptions: boolean,
+        toggleWalletConnect: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
+        toggleWalletConnect: false,
     }),
 
     computed: {
@@ -69,10 +71,10 @@ export default defineComponent({
 
                     <NativeLoginButton v-if="tab === 'right'" />
 
-                    <EVMLoginButtons v-else-if="tab === 'left'" @show-wallet-options="showWalletOptions = true"/>
+                    <EVMLoginButtons v-else-if="tab === 'left'" @toggle-wallet-connect="toggleWalletConnect = true" @show-wallet-options="showWalletOptions = true"/>
                 </div>
                 <div>
-                    <ConnectWalletOptions v-if="showWalletOptions" @close-wallet-options="showWalletOptions = false"/>
+                    <ConnectWalletOptions v-show="showWalletOptions" :toggleWalletConnect="toggleWalletConnect" @close-wallet-options="showWalletOptions = false"/>
                 </div>
                 <q-footer bordered>
                     <q-toolbar class="bg-dark flex-center">
