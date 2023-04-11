@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
