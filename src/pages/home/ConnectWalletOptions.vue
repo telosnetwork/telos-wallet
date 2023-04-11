@@ -59,7 +59,7 @@ export default defineComponent({
 
             web3modal.subscribeModal(async (newState) => {
                 if (newState.open === false) {
-                    //temporarily disabled for mobile
+                    //disable injected login for mobile
                     if (!usePlatformStore().isMobile){
                         await setWalletConnectAccount();
                     }
@@ -70,7 +70,6 @@ export default defineComponent({
         const setWalletConnectAccount = async () => {
             const { address } = getAccount(); // wagmi
             if (address){
-                // temp login handling for desktop
                 const accountStore = useAccountStore();
                 const chainStore = useChainStore();
                 const network = chainStore.currentChain.settings.getNetwork();
