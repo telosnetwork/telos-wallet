@@ -25,10 +25,6 @@ export default defineComponent({
             type: Object,
             required: true,
         },
-        tokenIsTlos: {
-            type: Boolean,
-            default: false,
-        },
     },
     data: () => ({
         showTooltip: false,
@@ -211,20 +207,21 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${process.env.EVM_NETWORK_EXPLORER}/address/${address}`;
 
+            const tokenIsTlos  = !this.token.address; // TLOS is the only token with no address
             const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
             const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
-            if (this.tokenIsTlos || tokenIsStlos) {
+            if (tokenIsTlos || tokenIsStlos) {
                 items.push({
-                    label: this.$t('evm_wallet.stake'),
+                    label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
                     icon: require('src/assets/icon--acorn.svg'),
                     strokeIcon: true,
                     url: { name: 'evm-staking' },
                 });
             }
 
-            if (this.tokenIsTlos) {
+            if (tokenIsTlos) {
                 items.push({
                     label: this.$t('evm_wallet.buy'),
                     icon: require('src/assets/icon--plus.svg'),
@@ -232,7 +229,7 @@ export default defineComponent({
                 });
             }
 
-            if (this.tokenIsTlos) {
+            if (tokenIsTlos) {
                 items.push({
                     label: this.$t('evm_wallet.wrap'),
                     icon: require('src/assets/icon--wrap-tlos.svg'),
@@ -248,7 +245,7 @@ export default defineComponent({
                 });
             }
 
-            if (!this.tokenIsTlos) {
+            if (!tokenIsTlos) {
                 items.push({
                     label: this.$t('global.contract'),
                     icon: require('src/assets/icon--code.svg'),
@@ -262,7 +259,7 @@ export default defineComponent({
                 url:  {
                     name: 'evm-send',
                     query: {
-                        ...(this.tokenIsTlos ? {} : { token: this.token.address }),
+                        ...(tokenIsTlos ? {} : { token: this.token.address }),
                     },
                 },
             });

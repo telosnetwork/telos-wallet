@@ -127,7 +127,6 @@ describe('WalletBalanceRow.vue', () => {
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
                     },
-                    tokenIsTlos: true,
                 },
             });
 
@@ -187,7 +186,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
             });
 
-            // snapshot contains c-wallet-balance-row__overflow-li for stake, contract, send
+            // snapshot contains c-wallet-balance-row__overflow-li for unstake, contract, send
             expect(wrapper.element).toMatchSnapshot();
 
             const [

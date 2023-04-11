@@ -81,7 +81,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.stake
+              evm_wallet.unstake
             </span>
           </li>
           <li
@@ -244,7 +244,7 @@ $456,789,123.67
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.stake
+              evm_wallet.unstake
             </span>
           </li>
           <li
@@ -407,7 +407,7 @@ $456,789,123.67
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.stake
+              evm_wallet.unstake
             </span>
           </li>
           <li
