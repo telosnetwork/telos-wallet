@@ -19,6 +19,7 @@ export default defineComponent({
         },
     },
     setup(props, { emit }){
+        const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
         watch(() => props.toggleWalletConnect, (newVal) => {
@@ -36,37 +37,38 @@ export default defineComponent({
         };
 
         const connectToWalletConnect = async () => {
-            const projectId = process.env.PROJECT_ID || '';
-            const chains = [telos, telosTestnet];
+            // const projectId = process.env.PROJECT_ID || '';
+            // const chains = [telos, telosTestnet];
 
-            const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
+            // const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
-            const wagmi = createClient({
-                autoConnect: true,
-                connectors: w3mConnectors({ projectId, version: 1, chains }),
-                provider,
-            });
+            // const wagmi = createClient({
+            //     autoConnect: true,
+            //     connectors: w3mConnectors({ projectId, version: 1, chains }),
+            //     provider,
+            // });
 
-            const explorerDenyList = [
-                // MetaMask
-                'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-            ];
+            // const explorerDenyList = [
+            //     // MetaMask
+            //     'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+            // ];
 
-            const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
-            const wagmiClient = new EthereumClient(wagmi, chains);
-            const web3modal = new Web3Modal(options, wagmiClient);
+            // const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
+            // const wagmiClient = new EthereumClient(wagmi, chains);
+            // const web3modal = new Web3Modal(options, wagmiClient);
+            if(web3Modal.value) {
+                await web3Modal.value.openModal();
+            }
 
-            await web3modal.openModal();
-
-            web3modal.subscribeModal(async (newState) => {
-                if (newState.open === false) {
-                    emit('toggleWalletConnect');
-                    //disable injected login for mobile
-                    if (!usePlatformStore().isMobile){
-                        await setWalletConnectAccount();
-                    }
-                }
-            });
+            // web3modal.subscribeModal(async (newState) => {
+            //     if (newState.open === false) {
+            //         emit('toggleWalletConnect');
+            //         //disable injected login for mobile
+            //         if (!usePlatformStore().isMobile){
+            //             await setWalletConnectAccount();
+            //         }
+            //     }
+            // });
         };
 
         const setWalletConnectAccount = async () => {
@@ -85,11 +87,45 @@ export default defineComponent({
         };
 
         return {
+            web3Modal,
             supportsMetamask,
             connectToMetaMask,
             connectToWalletConnect,
+            setWalletConnectAccount,
             redirectToMetamaskDownload,
         };
+    },
+    mounted() {
+        // create wagmi client and web3modal instance
+        const projectId = process.env.PROJECT_ID || '';
+        const chains = [telos, telosTestnet];
+
+        const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
+
+        const wagmi = createClient({
+            autoConnect: true,
+            connectors: w3mConnectors({ projectId, version: 1, chains }),
+            provider,
+        });
+
+        const explorerDenyList = [
+            // MetaMask
+            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+        ];
+
+        const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
+        const wagmiClient = new EthereumClient(wagmi, chains);
+        this.web3Modal = new Web3Modal(options, wagmiClient);
+
+        this.web3Modal.subscribeModal(async (newState) => {
+            if (newState.open === false) {
+                this.$emit('toggleWalletConnect');
+                //disable injected login for mobile
+                if (!usePlatformStore().isMobile){
+                    await this.setWalletConnectAccount();
+                }
+            }
+        });
     },
 });
 </script>
