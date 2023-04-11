@@ -19,7 +19,7 @@ export default defineComponent({
     }),
     computed: {
         menuItemTabIndex() {
-            return this.menuIsOpen ? '0' : '-1';
+            return this.menuIsOpen || this.$q.screen.gt.md ? '0' : '-1';
         },
     },
     watch: {
@@ -68,7 +68,7 @@ export default defineComponent({
             icon="menu"
             color="black"
             aria-haspopup="menu"
-            :aria-label="$t('open_menu')"
+            :aria-label="$t('nav.open_menu')"
             :tabindex="menuIsOpen ? '-1' : '0'"
             @click="menuIsOpen = !menuIsOpen"
             @keydown.space.enter="menuIsOpen = !menuIsOpen"
@@ -103,7 +103,7 @@ export default defineComponent({
                 icon="menu_open"
                 class="q-ma-md self-start"
                 aria-haspopup="menu"
-                :aria-label="$t('close_menu')"
+                :aria-label="$t('nav.close_menu')"
                 :tabindex="menuItemTabIndex"
                 @click="menuIsOpen = !menuIsOpen"
                 @keydown.space.enter="menuIsOpen = !menuIsOpen"

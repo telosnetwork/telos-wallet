@@ -47,6 +47,17 @@ export default {
         logout: 'Log Out',
         teloscan: 'Teloscan',
     },
+    evm_wallet: {
+        send_icon_alt: 'Send icon',
+        receive_icon_alt: 'Receive icon',
+        buy_icon_alt: 'Buy more tokens icon',
+        send: 'Send',
+        receive: 'Receive',
+        buy: 'Buy',
+        link_to_send_aria: 'Link to Send page',
+        link_to_receive_aria: 'Link to Receive page',
+        link_to_buy_aria: 'External link to buy tokens',
+    },
     global: {
         native: 'Native',
         telos_evm: 'Telos EVM',

@@ -29,7 +29,17 @@ const routes = [
             {
                 path: 'wallet',
                 name: 'evm-wallet',
-                component: () => import('pages/evm/WalletPage.vue'),
+                component: () => import('pages/evm/wallet/WalletPage.vue'),
+            },
+            {
+                path: 'send',
+                name: 'evm-send',
+                component: () => import('pages/evm/wallet/SendPage.vue'),
+            },
+            {
+                path: 'receive',
+                name: 'evm-receive',
+                component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
             {
                 path: 'staking',
