@@ -11,7 +11,7 @@ describe('prettyPrintCurrency', () => {
     });
 
     describe('should print values correctly when the locale is', () => {
-        describe('en-US and the currency is USD', () => {
+        describe('en-US and the currency is', () => {
             const locale = 'en-US';
 
             test('USD', () => {
@@ -90,7 +90,6 @@ describe('prettyPrintCurrency', () => {
                 expect(prettyPrintCurrency(1234, 4, locale, true, currency, true)).toBe('USD\u00A01.23K');
                 expect(prettyPrintCurrency(-1234, 4, locale, true, currency, true)).toBe('-USD\u00A01.23K');
             });
-
         });
     });
 });
