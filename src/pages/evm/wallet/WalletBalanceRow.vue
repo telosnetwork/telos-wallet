@@ -480,15 +480,15 @@ export default defineComponent({
 
         &:hover {
             background-color: var(--bg-color-hover);
-            color: var(--text-color-hover);
+            color: $primary;
 
             #{$this}__overflow-icon {
                 &:not(#{$this}__overflow-icon--stroke) path {
-                    fill: var(--text-color-hover);
+                    fill: $primary;
                 }
 
                 &#{$this}__overflow-icon--stroke path {
-                    stroke: var(--text-color-hover);
+                    stroke: $primary;
                 }
             }
         }
