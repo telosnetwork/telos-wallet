@@ -15,19 +15,24 @@ export default defineComponent({
             return Array.isArray(this.tabs);
         },
         selectedTab() {
-            return (this.$route.query.tab ?? this.tabs[0] ?? '') as string;
+            return (this.$route.query.tab ?? '') as string;
         },
     },
     watch: {
-        '$route.query.tab': {
+        $route: {
             immediate: true,
-            handler(newValue) {
-                if (this.tabs === null) {
-                    return;
-                }
+            deep: true,
+            handler(newValue, oldValue = null) {
+                const isSameRoute = oldValue === null || newValue?.path === oldValue?.path;
 
-                if (!this.tabs.includes(newValue)) {
-                    this.$router.replace({ query: { tab: this.tabs[0] as string } });
+                if (isSameRoute) {
+                    if (this.tabs === null) {
+                        return;
+                    }
+
+                    if (!this.tabs.includes(newValue.query.tab)) {
+                        this.$router.replace({ query: { tab: this.tabs[0] } });
+                    }
                 }
             },
         },
@@ -44,14 +49,14 @@ export default defineComponent({
 
         <q-tabs
             v-if="showTabs"
-            v-model="selectedTab"
+            :model-value="selectedTab"
             inline-label
             no-caps
             indicator-color="primary"
             class="c-app-page__tabs"
         >
             <q-route-tab
-                v-for="tab in tabs"
+                v-for="tab in (tabs ?? [])"
                 :key="tab"
                 :name="tab"
                 :label="tab.charAt(0).toUpperCase() + tab.slice(1)"
@@ -101,6 +106,8 @@ export default defineComponent({
     &__header {
         color: var(--header-text-color);
         background: var(--header-bg-color);
+
+        padding-top: 24px;
     }
 
     &__header-content {
@@ -114,6 +121,7 @@ export default defineComponent({
     }
 
     &__tabs {
+        margin-top: 48px;
         flex-grow: 1;
         color: var(--header-text-color);
 

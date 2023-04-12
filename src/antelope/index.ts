@@ -1,5 +1,6 @@
 import { App } from 'vue';
 import { Subject } from 'rxjs';
+import { Store } from 'pinia';
 
 import { AntelopeConfig } from 'src/antelope/config/';
 import installPinia from 'src/antelope/stores';
@@ -20,6 +21,13 @@ import { useHistoryStore } from 'src/antelope/stores/history';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { useEVMStore } from 'src/antelope/stores/evm';
+
+// provide typings for `this.$store`
+declare module '@vue/runtime-core' {
+    interface ComponentCustomProperties {
+        $store: Store;
+    }
+}
 
 const events = {
     onLoggedIn: new Subject<AccountModel>(),
@@ -73,7 +81,7 @@ export class Antelope {
             contract: useContractStore(),
             balances: useBalancesStore(),
             history: useHistoryStore(),
-            feedbacl: useFeedbackStore(),
+            feedback: useFeedbackStore(),
             platform: usePlatformStore(),
             evm: useEVMStore(),
         };

@@ -61,64 +61,66 @@ export default defineComponent({
         :aria-label="$t('nav.copy_address')"
         @click="copyAddress"
     />
-    <q-btn-dropdown
+    <q-btn
         flat
         dense
-        no-icon-animation
-        dropdown-icon="more_vert"
-        class="c-user-info__dropdown"
+        icon="more_vert"
+        class="q-mr-sm c-user-info__menu-btn"
         :aria-label="$t('nav.overflow_menu')"
     >
-        <ul class="c-user-info__dropdown-items" role="menu">
-            <li
-                class="c-user-info__dropdown-item"
-                role="menuitem"
-                tabindex="0"
-                @click="gotoTeloscan()"
-                @keypress.space.enter="$router.push({ name: 'evm-staking' })"
-            >
-                <InlineSvg
-                    :src="require('src/assets/icon--acorn.svg')"
-                    :class="{
-                        'c-user-info__icon': true,
-                        'c-user-info__icon--acorn': true,
-                    }"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                <span class="c-user-info__dropdown-item-text">{{ $t('nav.teloscan') }}</span>
-                <q-icon size="xs" name="launch" class="c-user-info__dropdown-item-min-icon" />
-            </li>
+        <q-menu anchor="bottom end" self="top right" :offset="[0, 16]">
+            <ul class="c-user-info__menu-items" role="menu">
+                <li
+                    class="c-user-info__menu-item"
+                    role="menuitem"
+                    tabindex="0"
+                    @click="gotoTeloscan()"
+                    @keypress.space.enter="$router.push({ name: 'evm-staking' })"
+                >
+                    <div class="c-user-info__icon-wraper"><InlineSvg
+                        :src="require('src/assets/icon--acorn.svg')"
+                        :class="{
+                            'c-user-info__icon': true,
+                            'c-user-info__icon--acorn': true,
+                        }"
+                        height="24"
+                        width="24"
+                        aria-hidden="true"
+                    /></div>
+                    <span class="c-user-info__menu-item-text">{{ $t('nav.teloscan') }}</span>
+                    <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
+                </li>
 
-            <li
-                class="c-user-info__dropdown-item"
-                role="menuitem"
-                tabindex="1"
-                @click="logout"
-                @keypress.space.enter="logout"
-            >
-                <InlineSvg
-                    :src="require('src/assets/icon--logout.svg')"
-                    class="c-user-info__icon"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                <span class="c-user-info__dropdown-item-text">{{ $t('global.sign_out') }}</span>
-            </li>
+                <li
+                    class="c-user-info__menu-item"
+                    role="menuitem"
+                    tabindex="1"
+                    @click="logout"
+                    @keypress.space.enter="logout"
+                >
+                    <div class="c-user-info__icon-wraper"><InlineSvg
+                        :src="require('src/assets/icon--logout.svg')"
+                        class="c-user-info__icon"
+                        height="24"
+                        width="24"
+                        aria-hidden="true"
+                    /></div>
+                    <span class="c-user-info__menu-item-text">{{ $t('global.sign_out') }}</span>
+                </li>
 
-            <li
-                class="c-user-info__dropdown-item"
-                role="menuitem"
-                tabindex="2"
-                @click="toggleDarkMode"
-            >
-                <span class="c-user-info__dropdown-item-text">{{ isDarkMode ? $t('global.light_mode') : $t('global.dark_mode') }}</span>
-            </li>
+                <li
+                    class="c-user-info__menu-item"
+                    role="menuitem"
+                    tabindex="2"
+                    @click="toggleDarkMode"
+                >
+                    <div class="c-user-info__icon-wraper"></div>
+                    <span class="c-user-info__menu-item-text">{{ isDarkMode ? $t('global.light_mode') : $t('global.dark_mode') }}</span>
+                </li>
 
-        </ul>
-    </q-btn-dropdown>
+            </ul>
+        </q-menu>
+    </q-btn>
 </div>
 </template>
 
@@ -140,9 +142,9 @@ export default defineComponent({
         }
     }
 
-    &__dropdown-items {
-        padding: 5px 0px;
-        margin: 3px 0px;
+    &__menu-items {
+        padding: 0px 0px;
+        margin: 0px 0px;
         list-style: none;
         text-transform: uppercase;
         font-weight: bold;
@@ -150,7 +152,7 @@ export default defineComponent({
         flex-direction: column;
     }
 
-    &__dropdown-item {
+    &__menu-item {
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -177,13 +179,21 @@ export default defineComponent({
         }
     }
 
-    &__dropdown-item-text {
+    &__menu-item-text {
         margin-left: 8px;
         font-size: 15px;
         font-weight: 600;
     }
 
+    &__menu-item-min-icon {
+        margin-left: auto;
+        transform: scale(0.67);
+        margin-left: 5px;
+    }
+
     &__icon {
+        height: 24px;
+        width: 24px;
         &:not(#{$this}__icon--acorn) path {
             fill: var(--text-color);
         }
@@ -193,11 +203,12 @@ export default defineComponent({
         }
     }
 
-    &__dropdown-item-min-icon {
-        margin-left: auto;
-        transform: scale(0.67);
-        margin-left: 5px;
+    &__icon-wraper {
+        display: inline-block;
+        height: 24px;
+        width: 24px;
     }
+
 }
 </style>
 
