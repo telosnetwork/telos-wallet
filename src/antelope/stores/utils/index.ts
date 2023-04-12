@@ -171,83 +171,56 @@ export function getFormattedUtcOffset(date: Date): string {
     return sign + hours + ':' + minutes;
 }
 
-/**
- * Formats a number amount to a commified string with a specified number of decimal places
- *
- * @param {number} amount - the amount of currency as a number or a string. If a string, amount should only contain numbers and up to a single '.'
- * @param {number} decimals - the number of decimal places to show
- *
- * @return {string}
- */
-export function prettyPrintCurrency(amount: number | string, decimals = 2) {
-    const numberRegex = /^-?\d+(\.\d+)?$/;
+/*
+* Formats a currency amount in a localized way
+*
+* @param {number} amount - the currency amount
+* @param {number} decimals - the number of decimals that should be displayed. Ignored if abbreviate is true and the value is over 1000
+* @param {string} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} abbreviate - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} currency - code for the currency to be used, e.g. 'USD'. If defined, either the symbol or code (determined by the param displayCurrencyAsSymbol) will be displayed, e.g. $123.00 . Generally gotten from the user store like useUserStore().currency
+* @param {boolean?} displayCurrencyAsCode - if currency is defined, controls whether the currency is display as a symbol or code, e.g. $100 or USD 100
+* */
+export function prettyPrintCurrency(
+    amount: number,
+    decimals: number,
+    locale: string,
+    abbreviate = false,
+    currency?: string,
+    displayCurrencyAsCode?: boolean,
+) {
 
-    const amountIsNumber = ['string', 'number'].includes(typeof amount);
-    const amountIsStringAndValid = typeof amount === 'string' && numberRegex.test(amount);
-    const decimalsIsValidInt = typeof decimals === 'number' && decimals >= 0 && decimals % 1 === 0;
+    const decimalOptions : Record<string, number | undefined> = {
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        minimumIntegerDigits: undefined,
+        maximumIntegerDigits: undefined,
+    };
 
-    if (!amountIsNumber && !amountIsStringAndValid) {
-        throw `String amount ${amount} does not represent a number`;
+    if (amount < 1 && amount > 0) {
+        decimalOptions.maximumIntegerDigits = 1;
+        decimalOptions.minimumIntegerDigits = 1;
+    } else if (abbreviate) {
+        const forceFractionDisplay = amount % 1 !== 0 && amount < 1000;
+
+        decimalOptions.maximumFractionDigits = forceFractionDisplay ? decimals : 2;
+        decimalOptions.minimumFractionDigits = forceFractionDisplay ? decimals : 2;
+        decimalOptions.maximumIntegerDigits = 3;
     }
 
-    if (!decimalsIsValidInt) {
-        throw `Decimal precision ${decimals} is not a positive integer`;
-    }
+    const currencyOptions : Record<string, string | boolean | undefined> = {
+        style: currency ? 'currency' : undefined,
+        currencyDisplay: currency ? (displayCurrencyAsCode ? 'code' : 'symbol') : undefined,
+        currency,
+    };
 
-    const amountNumber = typeof amount === 'string' ? +amount : amount;
-
-    let formatted = amountNumber.toLocaleString('en-us');
-
-    if (decimals === 0) {
-        return Math.floor(parseFloat(formatted.replace(/,/g, ''))).toString();
-    }
-
-    if (formatted.indexOf('.') !== -1) {
-        const formattedInteger = formatted.split('.')[0];
-        const formattedFraction = amountNumber.toFixed(decimals).split('.')[1];
-
-        formatted = `${formattedInteger}.${formattedFraction}`;
-    } else {
-        formatted = `${formatted}.`.concat('0'.repeat(decimals));
-    }
+    const formatted = Intl.NumberFormat(
+        locale,
+        {
+            notation: abbreviate ? 'compact' : undefined,
+            ...currencyOptions,
+            ...decimalOptions,
+        }).format(amount);
 
     return formatted;
-}
-
-
-/**
- * Given a number, returns an abbreviated version for large values, such as 1.5B
- * for small fractions like 0.12345, a 4-precision representation is returned
- * @param {number} amount - number to format
- * @param {number} precision - number of decimals to display for small numbers with fractional values
- *
- * @return {string}
- */
-export function abbreviateNumber(amount: number, precision = 4) {
-    if (typeof amount !== 'number') {
-        throw 'Type of amount must be number';
-    }
-
-    const precisionIsValid = typeof precision === 'number' && precision >= 0 && precision % 1 === 0;
-
-    if (!precisionIsValid) {
-        throw 'Type of precision must be a positive integer or zero';
-    }
-
-    if (amount < 1000 && amount >= 0) {
-        return amount.toFixed(precision);
-    }
-
-    let abbreviated = Intl.NumberFormat('en-US', {
-        notation: 'compact',
-        maximumFractionDigits: 2,
-    }).format(amount);
-
-    // retain fractional value for numbers under 1k, as the above expression will chop off fractions
-    if (amount % 1 !== 0 && amount < 1000 && precision > 0) {
-        const fraction = amount.toFixed(precision).split('.')[1];
-        abbreviated += `.${fraction}`;
-    }
-
-    return abbreviated;
 }

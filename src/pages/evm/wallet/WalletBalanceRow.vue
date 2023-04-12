@@ -3,10 +3,13 @@ import { defineComponent } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { prettyPrintCurrency, abbreviateNumber } from 'src/antelope/stores/utils';
-import { commify } from 'ethers/lib/utils';
-import { useChainStore } from 'src/antelope';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { useChainStore, useUserStore } from 'src/antelope';
+
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+
+const userStore = useUserStore();
+const { locale, currency } = userStore;
 
 interface OverflowMenuItem {
     label: string;
@@ -89,13 +92,16 @@ export default defineComponent({
                 return '';
             }
 
+            const fiatAmount = 0.7732;
+            const pretty = prettyPrintCurrency(
+                fiatAmount,
+                4,
+                locale,
+                false,
+                currency,
+            );
 
-            // https://github.com/telosnetwork/telos-wallet/issues/179
-            //     get actual symbol from site settings
-            const fiatSymbol = '$';
-            const fiatAmount = abbreviateNumber(0.7732);
-
-            return `(@ ${fiatSymbol}${fiatAmount} / ${this.token.symbol})`;
+            return `(@ ${pretty} / ${this.token.symbol})`;
         },
         primaryAmount(): number | string {
             const isMobile = this.$q.screen.lt.md;
@@ -113,27 +119,21 @@ export default defineComponent({
             const isMobile = this.$q.screen.lt.md;
 
             if (!isMobile) {
-                const formatted = prettyPrintCurrency(this.primaryAmount, 4);
+                const formatted = prettyPrintCurrency(+this.primaryAmount, 4, locale);
 
                 return `${formatted} ${this.token.symbol}`;
             } else {
                 if (this.tokenHasFiatValue) {
                     if (this.truncatePrimaryValue) {
-                        const amount = abbreviateNumber(this.primaryAmount as number);
-                        const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
-
-                        return `${symbol} ${amount}`;
+                        return prettyPrintCurrency(+this.primaryAmount, 2, locale, true, currency);
                     } else {
-                        const amount = prettyPrintCurrency(this.primaryAmount);
-                        const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
-
-                        return `${symbol} ${amount}`;
+                        return prettyPrintCurrency(+this.primaryAmount, 2, locale, false, currency);
                     }
                 } else {
                     if (this.truncatePrimaryValue) {
-                        return abbreviateNumber(+this.primaryAmount);
+                        return prettyPrintCurrency(+this.primaryAmount, 4, locale, true);
                     } else {
-                        return prettyPrintCurrency(this.primaryAmount, 4);
+                        return prettyPrintCurrency(+this.primaryAmount, 4, locale);
                     }
                 }
             }
@@ -161,38 +161,33 @@ export default defineComponent({
 
             if (isMobile) {
                 if (this.truncateSecondaryValue) {
-                    return abbreviateNumber(+this.secondaryAmount).concat(` ${this.token.symbol}`);
+                    return prettyPrintCurrency(+this.secondaryAmount, 4, locale, true).concat(` ${this.token.symbol}`);
                 } else {
-                    const formatted = prettyPrintCurrency(this.secondaryAmount, 4);
+                    const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, locale);
 
                     return `${formatted} ${this.token.symbol}`;
                 }
             } else {
-                if (this.truncateSecondaryValue) {
-                    const amount = abbreviateNumber(this.secondaryAmount as number);
-                    const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
+                const amount = prettyPrintCurrency(+this.secondaryAmount, 2, locale, false, currency);
 
-                    return `${symbol} ${amount}`;
-                } else {
-                    const amount = prettyPrintCurrency(this.secondaryAmount as number);
-                    const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get this from site settings
-
-                    return `${symbol} ${amount} ${this.fiatRateText}`;
-                }
+                return `${amount} ${this.fiatRateText}`;
             }
         },
         tooltipText(): string {
             let text = '';
 
-            if (this.truncatePrimaryValue) {
-                text = `${this.$t('evm_wallet.token_balance')}:\n${commify(this.token.balance)}\n\n`;
+            if (this.truncatePrimaryValue && this.tokenHasFiatValue) {
+                const formattedBalance = prettyPrintCurrency(this.tokenBalanceFiat as number, 2, locale, false, currency);
+                text = `${this.$t('evm_wallet.fiat_value')}:\n${formattedBalance}\n\n`;
             }
 
-            if (this.truncateSecondaryValue && this.tokenHasFiatValue) {
-                const symbol = '$'; // https://github.com/telosnetwork/telos-wallet/issues/179 get from site settings
-                // eztodo format
-                const formatted = commify(this.tokenBalanceFiat as number);
-                text += `${this.$t('evm_wallet.fiat_value')}:\n${symbol}${formatted}\n\n`;
+            if (
+                (this.truncateSecondaryValue && this.tokenHasFiatValue) ||
+                (this.truncatePrimaryValue && !this.tokenHasFiatValue)
+            ) {
+                const formattedBalance = prettyPrintCurrency(+this.token.balance, this.token.decimals, locale, false);
+
+                text += `${this.$t('evm_wallet.token_balance')}:\n${formattedBalance}\n\n`;
             }
 
             if (!this.tokenHasFiatValue) {
@@ -253,15 +248,11 @@ export default defineComponent({
                 });
             }
 
+
             items.push({
                 label: this.$t('evm_wallet.send'),
                 icon: require('assets/icon--arrow-diagonal.svg'),
-                url:  {
-                    name: 'evm-send',
-                    query: {
-                        ...(tokenIsTlos ? {} : { token: this.token.address }),
-                    },
-                },
+                url:  { name: 'evm-send', query: { token: this.token.address } },
             });
 
             return items;
