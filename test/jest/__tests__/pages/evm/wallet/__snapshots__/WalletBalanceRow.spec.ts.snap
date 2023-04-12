@@ -39,7 +39,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
-        $ 456,789,123.67 (@ $0.7732 / STLOS)
+        $456,789,123.67 (@ $0.7732 / STLOS)
       </span>
     </div>
     <q-btn-stub
@@ -173,7 +173,7 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $ 456.79M 
+        $456.79M 
         
         <inline-svg-stub
           aria-hidden="true"
@@ -189,11 +189,11 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
           <span
             class="c-wallet-balance-row__tooltip"
           >
-            evm_wallet.token_balance:
-3,642.0243
-
-evm_wallet.fiat_value:
+            evm_wallet.fiat_value:
 $456,789,123.67
+
+evm_wallet.token_balance:
+3,642.024300000000000000
           </span>
           
         </q-tooltip-stub>
@@ -336,7 +336,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $ 456.79M 
+        $456.79M 
         
         <inline-svg-stub
           aria-hidden="true"
@@ -352,11 +352,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
           <span
             class="c-wallet-balance-row__tooltip"
           >
-            evm_wallet.token_balance:
-3,642.0243
-
-evm_wallet.fiat_value:
+            evm_wallet.fiat_value:
 $456,789,123.67
+
+evm_wallet.token_balance:
+3,642.024300000000000000
           </span>
           
         </q-tooltip-stub>
@@ -499,7 +499,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $ 0.00 
+        $0.00 
         
         <inline-svg-stub
           aria-hidden="true"
@@ -515,8 +515,8 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
           <span
             class="c-wallet-balance-row__tooltip"
           >
-            evm_wallet.fiat_value:
-$0
+            evm_wallet.token_balance:
+3,642.024300000000000000
           </span>
           
         </q-tooltip-stub>
@@ -682,7 +682,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $ 12.35K 
+        $12.35K 
         
         <inline-svg-stub
           aria-hidden="true"
@@ -698,11 +698,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
           <span
             class="c-wallet-balance-row__tooltip"
           >
-            evm_wallet.token_balance:
-3,642.0243
-
-evm_wallet.fiat_value:
+            evm_wallet.fiat_value:
 $12,345.67
+
+evm_wallet.token_balance:
+3,642.024300000000000000
           </span>
           
         </q-tooltip-stub>
@@ -862,7 +862,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             class="c-wallet-balance-row__tooltip"
           >
             evm_wallet.token_balance:
-3,642.0243
+3,642.024300000000000000
 
 evm_wallet.no_fiat_value
           </span>

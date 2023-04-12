@@ -4,6 +4,6 @@ exports[`BigFiatText.vue should render correctly 1`] = `
 <div
   class="c-big-fiat-text"
 >
-  $ 12,345.00
+  $12,345.00
 </div>
 `;

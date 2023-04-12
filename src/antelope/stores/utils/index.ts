@@ -189,6 +189,9 @@ export function prettyPrintCurrency(
     currency?: string,
     displayCurrencyAsCode?: boolean,
 ) {
+    if (decimals % 1 !== 0 || decimals < 0) {
+        throw 'Decimals must be a positive integer or zero';
+    }
 
     const decimalOptions : Record<string, number | undefined> = {
         maximumFractionDigits: decimals,
@@ -201,7 +204,7 @@ export function prettyPrintCurrency(
         decimalOptions.maximumIntegerDigits = 1;
         decimalOptions.minimumIntegerDigits = 1;
     } else if (abbreviate) {
-        const forceFractionDisplay = amount % 1 !== 0 && amount < 1000;
+        const forceFractionDisplay = amount < 1000 && amount > -1000 ;
 
         decimalOptions.maximumFractionDigits = forceFractionDisplay ? decimals : 2;
         decimalOptions.minimumFractionDigits = forceFractionDisplay ? decimals : 2;

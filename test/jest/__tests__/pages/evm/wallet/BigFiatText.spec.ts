@@ -1,5 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
 
+import * as antelope from 'src/antelope';
+jest.mock('src/antelope', () => ({
+    useUserStore: () => ({
+        locale: 'en-US',
+        currency: 'USD',
+    }),
+}));
+
+
 import BigFiatText from 'components/evm/BigFiatText.vue';
 describe('BigFiatText.vue', () => {
     it('should have the correct name', () => {

@@ -4,7 +4,7 @@ const fakeBuyMoreLink = 'fake';
 const fakeStlosContractAddress = '0x'.concat('9'.repeat(40));
 const fakeWtlosContractAddress = '0x'.concat('8'.repeat(40));
 const fakeTokenContractAddress = '0x'.concat('7'.repeat(40));
-const chainStoreMock = {
+const storeMock = {
     useChainStore: () => ({
         currentChain: {
             settings: {
@@ -14,13 +14,18 @@ const chainStoreMock = {
             },
         },
     }),
+    useUserStore: () => ({
+        locale: 'en-US',
+        currency: 'USD',
+    }),
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import * as antelope from 'src/antelope';
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
-jest.mock('src/antelope', () => chainStoreMock);
+jest.mock('src/antelope', () => storeMock);
+
 describe('WalletBalanceRow.vue', () => {
     const stubs = {
         'q-tooltip': stubWithSlot('q-tooltip'),
