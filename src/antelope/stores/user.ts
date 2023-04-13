@@ -49,13 +49,13 @@ export type SupportedCurrencyLocale = 'en-US';
 export type SupportedCurrency = 'USD';
 
 export interface UserCurrencyPreference {
-    locale: SupportedCurrencyLocale;
-    currency: SupportedCurrency;
+    fiatLocale: SupportedCurrencyLocale;
+    fiatCurrency: SupportedCurrency;
 }
 
 const defaultCurrencyPreferences: UserCurrencyPreference = {
-    locale: 'en-US',
-    currency: 'USD',
+    fiatLocale: 'en-US',
+    fiatCurrency: 'USD',
 };
 
 export interface UserState {
@@ -79,8 +79,8 @@ export const useUserStore = defineStore(store_name, {
         accounts: state => state.__user_accounts,
         allUsers: state => state.__all_users,
         currencyPreferences: state => state.__preferred_fiat_currency,
-        locale: state => state.__preferred_fiat_currency?.locale || '',
-        currency: state => state.__preferred_fiat_currency?.currency || '',
+        fiatLocale: state => state.__preferred_fiat_currency?.fiatLocale || '',
+        fiatCurrency: state => state.__preferred_fiat_currency?.fiatCurrency || '',
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -110,14 +110,15 @@ export const useUserStore = defineStore(store_name, {
             let shouldSetDefaultPreferences = false;
 
             try {
-                const { locale, currency } = JSON.parse(localStorage.getItem(CURRENCY_PREFERENCES_KEY) || '{}');
+                const { fiatLocale, fiatCurrency } = JSON.parse(localStorage.getItem(CURRENCY_PREFERENCES_KEY) || '{}');
 
-                if (![typeof locale, typeof currency].every(type => type === 'string')) {
+                // if stored locale or currency is undefined, set both to defaults
+                if (![typeof fiatLocale, typeof fiatCurrency].every(type => type === 'string')) {
                     shouldSetDefaultPreferences = true;
                 } else {
                     this.setCurrencyPreferences({
-                        locale,
-                        currency,
+                        fiatLocale,
+                        fiatCurrency,
                     }, false);
                 }
 

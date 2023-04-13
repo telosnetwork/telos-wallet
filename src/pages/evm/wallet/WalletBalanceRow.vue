@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
@@ -7,9 +7,10 @@ import { prettyPrintCurrency } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { EvmToken } from 'src/antelope/types';
 
 const userStore = useUserStore();
-const { locale, currency } = userStore;
+const { fiatLocale, fiatCurrency } = userStore;
 
 interface OverflowMenuItem {
     label: string;
@@ -25,7 +26,7 @@ export default defineComponent({
     },
     props: {
         token: {
-            type: Object,
+            type: Object as PropType<EvmToken>,
             required: true,
         },
     },
@@ -96,9 +97,9 @@ export default defineComponent({
             const pretty = prettyPrintCurrency(
                 fiatAmount,
                 4,
-                locale,
+                fiatLocale,
                 false,
-                currency,
+                fiatCurrency,
             );
 
             return `(@ ${pretty} / ${this.token.symbol})`;
@@ -112,28 +113,28 @@ export default defineComponent({
             if (this.tokenHasFiatValue && isMobile) {
                 return this.tokenBalanceFiat as number;
             } else {
-                return this.token.balance;
+                return +(this.token.balance ?? 0);
             }
         },
         prettyPrimaryAmount(): string {
             const isMobile = this.$q.screen.lt.md;
 
             if (!isMobile) {
-                const formatted = prettyPrintCurrency(+this.primaryAmount, 4, locale);
+                const formatted = prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale);
 
                 return `${formatted} ${this.token.symbol}`;
             } else {
                 if (this.tokenHasFiatValue) {
                     if (this.truncatePrimaryValue) {
-                        return prettyPrintCurrency(+this.primaryAmount, 2, locale, true, currency);
+                        return prettyPrintCurrency(+this.primaryAmount, 2, fiatLocale, true, fiatCurrency);
                     } else {
-                        return prettyPrintCurrency(+this.primaryAmount, 2, locale, false, currency);
+                        return prettyPrintCurrency(+this.primaryAmount, 2, fiatLocale, false, fiatCurrency);
                     }
                 } else {
                     if (this.truncatePrimaryValue) {
-                        return prettyPrintCurrency(+this.primaryAmount, 4, locale, true);
+                        return prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale, true);
                     } else {
-                        return prettyPrintCurrency(+this.primaryAmount, 4, locale);
+                        return prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale);
                     }
                 }
             }
@@ -145,7 +146,7 @@ export default defineComponent({
                 return '';
             } else {
                 if (isMobile) {
-                    return this.token.balance;
+                    return +(this.token.balance ?? 0);
                 } else {
                     return this.tokenBalanceFiat ?? 0;
                 }
@@ -161,14 +162,14 @@ export default defineComponent({
 
             if (isMobile) {
                 if (this.truncateSecondaryValue) {
-                    return prettyPrintCurrency(+this.secondaryAmount, 4, locale, true).concat(` ${this.token.symbol}`);
+                    return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
                 } else {
-                    const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, locale);
+                    const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
 
                     return `${formatted} ${this.token.symbol}`;
                 }
             } else {
-                const amount = prettyPrintCurrency(+this.secondaryAmount, 2, locale, false, currency);
+                const amount = prettyPrintCurrency(+this.secondaryAmount, 2, fiatLocale, false, fiatCurrency);
 
                 return `${amount} ${this.fiatRateText}`;
             }
@@ -177,7 +178,7 @@ export default defineComponent({
             let text = '';
 
             if (this.truncatePrimaryValue && this.tokenHasFiatValue) {
-                const formattedBalance = prettyPrintCurrency(this.tokenBalanceFiat as number, 2, locale, false, currency);
+                const formattedBalance = prettyPrintCurrency(this.tokenBalanceFiat as number, 2, fiatLocale, false, fiatCurrency);
                 text = `${this.$t('evm_wallet.fiat_value')}:\n${formattedBalance}\n\n`;
             }
 
@@ -185,7 +186,7 @@ export default defineComponent({
                 (this.truncateSecondaryValue && this.tokenHasFiatValue) ||
                 (this.truncatePrimaryValue && !this.tokenHasFiatValue)
             ) {
-                const formattedBalance = prettyPrintCurrency(+this.token.balance, this.token.decimals, locale, false);
+                const formattedBalance = prettyPrintCurrency(+(this.token.balance ?? 0), this.token.decimals, fiatLocale, false);
 
                 text += `${this.$t('evm_wallet.token_balance')}:\n${formattedBalance}\n\n`;
             }
@@ -200,7 +201,7 @@ export default defineComponent({
             const items: OverflowMenuItem[] = [];
             const chainStore = useChainStore();
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
-            const getExplorerUrl = (address: string) => `${process.env.EVM_NETWORK_EXPLORER}/address/${address}`;
+            const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
             const tokenIsTlos  = !this.token.address; // TLOS is the only token with no address
             const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
@@ -244,7 +245,7 @@ export default defineComponent({
                 items.push({
                     label: this.$t('global.contract'),
                     icon: require('src/assets/icon--code.svg'),
-                    url: getExplorerUrl(this.token.address),
+                    url: getExplorerUrl(this.token.address ?? ''),
                 });
             }
 
@@ -252,7 +253,7 @@ export default defineComponent({
             items.push({
                 label: this.$t('evm_wallet.send'),
                 icon: require('assets/icon--arrow-diagonal.svg'),
-                url:  { name: 'evm-send', query: { token: this.token.address } },
+                url:  { name: 'evm-send', query: { token: this.token.address ?? '' } },
             });
 
             return items;

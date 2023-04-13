@@ -380,7 +380,7 @@ export const useEVMStore = defineStore(store_name, {
             const contract = new EvmContract({
                 name: tokenData.symbol ? `${tokenData.name} (${tokenData.symbol})` : tokenData.name ?? 'Unknown',
                 address,
-                abi: this.getTokenABI(tokenData.type),
+                abi: this.getTokenABI(tokenData.type ?? ''),
                 manager: createManager(),
                 creationInfo,
                 token: Object.assign({
@@ -491,7 +491,7 @@ export const useEVMStore = defineStore(store_name, {
         async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
             const token = await this.getToken(address, suspectedType);
             if (token) {
-                const abi = this.getTokenABI(token.type);
+                const abi = this.getTokenABI(token.type ?? '');
                 const token_contract = new EvmContract({
                     name: `${token.name} (${token.symbol})`,
                     address,

@@ -20,7 +20,6 @@ const TESTNET = {
     TELOS_API_ENDPOINT: 'https://api-dev.telos.net/v1',
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
-    EVM_NETWORK_EXPLORER: 'https://testnet.teloscan.io',
     CHAIN_NAME: 'telos-testnet',
 };
 
@@ -34,7 +33,6 @@ const MAINNET = {
     TELOS_API_ENDPOINT: 'https://api.telos.net/v1',
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
-    EVM_NETWORK_EXPLORER: 'https://teloscan.io',
     CHAIN_NAME: 'telos',
 };
 

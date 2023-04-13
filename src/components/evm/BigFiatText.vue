@@ -13,13 +13,13 @@ export default defineComponent({
     },
     computed: {
         prettyAmount() {
-            const { locale, currency } = useUserStore();
+            const { fiatLocale, fiatCurrency } = useUserStore();
             let formatted = prettyPrintCurrency(
                 this.amount,
                 2,
-                locale,
+                fiatLocale,
                 false,
-                currency,
+                fiatCurrency,
             );
 
             return `${formatted}`;
