@@ -22,7 +22,7 @@ const storeMock = {
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import * as antelope from 'src/antelope';
+
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
 jest.mock('src/antelope', () => storeMock);
