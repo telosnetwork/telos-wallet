@@ -80,6 +80,8 @@ export const useEVMStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+
+            // bypass provider detection if using WalletConnect
             if (localStorage.getItem('wagmi.connected')){
                 return;
             }
