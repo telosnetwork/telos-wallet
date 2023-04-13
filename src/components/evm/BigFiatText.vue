@@ -13,14 +13,14 @@ export default defineComponent({
     },
     computed: {
         prettyAmount() {
-            const { locale, currency } = useUserStore();
+            const { fiatLocale, fiatCurrency } = useUserStore();
 
             return prettyPrintCurrency(
                 this.amount,
                 2,
-                locale,
+                fiatLocale,
                 false,
-                currency,
+                fiatCurrency,
             );
         },
     },

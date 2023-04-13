@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { EvmTokenInfo } from 'src/antelope/types';
+import { EvmToken } from 'src/antelope/types';
 
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
@@ -20,7 +20,7 @@ export default defineComponent({
         tabs: ['balance', 'transactions'],
     }),
     computed: {
-        chainTokens(): EvmTokenInfo[] {
+        chainTokens(): EvmToken[] {
             const tokens = [];
 
             const chainStore = useChainStore();
@@ -38,7 +38,7 @@ export default defineComponent({
                 logo,
             } = chainSettings.getSystemToken();
 
-            const chainToken: EvmTokenInfo = {
+            const chainToken: EvmToken = {
                 symbol,
                 name,
                 logoURI: logo,
@@ -85,7 +85,7 @@ export default defineComponent({
 
             return tokens;
         },
-        nonChainTokens(): EvmTokenInfo[] {
+        nonChainTokens(): EvmToken[] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //      get all user tokens here. filter out wlos and stlos if they appear in this list.
             return [{
@@ -140,15 +140,15 @@ export default defineComponent({
         // take all non-chain tokens and return a tuple of sorted arrays;
         // first is arrays with a fiat balance, second is those without
         // the first array is sorted based on fiat value, the second is sorted based on token balance
-        splitTokensBasedOnHasFiatValue(tokens: EvmTokenInfo[]): [EvmTokenInfo[], EvmTokenInfo[]] {
+        splitTokensBasedOnHasFiatValue(tokens: EvmToken[]): [EvmToken[], EvmToken[]] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //     replace tokenHasFiatValue and sortByFiatValue with real implementation which uses oracle
             let tokensWithFiatValue;
             let tokensWithNoFiatValue;
 
-            const tokenHasFiatValue = (token: EvmTokenInfo) => ['SHTB', 'SHTA'].includes(token.symbol);
+            const tokenHasFiatValue = (token: EvmToken) => ['SHTB', 'SHTA'].includes(token.symbol);
 
-            const sortByFiatValue = (tokenOne: EvmTokenInfo, tokenTwo: EvmTokenInfo) => {
+            const sortByFiatValue = (tokenOne: EvmToken, tokenTwo: EvmToken) => {
                 if (tokenOne.symbol === 'SHTB') {
                     return 1;
                 } else {
@@ -156,8 +156,11 @@ export default defineComponent({
                 }
             };
 
-            const sortByTokenBalance = (tokenOne: EvmTokenInfo, tokenTwo: EvmTokenInfo) => {
-                if (+tokenOne.balance > +tokenTwo.balance) {
+            const sortByTokenBalance = (tokenOne: EvmToken, tokenTwo: EvmToken) => {
+                const balanceOne = +(tokenOne?.balance ?? 0);
+                const balanceTwo = +(tokenTwo?.balance ?? 0);
+
+                if (balanceOne > balanceTwo) {
                     return -1;
                 } else {
                     return 1;
