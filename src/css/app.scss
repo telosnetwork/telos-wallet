@@ -217,3 +217,8 @@ div.cleos-auth-dialog {
   text-overflow: ellipsis;
 }
 
+
+// Quasar overrides
+.q-tooltip {
+    background: $tooltip-gradient;
+}

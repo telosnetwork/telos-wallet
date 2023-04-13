@@ -8,6 +8,7 @@ import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmToken } from 'src/antelope/types';
+import ToolTip from 'components/ToolTip.vue';
 
 const userStore = useUserStore();
 const { fiatLocale, fiatCurrency } = userStore;
@@ -22,6 +23,7 @@ interface OverflowMenuItem {
 export default defineComponent({
     name: 'WalletBalanceRow',
     components: {
+        ToolTip,
         InlineSvg,
     },
     props: {
@@ -191,11 +193,10 @@ export default defineComponent({
                 text += `${this.$t('evm_wallet.token_balance')}:\n${formattedBalance}\n\n`;
             }
 
-            if (!this.tokenHasFiatValue) {
-                text += `${this.$t('evm_wallet.no_fiat_value')}`;
-            }
-
             return text.trim();
+        },
+        tooltipWarningText() {
+            return !this.tokenHasFiatValue ? [`${this.$t('evm_wallet.no_fiat_value')}`] : undefined;
         },
         overflowMenuItems(): OverflowMenuItem[] {
             const items: OverflowMenuItem[] = [];
@@ -308,18 +309,12 @@ export default defineComponent({
             <div class="c-wallet-balance-row__primary-amount" @click="toggleTooltip">
                 {{ prettyPrimaryAmount }}
 
-                <template v-if="truncatePrimaryValue || truncateSecondaryValue || !tokenHasFiatValue">
-                    <InlineSvg
-                        :src="require('src/assets/icon--info.svg')"
-                        class="c-wallet-balance-row__info-icon"
-                        aria-hidden="true"
-                    />
-                    <q-tooltip :model-value="showTooltip">
-                        <span class="c-wallet-balance-row__tooltip">
-                            {{ tooltipText }}
-                        </span>
-                    </q-tooltip>
-                </template>
+                <ToolTip
+                    v-if="truncatePrimaryValue || truncateSecondaryValue || !tokenHasFiatValue"
+                    icon="info"
+                    :text="tooltipText"
+                    :warnings="tooltipWarningText"
+                />
             </div>
             <span v-if="secondaryAmount !== ''" class="c-wallet-balance-row__secondary-amount">
                 {{ prettySecondaryAmount }}
@@ -449,17 +444,6 @@ export default defineComponent({
 
     &__secondary-amount {
         color: var(--text-color-muted);
-    }
-
-    &__info-icon {
-        // svg color override
-        path {
-            fill: $primary;
-        }
-    }
-
-    &__tooltip {
-        white-space: pre-line;
     }
 
     &__overflow {
