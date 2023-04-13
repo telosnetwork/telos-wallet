@@ -1,8 +1,9 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import {
     AbiSignature,
     ChainSettings,
+    EvmBlockData,
     EvmContractCreationInfo,
     EvmToken,
     EvmTransaction,
@@ -11,6 +12,7 @@ import {
     PriceChartData,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
+import { ethers } from 'ethers';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -168,10 +170,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         const url =  'https://raw.githubusercontent.com/telosnetwork/token-list/main/telosevm.tokenlist.json';
         this.tokenListPromise = axios.get(url)
-            .then(results => results.data.tokens as unknown as {chainId:number}[])
+            .then(results => results.data.tokens as unknown as {chainId:number, logoURI: string}[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
-            .then(tokens => tokens.map(t => t as unknown as EvmToken))
-            .then(tokens => tokens);
+            .then(tokens => tokens.map(t => ({ ...t, logo: t.logoURI })))
+            .then(tokens => tokens.map(t => t as unknown as EvmToken));
 
 
         return this.tokenListPromise;
@@ -191,5 +193,45 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getContractMetadata(checksumAddress: string): Promise<string> {
         return this.contractsBucket.get(`${checksumAddress}/metadata.json`)
             .then(response => response.data.content as string);
+    }
+
+    rpcCounter = 0;
+    nextId(): number {
+        return ++this.rpcCounter;
+    }
+
+    async doRPC<T>({ method, params }: AxiosRequestConfig): Promise<T> {
+        const rpcPayload = {
+            jsonrpc: '2.0',
+            id: this.nextId(),
+            method,
+            params,
+        };
+        return this.hyperion.post('/evm', rpcPayload)
+            .then(response => response.data as T);
+    }
+
+    async getGasPrice(): Promise<ethers.BigNumber> {
+        return this.doRPC<{result:string}>({
+            method: 'eth_gasPrice' as Method,
+            params: [],
+        }).then(response => ethers.BigNumber.from(response.result));
+    }
+
+    async getLatestBlock(): Promise<ethers.BigNumber> {
+        return this.doRPC<{result:string}>({
+            method: 'eth_blockNumber' as Method,
+            params: [],
+        }).then(response => ethers.BigNumber.from(response.result));
+    }
+
+    async getBlockByNumber(blockNumber: string): Promise<EvmBlockData> {
+        return this.doRPC<{result:EvmBlockData}>({
+            method: 'eth_getBlockByNumber' as Method,
+            params: [parseInt(blockNumber).toString(16), false],
+        }).then((response) => {
+            console.error('type of response.result', typeof response.result, [response.result]);
+            return response.result as EvmBlockData;
+        });
     }
 }

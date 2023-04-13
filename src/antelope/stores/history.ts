@@ -54,7 +54,7 @@ export const useHistoryStore = defineStore(store_name, {
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
-                next: ({ label, account }) => {
+                next: ({ account }) => {
                     const self = useHistoryStore();
                     if (account) {
                         if (account.isNative) {
@@ -62,9 +62,6 @@ export const useHistoryStore = defineStore(store_name, {
                         } else {
                             self.setFilter({ address: account.account });
                         }
-                        self.queryNextPage(label);
-                    } else {
-
                     }
                 },
             });

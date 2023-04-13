@@ -6,6 +6,7 @@ export * from 'src/antelope/types/ChainInfo';
 export * from 'src/antelope/types/ChainSettings';
 export * from 'src/antelope/types/EvmContractData';
 export * from 'src/antelope/types/EvmLog';
+export * from 'src/antelope/types/EvmBlockData';
 export * from 'src/antelope/types/EvmTransaction';
 export * from 'src/antelope/types/ExceptionError';
 export * from 'src/antelope/types/Filters';
