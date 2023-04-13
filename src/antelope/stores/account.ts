@@ -146,7 +146,7 @@ export const useAccountStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('account.login');
 
-                if (localStorage.getItem('wagmi.connected') && getAccount()){
+                if (localStorage.getItem('wagmi.connected')){
                     address = getAccount().address;
                 }else{
                     address = await useEVMStore().login(network);

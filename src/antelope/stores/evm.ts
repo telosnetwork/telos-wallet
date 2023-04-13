@@ -550,8 +550,7 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setExternalProvider(value: ExternalProvider | any | null) {
+        setExternalProvider(value: ExternalProvider | null) {
             this.trace('setExternalProvider', value);
             try {
                 this.__external_provider = value;

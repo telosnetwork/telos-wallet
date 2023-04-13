@@ -68,7 +68,7 @@ export default defineComponent({
         this.web3Modal.subscribeModal(async (newState) => {
             if (newState.open === false) {
                 this.$emit('toggleWalletConnect');
-                if (localStorage.getItem('wagmi.connected') && getAccount().address){
+                if (localStorage.getItem('wagmi.connected')){
                     this.loginEvm();
                 }
             }
