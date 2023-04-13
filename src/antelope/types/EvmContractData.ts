@@ -15,6 +15,7 @@ export interface EvmContractData {
 }
 
 export interface EvmContractManagerI {
+    getSigner: () => ethers.Signer;
     getRpcProvider: () => ethers.providers.JsonRpcProvider;
     getFunctionIface: (hash:string) => Promise<ethers.utils.Interface | null>;
     getEventIface: (hash:string) => Promise<ethers.utils.Interface | null>;

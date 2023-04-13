@@ -175,7 +175,7 @@ export const useChainStore = defineStore(store_name, {
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
                     this.__chains[label] = newChainModel(network);
                     void this.updateChainData(label);
-                    getAntelope().events.onChainChanged.next(
+                    getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },
                     );
                 }

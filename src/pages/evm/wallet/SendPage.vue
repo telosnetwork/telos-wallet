@@ -1,6 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
+import { getAntelope } from 'src/antelope';
+import { EvmToken, Token } from 'src/antelope/types';
+
+const ant = getAntelope();
 
 export default defineComponent({
     name: 'SendPage',
@@ -8,23 +12,70 @@ export default defineComponent({
         AppPage,
     },
     data: () => ({
-        address: '',
-        token: '',
+        address: '0xa30b5e3c8Fee56C135Aecb733cd708cC31A5657a',
+        token: null as EvmToken | null,
         amount: '',
         amountInFiat: '0.00 USD',
+        amountInTokens: '0.1234 TLOS',
         gasFeeInTlos: '0.0058 TLOS',
         gasFeeInFiat: '$0.00',
-        available: '12,845.1235 TLOS',
+        useFiat: false,
     }),
+    watch: {
+        balances: {
+            handler() {
+                if (this.balances.length > 0) {
+                    this.token = this.balances[0];
+                }
+            },
+            immediate: true,
+        },
+    },
+    computed: {
+        balances(): EvmToken[] {
+            console.log('ant.stores.balances.getBalances(\'logged\')', ant.stores.balances.getBalances('logged'));
+            return ant.stores.balances.getBalances('logged')
+                .map(t => ({ ...t, label: t.symbol })) as unknown as EvmToken[];
+        },
+        showContractLink(): boolean {
+            return !!this.token?.address;
+        },
+        available(): string {
+            if (this.token) {
+                return `${this.token.balance} ${this.token.symbol}`;
+            }
+            return '0.00 TLOS';
+        },
+    },
     methods: {
+        toggleUseFiat() {
+            this.useFiat = !this.useFiat;
+        },
         setAllBalance() {
             this.amount = this.available;
         },
         viewTokenContract() {
-            console.log('viewTokenContract');
+            if (this.token) {
+                const explorerUrl = ant.stores.chain.loggedEvmChain?.settings.getExplorerUrl();
+                if (explorerUrl) {
+                    window.open(explorerUrl + '/address/' + this.token.address, '_blank');
+                    return;
+                } else {
+                    ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: ant.stores.chain.currentChain?.settings.getNetwork() }));
+                }
+            }
         },
         goBack() {
             this.$router.back();
+        },
+        startTransfer() {
+            console.log('startTransfer');
+
+            // transferTokens(token: Token, to: string, amount: string, memo?: string)
+            const token = this.token;
+            const amount = this.amountInTokens.split(' ')[0];
+            const to = this.address;
+            ant.stores.balances.transferTokens(token as Token, to, amount);
         },
     },
 
@@ -62,20 +113,34 @@ export default defineComponent({
                 </div>
             </div>
             <div class="c-send-page__row c-send-page__row--3 row">
+                <!-- Token selection -->
                 <div class="col-auto">
                     <q-select
                         v-model="token"
                         outlined
                         :label="$t('evm_wallet.token')"
-                        :options="['TLOS', 'WTLOS', 'STLOS', 'ACORN']"
+                        :options="balances"
                         class="c-send-page__token-selector"
-                    />
-                    <div class="c-send-page__view-contract" @click="viewTokenContract">
+                    >
+                        <template v-slot:option="scope">
+                            <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
+                                <div class="c-send-page__selector-op-avatar">
+                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
+                                </div>
+                                <div>
+                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
+                                    <q-item-label class="c-send-page__selector-op-balance" caption>{{ scope.opt.tinyBalance }} {{ scope.opt.symbol }}</q-item-label>
+                                </div>
+                            </q-item>
+                        </template>
+                    </q-select>
+                    <div v-if="showContractLink" class="c-send-page__view-contract" @click="viewTokenContract">
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
                     </div>
                 </div>
-                <div class="col">
+                <!-- Amount input -->
+                <div class="c-send-page__amount-col col">
                     <q-input
                         v-model="amount"
                         outlined
@@ -84,12 +149,19 @@ export default defineComponent({
                         :rules="[val => !!val || $t('evm_wallet.amount_required')]"
                     >
                         <template v-slot:hint>
-                            <div class="c-send-page__amount-fiat">
+                            <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
+                                <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
+                                <span class="c-send-page__amount-fiat-text"> {{ amountInTokens }}</span>
+                            </div>
+                            <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
                                 <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
                                 <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
                             </div>
                         </template>
                     </q-input>
+                    <div v-if="token && amount" class="c-send-page__amount-symbol-container">
+                        <span class="c-send-page__amount-symbol"><span class="c-send-page__amount-transparent">{{ amount }}</span> {{ token.symbol }}</span>
+                    </div>
                 </div>
             </div>
             <div class="c-send-page__row c-send-page__row--4 row">
@@ -122,6 +194,7 @@ export default defineComponent({
                             color="primary"
                             :label="$t('evm_wallet.send')"
                             class="wallet-btn"
+                            @click="startTransfer"
                         />
                     </div>
                 </div>
@@ -194,6 +267,43 @@ export default defineComponent({
 
     &__token-selector {
         width: 140px;
+    }
+
+    &__selector-op-avatar {
+        padding: 0px 14px 0px 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &__selector-op-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    &__amount-col {
+        position: relative;
+    }
+
+    &__amount-symbol-container {
+        pointer-events: none;
+        position: absolute;
+        top: 25px;
+        left: 12px
+    }
+
+    &__amount-transparent {
+        font-weight: 400;
+        letter-spacing: 0.00937em;
+        outline: 0;
+        color: transparent;
+    }
+
+    &__amount-symbol {
+        font-weight: 400;
+        letter-spacing: 0.00937em;
+        outline: 0;
+        color: rgba(var(--text-color-rgb), 0.5)
     }
 
     &__view-contract {

@@ -54,6 +54,7 @@ const whenReady = evmEvents.onEvmReady.asObservable().pipe(
 );
 
 export interface EVMState {
+    __external_signer: ethers.Signer | null;
     __external_provider: ExternalProvider | null;
     __ethers_rpc_provider: ethers.providers.JsonRpcProvider | null;
     __supports_meta_mask: boolean;
@@ -62,6 +63,7 @@ export interface EVMState {
 const store_name = 'evm';
 
 const createManager = ():EvmContractManagerI => ({
+    getSigner: () => toRaw(useEVMStore().signer) as ethers.Signer,
     getRpcProvider: () => toRaw(useEVMStore().rpcProvider) as ethers.providers.JsonRpcProvider,
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
@@ -72,6 +74,7 @@ export const useEVMStore = defineStore(store_name, {
     getters: {
         provider: state => state.__external_provider,
         rpcProvider: state => state.__ethers_rpc_provider,
+        signer: state => state.__external_signer,
         isMetamaskSupported: state => state.__supports_meta_mask,
         functionInterfaces: () => functions_overrides,
         eventInterfaces: () => events_signatures,
@@ -134,7 +137,33 @@ export const useEVMStore = defineStore(store_name, {
                 }
             } finally {
                 useFeedbackStore().unsetLoading('evm.login');
+                const provider = await this.ensureProvider();
+                const checkProvider = new ethers.providers.Web3Provider(provider);
+                const signer = await checkProvider.getSigner();
+                this.setExternalSigner(signer);
+
             }
+        },
+        async sendSystemToken (to: string, amount: string): Promise<unknown> {
+            this.trace('sendSystemToken', to, amount);
+            // Define the amount to send
+            const value = this.toBigNumber(amount);
+
+            // Send the transaction
+            if (this.signer) {
+                this.signer.sendTransaction({
+                    to,
+                    value,
+                }).then((transaction) => {
+                    console.log(`Transaction sent: ${transaction.hash}`);
+                }).catch((error) => {
+                    throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                });
+            } else {
+                console.error('Error sending transaction: No signer');
+                throw new Error('antelope.evm.error_no_signer');
+            }
+            return null;
         },
         async ensureProvider(): Promise<ExternalProvider> {
             return new Promise((resolve, reject) => {
@@ -232,6 +261,15 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
+        // utils ---
+        toWei(value: string | number, decimals: number): string {
+            const amount = typeof value === 'string' ? parseFloat(value) : value;
+            const amountInWei = (amount * Math.pow(10, decimals)).toString();
+            return amountInWei;
+        },
+        toBigNumber(value: string): ethers.BigNumber {
+            return ethers.utils.parseEther(value);
+        },
         // Evm Contract Managment
         async getFunctionIface(hash:string): Promise<ethers.utils.Interface | null> {
             const prefix = hash.toLowerCase().slice(0, 10);
@@ -305,6 +343,7 @@ export const useEVMStore = defineStore(store_name, {
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
         async getContract(address:string, suspectedToken = ''): Promise<EvmContract | null> {
+            console.log('getContract()', address, suspectedToken);
             if (!address) {
                 return null;
             }
@@ -323,7 +362,7 @@ export const useEVMStore = defineStore(store_name, {
                 }
             }
 
-            const creationInfo = await this.getContractCreation(addressLower);
+            const creationInfo:EvmContractCreationInfo = await this.getContractCreation(addressLower);
 
             const metadata = await this.checkBucket(address);
             if (metadata && creationInfo) {
@@ -332,7 +371,6 @@ export const useEVMStore = defineStore(store_name, {
 
             const contract = await this.getContractFromTokenList(address, creationInfo, suspectedToken);
             if (contract) {
-                chain_settings.addContract(addressLower, contract);
                 return contract;
             }
 
@@ -498,7 +536,7 @@ export const useEVMStore = defineStore(store_name, {
                     creationInfo,
                     abi,
                     manager: createManager(),
-                    token: { ...token, address },
+                    token: { ...token, address } as EvmToken,
                 });
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
                 chain_settings.addContract(address, token_contract);
@@ -533,10 +571,19 @@ export const useEVMStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+        setExternalSigner(value: ethers.Signer | null) {
+            this.trace('setExternalSigner', value);
+            try {
+                this.__external_signer = value;
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+            }
+        },
     },
 });
 
 const evmInitialState: EVMState = {
+    __external_signer: null,
     __external_provider: null,
     __ethers_rpc_provider: null,
     __supports_meta_mask: false,

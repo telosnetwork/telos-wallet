@@ -11,8 +11,9 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: 'evm-native',
+    address: '',
     logo: LOGO,
+    logoURI: LOGO,
     isNative: false,
     isSystem: true,
 } as EvmToken;
@@ -51,7 +52,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getPriceData(): Promise<PriceChartData> {
-        return api.getEmptyPriceChartData();
+        return api.getCoingeckoPriceChartData('telos');
     }
 
     getSystemToken(): EvmToken {
@@ -59,7 +60,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getUsdPrice(): Promise<number> {
-        return Promise.resolve(0);
+        return api.getCoingeckoUsdPrice('telos');
     }
 
     getLargeLogoPath(): string {

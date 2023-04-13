@@ -119,7 +119,6 @@ export type AccountDetails = {
   total_actions: number;
 };
 
-
 export interface Token {
   symbol: string;
   name?: string;
@@ -127,6 +126,8 @@ export interface Token {
   logo?: string;
   isNative?: boolean;
   isSystem?: boolean;
+  price: number;
+  fiatBalance: string;
 }
 
 export interface EvmToken extends Token {

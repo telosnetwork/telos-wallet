@@ -224,3 +224,21 @@ export function prettyPrintCurrency(
 
     return formatted;
 }
+
+export function isAmountTooLarge(amount: number | string): boolean {
+    const primaryAmountIsTooLarge =
+        (typeof amount === 'number' && amount.toString().length > 6) ||
+        (typeof amount === 'string' && amount.length > 6);
+
+    return primaryAmountIsTooLarge;
+}
+
+export function prettyPrintCurrencyTiny(amount: number | string, locale: string) {
+    console.log('prettyPrintCurrencyTiny()', amount, locale);
+    return prettyPrintCurrency(+amount, 4, locale, isAmountTooLarge(amount));
+}
+
+export function prettyPrintFiatCurrency(fiatAmount: number | string, locale: string) {
+    console.log('prettyPrintCurrencyTiny()', fiatAmount, locale);
+    return prettyPrintCurrency(+fiatAmount, 2, locale, isAmountTooLarge(fiatAmount));
+}
