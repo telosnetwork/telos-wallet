@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import { markRaw } from 'vue';
-import { ExternalProvider } from '@ethersproject/providers';
 import {
     AntelopeError,
     EvmABI,
@@ -73,14 +72,15 @@ export default class EvmContract {
         return this.creationInfo.creator;
     }
 
-    getContractInstance(provider: ExternalProvider | null = null, createNew = false) {
+    // getContractInstance(signerOrProvider: ethers.providers.Provider | ethers.Signer | undefined = undefined, createNew = false) {
+    getContractInstance() {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
-
-        if (!this.contract || createNew) {
-            const web3Provider = provider ? new ethers.providers.Web3Provider(provider) : this.manager.getRpcProvider();
-            this.contract = new ethers.Contract(this.address, this.abi, web3Provider);
+        const signer = this.manager.getSigner();
+        console.log('-> getContractInstance()', this.address, [signer, this.manager.getRpcProvider()]);
+        if (!this.contract || signer) {
+            this.contract = new ethers.Contract(this.address, this.abi, signer ?? this.manager.getRpcProvider());
         }
         return this.contract;
     }
