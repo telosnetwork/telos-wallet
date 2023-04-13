@@ -11,12 +11,13 @@ const storeMock = {
                 getBuyMoreOfTokenLink: () => fakeBuyMoreLink,
                 getStlosContractAddress: () => fakeStlosContractAddress,
                 getWtlosContractAddress: () => fakeWtlosContractAddress,
+                getExplorerUrl: () => 'fake-url',
             },
         },
     }),
     useUserStore: () => ({
-        locale: 'en-US',
-        currency: 'USD',
+        fiatLocale: 'en-US',
+        fiatCurrency: 'USD',
     }),
 };
 
@@ -102,7 +103,6 @@ describe('WalletBalanceRow.vue', () => {
 
         beforeAll(() => {
             window.open = jest.fn();
-            process.env.EVM_NETWORK_EXPLORER = 'fake-url';
         });
 
         beforeEach(() => {
@@ -111,7 +111,6 @@ describe('WalletBalanceRow.vue', () => {
 
         afterAll(() => {
             window.open = originalWindowOpen;
-            process.env.EVM_NETWORK_EXPLORER = undefined;
         });
 
         test('TLOS', async () => {

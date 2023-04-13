@@ -253,7 +253,10 @@ export default defineComponent({
             items.push({
                 label: this.$t('evm_wallet.send'),
                 icon: require('assets/icon--arrow-diagonal.svg'),
-                url:  { name: 'evm-send', query: { token: this.token.address ?? '' } },
+                url:  {
+                    name: 'evm-send',
+                    query: { ...(this.token.address ? { token: this.token.address ?? '' } : {}) },
+                },
             });
 
             return items;
