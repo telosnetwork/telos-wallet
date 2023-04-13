@@ -22,7 +22,7 @@ const props = defineProps<{
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
-        :hide-delay="10000"
+        :hide-delay="5000"
     >
         <div class="c-tooltip__text-container">
             <div
