@@ -114,7 +114,7 @@ export const useEVMStore = defineStore(store_name, {
                 chain.setCurrentChain(network);
 
                 if (localStorage.getItem('wagmi.connected')){
-                    return getAccount().address || null;
+                    return getAccount().address as string;
                 }
 
                 const provider = await this.ensureProvider();
