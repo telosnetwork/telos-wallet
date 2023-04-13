@@ -29,7 +29,7 @@ jest.mock('src/antelope', () => storeMock);
 
 describe('WalletBalanceRow.vue', () => {
     const stubs = {
-        'q-tooltip': stubWithSlot('q-tooltip'),
+        'ToolTip': stubWithSlot('ToolTip'),
         'q-menu': stubWithSlot('q-menu'),
         'q-btn': stubWithSlot('q-btn'),
     };

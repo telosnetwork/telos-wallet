@@ -174,30 +174,17 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
         class="c-wallet-balance-row__primary-amount"
       >
         $456.79M 
-        
-        <inline-svg-stub
-          aria-hidden="true"
-          class="c-wallet-balance-row__info-icon"
-          keepduringloading="true"
-          src=""
-          transformsource="[Function]"
-        />
-        <q-tooltip-stub
-          model-value="false"
-        >
-          
-          <span
-            class="c-wallet-balance-row__tooltip"
-          >
-            evm_wallet.fiat_value:
+        <tooltip-stub
+          icon="info"
+          text="evm_wallet.fiat_value:
 $456,789,123.67
 
 evm_wallet.token_balance:
-3,642.024300000000000000
-          </span>
+3,642.024300000000000000"
+        >
           
-        </q-tooltip-stub>
-        
+          
+        </tooltip-stub>
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
@@ -337,30 +324,17 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
         class="c-wallet-balance-row__primary-amount"
       >
         $456.79M 
-        
-        <inline-svg-stub
-          aria-hidden="true"
-          class="c-wallet-balance-row__info-icon"
-          keepduringloading="true"
-          src=""
-          transformsource="[Function]"
-        />
-        <q-tooltip-stub
-          model-value="false"
-        >
-          
-          <span
-            class="c-wallet-balance-row__tooltip"
-          >
-            evm_wallet.fiat_value:
+        <tooltip-stub
+          icon="info"
+          text="evm_wallet.fiat_value:
 $456,789,123.67
 
 evm_wallet.token_balance:
-3,642.024300000000000000
-          </span>
+3,642.024300000000000000"
+        >
           
-        </q-tooltip-stub>
-        
+          
+        </tooltip-stub>
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
@@ -500,27 +474,14 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
         class="c-wallet-balance-row__primary-amount"
       >
         $0.00 
-        
-        <inline-svg-stub
-          aria-hidden="true"
-          class="c-wallet-balance-row__info-icon"
-          keepduringloading="true"
-          src=""
-          transformsource="[Function]"
-        />
-        <q-tooltip-stub
-          model-value="false"
+        <tooltip-stub
+          icon="info"
+          text="evm_wallet.token_balance:
+3,642.024300000000000000"
         >
           
-          <span
-            class="c-wallet-balance-row__tooltip"
-          >
-            evm_wallet.token_balance:
-3,642.024300000000000000
-          </span>
           
-        </q-tooltip-stub>
-        
+        </tooltip-stub>
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
@@ -683,30 +644,17 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
         class="c-wallet-balance-row__primary-amount"
       >
         $12.35K 
-        
-        <inline-svg-stub
-          aria-hidden="true"
-          class="c-wallet-balance-row__info-icon"
-          keepduringloading="true"
-          src=""
-          transformsource="[Function]"
-        />
-        <q-tooltip-stub
-          model-value="false"
-        >
-          
-          <span
-            class="c-wallet-balance-row__tooltip"
-          >
-            evm_wallet.fiat_value:
+        <tooltip-stub
+          icon="info"
+          text="evm_wallet.fiat_value:
 $12,345.67
 
 evm_wallet.token_balance:
-3,642.024300000000000000
-          </span>
+3,642.024300000000000000"
+        >
           
-        </q-tooltip-stub>
-        
+          
+        </tooltip-stub>
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
@@ -846,29 +794,15 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
         class="c-wallet-balance-row__primary-amount"
       >
         3.64K 
-        
-        <inline-svg-stub
-          aria-hidden="true"
-          class="c-wallet-balance-row__info-icon"
-          keepduringloading="true"
-          src=""
-          transformsource="[Function]"
-        />
-        <q-tooltip-stub
-          model-value="false"
+        <tooltip-stub
+          icon="info"
+          text="evm_wallet.token_balance:
+3,642.024300000000000000"
+          warnings="evm_wallet.no_fiat_value"
         >
           
-          <span
-            class="c-wallet-balance-row__tooltip"
-          >
-            evm_wallet.token_balance:
-3,642.024300000000000000
-
-evm_wallet.no_fiat_value
-          </span>
           
-        </q-tooltip-stub>
-        
+        </tooltip-stub>
       </div>
       <!--v-if-->
     </div>
