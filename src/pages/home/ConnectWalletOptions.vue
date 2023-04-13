@@ -1,13 +1,12 @@
 
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, defineComponent, inject, ref, watch } from 'vue';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { telos, telosTestnet } from '@wagmi/core/chains';
-import { configureChains, createClient, getAccount } from '@wagmi/core';
+import { EthereumClient } from '@web3modal/ethereum';
+import { getAccount } from '@wagmi/core';
 import { useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
@@ -19,6 +18,7 @@ export default defineComponent({
         },
     },
     setup(props){
+        const wagmiClient = inject('$wagmi') as EthereumClient;
         const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
@@ -51,28 +51,19 @@ export default defineComponent({
             loginEvm,
             connectToWalletConnect,
             redirectToMetamaskDownload,
+            wagmiClient,
         };
     },
     mounted() {
-        // create wagmi client and web3modal instance
         const projectId = process.env.PROJECT_ID || '';
-        const chains = [telos, telosTestnet];
-        const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
-
-        const wagmi = createClient({
-            autoConnect: true,
-            connectors: w3mConnectors({ projectId, version: 1, chains }),
-            provider,
-        });
-
         const explorerDenyList = [
             // MetaMask
             'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
         ];
 
         const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerDenyList };
-        const wagmiClient = new EthereumClient(wagmi, chains);
-        this.web3Modal = new Web3Modal(options, wagmiClient);
+
+        this.web3Modal = new Web3Modal(options, this.wagmiClient);
 
         this.web3Modal.subscribeModal(async (newState) => {
             if (newState.open === false) {
