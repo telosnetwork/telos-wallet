@@ -28,7 +28,7 @@ export default defineComponent({
             };
         });
 
-        const connectToMetaMask = () => {
+        const loginEvm = () => {
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();
@@ -42,13 +42,8 @@ export default defineComponent({
         };
 
         const setWalletConnectAccount = async () => {
-            const { address } = getAccount(); // wagmi
-            if (address){
-                const accountStore = useAccountStore();
-                const chainStore = useChainStore();
-                const network = chainStore.currentChain.settings.getNetwork();
-                accountStore.loginEVM({ network });
-
+            if (localStorage.getItem('wagmi.connected') && getAccount().address){
+                loginEvm();
             }
         };
 
@@ -59,7 +54,7 @@ export default defineComponent({
         return {
             web3Modal,
             supportsMetamask,
-            connectToMetaMask,
+            loginEvm,
             connectToWalletConnect,
             setWalletConnectAccount,
             redirectToMetamaskDownload,
@@ -71,7 +66,7 @@ export default defineComponent({
         const chains = [telos, telosTestnet];
 
         const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
-
+        // useEVMStore().setExternalProvider(provider);
         const wagmi = createClient({
             autoConnect: true,
             connectors: w3mConnectors({ projectId, version: 1, chains }),
@@ -91,9 +86,9 @@ export default defineComponent({
             if (newState.open === false) {
                 this.$emit('toggleWalletConnect');
                 //disable injected login for mobile
-                if (!usePlatformStore().isMobile){
-                    await this.setWalletConnectAccount();
-                }
+                // if (!usePlatformStore().isMobile){
+                await this.setWalletConnectAccount();
+                // }
             }
         });
     },
@@ -114,7 +109,7 @@ export default defineComponent({
         <div class="wallet-options__header">
             Connect your wallet
         </div>
-        <div class="wallet-options__option" @click="supportsMetamask ? connectToMetaMask() : redirectToMetamaskDownload()">
+        <div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
