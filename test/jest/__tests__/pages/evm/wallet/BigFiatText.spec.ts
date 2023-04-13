@@ -3,8 +3,8 @@ import { shallowMount } from '@vue/test-utils';
 import * as antelope from 'src/antelope';
 jest.mock('src/antelope', () => ({
     useUserStore: () => ({
-        locale: 'en-US',
-        currency: 'USD',
+        fiatLocale: 'en-US',
+        fiatCurrency: 'USD',
     }),
 }));
 
