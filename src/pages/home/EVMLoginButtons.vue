@@ -5,18 +5,25 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
-    methods: {
-        setDefaultEVMChain() {
+    setup(props, { emit }){
+
+        const setDefaultEVMChain = () => {
             const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet' ;
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
-        },
-        viewAnyAccount() {
+        };
 
-        },
-        toggleWalletOptions() {
-            usePlatformStore().isMobile ? this.$emit('toggleWalletConnect') : this.$emit('showWalletOptions');
-        },
+        const viewAnyAccount = () => {};
+
+        const toggleWalletOptions = () => {
+            usePlatformStore().isMobile ? emit('toggleWalletConnect') : emit('showWalletOptions');
+        };
+
+        return {
+            setDefaultEVMChain,
+            viewAnyAccount,
+            toggleWalletOptions,
+        };
     },
     mounted() {
         this.setDefaultEVMChain();
