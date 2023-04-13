@@ -75,7 +75,7 @@ export default defineComponent({
                     role="menuitem"
                     tabindex="0"
                     @click="gotoTeloscan()"
-                    @keypress.space.enter="$router.push({ name: 'evm-staking' })"
+                    @keypress.space.enter="gotoTeloscan()"
                 >
                     <div class="c-user-info__icon-wraper"><InlineSvg
                         :src="require('src/assets/icon--acorn.svg')"

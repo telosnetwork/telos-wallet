@@ -40,13 +40,33 @@ export interface AccountId {
     account: string;
 }
 
+// should be updated as new locales and currencies are added, e.g.
+//     export type SupportedCurrencyLocale = 'en-US' | 'es-ES';
+//     export type SupportedCurrency = 'USD' | 'MXN';
+// as locales/currencies are added, unit tests for prettyPrintCurrency should be updated to ensure
+// new currency formats are properly displayed
+export type SupportedCurrencyLocale = 'en-US';
+export type SupportedCurrency = 'USD';
+
+export interface UserCurrencyPreference {
+    fiatLocale: SupportedCurrencyLocale;
+    fiatCurrency: SupportedCurrency;
+}
+
+const defaultCurrencyPreferences: UserCurrencyPreference = {
+    fiatLocale: 'en-US',
+    fiatCurrency: 'USD',
+};
+
 export interface UserState {
     __user_id: string;
     __user_name: string;
     __user_accounts: AccountList;
     __all_users: Array<UserModel>;
+    __preferred_fiat_currency: UserCurrencyPreference | null,
 }
 const LOCAL_STORAGE_KEY = 'user-store';
+const CURRENCY_PREFERENCES_KEY = 'currency-preferences';
 
 const store_name = 'user';
 
@@ -58,6 +78,9 @@ export const useUserStore = defineStore(store_name, {
         name: state => state.__user_name,
         accounts: state => state.__user_accounts,
         allUsers: state => state.__all_users,
+        currencyPreferences: state => state.__preferred_fiat_currency,
+        fiatLocale: state => state.__preferred_fiat_currency?.fiatLocale || '',
+        fiatCurrency: state => state.__preferred_fiat_currency?.fiatCurrency || '',
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -78,6 +101,35 @@ export const useUserStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             } finally {
                 useFeedbackStore().unsetLoading('account.loadUsers');
+            }
+
+            this.loadCurrencyPreferences();
+        },
+        loadCurrencyPreferences() {
+            this.trace('loadCurrencyPreferences');
+            let shouldSetDefaultPreferences = false;
+
+            try {
+                const { fiatLocale, fiatCurrency } = JSON.parse(localStorage.getItem(CURRENCY_PREFERENCES_KEY) || '{}');
+
+                // if stored locale or currency is undefined, set both to defaults
+                if (![typeof fiatLocale, typeof fiatCurrency].every(type => type === 'string')) {
+                    shouldSetDefaultPreferences = true;
+                } else {
+                    this.setCurrencyPreferences({
+                        fiatLocale,
+                        fiatCurrency,
+                    }, false);
+                }
+
+            } catch(error) {
+                console.error('Error: ', errorToString(error));
+
+                shouldSetDefaultPreferences = true;
+            }
+
+            if (shouldSetDefaultPreferences) {
+                this.setCurrencyPreferences(defaultCurrencyPreferences, true);
             }
         },
         async saveUsers(): Promise<void> {
@@ -226,6 +278,28 @@ export const useUserStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+        setCurrencyPreferences(preferences: UserCurrencyPreference, setLocalStorage = false) {
+            this.trace('setCurrencyPreferences', preferences);
+
+            try {
+                this.__preferred_fiat_currency = { ...preferences };
+
+                if (setLocalStorage) {
+                    localStorage.setItem(CURRENCY_PREFERENCES_KEY, JSON.stringify(preferences));
+                }
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+
+                this.__preferred_fiat_currency = { ...defaultCurrencyPreferences };
+
+                if (setLocalStorage) {
+                    localStorage.setItem(
+                        CURRENCY_PREFERENCES_KEY,
+                        JSON.stringify(defaultCurrencyPreferences),
+                    );
+                }
+            }
+        },
     },
 });
 
@@ -234,5 +308,6 @@ export const userInitialState: UserState = {
     __user_name: '',
     __user_accounts: [],
     __all_users: [],
+    __preferred_fiat_currency: null,
 };
 

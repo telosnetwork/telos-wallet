@@ -1,5 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { useUserStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'BigFiatText',
@@ -10,25 +12,17 @@ export default defineComponent({
         },
     },
     computed: {
-        // TODO use dynamic fiat to get symbol
-        // https://github.com/telosnetwork/telos-wallet/issues/215
-        symbol() {
-            return '$';
-        },
         prettyAmount() {
-            let formatted = this.amount.toLocaleString('en-us');
+            const { fiatLocale, fiatCurrency } = useUserStore();
+            let formatted = prettyPrintCurrency(
+                this.amount,
+                2,
+                fiatLocale,
+                false,
+                fiatCurrency,
+            );
 
-            if (formatted.indexOf('.') !== -1) {
-                const formattedInteger = formatted.split('.')[0];
-                const formattedFraction = this.amount.toFixed(2).split('.')[1];
-
-                formatted = `${formattedInteger}.${formattedFraction}`;
-
-            } else {
-                formatted = `${formatted}.00`;
-            }
-
-            return `${this.symbol} ${formatted}`;
+            return `${formatted}`;
         },
     },
 });
