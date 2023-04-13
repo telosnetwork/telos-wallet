@@ -18,7 +18,7 @@ export default defineComponent({
             type: Boolean,
         },
     },
-    setup(props, { emit }){
+    setup(props){
         const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
@@ -41,12 +41,6 @@ export default defineComponent({
             }
         };
 
-        const setWalletConnectAccount = async () => {
-            if (localStorage.getItem('wagmi.connected') && getAccount().address){
-                loginEvm();
-            }
-        };
-
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
@@ -56,7 +50,6 @@ export default defineComponent({
             supportsMetamask,
             loginEvm,
             connectToWalletConnect,
-            setWalletConnectAccount,
             redirectToMetamaskDownload,
         };
     },
@@ -64,9 +57,8 @@ export default defineComponent({
         // create wagmi client and web3modal instance
         const projectId = process.env.PROJECT_ID || '';
         const chains = [telos, telosTestnet];
-
         const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
-        // useEVMStore().setExternalProvider(provider);
+
         const wagmi = createClient({
             autoConnect: true,
             connectors: w3mConnectors({ projectId, version: 1, chains }),
@@ -85,10 +77,9 @@ export default defineComponent({
         this.web3Modal.subscribeModal(async (newState) => {
             if (newState.open === false) {
                 this.$emit('toggleWalletConnect');
-                //disable injected login for mobile
-                // if (!usePlatformStore().isMobile){
-                await this.setWalletConnectAccount();
-                // }
+                if (localStorage.getItem('wagmi.connected') && getAccount().address){
+                    this.loginEvm();
+                }
             }
         });
     },
