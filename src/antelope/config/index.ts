@@ -8,6 +8,10 @@ export class AntelopeConfig {
     private __notify_success_handler: (message: string) => void = alert;
     private __notify_warning_handler: (message: string) => void = alert;
 
+    // transaction attempts handlers --
+    private __notify_successful_trx_handler: (link: string) => void = alert;
+    private __notify_failed_trx_handler: (message: string) => void = alert;
+
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
 
@@ -74,6 +78,14 @@ export class AntelopeConfig {
         return this.__notify_warning_handler;
     }
 
+    get notifySuccessfulTrxHandler() {
+        return this.__notify_successful_trx_handler;
+    }
+
+    get notifyFailedTrxHandler() {
+        return this.__notify_failed_trx_handler;
+    }
+
     get authenticatorsGetter() {
         return this.__authenticators_getter;
     }
@@ -97,6 +109,14 @@ export class AntelopeConfig {
 
     public setNotifyWarningHandler(handler: (message: string) => void) {
         this.__notify_warning_handler = handler;
+    }
+
+    public setNotifySuccessfulTrxHandler(handler: (link: string) => void) {
+        this.__notify_successful_trx_handler = handler;
+    }
+
+    public setNotifyFailedTrxHandler(handler: (message: string) => void) {
+        this.__notify_failed_trx_handler = handler;
     }
 
     // setting authenticators getter --
