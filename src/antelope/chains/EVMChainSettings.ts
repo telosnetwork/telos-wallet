@@ -172,7 +172,18 @@ export default abstract class EVMChainSettings implements ChainSettings {
         this.tokenListPromise = axios.get(url)
             .then(results => results.data.tokens as unknown as {chainId:number, logoURI: string}[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
-            .then(tokens => tokens.map(t => ({ ...t, logo: t.logoURI })))
+            .then(tokens => tokens.map(t => ({
+                // defaults values
+                logo: t.logoURI ?? require('src/assets/logo--tlos.svg'),
+                isNative: false,
+                isSystem: false,
+                price: 0,
+                balance: '',
+                fullBalance: '',
+                fiatBalance: '',
+                // actual token values
+                ...t,
+            })))
             .then(tokens => tokens.map(t => t as unknown as EvmToken));
 
 

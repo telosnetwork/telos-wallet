@@ -75,6 +75,7 @@ export default {
         amount_available: '{amount} Available',
         amount_required: 'Amount is required',
         view_contract: 'View Contract',
+        invalid_form: 'There are still invalid fields',
     },
     global: {
         native: 'Native',
@@ -354,6 +355,10 @@ export default {
             error_parsing_transaction: 'Failed to parse transaction data',
             error_contract_instance: 'Failed to create contract instance',
             error_parsing_log_event: 'Failed to parse log event',
+        },
+        balances: {
+            error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
+            error_token_contract_not_found: 'Token contract not found for address {address}',
         },
     },
 };

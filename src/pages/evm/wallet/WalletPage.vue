@@ -21,7 +21,7 @@ export default defineComponent({
     }),
     computed: {
         chainTokens(): EvmToken[] {
-            const tokens = [];
+            const tokens:EvmToken[] = [];
 
             const chainStore = useChainStore();
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
@@ -38,13 +38,24 @@ export default defineComponent({
                 logo,
             } = chainSettings.getSystemToken();
 
+            const defaults = {
+                chainId: +chainStore.currentChain.settings.getChainId(),
+                isNative: false,
+                isSystem: false,
+                price: 0,
+                fiatBalance: '',
+            };
+
             const chainToken: EvmToken = {
+                ...defaults,
+                isSystem: true,
+                address: '',
                 symbol,
                 name,
                 logoURI: logo,
                 decimals,
-                balance: balance ?? '0',
-                fullBalance: fullBalance ?? '0',
+                balance: balance ?? '',
+                fullBalance: fullBalance ?? '',
             };
 
             tokens.push(chainToken);
@@ -53,6 +64,7 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get stlos token info from store
                 tokens.push({
+                    ...defaults,
                     address: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -67,6 +79,7 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get wtlos token info from store
                 tokens.push({
+                    ...defaults,
                     address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
                     symbol: 'WTLOS',
                     name: 'Wrapped TLOS',
@@ -82,7 +95,18 @@ export default defineComponent({
         nonChainTokens(): EvmToken[] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //      get all user tokens here. filter out wlos and stlos if they appear in this list.
+            const chainStore = useChainStore();
+            const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
+            const defaults = {
+                chainId: +chainStore.currentChain.settings.getChainId(),
+                isNative: false,
+                isSystem: false,
+                price: 0,
+                fiatBalance: '',
+            };
+
             return [{
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTA',
                 name: 'Shitcoin Alpha',
@@ -91,6 +115,7 @@ export default defineComponent({
                 balance: '350.0032',
                 fullBalance: '350.0032',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTB',
                 name: 'Shitcoin Beta',
@@ -99,6 +124,7 @@ export default defineComponent({
                 balance: '870123.0000',
                 fullBalance: '870123.0000',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB2',
                 name: 'Shiba 2',
@@ -107,6 +133,7 @@ export default defineComponent({
                 balance: '10',
                 fullBalance: '10',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB',
                 name: 'Shiba',
