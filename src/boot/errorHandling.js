@@ -40,6 +40,7 @@ const successNotification = function(message) {
 };
 
 // TODO: refactoring needed --------------------
+// https://github.com/telosnetwork/telos-wallet/issues/254
 const ant = getAntelope();
 
 const check_icon = `<svg width="33" height="28" viewBox="0 0 33 28" fill="none" xmlns="http://www.w3.org/2000/svg">

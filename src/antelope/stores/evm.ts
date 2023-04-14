@@ -42,6 +42,7 @@ import {
     supportsInterfaceAbi,
     Token,
     VerifiedContractMetadata,
+    EvmTransactionResponse,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
@@ -157,18 +158,19 @@ export const useEVMStore = defineStore(store_name, {
 
             }
         },
-        async sendSystemToken (to: string, amount: string): Promise<unknown> {
+        async sendSystemToken (to: string, amount: string): Promise<EvmTransactionResponse> {
             this.trace('sendSystemToken', to, amount);
             // Define the amount to send
             const value = this.toBigNumber(amount);
 
             // Send the transaction
             if (this.signer) {
-                this.signer.sendTransaction({
+                return this.signer.sendTransaction({
                     to,
                     value,
-                }).then((transaction) => {
+                }).then((transaction: ethers.providers.TransactionResponse) => {
                     console.log(`Transaction sent: ${transaction.hash}`);
+                    return transaction;
                 }).catch((error) => {
                     throw new AntelopeError('antelope.evm.error_send_transaction', { error });
                 });
@@ -176,7 +178,6 @@ export const useEVMStore = defineStore(store_name, {
                 console.error('Error sending transaction: No signer');
                 throw new Error('antelope.evm.error_no_signer');
             }
-            return null;
         },
         async ensureProvider(): Promise<ExternalProvider> {
             return new Promise((resolve, reject) => {
@@ -531,10 +532,10 @@ export const useEVMStore = defineStore(store_name, {
                 } else if(type === 'erc721'){
                     tokenData.symbol = await contract.symbol();
                     tokenData.name = await contract.name();
-                    tokenData.has_metadata = await this.supportsInterface(address, '0x5b5e139f');
+                    tokenData.hasMetadata = await this.supportsInterface(address, '0x5b5e139f');
                 } else if(type === 'erc1155'){
                     tokenData.name = contract.name || contract.address;
-                    tokenData.has_metadata = await this.supportsInterface(address, '0x0e89341c');
+                    tokenData.hasMetadata = await this.supportsInterface(address, '0x0e89341c');
                 }
 
                 tokenData.type = type;
