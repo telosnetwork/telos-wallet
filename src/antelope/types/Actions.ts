@@ -130,13 +130,15 @@ export interface Token {
 }
 
 export interface EvmToken extends Token {
-  address: string;
+  address?: string;
+  chainId?: number;
   metadata?: string;
   has_metadata?:boolean;
   symbol: string;
   name: string;
+  logoURI?: string;
   decimals: number;
-  type: string;
+  type?: string;
   balance?: string;
   fullBalance?: string;
 }

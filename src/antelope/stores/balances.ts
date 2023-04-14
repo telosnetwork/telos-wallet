@@ -75,7 +75,7 @@ export const useBalancesStore = defineStore(store_name, {
                         const evm = useEVMStore();
                         const tokens = await chain_settings.getTokenList();
                         balances = tokens;
-                        const promises = tokens.map((token, index) => evm.getContract(token.address)
+                        const promises = tokens.map((token, index) => evm.getContract(token.address ?? '')
                             .then((contract) => {
                                 if (contract) {
                                     try {
