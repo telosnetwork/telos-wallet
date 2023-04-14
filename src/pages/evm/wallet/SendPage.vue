@@ -1,10 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
-import { getAntelope } from 'src/antelope';
-import { EvmToken, Token } from 'src/antelope/types';
+import { getAntelope, useUserStore } from 'src/antelope';
+import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
+const userStore = useUserStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -12,11 +14,9 @@ export default defineComponent({
         AppPage,
     },
     data: () => ({
-        address: '0xa30b5e3c8Fee56C135Aecb733cd708cC31A5657a',
+        address: '', // 0xa30b5e3c8Fee56C135Aecb733cd708cC31A5657a
         token: null as EvmToken | null,
         amount: '',
-        amountInFiat: '0.00 USD',
-        amountInTokens: '0.1234 TLOS',
         gasFeeInTlos: '0.0058 TLOS',
         gasFeeInFiat: '$0.00',
         useFiat: false,
@@ -30,8 +30,18 @@ export default defineComponent({
             },
             immediate: true,
         },
+        token: {
+            handler() {
+                this.useFiat = false;
+                this.setAllBalance();
+            },
+            immediate: true,
+        },
     },
     computed: {
+        isMobile(): boolean {
+            return this.$q.screen.lt.md;
+        },
         balances(): EvmToken[] {
             console.log('ant.stores.balances.getBalances(\'logged\')', ant.stores.balances.getBalances('logged'));
             return ant.stores.balances.getBalances('logged')
@@ -42,17 +52,82 @@ export default defineComponent({
         },
         available(): string {
             if (this.token) {
-                return `${this.token.balance} ${this.token.symbol}`;
+                if (this.useFiat) {
+                    return prettyPrintFiatBalance(this.token.fiatBalance, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                } else {
+                    return prettyPrintBalance(this.token.balance, useUserStore().fiatLocale, this.isMobile, this.token.symbol);
+                }
             }
-            return '0.00 TLOS';
+            return '';
+        },
+        amountInFiat(): string {
+            if (this.token && this.token.price && !this.useFiat) {
+                return prettyPrintFiatBalance(+this.amount * this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+            }
+            return '';
+        },
+        amountInTokens(): string {
+            if (this.token && this.token.price && this.useFiat) {
+                return prettyPrintBalance(+this.amount / this.token.price, useUserStore().fiatLocale, this.isMobile, this.token.symbol);
+            }
+            return '';
+        },
+        fiatSymbol(): string {
+            return userStore.fiatCurrency;
+        },
+        fiatRateText(): string {
+            if (!this.token || !this.token.price) {
+                return '';
+            }
+
+            const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+            return `(@ ${pretty} / ${this.token.symbol})`;
+        },
+        finalTokenAmount(): string {
+            if (this.useFiat && this.token) {
+                return (+this.amount / this.token.price).toString();
+            } else {
+                return this.amount;
+            }
+        },
+        isAddressValid(): boolean {
+            const regex = /^0x[a-fA-F0-9]{40}$/;
+            return regex.test(this.address);
+        },
+        isAmountValid(): boolean {
+            if (this.token) {
+                const amount = +this.finalTokenAmount;
+                return amount > 0 && amount <= +this.token.fullBalance;
+            } else {
+                return false;
+            }
+        },
+        isFormValid(): boolean {
+            return this.isAddressValid && this.isAmountValid;
         },
     },
     methods: {
         toggleUseFiat() {
+            if (this.token) {
+                if (this.useFiat) {
+                    this.amount = (+this.amount / this.token.price).toString();
+                } else {
+                    this.amount = (+this.amount * this.token.price).toString();
+                }
+            }
+
             this.useFiat = !this.useFiat;
         },
         setAllBalance() {
-            this.amount = this.available;
+            if (this.token) {
+                if (this.useFiat) {
+                    this.amount = (+this.token.balance * this.token.price).toString();
+                } else {
+                    this.amount = this.token.balance;
+                }
+            } else {
+                this.amount = '';
+            }
         },
         viewTokenContract() {
             if (this.token) {
@@ -69,13 +144,23 @@ export default defineComponent({
             this.$router.back();
         },
         startTransfer() {
-            console.log('startTransfer');
-
-            // transferTokens(token: Token, to: string, amount: string, memo?: string)
             const token = this.token;
-            const amount = this.amountInTokens.split(' ')[0];
+            const amount = this.finalTokenAmount;
             const to = this.address;
-            ant.stores.balances.transferTokens(token as Token, to, amount);
+            if (this.isFormValid) {
+                ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
+                    const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
+                    if(chain_settings) {
+                        ant.config.notifySuccessfulTrxHandler(
+                            `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                        );
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            } else {
+                ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
+            }
         },
     },
 
@@ -142,25 +227,38 @@ export default defineComponent({
                 <!-- Amount input -->
                 <div class="c-send-page__amount-col col">
                     <q-input
-                        v-model="amount"
+                        v-model.number="amount"
                         outlined
                         class="c-send-page__amount-input"
                         :label="$t('evm_wallet.amount')"
                         :rules="[val => !!val || $t('evm_wallet.amount_required')]"
+                        type="number"
+                        step="0.01"
+                        pattern="[0-9]*\.?[0-9]+"
                     >
                         <template v-slot:hint>
-                            <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
-                                <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                <span class="c-send-page__amount-fiat-text"> {{ amountInTokens }}</span>
-                            </div>
-                            <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
-                                <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
+                            <div v-if="token && token.price > 0" class="c-send-page__amount-fiat-footer">
+                                <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
+                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
+                                    <span class="c-send-page__amount-fiat-text"> {{ amountInTokens }}</span>
+                                </div>
+                                <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
+                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
+                                    <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
+                                </div>
+                                <div class="c-send-page__amount-fiat-rate">
+                                    {{ fiatRateText }}
+                                </div>
                             </div>
                         </template>
                     </q-input>
+
                     <div v-if="token && amount" class="c-send-page__amount-symbol-container">
-                        <span class="c-send-page__amount-symbol"><span class="c-send-page__amount-transparent">{{ amount }}</span> {{ token.symbol }}</span>
+                        <span class="c-send-page__amount-symbol">
+                            <span class="c-send-page__amount-transparent">{{ amount }} &nbsp;</span>
+                            <span v-if="useFiat"> {{ fiatSymbol }} </span>
+                            <span v-else> {{ token.symbol }} </span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -330,6 +428,18 @@ export default defineComponent({
         display: flex;
         align-items: center;
         cursor: pointer;
+        flex-grow: 1;
+    }
+
+    &__amount-fiat-footer {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__amount-fiat-rate {
+        margin-top: 3px;
+        font-size: 0.9rem;
+        margin-right: -12px;
     }
 
     &__amount-fiat-icon {

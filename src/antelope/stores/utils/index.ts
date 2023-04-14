@@ -245,12 +245,11 @@ export function isAmountTooLarge(amount: number | string): boolean {
     return primaryAmountIsTooLarge;
 }
 
-export function prettyPrintCurrencyTiny(amount: number | string, locale: string) {
-    console.log('prettyPrintCurrencyTiny()', amount, locale);
-    return prettyPrintCurrency(+amount, 4, locale, isAmountTooLarge(amount));
+export function prettyPrintBalance(amount: number | string, locale: string, tiny: boolean, symbol = '') {
+    return ['', ' ' + symbol].join(prettyPrintCurrency(+amount, 4, locale, tiny ? isAmountTooLarge(amount) : false));
 }
 
-export function prettyPrintFiatCurrency(fiatAmount: number | string, locale: string) {
-    console.log('prettyPrintCurrencyTiny()', fiatAmount, locale);
-    return prettyPrintCurrency(+fiatAmount, 2, locale, isAmountTooLarge(fiatAmount));
+export function prettyPrintFiatBalance(fiatAmount: number | string, locale: string, tiny: boolean, currency = 'USD') {
+    return prettyPrintCurrency(+fiatAmount, 2, locale, tiny ? isAmountTooLarge(fiatAmount) : false, currency);
 }
+

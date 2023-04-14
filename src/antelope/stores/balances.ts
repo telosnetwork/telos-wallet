@@ -21,18 +21,22 @@ import {
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import { errorToString } from 'src/antelope/config';
-import { getAntelope, useUserStore } from '..';
+import { getAntelope } from '..';
 import {
+    AntelopeError,
     EvmToken,
+    EvmTransactionResponse,
     Label,
     NativeToken,
+    NativeTransactionResponse,
     Token,
+    TransactionResponse,
 } from 'src/antelope/types';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useEVMStore } from 'src/antelope/stores/evm';
-import { formatWei, prettyPrintCurrencyTiny, prettyPrintFiatCurrency } from 'src/antelope/stores/utils';
+import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber } from 'ethers';
 import { toRaw } from 'vue';
 
@@ -87,12 +91,12 @@ export const useBalancesStore = defineStore(store_name, {
                                     try {
                                         const contractInstance = contract.getContractInstance();
                                         const address = account.account;
-                                        return contractInstance.balanceOf(address).then((balance: BigNumber) => {
-                                            token.balance = `${formatWei(balance, token.decimals, 4)}`;
-                                            token.fullBalance = `${formatWei(balance, token.decimals)}`;
-                                            token.tinyBalance = prettyPrintCurrencyTiny(token.fullBalance, useUserStore().locale);
+                                        return contractInstance.balanceOf(address).then((value: BigNumber) => {
+                                            const balance = `${formatWei(value, token.decimals, 4)}`;
+                                            token.balance = `${formatWei(value, token.decimals, 4)}`;
+                                            token.fullBalance = `${formatWei(value, token.decimals)}`;
                                             // only adding balance if it is greater than 0
-                                            if (parseFloat(token.balance) > 0) {
+                                            if (parseFloat(balance) > 0) {
                                                 this.__balances[label] = [...this.__balances[label], token];
                                             }
                                         });
@@ -130,8 +134,6 @@ export const useBalancesStore = defineStore(store_name, {
                     token.balance = `${formatWei(balance, token.decimals, 4)}`;
                     token.fiatBalance = `${parseFloat(token.balance) * price}`;
                     token.fullBalance = `${formatWei(balance, token.decimals)}`;
-                    token.tinyBalance = prettyPrintCurrencyTiny(token.fullBalance, useUserStore().locale);
-                    // token.tinyFiatBalance = prettyPrintFiatCurrency(token.fiatBalance, useUserStore().locale);
                     // only adding balance if it is greater than 0
                     if (parseFloat(token.balance) > 0) {
                         this.__balances[label] = [token, ...this.__balances[label]];
@@ -140,26 +142,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
             return Promise.resolve(token);
         },
-        async updateBalancesPrettyPrints(label: string) {
-            this.trace('updateBalancesPrettyPrints', label);
-            try {
-                const chain_settings = useChainStore().getChain(label).settings;
-                if (chain_settings.isNative()) {
-                } else {
-                    useFeedbackStore().setLoading('updateBalancesPrettyPrints');
-                    const balances = this.getBalances(label) as EvmToken[];
-                    balances.forEach((token) => {
-                        token.tinyBalance = prettyPrintCurrencyTiny(token.fullBalance, useUserStore().locale);
-                        token.prettyBalance = prettyPrintCurrencyTiny(token.fullBalance, useUserStore().locale);
-                    });
-                }
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            } finally {
-                useFeedbackStore().unsetLoading('updateBalancesPrettyPrints');
-            }
-        },
-        async transferTokens(token: Token, to: string, amount: string, memo?: string): Promise<unknown> {
+        async transferTokens(token: Token, to: string, amount: string, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount, memo);
             try {
                 useFeedbackStore().setLoading('transferTokens');
@@ -175,6 +158,7 @@ export const useBalancesStore = defineStore(store_name, {
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+                throw error;
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
             }
@@ -186,7 +170,7 @@ export const useBalancesStore = defineStore(store_name, {
             to: string,
             amount: string,
             memo: string,
-        ): Promise<unknown> {
+        ): Promise<NativeTransactionResponse> {
             this.trace('transferNativeTokens', settings, account, token, to, amount, memo);
             try {
                 useFeedbackStore().setLoading('transferNativeTokens');
@@ -204,6 +188,7 @@ export const useBalancesStore = defineStore(store_name, {
                 });
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+                throw error;
             } finally {
                 useFeedbackStore().unsetLoading('transferNativeTokens');
             }
@@ -214,33 +199,27 @@ export const useBalancesStore = defineStore(store_name, {
             token: EvmToken,
             to: string,
             amount: string,
-        ): Promise<unknown> {
+        ): Promise<EvmTransactionResponse> {
             this.trace('transferEVMTokens', settings, account, token, to, amount);
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
                 const evm = useEVMStore();
 
                 if (token.isSystem) {
-                    evm.sendSystemToken(to, amount).then((a:unknown) => {
-                        console.log('Transaction sent:', a);
-                    }).catch((error: unknown) => {
-                        console.error(error);
-                    });
+                    return evm.sendSystemToken(to, amount);
                 } else {
                     const contract = await evm.getContract(token.address, 'erc20');
                     if (contract) {
                         const contractInstance = contract.getContractInstance();
                         const amountInWei = evm.toWei(amount, token.decimals);
-                        return contractInstance.transfer(to, amountInWei).then((a:unknown) => {
-                            console.log('Transaction sent:', a);
-                        }).catch((error: unknown) => {
-                            console.error(error);
-                        });
+                        return contractInstance.transfer(to, amountInWei);
+                    } else {
+                        throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
                     }
                 }
-
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+                throw new Error('antelope.balances.error_at_transfer_tokens');
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
