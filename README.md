@@ -40,6 +40,11 @@ yarn dev
 ```bash
 yarn lint
 ```
+### Run tests
+
+```bash
+npx jest
+```
 
 ### Build the app for production
 
