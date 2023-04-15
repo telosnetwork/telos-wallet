@@ -43,7 +43,7 @@ yarn lint
 ### Run tests
 
 ```bash
-npx jest
+yarn test
 ```
 
 ### Build the app for production
