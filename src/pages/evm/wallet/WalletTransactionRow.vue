@@ -1,8 +1,9 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
+import { ShapedTransactionRow } from 'src/antelope/types';
 
 const receiveIcon = require('src/assets/icon--arrow-diagonal.svg');
 
@@ -13,41 +14,68 @@ export default defineComponent({
         ExternalLink,
         InlineSvg,
     },
-    data: () => ({
-        // eztodo development aids, delete when done
-        tempInteractedWithText: '0x'.concat('1'.repeat(40)),
-        tempActionDescriptiveText: 'Received',
-        tempActionPrepositionText: 'from',
-        tempShowSecondaryInteractionText: true,
-        tempActionName: 'swapExactTokensForTokens',
-    }),
+    props: {
+        transaction: {
+            type: Object as PropType<ShapedTransactionRow>,
+            required: true,
+        },
+    },
     computed: {
         actionName(): string {
-            return this.tempActionName;
+            return this.transaction.actionName;
         },
-        interactionIcon() {
+        interactionIcon(): string {
             return receiveIcon;
         },
         showInteractionSecondaryText(): boolean {
-            return this.tempShowSecondaryInteractionText;
+            // on mobile, the second line of text is never shown
+            // on desktop, if the action has descriptive text, the second line is the name of the action
+            //             otherwise, it is a link to the address/account that was interacted with
+            return !['send', 'receive'].includes(this.transaction.actionName);
         },
         actionHasDescriptiveText(): boolean {
-            return !!this.actionDescriptiveText;
+            // only true for 'known actions' send, receive, and swapExactTokensForTokens
+            return ['send', 'receive', 'swapTokensForExactTokens'].includes(this.transaction.actionName);
         },
         actionDescriptiveText(): string {
-            return this.tempActionDescriptiveText;
+            // eztodo make i18n
+            switch (this.transaction.actionName) {
+            case 'send':
+                return 'Sent';
+            case 'receive':
+                return 'Received';
+            case 'swapTokensForExactTokens':
+                return 'Swapped';
+            default:
+                return '';
+            }
         },
         actionPrepositionText(): string {
-            return this.tempActionPrepositionText;
+            // eztodo make i18n
+            switch (this.transaction.actionName) {
+            case 'send':
+                return 'to';
+            case 'receive':
+                return 'from';
+            case 'swapTokensForExactTokens':
+                return 'with';
+            default:
+                return '';
+            }
         },
         interactedWithText(): string {
-            return this.tempInteractedWithText;
+            switch (this.transaction.actionName) {
+            case 'send':
+                return this.transaction.toPrettyName || this.transaction.to;
+            case 'receive':
+                return this.transaction.fromPrettyName || this.transaction.from;
+            default:
+                return this.transaction.toPrettyName || this.transaction.to;
+            }
         },
         interactedWithUrl(): string {
+            // eztodo switch to use get explorer url
             return `www.teloscan.io/address/${this.interactedWithText}`;
-        },
-        timestamp() {
-            return 1671100800;
         },
     },
 });
@@ -57,24 +85,6 @@ export default defineComponent({
 <div class="c-transaction-row">
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
         <div class="c-transaction-row__interaction-info">
-            <!--
-                icon
-
-                text container (stack on mobile, one line on desktop iff actionHasDescriptiveText)
-                    primary text
-                        if actionHasDescriptiveText
-                            bold, not a link
-                        else
-                            link to address/name
-                    secondary text v-if="showInteractionSecondaryText" (hide if desktop && action is send/receive)
-                        if actionHasDescriptiveText
-                            preposition text e.g. "With" / "from"
-                            link to address/name
-                        else
-                            action name
-
-                timestamp
-            -->
             <InlineSvg
                 :src="interactionIcon"
                 class="c-transaction-row__interaction-icon"
@@ -84,32 +94,37 @@ export default defineComponent({
 
             <div class="c-transaction-row__interaction-text-container">
                 <div class="c-transaction-row__primary-interaction-text">
-                    <span v-if="actionHasDescriptiveText" class="c-transaction-row__action-description">
-                        {{ actionDescriptiveText }}
-                    </span>
-                    <ExternalLink
-                        v-else
-                        :text="interactedWithText"
-                        :url="interactedWithUrl"
-                    />
-                </div>
-
-                <div v-if="showInteractionSecondaryText" class="c-transaction-row__secondary-interaction-text">
                     <template v-if="actionHasDescriptiveText">
+                        <span class="c-transaction-row__action-description">
+                            {{ actionDescriptiveText }}
+                        </span>
+                        <wbr>
                         {{ actionPrepositionText }}
                         <ExternalLink
                             :text="interactedWithText"
                             :url="interactedWithUrl"
                         />
                     </template>
-                    <template v-else>
+
+                    <span v-else class="c-transaction-row__action-name">
                         {{ actionName }}
-                    </template>
+                    </span>
+                </div>
+
+                <div v-if="showInteractionSecondaryText" class="c-transaction-row__secondary-interaction-text">
+                    <span v-if="transaction.actionName === 'swapTokensForExactTokens' && $q.screen.gt.xs">
+                        swapTokensForExactTokens
+                    </span>
+                    <ExternalLink
+                        v-else-if="!actionDescriptiveText"
+                        :text="interactedWithText"
+                        :url="interactedWithUrl"
+                    />
                 </div>
             </div>
 
             <div class="c-transaction-row__timestamp">
-                <TimeStamp :timestamp="timestamp" />
+                <TimeStamp :timestamp="transaction.epoch" :muted="true" />
             </div>
         </div>
     </div>
@@ -126,6 +141,9 @@ export default defineComponent({
 
 <style lang="scss">
 .c-transaction-row {
+    padding: 16px 8px;
+    border-bottom: 2px solid $page-header;
+
     &__info-container {
         &--first {
 
@@ -142,12 +160,16 @@ export default defineComponent({
 
     &__interaction-info {
         display: grid;
-        grid-template-columns: min-content max-content 1fr;
+        grid-template-columns: min-content minmax(0, 1fr) max-content;
+        gap: 8px;
+        max-width: 100%;
         //flex-direction: row;
     }
 
     &__interaction-icon {
-
+        path {
+            fill: $primary;
+        }
     }
 
     &__interaction-text-container {
@@ -155,21 +177,36 @@ export default defineComponent({
     }
 
     &__primary-interaction-text {
+        font-size: 12px;
+        line-height: 14px;
 
+        @media only screen and (min-width: $breakpoint-sm-min) {
+            font-size: 16px;
+            line-height: 24px;
+        }
     }
 
     &__action-description {
+        font-weight: 600;
+    }
 
+    &__action-name {
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 16px;
     }
 
     &__secondary-interaction-text {
-        width: max-content;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &__timestamp {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: flex-end;
+        width: max-content;
     }
 }
 </style>

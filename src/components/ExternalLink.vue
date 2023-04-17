@@ -21,13 +21,33 @@ const formattedText = computed(() => {
 
 <template>
 <div class="c-external-link">
-    <a :href="url" target="_blank" rel="noopener noreferrer">{{ formattedText }}</a>
+    <a
+        :href="url"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="c-external-link__link"
+    >
+        {{ formattedText }}
+    </a>
+
+    <q-icon size="xs" name="launch" class="c-external-link__icon"/>
 </div>
 </template>
 
 <style lang="scss">
 .c-external-link {
-    display: inline;
-    color: $link-blue;
+    display: inline-flex;
+    align-items: center;
+
+    &__link {
+        text-decoration: none;
+        color: $link-blue;
+    }
+
+    &__icon {
+        color: $link-blue;
+        margin-left: 4px;
+        transform: scale(0.67);
+    }
 }
 </style>
