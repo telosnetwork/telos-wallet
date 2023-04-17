@@ -82,6 +82,7 @@ export default {
         amount_required: 'Amount is required',
         view_contract: 'View Contract',
         invalid_form: 'There are still invalid fields',
+        general_error: 'There was an error processing your request',
     },
     global: {
         native: 'Native',
