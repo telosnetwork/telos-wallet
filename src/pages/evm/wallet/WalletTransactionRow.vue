@@ -97,13 +97,14 @@ export default defineComponent({
                     <template v-if="actionHasDescriptiveText">
                         <span class="c-transaction-row__action-description">
                             {{ actionDescriptiveText }}
+                        </span>&nbsp;
+                        <span class="c-transaction-row__interaction-nowrap">
+                            {{ actionPrepositionText }}&nbsp;
+                            <ExternalLink
+                                :text="interactedWithText"
+                                :url="interactedWithUrl"
+                            />
                         </span>
-                        <wbr>
-                        {{ actionPrepositionText }}
-                        <ExternalLink
-                            :text="interactedWithText"
-                            :url="interactedWithUrl"
-                        />
                     </template>
 
                     <span v-else class="c-transaction-row__action-name">
@@ -174,6 +175,10 @@ export default defineComponent({
 
     &__interaction-text-container {
 
+    }
+
+    &__interaction-nowrap {
+        white-space: nowrap;
     }
 
     &__primary-interaction-text {
