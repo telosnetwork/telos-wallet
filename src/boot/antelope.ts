@@ -4,10 +4,14 @@ import { installAntelope } from 'src/antelope';
 export default boot(({ app }) => {
     const ant = installAntelope(app);
 
-    // settting notifucation handlers --
+    // settting simple notification handlers --
     ant.config.setNotifyErrorHandler(app.config.globalProperties.$errorNotification);
     ant.config.setNotifySuccessHandler(app.config.globalProperties.$successNotification);
     ant.config.setNotifyWarningHandler(app.config.globalProperties.$unexpectedErrorNotification);
+
+    // setting transaction notification handlers --
+    ant.config.setNotifySuccessfulTrxHandler(app.config.globalProperties.$successfulTransactionNotification);
+    ant.config.setNotifyFailedTrxHandler(app.config.globalProperties.$failedTransactionNotification);
 
     // setting log in and out callbacks --
     ant.events.onLoggedIn.subscribe({
