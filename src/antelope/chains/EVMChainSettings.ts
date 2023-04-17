@@ -13,6 +13,7 @@ import {
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 import { ethers } from 'ethers';
+import { formatWei } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -29,7 +30,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     tokenListPromise: Promise<EvmToken[]> | null = null;
 
     // EvmContracts cache mapped by address
-    protected contracts: Record<string, EvmContract> = {};
+    protected contracts: Record<string, EvmContract | false> = {};
 
     constructor(network: string) {
         this.network = network;
@@ -99,13 +100,22 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getExplorerUrl(): string;
     abstract getTrustedContractsBucket(): string;
 
-    getContract(address: string): EvmContract | null {
-        return this.contracts[address] ?? null;
+    getContract(address: string): EvmContract | false | null {
+        const key = address.toLowerCase();
+        return this.contracts[key] ?? null;
     }
 
     addContract(address: string, contract: EvmContract) {
-        if (!this.contracts[address]) {
-            this.contracts[address] = contract;
+        const key = address.toLowerCase();
+        if (!this.contracts[key]) {
+            this.contracts[key] = contract;
+        }
+    }
+
+    setContractAsNotExisting(address: string) {
+        const key = address.toLowerCase();
+        if (!this.contracts[key]) {
+            this.contracts[key] = false;
         }
     }
 
@@ -229,6 +239,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }).then(response => ethers.BigNumber.from(response.result));
     }
 
+    async getEstimatedGas(limit: number): Promise<{ system:string, fiat:string }> {
+        const gasPrice = await this.getGasPrice();
+        const tokenPrice = await this.getUsdPrice();
+        const system = formatWei(gasPrice.mul(limit), 18, 4);
+        const fiat = (parseFloat(system) * tokenPrice).toFixed(2);
+        return { system, fiat };
+    }
     async getLatestBlock(): Promise<ethers.BigNumber> {
         return this.doRPC<{result:string}>({
             method: 'eth_blockNumber' as Method,

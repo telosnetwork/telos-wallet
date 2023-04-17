@@ -1,12 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
-import { getAntelope, useUserStore } from 'src/antelope';
+import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
 const userStore = useUserStore();
+const chainStore = useChainStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -14,38 +15,52 @@ export default defineComponent({
         AppPage,
     },
     data: () => ({
-        address: '', // 0xa30b5e3c8Fee56C135Aecb733cd708cC31A5657a
+        address: '',
         token: null as EvmToken | null,
         amount: '',
-        gasFeeInTlos: '0.0058 TLOS',
-        gasFeeInFiat: '$0.00',
         useFiat: false,
+        userStore,
+        estimatedGas: { system: '0', fiat: '0' },
+        prettyPrintBalance,
+        tempCurrentBalance: '',
     }),
     watch: {
         balances: {
             handler() {
-                if (this.balances.length > 0) {
-                    this.token = this.balances[0];
+                let token = this.token;
+                this.token = null;
+                if (this.balances.length > 0 && !token) {
+                    token = this.balances[0];
                 }
+                this.token = token;
             },
             immediate: true,
         },
         token: {
             handler() {
                 this.useFiat = false;
+                this.updateEstimatedGas();
                 this.setAllBalance();
             },
             immediate: true,
         },
     },
     computed: {
+        gasFeeInTlos() {
+            const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
+            return prettyPrintBalance(this.estimatedGas.system, userStore.fiatLocale, this.isMobile, symbol);
+        },
+        gasFeeInFiat() {
+            return prettyPrintFiatBalance(this.estimatedGas.fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+        },
+        getSystemToken(): Token {
+            return this.balances[0];
+        },
         isMobile(): boolean {
             return this.$q.screen.lt.md;
         },
         balances(): EvmToken[] {
-            console.log('ant.stores.balances.getBalances(\'logged\')', ant.stores.balances.getBalances('logged'));
-            return ant.stores.balances.getBalances('logged')
-                .map(t => ({ ...t, label: t.symbol })) as unknown as EvmToken[];
+            return ant.stores.balances.getBalances('logged') as EvmToken[];
         },
         showContractLink(): boolean {
             return !!this.token?.address;
@@ -55,7 +70,7 @@ export default defineComponent({
                 if (this.useFiat) {
                     return prettyPrintFiatBalance(this.token.fiatBalance, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
                 } else {
-                    return prettyPrintBalance(this.token.balance, useUserStore().fiatLocale, this.isMobile, this.token.symbol);
+                    return prettyPrintBalance(this.token.balance, userStore.fiatLocale, this.isMobile, this.token.symbol);
                 }
             }
             return '';
@@ -68,7 +83,7 @@ export default defineComponent({
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                return prettyPrintBalance(+this.amount / this.token.price, useUserStore().fiatLocale, this.isMobile, this.token.symbol);
+                return prettyPrintBalance(+this.amount / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
         },
@@ -107,6 +122,18 @@ export default defineComponent({
         },
     },
     methods: {
+        async updateEstimatedGas() {
+            const chain_settings = chainStore.loggedEvmChain?.settings;
+            if (chain_settings)  {
+                if (this.token?.isSystem) {
+                    this.estimatedGas = await chain_settings.getEstimatedGas(26250);
+                } else {
+                    this.estimatedGas = await chain_settings.getEstimatedGas(55500);
+                }
+            } else {
+                this.estimatedGas = { system: '0', fiat: '0' };
+            }
+        },
         toggleUseFiat() {
             if (this.token) {
                 if (this.useFiat) {
@@ -156,7 +183,14 @@ export default defineComponent({
                         );
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    if (typeof err.message === 'string') {
+                        console.error(err.message, err.payload, err);
+                        ant.config.notifyFailedTrxHandler(this.$t(err.message));
+                    } else if (typeof err === 'string') {
+                        ant.config.notifyFailedTrxHandler(this.$t(err));
+                    } else {
+                        ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
+                    }
                 });
             } else {
                 ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
@@ -171,8 +205,16 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-send-page__title-container">
-            <p class="c-send-page__title">Send</p>
+            <p class="c-send-page__title"> {{ $t('evm_wallet.send') }}</p>
         </div>
+        <q-btn
+            class="c-send-page__back-button"
+            flat
+            dense
+            label="Back"
+            icon="arrow_back_ios"
+            @click="goBack"
+        />
     </template>
 
     <div class="c-send-page__form-container">
@@ -207,6 +249,10 @@ export default defineComponent({
                         :options="balances"
                         class="c-send-page__token-selector"
                     >
+                        <template v-slot:selected>
+                            <span>{{ token?.symbol }}</span>
+                        </template>
+
                         <template v-slot:option="scope">
                             <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
                                 <div class="c-send-page__selector-op-avatar">
@@ -214,12 +260,20 @@ export default defineComponent({
                                 </div>
                                 <div>
                                     <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
-                                    <q-item-label class="c-send-page__selector-op-balance" caption>{{ scope.opt.tinyBalance }} {{ scope.opt.symbol }}</q-item-label>
+                                    <q-item-label class="c-send-page__selector-op-balance" caption>
+                                        {{ prettyPrintBalance(scope.opt.balance, userStore.fiatLocale, isMobile, scope.opt.symbol) }} {{ scope.opt.symbol }}
+                                    </q-item-label>
                                 </div>
                             </q-item>
                         </template>
                     </q-select>
-                    <div v-if="showContractLink" class="c-send-page__view-contract" @click="viewTokenContract">
+                    <div
+                        :class="{
+                            'c-send-page__view-contract': true,
+                            'c-send-page__view-contract--hidden': !showContractLink,
+                        }"
+                        @click="viewTokenContract"
+                    >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
                     </div>
@@ -227,7 +281,7 @@ export default defineComponent({
                 <!-- Amount input -->
                 <div class="c-send-page__amount-col col">
                     <q-input
-                        v-model.number="amount"
+                        v-model="amount"
                         outlined
                         class="c-send-page__amount-input"
                         :label="$t('evm_wallet.amount')"
@@ -282,13 +336,6 @@ export default defineComponent({
                 <div class="col">
                     <div class="row justify-end">
                         <q-btn
-                            flat
-                            color="primary"
-                            :label="$t('evm_wallet.cancel')"
-                            class="wallet-btn"
-                            @click="goBack"
-                        />
-                        <q-btn
                             color="primary"
                             :label="$t('evm_wallet.send')"
                             class="wallet-btn"
@@ -316,6 +363,18 @@ export default defineComponent({
 
 
 .c-send-page {
+    // back-button on top left
+    &__back-button {
+        position: absolute;
+        top: 24px;
+        left: 32px;
+        z-index: 1;
+        font-size: 12.8px;
+        font-weight: 600;
+        i {
+            font-size: 1.15em;
+        }
+    }
     &__title-container {
         display: flex;
         justify-content: center;
@@ -410,6 +469,10 @@ export default defineComponent({
         cursor: pointer;
         margin-top: 8px;
         color: $link-blue;
+        &--hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
     }
 
     &__view-contract-text {

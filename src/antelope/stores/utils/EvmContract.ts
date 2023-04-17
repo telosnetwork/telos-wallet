@@ -78,7 +78,6 @@ export default class EvmContract {
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
         const signer = this.manager.getSigner();
-        console.log('-> getContractInstance()', this.address, [signer, this.manager.getRpcProvider()]);
         if (!this.contract || signer) {
             this.contract = new ethers.Contract(this.address, this.abi, signer ?? this.manager.getRpcProvider());
         }

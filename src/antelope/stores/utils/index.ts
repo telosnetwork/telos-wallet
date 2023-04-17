@@ -13,7 +13,7 @@ const REVERT_PANIC_SELECTOR = '0x4e487b71';
 
 export const WEI_PRECISION = 18;
 
-export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals = 4): string {
+export function formatWei(bn: string | number | BigNumber, tokenDecimals: number, displayDecimals = 4): string {
     const amount = BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
@@ -189,6 +189,9 @@ export function prettyPrintCurrency(
     currency?: string,
     displayCurrencyAsCode?: boolean,
 ) {
+    if (decimals % 1 !== 0 || decimals < 0) {
+        throw 'Decimals must be a positive integer or zero';
+    }
 
     const decimalOptions : Record<string, number | undefined> = {
         maximumFractionDigits: decimals,
@@ -201,7 +204,7 @@ export function prettyPrintCurrency(
         decimalOptions.maximumIntegerDigits = 1;
         decimalOptions.minimumIntegerDigits = 1;
     } else if (abbreviate) {
-        const forceFractionDisplay = amount % 1 !== 0 && amount < 1000;
+        const forceFractionDisplay = amount < 1000 && amount > -1000 ;
 
         decimalOptions.maximumFractionDigits = forceFractionDisplay ? decimals : 2;
         decimalOptions.minimumFractionDigits = forceFractionDisplay ? decimals : 2;
