@@ -147,7 +147,6 @@ export default defineComponent({
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wallet.svg')"
-                    class=""
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--current-route': $route.name === 'evm-wallet',
