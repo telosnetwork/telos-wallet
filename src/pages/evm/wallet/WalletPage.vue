@@ -47,6 +47,12 @@ export default defineComponent({
                 fullBalance: fullBalance ?? '0',
             };
 
+            // system token is always the first in this.allTokens; this is used in the template
+            // ( <WalletBalanceRow ... :token-is-tlos="index === 0"> ) to indicate to the Row component
+            // that the token is the system token, as the system token has no address to
+            // use in comparisons in the Row component. We don't want to rely on the lack of an address
+            // in case some malformed data comes in, which would make it ambiguous which one is the system token
+            // This information is used in the row component to determine what links to show in the overflow menu
             tokens.push(chainToken);
 
             if (chainHasStlos) {
