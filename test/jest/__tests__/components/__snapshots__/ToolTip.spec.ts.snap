@@ -12,7 +12,7 @@ exports[`ToolTip.vue should render correctly 1`] = `
     transformsource="[Function]"
   />
   <q-tooltip-stub
-    hide-delay="5000"
+    model-value="false"
     transition-hide="scale"
     transition-show="scale"
   >
@@ -45,7 +45,7 @@ exports[`ToolTip.vue should render correctly 2`] = `
     transformsource="[Function]"
   />
   <q-tooltip-stub
-    hide-delay="5000"
+    model-value="false"
     transition-hide="scale"
     transition-show="scale"
   >
