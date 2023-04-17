@@ -14,7 +14,7 @@ const REVERT_PANIC_SELECTOR = '0x4e487b71';
 
 export const WEI_PRECISION = 18;
 
-export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals = 4): string {
+export function formatWei(bn: string | number | BigNumber, tokenDecimals: number, displayDecimals = 4): string {
     const amount = BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();

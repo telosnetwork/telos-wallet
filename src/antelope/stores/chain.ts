@@ -72,6 +72,10 @@ export interface ChainModel {
 
 export interface EvmChainModel {
     apy: string;
+    gasPrice: {
+        wei: number;
+        gwei: string;
+    },
     settings: EVMChainSettings;
     tokens: EvmToken[];
 }
@@ -82,18 +86,25 @@ export interface NativeChainModel {
     tokens: NativeToken[];
 }
 
+const newChainModel = (network: string, isNative: boolean): ChainModel => {
+    const model = {
+        apy: '',
+        settings: settings[network],
+        tokens: [],
+    } as ChainModel;
+    if (!isNative) {
+        (model as EvmChainModel).gasPrice = {
+            wei: 0,
+            gwei: '0',
+        };
+    }
+    return model;
+};
 
 export interface ChainState {
     // chains mapped by label
     __chains: { [label: Label]: ChainModel };
 }
-
-const newChainModel = (network: string): ChainModel => ({
-    apy: '',
-    settings: settings[network],
-    tokens: [],
-});
-
 
 const store_name = 'chain';
 
@@ -122,6 +133,7 @@ export const useChainStore = defineStore(store_name, {
             try {
                 await Promise.all([
                     this.updateApy(label),
+                    this.updateGasPrice(label),
                 ]);
             } catch (error) {
                 console.error(error);
@@ -145,6 +157,26 @@ export const useChainStore = defineStore(store_name, {
                 throw new Error('antelope.chain.error_apy');
             } finally {
                 useFeedbackStore().unsetLoading('updateApy');
+            }
+        },
+        async updateGasPrice(label: string) {
+            useFeedbackStore().setLoading('updateGasPrice');
+            this.trace('updateGasPrice');
+            const chain = this.getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const gasPrice = await (chain.settings as EVMChainSettings).getGasPrice();
+                    const wei = gasPrice.toNumber();
+                    const gwei = (wei / 1000000000).toFixed(2);
+                    (chain as EvmChainModel).gasPrice = {
+                        wei,
+                        gwei,
+                    };
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                useFeedbackStore().unsetLoading('updateGasPrice');
             }
         },
         async updateTokenList(label: string) {
@@ -176,7 +208,7 @@ export const useChainStore = defineStore(store_name, {
             if (network in settings) {
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
-                    this.__chains[label] = newChainModel(network);
+                    this.__chains[label] = newChainModel(network, settings[network].isNative());
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },

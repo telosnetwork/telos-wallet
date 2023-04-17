@@ -48,13 +48,13 @@ import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 
-export const evmEvents = {
-    onEvmReady: new BehaviorSubject<boolean>(false),
-};
+const onEvmReady = new BehaviorSubject<boolean>(false);
 
-const whenReady = evmEvents.onEvmReady.asObservable().pipe(
-    filter(ready => ready),
-);
+export const evmEvents = {
+    whenReady: onEvmReady.asObservable().pipe(
+        filter(ready => ready),
+    ),
+};
 
 export interface EVMState {
     __external_signer: ethers.Signer | null;
@@ -77,7 +77,7 @@ export const useEVMStore = defineStore(store_name, {
     getters: {
         provider: state => state.__external_provider,
         rpcProvider: state => state.__ethers_rpc_provider,
-        signer: state => state.__external_signer,
+        signer: state => toRaw(state.__external_signer),
         isMetamaskSupported: state => state.__supports_meta_mask,
         functionInterfaces: () => functions_overrides,
         eventInterfaces: () => events_signatures,
@@ -106,10 +106,10 @@ export const useEVMStore = defineStore(store_name, {
                         evm.trace('provider.accountsChanged', accounts);
                     });
                 }
-                evmEvents.onEvmReady.next(true);
+                onEvmReady.next(true);
             });
         },
-
+        // actions ---
         async login (network: string): Promise<string | null> {
             this.trace('login', network);
             const chain = useChainStore();
@@ -179,9 +179,10 @@ export const useEVMStore = defineStore(store_name, {
                 throw new Error('antelope.evm.error_no_signer');
             }
         },
+        // auxiliar
         async ensureProvider(): Promise<ExternalProvider> {
             return new Promise((resolve, reject) => {
-                whenReady.subscribe(async () => {
+                evmEvents.whenReady.subscribe(async () => {
                     const provider = this.__external_provider as ExternalProvider;
                     if (provider) {
                         resolve(provider);
@@ -364,7 +365,6 @@ export const useEVMStore = defineStore(store_name, {
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
         async getContract(address:string, suspectedToken = ''): Promise<EvmContract | null> {
-            console.log('getContract()', address, suspectedToken);
             if (!address) {
                 return null;
             }
@@ -374,16 +374,27 @@ export const useEVMStore = defineStore(store_name, {
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
-            if (cached) {
+            // If cached is null, it means this is the first time this address is queried
+            if (cached !== null) {
                 if (
                     !suspectedToken ||
+                    // cached === false means we already tried to get the contract creation info and it failed
+                    !cached ||
                     cached.token && cached.token?.type === suspectedToken
                 ) {
-                    return cached;
+                    // this never return false
+                    return cached || null;
                 }
             }
 
+            // We mark this address as not existing so we don't query it again
+            chain_settings.setContractAsNotExisting(addressLower);
+
+            // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
             const creationInfo:EvmContractCreationInfo = await this.getContractCreation(addressLower);
+
+            // The the contract passes the creation info check,
+            // we overwrite the previous call to set contract as not existing with the actual EvmContract
 
             const metadata = await this.checkBucket(address);
             if (metadata && creationInfo) {

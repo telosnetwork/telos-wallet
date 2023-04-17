@@ -64,6 +64,14 @@ export const useBalancesStore = defineStore(store_name, {
                     useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
             });
+
+            // update logged balances every 10 seconds only if the user is logged
+            setInterval(() => {
+                if (useAccountStore().loggedAccount) {
+                    useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                }
+            }, 10000);
+
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
             this.trace('updateBalancesForAccount', label, account);
@@ -97,7 +105,7 @@ export const useBalancesStore = defineStore(store_name, {
                                             token.fullBalance = `${formatWei(value, token.decimals)}`;
                                             // only adding balance if it is greater than 0
                                             if (parseFloat(balance) > 0) {
-                                                this.__balances[label] = [...this.__balances[label], token];
+                                                this.addNewBalance(label, token);
                                             }
                                         });
                                     } catch (e) {
@@ -127,40 +135,43 @@ export const useBalancesStore = defineStore(store_name, {
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const provider = toRaw(evm.rpcProvider);
             const token = chain_settings.getSystemToken();
-            const price = await chain_settings.getUsdPrice();
-            token.price = price;
             if (provider) {
-                provider.getBalance(address).then((balance: BigNumber) => {
+                provider.getBalance(address).then(async (balance: BigNumber) => {
                     token.balance = `${formatWei(balance, token.decimals, 4)}`;
-                    token.fiatBalance = `${parseFloat(token.balance) * price}`;
                     token.fullBalance = `${formatWei(balance, token.decimals)}`;
                     // only adding balance if it is greater than 0
                     if (parseFloat(token.balance) > 0) {
-                        this.__balances[label] = [token, ...this.__balances[label]];
+                        this.addNewBalance(label, token);
                     }
+
+                    const price = await chain_settings.getUsdPrice();
+                    token.fiatBalance = `${parseFloat(token.balance) * price}`;
+                    token.price = price;
                 });
             }
             return Promise.resolve(token);
         },
         async transferTokens(token: Token, to: string, amount: string, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount, memo);
+            const label = 'logged';
             try {
                 useFeedbackStore().setLoading('transferTokens');
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '');
+                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '');
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount);
+                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw error;
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
+                useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
             }
         },
         async transferNativeTokens(
@@ -222,6 +233,26 @@ export const useBalancesStore = defineStore(store_name, {
                 throw new Error('antelope.balances.error_at_transfer_tokens');
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
+            }
+        },
+        // commits -----
+        addNewBalance(label: string, balance: Token): void {
+            this.trace('addNewBalance', label, balance);
+            // if the balance already exists, we update it, if not, we add it
+            if (this.__balances[label].find(b => b.symbol === balance.symbol)) {
+                this.updateBalance(label, balance);
+            } else {
+                this.__balances[label] = [...this.__balances[label], balance];
+            }
+        },
+        updateBalance(label: string, token: Token): void {
+            this.trace('updateBalance', label, token);
+            const index = this.__balances[label].findIndex(b => b.symbol === token.symbol);
+            if (index >= 0) {
+                this.__balances[label][index].balance = token.balance;
+                this.__balances[label][index].fullBalance = token.fullBalance;
+                this.__balances[label][index].price = token.price;
+                this.__balances[label][index].fiatBalance = token.fiatBalance;
             }
         },
     },
