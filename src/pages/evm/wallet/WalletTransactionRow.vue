@@ -5,7 +5,9 @@ import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
 
-const receiveIcon = require('src/assets/icon--arrow-diagonal.svg');
+const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
+const swapIcon = require('src/assets/icon--swap-diagonal.svg');
+const contractIcon = require('src/assets/icon--contract.svg');
 
 export default defineComponent({
     name: 'WalletTransactionRow',
@@ -25,7 +27,16 @@ export default defineComponent({
             return this.transaction.actionName;
         },
         interactionIcon(): string {
-            return receiveIcon;
+            if (this.actionName === 'swapTokensForExactTokens') {
+                return swapIcon;
+            } else if (['send', 'receive'].includes(this.actionName)) {
+                return arrowIcon;
+            } else {
+                return contractIcon;
+            }
+        },
+        rotateIcon() {
+            return this.actionName === 'receive';
         },
         showInteractionSecondaryText(): boolean {
             // on mobile, the second line of text is never shown
@@ -64,12 +75,9 @@ export default defineComponent({
             }
         },
         interactedWithText(): string {
-            switch (this.transaction.actionName) {
-            case 'send':
-                return this.transaction.toPrettyName || this.transaction.to;
-            case 'receive':
+            if (this.transaction.actionName === 'receive') {
                 return this.transaction.fromPrettyName || this.transaction.from;
-            default:
+            } else {
                 return this.transaction.toPrettyName || this.transaction.to;
             }
         },
@@ -85,12 +93,17 @@ export default defineComponent({
 <div class="c-transaction-row">
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
         <div class="c-transaction-row__interaction-info">
-            <InlineSvg
-                :src="interactionIcon"
-                class="c-transaction-row__interaction-icon"
-                height="12"
-                aria-hidden="true"
-            />
+            <div class="c-transaction-row__interaction-icon-container">
+                <InlineSvg
+                    :src="interactionIcon"
+                    :class="{
+                        'c-transaction-row__interaction-icon': true,
+                        'c-transaction-row__interaction-icon--rotated': rotateIcon,
+                    }"
+                    height="12"
+                    aria-hidden="true"
+                />
+            </div>
 
             <div class="c-transaction-row__interaction-text-container">
                 <div class="c-transaction-row__primary-interaction-text">
@@ -113,7 +126,7 @@ export default defineComponent({
                 </div>
 
                 <div v-if="showInteractionSecondaryText" class="c-transaction-row__secondary-interaction-text">
-                    <span v-if="transaction.actionName === 'swapTokensForExactTokens' && $q.screen.gt.xs">
+                    <span v-if="actionName === 'swapTokensForExactTokens' && $q.screen.gt.xs">
                         swapTokensForExactTokens
                     </span>
                     <ExternalLink
@@ -167,9 +180,23 @@ export default defineComponent({
         //flex-direction: row;
     }
 
+    &__interaction-icon-container {
+        height: 16px;
+        width: 16px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     &__interaction-icon {
+        height: 16px;
+
         path {
             fill: $primary;
+        }
+
+        &--rotated {
+            transform: rotate(180deg);
         }
     }
 
@@ -187,7 +214,7 @@ export default defineComponent({
 
         @media only screen and (min-width: $breakpoint-sm-min) {
             font-size: 16px;
-            line-height: 24px;
+            line-height: 16px;
         }
     }
 
