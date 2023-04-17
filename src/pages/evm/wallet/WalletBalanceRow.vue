@@ -434,7 +434,6 @@ export default defineComponent({
     &__primary-amount {
         display: flex;
         align-items: center;
-        gap: 8px;
         flex: 1 1 max-content;
         text-align: right;
         font-size: 18px;
