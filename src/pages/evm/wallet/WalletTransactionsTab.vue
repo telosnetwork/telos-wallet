@@ -13,103 +13,116 @@ export default defineComponent({
     computed: {
         shapedTransactions(): ShapedTransactionRow[] {
             return [{
-                id: '', // transaction id
+                id: '0x'.concat('1'.repeat(40)), // transaction id
                 epoch: 1681775186, // timestamp - unix
                 actionName: 'send', // send, receive, swap, anything else
                 from: '0x'.concat('1'.repeat(40)), // address
                 fromPrettyName: '', // blank or name like Swappi
                 to: '0x'.concat('2'.repeat(40)), // address
                 toPrettyName: '', // blank or name like Swappi
-                valueIn: {
+                valuesIn: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'TLOS', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
-                valueOut: {
+                }],
+                valuesOut: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'TLOS', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
+                }, {
+                    amount: 35.1234, // number, already converted from wei
+                    symbol: 'USDC', // string e.g. TLOS
+                }],
                 gasUsed: 0.15, // gas in tlos, number
                 gasFiatValue: 0.03, // gas in fiat, number
             }, {
-                id: '', // transaction id
+                id: '0x'.concat('1'.repeat(40)), // transaction id
                 epoch: 1681775186, // timestamp - unix
-                actionName: 'swapTokensForExactTokens', // send, receive, swapTokensForExactTokens, anything else
+                actionName: 'swap', // send, receive, swap, anything else
                 from: '0x'.concat('1'.repeat(40)), // address
                 fromPrettyName: '', // blank or name like Swappi
                 to: '0x'.concat('2'.repeat(40)), // address
                 toPrettyName: '', // blank or name like Swappi
-                valueIn: {
+                valuesIn: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'FAIRY', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
-                valueOut: {
+                }],
+                valuesOut: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'sFAIRY', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
+                }],
                 gasUsed: 0.15, // gas in tlos, number
                 gasFiatValue: 0.03, // gas in fiat, number
             },  {
-                id: '', // transaction id
+                id: '0x'.concat('1'.repeat(40)), // transaction id
                 epoch: 1681775186, // timestamp - unix
-                actionName: 'receive', // send, receive, swapTokensForExactTokens, anything else
+                actionName: 'receive', // send, receive, swap, anything else
                 from: '0x'.concat('1'.repeat(40)), // address
                 fromPrettyName: 'SomeAddress', // blank or name like Swappi
                 to: '0x'.concat('2'.repeat(40)), // address
                 toPrettyName: '', // blank or name like Swappi
-                valueIn: {
+                valuesIn: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
-                    fiatValue: 100, // number
-                },
-                valueOut: {
-                    amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
-                    fiatValue: 100, // number
-                },
+                    symbol: 'USDT', // string e.g. TLOS
+                }],
+                valuesOut: [],
                 gasUsed: 0.15, // gas in tlos, number
                 gasFiatValue: 0.03, // gas in fiat, number
             }, {
-                id: '', // transaction id
+                id: '0x'.concat('1'.repeat(40)), // transaction id
                 epoch: 1681775186, // timestamp - unix
                 actionName: 'stake', // send, receive, swap, anything else
                 from: '0x'.concat('3'.repeat(40)), // address
                 fromPrettyName: '', // blank or name like Swappi
                 to: '0x'.concat('4'.repeat(40)), // address
                 toPrettyName: 'SomeContract', // blank or name like Swappi
-                valueIn: {
+                valuesIn: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'TLOS', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
-                valueOut: {
+                }],
+                valuesOut: [{
                     amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
+                    symbol: 'sTLOS', // string e.g. TLOS
                     fiatValue: 100, // number
-                },
+                }],
                 gasUsed: 0.15, // gas in tlos, number
                 gasFiatValue: 0.03, // gas in fiat, number
             }, {
-                id: '', // transaction id
+                id: '0x'.concat('1'.repeat(40)), // transaction id
                 epoch: 1681775186, // timestamp - unix
                 actionName: 'approve', // send, receive, swap, anything else
                 from: '0x'.concat('3'.repeat(40)), // address
                 fromPrettyName: '', // blank or name like Swappi
                 to: '0x'.concat('4'.repeat(40)), // address
                 toPrettyName: '', // blank or name like Swappi
-                valueIn: {
-                    amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
-                    fiatValue: 100, // number
-                },
-                valueOut: {
-                    amount: 100, // number, already converted from wei
-                    symbol: '', // string e.g. TLOS
-                    fiatValue: 100, // number
-                },
+                valuesIn: [],
+                valuesOut: [],
+                gasUsed: 0.15, // gas in tlos, number
+                gasFiatValue: 0.03, // gas in fiat, number
+            }, {
+                id: '0x'.concat('1'.repeat(40)), // transaction id
+                epoch: 1681775186, // timestamp - unix
+                actionName: '', // send, receive, swap, anything else
+                from: '0x'.concat('3'.repeat(40)), // address
+                fromPrettyName: '', // blank or name like Swappi
+                to: '0x'.concat('4'.repeat(40)), // address
+                toPrettyName: '', // blank or name like Swappi
+                valuesIn: [],
+                valuesOut: [],
+                failed: true,
+            }, {
+                id: '0x'.concat('1'.repeat(40)), // transaction id
+                epoch: 1681775186, // timestamp - unix
+                actionName: '', // send, receive, swap, anything else
+                from: '0x'.concat('3'.repeat(40)), // address
+                fromPrettyName: '', // blank or name like Swappi
+                to: '0x'.concat('4'.repeat(40)), // address
+                toPrettyName: '', // blank or name like Swappi
+                valuesIn: [],
+                valuesOut: [],
                 gasUsed: 0.15, // gas in tlos, number
                 gasFiatValue: 0.03, // gas in fiat, number
             }];

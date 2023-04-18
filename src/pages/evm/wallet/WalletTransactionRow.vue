@@ -8,6 +8,7 @@ import { ShapedTransactionRow } from 'src/antelope/types';
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
 const contractIcon = require('src/assets/icon--contract.svg');
+const failureIcon = require('src/assets/icon--x.svg');
 
 export default defineComponent({
     name: 'WalletTransactionRow',
@@ -24,10 +25,17 @@ export default defineComponent({
     },
     computed: {
         actionName(): string {
-            return this.transaction.actionName;
+            // eztodo i18n
+            if (this.transaction.failed) {
+                return 'Failed contract interaction';
+            }
+
+            return this.transaction.actionName || 'Contract interaction';
         },
         interactionIcon(): string {
-            if (this.actionName === 'swapTokensForExactTokens') {
+            if (this.transaction.failed) {
+                return failureIcon;
+            } else if (this.actionName === 'swap') {
                 return swapIcon;
             } else if (['send', 'receive'].includes(this.actionName)) {
                 return arrowIcon;
@@ -39,14 +47,15 @@ export default defineComponent({
             return this.actionName === 'receive';
         },
         showInteractionSecondaryText(): boolean {
-            // on mobile, the second line of text is never shown
-            // on desktop, if the action has descriptive text, the second line is the name of the action
-            //             otherwise, it is a link to the address/account that was interacted with
-            return !['send', 'receive'].includes(this.transaction.actionName);
+            if (this.$q.screen.lt.sm && this.transaction.failed) {
+                return false;
+            }
+
+            return !['send', 'receive', 'swap'].includes(this.transaction.actionName);
         },
         actionHasDescriptiveText(): boolean {
-            // only true for 'known actions' send, receive, and swapExactTokensForTokens
-            return ['send', 'receive', 'swapTokensForExactTokens'].includes(this.transaction.actionName);
+            // only true for 'known actions' send, receive, and swap
+            return ['send', 'receive', 'swap'].includes(this.transaction.actionName);
         },
         actionDescriptiveText(): string {
             // eztodo make i18n
@@ -55,7 +64,7 @@ export default defineComponent({
                 return 'Sent';
             case 'receive':
                 return 'Received';
-            case 'swapTokensForExactTokens':
+            case 'swap':
                 return 'Swapped';
             default:
                 return '';
@@ -68,12 +77,13 @@ export default defineComponent({
                 return 'to';
             case 'receive':
                 return 'from';
-            case 'swapTokensForExactTokens':
+            case 'swap':
                 return 'with';
             default:
                 return '';
             }
         },
+        // the text representing who the user interacted with, either an address or alias
         interactedWithText(): string {
             if (this.transaction.actionName === 'receive') {
                 return this.transaction.fromPrettyName || this.transaction.from;
@@ -81,9 +91,20 @@ export default defineComponent({
                 return this.transaction.toPrettyName || this.transaction.to;
             }
         },
+        // link to the explorer page for the address the user interacted with
         interactedWithUrl(): string {
-            // eztodo switch to use get explorer url
-            return `www.teloscan.io/address/${this.interactedWithText}`;
+            // eztodo store to use get explorer url
+
+            const { actionName, from, to } = this.transaction;
+
+            let address = actionName === 'receive' ? from : to;
+
+            return `www.teloscan.io/address/${address}`;
+        },
+        transactionUrl() {
+            // eztodo store to use get explorer url
+
+            return `www.teloscan.io/tx/${this.transaction.id}`;
         },
     },
 });
@@ -92,63 +113,102 @@ export default defineComponent({
 <template>
 <div class="c-transaction-row">
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
-        <div class="c-transaction-row__interaction-info">
-            <div class="c-transaction-row__interaction-icon-container">
-                <InlineSvg
-                    :src="interactionIcon"
-                    :class="{
-                        'c-transaction-row__interaction-icon': true,
-                        'c-transaction-row__interaction-icon--rotated': rotateIcon,
-                    }"
-                    height="12"
-                    aria-hidden="true"
+        <div class="c-transaction-row__interaction-icon-container">
+            <InlineSvg
+                :src="interactionIcon"
+                :class="{
+                    'c-transaction-row__interaction-icon': true,
+                    'c-transaction-row__interaction-icon--rotated': rotateIcon,
+                    'c-transaction-row__interaction-icon--red': transaction.failed,
+                }"
+                height="12"
+                aria-hidden="true"
+            />
+        </div>
+
+        <div class="c-transaction-row__interaction-text-container">
+            <div class="c-transaction-row__primary-interaction-text">
+                <template v-if="actionHasDescriptiveText">
+                    <span class="c-transaction-row__action-description">
+                        {{ actionDescriptiveText }}&thinsp;
+                    </span>
+                    <span class="c-transaction-row__interaction-nowrap">
+                        {{ actionPrepositionText }}
+                        <ExternalLink
+                            :text="interactedWithText"
+                            :url="interactedWithUrl"
+                        />
+                    </span>
+                </template>
+
+                <span v-else class="c-transaction-row__action-name">
+                    {{ actionName }}
+                </span>
+            </div>
+
+            <div v-if="showInteractionSecondaryText" class="c-transaction-row__secondary-interaction-text">
+                <ExternalLink
+                    :text="interactedWithText"
+                    :url="interactedWithUrl"
                 />
             </div>
+        </div>
 
-            <div class="c-transaction-row__interaction-text-container">
-                <div class="c-transaction-row__primary-interaction-text">
-                    <template v-if="actionHasDescriptiveText">
-                        <span class="c-transaction-row__action-description">
-                            {{ actionDescriptiveText }}
-                        </span>&nbsp;
-                        <span class="c-transaction-row__interaction-nowrap">
-                            {{ actionPrepositionText }}&nbsp;
-                            <ExternalLink
-                                :text="interactedWithText"
-                                :url="interactedWithUrl"
-                            />
-                        </span>
-                    </template>
+        <div class="c-transaction-row__timestamp">
+            <TimeStamp :timestamp="transaction.epoch" :muted="true" />
 
-                    <span v-else class="c-transaction-row__action-name">
-                        {{ actionName }}
-                    </span>
-                </div>
-
-                <div v-if="showInteractionSecondaryText" class="c-transaction-row__secondary-interaction-text">
-                    <span v-if="actionName === 'swapTokensForExactTokens' && $q.screen.gt.xs">
-                        swapTokensForExactTokens
-                    </span>
+            <template v-if="$q.screen.gt.xs">
+                <div>
+                    trx:
                     <ExternalLink
-                        v-else-if="!actionDescriptiveText"
-                        :text="interactedWithText"
-                        :url="interactedWithUrl"
+                        :text="transaction.id"
+                        :url="transactionUrl"
                     />
                 </div>
-            </div>
-
-            <div class="c-transaction-row__timestamp">
-                <TimeStamp :timestamp="transaction.epoch" :muted="true" />
-            </div>
+            </template>
         </div>
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--second">
+        <div
+            v-for="(values, index) in transaction.valuesOut"
+            :key="`values-out-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <span class="c-transaction-row__value c-transaction-row__value--out">
+                -{{ values.amount }} {{ values.symbol }}
+            </span>
+            <span
+                v-if="values.fiatValue"
+                class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
+            >
+                <!-- eztodo switch to fiat symbol from store -->
+                -{{ values.fiatValue }} USD
+            </span>
+        </div>
 
+        <div
+            v-for="(values, index) in transaction.valuesIn"
+            :key="`values-in-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <span class="c-transaction-row__value c-transaction-row__value--in">
+                +{{ values.amount }} {{ values.symbol }}
+            </span>
+            <span
+                v-if="values.fiatValue"
+                class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
+            >
+                <!-- eztodo switch to fiat symbol from store -->
+                +{{ values.fiatValue }} USD
+            </span>
+        </div>
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
-
+        0.0123 TLOS
+        <br>
+        $0.00
     </div>
 </div>
 </template>
@@ -157,14 +217,44 @@ export default defineComponent({
 .c-transaction-row {
     padding: 16px 8px;
     border-bottom: 2px solid $page-header;
+    display: grid;
+    gap: 16px;
+    grid-template:
+        'a'
+        'b'
+        'c';
+
+    @media only screen and (min-width: $breakpoint-sm-min) {
+        grid-template: 'a b c' / auto auto 150px;
+    }
 
     &__info-container {
         &--first {
+            display: grid;
+            grid-template: 'a b c' auto / min-content auto max-content;
+            gap: 8px;
 
+            @media only screen and (min-width: $breakpoint-sm-min) {
+                grid-template:
+                    'a b' auto
+                    'c c' auto
+                    / 16px max-content;
+            }
+        }
+
+        &--second,
+        &--third {
+            margin-left: 24px;
         }
 
         &--second {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
 
+            @media only screen and (min-width: $breakpoint-sm-min) {
+                justify-content: center;
+            }
         }
 
         &--third {
@@ -197,6 +287,12 @@ export default defineComponent({
 
         &--rotated {
             transform: rotate(180deg);
+        }
+
+        &--red {
+            path {
+                fill: $negative;
+            }
         }
     }
 
@@ -239,6 +335,54 @@ export default defineComponent({
         align-items: flex-start;
         justify-content: flex-end;
         width: max-content;
+        margin-left: 24px;
+        color: var(--text-color-muted);
+
+        @media only screen and (min-width: $breakpoint-sm-min) {
+            align-items: center;
+            gap: 12px;
+        }
+    }
+
+    &__value-container {
+        display: flex;
+        flex-direction: column;
+
+        @media only screen and (min-width: $breakpoint-sm-min) {
+            gap: 8px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+        }
+    }
+
+    &__value {
+        $value: &;
+
+        font-weight: 400;
+        font-size: 16px;
+        width: max-content;
+        display: inline;
+
+        &--out {
+            color: darkred;
+        }
+
+        &--out#{$value}--small {
+            color: palevioletred;
+        }
+
+        &--in {
+            color: forestgreen;
+        }
+
+        &--in#{$value}--small {
+            color: darkseagreen;
+        }
+
+        &--small {
+            font-size: 14px;
+        }
     }
 }
 </style>

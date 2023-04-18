@@ -23,21 +23,24 @@ export interface TransactionV1 {
 export interface ShapedTransactionRow {
     id: string;
     epoch: number;
+    // action should be 'send', 'receive', 'swap', or some other action like 'approve'
+    // a swap is either 'swapExactTokensForTokens' or 'swapExactETHForTokens'
     actionName: string;
-    from: string;
+    from: string; // address
     fromPrettyName?: string;
-    to: string;
+    to: string; // address
     toPrettyName?: string;
-    valueIn: {
+    valuesIn: {
         amount: number;
         symbol: string;
-        fiatValue: number;
-    };
-    valueOut: {
+        fiatValue?: number;
+    }[];
+    valuesOut: {
         amount: number;
         symbol: string;
-        fiatValue: number;
-    };
-    gasUsed: number;
-    gasFiatValue: number;
+        fiatValue?: number;
+    }[];
+    gasUsed?: number;
+    gasFiatValue?: number;
+    failed?: boolean;
 }
