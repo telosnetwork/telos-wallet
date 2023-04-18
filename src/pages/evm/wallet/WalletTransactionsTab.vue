@@ -112,6 +112,8 @@ export default defineComponent({
                 toPrettyName: '', // blank or name like Swappi
                 valuesIn: [],
                 valuesOut: [],
+                gasUsed: 0.15, // gas in tlos, number
+                gasFiatValue: 0.03, // gas in fiat, number
                 failed: true,
             }, {
                 id: '0x'.concat('1'.repeat(40)), // transaction id

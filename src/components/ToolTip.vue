@@ -52,7 +52,8 @@ const props = defineProps<{
 
 <style lang="scss">
 .c-tooltip {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 
     &__icon {
         height: 14px;

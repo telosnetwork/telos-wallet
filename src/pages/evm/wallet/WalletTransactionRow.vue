@@ -4,6 +4,7 @@ import InlineSvg from 'vue-inline-svg';
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
+import ToolTip from 'components/ToolTip.vue';
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
@@ -13,6 +14,7 @@ const failureIcon = require('src/assets/icon--x.svg');
 export default defineComponent({
     name: 'WalletTransactionRow',
     components: {
+        ToolTip,
         TimeStamp,
         ExternalLink,
         InlineSvg,
@@ -182,9 +184,11 @@ export default defineComponent({
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
             >
-                <!-- eztodo switch to fiat symbol from store -->
+                <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
                 -{{ values.fiatValue }} USD
             </span>
+            <!-- eztodo i18n -->
+            <ToolTip v-else :warnings="['No reliable fiat value found']"/>
         </div>
 
         <div
@@ -199,16 +203,20 @@ export default defineComponent({
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
             >
-                <!-- eztodo switch to fiat symbol from store -->
+                <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
                 +{{ values.fiatValue }} USD
             </span>
+            <!-- eztodo i18n -->
+            <ToolTip v-else :warnings="['No reliable fiat value found']"/>
         </div>
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
-        0.0123 TLOS
+        <!-- eztodo get system token symbol from store -->
+        {{ transaction.gasUsed }} TLOS
         <br>
-        $0.00
+        <!-- eztodo get symbol from store -->
+        ${{ transaction.gasFiatValue }}
     </div>
 </div>
 </template>
