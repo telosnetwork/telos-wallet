@@ -39,22 +39,12 @@ export interface ParsedEvmTransaction extends EvmTransaction {
         symbol: string;
     };
 }
-/*
-export interface EvmTransactionDescription {
-    args: unknown[];
-    functionFragment: {
-        constant: boolean;
-        gas: unknown;
-        inputs: ethers.utils.ParamType[];
-        name: string;
-        outputs: ethers.utils.ParamType[];
-        payable: boolean;
-        stateMutability: string;
-        type: string;
-        _isFragment: true;
-    };
-    name: string;
-    sighash: string;
-    signature: string;
+
+// TODO: refactoring needed
+export type EvmTransactionResponse = ethers.providers.TransactionResponse;
+export interface TransactionResponse {
+    hash: string;
 }
-*/
+export interface NativeTransactionResponse extends TransactionResponse {
+    __?: string;
+}
