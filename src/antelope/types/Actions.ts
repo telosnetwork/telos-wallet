@@ -129,6 +129,7 @@ export interface TokenBalance {
 }
 
 export interface Token {
+    tokenId: string;
     symbol: string;
     name: string;
     logo?: string;

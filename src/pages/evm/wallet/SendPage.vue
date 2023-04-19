@@ -261,7 +261,7 @@ export default defineComponent({
                                 <div>
                                     <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
                                     <q-item-label class="c-send-page__selector-op-balance" caption>
-                                        {{ prettyPrintBalance(scope.opt.balance, userStore.fiatLocale, isMobile, scope.opt.symbol) }} {{ scope.opt.symbol }}
+                                        {{ prettyPrintBalance(scope.opt.balance, userStore.fiatLocale, isMobile, scope.opt.symbol) }}
                                     </q-item-label>
                                 </div>
                             </q-item>

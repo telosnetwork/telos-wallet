@@ -183,6 +183,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(results => results.data.tokens as unknown as {chainId:number, logoURI: string}[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
             .then(tokens => tokens.map(t => ({
+                // Token Id - '<symbol>-<address>-<chainId>'
+                tokenId: `${(t as EvmToken).symbol}-${(t as EvmToken).address}-${t.chainId}`,
                 // defaults values
                 logo: t.logoURI ?? require('src/assets/logo--tlos.svg'),
                 isNative: false,

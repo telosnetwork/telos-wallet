@@ -48,6 +48,8 @@ import {
     NativeToken,
     Token,
 } from 'src/antelope/types';
+import { ethers } from 'ethers';
+
 
 
 
@@ -73,7 +75,7 @@ export interface ChainModel {
 export interface EvmChainModel {
     apy: string;
     gasPrice: {
-        wei: number;
+        wei: ethers.BigNumber;
         gwei: string;
     },
     settings: EVMChainSettings;
@@ -94,7 +96,7 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
     } as ChainModel;
     if (!isNative) {
         (model as EvmChainModel).gasPrice = {
-            wei: 0,
+            wei: ethers.BigNumber.from(0),
             gwei: '0',
         };
     }
@@ -162,9 +164,8 @@ export const useChainStore = defineStore(store_name, {
             const chain = this.getChain(label);
             try {
                 if (!chain.settings.isNative()) {
-                    const gasPrice = await (chain.settings as EVMChainSettings).getGasPrice();
-                    const wei = gasPrice.toNumber();
-                    const gwei = (wei / 1000000000).toFixed(2);
+                    const wei = await (chain.settings as EVMChainSettings).getGasPrice();
+                    const gwei = wei.div(1000000000).toNumber().toFixed(2);
                     (chain as EvmChainModel).gasPrice = {
                         wei,
                         gwei,
