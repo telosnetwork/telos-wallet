@@ -412,6 +412,10 @@ export default defineComponent({
         flex-direction: column;
 
         @media only screen and (min-width: $breakpoint-sm-min) {
+            align-items: flex-end;
+        }
+
+        @media only screen and (min-width: $breakpoint-md-min) {
             gap: 8px;
             flex-direction: row;
             align-items: center;
@@ -430,19 +434,19 @@ export default defineComponent({
         gap: 8px;
 
         &--out {
-            color: darkred;
+            color: $negative;
         }
 
         &--out#{$value}--small {
-            color: palevioletred;
+            color: var(--negative-muted);
         }
 
         &--in {
-            color: forestgreen;
+            color: $positive;
         }
 
         &--in#{$value}--small {
-            color: darkseagreen;
+            color: var(--positive-muted);
         }
 
         &--small {
