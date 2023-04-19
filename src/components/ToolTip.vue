@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref } from 'vue';
+import { directive as vClickAway } from 'vue3-click-away';
 
 import InlineSvg from 'vue-inline-svg';
 const infoIcon = require('src/assets/icon--info.svg');
@@ -10,10 +11,25 @@ const props = defineProps<{
     warnings?: string[],
     hideIcon?: boolean,
 }>();
+
+let tooltipEnabled = ref(false);
+
+function setTooltipVisibility(enable: boolean) {
+    tooltipEnabled.value = enable;
+}
 </script>
 
 <template>
-<div class="c-tooltip">
+<div
+    v-click-away="() => setTooltipVisibility(false)"
+    :class="{
+        'c-tooltip': true,
+        'c-tooltip--dynamic-size': $slots.default
+    }"
+    @mouseenter="setTooltipVisibility(true)"
+    @mouseleave="setTooltipVisibility(false)"
+    @touchend="setTooltipVisibility(!tooltipEnabled)"
+>
     <slot></slot>
     <InlineSvg
         v-if="!hideIcon"
@@ -22,10 +38,10 @@ const props = defineProps<{
         aria-hidden="true"
     />
     <q-tooltip
+        :model-value="tooltipEnabled"
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
-        :hide-delay="5000"
     >
         <div class="c-tooltip__text-container">
             <div
@@ -56,7 +72,16 @@ const props = defineProps<{
 <style lang="scss">
 .c-tooltip {
     display: inline-flex;
+    height: 24px;
+    width: 24px;
+    justify-content: center;
     align-items: center;
+
+    &--dynamic-size {
+        width: unset;
+        height: unset;
+        justify-content: unset;
+    }
 
     &__icon {
         height: 14px;

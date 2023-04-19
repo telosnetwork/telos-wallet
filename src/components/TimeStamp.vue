@@ -32,6 +32,8 @@ const friendlyDate = computed(() => moment.unix(props.timestamp).fromNow());
 
 <style lang="scss">
 .c-timestamp {
+    white-space: nowrap;
+    width: max-content;
     font-weight: 400;
     font-size: 14px;
     line-height: 16px;

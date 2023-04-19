@@ -171,6 +171,18 @@ export function getFormattedUtcOffset(date: Date): string {
     return sign + hours + ':' + minutes;
 }
 
+/**
+ * Given a unix timestamp, returns a date in the form of Jan 1, 2023 07:45:22 AM
+ *
+ * @param epoch
+ *
+ * @return string
+ */
+export function getLongDate(epoch: number): string {
+    const offset = getFormattedUtcOffset(new Date(epoch));
+    return `${moment.unix(epoch).format('MMM D, YYYY hh:mm:ss A')} (UTC ${offset})`;
+}
+
 /*
 * Formats a currency amount in a localized way
 *

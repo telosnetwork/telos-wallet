@@ -5,7 +5,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
-import { getFormattedUtcOffset } from 'src/antelope/stores/utils';
+import { getFormattedUtcOffset, getLongDate } from 'src/antelope/stores/utils';
 import moment from 'moment';
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
@@ -105,14 +105,13 @@ export default defineComponent({
 
             return `www.teloscan.io/address/${address}`;
         },
-        transactionUrl() {
+        transactionUrl(): string {
             // eztodo store to use get explorer url
 
             return `www.teloscan.io/tx/${this.transaction.id}`;
         },
-        longDate() {
-            const offset = getFormattedUtcOffset(new Date(this.transaction.epoch));
-            return `${moment.unix(this.transaction.epoch).format('MMM D, YYYY HH:mm:ss')} (UTC ${offset})`;
+        longDate(): string {
+            return getLongDate(this.transaction.epoch);
         },
     },
 });
@@ -163,11 +162,9 @@ export default defineComponent({
         </div>
 
         <div class="c-transaction-row__timestamp">
-            <div>
-                <ToolTip :text="longDate" :hide-icon="true">
-                    <TimeStamp :timestamp="transaction.epoch" :muted="true" />
-                </ToolTip>
-            </div>
+            <ToolTip :text="longDate" :hide-icon="true">
+                <TimeStamp :timestamp="transaction.epoch" :muted="true" />
+            </ToolTip>
 
             <template v-if="$q.screen.gt.xs">
                 <div>
