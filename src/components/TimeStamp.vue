@@ -14,7 +14,6 @@ const props = defineProps({
     },
 });
 
-// eztodo this is showing as 4 months ago for today's time
 const friendlyDate = computed(() => moment.unix(props.timestamp).fromNow());
 
 </script>

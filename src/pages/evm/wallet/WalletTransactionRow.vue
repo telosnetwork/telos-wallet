@@ -7,9 +7,10 @@ import { ShapedTransactionRow } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
 import { getLongDate, prettyPrintCurrency } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 const { fiatLocale, fiatCurrency } = useUserStore();
-const chainSettings = useChainStore().currentChain.settings;
+const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
@@ -64,7 +65,6 @@ export default defineComponent({
             return ['send', 'receive', 'swap'].includes(this.transaction.actionName);
         },
         actionDescriptiveText(): string {
-            // eztodo make i18n
             switch (this.transaction.actionName) {
             case 'send':
                 return this.$t('evm_wallet.sent');
@@ -98,18 +98,14 @@ export default defineComponent({
         },
         // link to the explorer page for the address the user interacted with
         interactedWithUrl(): string {
-            // eztodo store to use get explorer url
-
             const { actionName, from, to } = this.transaction;
 
             let address = actionName === 'receive' ? from : to;
 
-            return `www.teloscan.io/address/${address}`;
+            return `${chainSettings.getExplorerUrl()}/address/${address}`;
         },
         transactionUrl(): string {
-            // eztodo store to use get explorer url
-
-            return `www.teloscan.io/tx/${this.transaction.id}`;
+            return `${chainSettings.getExplorerUrl()}/tx/${this.transaction.id}`;
         },
         longDate(): string {
             return getLongDate(this.transaction.epoch);
