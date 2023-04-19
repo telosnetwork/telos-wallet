@@ -5,8 +5,11 @@ import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
-import { getFormattedUtcOffset, getLongDate } from 'src/antelope/stores/utils';
-import moment from 'moment';
+import { getLongDate, prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { useChainStore, useUserStore } from 'src/antelope';
+
+const { fiatLocale, fiatCurrency } = useUserStore();
+const chainSettings = useChainStore().currentChain.settings;
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
@@ -113,6 +116,23 @@ export default defineComponent({
         longDate(): string {
             return getLongDate(this.transaction.epoch);
         },
+        chainTokenSymbol(): string {
+            return chainSettings.getSystemToken().symbol;
+        },
+    },
+    methods: {
+        formatAmount(amount: number, symbol: string = fiatCurrency, useSymbolCharacter: boolean = false) {
+            const decimals = symbol === fiatCurrency ? 2 : 4;
+            const formatted = prettyPrintCurrency(
+                amount,
+                decimals,
+                fiatLocale,
+                false,
+                useSymbolCharacter ? fiatCurrency : undefined,
+            );
+
+            return `${formatted} ${symbol}`;
+        },
     },
 });
 </script>
@@ -185,7 +205,7 @@ export default defineComponent({
             class="c-transaction-row__value-container"
         >
             <div class="c-transaction-row__value c-transaction-row__value--out">
-                -{{ values.amount }} {{ values.symbol }}
+                {{ formatAmount(-values.amount, values.symbol) }}
 
                 <!-- eztodo i18n -->
                 <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
@@ -194,8 +214,7 @@ export default defineComponent({
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
             >
-                <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
-                -{{ values.fiatValue }} USD
+                {{ formatAmount(-values.fiatValue) }}
             </span>
         </div>
 
@@ -205,7 +224,7 @@ export default defineComponent({
             class="c-transaction-row__value-container"
         >
             <div class="c-transaction-row__value c-transaction-row__value--in">
-                +{{ values.amount }} {{ values.symbol }}
+                +{{ formatAmount(values.amount, values.symbol) }}
 
                 <!-- eztodo i18n -->
                 <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
@@ -215,7 +234,7 @@ export default defineComponent({
                 class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
             >
                 <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
-                +{{ values.fiatValue }} USD
+                +{{ formatAmount(values.fiatValue) }}
             </span>
         </div>
     </div>
@@ -226,9 +245,10 @@ export default defineComponent({
             <q-icon name="local_gas_station" size="xs" />
         </div>
         <div class="c-transaction-row__gas-text">
-            <span>{{ transaction.gasUsed }} TLOS</span>
+            <!-- eztodo get system symbol from store -->
+            <span>{{ formatAmount(transaction.gasUsed, chainTokenSymbol) }}</span>
             <!-- eztodo get symbol from store -->
-            <span>${{ transaction.gasFiatValue }}</span>
+            <span>{{ formatAmount(transaction.gasFiatValue, undefined, true) }}</span>
         </div>
 
         <div
