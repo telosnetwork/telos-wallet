@@ -84,6 +84,13 @@ export default {
         with: 'with',
         more_info: 'More info',
     },
+    notification:{
+        success_title: 'Success',
+        success_message: 'Your transaction has been processed. For detailed information, click the link below.',
+        success_see_trx_label: 'See Transaction',
+        dismiss_label: 'Dismiss',
+        error_title: 'ooops',
+    },
     resources: {
         title: 'Network Resources',
         intro: 'Stake CPU and NET for processing transactions. RAM is used for storing data on the blockchain.',
