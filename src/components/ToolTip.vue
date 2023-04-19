@@ -8,12 +8,15 @@ const warningIcon = require('src/assets/icon--warning.svg');
 const props = defineProps<{
     text?: string,
     warnings?: string[],
+    hideIcon?: boolean,
 }>();
 </script>
 
 <template>
 <div class="c-tooltip">
+    <slot></slot>
     <InlineSvg
+        v-if="!hideIcon"
         :src="infoIcon"
         class="c-tooltip__icon"
         aria-hidden="true"

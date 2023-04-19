@@ -138,9 +138,15 @@ export default defineComponent({
     v-for="(transaction, index) in shapedTransactions"
     :key="`tx-${index}`"
     :transaction="transaction"
+    class="c-wallet-tx-tab__row"
 />
+
 </template>
 
 <style lang="scss">
-
+.c-wallet-tx-tab {
+    &__row {
+        margin: auto;
+    }
+}
 </style>

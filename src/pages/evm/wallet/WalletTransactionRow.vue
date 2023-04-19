@@ -5,6 +5,8 @@ import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
+import { getFormattedUtcOffset } from 'src/antelope/stores/utils';
+import moment from 'moment';
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
@@ -108,6 +110,10 @@ export default defineComponent({
 
             return `www.teloscan.io/tx/${this.transaction.id}`;
         },
+        longDate() {
+            const offset = getFormattedUtcOffset(new Date(this.transaction.epoch));
+            return `${moment.unix(this.transaction.epoch).format('MMM D, YYYY HH:mm:ss')} (UTC ${offset})`;
+        },
     },
 });
 </script>
@@ -157,7 +163,11 @@ export default defineComponent({
         </div>
 
         <div class="c-transaction-row__timestamp">
-            <TimeStamp :timestamp="transaction.epoch" :muted="true" />
+            <div>
+                <ToolTip :text="longDate" :hide-icon="true">
+                    <TimeStamp :timestamp="transaction.epoch" :muted="true" />
+                </ToolTip>
+            </div>
 
             <template v-if="$q.screen.gt.xs">
                 <div>
@@ -177,9 +187,12 @@ export default defineComponent({
             :key="`values-out-${index}`"
             class="c-transaction-row__value-container"
         >
-            <span class="c-transaction-row__value c-transaction-row__value--out">
+            <div class="c-transaction-row__value c-transaction-row__value--out">
                 -{{ values.amount }} {{ values.symbol }}
-            </span>
+
+                <!-- eztodo i18n -->
+                <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
+            </div>
             <span
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
@@ -187,8 +200,6 @@ export default defineComponent({
                 <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
                 -{{ values.fiatValue }} USD
             </span>
-            <!-- eztodo i18n -->
-            <ToolTip v-else :warnings="['No reliable fiat value found']"/>
         </div>
 
         <div
@@ -196,9 +207,12 @@ export default defineComponent({
             :key="`values-in-${index}`"
             class="c-transaction-row__value-container"
         >
-            <span class="c-transaction-row__value c-transaction-row__value--in">
+            <div class="c-transaction-row__value c-transaction-row__value--in">
                 +{{ values.amount }} {{ values.symbol }}
-            </span>
+
+                <!-- eztodo i18n -->
+                <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
+            </div>
             <span
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
@@ -206,23 +220,37 @@ export default defineComponent({
                 <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
                 +{{ values.fiatValue }} USD
             </span>
-            <!-- eztodo i18n -->
-            <ToolTip v-else :warnings="['No reliable fiat value found']"/>
         </div>
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
         <!-- eztodo get system token symbol from store -->
-        {{ transaction.gasUsed }} TLOS
-        <br>
-        <!-- eztodo get symbol from store -->
-        ${{ transaction.gasFiatValue }}
+        <div class="c-transaction-row__gas-icon-container">
+            <q-icon name="local_gas_station" size="xs" />
+        </div>
+        <div class="c-transaction-row__gas-text">
+            <span>{{ transaction.gasUsed }} TLOS</span>
+            <!-- eztodo get symbol from store -->
+            <span>${{ transaction.gasFiatValue }}</span>
+        </div>
+
+        <div
+            v-if="$q.screen.lt.sm"
+            class="c-transaction-row__mobile-tx-link"
+        >
+            <!-- eztodo localize -->
+            <ExternalLink
+                :text="'More info'"
+                :url="transactionUrl"
+            />
+        </div>
     </div>
 </div>
 </template>
 
 <style lang="scss">
 .c-transaction-row {
+    max-width: 1000px;
     padding: 16px 8px;
     border-bottom: 2px solid $page-header;
     display: grid;
@@ -233,7 +261,8 @@ export default defineComponent({
         'c';
 
     @media only screen and (min-width: $breakpoint-sm-min) {
-        grid-template: 'a b c' / auto auto 150px;
+        gap: 32px;
+        grid-template: 'a b c' / auto auto max-content;
     }
 
     &__info-container {
@@ -250,11 +279,6 @@ export default defineComponent({
             }
         }
 
-        &--second,
-        &--third {
-            margin-left: 24px;
-        }
-
         &--second {
             display: flex;
             flex-direction: column;
@@ -266,7 +290,13 @@ export default defineComponent({
         }
 
         &--third {
+            display: flex;
+            align-items: center;
+            gap: 4px;
 
+            @media only screen and (min-width: $breakpoint-sm-min) {
+                justify-content: flex-end;
+            }
         }
     }
 
@@ -275,7 +305,6 @@ export default defineComponent({
         grid-template-columns: min-content minmax(0, 1fr) max-content;
         gap: 8px;
         max-width: 100%;
-        //flex-direction: row;
     }
 
     &__interaction-icon-container {
@@ -370,7 +399,9 @@ export default defineComponent({
         font-weight: 400;
         font-size: 16px;
         width: max-content;
-        display: inline;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
 
         &--out {
             color: darkred;
@@ -391,6 +422,41 @@ export default defineComponent({
         &--small {
             font-size: 14px;
         }
+    }
+    //
+    //&__gas-container {
+    //    display: grid;
+    //    gap: 4px;
+    //    grid-template: 'a b c' / 16px max-content;
+    //
+    //    @media only screen and (min-width: $breakpoint-sm-min) {
+    //        grid-template:
+    //                'a b'
+    //                'a c' auto / 16px max-content;
+    //    }
+    //}
+
+    &__gas-icon-container {
+        display: flex;
+        align-items: center;
+    }
+
+    &__gas-text {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+
+        @media only screen and (min-width: $breakpoint-sm-min) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+        }
+    }
+
+    &__mobile-tx-link {
+        flex: 1 1 100%;
+        text-align: right;
     }
 }
 </style>
