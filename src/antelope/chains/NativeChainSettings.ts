@@ -148,8 +148,12 @@ export default abstract class NativeChainSettings implements ChainSettings {
         const url = `https://raw.githubusercontent.com/telosnetwork/token-list/main/tokens.${name}.json`;
         const response = fetch(url)
             .then(response => response.text())
-            .then((fileContent: string) => JSON.parse(fileContent) as { account: string }[])
-            .then(originals => originals.map(token => token as unknown as NativeToken))
+            .then((fileContent: string) => JSON.parse(fileContent) as NativeToken[])
+            .then(originals => originals.map(t => ({
+                ...t,
+                // Token Id - '<symbol>-<contract>-<chain-name>'
+                tokenId: `${t.symbol}-${t.contract}-${name}`,
+            }) as unknown as NativeToken))
             .catch((error) => {
                 console.error(error);
                 return [];

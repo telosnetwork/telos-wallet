@@ -88,7 +88,7 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account) {
-                        // we take the hole list of tokens and add the system token to the beginning
+                        // we take the whole list of tokens and add the system token to the beginning
                         const evm = useEVMStore();
                         const tokens = await chain_settings.getTokenList();
                         this.updateSystemBalanceForAccount(label, account.account);
@@ -239,7 +239,7 @@ export const useBalancesStore = defineStore(store_name, {
         addNewBalance(label: string, balance: Token): void {
             this.trace('addNewBalance', label, balance);
             // if the balance already exists, we update it, if not, we add it
-            if (this.__balances[label].find(b => b.symbol === balance.symbol)) {
+            if (this.__balances[label].find(b => b.tokenId === balance.tokenId)) {
                 this.updateBalance(label, balance);
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
@@ -247,7 +247,7 @@ export const useBalancesStore = defineStore(store_name, {
         },
         updateBalance(label: string, token: Token): void {
             this.trace('updateBalance', label, token);
-            const index = this.__balances[label].findIndex(b => b.symbol === token.symbol);
+            const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
                 this.__balances[label][index].balance = token.balance;
                 this.__balances[label][index].fullBalance = token.fullBalance;

@@ -39,16 +39,40 @@ const successNotification = function(message) {
     });
 };
 
-// TODO: refactoring needed --------------------
-// https://github.com/telosnetwork/telos-wallet/issues/254
-const ant = getAntelope();
 
-const check_icon = `<svg width="33" height="28" viewBox="0 0 33 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M26.8338 0.933594L32.4605 6.56026L11.7138 27.3336L0.460449 16.0669L6.08712 10.4403L11.7138 16.0669L26.8338 0.933594ZM26.8338 4.66693L11.7138 19.8136L6.08712 14.2536L4.20712 16.0669L11.7138 23.5603L28.7138 6.56026L26.8338 4.66693Z" fill="#255B00"/></svg>`;
+// Fetching the icons' internal svg
+function makeRequest(url) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                resolve(xhr.responseText);
+            } else {
+                reject(new Error(`Request failed with status ${xhr.status}`));
+            }
+        };
+        xhr.onerror = function() {
+            reject(new Error('Request failed due to network error'));
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+}
 
-const cross_icon = `<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.960449 18.32L7.30712 12L0.960449 5.68L6.64045 0L12.9604 6.34667L19.2804 0L24.9604 5.68L18.6138 12L24.9604 18.32L19.2804 24L12.9604 17.6533L6.64045 24L0.960449 18.32ZM12.9604 13.88L19.2804 20.2133L21.1738 18.32L14.8404 12L21.1738 5.68L19.2804 3.78667L12.9604 10.12L6.64045 3.78667L4.74712 5.68L11.0805 12L4.74712 18.32L6.64045 20.2133L12.9604 13.88Z" fill="#880000"/>
-</svg>`;
+let crossIcon = '';
+let checkIcon = '';
+
+try {
+    crossIcon = await makeRequest('src/assets/icon--cross.svg');
+} catch (error) {
+    console.error(error);
+}
+
+try {
+    checkIcon = await makeRequest('src/assets/icon--check.svg');
+} catch (error) {
+    console.error(error);
+}
 
 const html = `
     <div class="c-notify__container c-notify__container--{type}">
@@ -66,7 +90,7 @@ const successfulTransactionNotification = function(link) {
     Notify.create({
         timeout: 5000,
         message: html
-            .replace('{svg}', check_icon)
+            .replace('{svg}', checkIcon)
             .replace('{type}', 'success')
             .replace('{title}', this.$t('notification.success_title'))
             .replace('{message}', this.$t('notification.success_message')),
@@ -91,7 +115,7 @@ const failedTransactionNotification = function(message) {
     Notify.create({
         timeout: 5000,
         message: html
-            .replace('{svg}', cross_icon)
+            .replace('{svg}', crossIcon)
             .replace('{type}', 'error')
             .replace('{title}', this.$t('notification.error_title'))
             .replace('{message}', message),

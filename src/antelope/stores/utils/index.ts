@@ -223,6 +223,14 @@ export function prettyPrintCurrency(
     return formatted;
 }
 
+
+
+/*
+* Determines whether the amount is too large (more than six characters long) to be displayed in full on mobile devices
+*
+* @param {number} amount - the currency amount
+* return {boolean} - true if the amount is too large to be displayed in full on mobile devices
+* */
 export function isAmountTooLarge(amount: number | string): boolean {
     const primaryAmountIsTooLarge =
         (typeof amount === 'number' && amount.toString().length > 6) ||
@@ -231,10 +239,32 @@ export function isAmountTooLarge(amount: number | string): boolean {
     return primaryAmountIsTooLarge;
 }
 
+
+
+/*
+* Formats a token balance amount in a localized way, using 4 decimals,
+* abbreviating if the amount is too large to be displayed in full on mobile devices only if tiny is true
+*
+* @param {number} amount - the currency amount
+* @param {number} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} tiny - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} symbol - symbol for the currency to be used, e.g. 'TLOS'. If defined, the symbol will be displayed, e.g. 123.00 TLOS.
+* return {string} - the formatted amount
+* */
 export function prettyPrintBalance(amount: number | string, locale: string, tiny: boolean, symbol = '') {
     return ['', ' ' + symbol].join(prettyPrintCurrency(+amount, 4, locale, tiny ? isAmountTooLarge(amount) : false));
 }
 
+/*
+* Formats a fiat balance amount in a localized way, using 2 decimals,
+* abbreviating if the amount is too large to be displayed in full on mobile devices only if tiny is true
+*
+* @param {number} amount - the currency amount
+* @param {number} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} tiny - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} currency - code for the currency to be used, e.g. 'USD'. If defined, either the symbol or code (determined by the param displayCurrencyAsSymbol) will be displayed, e.g. $123.00 . Generally gotten from the user store like useUserStore().currency
+* return {string} - the formatted amount
+* */
 export function prettyPrintFiatBalance(fiatAmount: number | string, locale: string, tiny: boolean, currency = 'USD') {
     return prettyPrintCurrency(+fiatAmount, 2, locale, tiny ? isAmountTooLarge(fiatAmount) : false, currency);
 }
