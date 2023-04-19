@@ -276,6 +276,15 @@ export default defineComponent({
             }
         }
 
+        &--second,
+        &--third {
+            margin-left: 24px;
+
+            @media only screen and (min-width: $breakpoint-sm-min) {
+                margin-left: unset;
+            }
+        }
+
         &--second {
             display: flex;
             flex-direction: column;
