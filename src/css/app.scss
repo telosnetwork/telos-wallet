@@ -217,6 +217,7 @@ div.cleos-auth-dialog {
   text-overflow: ellipsis;
 }
 
+<<<<<<< HEAD
 // Quasar overrides
 .q-tooltip {
     background: $tooltip-gradient;
@@ -303,3 +304,7 @@ div.cleos-auth-dialog {
         }
     }
 }
+=======
+// importing components css
+@import 'components/notification'
+>>>>>>> c803edb (addressing some of the EZs comments)

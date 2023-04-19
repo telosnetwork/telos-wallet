@@ -71,8 +71,32 @@ export default defineComponent({
                         :label="$t('evm_wallet.token')"
                         :options="['TLOS', 'WTLOS', 'STLOS', 'ACORN']"
                         class="c-send-page__token-selector"
-                    />
-                    <div class="c-send-page__view-contract" @click="viewTokenContract">
+                    >
+                        <template v-slot:selected>
+                            <span>{{ token?.symbol }}</span>
+                        </template>
+
+                        <template v-slot:option="scope">
+                            <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
+                                <div class="c-send-page__selector-op-avatar">
+                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
+                                </div>
+                                <div>
+                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
+                                    <q-item-label class="c-send-page__selector-op-balance" caption>
+                                        {{ prettyPrintBalance(scope.opt.balance, userStore.fiatLocale, isMobile, scope.opt.symbol) }}
+                                    </q-item-label>
+                                </div>
+                            </q-item>
+                        </template>
+                    </q-select>
+                    <div
+                        :class="{
+                            'c-send-page__view-contract': true,
+                            'c-send-page__view-contract--hidden': !showContractLink,
+                        }"
+                        @click="viewTokenContract"
+                    >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
                     </div>
