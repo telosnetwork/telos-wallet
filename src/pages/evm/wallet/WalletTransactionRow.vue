@@ -32,12 +32,11 @@ export default defineComponent({
     },
     computed: {
         actionName(): string {
-            // eztodo i18n
             if (this.transaction.failed) {
-                return 'Failed contract interaction';
+                return this.$t('evm_wallet.failed_contract_interaction');
             }
 
-            return this.transaction.actionName || 'Contract interaction';
+            return this.transaction.actionName || this.$t('evm_wallet.contract_interaction');
         },
         interactionIcon(): string {
             if (this.transaction.failed) {
@@ -68,24 +67,23 @@ export default defineComponent({
             // eztodo make i18n
             switch (this.transaction.actionName) {
             case 'send':
-                return 'Sent';
+                return this.$t('evm_wallet.sent');
             case 'receive':
-                return 'Received';
+                return this.$t('evm_wallet.received');
             case 'swap':
-                return 'Swapped';
+                return this.$t('evm_wallet.swapped');
             default:
                 return '';
             }
         },
         actionPrepositionText(): string {
-            // eztodo make i18n
             switch (this.transaction.actionName) {
             case 'send':
-                return 'to';
+                return this.$t('global.to');
             case 'receive':
-                return 'from';
+                return this.$t('global.from');
             case 'swap':
-                return 'with';
+                return this.$t('global.with');
             default:
                 return '';
             }
@@ -207,8 +205,10 @@ export default defineComponent({
             <div class="c-transaction-row__value c-transaction-row__value--out">
                 {{ formatAmount(-values.amount, values.symbol) }}
 
-                <!-- eztodo i18n -->
-                <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
+                <ToolTip
+                    v-if="!values.fiatValue"
+                    :warnings="[$t('evm_wallet.no_fiat_value')]"
+                />
             </div>
             <span
                 v-if="values.fiatValue"
@@ -226,28 +226,27 @@ export default defineComponent({
             <div class="c-transaction-row__value c-transaction-row__value--in">
                 +{{ formatAmount(values.amount, values.symbol) }}
 
-                <!-- eztodo i18n -->
-                <ToolTip v-if="!values.fiatValue" :warnings="['No reliable fiat value found']"/>
+                <ToolTip
+                    v-if="!values.fiatValue"
+                    :warnings="[$t('evm_wallet.no_fiat_value')]"
+                />
             </div>
             <span
                 v-if="values.fiatValue"
                 class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
             >
-                <!-- eztodo switch to fiat symbol from store, format values using formatcurrency -->
                 +{{ formatAmount(values.fiatValue) }}
             </span>
         </div>
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
-        <!-- eztodo get system token symbol from store -->
         <div class="c-transaction-row__gas-icon-container">
             <q-icon name="local_gas_station" size="xs" />
         </div>
         <div class="c-transaction-row__gas-text">
-            <!-- eztodo get system symbol from store -->
             <span>{{ formatAmount(transaction.gasUsed, chainTokenSymbol) }}</span>
-            <!-- eztodo get symbol from store -->
+
             <span>{{ formatAmount(transaction.gasFiatValue, undefined, true) }}</span>
         </div>
 
@@ -255,9 +254,8 @@ export default defineComponent({
             v-if="$q.screen.lt.sm"
             class="c-transaction-row__mobile-tx-link"
         >
-            <!-- eztodo localize -->
             <ExternalLink
-                :text="'More info'"
+                :text="$t('global.more_info')"
                 :url="transactionUrl"
             />
         </div>

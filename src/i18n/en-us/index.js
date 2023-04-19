@@ -66,6 +66,11 @@ export default {
         token_balance: 'Token Balance',
         fiat_value: 'Fiat Value',
         no_fiat_value: 'No reliable fiat value found',
+        sent: 'Sent',
+        received: 'Received',
+        swapped: 'Swapped',
+        failed_contract_interaction: 'Failed contract interaction',
+        contract_interaction: 'Contract interaction',
     },
     global: {
         native: 'Native',
@@ -74,6 +79,10 @@ export default {
         dark_mode: 'Dark Mode',
         light_mode: 'Light Mode',
         contract: 'Contract',
+        to: 'to',
+        from: 'from',
+        with: 'with',
+        more_info: 'More info',
     },
     resources: {
         title: 'Network Resources',
