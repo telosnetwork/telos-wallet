@@ -54,9 +54,6 @@ describe('ConnectWalletOptions.vue', () => {
                 props: {
                     toggleWalletConnect: false,
                 },
-                provide: {
-                    '$wagmi': null,
-                },
             });
         });
 
