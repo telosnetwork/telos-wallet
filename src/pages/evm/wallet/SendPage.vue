@@ -19,9 +19,153 @@ export default defineComponent({
         gasFeeInFiat: '$0.00',
         available: '12,845.1235 TLOS',
     }),
+    watch: {
+        balances: {
+            handler() {
+                let token = this.token;
+                this.token = null;
+                if (this.balances.length > 0 && !token) {
+                    token = this.balances[0];
+                }
+                this.token = token;
+            },
+            immediate: true,
+        },
+        token: {
+            handler() {
+                this.useFiat = false;
+                this.updateEstimatedGas();
+                this.setAllBalance();
+            },
+            immediate: true,
+        },
+    },
+    computed: {
+        gasFeeInTlos() {
+            const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
+            return prettyPrintBalance(this.estimatedGas.system, userStore.fiatLocale, this.isMobile, symbol);
+        },
+        gasFeeInFiat() {
+            return prettyPrintFiatBalance(this.estimatedGas.fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+        },
+        getSystemToken(): Token {
+            return this.balances[0];
+        },
+        isMobile(): boolean {
+            return this.$q.screen.lt.md;
+        },
+        balances(): EvmToken[] {
+            return ant.stores.balances.getBalances('logged') as EvmToken[];
+        },
+        showContractLink(): boolean {
+            return !!this.token?.address;
+        },
+        available(): string {
+            if (this.token) {
+                if (this.useFiat) {
+                    return prettyPrintFiatBalance(this.token.fiatBalance, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                } else {
+                    return prettyPrintBalance(this.token.balance, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                }
+            }
+            return '';
+        },
+        amountInFiat(): string {
+            if (this.token && this.token.price && !this.useFiat) {
+                return prettyPrintFiatBalance(+this.amount * this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+            }
+            return '';
+        },
+        amountInTokens(): string {
+            if (this.token && this.token.price && this.useFiat) {
+                return prettyPrintBalance(+this.amount / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
+            }
+            return '';
+        },
+        fiatSymbol(): string {
+            return userStore.fiatCurrency;
+        },
+        fiatRateText(): string {
+            if (!this.token || !this.token.price) {
+                return '';
+            }
+
+            const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+            return `(@ ${pretty} / ${this.token.symbol})`;
+        },
+        finalTokenAmount(): string {
+            if (this.useFiat && this.token) {
+                return (+this.amount / this.token.price).toString();
+            } else {
+                return this.amount;
+            }
+        },
+        useTextarea(): boolean {
+            return this.$q.screen.width < 500;
+        },
+        isAddressValid(): boolean {
+            const regex = /^0x[a-fA-F0-9]{40}$/;
+            return regex.test(this.address);
+        },
+        isAmountValid(): boolean {
+            if (this.token) {
+                const amount = +this.finalTokenAmount;
+                return amount > 0 && amount <= +this.token.fullBalance;
+            } else {
+                return false;
+            }
+        },
+        isFormValid(): boolean {
+            return this.isAddressValid && this.isAmountValid && this.isPrecisionCorrect;
+        },
+        isPrecisionCorrect(): boolean {
+            if (this.token) {
+                if (this.useFiat) {
+                    const result = (this.amount.split('.')[1]?.length ?? 0) <= 2;
+                    return result;
+                } else {
+                    const result = (this.amount.split('.')[1]?.length ?? 0) <= this.token.decimals;
+                    return result;
+                }
+            } else {
+                return true;
+            }
+        },
+    },
     methods: {
+        async updateEstimatedGas() {
+            const chain_settings = chainStore.loggedEvmChain?.settings;
+            if (chain_settings)  {
+                if (this.token?.isSystem) {
+                    this.estimatedGas = await chain_settings.getEstimatedGas(26250);
+                } else {
+                    this.estimatedGas = await chain_settings.getEstimatedGas(55500);
+                }
+            } else {
+                this.estimatedGas = { system: '0', fiat: '0' };
+            }
+        },
+        toggleUseFiat() {
+            if (this.token) {
+                if (this.useFiat) {
+                    this.amount = (+this.amount / this.token.price).toString();
+                } else {
+                    this.amount = (+this.amount * this.token.price).toFixed(2);
+                }
+            }
+
+            this.useFiat = !this.useFiat;
+        },
         setAllBalance() {
-            this.amount = this.available;
+            if (this.token) {
+                if (this.useFiat) {
+                    this.amount = (+this.token.balance * this.token.price).toFixed(2);
+                } else {
+                    this.amount = this.token.balance;
+                }
+            } else {
+                this.amount = '';
+            }
         },
         viewTokenContract() {
             console.log('viewTokenContract');
@@ -50,12 +194,14 @@ export default defineComponent({
                     <q-input
                         v-model="address"
                         outlined
+                        autogrow
+                        :type="useTextarea ? 'textarea' : 'text'"
                         :label="$t('evm_wallet.receiving_account')"
                         :rules="[val => !!val || $t('evm_wallet.account_required')]"
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--2 row">
+            <div v-if="!isMobile" class="c-send-page__row c-send-page__row--2 row c-send-page__available">
                 <q-space/>
                 <div class="col-auto">
                     <span class="c-send-page__amount-available" @click="setAllBalance">
@@ -64,13 +210,17 @@ export default defineComponent({
                 </div>
             </div>
             <div class="c-send-page__row c-send-page__row--3 row">
-                <div class="col-auto">
+                <!-- Token selection -->
+                <div class="col-12 col-md-auto">
                     <q-select
                         v-model="token"
                         outlined
                         :label="$t('evm_wallet.token')"
-                        :options="['TLOS', 'WTLOS', 'STLOS', 'ACORN']"
-                        class="c-send-page__token-selector"
+                        :options="balances"
+                        :class="{
+                            'c-send-page__token-selector': true,
+                            'c-send-page__token-selector--mobile': isMobile,
+                        }"
                     >
                         <template v-slot:selected>
                             <span>{{ token?.symbol }}</span>
@@ -98,16 +248,32 @@ export default defineComponent({
                         @click="viewTokenContract"
                     >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
+                        <q-space v-if="!isMobile"/>
                         <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
                     </div>
                 </div>
-                <div class="col">
+                <!-- Amount input -->
+                <div class="c-send-page__amount-col col">
+                    <div v-if="isMobile" class="row c-send-page__available">
+                        <q-space/>
+                        <div class="col-auto">
+                            <span class="c-send-page__amount-available" @click="setAllBalance">
+                                {{ $t('evm_wallet.amount_available', { amount:available }) }}
+                            </span>
+                        </div>
+                    </div>
                     <q-input
                         v-model="amount"
                         outlined
                         class="c-send-page__amount-input"
                         :label="$t('evm_wallet.amount')"
-                        :rules="[val => !!val || $t('evm_wallet.amount_required')]"
+                        :rules="[
+                            val => !!val || $t('evm_wallet.amount_required'),
+                            val => isPrecisionCorrect || $t('evm_wallet.invalid_amount_precision', { precision: useFiat ? 2 : (token?.decimals ?? 0) })
+                        ]"
+                        type="number"
+                        step="0.01"
+                        pattern="[0-9]*\.?[0-9]+"
                     >
                         <template v-slot:hint>
                             <div class="c-send-page__amount-fiat">
@@ -116,6 +282,20 @@ export default defineComponent({
                             </div>
                         </template>
                     </q-input>
+
+                    <div
+                        v-if="token && amount"
+                        :class="{
+                            'c-send-page__amount-symbol-container': true,
+                            'c-send-page__amount-symbol-container--mobile': isMobile,
+                        }"
+                    >
+                        <span class="c-send-page__amount-symbol">
+                            <span class="c-send-page__amount-transparent">{{ amount }} &nbsp;</span>
+                            <span v-if="useFiat"> {{ fiatSymbol }} </span>
+                            <span v-else> {{ token.symbol }} </span>
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="c-send-page__row c-send-page__row--4 row">
@@ -220,6 +400,50 @@ export default defineComponent({
 
     &__token-selector {
         width: 140px;
+        &--mobile {
+            width: 100%;
+        }
+    }
+
+    &__selector-op-avatar {
+        padding: 0px 14px 0px 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &__selector-op-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    &__amount-col {
+        position: relative;
+    }
+
+    &__amount-symbol-container {
+        pointer-events: none;
+        position: absolute;
+        top: 25px;
+        left: 12px;
+        &--mobile {
+            top: 46px;
+            left: 12px;
+        }
+    }
+
+    &__amount-transparent {
+        font-weight: 400;
+        letter-spacing: 0.00937em;
+        outline: 0;
+        color: transparent;
+    }
+
+    &__amount-symbol {
+        font-weight: 400;
+        letter-spacing: 0.00937em;
+        outline: 0;
+        color: rgba(var(--text-color-rgb), 0.5)
     }
 
     &__view-contract {
@@ -234,7 +458,6 @@ export default defineComponent({
         margin-left: 2px;
         font-size: 0.9rem;
         font-weight: 500;
-        flex-grow: 1;
     }
 
     &__view-contract-min-icon {

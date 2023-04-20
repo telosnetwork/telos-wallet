@@ -40,45 +40,14 @@ const successNotification = function(message) {
 };
 
 
-// Fetching the icons' internal svg
-function makeRequest(url) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                resolve(xhr.responseText);
-            } else {
-                reject(new Error(`Request failed with status ${xhr.status}`));
-            }
-        };
-        xhr.onerror = function() {
-            reject(new Error('Request failed due to network error'));
-        };
-        xhr.open('GET', url);
-        xhr.send();
-    });
-}
-
-let crossIcon = '';
-let checkIcon = '';
-
-try {
-    crossIcon = await makeRequest('src/assets/icon--cross.svg');
-} catch (error) {
-    console.error(error);
-}
-
-try {
-    checkIcon = await makeRequest('src/assets/icon--check.svg');
-} catch (error) {
-    console.error(error);
-}
+const crossIcon = require('src/assets/icon--cross.svg');
+const checkIcon = require('src/assets/icon--check.svg');
 
 const html = `
     <div class="c-notify__container c-notify__container--{type}">
         <div class="c-notify__header"></div>
         <div class="c-notify__title">
-            {svg}
+            <img src='{svg}' class="c-notify__icon" />
             <span>{title}</span>
         </div>
         <div class="c-notify__message">
@@ -131,8 +100,6 @@ const failedTransactionNotification = function(message) {
         }],
     });
 };
-
-// --------------------------------------------
 
 
 export default boot(({ app, store }) => {
