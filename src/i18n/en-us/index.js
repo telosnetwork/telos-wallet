@@ -77,6 +77,7 @@ export default {
         view_contract: 'View Contract',
         invalid_form: 'There are still invalid fields',
         general_error: 'There was an error processing your request',
+        invalid_amount_precision: 'You can only enter {precision} decimal places',
     },
     global: {
         native: 'Native',
