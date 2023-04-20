@@ -19,6 +19,9 @@
     "@quasar/extras": "^1.0.0",
     "@telosnetwork/telosevm-js": "0.2.6",
     "@telosnetwork/ual-cleos": "1.13.1",
+    "@wagmi/core": "^0.10.9",
+    "@web3modal/ethereum": "^2.2.2",
+    "@web3modal/html": "^2.2.2",
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
     "bignumber.js": "^9.0.1",
@@ -68,7 +71,8 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-quasar": "^1.0.0",
     "eslint-plugin-vue": "8.2.0",
-    "eslint-webpack-plugin": "^2.4.0"
+    "eslint-webpack-plugin": "^2.4.0",
+    "jest-fetch-mock": "^3.0.3"
   },
   "browserslist": [
     "last 10 Chrome versions",
