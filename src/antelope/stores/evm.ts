@@ -45,6 +45,7 @@ import {
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
+import { usePlatformStore } from './platform';
 
 export const evmEvents = {
     onEvmReady: new BehaviorSubject<boolean>(false),
@@ -81,8 +82,8 @@ export const useEVMStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
 
-            // bypass provider detection if using WalletConnect
-            if (localStorage.getItem('wagmi.connected')){
+            // bypass provider detection on mobile
+            if (usePlatformStore().isMobile){
                 return;
             }
 

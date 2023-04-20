@@ -6,7 +6,6 @@ import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
-import { getAccount } from '@wagmi/core';
 import { useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
