@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import { boot } from 'quasar/wrappers';
 import { configureChains, createClient } from '@wagmi/core';
 import { telos, telosTestnet } from '@wagmi/core/chains';
