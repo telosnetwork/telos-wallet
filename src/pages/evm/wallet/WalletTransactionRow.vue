@@ -447,18 +447,6 @@ export default defineComponent({
             font-size: 14px;
         }
     }
-    //
-    //&__gas-container {
-    //    display: grid;
-    //    gap: 4px;
-    //    grid-template: 'a b c' / 16px max-content;
-    //
-    //    @media only screen and (min-width: $breakpoint-sm-min) {
-    //        grid-template:
-    //                'a b'
-    //                'a c' auto / 16px max-content;
-    //    }
-    //}
 
     &__gas-icon-container {
         display: flex;
@@ -467,15 +455,10 @@ export default defineComponent({
 
     &__gas-text {
         display: flex;
-        align-items: center;
-        gap: 4px;
+        gap: 0;
         flex-shrink: 0;
-
-        @media only screen and (min-width: $breakpoint-sm-min) {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0;
-        }
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     &__mobile-tx-link {
