@@ -39,7 +39,7 @@ export default defineComponent({
             } = chainSettings.getSystemToken();
 
             const defaults = {
-                chainId: +chainStore.currentChain.settings.getChainId(),
+                chainId: +chainSettings.getChainId(),
                 isNative: false,
                 isSystem: false,
                 price: 0,
@@ -48,6 +48,7 @@ export default defineComponent({
 
             const chainToken: EvmToken = {
                 ...defaults,
+                tokenId: `${symbol}-system-${chainSettings.getChainId()}`,
                 isSystem: true,
                 address: '',
                 symbol,
@@ -71,6 +72,7 @@ export default defineComponent({
                 //     get stlos token info from store
                 tokens.push({
                     ...defaults,
+                    tokenId: `STLOS-0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905-${chainSettings.getChainId()}`,
                     address: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -86,6 +88,7 @@ export default defineComponent({
                 //     get wtlos token info from store
                 tokens.push({
                     ...defaults,
+                    tokenId: `WTLOS-0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E-${chainSettings.getChainId()}`,
                     address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
                     symbol: 'WTLOS',
                     name: 'Wrapped TLOS',
@@ -115,6 +118,7 @@ export default defineComponent({
                 ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTA',
+                tokenId: `SHTA-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shitcoin Alpha',
                 logoURI: '',
                 decimals: 18,
@@ -124,6 +128,7 @@ export default defineComponent({
                 ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTB',
+                tokenId: `SHTB-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shitcoin Beta',
                 logoURI: '',
                 decimals: 18,
@@ -133,6 +138,7 @@ export default defineComponent({
                 ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB2',
+                tokenId: `SHIB2-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shiba 2',
                 logoURI: '',
                 decimals: 18,
@@ -142,6 +148,7 @@ export default defineComponent({
                 ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB',
+                tokenId: `SHIB-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shiba',
                 logoURI: '',
                 decimals: 18,

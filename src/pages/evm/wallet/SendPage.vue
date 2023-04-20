@@ -105,6 +105,9 @@ export default defineComponent({
                 return this.amount;
             }
         },
+        useTextarea(): boolean {
+            return this.$q.screen.width < 500;
+        },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
             return regex.test(this.address);
@@ -118,7 +121,20 @@ export default defineComponent({
             }
         },
         isFormValid(): boolean {
-            return this.isAddressValid && this.isAmountValid;
+            return this.isAddressValid && this.isAmountValid && this.isPrecisionCorrect;
+        },
+        isPrecisionCorrect(): boolean {
+            if (this.token) {
+                if (this.useFiat) {
+                    const result = (this.amount.split('.')[1]?.length ?? 0) <= 2;
+                    return result;
+                } else {
+                    const result = (this.amount.split('.')[1]?.length ?? 0) <= this.token.decimals;
+                    return result;
+                }
+            } else {
+                return true;
+            }
         },
     },
     methods: {
@@ -139,7 +155,7 @@ export default defineComponent({
                 if (this.useFiat) {
                     this.amount = (+this.amount / this.token.price).toString();
                 } else {
-                    this.amount = (+this.amount * this.token.price).toString();
+                    this.amount = (+this.amount * this.token.price).toFixed(2);
                 }
             }
 
@@ -148,7 +164,7 @@ export default defineComponent({
         setAllBalance() {
             if (this.token) {
                 if (this.useFiat) {
-                    this.amount = (+this.token.balance * this.token.price).toString();
+                    this.amount = (+this.token.balance * this.token.price).toFixed(2);
                 } else {
                     this.amount = this.token.balance;
                 }
@@ -226,12 +242,14 @@ export default defineComponent({
                     <q-input
                         v-model="address"
                         outlined
+                        autogrow
+                        :type="useTextarea ? 'textarea' : 'text'"
                         :label="$t('evm_wallet.receiving_account')"
                         :rules="[val => !!val || $t('evm_wallet.account_required')]"
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--2 row">
+            <div v-if="!isMobile" class="c-send-page__row c-send-page__row--2 row c-send-page__available">
                 <q-space/>
                 <div class="col-auto">
                     <span class="c-send-page__amount-available" @click="setAllBalance">
@@ -241,13 +259,16 @@ export default defineComponent({
             </div>
             <div class="c-send-page__row c-send-page__row--3 row">
                 <!-- Token selection -->
-                <div class="col-auto">
+                <div class="col-12 col-md-auto">
                     <q-select
                         v-model="token"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
-                        class="c-send-page__token-selector"
+                        :class="{
+                            'c-send-page__token-selector': true,
+                            'c-send-page__token-selector--mobile': isMobile,
+                        }"
                     >
                         <template v-slot:selected>
                             <span>{{ token?.symbol }}</span>
@@ -275,17 +296,29 @@ export default defineComponent({
                         @click="viewTokenContract"
                     >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
+                        <q-space v-if="!isMobile"/>
                         <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
                     </div>
                 </div>
                 <!-- Amount input -->
                 <div class="c-send-page__amount-col col">
+                    <div v-if="isMobile" class="row c-send-page__available">
+                        <q-space/>
+                        <div class="col-auto">
+                            <span class="c-send-page__amount-available" @click="setAllBalance">
+                                {{ $t('evm_wallet.amount_available', { amount:available }) }}
+                            </span>
+                        </div>
+                    </div>
                     <q-input
                         v-model="amount"
                         outlined
                         class="c-send-page__amount-input"
                         :label="$t('evm_wallet.amount')"
-                        :rules="[val => !!val || $t('evm_wallet.amount_required')]"
+                        :rules="[
+                            val => !!val || $t('evm_wallet.amount_required'),
+                            val => isPrecisionCorrect || $t('evm_wallet.invalid_amount_precision', { precision: useFiat ? 2 : (token?.decimals ?? 0) })
+                        ]"
                         type="number"
                         step="0.01"
                         pattern="[0-9]*\.?[0-9]+"
@@ -307,7 +340,13 @@ export default defineComponent({
                         </template>
                     </q-input>
 
-                    <div v-if="token && amount" class="c-send-page__amount-symbol-container">
+                    <div
+                        v-if="token && amount"
+                        :class="{
+                            'c-send-page__amount-symbol-container': true,
+                            'c-send-page__amount-symbol-container--mobile': isMobile,
+                        }"
+                    >
                         <span class="c-send-page__amount-symbol">
                             <span class="c-send-page__amount-transparent">{{ amount }} &nbsp;</span>
                             <span v-if="useFiat"> {{ fiatSymbol }} </span>
@@ -424,6 +463,9 @@ export default defineComponent({
 
     &__token-selector {
         width: 140px;
+        &--mobile {
+            width: 100%;
+        }
     }
 
     &__selector-op-avatar {
@@ -446,7 +488,11 @@ export default defineComponent({
         pointer-events: none;
         position: absolute;
         top: 25px;
-        left: 12px
+        left: 12px;
+        &--mobile {
+            top: 46px;
+            left: 12px;
+        }
     }
 
     &__amount-transparent {
@@ -479,7 +525,6 @@ export default defineComponent({
         margin-left: 2px;
         font-size: 0.9rem;
         font-weight: 500;
-        flex-grow: 1;
     }
 
     &__view-contract-min-icon {
