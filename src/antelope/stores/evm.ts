@@ -45,7 +45,7 @@ import {
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
-import { usePlatformStore } from './platform';
+import { usePlatformStore } from 'src/antelope/stores/platform';
 
 export const evmEvents = {
     onEvmReady: new BehaviorSubject<boolean>(false),
