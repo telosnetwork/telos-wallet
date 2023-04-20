@@ -147,7 +147,7 @@ export default defineComponent({
             />
         </div>
 
-        <div class="c-transaction-row__interaction-text-container">
+        <div>
             <div class="c-transaction-row__primary-interaction-text">
                 <template v-if="actionHasDescriptiveText">
                     <span class="c-transaction-row__action-description">
@@ -351,10 +351,6 @@ export default defineComponent({
                 fill: $negative;
             }
         }
-    }
-
-    &__interaction-text-container {
-
     }
 
     &__interaction-nowrap {
