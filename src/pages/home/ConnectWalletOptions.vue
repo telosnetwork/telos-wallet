@@ -2,11 +2,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref, watch } from 'vue';
-import { useAccountStore } from 'src/antelope/stores/account';
-import { useChainStore } from 'src/antelope/stores/chain';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
-import { useEVMStore, usePlatformStore } from 'src/antelope';
+import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -31,6 +29,7 @@ export default defineComponent({
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();
+            console.log(network);
             accountStore.loginEVM({ network });
         };
 
