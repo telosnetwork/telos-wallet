@@ -89,7 +89,7 @@ export default defineComponent({
     />
     <div class="wallet-options">
         <div class="wallet-options__header">
-            Connect your wallet
+            {{ $t('home.connect_your_wallet') }}
         </div>
         <div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()">
             <img
@@ -98,7 +98,7 @@ export default defineComponent({
                 alt="MetaMask"
                 src="~assets/evm/metamask_fox.svg"
             >
-            {{ supportsMetamask ? 'MetaMask' : 'Install MetaMask' }}
+            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
         </div>
         <div class="wallet-options__option" @click="connectToWalletConnect">
             <img
@@ -107,7 +107,7 @@ export default defineComponent({
                 alt="WalletConnect"
                 src="~assets/evm/wallet_connect.svg"
             >
-            WalletConnect
+            {{ $t('home.walletconnect') }}
         </div>
     </div>
 </div>

@@ -34,6 +34,10 @@ export default {
         logged_as: 'Logged in as {account}',
         view_wallet: 'View Wallet',
         logout: 'Log Out',
+        install_metamask: 'Install MetaMask',
+        metamask: 'MetaMask',
+        walletconnect: 'WalletConnect',
+        connect_your_wallet: 'Connect Your Wallet',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
