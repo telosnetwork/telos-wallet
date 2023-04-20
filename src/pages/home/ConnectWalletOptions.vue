@@ -29,7 +29,6 @@ export default defineComponent({
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();
-            console.log(network);
             accountStore.loginEVM({ network });
         };
 

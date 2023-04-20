@@ -32,6 +32,7 @@ const web3ModalMock = {
 };
 
 import ConnectWalletOptions from 'src/pages/home/ConnectWalletOptions.vue';
+import { nextTick } from 'vue';
 
 jest.mock('src/antelope', () => storeMock);
 jest.mock('@wagmi/core', () => wagmiMock);
@@ -54,7 +55,7 @@ describe('ConnectWalletOptions.vue', () => {
                     toggleWalletConnect: false,
                 },
                 provide: {
-                    '$wagmi': jest.mock,
+                    '$wagmi': null,
                 },
             });
         });
@@ -78,12 +79,32 @@ describe('ConnectWalletOptions.vue', () => {
         });
 
         describe('redirectToMetamaskDownload', () => {
-            it.skip('should open a a new tab to metamask download page', () => {
+            it('should open a a new tab to metamask download page', () => {
+                window.open = () => null;
                 const methodSpy = jest.spyOn(window, 'open');
 
                 wrapper.vm.redirectToMetamaskDownload();
 
                 expect(methodSpy).toHaveBeenCalledWith('https://metamask.io/download/', '_blank');
+            });
+        });
+
+        describe('connectToWalletConnect', () => {
+            it('calls openModal if web3Modal is instantiated', () => {
+                const methodSpy = jest.spyOn(wrapper.vm.web3Modal, 'openModal');
+
+                wrapper.vm.connectToWalletConnect();
+
+                expect(methodSpy).toHaveBeenCalled();
+            });
+
+            it('returns if web3modal is undefined', () => {
+                wrapper.vm.web3Modal = undefined;
+                const methodSpy = jest.spyOn(wrapper.vm, 'connectToWalletConnect');
+
+                wrapper.vm.connectToWalletConnect();
+
+                expect(methodSpy).toHaveReturned();
             });
         });
     });
