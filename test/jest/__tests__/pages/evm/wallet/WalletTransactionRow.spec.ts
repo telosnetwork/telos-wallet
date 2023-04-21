@@ -34,7 +34,6 @@ describe('WalletTransactionRow.vue', () => {
     beforeAll(() => {
         // used so that timestamp text is the same for each test run, not depending on the day it is run
         jest.useFakeTimers('modern').setSystemTime(new Date(fakeDateSeconds * 1000));
-        jest.setSystemTime(new Date());
     });
 
     afterAll(() => {
