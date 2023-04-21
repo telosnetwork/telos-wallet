@@ -3,7 +3,6 @@ import { BigNumber } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
-import moment from 'moment';
 import {
     EvmABIEntry,
 } from 'src/antelope/types';
