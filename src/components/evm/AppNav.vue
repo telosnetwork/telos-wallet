@@ -19,6 +19,9 @@ export default defineComponent({
         showShadow: false,
     }),
     computed: {
+        loggedAccount() {
+            return accountStore.loggedAccount;
+        },
         menuItemTabIndex() {
             if (this.$q.screen.lt.md && !this.menuIsOpen) {
                 return '-1';
@@ -116,7 +119,7 @@ export default defineComponent({
             @keypress.space.enter="openMenu"
         />
 
-        <UserInfo />
+        <UserInfo :account="loggedAccount" />
     </div>
 
     <div
