@@ -32,7 +32,6 @@ const web3ModalMock = {
 };
 
 import ConnectWalletOptions from 'src/pages/home/ConnectWalletOptions.vue';
-import { nextTick } from 'vue';
 
 jest.mock('src/antelope', () => storeMock);
 jest.mock('@wagmi/core', () => wagmiMock);
