@@ -67,8 +67,6 @@ export default {
         link_to_receive_aria: 'Link to Receive page',
         link_to_buy_aria: 'External link to buy tokens',
         balance_row_actions_aria: 'Balance row actions',
-        token_balance: 'Token Balance',
-        fiat_value: 'Fiat Value',
         no_fiat_value: 'No reliable fiat value found',
         sent: 'Sent',
         received: 'Received',

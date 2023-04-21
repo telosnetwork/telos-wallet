@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { directive as vClickAway } from 'vue3-click-away';
 
 import InlineSvg from 'vue-inline-svg';
+import { useQuasar } from 'quasar';
 const infoIcon = require('src/assets/icon--info.svg');
 const warningIcon = require('src/assets/icon--warning.svg');
 
@@ -17,6 +18,16 @@ let tooltipEnabled = ref(false);
 function setTooltipVisibility(enable: boolean) {
     tooltipEnabled.value = enable;
 }
+
+const $q = useQuasar();
+watch($q.screen.lt, ({ sm: isMobile }) => {
+    if (isMobile) {
+        setTooltipVisibility(false);
+    }
+}, {
+    deep: true,
+});
+
 </script>
 
 <template>
@@ -42,6 +53,7 @@ function setTooltipVisibility(enable: boolean) {
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
+        @update:model-value="() => {}"
     >
         <div class="c-tooltip__text-container">
             <div
