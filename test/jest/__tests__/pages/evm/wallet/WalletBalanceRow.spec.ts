@@ -34,11 +34,11 @@ describe('WalletBalanceRow.vue', () => {
         'q-btn': stubWithSlot('q-btn'),
     };
 
-    const qScreenMock = (lessThanMd: boolean) => ({
+    const qScreenMock = (isMobile: boolean) => ({
         $q: {
             screen: {
                 lt: {
-                    md: lessThanMd,
+                    sm: isMobile,
                 },
             },
         },
