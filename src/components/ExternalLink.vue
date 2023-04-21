@@ -28,20 +28,20 @@ const formattedText = computed(() => {
         class="c-external-link__link"
     >
         {{ formattedText }}
+        <q-icon size="xs" name="launch" class="c-external-link__icon"/>
     </a>
 
-    <q-icon size="xs" name="launch" class="c-external-link__icon"/>
 </div>
 </template>
 
 <style lang="scss">
 .c-external-link {
-    display: inline-flex;
-    align-items: center;
-
     &__link {
+        line-height: 24px;
         text-decoration: none;
         color: $link-blue;
+        display: inline-flex;
+        align-items: center;
     }
 
     &__icon {
