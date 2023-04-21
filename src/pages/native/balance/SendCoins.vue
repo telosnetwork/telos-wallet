@@ -1,6 +1,5 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 export default {
