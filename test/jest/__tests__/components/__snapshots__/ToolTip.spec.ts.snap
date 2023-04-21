@@ -4,6 +4,8 @@ exports[`ToolTip.vue should render correctly 1`] = `
 <div
   class="c-tooltip"
 >
+  
+  
   <inline-svg-stub
     aria-hidden="true"
     class="c-tooltip__icon"
@@ -37,6 +39,8 @@ exports[`ToolTip.vue should render correctly 2`] = `
 <div
   class="c-tooltip"
 >
+  
+  
   <inline-svg-stub
     aria-hidden="true"
     class="c-tooltip__icon"
