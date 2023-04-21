@@ -1,7 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
-import { ShapedTransactionRow } from 'src/antelope/types';
+import { ShapedTransactionRow, TransactionValueData } from 'src/antelope/types';
+import { stubWithSlot } from 'app/test/jest/testing-helpers';
+import { shallowMount } from '@vue/test-utils';
 
 
 
@@ -13,120 +15,127 @@ export default defineComponent({
     computed: {
         shapedTransactions(): ShapedTransactionRow[] {
             return [{
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: 'send', // send, receive, swap, anything else
-                from: '0x'.concat('1'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('2'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: 'send',
+                from: '0x'.concat('1'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('2'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'TLOS', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'TLOS',
+                    fiatValue: 100,
                 }],
                 valuesOut: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'TLOS', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'TLOS',
+                    fiatValue: 100,
                 }, {
-                    amount: 35.1234, // number, already converted from wei
-                    symbol: 'USDC', // string e.g. TLOS
+                    amount: 35.1234,
+                    symbol: 'USDC',
                 }],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             }, {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: 'swap', // send, receive, swap, anything else
-                from: '0x'.concat('1'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('2'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: 'swap',
+                from: '0x'.concat('1'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('2'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'FAIRY', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'FAIRY',
+                    fiatValue: 100,
                 }],
                 valuesOut: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'sFAIRY', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'sFAIRY',
+                    fiatValue: 100,
                 }],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             },  {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: 'receive', // send, receive, swap, anything else
-                from: '0x'.concat('1'.repeat(40)), // address
-                fromPrettyName: 'SomeAddress', // blank or name like Swappi
-                to: '0x'.concat('2'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: 'receive',
+                from: '0x'.concat('1'.repeat(40)),
+                fromPrettyName: 'SomeAddress',
+                to: '0x'.concat('2'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'USDT', // string e.g. TLOS
+                    amount: 100.54121,
+                    symbol: 'NERD',
+                }, {
+                    amount: 357542547.674235,
+                    symbol: 'SHIB',
+                }, {
+                    amount: 1307.45,
+                    symbol: 'TLOS',
+                    fiatValue: 54.45123513,
                 }],
                 valuesOut: [],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             }, {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: 'stake', // send, receive, swap, anything else
-                from: '0x'.concat('3'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('4'.repeat(40)), // address
-                toPrettyName: 'SomeContract', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: 'stake',
+                from: '0x'.concat('3'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('4'.repeat(40)),
+                toPrettyName: 'SomeContract',
                 valuesIn: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'TLOS', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'TLOS',
+                    fiatValue: 100,
                 }],
                 valuesOut: [{
-                    amount: 100, // number, already converted from wei
-                    symbol: 'sTLOS', // string e.g. TLOS
-                    fiatValue: 100, // number
+                    amount: 100,
+                    symbol: 'sTLOS',
+                    fiatValue: 100,
                 }],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             }, {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: 'approve', // send, receive, swap, anything else
-                from: '0x'.concat('3'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('4'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: 'approve',
+                from: '0x'.concat('3'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('4'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [],
                 valuesOut: [],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             }, {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: '', // send, receive, swap, anything else
-                from: '0x'.concat('3'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('4'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: '',
+                from: '0x'.concat('3'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('4'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [],
                 valuesOut: [],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
                 failed: true,
             }, {
-                id: '0x'.concat('1'.repeat(40)), // transaction id
-                epoch: 1681775186, // timestamp - unix
-                actionName: '', // send, receive, swap, anything else
-                from: '0x'.concat('3'.repeat(40)), // address
-                fromPrettyName: '', // blank or name like Swappi
-                to: '0x'.concat('4'.repeat(40)), // address
-                toPrettyName: '', // blank or name like Swappi
+                id: '0x'.concat('1'.repeat(40)),
+                epoch: 1681775186,
+                actionName: '',
+                from: '0x'.concat('3'.repeat(40)),
+                fromPrettyName: '',
+                to: '0x'.concat('4'.repeat(40)),
+                toPrettyName: '',
                 valuesIn: [],
                 valuesOut: [],
-                gasUsed: 0.15, // gas in tlos, number
-                gasFiatValue: 0.03, // gas in fiat, number
+                gasUsed: 0.15,
+                gasFiatValue: 0.03,
             }];
         },
     },

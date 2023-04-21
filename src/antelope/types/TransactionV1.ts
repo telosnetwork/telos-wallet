@@ -20,6 +20,12 @@ export interface TransactionV1 {
   last_irreversible_block: number;
 }
 
+export interface TransactionValueData {
+    amount: number;
+    symbol: string;
+    fiatValue?: number;
+}
+
 export interface ShapedTransactionRow {
     id: string;
     epoch: number;
@@ -30,16 +36,8 @@ export interface ShapedTransactionRow {
     fromPrettyName?: string;
     to: string; // address
     toPrettyName?: string;
-    valuesIn: {
-        amount: number;
-        symbol: string;
-        fiatValue?: number;
-    }[];
-    valuesOut: {
-        amount: number;
-        symbol: string;
-        fiatValue?: number;
-    }[];
+    valuesIn: TransactionValueData[];
+    valuesOut: TransactionValueData[];
     gasUsed?: number;
     gasFiatValue?: number;
     failed?: boolean;

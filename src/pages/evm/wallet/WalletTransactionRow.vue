@@ -1,13 +1,16 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+
 import InlineSvg from 'vue-inline-svg';
-import ExternalLink from 'components/ExternalLink.vue';
-import TimeStamp from 'components/TimeStamp.vue';
+
 import { ShapedTransactionRow } from 'src/antelope/types';
-import ToolTip from 'components/ToolTip.vue';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getLongDate, prettyPrintCurrency } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+
+import ExternalLink from 'components/ExternalLink.vue';
+import TimeStamp from 'components/TimeStamp.vue';
+import ToolTip from 'components/ToolTip.vue';
 
 const { fiatLocale, fiatCurrency } = useUserStore();
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;

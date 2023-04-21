@@ -7,4 +7,7 @@ module.exports = {
         // Uncomment following line to apply style rules
         // 'plugin:jest/style',
     ],
+    rules: {
+        'jest/expect-expect': ['off'],
+    },
 };
