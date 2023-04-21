@@ -20,18 +20,15 @@ const formattedText = computed(() => {
 </script>
 
 <template>
-<div class="c-external-link">
-    <a
-        :href="url"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="c-external-link__link"
-    >
-        {{ formattedText }}
-        <q-icon size="xs" name="launch" class="c-external-link__icon"/>
-    </a>
-
-</div>
+<a
+    :href="url"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="c-external-link__link"
+>
+    {{ formattedText }}
+    <q-icon size="xs" name="launch" class="c-external-link__icon"/>
+</a>
 </template>
 
 <style lang="scss">
