@@ -1,7 +1,5 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
-import { stakeRex } from 'src/store/rex/actions';
+import { mapGetters } from 'vuex';
 import { format } from 'quasar';
 // destructuring to keep only what is needed
 const { capitalize, humanStorageSize } = format;

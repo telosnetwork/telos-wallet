@@ -3,7 +3,6 @@ import { BigNumber } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
-import moment from 'moment';
 import {
     EvmABIEntry,
 } from 'src/antelope/types';
@@ -32,10 +31,6 @@ export function isValidAddressFormat(ethAddressString: string): boolean {
 
 export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
-}
-
-export function formatIsoDateTime(dateTimezone: string | Date | number): string {
-    return moment(dateTimezone).utc().format('DD/MM/YYYY');
 }
 
 export function toChecksumAddress(address: string): string {
