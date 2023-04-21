@@ -28,6 +28,7 @@ import { getAntelope } from '..';
 import { errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { Action, Label } from 'src/antelope/types';
+import { getAccount, disconnect } from '@wagmi/core';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -137,18 +138,25 @@ export const useAccountStore = defineStore(store_name, {
             }
             return success;
         },
+
         async loginEVM({ network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             let success = false;
+            let address = null;
             try {
                 useFeedbackStore().setLoading('account.login');
 
-                const address = await useEVMStore().login(network);
+                if (localStorage.getItem('wagmi.connected')){
+                    address = getAccount().address;
+                }else{
+                    address = await useEVMStore().login(network);
+                }
 
                 if (address) {
                     const displayAddress = address.replace(/^..(.{4})(.*)(.{4})$/, '0x$1...$3');
 
                     const account = address;
+
                     const evmAccount:EvmAccountModel = {
                         network,
                         address,
@@ -178,6 +186,7 @@ export const useAccountStore = defineStore(store_name, {
             }
             return success;
         },
+
         async logout() {
             this.trace('logout');
             try {
@@ -185,6 +194,10 @@ export const useAccountStore = defineStore(store_name, {
                 localStorage.removeItem('account');
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
+
+                if (localStorage.getItem('wagmi.connected')){
+                    disconnect();
+                }
 
                 if (this.__accounts['logged']?.isNative) {
                     const logged = this.__accounts['logged'] as NativeAccountModel;
@@ -203,6 +216,7 @@ export const useAccountStore = defineStore(store_name, {
                 getAntelope().events.onLoggedOut.next();
             }
         },
+
         async autoLogin(): Promise<boolean> {
             this.trace('autoLogin');
             try {
@@ -237,6 +251,7 @@ export const useAccountStore = defineStore(store_name, {
             }
             return Promise.resolve(false);
         },
+
         async sendAction({ account, data, name, actor, permission }: SendActionData) {
             this.trace('sendAction', account, data, name, actor, permission);
             try {
@@ -248,6 +263,7 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('account.sendAction');
             }
         },
+
         async sendTransaction(actions: Action[]) {
             this.trace('sendTransaction', actions);
             try {
@@ -257,6 +273,7 @@ export const useAccountStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+
         async fetchAccountDataFor(label: string, account: AccountModel) {
             this.trace('fetchAccountDataFor', account);
             try {
@@ -281,6 +298,7 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('account.fetchAccountDataFor');
             }
         },
+
         // commits
         setCurrentAccount(account: AccountModel | null | string) {
             this.trace('setCurrentAccount', account);
@@ -313,6 +331,7 @@ export const useAccountStore = defineStore(store_name, {
                 }
             }
         },
+
         setLoggedAccount(account: AccountModel | null) {
             this.trace('setLoggedAccount', account);
             const label = 'logged';
