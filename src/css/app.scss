@@ -217,6 +217,11 @@ div.cleos-auth-dialog {
   text-overflow: ellipsis;
 }
 
+// Quasar overrides
+.q-tooltip {
+    background: $tooltip-gradient;
+}
+
 // TODO: refactoring needed
 // https://github.com/telosnetwork/telos-wallet/issues/254
 

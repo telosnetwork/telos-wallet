@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ToolTip.vue should render correctly 1`] = `
+<div
+  class="c-tooltip"
+>
+  <inline-svg-stub
+    aria-hidden="true"
+    class="c-tooltip__icon"
+    keepduringloading="true"
+    src=""
+    transformsource="[Function]"
+  />
+  <q-tooltip-stub
+    model-value="false"
+    transition-hide="scale"
+    transition-show="scale"
+  >
+    
+    <div
+      class="c-tooltip__text-container"
+    >
+      
+      
+      <span
+        class="c-tooltip__text"
+      >
+        Test
+      </span>
+    </div>
+    
+  </q-tooltip-stub>
+</div>
+`;
+
+exports[`ToolTip.vue should render correctly 2`] = `
+<div
+  class="c-tooltip"
+>
+  <inline-svg-stub
+    aria-hidden="true"
+    class="c-tooltip__icon"
+    keepduringloading="true"
+    src=""
+    transformsource="[Function]"
+  />
+  <q-tooltip-stub
+    model-value="false"
+    transition-hide="scale"
+    transition-show="scale"
+  >
+    
+    <div
+      class="c-tooltip__text-container"
+    >
+      
+      <div
+        class="c-tooltip__warning-container"
+      >
+        <inline-svg-stub
+          aria-hidden="true"
+          class="c-tooltip__icon c-tooltip__icon--warning"
+          keepduringloading="true"
+          src=""
+          transformsource="[Function]"
+        />
+        <span
+          class="c-tooltip__text"
+        >
+          test
+        </span>
+      </div>
+      <div
+        class="c-tooltip__warning-container"
+      >
+        <inline-svg-stub
+          aria-hidden="true"
+          class="c-tooltip__icon c-tooltip__icon--warning"
+          keepduringloading="true"
+          src=""
+          transformsource="[Function]"
+        />
+        <span
+          class="c-tooltip__text"
+        >
+          test2
+        </span>
+      </div>
+      
+      <span
+        class="c-tooltip__text"
+      >
+        Test
+      </span>
+    </div>
+    
+  </q-tooltip-stub>
+</div>
+`;
