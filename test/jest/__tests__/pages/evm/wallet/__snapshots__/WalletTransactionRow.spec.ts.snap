@@ -47,7 +47,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -143,7 +143,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -239,7 +239,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -335,7 +335,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -420,7 +420,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -505,7 +505,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -597,7 +597,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -689,7 +689,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -781,7 +781,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -873,7 +873,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -969,7 +969,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
@@ -1123,7 +1123,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     >
       <tool-tip-stub
         hideicon="true"
-        text="Apr 17, 2023 07:46:26 PM (UTC -05:00)"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
       />
       <!--v-if-->
     </div>
