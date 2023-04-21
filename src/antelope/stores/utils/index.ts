@@ -34,10 +34,6 @@ export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
 }
 
-export function formatIsoDateTime(dateTimezone: string | Date | number): string {
-    return moment(dateTimezone).utc().format('DD/MM/YYYY');
-}
-
 export function toChecksumAddress(address: string): string {
     if (!address) {
         return address;
