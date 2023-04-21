@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const formattedText = computed(() => {
-    const textIsAddress = /^0x\d{40}$/.test(props.text);
+    const textIsAddress = /^0x[0-9a-fA-F]{40}$/.test(props.text);
 
     if (textIsAddress) {
         const address = props.text;
