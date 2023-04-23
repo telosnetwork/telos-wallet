@@ -15,9 +15,7 @@ export default defineComponent({
     },
     methods: {
         generateQrCode() {
-            console.log('generateQrCode()');
             const background = getComputedStyle(document.body).getPropertyValue('--header-bg-color');
-            console.log('background', background);
 
             if (this.address !== '') {
                 const qr = new QRious({
@@ -43,10 +41,6 @@ export default defineComponent({
 </script>
 
 <template>
-<canvas id="qr-code" class="c-address-qr"></canvas>
+<canvas id="qr-code"></canvas>
 </template>
 
-<style lang="scss">
-.c-address-qr {
-}
-</style>

@@ -1,10 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useAccountStore, getAntelope } from 'src/antelope';
+import { useAccountStore, getAntelope, useChainStore } from 'src/antelope';
 import InlineSvg from 'vue-inline-svg';
-import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 
 const accountStore = useAccountStore();
+const chainStore = useChainStore();
 const ant = getAntelope();
 
 export default defineComponent({
@@ -18,6 +18,10 @@ export default defineComponent({
         displayFullAddress: {
             type: Boolean,
             default: false,
+        },
+        showAddress: {
+            type: Boolean,
+            default: true,
         },
         showCopyBtn: {
             type: Boolean,
@@ -46,7 +50,8 @@ export default defineComponent({
             this.$q.dark.toggle();
         },
         gotoTeloscan() {
-            const explorerUrl = ant.stores.chain.loggedEvmChain?.settings.getExplorerUrl();
+            const network =  this.account.network;
+            const explorerUrl =  chainStore.getExplorerUrl(network);
             if (explorerUrl) {
                 window.open(explorerUrl + '/address/' + this.account?.account, '_blank');
                 return;
@@ -72,7 +77,7 @@ export default defineComponent({
 
 <template>
 <div class="c-user-info">
-    <div class="c-user-info__address">{{ address }}</div>
+    <div v-if="showAddress" class="c-user-info__address">{{ address }}</div>
     <q-btn
         v-if="showCopyBtn"
         flat

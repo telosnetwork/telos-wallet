@@ -4,9 +4,11 @@ import AppPage from 'components/evm/AppPage.vue';
 import AddressQR from 'components/evm/AddressQR.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore } from 'src/antelope';
+import { useGlobalStore } from 'src/stores';
 
 const accountStore = useAccountStore();
 const ant = getAntelope();
+const global = useGlobalStore();
 
 export default defineComponent({
     name: 'ReceivePage',
@@ -14,6 +16,9 @@ export default defineComponent({
         AppPage,
         AddressQR,
         UserInfo,
+    },
+    mounted() {
+        global.setHeaderBackBtn(true);
     },
     methods: {
         goBack() {
@@ -46,14 +51,6 @@ export default defineComponent({
             <p class="c-receive-page__subtitle"> {{ $t('evm_wallet.scan_qr') }}</p>
             <AddressQR :address="address" class="c-receive-page__qr-code" />
         </div>
-        <q-btn
-            class="c-receive-page__back-button"
-            flat
-            dense
-            label="Back"
-            icon="arrow_back_ios"
-            @click="goBack"
-        />
     </template>
 
     <div
@@ -83,30 +80,11 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.q-btn.wallet-btn {
-    width: auto;
-    padding: 13px 24px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    &+& {
-        margin-left: 16px;
-    }
-}
 
 .c-receive-page {
-    &__back-button {
-        position: absolute;
-        top: 24px;
-        left: 32px;
-        z-index: 1;
-        font-size: 12.8px;
-        font-weight: 600;
-        i {
-            font-size: 1.15em;
-        }
-    }
     &__title-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -129,6 +107,7 @@ export default defineComponent({
     }
 
     &__user-info-container {
+        animation: #{$anim-slide-in-left};
         display: flex;
         align-items: center;
         flex-direction: column;
@@ -146,6 +125,7 @@ export default defineComponent({
         width: 100%;
         max-width: 200px;
     }
-
 }
+
+
 </style>
