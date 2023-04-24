@@ -39,6 +39,10 @@ export default defineComponent({
         isMobile() {
             return this.$q.screen.lt.md;
         },
+        canvasSize() {
+            const maxSize = Math.min(window.innerWidth, window.innerHeight) - 32;
+            return Math.min(maxSize, 400);
+        },
     },
 });
 </script>
@@ -49,7 +53,7 @@ export default defineComponent({
         <div class="c-receive-page__title-container">
             <p class="c-receive-page__title"> {{ $t('evm_wallet.receive') }}</p>
             <p class="c-receive-page__subtitle"> {{ $t('evm_wallet.scan_qr') }}</p>
-            <AddressQR :address="address" class="c-receive-page__qr-code" />
+            <AddressQR :size="canvasSize" :address="address" class="c-receive-page__qr-code" />
         </div>
     </template>
 
@@ -100,6 +104,7 @@ export default defineComponent({
     &__subtitle {
         font-size: 16px;
         font-weight: 400;
+        text-align: center;
     }
 
     &__qr-code {

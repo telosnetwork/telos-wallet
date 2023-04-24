@@ -9,6 +9,10 @@ export default defineComponent({
             type: String,
             required: true,
         },
+        size: {
+            type: Number,
+            default: 400,
+        },
     },
     mounted() {
         this.generateQrCode();
@@ -21,11 +25,10 @@ export default defineComponent({
                 const qr = new QRious({
                     background,
                     level: 'H',
-                    size: 400,
+                    size: this.size,
                     element: document.getElementById('qr-code'),
                     value: this.address,
                 });
-                console.log('new QRious() ', qr);
             }
         },
     },

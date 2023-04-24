@@ -23,7 +23,6 @@ export const useGlobalStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: createInitFunction(store_name),
         setHeaderBackBtn(value: boolean) {
-            console.log('setHeaderBackBtn()', value);
             useGlobalStore().__headerBackBtn = value;
         },
     },
