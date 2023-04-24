@@ -1,4 +1,4 @@
-import { VueWrapper, shallowMount } from '@vue/test-utils';
+import { shallowMount, VueWrapper } from '@vue/test-utils';
 import AddressQR from 'components/evm/AddressQR.vue';
 import QRious from 'qrious';
 
@@ -15,9 +15,9 @@ Object.defineProperty(window, 'getComputedStyle', {
     }),
 });
 
+interface WrapperVM {$nextTick: ()=>Promise<void>}
 
 describe('AddressQR.vue', () => {
-
     const getNewWrapper = () => shallowMount(AddressQR, {
         props: {
             address: ADDRESS_A,
@@ -31,10 +31,9 @@ describe('AddressQR.vue', () => {
                 },
             },
         },
-    }) as VueWrapper<typeof AddressQR>;
+    }) as VueWrapper<never>;
 
-
-    let wrapper: VueWrapper<typeof AddressQR>;
+    let wrapper: VueWrapper<never>;
 
     beforeEach(() => {
         wrapper = getNewWrapper();
@@ -69,7 +68,7 @@ describe('AddressQR.vue', () => {
 
     it('should update the QR code when the address prop is changed', async () => {
         wrapper.setProps({ address: ADDRESS_B });
-        await wrapper.vm.$nextTick();
+        await (wrapper.vm as WrapperVM).$nextTick();
         expect(QRious).toHaveBeenCalledWith({
             background: BACKGROUND_COLOR,
             level: 'H',
@@ -79,13 +78,15 @@ describe('AddressQR.vue', () => {
         });
     });
 
+
     it('should not call QRious if the address prop is an empty string', async () => {
         // expect to be called once in beforeEach
         expect(QRious).toHaveBeenCalledTimes(1);
         wrapper.setProps({ address: '' });
-        await wrapper.vm.$nextTick();
+        await (wrapper.vm as WrapperVM).$nextTick();
 
         // expect to not be called again
         expect(QRious).toHaveBeenCalledTimes(1);
     });
+
 });

@@ -22,7 +22,7 @@ export default defineComponent({
             const background = getComputedStyle(document.body).getPropertyValue('--header-bg-color');
 
             if (this.address !== '') {
-                const qr = new QRious({
+                new QRious({
                     background,
                     level: 'H',
                     size: this.size,
