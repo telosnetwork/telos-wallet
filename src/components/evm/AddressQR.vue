@@ -14,22 +14,24 @@ export default defineComponent({
             default: 400,
         },
     },
+    data: () => ({
+        qrInstance: null as null | QRious,
+    }),
     mounted() {
         this.generateQrCode();
     },
     methods: {
         generateQrCode() {
             const background = getComputedStyle(document.body).getPropertyValue('--header-bg-color');
-
-            if (this.address !== '') {
+            this.qrInstance = this.address !== '' ?
                 new QRious({
                     background,
                     level: 'H',
                     size: this.size,
                     element: document.getElementById('qr-code'),
                     value: this.address,
-                });
-            }
+                }) :
+                null;
         },
     },
     watch: {
