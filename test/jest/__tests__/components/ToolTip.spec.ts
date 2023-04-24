@@ -26,5 +26,3 @@ describe('ToolTip.vue', () => {
         expect(wrapper.element).toMatchSnapshot();
     });
 });
-
-

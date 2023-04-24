@@ -78,7 +78,6 @@ describe('AddressQR.vue', () => {
         });
     });
 
-
     it('should not call QRious if the address prop is an empty string', async () => {
         // expect to be called once in beforeEach
         expect(QRious).toHaveBeenCalledTimes(1);

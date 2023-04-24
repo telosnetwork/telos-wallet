@@ -72,7 +72,6 @@ export default defineComponent({
             global.setHeaderBackBtn(false);
         },
         goBack() {
-            console.log('goBack()');
             this.$router.back();
             global.setHeaderBackBtn(false);
         },
