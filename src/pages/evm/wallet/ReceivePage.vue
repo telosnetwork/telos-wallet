@@ -84,6 +84,16 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+.q-btn.wallet-btn {
+    width: auto;
+    padding: 13px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    &+& {
+        margin-left: 16px;
+    }
+}
 
 .c-receive-page {
     &__title-container {

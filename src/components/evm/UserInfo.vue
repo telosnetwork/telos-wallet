@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue';
 import { useAccountStore, getAntelope, useChainStore } from 'src/antelope';
 import InlineSvg from 'vue-inline-svg';
+import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
