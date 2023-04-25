@@ -4,10 +4,12 @@ import AppPage from 'components/evm/AppPage.vue';
 import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
+import { useGlobalStore } from 'src/stores';
 
 const ant = getAntelope();
 const userStore = useUserStore();
 const chainStore = useChainStore();
+const global = useGlobalStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -24,6 +26,9 @@ export default defineComponent({
         prettyPrintBalance,
         tempCurrentBalance: '',
     }),
+    mounted() {
+        global.setHeaderBackBtn(true);
+    },
     watch: {
         balances: {
             handler() {
@@ -138,6 +143,8 @@ export default defineComponent({
         },
     },
     methods: {
+        // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
+        // https://github.com/telosnetwork/telos-wallet/issues/274
         async updateEstimatedGas() {
             const chain_settings = chainStore.loggedEvmChain?.settings;
             if (chain_settings)  {
@@ -183,9 +190,6 @@ export default defineComponent({
                 }
             }
         },
-        goBack() {
-            this.$router.back();
-        },
         startTransfer() {
             const token = this.token;
             const amount = this.finalTokenAmount;
@@ -199,14 +203,10 @@ export default defineComponent({
                         );
                     }
                 }).catch((err) => {
-                    if (typeof err.message === 'string') {
-                        console.error(err.message, err.payload, err);
-                        ant.config.notifyFailedTrxHandler(this.$t(err.message));
-                    } else if (typeof err === 'string') {
-                        ant.config.notifyFailedTrxHandler(this.$t(err));
-                    } else {
-                        ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
-                    }
+                    console.error(err);
+                    ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
+                    // TODO: verify in depth all error mesagged to know how to handle the feedback
+                    // https://github.com/telosnetwork/telos-wallet/issues/273
                 });
             } else {
                 ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
@@ -223,14 +223,6 @@ export default defineComponent({
         <div class="c-send-page__title-container">
             <p class="c-send-page__title"> {{ $t('evm_wallet.send') }}</p>
         </div>
-        <q-btn
-            class="c-send-page__back-button"
-            flat
-            dense
-            label="Back"
-            icon="arrow_back_ios"
-            @click="goBack"
-        />
     </template>
 
     <div class="c-send-page__form-container">
@@ -402,19 +394,9 @@ export default defineComponent({
 
 
 .c-send-page {
-    // back-button on top left
-    &__back-button {
-        position: absolute;
-        top: 24px;
-        left: 32px;
-        z-index: 1;
-        font-size: 12.8px;
-        font-weight: 600;
-        i {
-            font-size: 1.15em;
-        }
-    }
     &__title-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -427,6 +409,8 @@ export default defineComponent({
     }
 
     &__form-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;

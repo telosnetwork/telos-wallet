@@ -168,11 +168,16 @@ export const useEVMStore = defineStore(store_name, {
                 return this.signer.sendTransaction({
                     to,
                     value,
-                }).then((transaction: ethers.providers.TransactionResponse) => {
-                    console.log(`Transaction sent: ${transaction.hash}`);
-                    return transaction;
-                }).catch((error) => {
-                    throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                }).then(
+                    (transaction: ethers.providers.TransactionResponse) => transaction,
+                ).catch((error) => {
+                    if ('ACTION_REJECTED' === ((error as {code:string}).code)) {
+                        throw new AntelopeError('antelope.evm.transaction_canceled');
+                    } else {
+                        // unknown error we print on console
+                        console.error(error);
+                        throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                    }
                 });
             } else {
                 console.error('Error sending transaction: No signer');

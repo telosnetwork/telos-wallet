@@ -341,6 +341,7 @@ export default {
             error_getting_contract_creation: 'Error trying to get contract creation info',
             error_no_signer: 'No signer found',
             error_send_transaction: 'Error sending transaction',
+            transaction_canceled: 'Transaction canceled',
         },
         history: {
             error_fetching_trasactions: 'Error in fetching transactions',
