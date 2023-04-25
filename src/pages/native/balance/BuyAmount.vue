@@ -1,8 +1,6 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
+import { mapGetters } from 'vuex';
 import { setInterval } from 'timers';
-import { isNumber } from 'util';
 
 export default {
     props: ['showBuyAmountDlg', 'showHistoryDlg', 'selectedCoin', 'coins'],

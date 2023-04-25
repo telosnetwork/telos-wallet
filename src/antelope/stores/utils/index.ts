@@ -3,10 +3,11 @@ import { BigNumber } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
-import moment from 'moment';
 import {
     EvmABIEntry,
 } from 'src/antelope/types';
+import { fromUnixTime, format } from 'date-fns';
+
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
@@ -32,10 +33,6 @@ export function isValidAddressFormat(ethAddressString: string): boolean {
 
 export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
-}
-
-export function formatIsoDateTime(dateTimezone: string | Date | number): string {
-    return moment(dateTimezone).utc().format('DD/MM/YYYY');
 }
 
 export function toChecksumAddress(address: string): string {
@@ -180,7 +177,7 @@ export function getFormattedUtcOffset(date: Date): string {
  */
 export function getLongDate(epoch: number): string {
     const offset = getFormattedUtcOffset(new Date(epoch));
-    return `${moment.unix(epoch).format('MMM D, YYYY hh:mm:ss A')} (UTC ${offset})`;
+    return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
 }
 
 /*

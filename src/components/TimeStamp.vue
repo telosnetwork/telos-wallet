@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import moment from 'moment';
+import { formatDistance, fromUnixTime } from 'date-fns';
 
 const props = defineProps({
     timestamp: {
@@ -14,8 +14,7 @@ const props = defineProps({
     },
 });
 
-const friendlyDate = computed(() => moment.unix(props.timestamp).fromNow());
-
+const friendlyDate = computed(() => formatDistance(fromUnixTime(props.timestamp), new Date(), { addSuffix: true }));
 </script>
 
 <template>
