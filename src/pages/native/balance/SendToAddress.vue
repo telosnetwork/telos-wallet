@@ -1,6 +1,5 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
 import SendConfirm from '~/pages/native/balance/SendConfirm';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
 

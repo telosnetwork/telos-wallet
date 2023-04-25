@@ -35,22 +35,6 @@ export default defineComponent({
         },
     },
     methods: {
-        // TODO: this is just for testing and should be removed after approval
-        notify(what: string) {
-            if (what === 'success') {
-                console.log('ant.config.notifySuccessfulTrxHandler()');
-                const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
-                if(!chain_settings) {
-                    return;
-                }
-                ant.config.notifySuccessfulTrxHandler(
-                    `${chain_settings.getExplorerUrl()}/tx/0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef`,
-                );
-            } else if (what === 'error') {
-                ant.config.notifyFailedTrxHandler('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed lorem sed nisl.');
-            }
-        },
-        // -------------------------------
         openMenu() {
             this.menuIsOpen = true;
 
@@ -164,7 +148,6 @@ export default defineComponent({
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wallet.svg')"
-                    class=""
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--current-route': $route.name === 'evm-wallet',
@@ -236,43 +219,6 @@ export default defineComponent({
                 />
                 {{ $t('global.sign_out') }}
             </li>
-
-            <!-- TODO: These two items are for testing purposes only. Remove them when done. -->
-            <li
-                class="c-app-nav__menu-item"
-                role="menuitem"
-                :tabindex="menuItemTabIndex"
-                @click="notify('success')"
-                @keypress.space.enter="notify('success')"
-            >
-                <InlineSvg
-                    :src="require('src/assets/icon--check.svg')"
-                    class="c-app-nav__icon"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                Notify Success !!
-            </li>
-
-            <li
-                class="c-app-nav__menu-item"
-                role="menuitem"
-                :tabindex="menuItemTabIndex"
-                @click="notify('error')"
-                @keypress.space.enter="notify('error')"
-            >
-                <InlineSvg
-                    :src="require('src/assets/icon--cross.svg')"
-                    class="c-app-nav__icon"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                Notify Failure :(
-            </li>
-            <!-- End of testing items -->
-
 
         </ul>
     </div>

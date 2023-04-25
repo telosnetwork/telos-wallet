@@ -8,10 +8,12 @@ import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope';
+import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 
 export default defineComponent({
     name: 'WalletPage',
     components: {
+        WalletTransactionsTab,
         AppPage,
         WalletBalanceRow,
         WalletPageHeader,
@@ -195,7 +197,7 @@ export default defineComponent({
     </template>
 
     <template v-slot:transactions>
-        <p>txns tab</p>
+        <WalletTransactionsTab />
     </template>
 </AppPage>
 </template>

@@ -9,6 +9,7 @@ const warningIcon = require('src/assets/icon--warning.svg');
 const props = defineProps<{
     text?: string,
     warnings?: string[],
+    hideIcon?: boolean,
 }>();
 
 let tooltipEnabled = ref(false);
@@ -21,12 +22,17 @@ function setTooltipVisibility(enable: boolean) {
 <template>
 <div
     v-click-away="() => setTooltipVisibility(false)"
-    class="c-tooltip"
+    :class="{
+        'c-tooltip': true,
+        'c-tooltip--dynamic-size': $slots.default
+    }"
     @mouseenter="setTooltipVisibility(true)"
     @mouseleave="setTooltipVisibility(false)"
     @touchend="setTooltipVisibility(!tooltipEnabled)"
 >
+    <slot></slot>
     <InlineSvg
+        v-if="!hideIcon"
         :src="infoIcon"
         class="c-tooltip__icon"
         aria-hidden="true"
@@ -36,6 +42,7 @@ function setTooltipVisibility(enable: boolean) {
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
+        @update:model-value="() => {}"
     >
         <div class="c-tooltip__text-container">
             <div
@@ -70,6 +77,12 @@ function setTooltipVisibility(enable: boolean) {
     width: 24px;
     justify-content: center;
     align-items: center;
+
+    &--dynamic-size {
+        width: unset;
+        height: unset;
+        justify-content: unset;
+    }
 
     &__icon {
         height: 14px;
