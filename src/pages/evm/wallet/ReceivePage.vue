@@ -25,7 +25,7 @@ export default defineComponent({
             this.$router.back();
         },
         copyToClipboard() {
-            navigator.clipboard.writeText(this.address);
+            navigator.clipboard.writeText(accountStore.loggedEvmAccount?.address);
             ant.config.notifySuccessHandler(this.$t('settings.copied_ok'));
         },
     },
