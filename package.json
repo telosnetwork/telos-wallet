@@ -59,7 +59,7 @@
     "@babel/eslint-parser": "^7.0.0",
     "@quasar/app-webpack": "3",
     "@quasar/quasar-app-extension-testing-unit-jest": "3.0.0-alpha.10",
-    "@types/jest": "^29.5.0",
+    "@types/jest": "^26.0.24",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
     "eslint": "^7.14.0",

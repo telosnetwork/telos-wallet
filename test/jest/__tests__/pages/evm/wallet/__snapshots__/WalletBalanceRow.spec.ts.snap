@@ -33,13 +33,17 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        3,642.0243 STLOS 
+        
+        3,642.0243 STLOS
+        
         <!--v-if-->
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
+        
         $456,789,123.67 (@ $0.7732 / STLOS)
+        
       </span>
     </div>
     <q-btn-stub
@@ -173,23 +177,27 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $456.79M 
         <tooltip-stub
-          icon="info"
-          text="evm_wallet.fiat_value:
-$456,789,123.67
-
-evm_wallet.token_balance:
-3,642.024300000000000000"
+          hide-icon="true"
+          text="456,789,123.67 USD"
         >
           
+          $456.79M
           
         </tooltip-stub>
+        <!--v-if-->
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
-        3.64K STLOS
+        <tooltip-stub
+          hide-icon="true"
+          text="3,642.0243 STLOS"
+        >
+          
+          3.64K STLOS
+          
+        </tooltip-stub>
       </span>
     </div>
     <q-btn-stub
@@ -323,23 +331,27 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $456.79M 
         <tooltip-stub
-          icon="info"
-          text="evm_wallet.fiat_value:
-$456,789,123.67
-
-evm_wallet.token_balance:
-3,642.024300000000000000"
+          hide-icon="true"
+          text="456,789,123.67 USD"
         >
           
+          $456.79M
           
         </tooltip-stub>
+        <!--v-if-->
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
-        3.64K STLOS
+        <tooltip-stub
+          hide-icon="true"
+          text="3,642.0243 STLOS"
+        >
+          
+          3.64K STLOS
+          
+        </tooltip-stub>
       </span>
     </div>
     <q-btn-stub
@@ -473,20 +485,22 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $0.00 
-        <tooltip-stub
-          icon="info"
-          text="evm_wallet.token_balance:
-3,642.024300000000000000"
-        >
-          
-          
-        </tooltip-stub>
+        
+        $0.00
+        
+        <!--v-if-->
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
-        3.64K TLOS
+        <tooltip-stub
+          hide-icon="true"
+          text="3,642.0243 TLOS"
+        >
+          
+          3.64K TLOS
+          
+        </tooltip-stub>
       </span>
     </div>
     <q-btn-stub
@@ -643,23 +657,27 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        $12.35K 
         <tooltip-stub
-          icon="info"
-          text="evm_wallet.fiat_value:
-$12,345.67
-
-evm_wallet.token_balance:
-3,642.024300000000000000"
+          hide-icon="true"
+          text="12,345.67 USD"
         >
           
+          $12.35K
           
         </tooltip-stub>
+        <!--v-if-->
       </div>
       <span
         class="c-wallet-balance-row__secondary-amount"
       >
-        3.64K WTLOS
+        <tooltip-stub
+          hide-icon="true"
+          text="3,642.0243 WTLOS"
+        >
+          
+          3.64K WTLOS
+          
+        </tooltip-stub>
       </span>
     </div>
     <q-btn-stub
@@ -793,11 +811,16 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        3.64K 
+        <tooltip-stub
+          hide-icon="true"
+          text="3,642.0243 SHIB"
+        >
+          
+          3.64K
+          
+        </tooltip-stub>
         <tooltip-stub
           icon="info"
-          text="evm_wallet.token_balance:
-3,642.024300000000000000"
           warnings="evm_wallet.no_fiat_value"
         >
           

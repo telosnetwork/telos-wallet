@@ -6,6 +6,8 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import {
     EvmABIEntry,
 } from 'src/antelope/types';
+import { fromUnixTime, format } from 'date-fns';
+
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
@@ -164,6 +166,18 @@ export function getFormattedUtcOffset(date: Date): string {
     const hours = pad(Math.floor(offset / 60));
     const minutes = pad(offset % 60);
     return sign + hours + ':' + minutes;
+}
+
+/**
+ * Given a unix timestamp, returns a date in the form of Jan 1, 2023 07:45:22 AM
+ *
+ * @param epoch
+ *
+ * @return string
+ */
+export function getLongDate(epoch: number): string {
+    const offset = getFormattedUtcOffset(new Date(epoch));
+    return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
 }
 
 /*
