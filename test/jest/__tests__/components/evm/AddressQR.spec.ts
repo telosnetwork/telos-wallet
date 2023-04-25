@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { shallowMount, VueWrapper } from '@vue/test-utils';
 import AddressQR from 'components/evm/AddressQR.vue';
 
