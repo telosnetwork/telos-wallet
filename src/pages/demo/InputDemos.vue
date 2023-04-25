@@ -8,43 +8,59 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
-        amount: 0, // eztodo make inputs for these
-        symbol: 'USD', // eztodo make inputs for these
-        locale: 'en-US',
+        currencyInputAmount: 0,
+        currencyInputSymbol: 'USD',
+        currencyInputLocale: 'en-US',
+        currencyInputDecimals: 4,
     }),
-    methods: {
-        updateLocale(event: InputEvent) {
-            this.locale = (event.target as HTMLInputElement)?.value;
-        },
-    },
 });
 </script>
 
 <template>
-<div class="row q-mb-lg">
-    <div class="col-6">
-        <label for="localeSelect">Locale:</label><br>
-        <select id="localeSelect" @change="updateLocale">
-            <option  value="en-US" selected>en-US</option>
-            <option value="de-DE">de-DE</option>
-            <option value="hi-IN">hi-IN</option>
-        </select>
-        <br>
-        {{ amount }}
-        <br>
-        <button @click="amount++">Add 1 to value</button>
+<div class="row">
+    <div class="col-12">
+        <h3>Inputs</h3>
     </div>
 </div>
-<div class="row">
-    <div class="col-xs-12 col-sm-6">
+<hr>
+<div class="row q-mb-lg">
+    <div class="col-12">
+        <h5>Currency Input</h5>
+    </div>
+    <div class="col-1">
+        <q-select
+            v-model="currencyInputLocale"
+            :options="['en-US', 'de-DE', 'in-IN']"
+            label="Locale"
+            color="primary"
+        />
+        <br>
+        <q-input
+            v-model="currencyInputSymbol"
+            dense
+            label="Symbol"
+        />
+        <br>
+        <q-input
+            v-model="currencyInputDecimals"
+            type="number"
+            step="1"
+            label="Decimals"
+        />
+        <br>
+        v-model: {{ currencyInputAmount }}
+    </div>
+    <div class="col-1"></div>
+    <div class="col-10">
         <CurrencyInput
-            v-model="amount"
-            :symbol="symbol"
-            :decimals="4"
-            :locale="locale"
+            v-model="currencyInputAmount"
+            :symbol="currencyInputSymbol"
+            :decimals="+currencyInputDecimals"
+            :locale="currencyInputLocale"
         />
     </div>
 </div>
+<hr>
 
 </template>
 
