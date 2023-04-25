@@ -4,5 +4,8 @@
     "baseUrl": ".",
     "allowJs": true,
     "strict": true,
-  }
+  },
+  "include": [
+    "**/*.d.ts"
+  ]
 }

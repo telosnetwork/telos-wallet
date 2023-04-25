@@ -7,7 +7,7 @@ node_modules
 /dist
 
 # Temporary Istanbul (Jest) test reporting
-test
+test/coverage
 
 # Cordova related directories and files
 /src-cordova/node_modules
