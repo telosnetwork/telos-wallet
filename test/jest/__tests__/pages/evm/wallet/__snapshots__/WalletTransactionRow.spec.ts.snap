@@ -34,6 +34,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         >
           global.to 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="SomeContract"
             url="example.com/address/0x2222222222222222222222222222222222222222"
           />
@@ -88,6 +89,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -130,6 +132,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         >
           global.to 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="SomeContract"
             url="example.com/address/0x2222222222222222222222222222222222222222"
           />
@@ -184,6 +187,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -226,6 +230,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         >
           global.from 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="AContract"
             url="example.com/address/0x1111111111111111111111111111111111111111"
           />
@@ -280,6 +285,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -322,6 +328,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         >
           global.from 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="AContract"
             url="example.com/address/0x1111111111111111111111111111111111111111"
           />
@@ -376,6 +383,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -461,6 +469,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -546,6 +555,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -587,6 +597,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         class="c-transaction-row__secondary-interaction-text"
       >
         <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
           text="0x2222222222222222222222222222222222222222"
           url="example.com/address/0x2222222222222222222222222222222222222222"
         />
@@ -638,6 +649,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -679,6 +691,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         class="c-transaction-row__secondary-interaction-text"
       >
         <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
           text="0x2222222222222222222222222222222222222222"
           url="example.com/address/0x2222222222222222222222222222222222222222"
         />
@@ -730,6 +743,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -771,6 +785,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         class="c-transaction-row__secondary-interaction-text"
       >
         <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
           text="0x2222222222222222222222222222222222222222"
           url="example.com/address/0x2222222222222222222222222222222222222222"
         />
@@ -822,6 +837,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -863,6 +879,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         class="c-transaction-row__secondary-interaction-text"
       >
         <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
           text="0x2222222222222222222222222222222222222222"
           url="example.com/address/0x2222222222222222222222222222222222222222"
         />
@@ -914,6 +931,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -956,6 +974,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
         >
           global.with 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="SomeContract"
             url="example.com/address/0x2222222222222222222222222222222222222222"
           />
@@ -1068,6 +1087,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
@@ -1110,6 +1130,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
         >
           global.with 
           <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
             text="SomeContract"
             url="example.com/address/0x2222222222222222222222222222222222222222"
           />
@@ -1222,6 +1243,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
       class="c-transaction-row__mobile-tx-link"
     >
       <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
         text="global.more_info"
         url="example.com/tx/0x1111111111111111111111111111111111111111"
       />
