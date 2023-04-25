@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddressQR.vue renders correctly 1`] = `
+<canvas
+  height="400"
+  id="qr-code"
+  width="400"
+/>
+`;

@@ -4,5 +4,5 @@
     "baseUrl": ".",
     "allowJs": true,
     "strict": true,
-  }
+  },
 }

@@ -4,9 +4,11 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope } from 'src/antelope';
+import { useGlobalStore } from 'src/stores';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
+const global = useGlobalStore();
 
 export default defineComponent({
     name: 'AppNav',
@@ -19,6 +21,18 @@ export default defineComponent({
         showShadow: false,
     }),
     computed: {
+        showMenuIcon() {
+            return this.$q.screen.lt.md && !this.showBackButton;
+        },
+        showBackButton() {
+            return global.headerBackBtn;
+        },
+        showUserInfo() {
+            return !this.showBackButton;
+        },
+        loggedAccount() {
+            return accountStore.loggedAccount;
+        },
         menuItemTabIndex() {
             if (this.$q.screen.lt.md && !this.menuIsOpen) {
                 return '-1';
@@ -55,6 +69,11 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
+            global.setHeaderBackBtn(false);
+        },
+        goBack() {
+            this.$router.back();
+            global.setHeaderBackBtn(false);
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {
@@ -87,7 +106,7 @@ export default defineComponent({
         }"
     >
         <q-btn
-            v-if="$q.screen.lt.md"
+            v-if="showMenuIcon"
             flat
             round
             dense
@@ -100,7 +119,22 @@ export default defineComponent({
             @keypress.space.enter="openMenu"
         />
 
-        <UserInfo />
+        <q-btn
+            v-if="showBackButton"
+            class="c-app-nav__back-button"
+            flat
+            dense
+            label="Back"
+            icon="arrow_back_ios"
+            @click="goBack"
+        />
+
+        <q-space />
+
+        <UserInfo
+            v-if="showUserInfo"
+            :account="loggedAccount"
+        />
     </div>
 
     <div
@@ -226,9 +260,19 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+
 .c-app-nav {
     color: white;
     $this: &;
+
+    &__back-button {
+        height: 32px;
+        font-size: 12.8px;
+        font-weight: 600;
+        i {
+            font-size: 1.15em;
+        }
+    }
 
     &__menu-container {
         position: fixed;

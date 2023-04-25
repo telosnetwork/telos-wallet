@@ -93,3 +93,14 @@ body
     background-color: var(--bg-color)
 
 
+// slide-in-left animation
+$anim-slide-in-left: slide-in-left 0.3s cubic-bezier(0,1.02,1,.99) both
+@keyframes slide-in-left
+    0%
+        -webkit-transform: translateX(100%)
+        transform: translateX(100%)
+        opacity: 0
+    100%
+        -webkit-transform: translateX(0)
+        transform: translateX(0)
+        opacity: 1
