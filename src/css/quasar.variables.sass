@@ -18,17 +18,19 @@ $accent    : #ffd75e
 
 $dark      : #130C3F
 
-$positive  : #55c3b3
-$negative  : #ff422a
+$positive  : #255B00
+$negative  : #880000
 $info      : #dfdfed
 $warning   : #F2C037
 
 $link-blue: #646FD3
 $available-color: #172c6c
 $page-header: #F7F5FF
+$notify-success: #255B00
+$notify-error: #880000
 
 $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
-
+$tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8))
 
 /*********************
  *** Legacy Colors ***
@@ -49,15 +51,19 @@ $saveBtn         : #2e1f4f
 // Light Mode
 .body--light
     $page-header: #F7F5FF
-    
+
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
 
     $ink: #000
     $canvas: #fff
     --text-color: #{$ink}
-    --text-color-hover: #{lighten($ink, 80%)}
+    --text-color-rgb: 0, 0, 0
+    --text-color-hover: #{$primary}
+    --text-color-muted: #757575
+    --negative-muted: #{rgba($negative, 0.5)}
+    --positive-muted: #{rgba($positive, 0.5)}
     --bg-color: #{$canvas}
-    --bg-color-hover: #{darken($canvas, 80%)}
+    --bg-color-hover: #{$page-header}
 
     --header-text-color: #{$ink}
     --header-bg-color: #{$page-header}
@@ -66,13 +72,17 @@ $saveBtn         : #2e1f4f
 .body--dark
     $text-header: #F7F5FF
     $page-header: #2b0f46
-    
+
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
 
     $ink: #fff
     $canvas: #313133
     --text-color: #{$ink}
+    --text-color-rgb: 255, 255, 255
     --text-color-hover: #{darken($ink, 80%)}
+    --text-color-muted: #eeeeee
+    --negative-muted: #{rgba($negative, 0.5)}
+    --positive-muted: #{rgba($positive, 0.5)}
     --bg-color: #{$canvas}
     --bg-color-hover: #{lighten($canvas, 80%)}
     --header-text-color: #{$text-header}

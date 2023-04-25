@@ -56,7 +56,7 @@ export default defineComponent({
         flat
         dense
         icon="content_copy"
-        color="purple"
+        color="primary"
         class="q-mr-sm c-user-info__copy-btn"
         :aria-label="$t('nav.copy_address')"
         @click="copyAddress"
@@ -75,7 +75,7 @@ export default defineComponent({
                     role="menuitem"
                     tabindex="0"
                     @click="gotoTeloscan()"
-                    @keydown.space.enter="$router.push({ name: 'evm-staking' })"
+                    @keypress.space.enter="gotoTeloscan()"
                 >
                     <div class="c-user-info__icon-wraper"><InlineSvg
                         :src="require('src/assets/icon--acorn.svg')"
@@ -96,7 +96,7 @@ export default defineComponent({
                     role="menuitem"
                     tabindex="1"
                     @click="logout"
-                    @keydown.space.enter="logout"
+                    @keypress.space.enter="logout"
                 >
                     <div class="c-user-info__icon-wraper"><InlineSvg
                         :src="require('src/assets/icon--logout.svg')"
@@ -108,7 +108,7 @@ export default defineComponent({
                     <span class="c-user-info__menu-item-text">{{ $t('global.sign_out') }}</span>
                 </li>
 
-                <li
+                <!--li
                     class="c-user-info__menu-item"
                     role="menuitem"
                     tabindex="2"
@@ -116,7 +116,7 @@ export default defineComponent({
                 >
                     <div class="c-user-info__icon-wraper"></div>
                     <span class="c-user-info__menu-item-text">{{ isDarkMode ? $t('global.light_mode') : $t('global.dark_mode') }}</span>
-                </li>
+                </li-->
 
             </ul>
         </q-menu>
@@ -131,7 +131,7 @@ export default defineComponent({
     align-items: center;
 
     &__address {
-        font-weight: 500;
+        font-weight: bold;
 
         font-size: 20px;
         line-height: 24px;

@@ -3,10 +3,11 @@ import { BigNumber } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
-import moment from 'moment';
 import {
     EvmABIEntry,
 } from 'src/antelope/types';
+import { fromUnixTime, format } from 'date-fns';
+
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
@@ -17,7 +18,7 @@ export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals 
     const amount = BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
-    // Use string, do not convert to number so we never loose precision
+    // Use string, do not convert to number so we never lose precision
     if (displayDecimals > 0 && str.includes('.')) {
         const parts = str.split('.');
         return parts[0] + '.' + parts[1].slice(0, displayDecimals);
@@ -32,10 +33,6 @@ export function isValidAddressFormat(ethAddressString: string): boolean {
 
 export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
-}
-
-export function formatIsoDateTime(dateTimezone: string | Date | number): string {
-    return moment(dateTimezone).utc().format('DD/MM/YYYY');
 }
 
 export function toChecksumAddress(address: string): string {
@@ -171,3 +168,71 @@ export function getFormattedUtcOffset(date: Date): string {
     return sign + hours + ':' + minutes;
 }
 
+/**
+ * Given a unix timestamp, returns a date in the form of Jan 1, 2023 07:45:22 AM
+ *
+ * @param epoch
+ *
+ * @return string
+ */
+export function getLongDate(epoch: number): string {
+    const offset = getFormattedUtcOffset(new Date(epoch));
+    return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
+}
+
+/*
+* Formats a currency amount in a localized way
+*
+* @param {number} amount - the currency amount
+* @param {number} decimals - the number of decimals that should be displayed. Ignored if abbreviate is true and the value is over 1000
+* @param {string} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} abbreviate - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} currency - code for the currency to be used, e.g. 'USD'. If defined, either the symbol or code (determined by the param displayCurrencyAsSymbol) will be displayed, e.g. $123.00 . Generally gotten from the user store like useUserStore().currency
+* @param {boolean?} displayCurrencyAsCode - if currency is defined, controls whether the currency is display as a symbol or code, e.g. $100 or USD 100
+* */
+export function prettyPrintCurrency(
+    amount: number,
+    decimals: number,
+    locale: string,
+    abbreviate = false,
+    currency?: string,
+    displayCurrencyAsCode?: boolean,
+) {
+    if (decimals % 1 !== 0 || decimals < 0) {
+        throw 'Decimals must be a positive integer or zero';
+    }
+
+    const decimalOptions : Record<string, number | undefined> = {
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        minimumIntegerDigits: undefined,
+        maximumIntegerDigits: undefined,
+    };
+
+    if (amount < 1 && amount > 0) {
+        decimalOptions.maximumIntegerDigits = 1;
+        decimalOptions.minimumIntegerDigits = 1;
+    } else if (abbreviate) {
+        const forceFractionDisplay = amount < 1000 && amount > -1000 ;
+
+        decimalOptions.maximumFractionDigits = forceFractionDisplay ? decimals : 2;
+        decimalOptions.minimumFractionDigits = forceFractionDisplay ? decimals : 2;
+        decimalOptions.maximumIntegerDigits = 3;
+    }
+
+    const currencyOptions : Record<string, string | boolean | undefined> = {
+        style: currency ? 'currency' : undefined,
+        currencyDisplay: currency ? (displayCurrencyAsCode ? 'code' : 'symbol') : undefined,
+        currency,
+    };
+
+    const formatted = Intl.NumberFormat(
+        locale,
+        {
+            notation: abbreviate ? 'compact' : undefined,
+            ...currencyOptions,
+            ...decimalOptions,
+        }).format(amount);
+
+    return formatted;
+}

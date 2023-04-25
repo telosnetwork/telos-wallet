@@ -1,25 +1,29 @@
 <script lang="ts">
-import { useAccountStore } from 'src/antelope/stores/account';
+import { usePlatformStore } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
-    methods: {
-        setDefaultEVMChain() {
+    setup(props, { emit }){
+
+        const setDefaultEVMChain = () => {
             const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet' ;
             const chainStore = useChainStore();
             chainStore.setCurrentChain(network);
-        },
-        connectToMetaMask() {
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            const network = chainStore.currentChain.settings.getNetwork();
-            accountStore.loginEVM({ network });
-        },
-        viewAnyAccount() {
+        };
 
-        },
+        const viewAnyAccount = () => {};
+
+        const toggleWalletOptions = () => {
+            usePlatformStore().isMobile ? emit('toggleWalletConnect') : emit('showWalletOptions');
+        };
+
+        return {
+            setDefaultEVMChain,
+            viewAnyAccount,
+            toggleWalletOptions,
+        };
     },
     mounted() {
         this.setDefaultEVMChain();
@@ -29,7 +33,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="connectToMetaMask">
+    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
     </q-btn>
 

@@ -5,7 +5,8 @@ import InlineSvg from 'vue-inline-svg';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope } from 'src/antelope';
 
-const accountStore = getAntelope().stores.account;
+const ant = getAntelope();
+const accountStore = ant.stores.account;
 
 export default defineComponent({
     name: 'AppNav',
@@ -19,17 +20,31 @@ export default defineComponent({
     }),
     computed: {
         menuItemTabIndex() {
-            return this.menuIsOpen || this.$q.screen.gt.md ? '0' : '-1';
+            if (this.$q.screen.lt.md && !this.menuIsOpen) {
+                return '-1';
+            }
+
+            return '0';
         },
     },
     watch: {
-        '$q.screen.lt.lg'(newValue, oldValue) {
+        '$q.screen.lt.md'(newValue, oldValue) {
             if (newValue !== oldValue) {
                 this.menuIsOpen = false;
             }
         },
     },
     methods: {
+        openMenu() {
+            this.menuIsOpen = true;
+
+            this.$nextTick(() => {
+                (this.$refs['logo-image'] as HTMLElement)?.focus();
+            });
+        },
+        closeMenu() {
+            this.menuIsOpen = false;
+        },
         scrollHandler(info: { position: { top: number }}) {
             this.showShadow = info.position.top !== 0;
         },
@@ -40,6 +55,17 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
+        },
+        cycleFocus(event: Event, toFocus: 'first' | 'last') {
+            if (this.$q.screen.lt.md) {
+                event.preventDefault();
+
+                if (toFocus === 'first') {
+                    (this.$refs['logo-image'] as HTMLElement)?.focus();
+                } else {
+                    (this.$refs['last-link'] as HTMLElement)?.focus();
+                }
+            }
         },
     },
 });
@@ -61,7 +87,7 @@ export default defineComponent({
         }"
     >
         <q-btn
-            v-if="$q.screen.lt.lg"
+            v-if="$q.screen.lt.md"
             flat
             round
             dense
@@ -70,8 +96,8 @@ export default defineComponent({
             aria-haspopup="menu"
             :aria-label="$t('nav.open_menu')"
             :tabindex="menuIsOpen ? '-1' : '0'"
-            @click="menuIsOpen = !menuIsOpen"
-            @keydown.space.enter="menuIsOpen = !menuIsOpen"
+            @click="openMenu"
+            @keypress.space.enter="openMenu"
         />
 
         <UserInfo />
@@ -80,12 +106,13 @@ export default defineComponent({
     <div
         :class="{
             'c-app-nav__menu-container': true,
-            'c-app-nav__menu-container--open': menuIsOpen && $q.screen.lt.lg,
-            'c-app-nav__menu-container--desktop': $q.screen.gt.md,
+            'c-app-nav__menu-container--open': menuIsOpen && $q.screen.lt.md,
+            'c-app-nav__menu-container--desktop': $q.screen.gt.sm,
         }"
     >
         <div class="flex justify-between">
             <img
+                ref="logo-image"
                 src="~assets/logo--telos-wallet.svg"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
@@ -93,10 +120,11 @@ export default defineComponent({
                 :aria-label="$t('nav.go_home')"
                 class="c-app-nav__logo"
                 @click="goTo('home')"
-                @keydown.space.enter="goTo('home')"
+                @keypress.space.enter="goTo('home')"
+                @keydown.shift.tab="cycleFocus($event, 'last')"
             >
             <q-btn
-                v-if="$q.screen.lt.lg"
+                v-if="$q.screen.lt.md"
                 flat
                 round
                 dense
@@ -105,8 +133,8 @@ export default defineComponent({
                 aria-haspopup="menu"
                 :aria-label="$t('nav.close_menu')"
                 :tabindex="menuItemTabIndex"
-                @click="menuIsOpen = !menuIsOpen"
-                @keydown.space.enter="menuIsOpen = !menuIsOpen"
+                @click="closeMenu"
+                @keypress.space.enter="closeMenu"
             />
         </div>
 
@@ -116,11 +144,10 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wallet')"
-                @keydown.space.enter="goTo('evm-wallet')"
+                @keypress.space.enter="goTo('evm-wallet')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wallet.svg')"
-                    class=""
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--current-route': $route.name === 'evm-wallet',
@@ -137,7 +164,7 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-staking')"
-                @keydown.space.enter="goTo('evm-staking')"
+                @keypress.space.enter="goTo('evm-staking')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--acorn.svg')"
@@ -158,7 +185,7 @@ export default defineComponent({
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wrap')"
-                @keydown.space.enter="goTo('evm-wrap')"
+                @keypress.space.enter="goTo('evm-wrap')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--wrap-tlos.svg')"
@@ -174,11 +201,14 @@ export default defineComponent({
             </li>
 
             <li
+                ref="last-link"
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="logout"
-                @keydown.space.enter="logout"
+                @keypress.space.enter="logout"
+                @keyup.tab.stop.prevent="() => {}"
+                @keydown.tab.exact="cycleFocus($event, 'first')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--logout.svg')"
@@ -234,7 +264,7 @@ export default defineComponent({
         background-color: var(--header-bg-color);
         z-index: 999;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
+        @media only screen and (min-width: $breakpoint-md-min) {
             left: 300px;
             justify-content: flex-end;
         }
