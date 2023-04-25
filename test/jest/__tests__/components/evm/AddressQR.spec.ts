@@ -1,5 +1,6 @@
 import { shallowMount, VueWrapper } from '@vue/test-utils';
-import AddressQR from 'src/components/evm/AddressQR';
+import AddressQR from 'components/evm/AddressQR.vue';
+
 import QRious from 'qrious';
 
 const CANVAS_ID = 'qr-code';
@@ -26,9 +27,9 @@ describe('AddressQR.vue', () => {
                 },
             },
         },
-    }) as VueWrapper<InstanceType<typeof AddressQR>>;
+    }) as VueWrapper<InstanceType<any>>;
 
-    let wrapper: VueWrapper<InstanceType<typeof AddressQR>>;
+    let wrapper: VueWrapper<InstanceType<any>>;
 
     beforeEach(() => {
         wrapper = getNewWrapper();
