@@ -73,6 +73,8 @@ export default {
         swapped: 'Swapped',
         failed_contract_interaction: 'Failed contract interaction',
         contract_interaction: 'Contract interaction',
+        aria_link_to_address: 'Link to block explorer address page',
+        aria_link_to_transaction: 'Link to block explorer transaction page',
     },
     global: {
         native: 'Native',

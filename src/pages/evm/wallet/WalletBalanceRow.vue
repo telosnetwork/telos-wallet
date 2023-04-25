@@ -242,8 +242,7 @@ export default defineComponent({
         },
     },
     methods: {
-        // used only to format the balance shown in tooltips, the rest of formatting is handled in computed props
-        formatBalance(amount: number, isFiat: boolean) {
+        formatTooltipBalance(amount: number, isFiat: boolean) {
             const decimals = isFiat ? 2 : 4;
             const symbol = isFiat ? fiatCurrency : this.token.symbol;
 
@@ -287,7 +286,7 @@ export default defineComponent({
             <div class="c-wallet-balance-row__primary-amount">
                 <ToolTip
                     v-if="truncatePrimaryValue"
-                    :text="formatBalance(+primaryAmount, ($q.screen.lt.sm && secondaryAmount !== ''))"
+                    :text="formatTooltipBalance(+primaryAmount, ($q.screen.lt.sm && secondaryAmount !== ''))"
                     :hide-icon="true"
                 >
                     {{ prettyPrimaryAmount }}
@@ -305,7 +304,7 @@ export default defineComponent({
             <span v-if="secondaryAmount !== ''" class="c-wallet-balance-row__secondary-amount">
                 <ToolTip
                     v-if="truncateSecondaryValue"
-                    :text="formatBalance(+secondaryAmount, !$q.screen.lt.sm)"
+                    :text="formatTooltipBalance(+secondaryAmount, !$q.screen.lt.sm)"
                     :hide-icon="true"
                 >
                     {{ prettySecondaryAmount }}

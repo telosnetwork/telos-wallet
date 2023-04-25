@@ -161,6 +161,7 @@ export default defineComponent({
                         <ExternalLink
                             :text="interactedWithText"
                             :url="interactedWithUrl"
+                            :purpose="$t('evm_wallet.aria_link_to_address')"
                         />
                     </span>
                 </template>
@@ -174,6 +175,7 @@ export default defineComponent({
                 <ExternalLink
                     :text="interactedWithText"
                     :url="interactedWithUrl"
+                    :purpose="$t('evm_wallet.aria_link_to_address')"
                 />
             </div>
         </div>
@@ -189,6 +191,7 @@ export default defineComponent({
                     <ExternalLink
                         :text="transaction.id"
                         :url="transactionUrl"
+                        :purpose="$t('evm_wallet.aria_link_to_transaction')"
                     />
                 </div>
             </template>
@@ -256,6 +259,7 @@ export default defineComponent({
             <ExternalLink
                 :text="$t('global.more_info')"
                 :url="transactionUrl"
+                :purpose="$t('evm_wallet.aria_link_to_transaction')"
             />
         </div>
     </div>

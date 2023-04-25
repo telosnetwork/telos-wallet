@@ -4,6 +4,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     text: string,
     url: string,
+    purpose?: string,
 }>();
 
 const formattedText = computed(() => {
@@ -22,6 +23,7 @@ const formattedText = computed(() => {
 <template>
 <a
     :href="url"
+    :aria-label="purpose"
     target="_blank"
     rel="noopener noreferrer"
     class="c-external-link__link"
