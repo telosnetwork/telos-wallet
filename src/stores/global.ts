@@ -1,7 +1,3 @@
-/**
- * Global: this store is outside Antelope store because it is app specific and is responsible for handling the app global auxiliary state.
- */
-
 import { defineStore } from 'pinia';
 import {
     createInitFunction,
