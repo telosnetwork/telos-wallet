@@ -34,3 +34,17 @@ export function getNumberOfDecimalPlaces(amount: string | number, locale: string
     const numberOfDecimalPlaces = decimalPart.replace(/\D+/g, '').length;
     return numberOfDecimalPlaces;
 }
+
+export function getNumberFromLocalizedFormattedNumber(formatted: string, locale: string) {
+    const decimalSeparator = getDecimalSeparatorForLocale(locale);
+
+    const notIntegerOrSeparatorRegex = new RegExp(`[^0-9${decimalSeparator}]`, 'g');
+    let unformatted = formatted.replace(notIntegerOrSeparatorRegex, '');
+
+    // if the decimal separator is anything but a dot, replace it with a dot to allow conversion to number
+    if (decimalSeparator !== '.') {
+        unformatted = unformatted.replace(/[^0-9.]/g, '.');
+    }
+
+    return +unformatted;
+}

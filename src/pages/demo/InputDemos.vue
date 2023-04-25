@@ -8,8 +8,8 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
-        amount: 0,
-        symbol: 'USD',
+        amount: 0, // eztodo make inputs for these
+        symbol: 'USD', // eztodo make inputs for these
         locale: 'en-US',
     }),
     methods: {
@@ -29,12 +29,16 @@ export default defineComponent({
             <option value="de-DE">de-DE</option>
             <option value="hi-IN">hi-IN</option>
         </select>
+        <br>
+        {{ amount }}
+        <br>
+        <button @click="amount++">Add 1 to value</button>
     </div>
 </div>
 <div class="row">
     <div class="col-xs-12 col-sm-6">
         <CurrencyInput
-            :model-value="amount"
+            v-model="amount"
             :symbol="symbol"
             :decimals="4"
             :locale="locale"

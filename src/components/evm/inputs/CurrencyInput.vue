@@ -1,10 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { useUserStore } from 'src/antelope';
 import {
     getDecimalSeparatorForLocale,
-    getLargeNumberSeparatorForLocale,
+    getLargeNumberSeparatorForLocale, getNumberFromLocalizedFormattedNumber,
     getNumberOfDecimalPlaces,
 } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils';
@@ -41,12 +40,12 @@ export default defineComponent({
             default: null,
         },
     },
+    emits: [
+        'update:modelValue',
+    ],
     computed: {
         inputElement(): HTMLInputElement {
             return this.$refs.input as HTMLInputElement;
-        },
-        rawInputValue(): string {
-            return this.inputElement.value;
         },
         isRequired(): boolean {
             return [true, 'true', 'required'].includes(this.$attrs.required as string | boolean);
@@ -72,21 +71,55 @@ export default defineComponent({
                 return this.errorText;
             }
 
-            if (this.isRequired && this.rawInputValue === '') {
+            if (this.isRequired && this.inputElement.value === '') {
                 return 'This field is required'; // eztodo i18n
             }
 
-            if (+this.rawInputValue < 0) {
+            if (+this.inputElement.value < 0) {
                 return 'Value must be positive'; // eztodo i18n
             }
 
-            const numberOfDecimalPlaces = getNumberOfDecimalPlaces(this.rawInputValue, this.locale);
+            const numberOfDecimalPlaces = getNumberOfDecimalPlaces(this.inputElement.value, this.locale);
 
             if (numberOfDecimalPlaces > this.decimals) {
                 return `Maximum precision is ${this.decimals}`;  // eztodo i18n
             }
 
             return '';
+        },
+        leadingZeroesRegex(): RegExp {
+            const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
+            return new RegExp(leadingZeroesPattern, 'g');
+        },
+        notIntegerOrSeparatorRegex(): RegExp {
+            const notIntegerOrSeparatorPattern = `[^\\d${this.decimalSeparator}${this.largeNumberSeparator}]`;
+            return new RegExp(notIntegerOrSeparatorPattern, 'g');
+        },
+        notIntegerOrDecimalSeparatorRegex(): RegExp {
+            const notIntegerOrDecimalSeparatorPattern = `[^\\d${this.decimalSeparator}]`;
+            return new RegExp(notIntegerOrDecimalSeparatorPattern, 'g');
+        },
+        largeNumberSeparatorRegex(): RegExp {
+            return new RegExp(`[${this.largeNumberSeparator}]`, 'g');
+        },
+        decimalSeparatorRegex(): RegExp {
+            return new RegExp(`[${this.decimalSeparator}]`, 'g');
+        },
+    },
+    watch: {
+        modelValue(newValue: number, oldValue: number) {
+            if (newValue !== oldValue) {
+                this.setInputValue(
+                    this.prettyPrintNumber(newValue.toString()),
+                );
+                this.handleInput();
+            }
+        },
+        locale() {
+            this.setInputValue(
+                this.prettyPrintNumber(this.modelValue.toString()),
+            );
+            this.handleInput();
         },
     },
     methods: {
@@ -100,48 +133,36 @@ export default defineComponent({
         handleInput() {
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
-            const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
-            const leadingZeroesRegex = new RegExp(leadingZeroesPattern, 'g');
-
-            const notIntegerOrSeparatorPattern = `[^\\d${this.decimalSeparator}${this.largeNumberSeparator}]`;
-            const notIntegerOrSeparatorRegex = new RegExp(notIntegerOrSeparatorPattern, 'g');
-
-            const notIntegerOrDecimalSeparatorPattern = `[^\\d${this.decimalSeparator}]`;
-            const notIntegerOrDecimalSeparatorRegex = new RegExp(notIntegerOrDecimalSeparatorPattern, 'g');
-
-            const notIntegerOrLargeNumberSeparatorPattern = `[^\\d${this.largeNumberSeparator}]`;
-            const notIntegerOrLargeNumberSeparatorRegex = new RegExp(notIntegerOrLargeNumberSeparatorPattern, 'g');
-
-            const largeNumberSeparatorRegex = new RegExp(`[${this.largeNumberSeparator}]`, 'g');
-            const decimalSeparatorRegex = new RegExp(`[${this.decimalSeparator}]`, 'g');
-
-            const emit = (val: string) => {
-                if (+val !== this.modelValue) {
-                    this.$emit('update:modelValue', +val);
+            const emit = (val: number) => {
+                if (val !== this.modelValue) {
+                    this.$emit('update:modelValue', val);
                 }
             };
 
             // strip leading zeroes and invalid characters
             this.setInputValue(
                 String(this.inputElement.value)
-                    .replace(leadingZeroesRegex, '')
-                    .replace(notIntegerOrSeparatorRegex, ''),
+                    .replace(this.leadingZeroesRegex, '')
+                    .replace(this.notIntegerOrSeparatorRegex, ''),
             );
 
+            // if input element value is zero-ish, emit 0
             if (['', null, undefined, '0', zeroWithDecimalSeparator, this.decimalSeparator].includes(this.inputElement.value)) {
+                // if the user types a decimal separator in a blank input, add a zero before the separator
                 if (this.inputElement.value === this.decimalSeparator) {
                     this.setInputValue(zeroWithDecimalSeparator);
                 }
 
-                emit('0');
+                emit(0);
                 return;
             }
 
+            // save caret position and number of large number separators (e.g. comma or dot) for later
             let caretPosition = this.inputElement.selectionStart || 0;
-            const savedCommaCount = (this.inputElement.value.match(largeNumberSeparatorRegex) || []).length;
+            const savedLargeNumberSeparatorCount = (this.inputElement.value.match(this.largeNumberSeparatorRegex) || []).length;
 
             // remove extraneous decimal separators not handled in keydownHandler (i.e. from pasted values)
-            if ((this.inputElement.value?.match(decimalSeparatorRegex) ?? []).length > 1) {
+            if ((this.inputElement.value?.match(this.decimalSeparatorRegex) ?? []).length > 1) {
                 const { value } = this.inputElement;
                 const afterFirstDecimalSeparatorIndex = value.indexOf(this.decimalSeparator) + 1;
                 const int = value.slice(0, afterFirstDecimalSeparatorIndex);
@@ -157,37 +178,67 @@ export default defineComponent({
                 return;
             }
 
-            let workingValue = this.inputElement.value.replace(notIntegerOrDecimalSeparatorRegex, '') ?? '';
+            // workingValue is a simplified version of the input element's value, used for easier manipulation
+            // e.g. if input value === '123.456.789,001', working value === '123546789.001'
+            let workingValue = getNumberFromLocalizedFormattedNumber(
+                this.inputElement.value ?? '0',
+                this.locale,
+            ).toString();
 
+            // if user has typed a number larger than the max value, set input to max value
             if (!!this.maxValue && +workingValue > this.maxValue) {
                 workingValue = this.maxValue.toString();
                 caretPosition = workingValue.length;
                 // this.triggerWiggle(); eztodo
             }
 
-            // const decimals = getNumberOfDecimalPlaces(workingValue, this.locale);
-            // let commifiedWorkingValue = prettyPrintCurrency(+workingValue, decimals, this.locale);
-            const commifiedWorkingValue = workingValue;
+            // re-formatted working value, e.g. '123,456.789'
+            const formattedWorkingValue = this.prettyPrintNumber(workingValue);
 
-            this.setInputValue(commifiedWorkingValue);
+            this.setInputValue(formattedWorkingValue);
 
-            const newCommaCount = (this.inputElement.value.match(notIntegerOrLargeNumberSeparatorRegex) ?? []).length;
-            const deltaCommaCount = newCommaCount - savedCommaCount;
+            // get information needed to preserve user caret position in case commas/dots are added/removed
+            const newLargeNumberSeparatorCount = (
+                this.inputElement.value.match(this.notIntegerOrDecimalSeparatorRegex) ?? []
+            ).length;
+            const deltaLargeNumberSeparatorCount = newLargeNumberSeparatorCount - savedLargeNumberSeparatorCount;
 
-            this.setInputCaretPosition(caretPosition + deltaCommaCount);
-            emit(this.rawInputValue);
+            this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
+
+            const valueAsNumber = getNumberFromLocalizedFormattedNumber(this.inputElement.value, this.locale);
+            emit(valueAsNumber);
         },
         handleKeydown(event: KeyboardEvent) {
-            const input = (this.$refs.input as HTMLInputElement);
-
             const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             const modifierKeys: ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'];
-            const value = input.value;
-            const caretPosition = input.selectionStart ?? 0;
+
+            const validKeystrokes = [
+                ...numKeys,
+                ...modifierKeys,
+                this.decimalSeparator,
+                'ArrowLeft',
+                'ArrowRight',
+                'End',
+                'Home',
+                'Delete',
+                'Backspace',
+                'Tab',
+            ];
+
+            const userIsDoingTextOperation =
+                ['a', 'v', 'x', 'c', 'z'].includes(event.key) && (event.ctrlKey || event.metaKey);
+
+            if (!validKeystrokes.includes(event.key) && !userIsDoingTextOperation) {
+                event.preventDefault();
+                return;
+            }
+
+            const value = this.inputElement.value;
+            const caretPosition = this.inputElement.selectionStart ?? 0;
             const pressedKey = event.key;
 
             const eventHasModifiers = modifierKeys.some(modifier => event[modifier]);
-            const targetHasNoSelection = caretPosition === input.selectionEnd;
+            const targetHasNoSelection = caretPosition === this.inputElement.selectionEnd;
             const deletingBackward = event.key === 'Backspace' && !eventHasModifiers && targetHasNoSelection;
             const deletingForward  = event.key === 'Delete'    && !eventHasModifiers && targetHasNoSelection;
 
@@ -202,18 +253,18 @@ export default defineComponent({
                 (deletingBackward && previousCharacterIsLargeNumberSeparator);
 
             if (deletingDecimalSeparator) {
-                const indexOfDecimalSeparator = value.lastIndexOf(this.decimalSeparator);
-                const firstPart = value.slice(0, indexOfDecimalSeparator);
+                const indexOfDecimalSeparator = value.indexOf(this.decimalSeparator);
+                const firstPart  = value.slice(0, indexOfDecimalSeparator);
                 const secondPart = value.slice(indexOfDecimalSeparator + 1);
 
                 this.setInputValue(firstPart.concat(secondPart));
             } else if (deletingForward && nextCharacterIsLargeNumberSeparator) {
                 const preSeparatorInclusive = value.slice(0, caretPosition + 1);
-                const newPostSeparator =      value.slice(caretPosition + 2);
+                const newPostSeparator      = value.slice(caretPosition + 2);
 
                 this.setInputValue(preSeparatorInclusive.concat(newPostSeparator));
             } else if (deletingBackward && previousCharacterIsLargeNumberSeparator) {
-                const newPreSeparator =        value.slice(0, caretPosition - 2);
+                const newPreSeparator        = value.slice(0, caretPosition - 2);
                 const postSeparatorInclusive = value.slice(caretPosition - 1);
 
                 this.setInputValue(newPreSeparator.concat(postSeparatorInclusive));
@@ -227,7 +278,7 @@ export default defineComponent({
             }
 
             const tryingToAddDigitsPastMaxPrecision = (() => {
-                const indexOfDecimalSeparator = value.lastIndexOf(this.decimalSeparator);
+                const indexOfDecimalSeparator = value.indexOf(this.decimalSeparator);
                 const integer = value.slice(0, indexOfDecimalSeparator);
                 const fractional = value.slice(indexOfDecimalSeparator + 1);
 
@@ -243,15 +294,6 @@ export default defineComponent({
                     return false;
                 }
 
-                // this is true for certain locales like those in India
-                const decimalSeparatorIsAlsoLargeNumberSeparator = this.decimalSeparator === this.largeNumberSeparator;
-
-                if (decimalSeparatorIsAlsoLargeNumberSeparator) {
-                    // disallow user adding a decimal separator to the left of the existing one for locales like India
-                    return value.indexOf(this.decimalSeparator) < caretPosition;
-                }
-
-                // for other locales, if decimal separator already exists in string, disallow adding another
                 return value.includes(this.decimalSeparator);
             })();
 
@@ -269,6 +311,24 @@ export default defineComponent({
             if (invalidKeystroke) {
                 event.preventDefault();
             }
+        },
+        prettyPrintNumber(numberString: string) {
+            // this method takes a plain number string and adds in localized separators
+            // e.g. '123456.789' => '123,456.789' for de-DE
+            const indexOfDot = numberString.indexOf('.');
+            let decimal = '';
+            let integer = '';
+
+            if (indexOfDot > -1) {
+                integer = numberString.slice(0, numberString.indexOf(this.decimalSeparator));
+                decimal = this.decimalSeparator.concat(numberString.slice(indexOfDot + 1, numberString.length));
+            } else {
+                integer = numberString;
+            }
+
+            const formattedInteger = prettyPrintCurrency(+integer, 0, this.locale);
+
+            return formattedInteger.concat(decimal);
         },
     },
 });
