@@ -27,9 +27,9 @@ describe('AddressQR.vue', () => {
                 },
             },
         },
-    }) as VueWrapper<InstanceType<any>>;
+    }) as VueWrapper<any>;
 
-    let wrapper: VueWrapper<InstanceType<any>>;
+    let wrapper: VueWrapper<any>;
 
     beforeEach(() => {
         wrapper = getNewWrapper();
