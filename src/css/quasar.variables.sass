@@ -30,7 +30,7 @@ $notify-success: #255B00
 $notify-error: #880000
 
 $site-gradient: linear-gradient(0.4turn, #071033, #6039A4)
-
+$tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8))
 
 /*********************
  *** Legacy Colors ***
@@ -60,6 +60,8 @@ $saveBtn         : #2e1f4f
     --text-color-rgb: 0, 0, 0
     --text-color-hover: #{$primary}
     --text-color-muted: #757575
+    --negative-muted: #{rgba($negative, 0.5)}
+    --positive-muted: #{rgba($positive, 0.5)}
     --bg-color: #{$canvas}
     --bg-color-hover: #{$page-header}
 
@@ -79,6 +81,8 @@ $saveBtn         : #2e1f4f
     --text-color-rgb: 255, 255, 255
     --text-color-hover: #{darken($ink, 80%)}
     --text-color-muted: #eeeeee
+    --negative-muted: #{rgba($negative, 0.5)}
+    --positive-muted: #{rgba($positive, 0.5)}
     --bg-color: #{$canvas}
     --bg-color-hover: #{lighten($canvas, 80%)}
     --header-text-color: #{$text-header}
@@ -89,3 +93,14 @@ body
     background-color: var(--bg-color)
 
 
+// slide-in-left animation
+$anim-slide-in-left: slide-in-left 0.3s cubic-bezier(0,1.02,1,.99) both
+@keyframes slide-in-left
+    0%
+        -webkit-transform: translateX(100%)
+        transform: translateX(100%)
+        opacity: 0
+    100%
+        -webkit-transform: translateX(0)
+        transform: translateX(0)
+        opacity: 1

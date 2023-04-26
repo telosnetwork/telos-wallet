@@ -45,6 +45,8 @@ import {
     EvmTransactionResponse,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
+import { getAccount } from '@wagmi/core';
+import { usePlatformStore } from 'src/antelope/stores/platform';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -84,6 +86,11 @@ export const useEVMStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
 
+            // bypass provider detection on mobile
+            if (usePlatformStore().isMobile){
+                return;
+            }
+
             useFeedbackStore().setDebug(store_name, isTracingAll());
             const evm = useEVMStore();
 
@@ -102,7 +109,7 @@ export const useEVMStore = defineStore(store_name, {
                 onEvmReady.next(true);
             });
         },
-        // actions ---
+
         async login (network: string): Promise<string | null> {
             this.trace('login', network);
             const chain = useChainStore();
@@ -110,6 +117,11 @@ export const useEVMStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('evm.login');
                 chain.setLoggedChain(network);
                 chain.setCurrentChain(network);
+
+                if (localStorage.getItem('wagmi.connected')){
+                    return getAccount().address as string;
+                }
+
                 const provider = await this.ensureProvider();
 
                 let checkProvider = new ethers.providers.Web3Provider(provider);
@@ -146,6 +158,7 @@ export const useEVMStore = defineStore(store_name, {
 
             }
         },
+
         async sendSystemToken (to: string, amount: string): Promise<EvmTransactionResponse> {
             this.trace('sendSystemToken', to, amount);
             // Define the amount to send
@@ -167,7 +180,7 @@ export const useEVMStore = defineStore(store_name, {
                 throw new Error('antelope.evm.error_no_signer');
             }
         },
-        // auxiliar
+
         async ensureProvider(): Promise<ExternalProvider> {
             return new Promise((resolve, reject) => {
                 evmEvents.whenReady.subscribe(async () => {
@@ -180,6 +193,7 @@ export const useEVMStore = defineStore(store_name, {
                 });
             });
         },
+
         async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
             this.trace('ensureCorrectChain', checkProvider);
             let response = checkProvider;
@@ -193,6 +207,7 @@ export const useEVMStore = defineStore(store_name, {
             this.setRpcProvider(response);
             return response;
         },
+
         async switchChainInjected(): Promise<boolean> {
             this.trace('switchChainInjected');
             useFeedbackStore().setLoading('evm.switchChainInjected');
@@ -270,6 +285,7 @@ export const useEVMStore = defineStore(store_name, {
             const amountInWei = (amount * Math.pow(10, decimals)).toString();
             return amountInWei;
         },
+
         toBigNumber(value: string): ethers.BigNumber {
             return ethers.utils.parseEther(value);
         },
@@ -292,6 +308,7 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_getting_function_interface', { prefix });
             }
         },
+
         async loadTokenMetadata(address:string, token:EvmToken, tokenId:string): Promise<Token> {
             if(token.type === 'erc1155'){
                 const contract = await this.getContractFromAbi(address, erc1155Abi);
@@ -305,11 +322,13 @@ export const useEVMStore = defineStore(store_name, {
             }
             return token;
         },
+
         getTokenTypeFromLog(log:EvmLog): string {
             const sig = log.topics[0].substring(0, 10);
             const type = (log.topics.length === 4) ? 'erc721' : 'erc20';
             return (sig === ERC1155_TRANSFER_SIGNATURE) ? 'erc1155' : type;
         },
+
         async getEventIface(hex:string): Promise<ethers.utils.Interface | null> {
             const prefix = hex.toLowerCase().slice(0, 10);
             if (Object.prototype.hasOwnProperty.call(this.eventInterfaces, prefix)) {
@@ -328,6 +347,7 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_getting_event_interface', { hex });
             }
         },
+
         async getContractCreation(address:string): Promise<EvmContractCreationInfo> {
             if (!address) {
                 console.error('address is null', address);
@@ -341,6 +361,7 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_getting_contract_creation', { address });
             }
         },
+
         // suspectedToken is so we don't try to check for ERC20 info via eth_call unless we think this is a token...
         // this is coming from the token transfer, transactions table & transaction (general + logs tabs) pages where we're
         // looking for a contract based on a token transfer event
@@ -396,6 +417,7 @@ export const useEVMStore = defineStore(store_name, {
 
             return await this.getEmptyContract(addressLower, creationInfo);
         },
+
         async checkBucket(address:string): Promise<VerifiedContractMetadata | null> {
             const checksumAddress = toChecksumAddress(address);
             try {
@@ -407,6 +429,7 @@ export const useEVMStore = defineStore(store_name, {
                 return null;
             }
         },
+
         async getVerifiedContract(address:string, metadata:VerifiedContractMetadata, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract> {
             const token = await this.getToken(address, suspectedType);
             if(token){
@@ -427,6 +450,7 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.addContract(address, contract);
             return contract;
         },
+
         async getTokenContract(address:string, tokenData:EvmToken, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: tokenData.symbol ? `${tokenData.name} (${tokenData.symbol})` : tokenData.name ?? 'Unknown',
@@ -443,6 +467,7 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.addContract(address, contract);
             return contract;
         },
+
         async getEmptyContract(address:string, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: `0x${address.slice(0, 16)}...`,
@@ -454,6 +479,7 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.addContract(address, contract);
             return contract;
         },
+
         async supportsInterface(address:string, iface:string): Promise<boolean> {
             const provider = this.__ethers_rpc_provider;
             if (!provider) {
@@ -467,6 +493,7 @@ export const useEVMStore = defineStore(store_name, {
                 return false;
             }
         },
+
         async isTokenType(address:string, type:string): Promise<string> {
             if(typeof type === 'undefined'){
                 return '';
@@ -481,6 +508,7 @@ export const useEVMStore = defineStore(store_name, {
             }
             return address;
         },
+
         getTokenABI(type:string): EvmABI {
             if(type === 'erc721'){
                 return erc721Abi;
@@ -489,6 +517,7 @@ export const useEVMStore = defineStore(store_name, {
             }
             return erc20Abi;
         },
+
         async getContractFromAbi(address:string, abi:EvmABI): Promise<ethers.Contract> {
             const provider = this.__ethers_rpc_provider;
             if (!provider) {
@@ -496,6 +525,7 @@ export const useEVMStore = defineStore(store_name, {
             }
             return  new ethers.Contract(address, abi, provider);
         },
+
         async getTokenData(address:string, suspectedType:string): Promise<EvmToken> {
             const type = await this.isTokenType(address, suspectedType);
             if(type === ''){
@@ -527,6 +557,7 @@ export const useEVMStore = defineStore(store_name, {
                 return {} as EvmToken;
             }
         },
+
         async getToken(address:string, suspectedType:string): Promise<EvmToken> {
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             const tokens = await chain_settings.getTokenList();
@@ -539,6 +570,7 @@ export const useEVMStore = defineStore(store_name, {
             }
             return await this.getTokenData(address, suspectedType);
         },
+
         async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
             const token = await this.getToken(address, suspectedType);
             if (token) {
@@ -568,6 +600,7 @@ export const useEVMStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+
         setExternalProvider(value: ExternalProvider | null) {
             this.trace('setExternalProvider', value);
             try {
@@ -576,6 +609,7 @@ export const useEVMStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+
         setRpcProvider(value: ethers.providers.JsonRpcProvider | null) {
             this.trace('setRpcProvider', value);
             try {

@@ -1,20 +1,45 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useAccountStore, getAntelope } from 'src/antelope';
+import { useAccountStore, getAntelope, useChainStore } from 'src/antelope';
 import InlineSvg from 'vue-inline-svg';
+import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 
 const accountStore = useAccountStore();
+const chainStore = useChainStore();
 const ant = getAntelope();
 
 export default defineComponent({
     name: 'UserInfo',
+    props: {
+        account: {
+            // AccountModel
+            type: Object,
+            required: true,
+        },
+        displayFullAddress: {
+            type: Boolean,
+            default: false,
+        },
+        showAddress: {
+            type: Boolean,
+            default: true,
+        },
+        showCopyBtn: {
+            type: Boolean,
+            default: true,
+        },
+        showUserMenu: {
+            type: Boolean,
+            default: true,
+        },
+    },
     components: {
         InlineSvg,
     },
     methods: {
         copyAddress() {
-            if (!accountStore.loggedAccount.isNative && accountStore.isAuthenticated) {
-                const address = accountStore.loggedEvmAccount.account;
+            if (!this.account.isNative && accountStore.isAuthenticated) {
+                const address = this.account.address;
                 navigator.clipboard.writeText(address);
                 ant.config.notifySuccessHandler(this.$t('settings.copied_ok'));
             }
@@ -26,21 +51,23 @@ export default defineComponent({
             this.$q.dark.toggle();
         },
         gotoTeloscan() {
-            const explorerUrl = ant.stores.chain.loggedEvmChain?.settings.getExplorerUrl();
+            const network =  this.account.network;
+            const explorerUrl =  chainStore.getExplorerUrl(network);
             if (explorerUrl) {
-                window.open(explorerUrl + '/address/' + accountStore.loggedEvmAccount.account, '_blank');
+                window.open(explorerUrl + '/address/' + this.account?.account, '_blank');
                 return;
             } else {
-                ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: accountStore.loggedAccount.network }));
+                ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: this.account.network }));
             }
         },
     },
     computed: {
         address() {
-            if (accountStore.isAuthenticated) {
-                return accountStore.loggedEvmAccount.displayAddress;
+            if (this.displayFullAddress) {
+                return this.account?.address;
+            } else {
+                return this.account?.displayAddress;
             }
-            return '';
         },
         isDarkMode() {
             return this.$q.dark.isActive;
@@ -51,8 +78,9 @@ export default defineComponent({
 
 <template>
 <div class="c-user-info">
-    <div class="c-user-info__address">{{ address }}</div>
+    <div v-if="showAddress" class="c-user-info__address">{{ address }}</div>
     <q-btn
+        v-if="showCopyBtn"
         flat
         dense
         icon="content_copy"
@@ -62,6 +90,7 @@ export default defineComponent({
         @click="copyAddress"
     />
     <q-btn
+        v-if="showUserMenu"
         flat
         dense
         icon="more_vert"

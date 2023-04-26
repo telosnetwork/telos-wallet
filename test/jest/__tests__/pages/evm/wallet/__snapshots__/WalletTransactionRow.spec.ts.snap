@@ -1,0 +1,1253 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for addresses with an alias 1`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.sent  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.to 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="SomeContract"
+            url="example.com/address/0x2222222222222222222222222222222222222222"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for addresses with an alias 2`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.sent  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.to 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="SomeContract"
+            url="example.com/address/0x2222222222222222222222222222222222222222"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for addresses with an alias 3`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon c-transaction-row__interaction-icon--rotated"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.received  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.from 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="AContract"
+            url="example.com/address/0x1111111111111111111111111111111111111111"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for addresses with an alias 4`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon c-transaction-row__interaction-icon--rotated"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.received  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.from 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="AContract"
+            url="example.com/address/0x1111111111111111111111111111111111111111"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for failed transactions 1`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon c-transaction-row__interaction-icon--red"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          evm_wallet.failed_contract_interaction
+        </span>
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for failed transactions 2`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon c-transaction-row__interaction-icon--red"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          evm_wallet.failed_contract_interaction
+        </span>
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transactions with an action name other than send/receive/swap 1`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          approve
+        </span>
+      </div>
+      <div
+        class="c-transaction-row__secondary-interaction-text"
+      >
+        <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
+          text="0x2222222222222222222222222222222222222222"
+          url="example.com/address/0x2222222222222222222222222222222222222222"
+        />
+      </div>
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transactions with an action name other than send/receive/swap 2`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          approve
+        </span>
+      </div>
+      <div
+        class="c-transaction-row__secondary-interaction-text"
+      >
+        <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
+          text="0x2222222222222222222222222222222222222222"
+          url="example.com/address/0x2222222222222222222222222222222222222222"
+        />
+      </div>
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transactions with no known method name 1`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          evm_wallet.contract_interaction
+        </span>
+      </div>
+      <div
+        class="c-transaction-row__secondary-interaction-text"
+      >
+        <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
+          text="0x2222222222222222222222222222222222222222"
+          url="example.com/address/0x2222222222222222222222222222222222222222"
+        />
+      </div>
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transactions with no known method name 2`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        <span
+          class="c-transaction-row__action-name"
+        >
+          evm_wallet.contract_interaction
+        </span>
+      </div>
+      <div
+        class="c-transaction-row__secondary-interaction-text"
+      >
+        <external-link-stub
+          purpose="evm_wallet.aria_link_to_address"
+          text="0x2222222222222222222222222222222222222222"
+          url="example.com/address/0x2222222222222222222222222222222222222222"
+        />
+      </div>
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    
+    
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transfers with no fiat price 1`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.swapped  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.with 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="SomeContract"
+            url="example.com/address/0x2222222222222222222222222222222222222222"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--out"
+      >
+        -100.0000 sTLOS 
+        <!--v-if-->
+      </div>
+      <span
+        class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
+      >
+        -100.00 USD
+      </span>
+    </div>
+    
+    
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +100.5412 NERD 
+        <tool-tip-stub
+          hideicon="false"
+          warnings="evm_wallet.no_fiat_value"
+        />
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +357,542,547.6742 SHIB 
+        <tool-tip-stub
+          hideicon="false"
+          warnings="evm_wallet.no_fiat_value"
+        />
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +1,307.4500 TLOS 
+        <!--v-if-->
+      </div>
+      <span
+        class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
+      >
+         +54.45 USD
+      </span>
+    </div>
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WalletTransactionRow.vue row should be rendered correctly for transfers with no fiat price 2`] = `
+<div
+  class="c-transaction-row"
+>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--first"
+  >
+    <div
+      class="c-transaction-row__interaction-icon-container"
+    >
+      <inline-svg-stub
+        aria-hidden="true"
+        class="c-transaction-row__interaction-icon"
+        height="12"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+    </div>
+    <div>
+      <div
+        class="c-transaction-row__primary-interaction-text"
+      >
+        
+        <span
+          class="c-transaction-row__action-description"
+        >
+          evm_wallet.swapped  
+        </span>
+        <span
+          class="c-transaction-row__interaction-nowrap"
+        >
+          global.with 
+          <external-link-stub
+            purpose="evm_wallet.aria_link_to_address"
+            text="SomeContract"
+            url="example.com/address/0x2222222222222222222222222222222222222222"
+          />
+        </span>
+        
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__timestamp"
+    >
+      <tool-tip-stub
+        hideicon="true"
+        text="Apr 17, 2023 11:46:26 PM (UTC +00:00)"
+      />
+      <!--v-if-->
+    </div>
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--second"
+  >
+    
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--out"
+      >
+        -100.0000 sTLOS 
+        <!--v-if-->
+      </div>
+      <span
+        class="c-transaction-row__value c-transaction-row__value--out c-transaction-row__value--small"
+      >
+        -100.00 USD
+      </span>
+    </div>
+    
+    
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +100.5412 NERD 
+        <tool-tip-stub
+          hideicon="false"
+          warnings="evm_wallet.no_fiat_value"
+        />
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +357,542,547.6742 SHIB 
+        <tool-tip-stub
+          hideicon="false"
+          warnings="evm_wallet.no_fiat_value"
+        />
+      </div>
+      <!--v-if-->
+    </div>
+    <div
+      class="c-transaction-row__value-container"
+    >
+      <div
+        class="c-transaction-row__value c-transaction-row__value--in"
+      >
+         +1,307.4500 TLOS 
+        <!--v-if-->
+      </div>
+      <span
+        class="c-transaction-row__value c-transaction-row__value--in c-transaction-row__value--small"
+      >
+         +54.45 USD
+      </span>
+    </div>
+    
+  </div>
+  <div
+    class="c-transaction-row__info-container c-transaction-row__info-container--third"
+  >
+    <div
+      class="c-transaction-row__gas-icon-container"
+    >
+      <q-icon-stub
+        name="local_gas_station"
+        size="xs"
+      >
+        
+        
+      </q-icon-stub>
+    </div>
+    <div
+      class="c-transaction-row__gas-text"
+    >
+      <span>
+        0.1500 TLOS
+      </span>
+      <span>
+        $0.03 USD
+      </span>
+    </div>
+    <div
+      class="c-transaction-row__mobile-tx-link"
+    >
+      <external-link-stub
+        purpose="evm_wallet.aria_link_to_transaction"
+        text="global.more_info"
+        url="example.com/tx/0x1111111111111111111111111111111111111111"
+      />
+    </div>
+  </div>
+</div>
+`;

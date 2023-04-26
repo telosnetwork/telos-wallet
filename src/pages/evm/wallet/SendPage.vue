@@ -2,12 +2,14 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
+import { useGlobalStore } from 'src/stores';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
 const userStore = useUserStore();
 const chainStore = useChainStore();
+const global = useGlobalStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -214,6 +216,9 @@ export default defineComponent({
         },
     },
 
+    mounted() {
+        global.setHeaderBackBtn(true);
+    },
 });
 </script>
 

@@ -121,6 +121,9 @@ export const useChainStore = defineStore(store_name, {
         currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
+        // TODO: remove the 'as EVMChainSettings' when the native chains are implemented
+        // https://github.com/telosnetwork/telos-wallet/issues/246
+        getExplorerUrl: () => (network: string) => (settings[network] as EVMChainSettings).getExplorerUrl(),
     },
     actions: {
         trace: createTraceFunction(store_name),

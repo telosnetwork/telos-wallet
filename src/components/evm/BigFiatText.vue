@@ -14,15 +14,14 @@ export default defineComponent({
     computed: {
         prettyAmount() {
             const { fiatLocale, fiatCurrency } = useUserStore();
-            let formatted = prettyPrintCurrency(
+
+            return prettyPrintCurrency(
                 this.amount,
                 2,
                 fiatLocale,
                 false,
                 fiatCurrency,
             );
-
-            return `${formatted}`;
         },
     },
 });

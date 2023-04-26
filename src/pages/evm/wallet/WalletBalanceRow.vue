@@ -8,6 +8,7 @@ import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmToken } from 'src/antelope/types';
+import ToolTip from 'components/ToolTip.vue';
 
 const userStore = useUserStore();
 const { fiatLocale, fiatCurrency } = userStore;
@@ -22,6 +23,7 @@ interface OverflowMenuItem {
 export default defineComponent({
     name: 'WalletBalanceRow',
     components: {
+        ToolTip,
         InlineSvg,
     },
     props: {
@@ -30,9 +32,6 @@ export default defineComponent({
             required: true,
         },
     },
-    data: () => ({
-        showTooltip: false,
-    }),
     computed: {
         tokenLogo(): string {
             if (this.token.logoURI) {
@@ -61,7 +60,7 @@ export default defineComponent({
             return !['SHIB', 'SHIB2'].includes(this.token.symbol);
         },
         truncatePrimaryValue(): boolean {
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             if (!isMobile) {
                 return false;
@@ -74,7 +73,7 @@ export default defineComponent({
             }
         },
         truncateSecondaryValue() {
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             if (!isMobile) {
                 return false;
@@ -105,7 +104,7 @@ export default defineComponent({
             return `(@ ${pretty} / ${this.token.symbol})`;
         },
         primaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             // on desktop, the top value is fiat if there is a fiat value for the token
             // on mobile, the top (only) value is the token balance iff token has no reliable fiat value.
@@ -117,7 +116,7 @@ export default defineComponent({
             }
         },
         prettyPrimaryAmount(): string {
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             if (!isMobile) {
                 const formatted = prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale);
@@ -140,7 +139,7 @@ export default defineComponent({
             }
         },
         secondaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             if (!this.tokenHasFiatValue) {
                 return '';
@@ -158,7 +157,7 @@ export default defineComponent({
                 return '';
             }
 
-            const isMobile = this.$q.screen.lt.md;
+            const isMobile = this.$q.screen.lt.sm;
 
             if (isMobile) {
                 if (this.truncateSecondaryValue) {
@@ -174,28 +173,8 @@ export default defineComponent({
                 return `${amount} ${this.fiatRateText}`;
             }
         },
-        tooltipText(): string {
-            let text = '';
-
-            if (this.truncatePrimaryValue && this.tokenHasFiatValue) {
-                const formattedBalance = prettyPrintCurrency(this.tokenBalanceFiat as number, 2, fiatLocale, false, fiatCurrency);
-                text = `${this.$t('evm_wallet.fiat_value')}:\n${formattedBalance}\n\n`;
-            }
-
-            if (
-                (this.truncateSecondaryValue && this.tokenHasFiatValue) ||
-                (this.truncatePrimaryValue && !this.tokenHasFiatValue)
-            ) {
-                const formattedBalance = prettyPrintCurrency(+(this.token.balance ?? 0), this.token.decimals, fiatLocale, false);
-
-                text += `${this.$t('evm_wallet.token_balance')}:\n${formattedBalance}\n\n`;
-            }
-
-            if (!this.tokenHasFiatValue) {
-                text += `${this.$t('evm_wallet.no_fiat_value')}`;
-            }
-
-            return text.trim();
+        tooltipWarningText() {
+            return !this.tokenHasFiatValue ? [`${this.$t('evm_wallet.no_fiat_value')}`] : undefined;
         },
         overflowMenuItems(): OverflowMenuItem[] {
             const items: OverflowMenuItem[] = [];
@@ -263,12 +242,11 @@ export default defineComponent({
         },
     },
     methods: {
-        toggleTooltip() {
-            this.showTooltip = true;
+        formatTooltipBalance(amount: number, isFiat: boolean) {
+            const decimals = isFiat ? 2 : 4;
+            const symbol = isFiat ? fiatCurrency : this.token.symbol;
 
-            setTimeout(() => {
-                this.showTooltip = false;
-            }, 2000);
+            return `${prettyPrintCurrency(amount, decimals, fiatLocale)} ${symbol}`;
         },
         goToLink(url: string | object) {
             if (typeof url === 'object') {
@@ -305,24 +283,35 @@ export default defineComponent({
 
     <div class="c-wallet-balance-row__right-container">
         <div ref="balance-container" class="c-wallet-balance-row__balance-container">
-            <div class="c-wallet-balance-row__primary-amount" @click="toggleTooltip">
-                {{ prettyPrimaryAmount }}
-
-                <template v-if="truncatePrimaryValue || truncateSecondaryValue || !tokenHasFiatValue">
-                    <InlineSvg
-                        :src="require('src/assets/icon--info.svg')"
-                        class="c-wallet-balance-row__info-icon"
-                        aria-hidden="true"
-                    />
-                    <q-tooltip :model-value="showTooltip">
-                        <span class="c-wallet-balance-row__tooltip">
-                            {{ tooltipText }}
-                        </span>
-                    </q-tooltip>
+            <div class="c-wallet-balance-row__primary-amount">
+                <ToolTip
+                    v-if="truncatePrimaryValue"
+                    :text="formatTooltipBalance(+primaryAmount, ($q.screen.lt.sm && secondaryAmount !== ''))"
+                    :hide-icon="true"
+                >
+                    {{ prettyPrimaryAmount }}
+                </ToolTip>
+                <template v-else>
+                    {{ prettyPrimaryAmount }}
                 </template>
+
+                <ToolTip
+                    v-if="!tokenHasFiatValue"
+                    icon="info"
+                    :warnings="tooltipWarningText"
+                />
             </div>
             <span v-if="secondaryAmount !== ''" class="c-wallet-balance-row__secondary-amount">
-                {{ prettySecondaryAmount }}
+                <ToolTip
+                    v-if="truncateSecondaryValue"
+                    :text="formatTooltipBalance(+secondaryAmount, !$q.screen.lt.sm)"
+                    :hide-icon="true"
+                >
+                    {{ prettySecondaryAmount }}
+                </ToolTip>
+                <template v-else>
+                    {{ prettySecondaryAmount }}
+                </template>
             </span>
         </div>
 
@@ -439,7 +428,6 @@ export default defineComponent({
     &__primary-amount {
         display: flex;
         align-items: center;
-        gap: 8px;
         flex: 1 1 max-content;
         text-align: right;
         font-size: 18px;
@@ -449,17 +437,6 @@ export default defineComponent({
 
     &__secondary-amount {
         color: var(--text-color-muted);
-    }
-
-    &__info-icon {
-        // svg color override
-        path {
-            fill: $primary;
-        }
-    }
-
-    &__tooltip {
-        white-space: pre-line;
     }
 
     &__overflow {
