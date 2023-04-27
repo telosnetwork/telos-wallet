@@ -42,6 +42,7 @@ export default defineComponent({
         <h5>Currency Input</h5>
     </div>
     <div class="col-1">
+        <label>Locale:&nbsp;</label>
         <select @input="updateCurrencyInputLocale">
             <option value="en-US" selected>en-US</option>
             <option value="de-DE">de-DE</option>

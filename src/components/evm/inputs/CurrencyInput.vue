@@ -9,10 +9,14 @@ import {
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
 import { formatUnits } from 'ethers/lib/utils';
+import ToolTip from 'components/ToolTip.vue';
 
 
 export default defineComponent({
     name: 'CurrencyInput',
+    components: {
+        ToolTip,
+    },
     props: {
         modelValue: {
             // if this is a BigNumber, the currency is treated as a token. Otherwise, it's treated as fiat.
@@ -87,7 +91,10 @@ export default defineComponent({
             return '';
         },
         prettyMaxValue() {
-            return prettyPrintCurrency(this.maxValue, 4, this.locale, false, undefined, undefined, this.decimals);
+            const precision = this.isFiat ? 2 : 4;
+            const amount = prettyPrintCurrency(this.maxValue, precision, this.locale, false, undefined, undefined, this.decimals);
+
+            return `${amount} ${this.symbol} Available`; // eztodo i18n
         },
         leadingZeroesRegex(): RegExp {
             const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
@@ -383,6 +390,13 @@ export default defineComponent({
         focusInput() {
             this.inputElement.focus();
         },
+        fillMaxValue() {
+            const precision = this.getNumberOfDecimalsToShow(this.maxValue);
+            const decimals = this.isFiat ? undefined : this.decimals;
+            const formattedMaxValue = prettyPrintCurrency(this.maxValue, precision, this.locale, undefined, undefined, undefined, decimals, true);
+            this.setInputValue(formattedMaxValue);
+            this.handleInput();
+        },
     },
 });
 </script>
@@ -399,8 +413,15 @@ export default defineComponent({
         {{ label }}
     </div>
 
-    <div v-if="!!maxValue" class="c-currency-input__amount-available">
-        {{ prettyMaxValue }}
+    <div
+        v-if="!!maxValue"
+        class="c-currency-input__amount-available"
+        @click="fillMaxValue"
+    >
+        <!--eztodo i18n-->
+        <ToolTip :text="'Click to fill max amount'" :hide-icon="true">
+            {{ prettyMaxValue }}
+        </ToolTip>
     </div>
 
     <input
@@ -437,6 +458,7 @@ export default defineComponent({
     transition-timing-function: ease;
     position: relative;
     cursor: text;
+    margin-top: 24px;
 
     &:hover {
         border: 1px solid var(--text-color);
@@ -471,7 +493,11 @@ export default defineComponent({
 
     &__amount-available {
         position: absolute;
-        top: -36px;
+        top: -24px;
+        left: 0;
+        right: 0;
+        text-align: right;
+        cursor: pointer;
     }
 
     &__input {
