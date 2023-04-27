@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { shallowMount } from '@vue/test-utils';
 
 const fakeBuyMoreLink = 'fake';
@@ -23,6 +22,7 @@ const storeMock = {
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
+import { EvmToken } from 'src/antelope/types';
 
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
@@ -66,9 +66,9 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                },
+                } as unknown as EvmToken,
             },
-        } as any);
+        });
         expect(wrapper.element).toMatchSnapshot();
     });
 
@@ -89,9 +89,9 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                },
+                } as unknown as EvmToken,
             },
-        } as any);
+        });
         expect(wrapper.element).toMatchSnapshot();
     });
 
@@ -131,9 +131,9 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as unknown as EvmToken,
                 },
-            } as any);
+            });
 
             // snapshot contains c-wallet-balance-row__overflow-li for stake, buy, wrap, send
             expect(wrapper.element).toMatchSnapshot();
@@ -187,9 +187,9 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as unknown as EvmToken,
                 },
-            } as any);
+            });
 
             // snapshot contains c-wallet-balance-row__overflow-li for unstake, contract, send
             expect(wrapper.element).toMatchSnapshot();
@@ -242,9 +242,9 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as unknown as EvmToken,
                 },
-            } as any);
+            });
 
             // snapshot contains c-wallet-balance-row__overflow-li for unwrap, contract, send
             expect(wrapper.element).toMatchSnapshot();
@@ -298,9 +298,9 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as unknown as EvmToken,
                 },
-            } as any);
+            });
 
             // snapshot contains c-wallet-balance-row__overflow-li for contract, send
             expect(wrapper.element).toMatchSnapshot();

@@ -1,9 +1,19 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
-import { useGlobalStore } from 'src/stores';
+import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
+import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
+import { useAppNavStore } from 'src/stores';
+import { divideBn, multiplyBn } from 'src/antelope/stores/utils';
 
-const global = useGlobalStore();
+const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
+const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
+
+const ant = getAntelope();
+const userStore = useUserStore();
+const chainStore = useChainStore();
+const global = useAppNavStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -19,6 +29,9 @@ export default defineComponent({
         gasFeeInFiat: '$0.00',
         available: '12,845.1235 TLOS',
     }),
+    mounted() {
+        global.setShowBackBtn(true);
+    },
     watch: {
         balances: {
             handler() {
@@ -39,9 +52,15 @@ export default defineComponent({
             },
             immediate: true,
         },
+        gasFeeInSystemSym: {
+            handler() {
+                this.setAllBalance();
+            },
+            immediate: true,
+        },
     },
     computed: {
-        gasFeeInTlos() {
+        gasFeeInSystemSym() {
             const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
             return prettyPrintBalance(this.estimatedGas.system, userStore.fiatLocale, this.isMobile, symbol);
         },
@@ -62,23 +81,32 @@ export default defineComponent({
         },
         available(): string {
             if (this.token) {
+                let amount = parseFloat(this.token.balance) - (this.token.isSystem ? parseFloat(this.gasFeeInSystemSym) : 0);
                 if (this.useFiat) {
-                    return prettyPrintFiatBalance(this.token.fiatBalance, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                    amount = parseFloat(multiplyBn(+amount, this.token.price, 10));
+                    amount = +amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
+                }
+
+                if (this.useFiat) {
+                    return prettyPrintFiatBalance(amount, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
                 } else {
-                    return prettyPrintBalance(this.token.balance, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                    return prettyPrintBalance(amount, userStore.fiatLocale, this.isMobile, this.token.symbol);
                 }
             }
             return '';
         },
         amountInFiat(): string {
             if (this.token && this.token.price && !this.useFiat) {
-                return prettyPrintFiatBalance(+this.amount * this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                const amount = parseFloat(multiplyBn(+this.amount, this.token.price, 10));
+                const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
+                return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
             return '';
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                return prettyPrintBalance(+this.amount / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                const veryPreciseResult = divideBn(this.amount, this.token.price, 4);
+                return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
         },
@@ -89,13 +117,17 @@ export default defineComponent({
             if (!this.token || !this.token.price) {
                 return '';
             }
-
-            const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
-            return `(@ ${pretty} / ${this.token.symbol})`;
+            if (this.useFiat) {
+                const pretty = prettyPrintBalance(1 / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                return `(~ ${pretty} / ${userStore.fiatCurrency})`;
+            } else {
+                const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                return `(@ ${pretty} / ${this.token.symbol})`;
+            }
         },
         finalTokenAmount(): string {
             if (this.useFiat && this.token) {
-                return (+this.amount / this.token.price).toString();
+                return divideBn(this.amount, this.token.price, this.token.decimals);
             } else {
                 return this.amount;
             }
@@ -131,15 +163,20 @@ export default defineComponent({
                 return true;
             }
         },
+        isLoading(): boolean {
+            return ant.stores.feedback.isLoading('transferTokens');
+        },
     },
     methods: {
+        // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
+        // https://github.com/telosnetwork/telos-wallet/issues/274
         async updateEstimatedGas() {
             const chain_settings = chainStore.loggedEvmChain?.settings;
             if (chain_settings)  {
                 if (this.token?.isSystem) {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(26250);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER);
                 } else {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(55500);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
                 }
             } else {
                 this.estimatedGas = { system: '0', fiat: '0' };
@@ -148,9 +185,11 @@ export default defineComponent({
         toggleUseFiat() {
             if (this.token) {
                 if (this.useFiat) {
-                    this.amount = (+this.amount / this.token.price).toString();
+                    this.amount = divideBn(this.amount, this.token.price, this.token.decimals);
                 } else {
-                    this.amount = (+this.amount * this.token.price).toFixed(2);
+                    const amount = parseFloat(multiplyBn(+this.amount, this.token.price, 10));
+                    const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
+                    this.amount = fiat;
                 }
             }
 
@@ -158,10 +197,17 @@ export default defineComponent({
         },
         setAllBalance() {
             if (this.token) {
+                let available = +(this.available.split(' ')[0]);
                 if (this.useFiat) {
-                    this.amount = (+this.token.balance * this.token.price).toFixed(2);
+                    const available = +(this.available.substring(1).split(' ')[0]);
+                    this.amount = (available).toFixed(2);
                 } else {
-                    this.amount = this.token.balance;
+                    let available = +(this.available.split(' ')[0]);
+                    this.amount = available.toString();
+                }
+
+                if (+this.amount > available) {
+                    this.amount = available.toString();
                 }
             } else {
                 this.amount = '';
@@ -170,10 +216,30 @@ export default defineComponent({
         viewTokenContract() {
             console.log('viewTokenContract');
         },
-        goBack() {
-            this.$router.back();
+        startTransfer() {
+            const token = this.token;
+            const amount = this.finalTokenAmount;
+            const to = this.address;
+            if (this.isFormValid) {
+                ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
+                    const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
+                    if(chain_settings) {
+                        ant.config.notifySuccessfulTrxHandler(
+                            `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                        );
+                    }
+                }).catch((err) => {
+                    console.error(err);
+                    ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
+                    // TODO: verify in depth all error mesagged to know how to handle the feedback
+                    // https://github.com/telosnetwork/telos-wallet/issues/273
+                });
+            } else {
+                ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
+            }
         },
     },
+
 });
 </script>
 
@@ -307,7 +373,7 @@ export default defineComponent({
                             <q-space/>
                             <div class="col-auto q-mr-xs flex flex-column items-center justify-center"><q-icon name="local_gas_station" /></div>
                             <div class="col-auto">
-                                <div class="row text-no-wrap"> {{ gasFeeInTlos }} </div>
+                                <div class="row text-no-wrap"> {{ gasFeeInSystemSym }} </div>
                                 <div class="row text-no-wrap"> {{ gasFeeInFiat }} </div>
                             </div>
                         </div>
@@ -326,8 +392,11 @@ export default defineComponent({
                         />
                         <q-btn
                             color="primary"
-                            :label="$t('evm_wallet.send')"
                             class="wallet-btn"
+                            :label="$t('evm_wallet.send')"
+                            :loading="isLoading"
+                            :disable="!isFormValid || isLoading"
+                            @click="startTransfer"
                         />
                     </div>
                 </div>
@@ -352,6 +421,8 @@ export default defineComponent({
 
 .c-send-page {
     &__title-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -364,6 +435,8 @@ export default defineComponent({
     }
 
     &__form-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;

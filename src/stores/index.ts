@@ -1,1 +1,1 @@
-export * from 'src/stores/global';
+export * from 'src/stores/appnav';

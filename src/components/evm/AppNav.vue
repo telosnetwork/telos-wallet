@@ -4,11 +4,11 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope } from 'src/antelope';
-import { useGlobalStore } from 'src/stores';
+import { useAppNavStore } from 'src/stores';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
-const global = useGlobalStore();
+const global = useAppNavStore();
 
 export default defineComponent({
     name: 'AppNav',
@@ -25,7 +25,7 @@ export default defineComponent({
             return this.$q.screen.lt.md && !this.showBackButton;
         },
         showBackButton() {
-            return global.headerBackBtn;
+            return global.showBackBtn;
         },
         showUserInfo() {
             return !this.showBackButton;
@@ -69,11 +69,11 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
-            global.setHeaderBackBtn(false);
+            global.setShowBackBtn(false);
         },
         goBack() {
             this.$router.back();
-            global.setHeaderBackBtn(false);
+            global.setShowBackBtn(false);
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {

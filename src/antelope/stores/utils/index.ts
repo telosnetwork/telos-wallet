@@ -1,5 +1,5 @@
 export * from 'src/antelope/stores/utils/abi/signature';
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -7,6 +7,7 @@ import {
     EvmABIEntry,
 } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
+import BigNumber from 'bignumber.js';
 
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
@@ -14,8 +15,23 @@ const REVERT_PANIC_SELECTOR = '0x4e487b71';
 
 export const WEI_PRECISION = 18;
 
-export function formatWei(bn: string | number | BigNumber, tokenDecimals: number, displayDecimals = 4): string {
-    const amount = BigNumber.from(bn);
+
+export function divideBn(a: string | number, b: string | number, finaldecimals = 4): string {
+    const A = new BigNumber(a);
+    const B = new BigNumber(b);
+    const result = A.dividedBy(B).decimalPlaces(finaldecimals, BigNumber.ROUND_DOWN);
+    return result.toString();
+}
+
+export function multiplyBn(a: string | number, b: string | number, finaldecimals = 4): string {
+    const A = new BigNumber(a);
+    const B = new BigNumber(b);
+    const result = A.multipliedBy(B).decimalPlaces(finaldecimals, BigNumber.ROUND_DOWN);
+    return result.toString();
+}
+
+export function formatWei(bn: string | number | ethers.BigNumber, tokenDecimals: number, displayDecimals = 4): string {
+    const amount = ethers.BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
     // Use string, do not convert to number so we never lose precision

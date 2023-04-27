@@ -199,6 +199,7 @@ export const useChainStore = defineStore(store_name, {
         },
         // Commits ----
         setLoggedChain(network: string) {
+            this.setChain('current', network);
             this.setChain('logged', network);
         },
         setCurrentChain(network: string) {

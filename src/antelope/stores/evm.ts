@@ -168,11 +168,16 @@ export const useEVMStore = defineStore(store_name, {
                 return this.signer.sendTransaction({
                     to,
                     value,
-                }).then((transaction: ethers.providers.TransactionResponse) => {
-                    console.log(`Transaction sent: ${transaction.hash}`);
-                    return transaction;
-                }).catch((error) => {
-                    throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                }).then(
+                    (transaction: ethers.providers.TransactionResponse) => transaction,
+                ).catch((error) => {
+                    if ('ACTION_REJECTED' === ((error as {code:string}).code)) {
+                        throw new AntelopeError('antelope.evm.transaction_canceled');
+                    } else {
+                        // unknown error we print on console
+                        console.error(error);
+                        throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                    }
                 });
             } else {
                 console.error('Error sending transaction: No signer');
@@ -279,13 +284,15 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
         // utils ---
-        toWei(value: string | number, decimals: number): string {
-            const amount = typeof value === 'string' ? parseFloat(value) : value;
-            const amountInWei = (amount * Math.pow(10, decimals)).toString();
+        toWei(value: string | number, decimals = 18): string {
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), decimals.toString());
+            const amountInWei = bigAmount.toString();
             return amountInWei;
         },
-        toBigNumber(value: string): ethers.BigNumber {
-            return ethers.utils.parseEther(value);
+        toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
+            const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), dec.toString());
+            return bigAmount;
         },
         // Evm Contract Managment
         async getFunctionIface(hash:string): Promise<ethers.utils.Interface | null> {
