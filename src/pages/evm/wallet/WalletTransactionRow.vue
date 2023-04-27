@@ -5,12 +5,13 @@ import InlineSvg from 'vue-inline-svg';
 
 import { ShapedTransactionRow } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { getLongDate, prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { getLongDate } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const { fiatLocale, fiatCurrency } = useUserStore();
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;

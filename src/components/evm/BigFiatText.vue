@@ -1,7 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { prettyPrintCurrency } from 'src/antelope/stores/utils';
+
 import { useUserStore } from 'src/antelope';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 export default defineComponent({
     name: 'BigFiatText',

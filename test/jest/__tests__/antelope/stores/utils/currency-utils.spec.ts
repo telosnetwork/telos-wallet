@@ -1,13 +1,18 @@
-import { prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { BigNumber } from 'ethers';
+import { onePointOneEthInWei, oneThousandFiveHundredEthInWei } from 'test/jest/testing-helpers';
 
 describe('prettyPrintCurrency', () => {
     it('should throw when passed an invalid value', () => {
         const locale = 'en-US';
         const currency = 'USD';
 
-        // invalid decimals value
+        // invalid precision value
         expect(() => prettyPrintCurrency(1, -1, locale, false, currency)).toThrow();
         expect(() => prettyPrintCurrency(1, 0.5, locale, false, currency)).toThrow();
+
+        // trying to format BigNumber without token decimals
+        expect(() => prettyPrintCurrency(BigNumber.from(1), 1, locale, false, currency)).toThrow();
     });
 
     describe('should print values correctly when the locale is', () => {
@@ -91,5 +96,38 @@ describe('prettyPrintCurrency', () => {
                 expect(prettyPrintCurrency(-1234, 4, locale, true, currency, true)).toBe('-USD\u00A01.23K');
             });
         });
+    });
+
+    it('should trim trailing zeroes when trimZeroes is true', () => {
+        const locale = 'en-US';
+        expect(prettyPrintCurrency(0.123, 6, locale, false, undefined, undefined, undefined, true)).toBe('0.123');
+        expect(prettyPrintCurrency(1.0, 6, locale, false, undefined, undefined, undefined, true)).toBe('1');
+        expect(prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 6, locale, false, undefined, undefined, 18, true)).toBe('1.1');
+    });
+
+    it('should print correctly for BigNumber values', () => {
+        expect(
+            prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 1, 'en-US', false, undefined, undefined, 18),
+        ).toBe('1.1');
+
+        expect(
+            prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 4, 'en-US', false, undefined, undefined, 18),
+        ).toBe('1.1000');
+
+        expect(
+            prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 1, 'en-US', false, 'TLOS', undefined, 18),
+        ).toBe('1.1 TLOS');
+
+        expect(
+            prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', undefined, undefined, undefined, 18),
+        ).toBe('1,500.0000');
+
+        expect(
+            prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, undefined, undefined, 18),
+        ).toBe('1.5K');
+
+        expect(
+            prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, 'TLOS', undefined, 18),
+        ).toBe('1.5K TLOS');
     });
 });

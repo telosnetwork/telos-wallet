@@ -1,6 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
+import { parseUnits, formatUnits } from 'ethers/lib/utils';
+import { BigNumber } from 'ethers';
 
 export default defineComponent({
     name: 'InputDemos',
@@ -8,11 +10,21 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
-        currencyInputAmount: 0,
-        currencyInputSymbol: 'USD',
+        currencyInputAmount: BigNumber.from(0),
+        currencyInputSymbol: 'TLOS',
         currencyInputLocale: 'en-US',
-        currencyInputDecimals: 4,
+        currencyInputDecimals: 18, // eztodo need displaydecimals?
+        currencyInputMaxValue: 99999999,
+        currencyInputTokenDecimals: 18,
     }),
+    computed: {
+        currencyInputAmountAsNumberString() {
+            return formatUnits(this.currencyInputAmount ?? BigNumber.from(0), this.currencyInputTokenDecimals);
+        },
+        currencyInputMaxValueBn() {
+            return parseUnits(this.currencyInputMaxValue.toString(), this.currencyInputTokenDecimals);
+        },
+    },
 });
 </script>
 
@@ -45,10 +57,19 @@ export default defineComponent({
             v-model="currencyInputDecimals"
             type="number"
             step="1"
+            min="0"
             label="Decimals"
         />
         <br>
-        v-model: {{ currencyInputAmount }}
+        <q-input
+            v-model="currencyInputMaxValue"
+            type="number"
+            step="1"
+            min="0"
+            label="Max Value"
+        />
+        <br>
+        input value as number: {{ currencyInputAmountAsNumberString }}
     </div>
     <div class="col-1"></div>
     <div class="col-10">
@@ -57,6 +78,8 @@ export default defineComponent({
             :symbol="currencyInputSymbol"
             :decimals="+currencyInputDecimals"
             :locale="currencyInputLocale"
+            :max-value="currencyInputMaxValueBn"
+            label="Amount"
         />
     </div>
 </div>

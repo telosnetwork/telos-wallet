@@ -1,18 +1,21 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import {
     getDecimalSeparatorForLocale,
-    getLargeNumberSeparatorForLocale, getNumberFromLocalizedFormattedNumber,
-    getNumberOfDecimalPlaces,
+    getLargeNumberSeparatorForLocale,
+    getBigNumberFromLocalizedNumberString,
+    prettyPrintCurrency,
 } from 'src/antelope/stores/utils/currency-utils';
-import { prettyPrintCurrency } from 'src/antelope/stores/utils';
+import { BigNumber } from 'ethers';
+import { formatUnits } from 'ethers/lib/utils';
+
 
 export default defineComponent({
     name: 'CurrencyInput',
     props: {
         modelValue: {
-            type: Number,
+            type: Object as PropType<BigNumber>,
             required: true,
         },
         locale: {
@@ -21,22 +24,23 @@ export default defineComponent({
         },
         symbol: {
             type: String,
-            required: true,
+            required: true, // eztodo fiat not handled correctly
         },
         decimals: {
+            // the number of decimals used for the token. Leave undefined for fiat.
             type: Number,
-            required: true,
+            default: null,
         },
         label: {
             type: String,
             default: '',
-        },
+        }, // eztodo make computed label text with asterisk if required?
         errorText: {
             type: String,
             default: '',
         },
         maxValue: {
-            type: Number,
+            type: Object as PropType<BigNumber>,
             default: null,
         },
     },
@@ -75,17 +79,10 @@ export default defineComponent({
                 return 'This field is required'; // eztodo i18n
             }
 
-            if (+this.inputElement.value < 0) {
-                return 'Value must be positive'; // eztodo i18n
-            }
-
-            const numberOfDecimalPlaces = getNumberOfDecimalPlaces(this.inputElement.value, this.locale);
-
-            if (numberOfDecimalPlaces > this.decimals) {
-                return `Maximum precision is ${this.decimals}`;  // eztodo i18n
-            }
-
             return '';
+        },
+        prettyMaxValue() {
+            return prettyPrintCurrency(this.maxValue, 4, this.locale, false, undefined, undefined, this.decimals);
         },
         leadingZeroesRegex(): RegExp {
             const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
@@ -107,19 +104,31 @@ export default defineComponent({
         },
     },
     watch: {
-        modelValue(newValue: number, oldValue: number) {
-            if (newValue !== oldValue) {
+        modelValue(newValue: BigNumber, oldValue: BigNumber) {
+            if (newValue.eq(oldValue)) {
+                const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
                 this.setInputValue(
-                    this.prettyPrintNumber(newValue.toString()),
+                    prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals),
                 );
                 this.handleInput();
             }
         },
         locale() {
+            const decimalsToShow = this.getNumberOfDecimalsToShow(this.modelValue);
             this.setInputValue(
-                this.prettyPrintNumber(this.modelValue.toString()),
+                prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals),
             );
             this.handleInput();
+        },
+        decimals(newValue: number, oldValue: number) {
+            const inputHasDecimal = this.inputElement.value.indexOf(this.decimalSeparator) > -1;
+            if (newValue < oldValue && inputHasDecimal) {
+                let [integer, fraction] = this.inputElement.value.split(this.decimalSeparator);
+                fraction = fraction.slice(0, newValue);
+
+                this.setInputValue(`${integer}${fraction ? this.decimalSeparator : ''}${fraction}`);
+                this.handleInput();
+            }
         },
     },
     methods: {
@@ -133,8 +142,8 @@ export default defineComponent({
         handleInput() {
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
-            const emit = (val: number) => {
-                if (val !== this.modelValue) {
+            const emit = (val: BigNumber) => {
+                if (!val.eq(this.modelValue)) {
                     this.$emit('update:modelValue', val);
                 }
             };
@@ -146,6 +155,10 @@ export default defineComponent({
                     .replace(this.notIntegerOrSeparatorRegex, ''),
             );
 
+            // save caret position and number of large number separators (e.g. comma or dot) for later
+            let caretPosition = this.inputElement.selectionStart || 0;
+            const savedLargeNumberSeparatorCount = (this.inputElement.value.match(this.largeNumberSeparatorRegex) || []).length;
+
             // if input element value is zero-ish, emit 0
             if (['', null, undefined, '0', zeroWithDecimalSeparator, this.decimalSeparator].includes(this.inputElement.value)) {
                 // if the user types a decimal separator in a blank input, add a zero before the separator
@@ -153,13 +166,9 @@ export default defineComponent({
                     this.setInputValue(zeroWithDecimalSeparator);
                 }
 
-                emit(0);
+                emit(BigNumber.from(0));
                 return;
             }
-
-            // save caret position and number of large number separators (e.g. comma or dot) for later
-            let caretPosition = this.inputElement.selectionStart || 0;
-            const savedLargeNumberSeparatorCount = (this.inputElement.value.match(this.largeNumberSeparatorRegex) || []).length;
 
             // remove extraneous decimal separators not handled in keydownHandler (i.e. from pasted values)
             if ((this.inputElement.value?.match(this.decimalSeparatorRegex) ?? []).length > 1) {
@@ -172,7 +181,8 @@ export default defineComponent({
 
             // don't format or emit if the user is about to type a decimal
             if (
-                this.inputElement.value[this.inputElement.value.length - 1] === this.decimalSeparator &&
+                [this.decimalSeparator, '0'].includes(this.inputElement.value[this.inputElement.value.length - 1]) &&
+                this.inputElement.value.indexOf(this.decimalSeparator) !== -1 &&
                 caretPosition === this.inputElement.value.length
             ) {
                 return;
@@ -180,20 +190,22 @@ export default defineComponent({
 
             // workingValue is a simplified version of the input element's value, used for easier manipulation
             // e.g. if input value === '123.456.789,001', working value === '123546789.001'
-            let workingValue = getNumberFromLocalizedFormattedNumber(
+            let valueBn = getBigNumberFromLocalizedNumberString(
                 this.inputElement.value ?? '0',
+                this.decimals,
                 this.locale,
-            ).toString();
+            );
 
             // if user has typed a number larger than the max value, set input to max value
-            if (!!this.maxValue && +workingValue > this.maxValue) {
-                workingValue = this.maxValue.toString();
-                caretPosition = workingValue.length;
+            if (!!this.maxValue && valueBn.gt(this.maxValue)) {
+                valueBn = this.maxValue;
+                caretPosition = formatUnits(valueBn).length;
                 // this.triggerWiggle(); eztodo
             }
 
             // re-formatted working value, e.g. '123,456.789'
-            const formattedWorkingValue = this.prettyPrintNumber(workingValue);
+            const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
+            const formattedWorkingValue = prettyPrintCurrency(valueBn, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
 
             this.setInputValue(formattedWorkingValue);
 
@@ -205,8 +217,8 @@ export default defineComponent({
 
             this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
 
-            const valueAsNumber = getNumberFromLocalizedFormattedNumber(this.inputElement.value, this.locale);
-            emit(valueAsNumber);
+            valueBn = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+            emit(valueBn);
         },
         handleKeydown(event: KeyboardEvent) {
             const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -312,30 +324,41 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
-        prettyPrintNumber(numberString: string) {
-            // this method takes a plain number string and adds in localized separators
-            // e.g. '123456.789' => '123,456.789' for de-DE
-            const indexOfDot = numberString.indexOf('.');
-            let decimal = '';
-            let integer = '';
+        getNumberOfDecimalsToShow(valueBn: BigNumber) {
+            const valueString = formatUnits(valueBn, this.decimals).split('.')[1];
+            let decimalsToShow: number;
 
-            if (indexOfDot > -1) {
-                integer = numberString.slice(0, numberString.indexOf(this.decimalSeparator));
-                decimal = this.decimalSeparator.concat(numberString.slice(indexOfDot + 1, numberString.length));
+            if (this.inputElement.value.indexOf(this.decimalSeparator) > -1 && valueString !== '0') {
+                decimalsToShow = valueString.length;
             } else {
-                integer = numberString;
+                decimalsToShow = 0;
             }
 
-            const formattedInteger = prettyPrintCurrency(+integer, 0, this.locale);
-
-            return formattedInteger.concat(decimal);
+            return decimalsToShow;
+        },
+        focusInput() {
+            this.inputElement.focus();
         },
     },
 });
 </script>
 
 <template>
-<div class="c-currency-input">
+<div
+    :class="{
+        'c-currency-input': true,
+        'c-currency-input--error': !!visibleErrorText,
+    }"
+    @click="focusInput"
+>
+    <div class="c-currency-input__label-text">
+        {{ label }}
+    </div>
+
+    <div v-if="!!maxValue" class="c-currency-input__amount-available">
+        {{ prettyMaxValue }}
+    </div>
+
     <input
         ref="input"
         :disabled="isDisabled"
@@ -348,12 +371,71 @@ export default defineComponent({
         @keydown="handleKeydown"
         @input.stop="handleInput"
     >
+    <div class="c-currency-input__error-text">
+        {{ visibleErrorText }}
+    </div>
 </div>
 
 </template>
 
 <style lang="scss">
 .c-currency-input {
-    max-width: 250px;
+    $this: &;
+
+    width: 300px;
+    height: 56px;
+    padding: 0 12px;
+    border-radius: 4px;
+    border: 1px solid $grey-5;
+    outline: 2px solid transparent;
+    transition-property: outline-color, border-color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+    position: relative;
+    cursor: text;
+
+    &:hover {
+        border: 1px solid var(--text-color);
+    }
+
+    &:focus-within {
+        outline-color: $primary;
+        border-color: transparent;
+        //transition: outline-color 0.3s ease; //eztodo figure out how to fade this
+        //border: 2px solid $primary;
+
+        &#{$this}--error {
+            outline-color: var(--negative-muted);
+
+            #{$this}__label-text {
+                color: var(--negative-muted);
+            }
+        }
+
+        #{$this}__label-text {
+            color: $primary;
+        }
+    }
+
+    &__label-text {
+        position: absolute;
+        top: 4px;
+        color: var(--text-color-muted);
+        font-size: 12px;
+        transition: color 0.3s ease;
+    }
+
+    &__amount-available {
+        position: absolute;
+        top: -36px;
+    }
+
+    &__input {
+        border: none;
+        outline: none;
+        background: none;
+        margin-top: 24px;
+    }
+
 }
 </style>
