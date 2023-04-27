@@ -10,19 +10,21 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
-        currencyInputAmount: BigNumber.from(0),
-        currencyInputSymbol: 'TLOS',
         currencyInputLocale: 'en-US',
-        currencyInputDecimals: 18, // eztodo need displaydecimals?
-        currencyInputMaxValue: 99999999,
-        currencyInputTokenDecimals: 18,
+
+        currencyTokenInputValue: BigNumber.from('0'),
+        currencyTokenInputSymbol: 'TLOS',
+        currencyTokenInputDecimals: 18,
+        currencyTokenInputMaxValue: BigNumber.from('9'.repeat(9).concat('0'.repeat(18))), // 999.999M TLOS
+
+        currencyFiatInputValue: 0,
+        currencyFiatInputSymbol: 'USD',
+        currencyFiatInputMaxValue: 999999999, // 999.999M USD
     }),
-    computed: {
-        currencyInputAmountAsNumberString() {
-            return formatUnits(this.currencyInputAmount ?? BigNumber.from(0), this.currencyInputTokenDecimals);
-        },
-        currencyInputMaxValueBn() {
-            return parseUnits(this.currencyInputMaxValue.toString(), this.currencyInputTokenDecimals);
+    methods: {
+        updateCurrencyInputLocale(event: InputEvent) {
+            const eventTarget = event.target as HTMLInputElement;
+            this.currencyInputLocale = eventTarget.value;
         },
     },
 });
@@ -40,47 +42,35 @@ export default defineComponent({
         <h5>Currency Input</h5>
     </div>
     <div class="col-1">
-        <q-select
-            v-model="currencyInputLocale"
-            :options="['en-US', 'de-DE', 'in-IN']"
-            label="Locale"
-            color="primary"
-        />
-        <br>
-        <q-input
-            v-model="currencyInputSymbol"
-            dense
-            label="Symbol"
-        />
-        <br>
-        <q-input
-            v-model="currencyInputDecimals"
-            type="number"
-            step="1"
-            min="0"
-            label="Decimals"
-        />
-        <br>
-        <q-input
-            v-model="currencyInputMaxValue"
-            type="number"
-            step="1"
-            min="0"
-            label="Max Value"
-        />
-        <br>
-        input value as number: {{ currencyInputAmountAsNumberString }}
+        <select @input="updateCurrencyInputLocale">
+            <option value="en-US" selected>en-US</option>
+            <option value="de-DE">de-DE</option>
+            <option value="in-IN">in-IN</option>
+        </select>
     </div>
     <div class="col-1"></div>
-    <div class="col-10">
+    <div class="col-3">
         <CurrencyInput
-            v-model="currencyInputAmount"
-            :symbol="currencyInputSymbol"
-            :decimals="+currencyInputDecimals"
+            v-model="currencyTokenInputValue"
+            :symbol="currencyTokenInputSymbol"
+            :decimals="currencyTokenInputDecimals"
             :locale="currencyInputLocale"
-            :max-value="currencyInputMaxValueBn"
-            label="Amount"
+            :max-value="currencyTokenInputMaxValue"
+            label="Amount (Token)"
+            class="q-mb-xl"
         />
+        Input amount: {{ currencyTokenInputValue.toString() }} (as BigNumber)
+    </div>
+    <div class="col-3">
+        <CurrencyInput
+            v-model="currencyFiatInputValue"
+            :symbol="currencyFiatInputSymbol"
+            :locale="currencyInputLocale"
+            :max-value="currencyFiatInputMaxValue"
+            label="Amount (fiat)"
+            class="q-mb-xl"
+        />
+        Input amount: {{ currencyFiatInputValue }} (as Number)
     </div>
 </div>
 <hr>

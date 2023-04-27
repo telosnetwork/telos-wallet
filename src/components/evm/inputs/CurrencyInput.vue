@@ -15,7 +15,8 @@ export default defineComponent({
     name: 'CurrencyInput',
     props: {
         modelValue: {
-            type: Object as PropType<BigNumber>,
+            // if this is a BigNumber, the currency is treated as a token. Otherwise, it's treated as fiat.
+            type: [BigNumber, Number] as PropType<BigNumber | number>,
             required: true,
         },
         locale: {
@@ -24,10 +25,10 @@ export default defineComponent({
         },
         symbol: {
             type: String,
-            required: true, // eztodo fiat not handled correctly
+            required: true,
         },
         decimals: {
-            // the number of decimals used for the token. Leave undefined for fiat.
+            // the number of decimals used for the token. Leave undefined / value is ignored for fiat.
             type: Number,
             default: null,
         },
@@ -40,7 +41,7 @@ export default defineComponent({
             default: '',
         },
         maxValue: {
-            type: Object as PropType<BigNumber>,
+            type: [BigNumber, Number] as PropType<BigNumber | number>,
             default: null,
         },
     },
@@ -52,6 +53,7 @@ export default defineComponent({
             return this.$refs.input as HTMLInputElement;
         },
         isRequired(): boolean {
+            // if the input is required, a value of 0 is considered invalid
             return [true, 'true', 'required'].includes(this.$attrs.required as string | boolean);
         },
         isDisabled(): boolean {
@@ -59,6 +61,9 @@ export default defineComponent({
         },
         isReadonly(): boolean {
             return [true, 'true', 'readonly'].includes(this.$attrs.readonly as string | boolean);
+        },
+        isFiat() {
+            return !(this.modelValue instanceof BigNumber);
         },
         allowedCharactersRegex(): string {
             const nonNumerics = `${this.largeNumberSeparator}${this.decimalSeparator}`;
@@ -104,23 +109,26 @@ export default defineComponent({
         },
     },
     watch: {
-        modelValue(newValue: BigNumber, oldValue: BigNumber) {
-            if (newValue.eq(oldValue)) {
+        modelValue(newValue: BigNumber | number, oldValue: BigNumber | number) {
+            const newValueIsBigNumber = newValue instanceof BigNumber;
+            const newValueIsDifferent = newValueIsBigNumber ? !newValue.eq(oldValue as BigNumber) : newValue !== oldValue;
+
+            if (newValueIsDifferent) {
                 const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
-                this.setInputValue(
-                    prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals),
-                );
+                const formatted = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+
+                this.setInputValue(formatted);
                 this.handleInput();
             }
         },
         locale() {
             const decimalsToShow = this.getNumberOfDecimalsToShow(this.modelValue);
-            this.setInputValue(
-                prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals),
-            );
-            this.handleInput();
+            const formatted = prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+
+            this.setInputValue(formatted);
         },
         decimals(newValue: number, oldValue: number) {
+            // eztodo review this
             const inputHasDecimal = this.inputElement.value.indexOf(this.decimalSeparator) > -1;
             if (newValue < oldValue && inputHasDecimal) {
                 let [integer, fraction] = this.inputElement.value.split(this.decimalSeparator);
@@ -142,8 +150,11 @@ export default defineComponent({
         handleInput() {
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
-            const emit = (val: BigNumber) => {
-                if (!val.eq(this.modelValue)) {
+            const emit = (val: BigNumber | number) => {
+                const newValIsBigNumber = val instanceof BigNumber;
+                const newValIsDifferent = newValIsBigNumber ? !val.eq(this.modelValue) : val !== this.modelValue;
+
+                if (newValIsDifferent) {
                     this.$emit('update:modelValue', val);
                 }
             };
@@ -166,7 +177,7 @@ export default defineComponent({
                     this.setInputValue(zeroWithDecimalSeparator);
                 }
 
-                emit(BigNumber.from(0));
+                emit(this.isFiat ? 0 : BigNumber.from(0));
                 return;
             }
 
@@ -179,6 +190,9 @@ export default defineComponent({
                 this.setInputValue(int.concat(fractional));
             }
 
+            // eztodo bug:
+            // if user deletes the last character after a decimal, value is not updated until decimal is also deleted
+
             // don't format or emit if the user is about to type a decimal
             if (
                 [this.decimalSeparator, '0'].includes(this.inputElement.value[this.inputElement.value.length - 1]) &&
@@ -188,24 +202,42 @@ export default defineComponent({
                 return;
             }
 
-            // workingValue is a simplified version of the input element's value, used for easier manipulation
-            // e.g. if input value === '123.456.789,001', working value === '123546789.001'
-            let valueBn = getBigNumberFromLocalizedNumberString(
-                this.inputElement.value ?? '0',
-                this.decimals,
-                this.locale,
-            );
+            let formattedWorkingValue: string;
+            let newValue: BigNumber | number;
 
-            // if user has typed a number larger than the max value, set input to max value
-            if (!!this.maxValue && valueBn.gt(this.maxValue)) {
-                valueBn = this.maxValue;
-                caretPosition = formatUnits(valueBn).length;
-                // this.triggerWiggle(); eztodo
+            // eztodo maxvalue logic is not working at all
+            if (!this.isFiat) {
+                // workingValue is a simplified version of the input element's value, used for easier manipulation
+                // e.g. if input value === '123.456.789,001', working value === '123546789.001'
+                let valueBn = getBigNumberFromLocalizedNumberString(
+                    this.inputElement.value ?? '0',
+                    this.decimals,
+                    this.locale,
+                );
+
+                // if user has typed a number larger than the max value, set input to max value
+                if (!!this.maxValue && valueBn.gt(this.maxValue)) {
+                    newValue = this.maxValue;
+                    // caretPosition = formatUnits(valueBn).length; // eztodo this might be a problem
+                    // this.triggerWiggle(); eztodo
+                }
+
+                // re-formatted working value, e.g. '123,456.789'
+                const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
+                formattedWorkingValue = prettyPrintCurrency(valueBn, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+            } else {
+                const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+
+                // if user has typed a number larger than the max value, set input to max value
+                if (!!this.maxValue && valueAsNumber > this.maxValue) {
+                    newValue = this.maxValue;
+                    // caretPosition = formatUnits(valueBn).length; // eztodo this might be a problem
+                    // this.triggerWiggle(); eztodo
+                }
+
+                // re-formatted working value, e.g. '123,456.789'
+                formattedWorkingValue = prettyPrintCurrency(valueAsNumber, 2, this.locale, false, undefined, undefined, undefined, true);
             }
-
-            // re-formatted working value, e.g. '123,456.789'
-            const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
-            const formattedWorkingValue = prettyPrintCurrency(valueBn, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
 
             this.setInputValue(formattedWorkingValue);
 
@@ -217,8 +249,13 @@ export default defineComponent({
 
             this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
 
-            valueBn = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
-            emit(valueBn);
+            if (this.isFiat) {
+                newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+            } else {
+                newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+            }
+
+            emit(newValue);
         },
         handleKeydown(event: KeyboardEvent) {
             const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -264,6 +301,7 @@ export default defineComponent({
             const deletingLargeNumberSeparator = (deletingForward  && nextCharacterIsLargeNumberSeparator) ||
                 (deletingBackward && previousCharacterIsLargeNumberSeparator);
 
+
             if (deletingDecimalSeparator) {
                 const indexOfDecimalSeparator = value.indexOf(this.decimalSeparator);
                 const firstPart  = value.slice(0, indexOfDecimalSeparator);
@@ -296,7 +334,7 @@ export default defineComponent({
 
                 const keypressIsDigit = numKeys.includes(event.key);
                 const caretIsPastDecimal = caretPosition > integer.length + 1;
-                const fractionalUnderMaxLength = fractional.length < this.decimals;
+                const fractionalUnderMaxLength = fractional.length < (this.isFiat ? 2 : this.decimals);
 
                 return keypressIsDigit && caretIsPastDecimal && !fractionalUnderMaxLength;
             })();
@@ -324,12 +362,18 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
-        getNumberOfDecimalsToShow(valueBn: BigNumber) {
-            const valueString = formatUnits(valueBn, this.decimals).split('.')[1];
+        getNumberOfDecimalsToShow(value: BigNumber | number) {
+            const valueString = (typeof value === 'number' ? value.toString() : formatUnits(value, this.decimals));
+            const fraction = valueString.split('.')[1];
+
+            if (!fraction) {
+                return 0;
+            }
+
             let decimalsToShow: number;
 
-            if (this.inputElement.value.indexOf(this.decimalSeparator) > -1 && valueString !== '0') {
-                decimalsToShow = valueString.length;
+            if (this.inputElement.value.indexOf(this.decimalSeparator) > -1 && fraction !== '0') {
+                decimalsToShow = fraction.length;
             } else {
                 decimalsToShow = 0;
             }
