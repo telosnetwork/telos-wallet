@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { shallowMount } from '@vue/test-utils';
 
 const fakeBuyMoreLink = 'fake';
@@ -67,7 +68,7 @@ describe('WalletBalanceRow.vue', () => {
                     fullBalance: '3642.024318091460206147',
                 },
             },
-        });
+        } as any);
         expect(wrapper.element).toMatchSnapshot();
     });
 
@@ -90,7 +91,7 @@ describe('WalletBalanceRow.vue', () => {
                     fullBalance: '3642.024318091460206147',
                 },
             },
-        });
+        } as any);
         expect(wrapper.element).toMatchSnapshot();
     });
 
@@ -132,7 +133,7 @@ describe('WalletBalanceRow.vue', () => {
                         fullBalance: '3642.024318091460206147',
                     },
                 },
-            });
+            } as any);
 
             // snapshot contains c-wallet-balance-row__overflow-li for stake, buy, wrap, send
             expect(wrapper.element).toMatchSnapshot();
@@ -188,7 +189,7 @@ describe('WalletBalanceRow.vue', () => {
                         fullBalance: '3642.024318091460206147',
                     },
                 },
-            });
+            } as any);
 
             // snapshot contains c-wallet-balance-row__overflow-li for unstake, contract, send
             expect(wrapper.element).toMatchSnapshot();
@@ -243,7 +244,7 @@ describe('WalletBalanceRow.vue', () => {
                         fullBalance: '3642.024318091460206147',
                     },
                 },
-            });
+            } as any);
 
             // snapshot contains c-wallet-balance-row__overflow-li for unwrap, contract, send
             expect(wrapper.element).toMatchSnapshot();
@@ -299,7 +300,7 @@ describe('WalletBalanceRow.vue', () => {
                         fullBalance: '3642.024318091460206147',
                     },
                 },
-            });
+            } as any);
 
             // snapshot contains c-wallet-balance-row__overflow-li for contract, send
             expect(wrapper.element).toMatchSnapshot();
