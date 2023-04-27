@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { setActivePinia, createPinia } from 'pinia';
 
 import { useAppNavStore } from 'src/stores';
@@ -8,7 +9,7 @@ jest.mock('src/antelope/stores/feedback', () => ({
 }));
 
 
-describe('Global Pinia Store', () => {
+describe('AppNav Pinia Store', () => {
     let store: any;
 
     beforeEach(() => {

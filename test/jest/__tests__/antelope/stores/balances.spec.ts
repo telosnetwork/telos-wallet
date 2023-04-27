@@ -1,50 +1,109 @@
-/**
- * Balances: This store is responsible for managing liquid balances (both retrieving
- * and listing balances, as well as executing transfers) for the accounts set in the
- * Account store.
- *
- * To achieve this, it communicates with the Chain and Tokens stores to obtain a list of
- * known tokens within the network to which the account belongs.
- *
- * Whenever the logged account or the current account changes in the store, the
- * corresponding handlers are called to update the balances for that account and make
- * them available for local querying.
- */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ethers } from 'ethers';
+import { setActivePinia, createPinia } from 'pinia';
+import { useBalancesStore } from 'src/antelope/stores/balances';
+
+const tokenList = [{
+    address: 'address-TEST',
+    symbol: 'TEST',
+    decimals: 18,
+    tokenId: 2,
+}];
+
+const tokenSys = {
+    address: 'no-address',
+    symbol: 'TLOS',
+    decimals: 18,
+    tokenId: 1,
+};
+
+jest.mock('src/antelope/stores/evm', () => ({
+    useEVMStore: jest.fn().mockImplementation(() => ({
+        getContract: jest.fn().mockImplementation(() => ({
+            then: jest.fn().mockImplementation((cb1: any) => {
+                cb1({
+                    getContractInstance: jest.fn().mockImplementation(() => ({
+                        transfer: jest.fn(),
+                        balanceOf: jest.fn().mockImplementation(() => ({
+                            then: jest.fn().mockImplementation((cb: any) => {
+                                cb(ethers.BigNumber.from('123'.concat('1'.repeat(18))));
+                            }),
+                        })),
+                    })),
+                });
+            }),
+        })),
+        toWei: jest.fn().mockImplementation((value: any) => value),
+        sendSystemToken: jest.fn(),
+        rpcProvider: {
+            getBalance: jest.fn().mockImplementation(() => ({
+                then: jest.fn().mockImplementation((cb: any) => {
+                    cb(ethers.BigNumber.from('321'.concat('9'.repeat(18))));
+                }),
+            })),
+        },
+    })),
+}));
+
+jest.mock('src/antelope/stores/chain', () => ({
+    useChainStore: jest.fn().mockImplementation(() => ({
+        getChain: jest.fn().mockImplementation(() => ({
+            settings: {
+                isNative: jest.fn(),
+                getTokens: jest.fn(),
+                getTokenList: jest.fn().mockImplementation(() => tokenList),
+                getSystemToken: jest.fn().mockImplementation(() => tokenSys),
+                getUsdPrice: jest.fn().mockImplementation(() => 1),
+            },
+        })),
+        loggedChain: {
+            settings: {
+                isNative: jest.fn(),
+                getTokens: jest.fn(),
+                getTokenList: jest.fn().mockImplementation(() => tokenList),
+            },
+        },
+    })),
+}));
+
+jest.mock('src/antelope/stores/account', () => ({
+    useAccountStore: jest.fn().mockImplementation(() => ({
+        loggedAccount: {},
+        currentIsLogged: true,
+        sendAction: jest.fn(),
+    })),
+}));
+
+jest.mock('src/antelope/stores/feedback', () => ({
+    createTraceFunction: jest.fn().mockImplementation(() => jest.fn()),
+    useFeedbackStore: jest.fn().mockImplementation(() => ({
+        setDebug: jest.fn(),
+        setLoading: jest.fn(),
+        unsetLoading: jest.fn(),
+    })),
+    isTracingAll: jest.fn().mockImplementation(() => false),
+}));
+
+jest.mock('src/antelope', () => ({
+    getAntelope: jest.fn().mockImplementation(() => ({
+        events: {
+            onAccountChanged: {
+                subscribe: jest.fn(),
+            },
+        },
+        config: {
+            errorToStringHandler: jest.fn(),
+        },
+    })),
+}));
+
+jest.mock('src/antelope/config', () => ({
+    errorToString: jest.fn().mockImplementation(e => e),
+}));
 
 
-
-import { defineStore } from 'pinia';
-import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import {
-    createTraceFunction,
-    isTracingAll,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
-import { errorToString } from 'src/antelope/config';
-import { getAntelope } from '..';
-import {
-    AntelopeError,
-    EvmToken,
-    EvmTransactionResponse,
-    Label,
-    NativeToken,
-    NativeTransactionResponse,
-    Token,
-    TransactionResponse,
-} from 'src/antelope/types';
-import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
-import { useChainStore } from 'src/antelope/stores/chain';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useEVMStore } from 'src/antelope/stores/evm';
-import { formatWei } from 'src/antelope/stores/utils';
-import { BigNumber } from 'ethers';
-import { toRaw } from 'vue';
-
-export interface BalancesState {
-    __balances:  { [label: Label]: Token[] };
-}
-
-const store_name = 'balances';
+// This is the original code we want to test:
+/*
 
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
@@ -80,7 +139,6 @@ export const useBalancesStore = defineStore(store_name, {
                 const chain = useChainStore().getChain(label);
                 const accountStore = useAccountStore();
                 let balances: Token[] = [];
-                this.__balances[label] = this.__balances[label] ?? balances;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     if (account) {
@@ -103,7 +161,7 @@ export const useBalancesStore = defineStore(store_name, {
                                         return contractInstance.balanceOf(address).then((value: BigNumber) => {
                                             const balance = `${formatWei(value, token.decimals, 4)}`;
                                             token.balance = `${formatWei(value, token.decimals, 4)}`;
-                                            token.fullBalance = `${formatWei(value, token.decimals, token.decimals)}`;
+                                            token.fullBalance = `${formatWei(value, token.decimals)}`;
                                             // only adding balance if it is greater than 0
                                             if (parseFloat(balance) > 0) {
                                                 this.addNewBalance(label, token);
@@ -121,8 +179,9 @@ export const useBalancesStore = defineStore(store_name, {
                         });
                     }
                 }
+                this.__balances[label] = balances;
                 if (accountStore.currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
+                    this.__balances['logged'] = balances;
                 }
                 this.trace('updateBalancesForAccount', 'balances: ', balances);
 
@@ -138,12 +197,10 @@ export const useBalancesStore = defineStore(store_name, {
             if (provider) {
                 provider.getBalance(address).then(async (balance: BigNumber) => {
                     token.balance = `${formatWei(balance, token.decimals, 4)}`;
-                    token.fullBalance = `${formatWei(balance, token.decimals, token.decimals)}`;
+                    token.fullBalance = `${formatWei(balance, token.decimals)}`;
                     // only adding balance if it is greater than 0
                     if (parseFloat(token.balance) > 0) {
                         this.addNewBalance(label, token);
-                    } else {
-                        this.removeBalance(label, token);
                     }
 
                     const price = await chain_settings.getUsdPrice();
@@ -257,16 +314,46 @@ export const useBalancesStore = defineStore(store_name, {
                 this.__balances[label][index].fiatBalance = token.fiatBalance;
             }
         },
-        removeBalance(label: string, token: Token): void {
-            this.trace('removeBalance', label, token);
-            const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
-            if (index >= 0) {
-                this.__balances[label].splice(index, 1);
-            }
-        },
     },
 });
 
 const balancesInitialState: BalancesState = {
     __balances: {},
 };
+*/
+describe('Antelope Balance Store', () => {
+    let store: any;
+
+    beforeEach(() => {
+        setActivePinia(createPinia());
+        store = useBalancesStore();
+    });
+
+    test('initial state of __balances should be {}', () => {
+        expect(JSON.stringify(store.__balances)).toBe('{}');
+    });
+
+    test('updateBalancesForAccount should update __balances', async () => {
+        const label = 'label';
+        const account = { account: 'address' };
+        await store.updateBalancesForAccount(label, account);
+
+        const expected = {
+            label: [
+                {
+                    ...tokenSys,
+                    balance: '321.9999',
+                    fullBalance: '321.999999999999999999',
+                },
+                {
+                    ...tokenList[0],
+                    balance: '123.1111',
+                    fullBalance: '123.111111111111111111',
+                },
+            ],
+        };
+        expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
+    });
+
+});
+

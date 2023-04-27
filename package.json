@@ -10,7 +10,8 @@
     "build": "quasar build",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "lint:fix": "eslint --fix --ext .js,.vue src",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "q": "jest test/jest/__tests__/antelope/stores/balances.spec.ts"
   },
   "dependencies": {
     "@eosrio/hyperion-stream-client": "^0.4.0-beta.5",

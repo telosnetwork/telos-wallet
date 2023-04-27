@@ -8,7 +8,7 @@ import { useAppNavStore } from 'src/stores';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
-const global = useAppNavStore();
+const appnav = useAppNavStore();
 
 export default defineComponent({
     name: 'AppNav',
@@ -25,7 +25,7 @@ export default defineComponent({
             return this.$q.screen.lt.md && !this.showBackButton;
         },
         showBackButton() {
-            return global.showBackBtn;
+            return appnav.showBackBtn;
         },
         showUserInfo() {
             return !this.showBackButton;
@@ -69,11 +69,11 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
-            global.setShowBackBtn(false);
+            appnav.setShowBackBtn(false);
         },
         goBack() {
             this.$router.back();
-            global.setShowBackBtn(false);
+            appnav.setShowBackBtn(false);
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {

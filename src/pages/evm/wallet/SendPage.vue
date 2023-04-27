@@ -22,12 +22,13 @@ export default defineComponent({
     },
     data: () => ({
         address: '',
-        token: '',
+        token: null as EvmToken | null,
         amount: '',
-        amountInFiat: '0.00 USD',
-        gasFeeInTlos: '0.0058 TLOS',
-        gasFeeInFiat: '$0.00',
-        available: '12,845.1235 TLOS',
+        useFiat: false,
+        userStore,
+        estimatedGas: { system: '0', fiat: '0' },
+        prettyPrintBalance,
+        tempCurrentBalance: '',
     }),
     mounted() {
         global.setShowBackBtn(true);
@@ -214,7 +215,15 @@ export default defineComponent({
             }
         },
         viewTokenContract() {
-            console.log('viewTokenContract');
+            if (this.token) {
+                const explorerUrl = ant.stores.chain.loggedEvmChain?.settings.getExplorerUrl();
+                if (explorerUrl) {
+                    window.open(explorerUrl + '/address/' + this.token.address, '_blank');
+                    return;
+                } else {
+                    ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: ant.stores.chain.currentChain?.settings.getNetwork() }));
+                }
+            }
         },
         startTransfer() {
             const token = this.token;
@@ -247,7 +256,7 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-send-page__title-container">
-            <p class="c-send-page__title">Send</p>
+            <p class="c-send-page__title"> {{ $t('evm_wallet.send') }}</p>
         </div>
     </template>
 
@@ -342,9 +351,18 @@ export default defineComponent({
                         pattern="[0-9]*\.?[0-9]+"
                     >
                         <template v-slot:hint>
-                            <div class="c-send-page__amount-fiat">
-                                <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
+                            <div v-if="token && token.price > 0" class="c-send-page__amount-fiat-footer">
+                                <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
+                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
+                                    <span class="c-send-page__amount-fiat-text"> {{ amountInTokens }}</span>
+                                </div>
+                                <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
+                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
+                                    <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
+                                </div>
+                                <div class="c-send-page__amount-fiat-rate">
+                                    {{ fiatRateText }}
+                                </div>
                             </div>
                         </template>
                     </q-input>
@@ -383,13 +401,6 @@ export default defineComponent({
             <div class="c-send-page__row c-send-page__row--5 row">
                 <div class="col">
                     <div class="row justify-end">
-                        <q-btn
-                            flat
-                            color="primary"
-                            :label="$t('evm_wallet.cancel')"
-                            class="wallet-btn"
-                            @click="goBack"
-                        />
                         <q-btn
                             color="primary"
                             class="wallet-btn"
@@ -525,6 +536,10 @@ export default defineComponent({
         cursor: pointer;
         margin-top: 8px;
         color: $link-blue;
+        &--hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
     }
 
     &__view-contract-text {
@@ -542,6 +557,18 @@ export default defineComponent({
         display: flex;
         align-items: center;
         cursor: pointer;
+        flex-grow: 1;
+    }
+
+    &__amount-fiat-footer {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__amount-fiat-rate {
+        margin-top: 3px;
+        font-size: 0.9rem;
+        margin-right: -12px;
     }
 
     &__amount-fiat-icon {

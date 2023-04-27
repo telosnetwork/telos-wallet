@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { defineComponent, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import QRious from 'qrious';
 
 const props = defineProps({
