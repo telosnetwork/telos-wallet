@@ -7,7 +7,6 @@ import {
     EvmABIEntry,
 } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
-import BigNumber from 'bignumber.js';
 
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
@@ -15,19 +14,36 @@ const REVERT_PANIC_SELECTOR = '0x4e487b71';
 
 export const WEI_PRECISION = 18;
 
-
-export function divideBn(a: string | number, b: string | number, finaldecimals = 4): string {
-    const A = new BigNumber(a);
-    const B = new BigNumber(b);
-    const result = A.dividedBy(B).decimalPlaces(finaldecimals, BigNumber.ROUND_DOWN);
-    return result.toString();
+/**
+ * divideBn performs a division of two float numbers represented as strings or native numbers.
+ * @param a is the numerator expressed as a number or a string representing a number (e.g. '100000000002', '1.5' or '0.000000000000000001')
+ * @param b is the denominator expressed as a number or a string representing a number
+ * @returns a string representing the result of the division also as a float number
+ */
+export function divideBn(a: string | number, b: string | number): string {
+    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
+    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const decimals = 2 * Math.max(a_decimals, b_decimals);
+    const A = ethers.utils.parseUnits(a.toString(), decimals);
+    const B = ethers.utils.parseUnits(b.toString(), b_decimals);
+    const result = A.div(B);
+    return formatUnits(result.toString(), decimals-b_decimals);
 }
 
-export function multiplyBn(a: string | number, b: string | number, finaldecimals = 4): string {
-    const A = new BigNumber(a);
-    const B = new BigNumber(b);
-    const result = A.multipliedBy(B).decimalPlaces(finaldecimals, BigNumber.ROUND_DOWN);
-    return result.toString();
+/**
+ * multiplyBn performs a multiplication of two float numbers represented as strings or native numbers.
+ * @param a is the first factor expressed as a number or a string representing a number (e.g. '100000000002', '1.5' or '0.000000000000000001')
+ * @param b is the second factor expressed as a number or a string representing a number
+ * @returns a string representing the result of the multiplication also as a float number
+ */
+export function multiplyBn(a: string | number, b: string | number): string {
+    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
+    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const decimals = a_decimals + b_decimals;
+    const A = ethers.utils.parseUnits(a.toString(), decimals);
+    const B = ethers.utils.parseUnits(b.toString(), decimals);
+    const result = A.mul(B);
+    return formatUnits(result.toString(), decimals+decimals);
 }
 
 export function formatWei(bn: string | number | ethers.BigNumber, tokenDecimals: number, displayDecimals = 4): string {

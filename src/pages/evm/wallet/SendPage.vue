@@ -6,6 +6,7 @@ import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { divideBn, multiplyBn } from 'src/antelope/stores/utils';
+import { ethers } from 'ethers';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -80,11 +81,14 @@ export default defineComponent({
         showContractLink(): boolean {
             return !!this.token?.address;
         },
+        availableInTokens(): number {
+            return parseFloat(this.token?.balance ?? '0') - (this.token?.isSystem ? parseFloat(this.gasFeeInSystemSym) : 0);
+        },
         available(): string {
             if (this.token) {
-                let amount = parseFloat(this.token.balance) - (this.token.isSystem ? parseFloat(this.gasFeeInSystemSym) : 0);
+                let amount = this.availableInTokens;
                 if (this.useFiat) {
-                    amount = parseFloat(multiplyBn(+amount, this.token.price, 10));
+                    amount = parseFloat(multiplyBn(+amount, this.token.price));
                     amount = +amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
                 }
 
@@ -98,7 +102,8 @@ export default defineComponent({
         },
         amountInFiat(): string {
             if (this.token && this.token.price && !this.useFiat) {
-                const amount = parseFloat(multiplyBn(+this.amount, this.token.price, 10));
+                const mult = multiplyBn(+this.amount, this.token.price);
+                const amount = parseFloat(mult);
                 const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
@@ -106,7 +111,7 @@ export default defineComponent({
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = divideBn(this.amount, this.token.price, 4);
+                const veryPreciseResult = divideBn(this.amount, this.token.price);
                 return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
@@ -126,12 +131,12 @@ export default defineComponent({
                 return `(@ ${pretty} / ${this.token.symbol})`;
             }
         },
-        finalTokenAmount(): string {
+        finalTokenAmount(): ethers.BigNumber {
+            let amount = this.amount;
             if (this.useFiat && this.token) {
-                return divideBn(this.amount, this.token.price, this.token.decimals);
-            } else {
-                return this.amount;
+                amount = divideBn(this.amount, this.token.price);
             }
+            return ethers.utils.parseUnits(amount,  this.token?.decimals ?? 0);
         },
         useTextarea(): boolean {
             return this.$q.screen.width < 500;
@@ -142,8 +147,9 @@ export default defineComponent({
         },
         isAmountValid(): boolean {
             if (this.token) {
-                const amount = +this.finalTokenAmount;
-                return amount > 0 && amount <= +this.token.fullBalance;
+                const available = ethers.utils.parseUnits(this.availableInTokens.toString(),  this.token?.decimals ?? 18);
+                const amount = this.finalTokenAmount;
+                return !amount.isZero() && !amount.isNegative() && available.gte(amount);
             } else {
                 return false;
             }
@@ -186,9 +192,9 @@ export default defineComponent({
         toggleUseFiat() {
             if (this.token) {
                 if (this.useFiat) {
-                    this.amount = divideBn(this.amount, this.token.price, this.token.decimals);
+                    this.amount = divideBn(this.amount, this.token.price);
                 } else {
-                    const amount = parseFloat(multiplyBn(+this.amount, this.token.price, 10));
+                    const amount = parseFloat(multiplyBn(+this.amount, this.token.price));
                     const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
                     this.amount = fiat;
                 }

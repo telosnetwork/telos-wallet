@@ -82,7 +82,7 @@ const successfulTransactionNotification = function(link) {
 
 const failedTransactionNotification = function(message) {
     Notify.create({
-        timeout: 5000,
+        timeout: 0,
         message: html
             .replace('{svg}', crossIcon)
             .replace('{type}', 'error')

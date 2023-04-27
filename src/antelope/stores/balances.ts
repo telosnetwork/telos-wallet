@@ -153,8 +153,8 @@ export const useBalancesStore = defineStore(store_name, {
             }
             return Promise.resolve(token);
         },
-        async transferTokens(token: Token, to: string, amount: string, memo?: string): Promise<TransactionResponse> {
-            this.trace('transferTokens', token, to, amount, memo);
+        async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
+            this.trace('transferTokens', token, to, amount.toString(), memo);
             const label = 'logged';
             try {
                 useFeedbackStore().setLoading('transferTokens');
@@ -181,10 +181,10 @@ export const useBalancesStore = defineStore(store_name, {
             account: AccountModel,
             token: NativeToken,
             to: string,
-            amount: string,
+            amount: BigNumber,
             memo: string,
         ): Promise<NativeTransactionResponse> {
-            this.trace('transferNativeTokens', settings, account, token, to, amount, memo);
+            this.trace('transferNativeTokens', settings, account, token, to, amount.toString(), memo);
             try {
                 useFeedbackStore().setLoading('transferNativeTokens');
                 return useAccountStore().sendAction({
@@ -193,7 +193,7 @@ export const useBalancesStore = defineStore(store_name, {
                     data: {
                         from: account.account,
                         to,
-                        quantity: `${parseFloat(amount).toFixed(token.precision)} ${token.symbol}`,
+                        quantity: `${formatWei(amount, token.precision)} ${token.symbol}`,
                         memo,
                     },
                     actor: account.account,
@@ -211,9 +211,9 @@ export const useBalancesStore = defineStore(store_name, {
             account: AccountModel,
             token: EvmToken,
             to: string,
-            amount: string,
+            amount: BigNumber,
         ): Promise<EvmTransactionResponse> {
-            this.trace('transferEVMTokens', settings, account, token, to, amount);
+            this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
                 const evm = useEVMStore();
@@ -224,7 +224,7 @@ export const useBalancesStore = defineStore(store_name, {
                     const contract = await evm.getContract(token.address, 'erc20');
                     if (contract) {
                         const contractInstance = contract.getContractInstance();
-                        const amountInWei = evm.toWei(amount, token.decimals);
+                        const amountInWei = amount.toString();
                         return contractInstance.transfer(to, amountInWei);
                     } else {
                         throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });

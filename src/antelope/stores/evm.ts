@@ -11,7 +11,7 @@
 
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ExternalProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
@@ -158,10 +158,8 @@ export const useEVMStore = defineStore(store_name, {
 
             }
         },
-        async sendSystemToken (to: string, amount: string): Promise<EvmTransactionResponse> {
-            this.trace('sendSystemToken', to, amount);
-            // Define the amount to send
-            const value = this.toBigNumber(amount);
+        async sendSystemToken (to: string, value: BigNumber): Promise<EvmTransactionResponse> {
+            this.trace('sendSystemToken', to, value);
 
             // Send the transaction
             if (this.signer) {
