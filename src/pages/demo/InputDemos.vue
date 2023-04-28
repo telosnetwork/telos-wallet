@@ -18,11 +18,11 @@ export default defineComponent({
         currencyTokenInputValue: BigNumber.from('0'),
         currencyTokenInputSymbol: 'TLOS',
         currencyTokenInputDecimals: 18,
-        currencyTokenInputMaxValue: BigNumber.from('9'.repeat(9).concat('0'.repeat(18))), // 999.999M TLOS
+        currencyTokenInputMaxValue: BigNumber.from('9'.repeat(7).concat('0'.repeat(18))), // 9.999M TLOS
 
         currencyFiatInputValue: 0,
         currencyFiatInputSymbol: 'USD',
-        currencyFiatInputMaxValue: 999999999, // 999.999M USD
+        currencyFiatInputMaxValue: 9999999, // 9.999M USD
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
@@ -45,8 +45,8 @@ export default defineComponent({
         <h5>Currency Input</h5>
     </div>
     <div class="col-1">
-        <label>Locale:&nbsp;</label>
-        <select @input="updateCurrencyInputLocale">
+        <label>Locale:&nbsp;</label><br>
+        <select class="q-mb-md" @input="updateCurrencyInputLocale">
             <option value="en-US" selected>en-US</option>
             <option value="de-DE">de-DE</option>
             <option value="in-IN">in-IN</option>

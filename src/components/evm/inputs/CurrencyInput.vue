@@ -8,7 +8,7 @@ import {
     prettyPrintCurrency,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
-import { formatUnits } from 'ethers/lib/utils';
+import { formatUnits, Logger } from 'ethers/lib/utils';
 import ToolTip from 'components/ToolTip.vue';
 
 
@@ -206,6 +206,16 @@ export default defineComponent({
     methods: {
         setInputValue(val: string): void {
             this.inputElement.value = val;
+
+            // set the indent amount for the symbol label inside of the input
+            // numbers get 8px of width, separators like commas get 2px
+            const length = val.length;
+            const numberOfSeparators = (val.match(this.largeNumberSeparatorRegex)?.length || 0) + (val.match(this.decimalSeparatorRegex)?.length || 0);
+            const numberOfNumbers = length - numberOfSeparators;
+            const leftIndent = numberOfNumbers * 8 + numberOfSeparators * 2;
+
+            const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
+            this.$el.style.setProperty('--symbol-left', leftAmount);
         },
         setInputCaretPosition(val: number) {
             this.inputElement.selectionStart = val;
@@ -469,6 +479,7 @@ export default defineComponent({
         [$attrs.class]: true,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
+        'c-currency-input--disabled': !!inputElementAttrs.disabled,
     }"
     @click="focusInput"
 >
@@ -485,6 +496,10 @@ export default defineComponent({
         <ToolTip :text="'Click to fill max amount'" :hide-icon="true">
             {{ prettyMaxValue }}
         </ToolTip>
+    </div>
+
+    <div class="c-currency-input__symbol">
+        {{ symbol }}
     </div>
 
     <input
@@ -507,6 +522,7 @@ export default defineComponent({
 
 <style lang="scss">
 .c-currency-input {
+    --symbol-left: 28px;
     $this: &;
 
     width: 300px;
@@ -522,6 +538,10 @@ export default defineComponent({
     cursor: text;
     margin-top: 24px;
 
+    &--disabled {
+        cursor: not-allowed;
+    }
+
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
         border: 1px solid var(--text-color);
     }
@@ -529,14 +549,11 @@ export default defineComponent({
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
         outline-color: $primary;
         border-color: transparent;
-        //transition: outline-color 0.3s ease; //eztodo figure out how to fade this
-        //border: 2px solid $primary;
 
         #{$this}__label-text {
             color: $primary;
         }
     }
-
 
     &--error {
         outline-color: var(--negative-muted);
@@ -566,6 +583,13 @@ export default defineComponent({
         font-size: 12px;
     }
 
+    &__symbol {
+        font-size: 14px;
+        position: absolute;
+        top: 25px;
+        left: var(--symbol-left);
+    }
+
     &__amount-available {
         position: absolute;
         top: -24px;
@@ -573,6 +597,10 @@ export default defineComponent({
         right: 0;
         text-align: right;
         cursor: pointer;
+        color: $link-blue;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 150%;
     }
 
     &__input {
