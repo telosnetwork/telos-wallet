@@ -44,7 +44,7 @@ export default defineComponent({
             type: String,
             default: '',
         },
-        maxValue: {
+        maxValue: { // eztodo include number.max integer for fiat
             type: [BigNumber, Number] as PropType<BigNumber | number>,
             default: null,
         },
@@ -121,11 +121,45 @@ export default defineComponent({
             const newValueIsDifferent = newValueIsBigNumber ? !newValue.eq(oldValue as BigNumber) : newValue !== oldValue;
 
             if (newValueIsDifferent) {
-                const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
-                const formatted = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+                // if user has just deleted the last character before the decimal separator
+                // convert modelValue to string and check if inputValue is equal to it plus a decimal separator
+                // this is to prevent the decimal separator from being stripped if the user deletes the last character before it
 
-                this.setInputValue(formatted);
-                this.handleInput();
+                let shouldSkipFormattingAndEmitting = false;
+
+                if (newValue instanceof BigNumber) {
+                    // formatUnits always adds a decimal separator and zero if input is an integer
+                    // as such, the user has just deleted the last character before the decimal separator
+                    // if the input value is equal to the modelValue (converted from BigNumber to a number string) plus a zero
+                    const newValueAsString = formatUnits(newValue, this.decimals);
+                    const inputValue = this.inputElement.value;
+                    const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
+                    const newValueIsEqualToInputValueWithZero = newValueAsString === `${inputValue}0`;
+
+                    if (lastCharacterOfInputIsDecimalSeparator && newValueIsEqualToInputValueWithZero) {
+                        shouldSkipFormattingAndEmitting = true;
+                    }
+                } else {
+                    // if the modelValue is a number,
+                    // the user has deleted the last character before a decimal if the input value is equal
+                    // to the modelValue plus a decimal separator
+                    const newValueAsString = newValue.toString();
+                    const inputValue = this.inputElement.value;
+                    const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
+                    const newValueIsEqualToInputValueWithDecimalSeparator = inputValue === `${newValueAsString}${this.decimalSeparator}`;
+
+                    if (lastCharacterOfInputIsDecimalSeparator && newValueIsEqualToInputValueWithDecimalSeparator) {
+                        shouldSkipFormattingAndEmitting = true;
+                    }
+                }
+
+                if (!shouldSkipFormattingAndEmitting) {
+                    const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
+                    const formatted = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+
+                    this.setInputValue(formatted);
+                    this.handleInput();
+                }
             }
         },
         locale() {
@@ -197,15 +231,27 @@ export default defineComponent({
                 this.setInputValue(int.concat(fractional));
             }
 
-            // eztodo bug:
-            // if user deletes the last character after a decimal, value is not updated until decimal is also deleted
-
             // don't format or emit if the user is about to type a decimal
             if (
                 [this.decimalSeparator, '0'].includes(this.inputElement.value[this.inputElement.value.length - 1]) &&
                 this.inputElement.value.indexOf(this.decimalSeparator) !== -1 &&
                 caretPosition === this.inputElement.value.length
             ) {
+                // handle scenario where the user has just deleted the last character after a decimal separator
+                // in this case, eg. "123.4" => "123.", the value should be emitted but no further formatting should
+                // occur so as not to strip the decimal separator
+                const modelValueString = this.isFiat ? this.modelValue.toString() : formatUnits(this.modelValue, this.decimals);
+                const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === modelValueString.length - 1;
+
+                if (isDeletingLastCharacterAfterDecimal) {
+                    const emitValue = this.isFiat
+                        ? Number(this.inputElement.value.replaceAll(this.decimalSeparator, ''))
+                        : getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+                    // if the user has deleted the last number after a decimal, the value should be emitted but
+                    // no further formatting should occur
+                    emit(emitValue);
+                }
+
                 return;
             }
 
