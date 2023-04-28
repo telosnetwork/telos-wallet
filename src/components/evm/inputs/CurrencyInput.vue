@@ -573,11 +573,11 @@ export default defineComponent({
     }
 
     &--error {
-        outline-color: var(--negative-muted);
+        outline-color: $negative;
         border-color: transparent;
 
         #{$this}__label-text {
-            color: var(--negative-muted);
+            color: $negative;
         }
     }
 
@@ -596,7 +596,7 @@ export default defineComponent({
         left: 0;
         right: 0;
         text-align: right;
-        color: var(--negative-muted);
+        color: $negative;
         font-size: 12px;
     }
 
@@ -605,6 +605,10 @@ export default defineComponent({
         position: absolute;
         top: 25px;
         left: var(--symbol-left);
+
+        #{$this}--disabled & {
+            color: var(--text-color-muted);
+        }
     }
 
     &__amount-available {
