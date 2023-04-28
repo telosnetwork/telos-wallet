@@ -271,28 +271,28 @@ export default defineComponent({
                 // if user has typed a number larger than the max value, set input to max value
                 if (!!this.maxValue && valueBn.gt(this.maxValue)) {
                     newValue = this.maxValue;
-                    // caretPosition = formatUnits(valueBn).length; // eztodo this might be a problem
                     // this.triggerWiggle(); eztodo
+                    const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
+                    formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+                    caretPosition = formattedWorkingValue.length;
+                    this.setInputValue(formattedWorkingValue);
+                } else {
+                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
                 }
-
-                // re-formatted working value, e.g. '123,456.789'
-                const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
-                formattedWorkingValue = prettyPrintCurrency(valueBn, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
             } else {
                 const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
 
                 // if user has typed a number larger than the max value, set input to max value
                 if (!!this.maxValue && valueAsNumber > this.maxValue) {
                     newValue = this.maxValue;
-                    // caretPosition = formatUnits(valueBn).length; // eztodo this might be a problem
                     // this.triggerWiggle(); eztodo
+                    formattedWorkingValue = prettyPrintCurrency(newValue, 2, this.locale, false, undefined, undefined, undefined, true);
+                    caretPosition = formattedWorkingValue.length;
+                    this.setInputValue(formattedWorkingValue);
+                } else {
+                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
                 }
-
-                // re-formatted working value, e.g. '123,456.789'
-                formattedWorkingValue = prettyPrintCurrency(valueAsNumber, 2, this.locale, false, undefined, undefined, undefined, true);
             }
-
-            this.setInputValue(formattedWorkingValue);
 
             // get information needed to preserve user caret position in case commas/dots are added/removed
             const newLargeNumberSeparatorCount = (
@@ -301,12 +301,6 @@ export default defineComponent({
             const deltaLargeNumberSeparatorCount = newLargeNumberSeparatorCount - savedLargeNumberSeparatorCount;
 
             this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
-
-            if (this.isFiat) {
-                newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-            } else {
-                newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
-            }
 
             emit(newValue);
         },
