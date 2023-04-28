@@ -207,12 +207,13 @@ export default defineComponent({
         setInputValue(val: string): void {
             this.inputElement.value = val;
 
-            // set the indent amount for the symbol label inside of the input
-            // numbers get 8px of width, separators like commas get 2px
+            // set the indent amount for the symbol label inside the input
+            // 1's are 7px, other numbers are 8px, separators like commas are 2px
             const length = val.length;
             const numberOfSeparators = (val.match(this.largeNumberSeparatorRegex)?.length || 0) + (val.match(this.decimalSeparatorRegex)?.length || 0);
-            const numberOfNumbers = length - numberOfSeparators;
-            const leftIndent = numberOfNumbers * 8 + numberOfSeparators * 2;
+            const numberOfOnes = (val.match(/1/g) || []).length;
+            const numberOfOtherNumbers = length - numberOfSeparators - numberOfOnes;
+            const leftIndent = (numberOfOtherNumbers * 8) + (numberOfSeparators * 2) + (numberOfOnes * 7);
 
             const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
             this.$el.style.setProperty('--symbol-left', leftAmount);
