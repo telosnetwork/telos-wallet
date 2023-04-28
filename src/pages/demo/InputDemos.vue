@@ -11,6 +11,9 @@ export default defineComponent({
     },
     data: () => ({
         currencyInputLocale: 'en-US',
+        currencyInputIsRequired: false,
+        currencyInputIsDisabled: false,
+        currencyInputIsReadonly: false,
 
         currencyTokenInputValue: BigNumber.from('0'),
         currencyTokenInputSymbol: 'TLOS',
@@ -48,6 +51,12 @@ export default defineComponent({
             <option value="de-DE">de-DE</option>
             <option value="in-IN">in-IN</option>
         </select>
+
+        <br>
+
+        <q-checkbox v-model="currencyInputIsDisabled">Disabled?</q-checkbox>
+        <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
+        <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
     </div>
     <div class="col-1"></div>
     <div class="col-3">
@@ -57,6 +66,9 @@ export default defineComponent({
             :decimals="currencyTokenInputDecimals"
             :locale="currencyInputLocale"
             :max-value="currencyTokenInputMaxValue"
+            :disabled="currencyInputIsDisabled"
+            :readonly="currencyInputIsReadonly"
+            :required="currencyInputIsRequired"
             label="Amount (Token)"
             class="q-mb-xl"
         />
@@ -68,6 +80,9 @@ export default defineComponent({
             :symbol="currencyFiatInputSymbol"
             :locale="currencyInputLocale"
             :max-value="currencyFiatInputMaxValue"
+            :disabled="currencyInputIsDisabled"
+            :readonly="currencyInputIsReadonly"
+            :required="currencyInputIsRequired"
             label="Amount (fiat)"
             class="q-mb-xl"
         />

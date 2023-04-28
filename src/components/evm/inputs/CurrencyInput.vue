@@ -14,6 +14,7 @@ import ToolTip from 'components/ToolTip.vue';
 
 export default defineComponent({
     name: 'CurrencyInput',
+    inheritAttrs: false,
     components: {
         ToolTip,
     },
@@ -64,7 +65,29 @@ export default defineComponent({
             return [true, 'true', 'disabled'].includes(this.$attrs.disabled as string | boolean);
         },
         isReadonly(): boolean {
-            return [true, 'true', 'readonly'].includes(this.$attrs.readonly as string | boolean);
+            return [true, 'true', 'readonly'].includes(this .$attrs.readonly as string | boolean);
+        },
+        inputElementAttrs() {
+            const attrs: Record<string, string> = {
+                ...this.$attrs,
+                disabled: 'disabled',
+                readonly: 'readonly',
+                required: 'required',
+            };
+
+            if (!this.isDisabled) {
+                delete attrs.disabled;
+            }
+
+            if (!this.isReadonly) {
+                delete attrs.readonly;
+            }
+
+            if (!this.isRequired) {
+                delete attrs.required;
+            }
+
+            return attrs;
         },
         isFiat() {
             return !(this.modelValue instanceof BigNumber);
@@ -84,7 +107,8 @@ export default defineComponent({
                 return this.errorText;
             }
 
-            if (this.isRequired && this.inputElement.value === '') {
+            const modelValueIsZero = this.modelValue instanceof BigNumber ? this.modelValue.isZero() : this.modelValue === 0;
+            if (this.isRequired && modelValueIsZero) {
                 return 'This field is required'; // eztodo i18n
             }
 
@@ -140,9 +164,8 @@ export default defineComponent({
                         shouldSkipFormattingAndEmitting = true;
                     }
                 } else {
-                    // if the modelValue is a number,
-                    // the user has deleted the last character before a decimal if the input value is equal
-                    // to the modelValue plus a decimal separator
+                    // if the modelValue is a number, the user has deleted the last character before a decimal if
+                    // the input value is equal to the modelValue plus a decimal separator
                     const newValueAsString = newValue.toString();
                     const inputValue = this.inputElement.value;
                     const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
@@ -258,10 +281,7 @@ export default defineComponent({
             let formattedWorkingValue: string;
             let newValue: BigNumber | number;
 
-            // eztodo maxvalue logic is not working at all
             if (!this.isFiat) {
-                // workingValue is a simplified version of the input element's value, used for easier manipulation
-                // e.g. if input value === '123.456.789,001', working value === '123546789.001'
                 let valueBn = getBigNumberFromLocalizedNumberString(
                     this.inputElement.value ?? '0',
                     this.decimals,
@@ -443,14 +463,17 @@ export default defineComponent({
 
 <template>
 <div
+    :id="$attrs.id"
     :class="{
         'c-currency-input': true,
+        [$attrs.class]: true,
         'c-currency-input--error': !!visibleErrorText,
+        'c-currency-input--readonly': !!inputElementAttrs.readonly,
     }"
     @click="focusInput"
 >
     <div class="c-currency-input__label-text">
-        {{ label }}
+        {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
     <div
@@ -466,12 +489,11 @@ export default defineComponent({
 
     <input
         ref="input"
-        :disabled="isDisabled"
-        :readonly="isReadonly"
+        v-bind="inputElementAttrs"
+        :pattern="`${allowedCharactersRegex}*`"
         class="c-currency-input__input"
         type="text"
         placeholder="0"
-        :pattern="`${allowedCharactersRegex}*`"
         inputmode="decimal"
         @keydown="handleKeydown"
         @input.stop="handleInput"
@@ -500,26 +522,28 @@ export default defineComponent({
     cursor: text;
     margin-top: 24px;
 
-    &:hover {
+    &:hover:not(#{$this}--readonly):not(#{$this}--error) {
         border: 1px solid var(--text-color);
     }
 
-    &:focus-within {
+    &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
         outline-color: $primary;
         border-color: transparent;
         //transition: outline-color 0.3s ease; //eztodo figure out how to fade this
         //border: 2px solid $primary;
 
-        &#{$this}--error {
-            outline-color: var(--negative-muted);
-
-            #{$this}__label-text {
-                color: var(--negative-muted);
-            }
-        }
-
         #{$this}__label-text {
             color: $primary;
+        }
+    }
+
+
+    &--error {
+        outline-color: var(--negative-muted);
+        border-color: transparent;
+
+        #{$this}__label-text {
+            color: var(--negative-muted);
         }
     }
 
@@ -529,6 +553,17 @@ export default defineComponent({
         color: var(--text-color-muted);
         font-size: 12px;
         transition: color 0.3s ease;
+    }
+
+    &__error-text {
+        position: absolute;
+        bottom: -24px;
+        width: 100%;
+        left: 0;
+        right: 0;
+        text-align: right;
+        color: var(--negative-muted);
+        font-size: 12px;
     }
 
     &__amount-available {
