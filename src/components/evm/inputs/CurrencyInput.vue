@@ -302,7 +302,7 @@ export default defineComponent({
                 // if user has typed a number larger than the max value, set input to max value
                 if (!!this.maxValue && valueBn.gt(this.maxValue)) {
                     newValue = this.maxValue;
-                    // this.triggerWiggle(); eztodo
+                    this.triggerWiggle();
                     const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
                     formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
                     caretPosition = formattedWorkingValue.length;
@@ -316,7 +316,7 @@ export default defineComponent({
                 // if user has typed a number larger than the max value, set input to max value
                 if (!!this.maxValue && valueAsNumber > this.maxValue) {
                     newValue = this.maxValue;
-                    // this.triggerWiggle(); eztodo
+                    this.triggerWiggle();
                     formattedWorkingValue = prettyPrintCurrency(newValue, 2, this.locale, false, undefined, undefined, undefined, true);
                     caretPosition = formattedWorkingValue.length;
                     this.setInputValue(formattedWorkingValue);
@@ -468,6 +468,12 @@ export default defineComponent({
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },
+        triggerWiggle() {
+            this.$el.classList.add('c-currency-input--wiggle');
+        },
+        handleWiggleEnd() {
+            this.$el.classList.remove('c-currency-input--wiggle');
+        },
     },
 });
 </script>
@@ -476,13 +482,15 @@ export default defineComponent({
 <div
     :id="$attrs.id"
     :class="{
-        'c-currency-input': true,
         [$attrs.class]: true,
+        'c-currency-input': true,
+        'c-currency-input--wiggle': false,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
         'c-currency-input--disabled': !!inputElementAttrs.disabled,
     }"
     @click="focusInput"
+    @animationend="handleWiggleEnd"
 >
     <div class="c-currency-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
@@ -539,9 +547,9 @@ export default defineComponent({
     cursor: text;
     margin-top: 24px;
 
-    &--disabled {
-        cursor: not-allowed;
-    }
+    animation-duration: 350ms;
+    animation-iteration-count: 1;
+    animation-timing-function: linear;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
         border: 1px solid var(--text-color);
@@ -554,6 +562,14 @@ export default defineComponent({
         #{$this}__label-text {
             color: $primary;
         }
+    }
+
+    &--wiggle {
+        animation-name: wiggle;
+    }
+
+    &--disabled {
+        cursor: not-allowed;
     }
 
     &--error {
@@ -611,5 +627,26 @@ export default defineComponent({
         margin-top: 24px;
     }
 
+    @keyframes wiggle {
+        0% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-4px);
+        }
+
+        50% {
+            transform: translateX(4px);
+        }
+
+        75% {
+            transform: translateX(-4px);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
 }
 </style>
