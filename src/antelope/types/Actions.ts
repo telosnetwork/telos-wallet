@@ -120,6 +120,8 @@ export type AccountDetails = {
     total_actions: number;
 };
 
+// TODO: review this TokenBalance and Token interfaces ingeneral to be more EVM/Native Agnostic
+// https://github.com/telosnetwork/telos-wallet/issues/280
 export interface TokenBalance {
     amount: number; // do we need this?
     value: string;  // string value simplified to 4 decimal places - no formating

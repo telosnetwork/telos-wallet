@@ -78,7 +78,7 @@ export default class EvmContract {
         }
         const signer = this.manager.getSigner();
         if (!this.contract || signer) {
-            this.contract = new ethers.Contract(this.address, this.abi, signer ?? this.manager.getRpcProvider());
+            this.contract = new ethers.Contract(this.address, this.abi, signer);
         }
         return this.contract;
     }

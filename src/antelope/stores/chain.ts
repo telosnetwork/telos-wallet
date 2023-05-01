@@ -74,10 +74,7 @@ export interface ChainModel {
 
 export interface EvmChainModel {
     apy: string;
-    gasPrice: {
-        wei: ethers.BigNumber;
-        gwei: string;
-    },
+    gasPrice: ethers.BigNumber;
     settings: EVMChainSettings;
     tokens: EvmToken[];
 }
@@ -95,10 +92,7 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
         tokens: [],
     } as ChainModel;
     if (!isNative) {
-        (model as EvmChainModel).gasPrice = {
-            wei: ethers.BigNumber.from(0),
-            gwei: '0',
-        };
+        (model as EvmChainModel).gasPrice = ethers.BigNumber.from(0);
     }
     return model;
 };
@@ -168,11 +162,7 @@ export const useChainStore = defineStore(store_name, {
             try {
                 if (!chain.settings.isNative()) {
                     const wei = await (chain.settings as EVMChainSettings).getGasPrice();
-                    const gwei = wei.div(1000000000).toNumber().toFixed(2);
-                    (chain as EvmChainModel).gasPrice = {
-                        wei,
-                        gwei,
-                    };
+                    (chain as EvmChainModel).gasPrice = wei;
                 }
             } catch (error) {
                 console.error(error);

@@ -142,6 +142,8 @@ export const useBalancesStore = defineStore(store_name, {
                     token.fiatBalance = `${parseFloat(token.balance) * price}`;
                     token.price = price;
                 });
+            } else {
+                console.error('No provider');
             }
             return Promise.resolve(token);
         },

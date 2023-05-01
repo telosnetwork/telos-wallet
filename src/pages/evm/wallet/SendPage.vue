@@ -5,7 +5,7 @@ import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
-import { divideBn, multiplyBn } from 'src/antelope/stores/utils';
+import { divideFloat, multiplyFloat } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
@@ -117,7 +117,7 @@ export default defineComponent({
         },
         amountInFiat(): string {
             if (this.token && this.token.price && !this.useFiat) {
-                const mult = multiplyBn(this.amount, this.token.price);
+                const mult = multiplyFloat(this.amount, this.token.price);
                 const amount = ethers.utils.parseUnits(mult, this.token.decimals);
                 const fiat = `${formatWei(amount, this.token.decimals, 2)}`;
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
@@ -126,7 +126,7 @@ export default defineComponent({
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = divideBn(this.amount, this.token.price);
+                const veryPreciseResult = divideFloat(this.amount, this.token.price);
                 return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
@@ -149,7 +149,7 @@ export default defineComponent({
         finalTokenAmount(): ethers.BigNumber {
             let amount = this.amount;
             if (this.useFiat && this.token) {
-                amount = divideBn(this.amount, this.token.price);
+                amount = divideFloat(this.amount, this.token.price);
             }
             return ethers.utils.parseUnits(amount,  this.token?.decimals ?? 0);
         },
@@ -207,9 +207,9 @@ export default defineComponent({
         toggleUseFiat() {
             if (this.token) {
                 if (this.useFiat) {
-                    this.amount = divideBn(this.amount, this.token.price);
+                    this.amount = divideFloat(this.amount, this.token.price);
                 } else {
-                    this.amount = multiplyBn(this.amount, this.token.price);
+                    this.amount = multiplyFloat(this.amount, this.token.price);
                     const amount = ethers.utils.parseUnits(this.amount, this.token.decimals);
                     this.amount = `${formatWei(amount, this.token.decimals, 2)}`;
                 }
