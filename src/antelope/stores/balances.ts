@@ -37,7 +37,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
 
 export interface BalancesState {
@@ -229,6 +229,35 @@ export const useBalancesStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
         },
+        // sorting ----------
+        splitTokensBasedOnHasFiatValue(tokens: EvmToken[]): [EvmToken[], EvmToken[]] {
+            const tokenHasFiatValue = (token: EvmToken) => !!token.fiatBalance;
+
+            const sortByFiatValue = (t1: EvmToken, t2: EvmToken) => {
+                const fiatValueOne = ethers.utils.parseUnits(t1.fiatBalance ?? '0', t1.decimals);
+                const fiatValueTwo = ethers.utils.parseUnits(t2.fiatBalance ?? '0', t2.decimals);
+                return fiatValueOne.gt(fiatValueTwo) ? -1 : 1;
+            };
+
+            const sortByTokenBalance = (t1: EvmToken, t2: EvmToken) => t1.balanceBn.gt(t2.balanceBn) ? -1 : 1;
+
+            const tokensWithFiatValue   = tokens.filter(token => tokenHasFiatValue(token)).sort(sortByFiatValue);
+            const tokensWithNoFiatValue = tokens.filter(token => !tokenHasFiatValue(token)).sort(sortByTokenBalance);
+
+            // always show all tokens with fiat values before all tokens without
+            return [tokensWithFiatValue, tokensWithNoFiatValue];
+        },
+        sortBalances(label: string): void {
+            this.trace('sortBalances', label);
+            // TODO: refactor this to be EVM agnostic
+            // https://github.com/telosnetwork/telos-wallet/issues/280
+            const allTokens = this.__balances[label] as EvmToken[];
+            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(allTokens);
+            this.__balances[label] = [
+                ...tokensWithFiatValue,
+                ...tokensWithoutFiatValue,
+            ];
+        },
         // commits -----
         addNewBalance(label: string, balance: Token): void {
             this.trace('addNewBalance', label, balance);
@@ -237,6 +266,7 @@ export const useBalancesStore = defineStore(store_name, {
                 this.updateBalance(label, balance);
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
+                this.sortBalances(label);
                 if (useAccountStore().currentIsLogged && label === 'current') {
                     this.__balances['logged'] = this.__balances[label];
                 }
@@ -250,6 +280,7 @@ export const useBalancesStore = defineStore(store_name, {
                 this.__balances[label][index].fullBalance = token.fullBalance;
                 this.__balances[label][index].price = token.price;
                 this.__balances[label][index].fiatBalance = token.fiatBalance;
+                this.sortBalances(label);
                 if (useAccountStore().currentIsLogged && label === 'current') {
                     this.__balances['logged'] = this.__balances[label];
                 }
