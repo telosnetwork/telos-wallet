@@ -23,21 +23,17 @@ export function getLargeNumberSeparatorForLocale(locale: string) {
     return nonDigitCharacters[0];
 }
 
-export function getNumberOfDecimalPlaces(amount: string | number, locale: string) {
-    const amountString = typeof amount === 'string' ? amount : amount.toString();
-    const decimalSeparator = getDecimalSeparatorForLocale(locale);
-
-    // Check if the number has a decimal part
-    const decimalIndex = amountString.indexOf(decimalSeparator);
-    if (decimalIndex === -1) {
-        return 0;
-    }
-
-    // Count the number of digits after the decimal point
-    const decimalPart = amountString.slice(decimalIndex + 1);
-    const numberOfDecimalPlaces = decimalPart.replace(/\D+/g, '').length;
-    return numberOfDecimalPlaces;
-}
+// export function convertFiatToTokens() {
+//
+// }
+//
+// export function convertTokensToFiat() {
+//
+// }
+//
+// export function convertTokensToTokens(sourceTokenAmount: BigNumber, sourceDecimals: number, destinationDecimals: number, conversionRate: number) {
+//     const sourceAmount
+// }
 
 export function getBigNumberFromLocalizedNumberString(formatted: string, decimals: number, locale: string): BigNumber {
     const decimalSeparator = getDecimalSeparatorForLocale(locale);
@@ -164,4 +160,39 @@ export function prettyPrintCurrency(
 
         return finalFormattedValue;
     }
+}
+
+
+// eztodo jsdocs
+export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionRate: number) {
+    if (!Number.isInteger(tokenOneDecimals) || tokenOneDecimals <= 0) {
+        throw 'Token one decimals must be a positive integer or zero';
+    }
+
+    if (!Number.isInteger(tokenTwoDecimals) || tokenTwoDecimals <= 0) {
+        throw 'Token two decimals must be a positive integer or zero';
+    }
+
+    if (conversionRate <= 0) {
+        throw 'Conversion rate must be greater than zero';
+    }
+
+    if (tokenOneAmount.lt(0)) {
+        throw 'Token one amount must be positive';
+    }
+
+    const tenBn = BigNumber.from(10);
+    const scaledConversionRate = BigNumber.from(conversionRate * 10e12);
+
+    // normalize amount to 18 decimals
+    const normalizedAmount = tokenOneAmount.mul(tenBn.pow((18 - tokenOneDecimals) || 0));
+
+    // multiply amount by conversion rate
+    const normalizedScaledAmountTwo = normalizedAmount.mul(scaledConversionRate);
+
+    // denormalize from 18 decimals to tokenTwoDecimals
+    const denormalizedScaledAmountTwo = normalizedScaledAmountTwo.div(tenBn.pow((18 - tokenTwoDecimals) || 0));
+
+    // remove conversion rate scaling
+    return denormalizedScaledAmountTwo.div(tenBn.pow(13));
 }

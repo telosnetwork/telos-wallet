@@ -5,27 +5,34 @@ import {
     getDecimalSeparatorForLocale,
     getLargeNumberSeparatorForLocale,
     getBigNumberFromLocalizedNumberString,
-    prettyPrintCurrency,
+    prettyPrintCurrency, convertCurrency,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
-import { formatUnits, Logger } from 'ethers/lib/utils';
+import { formatUnits, Logger, parseUnits } from 'ethers/lib/utils';
 import ToolTip from 'components/ToolTip.vue';
+import InlineSvg from 'vue-inline-svg';
 
 
 export default defineComponent({
     name: 'CurrencyInput',
     inheritAttrs: false,
     components: {
+        InlineSvg,
         ToolTip,
     },
     props: {
         modelValue: {
             // if this is a BigNumber, the currency is treated as a token. Otherwise, it's treated as fiat.
+            // note that modelValue always represents the primary currency,
+            // e.g. if the modelValue (primary currency) is in TLOS, the emitted value will be the BigNumber amount of
+            // TLOS (not the secondary currency, e.g. USD), even if the user has 'swapped' to enter USD
+            // If the modelValue is a number, the primary currency is treated as fiat, and thus the emitted value will
+            // always be a number (not a BigNumber).
+            // This is to say that the 'swap' functionality does not change the behavior of modelValue, it only
+            // changes the way the user sees and enters the value.
+            // also note that the secondary currency may be either fiat or token, depending on the presence of
+            // the secondaryCurrencyDecimals prop
             type: [BigNumber, Number] as PropType<BigNumber | number>,
-            required: true,
-        },
-        locale: {
-            type: String,
             required: true,
         },
         symbol: {
@@ -36,6 +43,28 @@ export default defineComponent({
             // the number of decimals used for the token. Leave undefined / value is ignored for fiat.
             type: Number,
             default: null,
+        },
+        secondaryCurrencyConversionFactor: {
+            // pertains to the optional 'swap' amount under the input.
+            // only needed when there is a swappable secondary value, ignored otherwise.
+            // this represents the conversion factor between the primary and secondary amounts,
+            // e.g. if 1 TLOS = 0.20 USD, and the modelValue is in TLOS, the conversion factor is 0.20
+            type: Number,
+            default: null,
+        },
+        secondaryCurrencySymbol: {
+            // symbol used for the secondary currency
+            type: String,
+            default: '',
+        },
+        secondaryCurrencyDecimals: {
+            // the number of decimals used for the secondary currency. Leave undefined / value is ignored for fiat.
+            type: Number,
+            default: null,
+        },
+        locale: {
+            type: String,
+            required: true,
         },
         label: {
             type: String,
@@ -53,6 +82,10 @@ export default defineComponent({
     emits: [
         'update:modelValue',
     ],
+    data: () => ({
+        swapIcon: require('src/assets/icon--swap.svg'),
+        swapCurrencies: false, // whether the user has clicked the swap button
+    }),
     computed: {
         inputElement(): HTMLInputElement {
             return this.$refs.input as HTMLInputElement;
@@ -91,6 +124,75 @@ export default defineComponent({
         },
         isFiat() {
             return !(this.modelValue instanceof BigNumber);
+        },
+        hasSwappableCurrency() {
+            return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencySymbol;
+        },
+        secondaryCurrencyIsFiat() {
+            return this.hasSwappableCurrency && this.secondaryCurrencyDecimals === null;
+        },
+        secondaryCurrencyAmount(): BigNumber | number {
+            if (!this.hasSwappableCurrency) {
+                return 0;
+            }
+
+            if (this.secondaryCurrencyIsFiat && typeof this.modelValue === 'number') {
+                // two fiat values
+                return this.secondaryCurrencyConversionFactor * Number(this.modelValue);
+            } else if (this.secondaryCurrencyIsFiat && this.modelValue instanceof BigNumber) {
+                const converted = convertCurrency(
+                    this.modelValue as BigNumber,
+                    this.decimals,
+                    2,
+                    this.secondaryCurrencyConversionFactor,
+                );
+
+                return +formatUnits(converted, 2);
+            } else if (!this.secondaryCurrencyIsFiat && typeof this.modelValue === 'number') {
+                const modelAsBigNumber = parseUnits(this.modelValue.toString(), 2);
+                return convertCurrency(
+                    modelAsBigNumber,
+                    2,
+                    this.secondaryCurrencyDecimals,
+                    this.secondaryCurrencyConversionFactor,
+                );
+            } else {
+                // !this.secondaryCurrencyIsFiat && this.modelValue instanceof BigNumber
+                return convertCurrency(
+                    this.modelValue as BigNumber,
+                    this.decimals,
+                    this.secondaryCurrencyDecimals,
+                    this.secondaryCurrencyConversionFactor,
+                );
+            }
+        },
+        prettySecondaryValue() {
+            if (!this.hasSwappableCurrency) {
+                return '';
+            }
+
+            let amount: string;
+            let symbol: string;
+
+            if (!this.swapCurrencies) {
+                symbol = this.secondaryCurrencySymbol;
+
+                if (!this.secondaryCurrencyIsFiat) {
+                    amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 4, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
+                } else {
+                    amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 2, this.locale);
+                }
+            } else {
+                symbol = this.symbol;
+
+                if (this.modelValue instanceof BigNumber) {
+                    amount = prettyPrintCurrency(this.modelValue, 4, this.locale, false, undefined, undefined, this.decimals);
+                } else {
+                    amount = prettyPrintCurrency(this.modelValue, 2, this.locale);
+                }
+            }
+
+            return `${amount} ${symbol}`;
         },
         allowedCharactersRegex(): string {
             const nonNumerics = `${this.largeNumberSeparator}${this.decimalSeparator}`;
@@ -223,6 +325,7 @@ export default defineComponent({
             this.inputElement.selectionEnd = val;
         },
         handleInput() {
+            // eztodo need to handle secondary value in input
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
             const emit = (val: BigNumber | number) => {
@@ -508,7 +611,7 @@ export default defineComponent({
     </div>
 
     <div class="c-currency-input__symbol">
-        {{ symbol }}
+        {{ swapCurrencies ? secondaryCurrencySymbol : symbol }}
     </div>
 
     <input
@@ -522,6 +625,15 @@ export default defineComponent({
         @keydown="handleKeydown"
         @input.stop="handleInput"
     >
+    <div v-if="hasSwappableCurrency" class="c-currency-input__currency-switcher" @click="swapCurrencies = !swapCurrencies">
+        <InlineSvg
+            :src="swapIcon"
+            class="c-currency-input__swap-icon"
+            aria-hidden="true"
+        />
+        {{ prettySecondaryValue }}
+    </div>
+
     <div class="c-currency-input__error-text">
         {{ visibleErrorText }}
     </div>
@@ -587,6 +699,22 @@ export default defineComponent({
         color: var(--text-color-muted);
         font-size: 12px;
         transition: color 0.3s ease;
+    }
+
+    &__currency-switcher {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+
+    &__swap-icon {
+        path {
+            fill: $primary;
+        }
     }
 
     &__error-text {

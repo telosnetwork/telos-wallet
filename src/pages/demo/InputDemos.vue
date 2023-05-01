@@ -4,6 +4,8 @@ import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import { parseUnits, formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
+const maxTlos = BigNumber.from('9'.repeat(7).concat('0'.repeat(18))); // 9.999M TLOS
+
 export default defineComponent({
     name: 'InputDemos',
     components: {
@@ -18,11 +20,20 @@ export default defineComponent({
         currencyTokenInputValue: BigNumber.from('0'),
         currencyTokenInputSymbol: 'TLOS',
         currencyTokenInputDecimals: 18,
-        currencyTokenInputMaxValue: BigNumber.from('9'.repeat(7).concat('0'.repeat(18))), // 9.999M TLOS
+        currencyTokenInputMaxValue: maxTlos,
 
         currencyFiatInputValue: 0,
         currencyFiatInputSymbol: 'USD',
         currencyFiatInputMaxValue: 9999999, // 9.999M USD
+        currencyInputSecondaryValue: '',
+
+        currencySwappableInputValue: BigNumber.from('0'),
+        currencySwappableInputSymbol: 'TLOS',
+        currencySwappableInputDecimals: 18,
+        currencySwappableInputSecondarySymbol: 'USD',
+        currencySwappableInputSecondaryDecimals: 2,
+        currencySwappableInputConversionRate : 0.2,
+        currencySwappableInputMaxValue: maxTlos,
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
@@ -87,6 +98,23 @@ export default defineComponent({
             class="q-mb-xl"
         />
         Input amount: {{ currencyFiatInputValue }} (as Number)
+    </div>
+    <div class="col-3">
+        <CurrencyInput
+            v-model="currencySwappableInputValue"
+            :symbol="currencySwappableInputSymbol"
+            :decimals="currencySwappableInputDecimals"
+            :secondary-currency-symbol="currencySwappableInputSecondarySymbol"
+            :secondary-currency-conversion-factor="currencySwappableInputConversionRate"
+            :max-value="currencySwappableInputMaxValue"
+            :locale="currencyInputLocale"
+            :disabled="currencyInputIsDisabled"
+            :readonly="currencyInputIsReadonly"
+            :required="currencyInputIsRequired"
+            label="Amount (fiat)"
+            class="q-mb-xl"
+        />
+        Input amount: {{ currencySwappableInputValue.toString() }} (as BigNumber)
     </div>
 </div>
 <hr>
