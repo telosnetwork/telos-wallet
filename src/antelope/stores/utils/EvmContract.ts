@@ -72,7 +72,6 @@ export default class EvmContract {
         return this.creationInfo.creator;
     }
 
-    // getContractInstance(signerOrProvider: ethers.providers.Provider | ethers.Signer | undefined = undefined, createNew = false) {
     getContractInstance() {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');

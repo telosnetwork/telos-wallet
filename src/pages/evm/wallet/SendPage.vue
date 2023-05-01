@@ -164,9 +164,6 @@ export default defineComponent({
             if (this.token) {
                 const available = this.availableInTokensBn;
                 const amount = this.finalTokenAmount;
-                if (!available.gte(amount)) {
-                    console.log('available', available.toString(), 'amount', amount.toString());
-                }
                 return !amount.isZero() && !amount.isNegative() && available.gte(amount);
             } else {
                 return false;
