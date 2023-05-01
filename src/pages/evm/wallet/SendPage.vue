@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
-import { prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
+import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { divideBn, multiplyBn } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
@@ -27,7 +27,7 @@ export default defineComponent({
         amount: '',
         useFiat: false,
         userStore,
-        estimatedGas: { system: '0', fiat: '0' },
+        estimatedGas: { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) },
         prettyPrintBalance,
         tempCurrentBalance: '',
     }),
@@ -64,10 +64,12 @@ export default defineComponent({
     computed: {
         gasFeeInSystemSym() {
             const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
-            return prettyPrintBalance(this.estimatedGas.system, userStore.fiatLocale, this.isMobile, symbol);
+            const gas = `${formatWei(this.estimatedGas.system, 18, 18)}`;
+            return prettyPrintBalance(gas, userStore.fiatLocale, this.isMobile, symbol);
         },
         gasFeeInFiat() {
-            return prettyPrintFiatBalance(this.estimatedGas.fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+            const gasFiat = `${formatWei(this.estimatedGas.fiat, 18, 18)}`;
+            return prettyPrintFiatBalance(gasFiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
         },
         getSystemToken(): Token {
             return this.balances[0];
@@ -81,17 +83,30 @@ export default defineComponent({
         showContractLink(): boolean {
             return !!this.token?.address;
         },
-        availableInTokens(): number {
-            return parseFloat(this.token?.balance ?? '0') - (this.token?.isSystem ? parseFloat(this.gasFeeInSystemSym) : 0);
+        availableInTokensBn(): ethers.BigNumber {
+            const zero = ethers.BigNumber.from(0);
+            if (!this.token) {
+                return zero;
+            }
+            if (!this.token.balanceBn) {
+                return zero;
+            }
+            return this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
         },
-        available(): string {
+        availableInFiatBn(): ethers.BigNumber {
+            const zero = ethers.BigNumber.from(0);
+            if (!this.token) {
+                return zero;
+            }
+            const decimals = this.token.decimals;
+            const tokensBn = this.availableInTokensBn;
+            const priceBn = ethers.utils.parseUnits(this.token.price.toString(), decimals);
+            return tokensBn.mul(priceBn).div(ethers.utils.parseUnits('1', decimals));
+        },
+        availableDisplay(): string {
             if (this.token) {
-                let amount = this.availableInTokens;
-                if (this.useFiat) {
-                    amount = parseFloat(multiplyBn(+amount, this.token.price));
-                    amount = +amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
-                }
-
+                const decimals = this.token.decimals;
+                const amount = `${formatWei(this.useFiat ? this.availableInFiatBn : this.availableInTokensBn, decimals, decimals)}`;
                 if (this.useFiat) {
                     return prettyPrintFiatBalance(amount, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
                 } else {
@@ -102,9 +117,9 @@ export default defineComponent({
         },
         amountInFiat(): string {
             if (this.token && this.token.price && !this.useFiat) {
-                const mult = multiplyBn(+this.amount, this.token.price);
-                const amount = parseFloat(mult);
-                const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
+                const mult = multiplyBn(this.amount, this.token.price);
+                const amount = ethers.utils.parseUnits(mult, this.token.decimals);
+                const fiat = `${formatWei(amount, this.token.decimals, 2)}`;
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
             return '';
@@ -147,8 +162,11 @@ export default defineComponent({
         },
         isAmountValid(): boolean {
             if (this.token) {
-                const available = ethers.utils.parseUnits(this.availableInTokens.toString(),  this.token?.decimals ?? 18);
+                const available = this.availableInTokensBn;
                 const amount = this.finalTokenAmount;
+                if (!available.gte(amount)) {
+                    console.log('available', available.toString(), 'amount', amount.toString());
+                }
                 return !amount.isZero() && !amount.isNegative() && available.gte(amount);
             } else {
                 return false;
@@ -186,7 +204,7 @@ export default defineComponent({
                     this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
                 }
             } else {
-                this.estimatedGas = { system: '0', fiat: '0' };
+                this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
             }
         },
         toggleUseFiat() {
@@ -194,9 +212,9 @@ export default defineComponent({
                 if (this.useFiat) {
                     this.amount = divideBn(this.amount, this.token.price);
                 } else {
-                    const amount = parseFloat(multiplyBn(+this.amount, this.token.price));
-                    const fiat = amount.toFixed(10).substring(0, amount.toFixed(10).indexOf('.') + 3);
-                    this.amount = fiat;
+                    this.amount = multiplyBn(this.amount, this.token.price);
+                    const amount = ethers.utils.parseUnits(this.amount, this.token.decimals);
+                    this.amount = `${formatWei(amount, this.token.decimals, 2)}`;
                 }
             }
 
@@ -204,17 +222,10 @@ export default defineComponent({
         },
         setAllBalance() {
             if (this.token) {
-                let available = +(this.available.split(' ')[0]);
                 if (this.useFiat) {
-                    const available = +(this.available.substring(1).split(' ')[0]);
-                    this.amount = (available).toFixed(2);
+                    this.amount = `${formatWei(this.availableInFiatBn, this.token.decimals, 2)}`;
                 } else {
-                    let available = +(this.available.split(' ')[0]);
-                    this.amount = available.toString();
-                }
-
-                if (+this.amount > available) {
-                    this.amount = available.toString();
+                    this.amount = `${formatWei(this.availableInTokensBn, this.token.decimals, 4)}`;
                 }
             } else {
                 this.amount = '';
@@ -286,7 +297,7 @@ export default defineComponent({
                 <q-space/>
                 <div class="col-auto">
                     <span class="c-send-page__amount-available" @click="setAllBalance">
-                        {{ $t('evm_wallet.amount_available', { amount:available }) }}
+                        {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                     </span>
                 </div>
             </div>
@@ -339,7 +350,7 @@ export default defineComponent({
                         <q-space/>
                         <div class="col-auto">
                             <span class="c-send-page__amount-available" @click="setAllBalance">
-                                {{ $t('evm_wallet.amount_available', { amount:available }) }}
+                                {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                             </span>
                         </div>
                     </div>

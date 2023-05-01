@@ -13,8 +13,6 @@ import {
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 import { ethers } from 'ethers';
-import { formatWei } from 'src/antelope/stores/utils';
-
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -183,10 +181,14 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(results => results.data.tokens as unknown as {chainId:number, logoURI: string}[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
             .then(tokens => tokens.map(t => ({
+                ...t,
+                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
+            })))
+            .then(tokens => tokens.map(t => ({
                 // Token Id - '<symbol>-<address>-<chainId>'
                 tokenId: `${(t as EvmToken).symbol}-${(t as EvmToken).address}-${t.chainId}`,
-                // defaults values
-                logo: t.logoURI ?? require('src/assets/logo--tlos.svg'),
+                // defaults value
+                logo: t.logoURI,
                 isNative: false,
                 isSystem: false,
                 price: 0,
@@ -241,11 +243,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }).then(response => ethers.BigNumber.from(response.result));
     }
 
-    async getEstimatedGas(limit: number): Promise<{ system:string, fiat:string }> {
-        const gasPrice = await this.getGasPrice();
-        const tokenPrice = await this.getUsdPrice();
-        const system = formatWei(gasPrice.mul(limit), 18, 4);
-        const fiat = (parseFloat(system) * tokenPrice).toFixed(2);
+    async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
+        const gasPrice: ethers.BigNumber = await this.getGasPrice();
+        const tokenPrice: number = await this.getUsdPrice();
+        const price = ethers.utils.parseUnits(tokenPrice.toString(), 18);
+        const system = gasPrice.mul(limit);
+        const fiatDouble = system.mul(price);
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
         return { system, fiat };
     }
     async getLatestBlock(): Promise<ethers.BigNumber> {

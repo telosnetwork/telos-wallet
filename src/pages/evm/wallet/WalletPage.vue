@@ -9,6 +9,7 @@ import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
+import { ethers } from 'ethers';
 
 export default defineComponent({
     name: 'WalletPage',
@@ -46,6 +47,7 @@ export default defineComponent({
                 isSystem: false,
                 price: 0,
                 fiatBalance: '',
+                balanceBn: ethers.BigNumber.from(0),
             };
 
             const chainToken: EvmToken = {
@@ -114,6 +116,7 @@ export default defineComponent({
                 isSystem: false,
                 price: 0,
                 fiatBalance: '',
+                balanceBn: ethers.BigNumber.from(0),
             };
 
             return [{

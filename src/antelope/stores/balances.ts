@@ -78,18 +78,15 @@ export const useBalancesStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('updateBalancesForAccount');
                 const chain = useChainStore().getChain(label);
-                const accountStore = useAccountStore();
-                let balances: Token[] = [];
-                this.__balances[label] = this.__balances[label] ?? balances;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     if (account) {
-                        balances = await chain_settings.getTokens(account?.account);
+                        this.__balances[label] = await chain_settings.getTokens(account?.account);
                     }
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account) {
-                        // we take the whole list of tokens and add the system token to the beginning
+                        this.__balances[label] = this.__balances[label] ?? [];
                         const evm = useEVMStore();
                         const tokens = await chain_settings.getTokenList();
                         this.updateSystemBalanceForAccount(label, account.account);
@@ -100,13 +97,14 @@ export const useBalancesStore = defineStore(store_name, {
                                     try {
                                         const contractInstance = contract.getContractInstance();
                                         const address = account.account;
-                                        return contractInstance.balanceOf(address).then((value: BigNumber) => {
-                                            const balance = `${formatWei(value, token.decimals, 4)}`;
-                                            token.balance = `${formatWei(value, token.decimals, 4)}`;
-                                            token.fullBalance = `${formatWei(value, token.decimals, token.decimals)}`;
-                                            // only adding balance if it is greater than 0
-                                            if (parseFloat(balance) > 0) {
+                                        return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
+                                            token.balanceBn = balanceBn;
+                                            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+                                            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+                                            if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
                                                 this.addNewBalance(label, token);
+                                            } else {
+                                                this.removeBalance(label, token);
                                             }
                                         });
                                     } catch (e) {
@@ -121,11 +119,6 @@ export const useBalancesStore = defineStore(store_name, {
                         });
                     }
                 }
-                if (accountStore.currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
-                }
-                this.trace('updateBalancesForAccount', 'balances: ', balances);
-
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             }
@@ -136,16 +129,15 @@ export const useBalancesStore = defineStore(store_name, {
             const provider = toRaw(evm.rpcProvider);
             const token = chain_settings.getSystemToken();
             if (provider) {
-                provider.getBalance(address).then(async (balance: BigNumber) => {
-                    token.balance = `${formatWei(balance, token.decimals, 4)}`;
-                    token.fullBalance = `${formatWei(balance, token.decimals, token.decimals)}`;
-                    // only adding balance if it is greater than 0
-                    if (parseFloat(token.balance) > 0) {
+                provider.getBalance(address).then(async (balanceBn: BigNumber) => {
+                    token.balanceBn = balanceBn;
+                    token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+                    token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+                    if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
                         this.addNewBalance(label, token);
                     } else {
                         this.removeBalance(label, token);
                     }
-
                     const price = await chain_settings.getUsdPrice();
                     token.fiatBalance = `${parseFloat(token.balance) * price}`;
                     token.price = price;
@@ -245,6 +237,9 @@ export const useBalancesStore = defineStore(store_name, {
                 this.updateBalance(label, balance);
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
+                if (useAccountStore().currentIsLogged && label === 'current') {
+                    this.__balances['logged'] = this.__balances[label];
+                }
             }
         },
         updateBalance(label: string, token: Token): void {
@@ -255,6 +250,9 @@ export const useBalancesStore = defineStore(store_name, {
                 this.__balances[label][index].fullBalance = token.fullBalance;
                 this.__balances[label][index].price = token.price;
                 this.__balances[label][index].fiatBalance = token.fiatBalance;
+                if (useAccountStore().currentIsLogged && label === 'current') {
+                    this.__balances['logged'] = this.__balances[label];
+                }
             }
         },
         removeBalance(label: string, token: Token): void {
@@ -262,6 +260,9 @@ export const useBalancesStore = defineStore(store_name, {
             const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
                 this.__balances[label].splice(index, 1);
+            }
+            if (useAccountStore().currentIsLogged && label === 'current') {
+                this.__balances['logged'] = this.__balances[label];
             }
         },
     },

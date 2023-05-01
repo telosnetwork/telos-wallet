@@ -1,4 +1,5 @@
 import { API } from '@greymass/eosio';
+import { ethers } from 'ethers';
 
 export interface ActionData {
     actions: Action[];
@@ -138,6 +139,7 @@ export interface Token {
     price: number;
     amount?: number;
     balance: string;
+    balanceBn: ethers.BigNumber;
     fullBalance: string;
     fiatBalance: string;
 }
