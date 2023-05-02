@@ -145,7 +145,8 @@ export default defineComponent({
                     label="Amount (USD/TLOS)"
                     class="q-mb-xl"
                 />
-                <!-- eztodo updat styling to not need mb -->
+                <!-- eztodo update styling to not need mb -->
+                <!--eztodo add inputs to test other combos of fiat and token-->
                 Input amount: {{ currencyUsdTlosInputValue }} (as number)
             </div>
         </div>
