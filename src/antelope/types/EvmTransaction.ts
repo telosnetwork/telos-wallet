@@ -1,13 +1,19 @@
 import { ethers } from 'ethers';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 
-export interface EvmTransaction {
+export interface BasicTransaction {
+    from: string;
+    to: string;
+    value: string;
+    data: string;
+}
+
+export interface EvmTransaction extends BasicTransaction{
     block: number;
     block_hash: string;
     charged_gas_price: number;
     createdaddr: string;
     epoch: number;
-    from: string;
     gas_limit: number;
     gas_price: number;
     gasused: number;
@@ -22,10 +28,8 @@ export interface EvmTransaction {
     r: string;
     s: string;
     status: number;
-    to: string;
     trx_index: number;
     v: string;
-    value: string;
     parsed: boolean;
     isParsed?: boolean;
     isTransfer?: boolean;

@@ -1,19 +1,19 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
-import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
-import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { getAntelope, useChainStore, useEVMStore, useFeedbackStore, useUserStore } from 'src/antelope';
+import { BasicTransaction, EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { divideFloat, multiplyFloat } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
 
-const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
 
 const ant = getAntelope();
 const userStore = useUserStore();
 const chainStore = useChainStore();
+const feedback = useFeedbackStore();
 const global = useAppNavStore();
 
 export default defineComponent({
@@ -197,19 +197,58 @@ export default defineComponent({
             }
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferTokens');
+            return feedback.isLoading('transferTokens');
+        },
+        isLoadingGasEstimation(): boolean {
+            return feedback.isLoading('SendPage.getEstimatedGasLimit');
         },
     },
     methods: {
-        // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
-        // https://github.com/telosnetwork/telos-wallet/issues/274
+        async getEstimatedGasLimit(isSystemToken: boolean): Promise<ethers.BigNumber> {
+            const chain_settings = chainStore.loggedEvmChain?.settings;
+            if (!this.token || !chain_settings) {
+                console.error('Unexpectd error: no token or chain settings');
+                return ethers.BigNumber.from(0);
+            }
+
+            feedback.setLoading('SendPage.getEstimatedGasLimit');
+
+            // preparing dummie transfer
+            const someaddress = ant.stores.account.loggedEvmAccount?.address ?? '';
+            const from = someaddress;
+            const to = someaddress;
+            const amountToSend = ethers.utils.parseUnits('1', 18);
+            const transaction: BasicTransaction = {
+                from: from,
+                to: to,
+                value: amountToSend.toHexString(),
+                data: '0x',
+            };
+
+            if (!isSystemToken) {
+                const abi = ant.stores.evm.getTokenABI('erc20');
+                const contract = await ant.stores.evm.getContractFromAbi(this.token?.address, abi);
+                const transferFunction = contract.interface.encodeFunctionData('transfer', [to, amountToSend]);
+                transaction.data = transferFunction;
+            }
+
+            return chain_settings.getEstimatedGasLimit(transaction).then((gasLimit) => {
+                feedback.unsetLoading('SendPage.getEstimatedGasLimit');
+                return gasLimit;
+            }).catch((error) => {
+                console.error('Error getting gas limit: ', error);
+                feedback.unsetLoading('SendPage.getEstimatedGasLimit');
+                return ethers.BigNumber.from(0);
+            });
+        },
+
         async updateEstimatedGas() {
             const chain_settings = chainStore.loggedEvmChain?.settings;
             if (chain_settings)  {
                 if (this.token?.isSystem) {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(await this.getEstimatedGasLimit(true));
                 } else {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(await this.getEstimatedGasLimit(false));
                 }
             } else {
                 this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
@@ -411,7 +450,10 @@ export default defineComponent({
                 <q-space/>
                 <div class="col-auto">
                     <div class="c-send-page__gas-fee">
-                        <div class="row c-send-page__gas-fee-title text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
+                        <div class="row c-send-page__gas-fee-title text-no-wrap">
+                            <q-spinner v-if="isLoadingGasEstimation" size="20px" color="primary" />
+                            {{ $t('evm_wallet.estimated_fees') }}
+                        </div>
                         <div class="row c-send-page__gas-fee-info">
                             <q-space/>
                             <div class="col-auto q-mr-xs flex flex-column items-center justify-center"><q-icon name="local_gas_station" /></div>
@@ -618,6 +660,9 @@ export default defineComponent({
         font-size: 0.85rem;
         font-weight: 600;
         text-transform: uppercase;
+        .q-spinner {
+            margin-right: 4px;
+        }
     }
 }
 </style>
