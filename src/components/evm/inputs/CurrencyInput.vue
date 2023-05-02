@@ -167,6 +167,8 @@ export default defineComponent({
             }
         },
         prettySecondaryValue() {
+            // eztodo abbreviate large values using viters function
+
             if (!this.hasSwappableCurrency) {
                 return '';
             }
@@ -219,6 +221,7 @@ export default defineComponent({
         prettyMaxValue() {
             let symbol: string;
             let amount: string;
+
             if (this.swapCurrencies) {
                 const precision = this.secondaryCurrencyIsFiat ? 2 : 4;
                 const maxValueBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
@@ -259,7 +262,6 @@ export default defineComponent({
         },
     },
     watch: {
-        // eztodo add watch for swapCurrencies
         modelValue(newValue: BigNumber | number, oldValue: BigNumber | number) {
             const newValueIsBigNumber = newValue instanceof BigNumber;
             const newValueIsDifferent = newValueIsBigNumber ? !newValue.eq(oldValue as BigNumber) : newValue !== oldValue;
@@ -349,18 +351,6 @@ export default defineComponent({
             }
 
             this.setInputValue(newInputValue);
-
-
-            // const savedValue = this.inputElement.value;
-
-            // const decimalsToShow = this.getNumberOfDecimalsToShow(this.secondaryCurrencyAmount);
-            // const formatted = prettyPrintCurrency(this.secondaryCurrencyAmount, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2, true);
-
-            // this.$nextTick(() => {
-            //     this.setInputValue(savedValue);
-            //     debugger;
-            // });
-            // this.setInputValue(formatted);
         },
     },
     methods: {
@@ -385,7 +375,6 @@ export default defineComponent({
             this.inputElement.selectionEnd = val;
         },
         handleInput() {
-            // eztodo need to handle secondary value in input
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
             const emit = (val: BigNumber | number) => {
@@ -494,41 +483,93 @@ export default defineComponent({
                 return;
             }
 
-            let formattedWorkingValue: string;
+            let formattedWorkingValue: string; // eztodo represents what?
             let newValue: BigNumber | number;
 
-            if (!this.isFiat) {
-                let valueBn = getBigNumberFromLocalizedNumberString(
-                    this.inputElement.value ?? '0',
-                    this.decimals,
-                    this.locale,
-                );
+            //eztodo simplify instanceof bignumber statements using isFiat stuff
 
-                // if user has typed a number larger than the max value, set input to max value
-                if (!!this.maxValue && valueBn.gt(this.maxValue)) {
-                    newValue = this.maxValue;
-                    this.triggerWiggle();
-                    const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
-                    formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
-                    caretPosition = formattedWorkingValue.length;
-                    this.setInputValue(formattedWorkingValue);
+            // eztodo comment for this block
+            // eztodo try to simplify this block
+            // eztodo disable maxamount and swap buttons if disabled or readonly; style text too
+            // eztodo breaks when entering a token amount if main amount is fiat
+            if (this.swapCurrencies) {
+                if (!this.secondaryCurrencyIsFiat) {
+                    // currencies are swapped and secondary currency is a BigNumber
+                    const secondaryValueBn = getBigNumberFromLocalizedNumberString(
+                        this.inputElement.value ?? '0',
+                        this.secondaryCurrencyDecimals,
+                        this.locale,
+                    );
+
+                    const valueInPrimaryCurrencyBn = convertCurrency(secondaryValueBn, this.secondaryCurrencyDecimals, this.decimals ?? 2, this.secondaryCurrencyConversionFactor);
+
+                    if (!!this.maxValue && valueInPrimaryCurrencyBn.gt(this.maxValue)) {
+                        // user has entered a value larger than the max value; set input value to max, show visual feedback
+                        newValue = this.maxValue;
+                        this.triggerWiggle();
+                        const decimalsToShow = this.getNumberOfDecimalsToShow(secondaryValueBn);
+                        formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals, true);
+                        caretPosition = formattedWorkingValue.length;
+                        this.setInputValue(formattedWorkingValue);
+                    } else {
+                        newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
+                    }
                 } else {
-                    const decimals = this.swapCurrencies ? this.secondaryCurrencyDecimals : this.decimals;
-                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, decimals ?? 2, this.locale);
+                    // debugger;
+                    // currencies are swapped and secondary currency is a number
+                    const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+
+                    // eztodo handle maxvalue is undefined
+                    const maxValueAsNumber = typeof this.maxValue === 'number' ? this.maxValue : Number(formatUnits(this.maxValue, this.decimals ?? 2));
+
+                    // if user has typed a number larger than the max value, set input to max value
+                    if (!!this.maxValue && valueAsNumber > maxValueAsNumber) {
+                        // debugger;
+                        newValue = this.maxValue;
+                        this.triggerWiggle();
+                        const maxValueInPrimaryCurrencyBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
+                        const maxValueInSecondaryCurrencyBn = convertCurrency(maxValueInPrimaryCurrencyBn, this.decimals ?? 2, this.secondaryCurrencyDecimals ?? 2, this.secondaryCurrencyConversionFactor);
+
+                        formattedWorkingValue = prettyPrintCurrency(maxValueInSecondaryCurrencyBn, 2, this.locale, false, undefined, undefined, this.decimals ?? 2, true);
+                        caretPosition = formattedWorkingValue.length;
+                        this.setInputValue(formattedWorkingValue);
+                    } else {
+                        newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+                    }
                 }
             } else {
-                // eztodo handle secondary amount in this block
-                const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+                if (!this.isFiat) {
+                    let valueBn = getBigNumberFromLocalizedNumberString(
+                        this.inputElement.value ?? '0',
+                        this.decimals,
+                        this.locale,
+                    );
 
-                // if user has typed a number larger than the max value, set input to max value
-                if (!!this.maxValue && valueAsNumber > this.maxValue) {
-                    newValue = this.maxValue;
-                    this.triggerWiggle();
-                    formattedWorkingValue = prettyPrintCurrency(newValue, 2, this.locale, false, undefined, undefined, undefined, true);
-                    caretPosition = formattedWorkingValue.length;
-                    this.setInputValue(formattedWorkingValue);
+                    // if user has typed a number larger than the max value, set input to max value
+                    if (!!this.maxValue && valueBn.gt(this.maxValue)) {
+                        newValue = this.maxValue;
+                        this.triggerWiggle();
+                        const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
+                        formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+                        caretPosition = formattedWorkingValue.length;
+                        this.setInputValue(formattedWorkingValue);
+                    } else {
+                        newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+                    }
                 } else {
-                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+                    // eztodo handle secondary amount in this block
+                    const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+
+                    // if user has typed a number larger than the max value, set input to max value
+                    if (!!this.maxValue && valueAsNumber > this.maxValue) {
+                        newValue = this.maxValue;
+                        this.triggerWiggle();
+                        formattedWorkingValue = prettyPrintCurrency(newValue, 2, this.locale, false, undefined, undefined, undefined, true);
+                        caretPosition = formattedWorkingValue.length;
+                        this.setInputValue(formattedWorkingValue);
+                    } else {
+                        newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
+                    }
                 }
             }
 
@@ -681,12 +722,17 @@ export default defineComponent({
             let formattedMaxValue: string;
 
             if (this.swapCurrencies) {
-
+                const precision = this.getNumberOfDecimalsToShow(this.secondaryCurrencyAmount);
+                const decimals = this.secondaryCurrencyIsFiat ? 2 : this.secondaryCurrencyDecimals;
+                const maxValueBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
+                const maxValueInSecondaryCurrency = convertCurrency(maxValueBn, this.decimals ?? 2, this.secondaryCurrencyDecimals ?? 2, this.secondaryCurrencyConversionFactor);
+                formattedMaxValue = prettyPrintCurrency(maxValueInSecondaryCurrency, precision, this.locale, false, undefined, undefined, decimals, true);
             } else {
                 const precision = this.getNumberOfDecimalsToShow(this.maxValue);
-                const decimals = this.isFiat ? undefined : this.decimals;
+                const decimals = this.isFiat ? undefined : (this.decimals ?? 2);
                 formattedMaxValue = prettyPrintCurrency(this.maxValue, precision, this.locale, undefined, undefined, undefined, decimals, true);
             }
+
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },
