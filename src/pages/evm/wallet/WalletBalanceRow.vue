@@ -44,20 +44,10 @@ export default defineComponent({
             return !this.token.logoURI;
         },
         tokenBalanceFiat(): number | null {
-            // https://github.com/telosnetwork/telos-wallet/issues/179
-            //     get this.token fiat balance; if no fiat balance available, return null
-            //     if tokenBalanceFiat cannot be computed / mapped from store getter, move to data and
-            //     set in async created()
-            if (this.token.symbol === 'STLOS') {
-                return 456789123.67;
-            } else if (this.token.symbol === 'TLOS') {
-                return 0;
-            } else {
-                return 12345.67;
-            }
+            return this.tokenHasFiatValue ? parseFloat(this.token.fiatBalance) : null;
         },
         tokenHasFiatValue(): boolean {
-            return !['SHIB', 'SHIB2'].includes(this.token.symbol);
+            return !!this.token.fiatBalance;
         },
         truncatePrimaryValue(): boolean {
             const isMobile = this.$q.screen.lt.sm;
@@ -86,13 +76,11 @@ export default defineComponent({
             }
         },
         fiatRateText(): string {
-            // https://github.com/telosnetwork/telos-wallet/issues/179
-            //     get actual conversion rate
-            if (!this.tokenHasFiatValue) {
+            if (!this.tokenBalanceFiat) {
                 return '';
             }
 
-            const fiatAmount = 0.7732;
+            const fiatAmount = this.token.price;
             const pretty = prettyPrintCurrency(
                 fiatAmount,
                 4,
