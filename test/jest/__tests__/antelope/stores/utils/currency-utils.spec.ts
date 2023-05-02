@@ -168,6 +168,7 @@ describe('convertCurrency', () => {
         const onePointFiveUsdt = 1500000;
         const twoHundredThirtyFiveUsdt = 235000000;
         const onePointOneTwoFiveSevenThreeUsdt = 1125730;
+        const oneUsd = 100;
 
         const conversionRateFromTlosToUsdt = 0.2; // 1 USDT = 0.2 TLOS
         const conversionFactorFromUsdtToTlos = 5; // 5 TLOS = 1 USDT
@@ -207,6 +208,11 @@ describe('convertCurrency', () => {
         const onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn = convertCurrency(BigNumber.from(onePointOneTwoFiveSevenThreeUsdt), usdtDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
         const onePointOneTwoFiveSevenThreeUsdtConvertedToTlos = formatUnits(onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn, tlosDecimals);
         expect(onePointOneTwoFiveSevenThreeUsdtConvertedToTlos).toBe('5.62865');
+
+        // USD used the same conversion factor as USDT in this example
+        const oneUsdConvertedToTlosBn = convertCurrency(BigNumber.from(oneUsd), usdDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const oneUsdConvertedToTlos = formatUnits(oneUsdConvertedToTlosBn, tlosDecimals);
+        expect(oneUsdConvertedToTlos).toBe('5.0');
 
         // sanity check - one wei should be preserved
         const tinyTlosConvertedToOtherBn = convertCurrency(BigNumber.from('1'), tlosDecimals, tlosDecimals, 3);

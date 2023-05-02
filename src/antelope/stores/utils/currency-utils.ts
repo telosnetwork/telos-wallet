@@ -158,6 +158,8 @@ export function prettyPrintCurrency(
             finalFormattedValue += ` ${currency}`;
         }
 
+        // debugger;
+
         return finalFormattedValue;
     }
 }

@@ -217,10 +217,27 @@ export default defineComponent({
             return '';
         },
         prettyMaxValue() {
-            const precision = this.isFiat ? 2 : 4;
-            const amount = prettyPrintCurrency(this.maxValue, precision, this.locale, false, undefined, undefined, this.decimals);
+            let symbol: string;
+            let amount: string;
+            if (this.swapCurrencies) {
+                const precision = this.secondaryCurrencyIsFiat ? 2 : 4;
+                const maxValueBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
+                const maxValueInSecondaryCurrency = convertCurrency(
+                    maxValueBn,
+                    this.decimals ?? 2,
+                    this.secondaryCurrencyDecimals ?? 2,
+                    this.secondaryCurrencyConversionFactor,
+                );
 
-            return `${amount} ${this.symbol} Available`; // eztodo i18n
+                amount = prettyPrintCurrency(maxValueInSecondaryCurrency, precision, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2);
+                symbol = this.secondaryCurrencySymbol;
+            } else {
+                const precision = this.isFiat ? 2 : 4;
+                amount = prettyPrintCurrency(this.maxValue, precision, this.locale, false, undefined, undefined, this.decimals ?? 2);
+                symbol = this.symbol;
+            }
+
+            return `${amount} ${symbol} Available`; // eztodo i18n
         },
         leadingZeroesRegex(): RegExp {
             const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
@@ -242,6 +259,7 @@ export default defineComponent({
         },
     },
     watch: {
+        // eztodo add watch for swapCurrencies
         modelValue(newValue: BigNumber | number, oldValue: BigNumber | number) {
             const newValueIsBigNumber = newValue instanceof BigNumber;
             const newValueIsDifferent = newValueIsBigNumber ? !newValue.eq(oldValue as BigNumber) : newValue !== oldValue;
@@ -279,10 +297,25 @@ export default defineComponent({
                 }
 
                 if (!shouldSkipFormattingAndEmitting) {
+                    let newInputValue: string;
                     const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
-                    const formatted = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
 
-                    this.setInputValue(formatted);
+                    if (this.swapCurrencies) {
+                        const newValueBn = newValue instanceof BigNumber ? newValue : parseUnits(newValue.toString(), this.secondaryCurrencyDecimals ?? 2);
+
+                        const newValueInSecondaryCurrency = convertCurrency(
+                            newValueBn,
+                            this.decimals ?? 2,
+                            this.secondaryCurrencyDecimals ?? 2,
+                            this.secondaryCurrencyConversionFactor,
+                        );
+
+                        newInputValue = prettyPrintCurrency(newValueInSecondaryCurrency, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2, true);
+                    } else {
+                        newInputValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals ?? 2, true);
+                    }
+
+                    this.setInputValue(newInputValue);
                     this.handleInput();
                 }
             }
@@ -304,6 +337,31 @@ export default defineComponent({
                 this.handleInput();
             }
         },
+        swapCurrencies(showSecondaryCurrency: boolean) {
+            let newInputValue: string;
+
+            if (showSecondaryCurrency) {
+                const decimalsToShow = this.secondaryCurrencyIsFiat ? 2 : 4;
+                newInputValue = prettyPrintCurrency(this.secondaryCurrencyAmount, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2);
+            } else {
+                const decimalsToShow = this.isFiat ? 2 : 4;
+                newInputValue = prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals ?? 2);
+            }
+
+            this.setInputValue(newInputValue);
+
+
+            // const savedValue = this.inputElement.value;
+
+            // const decimalsToShow = this.getNumberOfDecimalsToShow(this.secondaryCurrencyAmount);
+            // const formatted = prettyPrintCurrency(this.secondaryCurrencyAmount, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2, true);
+
+            // this.$nextTick(() => {
+            //     this.setInputValue(savedValue);
+            //     debugger;
+            // });
+            // this.setInputValue(formatted);
+        },
     },
     methods: {
         setInputValue(val: string): void {
@@ -315,7 +373,9 @@ export default defineComponent({
             const numberOfSeparators = (val.match(this.largeNumberSeparatorRegex)?.length || 0) + (val.match(this.decimalSeparatorRegex)?.length || 0);
             const numberOfOnes = (val.match(/1/g) || []).length;
             const numberOfOtherNumbers = length - numberOfSeparators - numberOfOnes;
-            const leftIndent = (numberOfOtherNumbers * 8) + (numberOfSeparators * 2) + (numberOfOnes * 7);
+            const leftIndent = Math.ceil((numberOfOtherNumbers * 8.5) + (numberOfSeparators * 2) + (numberOfOnes * 7));
+
+            // eztodo tweak this
 
             const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
             this.$el.style.setProperty('--symbol-left', leftAmount);
@@ -329,11 +389,46 @@ export default defineComponent({
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
             const emit = (val: BigNumber | number) => {
-                const newValIsBigNumber = val instanceof BigNumber;
-                const newValIsDifferent = newValIsBigNumber ? !val.eq(this.modelValue) : val !== this.modelValue;
+                let newValIsDifferent: boolean;
+
+                if (this.swapCurrencies) {
+                    // val is the secondary currency amount; convert to primary currency and check against modelValue
+                    const modelValueAsBigNumber = this.modelValue instanceof BigNumber ? this.modelValue : parseUnits(this.modelValue.toString(), this.decimals);
+                    const newSecondaryAmountAsBigNumber = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
+                    const newSecondaryConvertedToPrimary = convertCurrency(newSecondaryAmountAsBigNumber, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryCurrencyConversionFactor);
+
+                    newValIsDifferent = !modelValueAsBigNumber.eq(newSecondaryConvertedToPrimary);
+                } else {
+                    const newValIsBigNumber = val instanceof BigNumber;
+                    newValIsDifferent = newValIsBigNumber ? !val.eq(this.modelValue) : val !== this.modelValue;
+                }
 
                 if (newValIsDifferent) {
-                    this.$emit('update:modelValue', val);
+                    if (this.swapCurrencies) {
+                        // val is the secondary currency amount; convert to primary currency and emit
+                        let valueBn;
+                        if (val instanceof BigNumber) {
+                            valueBn = val;
+                        } else {
+                            valueBn = parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
+                        }
+
+                        // conversion rate is from primary to secondary, so we need to invert it for secondary to primary
+                        const secondaryToPrimaryConversionRate = 1 / this.secondaryCurrencyConversionFactor;
+                        const secondaryConvertedToPrimary = convertCurrency(valueBn, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, secondaryToPrimaryConversionRate);
+
+                        let emitValue;
+
+                        if (this.modelValue instanceof BigNumber) {
+                            emitValue = secondaryConvertedToPrimary;
+                        } else {
+                            emitValue = parseFloat(formatUnits(secondaryConvertedToPrimary, this.decimals));
+                        }
+
+                        this.$emit('update:modelValue', emitValue);
+                    } else {
+                        this.$emit('update:modelValue', val);
+                    }
                 }
             };
 
@@ -377,8 +472,15 @@ export default defineComponent({
                 // handle scenario where the user has just deleted the last character after a decimal separator
                 // in this case, eg. "123.4" => "123.", the value should be emitted but no further formatting should
                 // occur so as not to strip the decimal separator
-                const modelValueString = this.isFiat ? this.modelValue.toString() : formatUnits(this.modelValue, this.decimals);
-                const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === modelValueString.length - 1;
+                let valueString: string;
+
+                if (this.swapCurrencies) {
+                    valueString = this.secondaryCurrencyIsFiat ? this.secondaryCurrencyAmount.toString() : formatUnits(this.secondaryCurrencyAmount, this.secondaryCurrencyDecimals ?? 2);
+                } else {
+                    valueString = this.isFiat ? this.modelValue.toString() : formatUnits(this.modelValue, this.decimals);
+                }
+
+                const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === valueString.length - 1;
 
                 if (isDeletingLastCharacterAfterDecimal) {
                     const emitValue = this.isFiat
@@ -411,9 +513,11 @@ export default defineComponent({
                     caretPosition = formattedWorkingValue.length;
                     this.setInputValue(formattedWorkingValue);
                 } else {
-                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+                    const decimals = this.swapCurrencies ? this.secondaryCurrencyDecimals : this.decimals;
+                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, decimals ?? 2, this.locale);
                 }
             } else {
+                // eztodo handle secondary amount in this block
                 const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
 
                 // if user has typed a number larger than the max value, set input to max value
@@ -505,6 +609,7 @@ export default defineComponent({
                 this.setInputCaretPosition(caretPosition);
                 event.preventDefault();
                 this.handleInput();
+
                 return;
             }
 
@@ -513,9 +618,17 @@ export default defineComponent({
                 const integer = value.slice(0, indexOfDecimalSeparator);
                 const fractional = value.slice(indexOfDecimalSeparator + 1);
 
+                let maxDecimals;
+
+                if (this.swapCurrencies) {
+                    maxDecimals = this.secondaryCurrencyIsFiat ? 2 : this.secondaryCurrencyDecimals;
+                } else {
+                    maxDecimals = this.isFiat ? 2 : this.decimals;
+                }
+
                 const keypressIsDigit = numKeys.includes(event.key);
                 const caretIsPastDecimal = caretPosition > integer.length + 1;
-                const fractionalUnderMaxLength = fractional.length < (this.isFiat ? 2 : this.decimals);
+                const fractionalUnderMaxLength = fractional.length < maxDecimals;
 
                 return keypressIsDigit && caretIsPastDecimal && !fractionalUnderMaxLength;
             })();
@@ -565,9 +678,15 @@ export default defineComponent({
             this.inputElement.focus();
         },
         fillMaxValue() {
-            const precision = this.getNumberOfDecimalsToShow(this.maxValue);
-            const decimals = this.isFiat ? undefined : this.decimals;
-            const formattedMaxValue = prettyPrintCurrency(this.maxValue, precision, this.locale, undefined, undefined, undefined, decimals, true);
+            let formattedMaxValue: string;
+
+            if (this.swapCurrencies) {
+
+            } else {
+                const precision = this.getNumberOfDecimalsToShow(this.maxValue);
+                const decimals = this.isFiat ? undefined : this.decimals;
+                formattedMaxValue = prettyPrintCurrency(this.maxValue, precision, this.locale, undefined, undefined, undefined, decimals, true);
+            }
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },

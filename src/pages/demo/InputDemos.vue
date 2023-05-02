@@ -33,7 +33,7 @@ export default defineComponent({
         currencySwappableInputSecondarySymbol: 'USD',
         currencySwappableInputSecondaryDecimals: 2,
         currencySwappableInputConversionRate : 0.2,
-        currencySwappableInputMaxValue: maxTlos,
+        currencySwappableInputMaxValue: BigNumber.from('5000'.concat('0'.repeat(18))), // 5K TLOS
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
