@@ -303,7 +303,7 @@ export default defineComponent({
                     const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
 
                     if (this.swapCurrencies) {
-                        const newValueBn = newValue instanceof BigNumber ? newValue : parseUnits(newValue.toString(), this.secondaryCurrencyDecimals ?? 2);
+                        const newValueBn = newValue instanceof BigNumber ? newValue : parseUnits(newValue.toString(), this.decimals ?? 2);
 
                         const newValueInSecondaryCurrency = convertCurrency(
                             newValueBn,
@@ -411,7 +411,7 @@ export default defineComponent({
                         if (this.modelValue instanceof BigNumber) {
                             emitValue = secondaryConvertedToPrimary;
                         } else {
-                            emitValue = parseFloat(formatUnits(secondaryConvertedToPrimary, this.decimals));
+                            emitValue = parseFloat(formatUnits(secondaryConvertedToPrimary, this.decimals ?? 2));
                         }
 
                         this.$emit('update:modelValue', emitValue);

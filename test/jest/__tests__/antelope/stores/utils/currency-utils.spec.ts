@@ -209,7 +209,7 @@ describe('convertCurrency', () => {
         const onePointOneTwoFiveSevenThreeUsdtConvertedToTlos = formatUnits(onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn, tlosDecimals);
         expect(onePointOneTwoFiveSevenThreeUsdtConvertedToTlos).toBe('5.62865');
 
-        // USD used the same conversion factor as USDT in this example
+        // USD uses the same conversion factor as USDT in this example
         const oneUsdConvertedToTlosBn = convertCurrency(BigNumber.from(oneUsd), usdDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
         const oneUsdConvertedToTlos = formatUnits(oneUsdConvertedToTlosBn, tlosDecimals);
         expect(oneUsdConvertedToTlos).toBe('5.0');
