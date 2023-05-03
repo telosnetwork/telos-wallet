@@ -22,6 +22,7 @@ const storeMock = {
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
+import { EvmToken } from 'src/antelope/types';
 
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
@@ -65,7 +66,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                },
+                } as EvmToken,
             },
         });
         expect(wrapper.element).toMatchSnapshot();
@@ -88,7 +89,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                },
+                } as EvmToken,
             },
         });
         expect(wrapper.element).toMatchSnapshot();
@@ -130,7 +131,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as EvmToken,
                 },
             });
 
@@ -186,7 +187,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as EvmToken,
                 },
             });
 
@@ -241,7 +242,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as EvmToken,
                 },
             });
 
@@ -297,7 +298,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    },
+                    } as EvmToken,
                 },
             });
 

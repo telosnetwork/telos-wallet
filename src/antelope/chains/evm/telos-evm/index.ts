@@ -11,8 +11,9 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: 'evm-native',
+    address: '',
     logo: LOGO,
+    logoURI: LOGO,
     isNative: false,
     isSystem: true,
 } as EvmToken;

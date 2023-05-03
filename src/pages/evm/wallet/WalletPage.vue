@@ -9,6 +9,7 @@ import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
+import { ethers } from 'ethers';
 
 export default defineComponent({
     name: 'WalletPage',
@@ -23,7 +24,7 @@ export default defineComponent({
     }),
     computed: {
         chainTokens(): EvmToken[] {
-            const tokens = [];
+            const tokens:EvmToken[] = [];
 
             const chainStore = useChainStore();
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
@@ -40,13 +41,26 @@ export default defineComponent({
                 logo,
             } = chainSettings.getSystemToken();
 
+            const defaults = {
+                chainId: +chainSettings.getChainId(),
+                isNative: false,
+                isSystem: false,
+                price: 0,
+                fiatBalance: '',
+                balanceBn: ethers.BigNumber.from(0),
+            };
+
             const chainToken: EvmToken = {
+                ...defaults,
+                tokenId: `${symbol}-system-${chainSettings.getChainId()}`,
+                isSystem: true,
+                address: '',
                 symbol,
                 name,
                 logoURI: logo,
                 decimals,
-                balance: balance ?? '0',
-                fullBalance: fullBalance ?? '0',
+                balance: balance ?? '',
+                fullBalance: fullBalance ?? '',
             };
 
             // system token is always the first in this.allTokens; this is used in the template
@@ -61,6 +75,8 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get stlos token info from store
                 tokens.push({
+                    ...defaults,
+                    tokenId: `STLOS-0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905-${chainSettings.getChainId()}`,
                     address: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -75,6 +91,8 @@ export default defineComponent({
                 // https://github.com/telosnetwork/telos-wallet/issues/179
                 //     get wtlos token info from store
                 tokens.push({
+                    ...defaults,
+                    tokenId: `WTLOS-0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E-${chainSettings.getChainId()}`,
                     address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
                     symbol: 'WTLOS',
                     name: 'Wrapped TLOS',
@@ -90,33 +108,52 @@ export default defineComponent({
         nonChainTokens(): EvmToken[] {
             // https://github.com/telosnetwork/telos-wallet/issues/179
             //      get all user tokens here. filter out wlos and stlos if they appear in this list.
+            const chainStore = useChainStore();
+            const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
+            const defaults = {
+                chainId: +chainStore.currentChain.settings.getChainId(),
+                isNative: false,
+                isSystem: false,
+                price: 0,
+                fiatBalance: '',
+                balanceBn: ethers.BigNumber.from(0),
+            };
+
             return [{
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTA',
+                tokenId: `SHTA-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shitcoin Alpha',
                 logoURI: '',
                 decimals: 18,
                 balance: '350.0032',
                 fullBalance: '350.0032',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHTB',
+                tokenId: `SHTB-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shitcoin Beta',
                 logoURI: '',
                 decimals: 18,
                 balance: '870123.0000',
                 fullBalance: '870123.0000',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB2',
+                tokenId: `SHIB2-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shiba 2',
                 logoURI: '',
                 decimals: 18,
                 balance: '10',
                 fullBalance: '10',
             }, {
+                ...defaults,
                 address: '0x'.concat('0'.repeat(40)),
                 symbol: 'SHIB',
+                tokenId: `SHIB-${'0x'.concat('0'.repeat(40))}-${chainSettings.getChainId()}`,
                 name: 'Shiba',
                 logoURI: '',
                 decimals: 18,

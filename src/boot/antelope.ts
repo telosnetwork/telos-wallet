@@ -17,14 +17,14 @@ export default boot(({ app }) => {
     ant.events.onLoggedIn.subscribe({
         next: () => {
             if (window.location.pathname === '/') {
-                app.config.globalProperties.$router.push({ path: '/evm/wallet?tab=balance' });
+                app.config.globalProperties?.$router?.push({ path: '/evm/wallet?tab=balance' });
             }
         },
     });
     ant.events.onLoggedOut.subscribe({
         next: () => {
             if (window.location.pathname !== '/') {
-                app.config.globalProperties.$router.push({ path: '/' });
+                app.config.globalProperties?.$router?.push({ path: '/' });
             }
         },
     });
@@ -39,8 +39,9 @@ export default boot(({ app }) => {
     ant.stores.account.autoLogin().then((loggedIn) => {
         if (!loggedIn) {
             if (window.location.pathname !== '/') {
-                app.config.globalProperties.$router.push({ path: '/' });
+                app.config.globalProperties?.$router?.push({ path: '/' });
             }
         }
     });
+
 });

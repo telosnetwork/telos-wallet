@@ -11,7 +11,7 @@
 
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ExternalProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
@@ -42,20 +42,22 @@ import {
     supportsInterfaceAbi,
     Token,
     VerifiedContractMetadata,
+    EvmTransactionResponse,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 
+const onEvmReady = new BehaviorSubject<boolean>(false);
+
 export const evmEvents = {
-    onEvmReady: new BehaviorSubject<boolean>(false),
+    whenReady: onEvmReady.asObservable().pipe(
+        filter(ready => ready),
+    ),
 };
 
-const whenReady = evmEvents.onEvmReady.asObservable().pipe(
-    filter(ready => ready),
-);
-
 export interface EVMState {
+    __external_signer: ethers.Signer | null;
     __external_provider: ExternalProvider | null;
     __ethers_rpc_provider: ethers.providers.JsonRpcProvider | null;
     __supports_meta_mask: boolean;
@@ -64,6 +66,7 @@ export interface EVMState {
 const store_name = 'evm';
 
 const createManager = ():EvmContractManagerI => ({
+    getSigner: () => toRaw(useEVMStore().signer) as ethers.Signer,
     getRpcProvider: () => toRaw(useEVMStore().rpcProvider) as ethers.providers.JsonRpcProvider,
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
@@ -74,6 +77,7 @@ export const useEVMStore = defineStore(store_name, {
     getters: {
         provider: state => state.__external_provider,
         rpcProvider: state => state.__ethers_rpc_provider,
+        signer: state => toRaw(state.__external_signer),
         isMetamaskSupported: state => state.__supports_meta_mask,
         functionInterfaces: () => functions_overrides,
         eventInterfaces: () => events_signatures,
@@ -102,10 +106,10 @@ export const useEVMStore = defineStore(store_name, {
                         evm.trace('provider.accountsChanged', accounts);
                     });
                 }
-                evmEvents.onEvmReady.next(true);
+                onEvmReady.next(true);
             });
         },
-
+        // actions ---
         async login (network: string): Promise<string | null> {
             this.trace('login', network);
             const chain = useChainStore();
@@ -147,12 +151,41 @@ export const useEVMStore = defineStore(store_name, {
                 }
             } finally {
                 useFeedbackStore().unsetLoading('evm.login');
+                const provider = await this.ensureProvider();
+                const checkProvider = new ethers.providers.Web3Provider(provider);
+                const signer = await checkProvider.getSigner();
+                this.setExternalSigner(signer);
+
             }
         },
+        async sendSystemToken (to: string, value: BigNumber): Promise<EvmTransactionResponse> {
+            this.trace('sendSystemToken', to, value);
 
+            // Send the transaction
+            if (this.signer) {
+                return this.signer.sendTransaction({
+                    to,
+                    value,
+                }).then(
+                    (transaction: ethers.providers.TransactionResponse) => transaction,
+                ).catch((error) => {
+                    if ('ACTION_REJECTED' === ((error as {code:string}).code)) {
+                        throw new AntelopeError('antelope.evm.transaction_canceled');
+                    } else {
+                        // unknown error we print on console
+                        console.error(error);
+                        throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                    }
+                });
+            } else {
+                console.error('Error sending transaction: No signer');
+                throw new Error('antelope.evm.error_no_signer');
+            }
+        },
+        // auxiliar
         async ensureProvider(): Promise<ExternalProvider> {
             return new Promise((resolve, reject) => {
-                whenReady.subscribe(async () => {
+                evmEvents.whenReady.subscribe(async () => {
                     const provider = this.__external_provider as ExternalProvider;
                     if (provider) {
                         resolve(provider);
@@ -248,7 +281,17 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
-
+        // utils ---
+        toWei(value: string | number, decimals = 18): string {
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), decimals.toString());
+            const amountInWei = bigAmount.toString();
+            return amountInWei;
+        },
+        toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
+            const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), dec.toString());
+            return bigAmount;
+        },
         // Evm Contract Managment
         async getFunctionIface(hash:string): Promise<ethers.utils.Interface | null> {
             const prefix = hash.toLowerCase().slice(0, 10);
@@ -336,16 +379,27 @@ export const useEVMStore = defineStore(store_name, {
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
-            if (cached) {
+            // If cached is null, it means this is the first time this address is queried
+            if (cached !== null) {
                 if (
                     !suspectedToken ||
+                    // cached === false means we already tried to get the contract creation info and it failed
+                    !cached ||
                     cached.token && cached.token?.type === suspectedToken
                 ) {
-                    return cached;
+                    // this never return false
+                    return cached || null;
                 }
             }
 
-            const creationInfo = await this.getContractCreation(addressLower);
+            // We mark this address as not existing so we don't query it again
+            chain_settings.setContractAsNotExisting(addressLower);
+
+            // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
+            const creationInfo:EvmContractCreationInfo = await this.getContractCreation(addressLower);
+
+            // The the contract passes the creation info check,
+            // we overwrite the previous call to set contract as not existing with the actual EvmContract
 
             const metadata = await this.checkBucket(address);
             if (metadata && creationInfo) {
@@ -354,7 +408,6 @@ export const useEVMStore = defineStore(store_name, {
 
             const contract = await this.getContractFromTokenList(address, creationInfo, suspectedToken);
             if (contract) {
-                chain_settings.addContract(addressLower, contract);
                 return contract;
             }
 
@@ -495,10 +548,10 @@ export const useEVMStore = defineStore(store_name, {
                 } else if(type === 'erc721'){
                     tokenData.symbol = await contract.symbol();
                     tokenData.name = await contract.name();
-                    tokenData.has_metadata = await this.supportsInterface(address, '0x5b5e139f');
+                    tokenData.hasMetadata = await this.supportsInterface(address, '0x5b5e139f');
                 } else if(type === 'erc1155'){
                     tokenData.name = contract.name || contract.address;
-                    tokenData.has_metadata = await this.supportsInterface(address, '0x0e89341c');
+                    tokenData.hasMetadata = await this.supportsInterface(address, '0x0e89341c');
                 }
 
                 tokenData.type = type;
@@ -531,7 +584,7 @@ export const useEVMStore = defineStore(store_name, {
                     creationInfo,
                     abi,
                     manager: createManager(),
-                    token: { ...token, address },
+                    token: { ...token, address } as EvmToken,
                 });
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
                 chain_settings.addContract(address, token_contract);
@@ -568,10 +621,19 @@ export const useEVMStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+        setExternalSigner(value: ethers.Signer | null) {
+            this.trace('setExternalSigner', value);
+            try {
+                this.__external_signer = value;
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+            }
+        },
     },
 });
 
 const evmInitialState: EVMState = {
+    __external_signer: null,
     __external_provider: null,
     __ethers_rpc_provider: null,
     __supports_meta_mask: false,

@@ -1,5 +1,5 @@
 export * from 'src/antelope/stores/utils/abi/signature';
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -14,8 +14,40 @@ const REVERT_PANIC_SELECTOR = '0x4e487b71';
 
 export const WEI_PRECISION = 18;
 
-export function formatWei(bn: BigNumber, tokenDecimals: number, displayDecimals = 4): string {
-    const amount = BigNumber.from(bn);
+/**
+ * divideFloat performs a division of two float numbers represented as strings or native numbers.
+ * @param a is the numerator expressed as a number or a string representing a number (e.g. '100000000002', '1.5' or '0.000000000000000001')
+ * @param b is the denominator expressed as a number or a string representing a number
+ * @returns a string representing the result of the division also as a float number
+ */
+export function divideFloat(a: string | number, b: string | number): string {
+    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
+    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const decimals = 2 * Math.max(a_decimals, b_decimals);
+    const A = ethers.utils.parseUnits(a.toString(), decimals);
+    const B = ethers.utils.parseUnits(b.toString(), b_decimals);
+    const result = A.div(B);
+    return formatUnits(result.toString(), decimals-b_decimals);
+}
+
+/**
+ * multiplyFloat performs a multiplication of two float numbers represented as strings or native numbers.
+ * @param a is the first factor expressed as a number or a string representing a number (e.g. '100000000002', '1.5' or '0.000000000000000001')
+ * @param b is the second factor expressed as a number or a string representing a number
+ * @returns a string representing the result of the multiplication also as a float number
+ */
+export function multiplyFloat(a: string | number, b: string | number): string {
+    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
+    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const decimals = a_decimals + b_decimals;
+    const A = ethers.utils.parseUnits(a.toString(), decimals);
+    const B = ethers.utils.parseUnits(b.toString(), decimals);
+    const result = A.mul(B);
+    return formatUnits(result.toString(), decimals+decimals);
+}
+
+export function formatWei(bn: string | number | ethers.BigNumber, tokenDecimals: number, displayDecimals = 4): string {
+    const amount = ethers.BigNumber.from(bn);
     const formatted = formatUnits(amount.toString(), tokenDecimals || WEI_PRECISION);
     const str = formatted.toString();
     // Use string, do not convert to number so we never lose precision
@@ -236,3 +268,50 @@ export function prettyPrintCurrency(
 
     return formatted;
 }
+
+
+
+/*
+* Determines whether the amount is too large (more than six characters long) to be displayed in full on mobile devices
+*
+* @param {number} amount - the currency amount
+* return {boolean} - true if the amount is too large to be displayed in full on mobile devices
+* */
+export function isAmountTooLarge(amount: number | string): boolean {
+    const primaryAmountIsTooLarge =
+        (typeof amount === 'number' && amount.toString().length > 6) ||
+        (typeof amount === 'string' && amount.length > 6);
+
+    return primaryAmountIsTooLarge;
+}
+
+
+
+/*
+* Formats a token balance amount in a localized way, using 4 decimals,
+* abbreviating if the amount is too large to be displayed in full on mobile devices only if tiny is true
+*
+* @param {number} amount - the currency amount
+* @param {number} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} tiny - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} symbol - symbol for the currency to be used, e.g. 'TLOS'. If defined, the symbol will be displayed, e.g. 123.00 TLOS.
+* return {string} - the formatted amount
+* */
+export function prettyPrintBalance(amount: number | string, locale: string, tiny: boolean, symbol = '') {
+    return ['', ' ' + symbol].join(prettyPrintCurrency(+amount, 4, locale, tiny ? isAmountTooLarge(amount) : false));
+}
+
+/*
+* Formats a fiat balance amount in a localized way, using 2 decimals,
+* abbreviating if the amount is too large to be displayed in full on mobile devices only if tiny is true
+*
+* @param {number} amount - the currency amount
+* @param {number} locale - user's locale code, e.g. 'en-US'. Generally gotten from the user store like useUserStore().locale
+* @param {boolean} tiny - whether to abbreviate the value, e.g. 123456.78 => 123.46K. Ignored for values under 1000
+* @param {string?} currency - code for the currency to be used, e.g. 'USD'. If defined, either the symbol or code (determined by the param displayCurrencyAsSymbol) will be displayed, e.g. $123.00 . Generally gotten from the user store like useUserStore().currency
+* return {string} - the formatted amount
+* */
+export function prettyPrintFiatBalance(fiatAmount: number | string, locale: string, tiny: boolean, currency = 'USD') {
+    return prettyPrintCurrency(+fiatAmount, 2, locale, tiny ? isAmountTooLarge(fiatAmount) : false, currency);
+}
+
