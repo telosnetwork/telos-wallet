@@ -141,6 +141,7 @@ export const useBalancesStore = defineStore(store_name, {
                     const price = await chain_settings.getUsdPrice();
                     token.fiatBalance = `${parseFloat(token.balance) * price}`;
                     token.price = price;
+                    this.updateBalance(label, token);
                 });
             } else {
                 console.error('No provider');
@@ -278,10 +279,13 @@ export const useBalancesStore = defineStore(store_name, {
             this.trace('updateBalance', label, token);
             const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
-                this.__balances[label][index].balance = token.balance;
-                this.__balances[label][index].fullBalance = token.fullBalance;
-                this.__balances[label][index].price = token.price;
-                this.__balances[label][index].fiatBalance = token.fiatBalance;
+                this.__balances[label][index] = {
+                    ...this.__balances[label][index],
+                    balance: token.balance,
+                    fullBalance: token.fullBalance,
+                    price: token.price,
+                    fiatBalance: token.fiatBalance,
+                } as Token;
                 this.sortBalances(label);
                 if (useAccountStore().currentIsLogged && label === 'current') {
                     this.__balances['logged'] = this.__balances[label];

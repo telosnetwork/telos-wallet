@@ -6,8 +6,10 @@ import { EvmToken } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { useBalancesStore } from 'src/antelope';
+import { useBalancesStore, useFeedbackStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
+
+const feddback = useFeedbackStore();
 
 export default defineComponent({
     name: 'WalletPage',
@@ -23,6 +25,12 @@ export default defineComponent({
     computed: {
         allTokens() {
             return useBalancesStore().loggedBalances as EvmToken[];
+        },
+        loadingStrings() {
+            return feddback.getLoadings;
+        },
+        loading() {
+            return feddback.isLoading('updateBalancesForAccount');
         },
     },
 });
@@ -43,6 +51,12 @@ export default defineComponent({
                 class="q-mb-xs"
             />
         </div>
+        <div v-if="loading" class="c-wallet-page--loading">
+            <q-spinner-dots
+                color="primary"
+                size="2em"
+            />
+        </div>
     </template>
 
     <template v-slot:transactions>
@@ -58,6 +72,9 @@ export default defineComponent({
 }
 
 .c-wallet-page {
-
+    &--loading {
+        text-align: center;
+        margin-top: 20px;
+    }
 }
 </style>
