@@ -1,12 +1,12 @@
-import { convertCurrency, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { convertCurrency, invertFloat, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
 import {
     oneEthInWei, oneHundredFiftyEthInWei,
     onePointFiveEthInWei,
     onePointOneEthInWei,
-    oneThousandFiveHundredEthInWei
+    oneThousandFiveHundredEthInWei,
 } from 'test/jest/testing-helpers';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
+import { formatUnits } from 'ethers/lib/utils';
 
 describe('prettyPrintCurrency', () => {
     it('should throw when passed an invalid value', () => {
@@ -160,63 +160,98 @@ describe('convertCurrency', () => {
 
     it('should accurately convert valid values', () => {
         const usdtDecimals = 6;
+        const usdcDecimals = 6;
         const usdDecimals = 2;
         const tlosDecimals = 18;
 
-        // USDT has 6 decimals, hence 1 USDT = 1000000 USDT-wei
-        const oneUsdt = 1000000;
-        const onePointFiveUsdt = 1500000;
-        const twoHundredThirtyFiveUsdt = 235000000;
-        const onePointOneTwoFiveSevenThreeUsdt = 1125730;
-        const oneUsd = 100;
+        // USDT/USDC have 6 decimals, hence 1 USDT/C = 1000000 USDT/C-wei
+        const oneUsdt = BigNumber.from(1000000);
+        const oneUsdc = BigNumber.from(1000000);
+        const oneTlos = BigNumber.from(oneEthInWei);
+        const onePtFiveTlos = BigNumber.from(onePointFiveEthInWei);
+        const oneHundredFiftyTlos = BigNumber.from(oneHundredFiftyEthInWei);
+        const onePointFiveUsdt = BigNumber.from(1500000);
+        const twoHundredThirtyFiveUsdt = BigNumber.from(235000000);
+        const onePointOneTwoFiveSevenThreeUsdt = BigNumber.from(1125730);
+        const oneUsd = BigNumber.from(100);
 
-        const conversionRateFromTlosToUsdt = 0.2; // 1 USDT = 0.2 TLOS
-        const conversionFactorFromUsdtToTlos = 5; // 5 TLOS = 1 USDT
+        // some arbitrary, realistic conversion rates
+        const conversionRateFromTlosToUsdt = '0.200';
+        const conversionRateFromTlosToUsdc = '0.19';
+        const conversionRateFromUsdtToTlos = '5';
+        const conversionRateFromUsdToTlos = '5';
+        const conversionRateFromUsdcToTlos = '5.263157894736842105';
+        const conversionRateOneToOne = '1';
 
         const zeroTlosConvertedToUsdtBn = convertCurrency(BigNumber.from(0), tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
         const zeroTlosConvertedToUsdt = formatUnits(zeroTlosConvertedToUsdtBn, usdtDecimals);
         expect(zeroTlosConvertedToUsdt).toBe('0.0');
 
-        const oneTlosConvertedToUsdtBn = convertCurrency(BigNumber.from(oneEthInWei), tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
+        const oneTlosConvertedToUsdtBn = convertCurrency(oneTlos, tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
         const oneTlosConvertedToUsdt = formatUnits(oneTlosConvertedToUsdtBn, usdtDecimals);
         expect(oneTlosConvertedToUsdt).toBe('0.2');
 
-        const onePointFiveTlosConvertedToUsdtBn = convertCurrency(BigNumber.from(onePointFiveEthInWei), tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
+        const onePointFiveTlosConvertedToUsdtBn = convertCurrency(onePtFiveTlos, tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
         const onePointFiveTlosConvertedToUsdt = formatUnits(onePointFiveTlosConvertedToUsdtBn, usdtDecimals);
         expect(onePointFiveTlosConvertedToUsdt).toBe('0.3');
 
-        const oneHundredFiftyTlosConvertedToUsdtBn = convertCurrency(BigNumber.from(oneHundredFiftyEthInWei), tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
+        const oneHundredFiftyTlosConvertedToUsdtBn = convertCurrency(oneHundredFiftyTlos, tlosDecimals, usdtDecimals, conversionRateFromTlosToUsdt);
         const oneHundredFiftyTlosConvertedToUsdt = formatUnits(oneHundredFiftyTlosConvertedToUsdtBn, usdtDecimals);
         expect(oneHundredFiftyTlosConvertedToUsdt).toBe('30.0');
 
-        const oneUsdtConvertedToUsdBn = convertCurrency(BigNumber.from(oneUsdt), usdtDecimals, usdDecimals, 1);
+        const oneUsdtConvertedToUsdBn = convertCurrency(oneUsdt, usdtDecimals, usdDecimals, conversionRateOneToOne);
         const oneUsdtConvertedToUsd = formatUnits(oneUsdtConvertedToUsdBn, usdDecimals);
         expect(oneUsdtConvertedToUsd).toBe('1.0');
 
-        const oneUsdtConvertedToTlosBn = convertCurrency(BigNumber.from(oneUsdt), usdtDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const oneUsdtConvertedToTlosBn = convertCurrency(oneUsdt, usdtDecimals, tlosDecimals, conversionRateFromUsdtToTlos);
         const oneUsdtConvertedToTlos = formatUnits(oneUsdtConvertedToTlosBn, tlosDecimals);
         expect(oneUsdtConvertedToTlos).toBe('5.0');
 
-        const twoHundredThirtyFiveUsdtConvertedToTlosBn = convertCurrency(BigNumber.from(twoHundredThirtyFiveUsdt), usdtDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const twoHundredThirtyFiveUsdtConvertedToTlosBn = convertCurrency(twoHundredThirtyFiveUsdt, usdtDecimals, tlosDecimals, conversionRateFromUsdtToTlos);
         const twoHundredThirtyFiveUsdtConvertedToTlos = formatUnits(twoHundredThirtyFiveUsdtConvertedToTlosBn, tlosDecimals);
         expect(twoHundredThirtyFiveUsdtConvertedToTlos).toBe('1175.0');
 
-        const onePointFiveUsdtConvertedToTlosBn = convertCurrency(BigNumber.from(onePointFiveUsdt), usdtDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const onePointFiveUsdtConvertedToTlosBn = convertCurrency(onePointFiveUsdt, usdtDecimals, tlosDecimals, conversionRateFromUsdtToTlos);
         const onePointFiveUsdtConvertedToTlos = formatUnits(onePointFiveUsdtConvertedToTlosBn, tlosDecimals);
         expect(onePointFiveUsdtConvertedToTlos).toBe('7.5');
 
-        const onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn = convertCurrency(BigNumber.from(onePointOneTwoFiveSevenThreeUsdt), usdtDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn = convertCurrency(onePointOneTwoFiveSevenThreeUsdt, usdtDecimals, tlosDecimals, conversionRateFromUsdtToTlos);
         const onePointOneTwoFiveSevenThreeUsdtConvertedToTlos = formatUnits(onePointOneTwoFiveSevenThreeUsdtConvertedToTlosBn, tlosDecimals);
         expect(onePointOneTwoFiveSevenThreeUsdtConvertedToTlos).toBe('5.62865');
 
-        // USD uses the same conversion factor as USDT in this example
-        const oneUsdConvertedToTlosBn = convertCurrency(BigNumber.from(oneUsd), usdDecimals, tlosDecimals, conversionFactorFromUsdtToTlos);
+        const oneUsdConvertedToTlosBn = convertCurrency(oneUsd, usdDecimals, tlosDecimals, conversionRateFromUsdToTlos);
         const oneUsdConvertedToTlos = formatUnits(oneUsdConvertedToTlosBn, tlosDecimals);
         expect(oneUsdConvertedToTlos).toBe('5.0');
 
+        const oneUsdcConvertedToTlosBn = convertCurrency(oneUsdc, usdcDecimals, tlosDecimals, conversionRateFromUsdcToTlos);
+        const oneUsdcConvertedToTlos = formatUnits(oneUsdcConvertedToTlosBn, tlosDecimals);
+        expect(oneUsdcConvertedToTlos).toBe('5.263157894736842105');
+
+        const oneTlosConvertedToUsdcBn = convertCurrency(oneTlos, tlosDecimals, usdcDecimals, conversionRateFromTlosToUsdc);
+        const oneTlosConvertedToUsdc = formatUnits(oneTlosConvertedToUsdcBn, usdcDecimals);
+        expect(oneTlosConvertedToUsdc).toBe('0.19');
+
         // sanity check - one wei should be preserved
-        const tinyTlosConvertedToOtherBn = convertCurrency(BigNumber.from('1'), tlosDecimals, tlosDecimals, 3);
+        const tinyTlosConvertedToOtherBn = convertCurrency(BigNumber.from(1), tlosDecimals, tlosDecimals, '3');
         const tinyTlosConvertedToOther = formatUnits(tinyTlosConvertedToOtherBn, tlosDecimals);
         expect(tinyTlosConvertedToOther).toBe('0.000000000000000003');
+    });
+});
+
+describe('invertFloat', () => {
+    it('should throw when passed an invalid value', () => {
+        expect(() => invertFloat(-1)).toThrow();
+        expect(() => invertFloat('a')).toThrow();
+        expect(() => invertFloat('')).toThrow();
+        expect(() => invertFloat(0)).toThrow();
+        expect(() => invertFloat('0')).toThrow();
+    });
+
+    it('should accurately invert floats', () => {
+        expect(invertFloat(0.2)).toBe('5');
+        expect(invertFloat('0.2')).toBe('5');
+        expect(invertFloat(5)).toBe('0.2');
+        expect(invertFloat('5')).toBe('0.2');
+        expect(invertFloat('0.19')).toBe('5.263157894736842105');
     });
 });

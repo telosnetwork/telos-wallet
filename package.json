@@ -27,7 +27,7 @@
     "bignumber.js": "^9.0.1",
     "core-js": "^3.6.5",
     "date-fns": "^2.29.3",
-    "decimal.js": "^10.2.1",
+    "decimal.js": "^10.4.3",
     "dotenv": "^8.2.0",
     "eos-common": "^0.8.0",
     "eosjs": "^21.0.3",

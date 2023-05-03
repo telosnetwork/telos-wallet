@@ -5,10 +5,10 @@ import {
     getDecimalSeparatorForLocale,
     getLargeNumberSeparatorForLocale,
     getBigNumberFromLocalizedNumberString,
-    prettyPrintCurrency, convertCurrency,
+    prettyPrintCurrency, convertCurrency, invertFloat,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
-import { formatUnits, Logger, parseUnits } from 'ethers/lib/utils';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import ToolTip from 'components/ToolTip.vue';
 import InlineSvg from 'vue-inline-svg';
 
@@ -49,7 +49,7 @@ export default defineComponent({
             // only needed when there is a swappable secondary value, ignored otherwise.
             // this represents the conversion factor between the primary and secondary amounts,
             // e.g. if 1 TLOS = 0.20 USD, and the modelValue is in TLOS, the conversion factor is 0.20
-            type: Number,
+            type: [String, Number],
             default: null,
         },
         secondaryCurrencySymbol: {
@@ -133,12 +133,21 @@ export default defineComponent({
         },
         secondaryCurrencyAmount(): BigNumber | number {
             if (!this.hasSwappableCurrency) {
-                return 0;
+                return BigNumber.from(0);
             }
 
             if (this.secondaryCurrencyIsFiat && typeof this.modelValue === 'number') {
                 // two fiat values
-                return this.secondaryCurrencyConversionFactor * Number(this.modelValue);
+                // eztodo this
+                // return this.secondaryCurrencyConversionFactor * Number(this.modelValue);
+                const converted = convertCurrency(
+                    parseUnits(this.modelValue.toString(), 2),
+                    2,
+                    2,
+                    this.secondaryCurrencyConversionFactor,
+                );
+
+                return +formatUnits(converted, 2);
             } else if (this.secondaryCurrencyIsFiat && this.modelValue instanceof BigNumber) {
                 const converted = convertCurrency(
                     this.modelValue as BigNumber,
@@ -207,6 +216,8 @@ export default defineComponent({
             return getDecimalSeparatorForLocale(this.locale);
         },
         visibleErrorText(): string {
+            // eztodo only show error state if input is dirty
+            // eztodo add validation rules?
             if (this.errorText) {
                 return this.errorText;
             }
@@ -217,6 +228,17 @@ export default defineComponent({
             }
 
             return '';
+        },
+        conversionRateText() {
+            if (!this.hasSwappableCurrency) {
+                return '';
+            }
+
+            return `@ ${this.secondaryCurrencyConversionFactor} ${this.secondaryCurrencySymbol} / ${this.symbol}`;
+        },
+        secondaryToPrimaryConversionRate(): string {
+            // this.secondaryCurrencyConversionFactor is for converting primary to secondary; invert to convert
+            return invertFloat(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
             let symbol: string;
@@ -384,7 +406,10 @@ export default defineComponent({
                     // val is the secondary currency amount; convert to primary currency and check against modelValue
                     const modelValueAsBigNumber = this.modelValue instanceof BigNumber ? this.modelValue : parseUnits(this.modelValue.toString(), this.decimals);
                     const newSecondaryAmountAsBigNumber = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
-                    const newSecondaryConvertedToPrimary = convertCurrency(newSecondaryAmountAsBigNumber, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryCurrencyConversionFactor);
+
+                    // eztodo consolidate with below
+                    const newSecondaryConvertedToPrimary = convertCurrency(newSecondaryAmountAsBigNumber, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
+                    console.log(newSecondaryConvertedToPrimary.toString());
 
                     newValIsDifferent = !modelValueAsBigNumber.eq(newSecondaryConvertedToPrimary);
                 } else {
@@ -402,9 +427,7 @@ export default defineComponent({
                             valueBn = parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
                         }
 
-                        // conversion rate is from primary to secondary, so we need to invert it for secondary to primary
-                        const secondaryToPrimaryConversionRate = 1 / this.secondaryCurrencyConversionFactor;
-                        const secondaryConvertedToPrimary = convertCurrency(valueBn, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, secondaryToPrimaryConversionRate);
+                        const secondaryConvertedToPrimary = convertCurrency(valueBn, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
 
                         let emitValue;
 
@@ -483,93 +506,21 @@ export default defineComponent({
                 return;
             }
 
-            let formattedWorkingValue: string; // eztodo represents what?
             let newValue: BigNumber | number;
 
-            //eztodo simplify instanceof bignumber statements using isFiat stuff
-
             // eztodo comment for this block
-            // eztodo try to simplify this block
             // eztodo disable maxamount and swap buttons if disabled or readonly; style text too
-            // eztodo breaks when entering a token amount if main amount is fiat
             if (this.swapCurrencies) {
                 if (!this.secondaryCurrencyIsFiat) {
-                    // currencies are swapped and secondary currency is a BigNumber
-                    const secondaryValueBn = getBigNumberFromLocalizedNumberString(
-                        this.inputElement.value ?? '0',
-                        this.secondaryCurrencyDecimals,
-                        this.locale,
-                    );
-
-                    const valueInPrimaryCurrencyBn = convertCurrency(secondaryValueBn, this.secondaryCurrencyDecimals, this.decimals ?? 2, this.secondaryCurrencyConversionFactor);
-
-                    if (!!this.maxValue && valueInPrimaryCurrencyBn.gt(this.maxValue)) {
-                        // user has entered a value larger than the max value; set input value to max, show visual feedback
-                        newValue = this.maxValue;
-                        this.triggerWiggle();
-                        const decimalsToShow = this.getNumberOfDecimalsToShow(secondaryValueBn);
-                        formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals, true);
-                        caretPosition = formattedWorkingValue.length;
-                        this.setInputValue(formattedWorkingValue);
-                    } else {
-                        newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
-                    }
+                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
                 } else {
-                    // debugger;
-                    // currencies are swapped and secondary currency is a number
-                    const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-
-                    // eztodo handle maxvalue is undefined
-                    const maxValueAsNumber = typeof this.maxValue === 'number' ? this.maxValue : Number(formatUnits(this.maxValue, this.decimals ?? 2));
-
-                    // if user has typed a number larger than the max value, set input to max value
-                    if (!!this.maxValue && valueAsNumber > maxValueAsNumber) {
-                        // debugger;
-                        newValue = this.maxValue;
-                        this.triggerWiggle();
-                        const maxValueInPrimaryCurrencyBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
-                        const maxValueInSecondaryCurrencyBn = convertCurrency(maxValueInPrimaryCurrencyBn, this.decimals ?? 2, this.secondaryCurrencyDecimals ?? 2, this.secondaryCurrencyConversionFactor);
-
-                        formattedWorkingValue = prettyPrintCurrency(maxValueInSecondaryCurrencyBn, 2, this.locale, false, undefined, undefined, this.decimals ?? 2, true);
-                        caretPosition = formattedWorkingValue.length;
-                        this.setInputValue(formattedWorkingValue);
-                    } else {
-                        newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-                    }
+                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
                 }
             } else {
                 if (!this.isFiat) {
-                    let valueBn = getBigNumberFromLocalizedNumberString(
-                        this.inputElement.value ?? '0',
-                        this.decimals,
-                        this.locale,
-                    );
-
-                    // if user has typed a number larger than the max value, set input to max value
-                    if (!!this.maxValue && valueBn.gt(this.maxValue)) {
-                        newValue = this.maxValue;
-                        this.triggerWiggle();
-                        const decimalsToShow = this.getNumberOfDecimalsToShow(valueBn);
-                        formattedWorkingValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
-                        caretPosition = formattedWorkingValue.length;
-                        this.setInputValue(formattedWorkingValue);
-                    } else {
-                        newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
-                    }
+                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
                 } else {
-                    // eztodo handle secondary amount in this block
-                    const valueAsNumber = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-
-                    // if user has typed a number larger than the max value, set input to max value
-                    if (!!this.maxValue && valueAsNumber > this.maxValue) {
-                        newValue = this.maxValue;
-                        this.triggerWiggle();
-                        formattedWorkingValue = prettyPrintCurrency(newValue, 2, this.locale, false, undefined, undefined, undefined, true);
-                        caretPosition = formattedWorkingValue.length;
-                        this.setInputValue(formattedWorkingValue);
-                    } else {
-                        newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-                    }
+                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
                 }
             }
 
@@ -736,12 +687,6 @@ export default defineComponent({
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },
-        triggerWiggle() {
-            this.$el.classList.add('c-currency-input--wiggle');
-        },
-        handleWiggleEnd() {
-            this.$el.classList.remove('c-currency-input--wiggle');
-        },
     },
 });
 </script>
@@ -758,7 +703,6 @@ export default defineComponent({
         'c-currency-input--disabled': !!inputElementAttrs.disabled,
     }"
     @click="focusInput"
-    @animationend="handleWiggleEnd"
 >
     <div class="c-currency-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
@@ -802,6 +746,11 @@ export default defineComponent({
     <div class="c-currency-input__error-text">
         {{ visibleErrorText }}
     </div>
+
+    <div v-if="!visibleErrorText && conversionRateText" class="c-currency-input__conversion-rate">
+        {{ conversionRateText }}
+    </div>
+<!--    eztodo add conversion rate text-->
 </div>
 
 </template>
@@ -811,7 +760,7 @@ export default defineComponent({
     --symbol-left: 28px;
     $this: &;
 
-    width: 300px;
+    width: 300px; // eztodo should this be different
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
@@ -824,10 +773,6 @@ export default defineComponent({
     cursor: text;
     margin-top: 24px;
 
-    animation-duration: 350ms;
-    animation-iteration-count: 1;
-    animation-timing-function: linear;
-
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
         border: 1px solid var(--text-color);
     }
@@ -839,10 +784,6 @@ export default defineComponent({
         #{$this}__label-text {
             color: $primary;
         }
-    }
-
-    &--wiggle {
-        animation-name: wiggle;
     }
 
     &--disabled {
@@ -882,15 +823,22 @@ export default defineComponent({
         }
     }
 
-    &__error-text {
+    &__error-text,
+    &__conversion-rate {
         position: absolute;
         bottom: -24px;
-        width: 100%;
-        left: 0;
+        width: max-content;
         right: 0;
         text-align: right;
-        color: $negative;
         font-size: 12px;
+    }
+
+    &__error-text {
+        color: $negative;
+    }
+
+    &__conversion-rate {
+        color: var(--text-color-muted);
     }
 
     &__symbol {
@@ -922,28 +870,6 @@ export default defineComponent({
         outline: none;
         background: none;
         margin-top: 24px;
-    }
-
-    @keyframes wiggle {
-        0% {
-            transform: translateX(0);
-        }
-
-        25% {
-            transform: translateX(-4px);
-        }
-
-        50% {
-            transform: translateX(4px);
-        }
-
-        75% {
-            transform: translateX(-4px);
-        }
-
-        100% {
-            transform: translateX(0);
-        }
     }
 }
 </style>

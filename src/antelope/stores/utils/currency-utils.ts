@@ -3,6 +3,7 @@
 import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatUnits } from '@ethersproject/units';
+import Decimal from 'decimal.js';
 
 export function getDecimalSeparatorForLocale(locale: string) {
     const numberWithDecimalSeparator = 1.1;
@@ -166,7 +167,12 @@ export function prettyPrintCurrency(
 
 
 // eztodo jsdocs
-export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionRate: number) {
+export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number) {
+    const conversionRate = conversionFactor.toString();
+    const leadingZeroesRegex = /^0+/g;
+    const trailingZeroesRegex = /0+$/g;
+    const floatRegex = /^\d+(\.\d+)?$/g;
+
     if (!Number.isInteger(tokenOneDecimals) || tokenOneDecimals <= 0) {
         throw 'Token one decimals must be a positive integer or zero';
     }
@@ -175,8 +181,8 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
         throw 'Token two decimals must be a positive integer or zero';
     }
 
-    if (conversionRate <= 0) {
-        throw 'Conversion rate must be greater than zero';
+    if (!floatRegex.test(conversionRate)) {
+        throw 'Conversion rate must be a positive floating point number or integer';
     }
 
     if (tokenOneAmount.lt(0)) {
@@ -184,17 +190,51 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
     }
 
     const tenBn = BigNumber.from(10);
-    const scaledConversionRate = BigNumber.from(conversionRate * 10e12);
 
-    // normalize amount to 18 decimals
-    const normalizedAmount = tokenOneAmount.mul(tenBn.pow((18 - tokenOneDecimals) || 0));
+    // represents the maximum significant figures of conversion calculations
+    const precisionCutoffBn = BigNumber.from(256);
 
-    // multiply amount by conversion rate
+    const [rawConversionRateIntegers, rawConversionRateDecimals = ''] = conversionRate.split('.');
+    const conversionRateIntegers = rawConversionRateIntegers.replace(leadingZeroesRegex, '');
+    const conversionRateDecimals = rawConversionRateDecimals.replace(trailingZeroesRegex, '');
+
+    const numberOfConversionRateDecimals = conversionRateDecimals.length;
+
+    const conversionRateScalingFactor = BigNumber.from(numberOfConversionRateDecimals).add(precisionCutoffBn);
+    const conversionRateAsIntegerString = conversionRateIntegers.concat((conversionRateDecimals ?? ''));
+
+    const conversionRateBn = BigNumber.from(conversionRateAsIntegerString);
+    const scaledConversionRate = conversionRateBn.mul(tenBn.pow(conversionRateScalingFactor));
+
+    // normalize amount to 256 precision
+    const normalizedAmount = tokenOneAmount.mul(tenBn.pow((precisionCutoffBn.sub(tokenOneDecimals))));
+
+    // multiply amount by conversion rate integer
     const normalizedScaledAmountTwo = normalizedAmount.mul(scaledConversionRate);
 
-    // denormalize from 18 decimals to tokenTwoDecimals
-    const denormalizedScaledAmountTwo = normalizedScaledAmountTwo.div(tenBn.pow((18 - tokenTwoDecimals) || 0));
+    // denormalize from 256 precision to tokenTwoDecimals
+    const denormalizedScaledAmountTwo = normalizedScaledAmountTwo.div(tenBn.pow((precisionCutoffBn.sub(tokenTwoDecimals))));
 
     // remove conversion rate scaling
-    return denormalizedScaledAmountTwo.div(tenBn.pow(13));
+    return denormalizedScaledAmountTwo.div(tenBn.pow(conversionRateScalingFactor.add(numberOfConversionRateDecimals)));
+}
+
+export function invertFloat(float: number | string) {
+    const floatRegex = /^\d+(\.\d+)?$/g;
+    const trailingZeroesRegex = /0+$/g;
+    const trailingDotRegex = /\.$/g;
+
+    if (!floatRegex.test(float.toString())) {
+        throw 'Conversion rate must be a positive floating point number or integer';
+    }
+
+    if ([0, '0'].includes(float)) {
+        throw 'Error inverting: cannot divide by zero';
+    }
+
+    return new Decimal(1)
+        .dividedBy(float)
+        .toFixed(18)
+        .replace(trailingZeroesRegex, '')
+        .replace(trailingDotRegex, '');
 }
