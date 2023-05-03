@@ -214,15 +214,15 @@ export default defineComponent({
             feedback.setLoading('SendPage.getEstimatedGasLimit');
 
             // preparing dummie transfer
-            const someaddress = ant.stores.account.loggedEvmAccount?.address ?? '';
+            const someaddress = ant.stores.account.loggedEvmAccount?.address || '';
             const from = someaddress;
-            const to = someaddress;
-            const amountToSend = ethers.utils.parseUnits('1', 18);
+            const to = this.address || someaddress;
+            const amountToSend = this.availableInTokensBn;
             const transaction: BasicTransaction = {
-                from: from,
-                to: to,
-                value: amountToSend.toHexString(),
-                data: '0x',
+                from,
+                to,
+                value: '0x00',
+                data: '0x00',
             };
 
             if (!isSystemToken) {
@@ -230,7 +230,14 @@ export default defineComponent({
                 const contract = await ant.stores.evm.getContractFromAbi(this.token?.address, abi);
                 const transferFunction = contract.interface.encodeFunctionData('transfer', [to, amountToSend]);
                 transaction.data = transferFunction;
+                transaction.value = '0x00';
             }
+
+            console.log('SendPage.getEstimatedGasLimit() transaction.from ', transaction.from);
+            console.log('SendPage.getEstimatedGasLimit() transaction.to   ', transaction.to);
+            console.log('SendPage.getEstimatedGasLimit() transaction.data ', transaction.data);
+            console.log('SendPage.getEstimatedGasLimit() transaction.value', transaction.value);
+
 
             return chain_settings.getEstimatedGasLimit(transaction).then((gasLimit) => {
                 feedback.unsetLoading('SendPage.getEstimatedGasLimit');

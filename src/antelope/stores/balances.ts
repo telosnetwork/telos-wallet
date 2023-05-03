@@ -213,13 +213,13 @@ export const useBalancesStore = defineStore(store_name, {
                 const evm = useEVMStore();
 
                 if (token.isSystem) {
-                    return evm.sendSystemToken(to, amount);
+                    return await evm.sendSystemToken(to, amount);
                 } else {
                     const contract = await evm.getContract(token.address, 'erc20');
                     if (contract) {
                         const contractInstance = contract.getContractInstance();
                         const amountInWei = amount.toString();
-                        return contractInstance.transfer(to, amountInWei);
+                        return await contractInstance.transfer(to, amountInWei);
                     } else {
                         throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
                     }

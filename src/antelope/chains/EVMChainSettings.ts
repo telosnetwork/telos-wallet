@@ -15,6 +15,7 @@ import {
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 import { ethers } from 'ethers';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { formatWei } from 'src/antelope/stores/utils';
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -247,16 +248,18 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     async getEstimatedGasLimit(transaction: BasicTransaction): Promise<ethers.BigNumber> {
         useFeedbackStore().setLoading('getEstimatedGasLimit');
+        const params = [{
+            from: transaction.from,
+            to: transaction.to,
+            value: transaction.value,
+            data: transaction.data,
+        }];
         const result = await this.doRPC<{ result: string }>({
             method: 'eth_estimateGas' as Method,
-            params: [{
-                from: transaction.from,
-                to: transaction.to,
-                value: transaction.value,
-                data: transaction.data,
-            }],
+            params,
         });
-        const limit = ethers.BigNumber.from(result.result);
+        const limit = ethers.BigNumber.from(result.result || '0');
+        console.log('EVMChainSettings.getEstimatedGasLimit() ', params, result.result, 'LIMIT:', limit.toString());
         useFeedbackStore().unsetLoading('getEstimatedGasLimit');
         return limit;
     }
@@ -270,6 +273,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const fiatDouble = system.mul(price);
         const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
         useFeedbackStore().unsetLoading('getEstimatedGas');
+        console.log('EVMChainSettings.getEstimatedGas() ', limit.toString(), `${formatWei(system, 18, 18)}`);
         return { system, fiat };
     }
     async getLatestBlock(): Promise<ethers.BigNumber> {
