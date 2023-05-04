@@ -7,7 +7,7 @@ import {
     getBigNumberFromLocalizedNumberString,
     prettyPrintCurrency,
     convertCurrency,
-    invertFloat,
+    getFloatReciprocal,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
@@ -97,14 +97,14 @@ export default defineComponent({
 
         // used to check if a new modelValue needs to be emitted when using a swappable currency.
         // this is needed because in many cases, the conversion factor from primary to secondary currency will result in
-        // an irrational number of secondary currency being equivalent to the modelValue (primary currency amount),
-        // e.g. .19 USD === 1 TLOS => 5.263157......... (irrational) USD = 1 TLOS
+        // a non-terminating decimal amount of secondary currency being equivalent to the modelValue (primary currency amount),
+        // e.g. 0.19 USD === 1 TLOS => 5.(263157894736842105) USD = 1 TLOS (parens indicate repeating decimal)
         // In these cases, there will be an infinite update loop as the logic to decide whether to emit relies on
         // comparing the secondary value converted to the primary value with the new modelValue (primary amount);
-        // a small amount of precision is lost (by rounding) with every conversion (because irrational numbers cannot be
+        // a small amount of precision is lost (by rounding) with every conversion (because non-terminating numbers cannot be
         // accurately stored in a variable), leading to inequality. This is the same reason that, when a user enters an
-        // amount in a secondary currency, and the conversion rate from secondary to primary is irrational, we must pass
-        // a rounded number to whatever service is being called. This rounding is accurate to the token's max precision
+        // amount in a secondary currency, and the conversion rate from secondary to primary is non-terminating, we must pass
+        // a rounded number to whatever service is being called. This rounding is accurate to 18 decimal places
         savedSecondaryValue: BigNumber.from(0),
     }),
     computed: {
@@ -228,7 +228,7 @@ export default defineComponent({
         },
         secondaryToPrimaryConversionRate(): string {
             // this.secondaryCurrencyConversionFactor is for converting primary to secondary; invert to convert
-            return invertFloat(this.secondaryCurrencyConversionFactor);
+            return getFloatReciprocal(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
             if (!this.maxValue) {

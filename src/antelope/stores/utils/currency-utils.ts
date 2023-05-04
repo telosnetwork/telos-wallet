@@ -206,7 +206,7 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
     return denormalizedScaledAmountTwo.div(tenBn.pow(conversionRateScalingFactor.add(numberOfConversionRateDecimals)));
 }
 
-export function invertFloat(float: number | string) {
+export function getFloatReciprocal(float: number | string) {
     const floatRegex = /^\d+(\.\d+)?$/g;
     const trailingZeroesRegex = /0+$/g;
     const trailingDotRegex = /\.$/g;
@@ -224,21 +224,4 @@ export function invertFloat(float: number | string) {
         .toFixed(18)
         .replace(trailingZeroesRegex, '')
         .replace(trailingDotRegex, '');
-}
-
-export function roundCurrency(num: BigNumber, decimals: number, precision = 4) {
-    if (!Number.isInteger(decimals) || decimals <= 0) {
-        throw 'Decimals must be a positive integer or zero';
-    }
-
-    if (!Number.isInteger(precision) || precision <= 0) {
-        throw 'Decimals must be a positive integer or zero';
-    }
-
-
-    const formatted = formatUnits(num, decimals);
-
-    const rounded = new Decimal(formatted).toFixed(precision);
-
-    return parseUnits(rounded, decimals);
 }

@@ -1,8 +1,7 @@
 import {
     convertCurrency,
-    invertFloat,
+    getFloatReciprocal,
     prettyPrintCurrency,
-    roundCurrency
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
 import {
@@ -255,47 +254,18 @@ describe('convertCurrency', () => {
 
 describe('invertFloat', () => {
     it('should throw when passed an invalid value', () => {
-        expect(() => invertFloat(-1)).toThrow();
-        expect(() => invertFloat('a')).toThrow();
-        expect(() => invertFloat('')).toThrow();
-        expect(() => invertFloat(0)).toThrow();
-        expect(() => invertFloat('0')).toThrow();
+        expect(() => getFloatReciprocal(-1)).toThrow();
+        expect(() => getFloatReciprocal('a')).toThrow();
+        expect(() => getFloatReciprocal('')).toThrow();
+        expect(() => getFloatReciprocal(0)).toThrow();
+        expect(() => getFloatReciprocal('0')).toThrow();
     });
 
     it('should accurately invert floats', () => {
-        expect(invertFloat(0.2)).toBe('5');
-        expect(invertFloat('0.2')).toBe('5');
-        expect(invertFloat(5)).toBe('0.2');
-        expect(invertFloat('5')).toBe('0.2');
-        expect(invertFloat('0.19')).toBe('5.263157894736842105');
-    });
-});
-
-describe('roundCurrency', () => {
-    it('should throw when passed invalid values', () => {
-        const zeroBn = BigNumber.from(0);
-
-        expect(() => roundCurrency(zeroBn, -1)).toThrow();
-        expect(() => roundCurrency(zeroBn, 0.5)).toThrow();
-        expect(() => roundCurrency(zeroBn, 0)).toThrow();
-        expect(() => roundCurrency(zeroBn, 18, -1)).toThrow();
-        expect(() => roundCurrency(zeroBn, 18, 0)).toThrow();
-    });
-
-    it('should accurately round BigNumber currencies', () => {
-        const precisionFour = 4;
-        const tlosDecimals = 18;
-        const pointNineRepeatingBn = BigNumber.from('9'.repeat(tlosDecimals));
-        const roundedPointNineBn = BigNumber.from('1'.concat('0'.repeat(18)));
-        const roundedFourPrecision = roundCurrency(pointNineRepeatingBn, tlosDecimals, precisionFour);
-        expect(roundedFourPrecision.eq(roundedPointNineBn)).toBe(true);
-
-        // check default precision
-        expect(roundCurrency(pointNineRepeatingBn, tlosDecimals).eq(roundedPointNineBn)).toBe(true);
-
-        // sanity check - rounding to the same precision the number already has should be 1:1
-        const precisionEighteen = 18;
-        const roundedEighteenPrecision = roundCurrency(pointNineRepeatingBn, tlosDecimals, precisionEighteen);
-        expect(roundedEighteenPrecision.eq(pointNineRepeatingBn)).toBe(true);
+        expect(getFloatReciprocal(0.2)).toBe('5');
+        expect(getFloatReciprocal('0.2')).toBe('5');
+        expect(getFloatReciprocal(5)).toBe('0.2');
+        expect(getFloatReciprocal('5')).toBe('0.2');
+        expect(getFloatReciprocal('0.19')).toBe('5.263157894736842105');
     });
 });
