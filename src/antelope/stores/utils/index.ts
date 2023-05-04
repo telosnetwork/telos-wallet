@@ -8,6 +8,7 @@ import {
 } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
 
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
