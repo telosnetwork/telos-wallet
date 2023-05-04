@@ -23,7 +23,7 @@ export default defineComponent({
         currencyTokenInputDecimals: 18,
         currencyTokenInputMaxValue: maxTlos,
 
-        // swappable input - primary amount is in TLOS (token), secondary in USDT (token)
+        // swappable input - primary amount is in TLOS, secondary in USDT
         currencyTlosUsdtInputValue: BigNumber.from('0'),
         currencyTlosUsdtInputSymbol: 'TLOS',
         currencyTlosUsdtInputDecimals: 18,
@@ -31,6 +31,15 @@ export default defineComponent({
         currencyTlosUsdtInputSecondaryDecimals: 6,
         currencyTlosUsdtInputConversionRate: 0.19,
         currencyTlosUsdtInputMaxValue: BigNumber.from('49295123412'.concat('0'.repeat(11))), // eztodo make variable
+
+        // swappable input - primary amount is in TLOS, secondary in USD
+        currencyTlosUsdInputValue: BigNumber.from('0'),
+        currencyTlosUsdInputSymbol: 'TLOS',
+        currencyTlosUsdInputDecimals: 18,
+        currencyTlosUsdInputSecondarySymbol: 'USD',
+        currencyTlosUsdInputSecondaryDecimals: 2,
+        currencyTlosUsdInputConversionRate: 0.21,
+        currencyTlosUsdInputMaxValue: BigNumber.from('49295123412'.concat('0'.repeat(11))), // eztodo make variable
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
@@ -104,6 +113,25 @@ export default defineComponent({
                 />
                 <!-- eztodo error when inputting usdt value-->
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
+            </div>
+            <div class="col-3">
+                <CurrencyInput
+                    v-model="currencyTlosUsdInputValue"
+                    :locale="currencyInputLocale"
+                    :symbol="currencyTlosUsdInputSymbol"
+                    :decimals="currencyTlosUsdInputDecimals"
+                    :secondary-currency-symbol="currencyTlosUsdInputSecondarySymbol"
+                    :secondary-currency-decimals="currencyTlosUsdInputSecondaryDecimals"
+                    :secondary-currency-conversion-factor="currencyTlosUsdInputConversionRate"
+                    :max-value="currencyTlosUsdInputMaxValue"
+                    :disabled="currencyInputIsDisabled"
+                    :readonly="currencyInputIsReadonly"
+                    :required="currencyInputIsRequired"
+                    label="Amount (TLOS/USD)"
+                    class="q-mb-xl"
+                />
+                <!-- eztodo error when inputting usdt value-->
+                Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
             </div>
         </div>
     </div>

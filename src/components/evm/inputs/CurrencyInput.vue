@@ -170,14 +170,28 @@ export default defineComponent({
             if (!this.swapCurrencies) {
                 symbol = this.secondaryCurrencySymbol;
 
-                // eztodo not quite right precision
-                amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 2, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
+                amount = prettyPrintCurrency(
+                    this.secondaryCurrencyAmount,
+                    this.secondaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.secondaryCurrencyDecimals,
+                );
 
             } else {
                 symbol = this.symbol;
 
-                // eztodo update precision
-                amount = prettyPrintCurrency(this.modelValue, 4, this.locale, false, undefined, undefined, this.decimals);
+                amount = prettyPrintCurrency(
+                    this.modelValue,
+                    this.primaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.decimals,
+                );
             }
 
             return `${amount} ${symbol}`;
@@ -232,16 +246,38 @@ export default defineComponent({
                     this.secondaryCurrencyConversionFactor,
                 );
 
-                // eztodo look at precision
-                amount = prettyPrintCurrency(maxValueInSecondaryCurrency, 4, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
+                amount = prettyPrintCurrency(
+                    maxValueInSecondaryCurrency,
+                    this.secondaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.secondaryCurrencyDecimals,
+                );
                 symbol = this.secondaryCurrencySymbol;
             } else {
-                // eztodo look at precision
-                amount = prettyPrintCurrency(this.maxValue, 4, this.locale, false, undefined, undefined, this.decimals);
+                amount = prettyPrintCurrency(
+                    this.maxValue,
+                    this.primaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.decimals,
+                );
                 symbol = this.symbol;
             }
 
             return `${amount} ${symbol} Available`; // eztodo i18n
+        },
+        primaryCurrencyDisplayPrecision() {
+            // if the value represents fiat, show 2 decimals; else show 4
+            return this.decimals === 2 ? 2 : 4;
+        },
+        secondaryCurrencyDisplayPrecision() {
+            // if the value represents fiat, show 2 decimals; else show 4
+            return this.secondaryCurrencyDecimals === 2 ? 2 : 4;
         },
         leadingZeroesRegex(): RegExp {
             const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
@@ -295,7 +331,9 @@ export default defineComponent({
 
                 if (!shouldSkipFormattingAndEmitting) {
                     let newInputValue: string;
-                    const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
+                    const decimalsToShow = (this.swapCurrencies && this.hasSwappableCurrency) ?
+                        this.secondaryCurrencyDisplayPrecision :
+                        this.primaryCurrencyDisplayPrecision;
 
                     if (this.swapCurrencies && this.hasSwappableCurrency) {
                         const newValueInSecondaryCurrency = convertCurrency(
@@ -364,10 +402,9 @@ export default defineComponent({
             let newInputValue: string;
 
             if (showSecondaryCurrency) {
-                // eztodo address precision
                 newInputValue = prettyPrintCurrency(
                     this.secondaryCurrencyAmount,
-                    4,
+                    this.secondaryCurrencyDisplayPrecision,
                     this.locale,
                     false,
                     undefined,
@@ -375,10 +412,9 @@ export default defineComponent({
                     this.secondaryCurrencyDecimals,
                 );
             } else {
-                // eztodo address precision
                 newInputValue = prettyPrintCurrency(
                     this.modelValue,
-                    4,
+                    this.primaryCurrencyDisplayPrecision,
                     this.locale,
                     false,
                     undefined,
@@ -654,7 +690,7 @@ export default defineComponent({
 
             let decimalsToShow: number;
 
-            if (this.inputElement.value.indexOf(this.decimalSeparator) > -1 && fraction !== '0') {
+            if ((this.inputElement.value.indexOf(this.decimalSeparator) > -1 || this.inputElement.value === '') && fraction !== '0') {
                 decimalsToShow = fraction.length;
             } else {
                 decimalsToShow = 0;
@@ -669,8 +705,6 @@ export default defineComponent({
             let formattedMaxValue: string;
 
             if (this.swapCurrencies && this.hasSwappableCurrency) {
-                const precision = this.getNumberOfDecimalsToShow(this.secondaryCurrencyAmount);
-                const decimals = this.secondaryCurrencyDecimals; // eztodo review this decimals
                 const maxValueInSecondaryCurrency = convertCurrency(
                     this.maxValue,
                     this.decimals,
@@ -679,25 +713,23 @@ export default defineComponent({
                 );
                 formattedMaxValue = prettyPrintCurrency(
                     maxValueInSecondaryCurrency,
-                    precision,
+                    this.secondaryCurrencyDisplayPrecision,
                     this.locale,
                     false,
                     undefined,
                     undefined,
-                    decimals,
+                    this.secondaryCurrencyDecimals,
                     true,
                 );
             } else {
-                const precision = this.getNumberOfDecimalsToShow(this.maxValue);
-                const decimals = this.decimals; // eztodo review this decimals
                 formattedMaxValue = prettyPrintCurrency(
                     this.maxValue,
-                    precision,
+                    this.primaryCurrencyDisplayPrecision,
                     this.locale,
                     undefined,
                     undefined,
                     undefined,
-                    decimals,
+                    this.decimals,
                     true,
                 );
             }
