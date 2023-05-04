@@ -32,6 +32,10 @@ export default defineComponent({
             type: Boolean,
             default: true,
         },
+        lightweight: {
+            type: Boolean,
+            default: false,
+        },
     },
     components: {
         InlineSvg,
@@ -83,6 +87,7 @@ export default defineComponent({
         :class="{
             'c-user-info__address': true,
             'c-user-info__address--alone': !showCopyBtn && !showUserMenu,
+            'c-user-info__address--lightweight': lightweight,
         }"
     >{{ address }}</div>
     <q-btn
@@ -177,7 +182,7 @@ export default defineComponent({
             margin-right: 0px;
         }
 
-        #{$this}--lightweight & {
+        &--lightweight {
             font-weight: 400;
         }
 

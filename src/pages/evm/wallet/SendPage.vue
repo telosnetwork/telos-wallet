@@ -279,11 +279,12 @@ export default defineComponent({
             <div class="c-send-page__title"> {{ $t('evm_wallet.send') }}</div>
             <div class="c-send-page__title-from">{{ $t('global.from') }}</div>
             <UserInfo
-                class="c-send-page__title-address c-user-info--lightweight"
+                class="c-send-page__title-address"
                 :displayFullAddress="false"
                 :showAddress="true"
                 :showCopyBtn="false"
                 :showUserMenu="false"
+                :lightweight="true"
                 :account="loggedAccount"
             />
         </div>
