@@ -63,7 +63,7 @@ export interface UserState {
     __user_name: string;
     __user_accounts: AccountList;
     __all_users: Array<UserModel>;
-    __preferred_fiat_currency: UserCurrencyPreference | null,
+    __preferred_fiat_currency: UserCurrencyPreference,
 }
 const LOCAL_STORAGE_KEY = 'user-store';
 const CURRENCY_PREFERENCES_KEY = 'currency-preferences';
@@ -308,6 +308,6 @@ export const userInitialState: UserState = {
     __user_name: '',
     __user_accounts: [],
     __all_users: [],
-    __preferred_fiat_currency: null,
+    __preferred_fiat_currency: defaultCurrencyPreferences,
 };
 

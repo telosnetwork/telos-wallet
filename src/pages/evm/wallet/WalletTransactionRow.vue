@@ -13,8 +13,7 @@ import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
-const { fiatLocale, fiatCurrency } = useUserStore();
-const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+const userStore = useUserStore();
 
 const arrowIcon = require('src/assets/icon--arrow-diagonal.svg');
 const swapIcon = require('src/assets/icon--swap-diagonal.svg');
@@ -36,6 +35,15 @@ export default defineComponent({
         },
     },
     computed: {
+        fiatLocale(): string {
+            return useUserStore().fiatLocale;
+        },
+        fiatCurrency(): string {
+            return useUserStore().fiatCurrency;
+        },
+        chainSettings(): EVMChainSettings {
+            return useChainStore().currentChain.settings as EVMChainSettings;
+        },
         actionName(): string {
             if (this.transaction.failed) {
                 return this.$t('evm_wallet.failed_contract_interaction');
@@ -106,27 +114,27 @@ export default defineComponent({
 
             let address = actionName === 'receive' ? from : to;
 
-            return `${chainSettings.getExplorerUrl()}/address/${address}`;
+            return `${this.chainSettings.getExplorerUrl()}/address/${address}`;
         },
         transactionUrl(): string {
-            return `${chainSettings.getExplorerUrl()}/tx/${this.transaction.id}`;
+            return `${this.chainSettings.getExplorerUrl()}/tx/${this.transaction.id}`;
         },
         longDate(): string {
             return getLongDate(this.transaction.epoch);
         },
         chainTokenSymbol(): string {
-            return chainSettings.getSystemToken().symbol;
+            return this.chainSettings.getSystemToken().symbol;
         },
     },
     methods: {
-        formatAmount(amount: number, symbol: string = fiatCurrency, useSymbolCharacter: boolean = false) {
-            const decimals = symbol === fiatCurrency ? 2 : 4;
+        formatAmount(amount: number, symbol: string = userStore.fiatCurrency, useSymbolCharacter: boolean = false) {
+            const decimals = symbol === userStore.fiatCurrency ? 2 : 4;
             const formatted = prettyPrintCurrency(
                 amount,
                 decimals,
-                fiatLocale,
+                userStore.fiatLocale,
                 false,
-                useSymbolCharacter ? fiatCurrency : undefined,
+                useSymbolCharacter ? userStore.fiatCurrency : undefined,
             );
 
             return `${formatted} ${symbol}`;
@@ -248,9 +256,9 @@ export default defineComponent({
             <q-icon name="local_gas_station" size="xs" />
         </div>
         <div class="c-transaction-row__gas-text">
-            <span>{{ formatAmount(transaction.gasUsed, chainTokenSymbol) }}</span>
+            <span>{{ formatAmount(transaction.gasUsed ?? 0, chainTokenSymbol) }}</span>
 
-            <span>{{ formatAmount(transaction.gasFiatValue, undefined, true) }}</span>
+            <span>{{ formatAmount(transaction.gasFiatValue ?? 0, undefined, true) }}</span>
         </div>
 
         <div

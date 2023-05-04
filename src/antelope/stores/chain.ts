@@ -48,6 +48,8 @@ import {
     NativeToken,
     Token,
 } from 'src/antelope/types';
+import { ethers } from 'ethers';
+
 
 
 
@@ -72,6 +74,7 @@ export interface ChainModel {
 
 export interface EvmChainModel {
     apy: string;
+    gasPrice: ethers.BigNumber;
     settings: EVMChainSettings;
     tokens: EvmToken[];
 }
@@ -82,18 +85,22 @@ export interface NativeChainModel {
     tokens: NativeToken[];
 }
 
+const newChainModel = (network: string, isNative: boolean): ChainModel => {
+    const model = {
+        apy: '',
+        settings: settings[network],
+        tokens: [],
+    } as ChainModel;
+    if (!isNative) {
+        (model as EvmChainModel).gasPrice = ethers.BigNumber.from(0);
+    }
+    return model;
+};
 
 export interface ChainState {
     // chains mapped by label
     __chains: { [label: Label]: ChainModel };
 }
-
-const newChainModel = (network: string): ChainModel => ({
-    apy: '',
-    settings: settings[network],
-    tokens: [],
-});
-
 
 const store_name = 'chain';
 
@@ -108,6 +115,9 @@ export const useChainStore = defineStore(store_name, {
         currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
+        // TODO: remove the 'as EVMChainSettings' when the native chains are implemented
+        // https://github.com/telosnetwork/telos-wallet/issues/246
+        getExplorerUrl: () => (network: string) => (settings[network] as EVMChainSettings).getExplorerUrl(),
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -119,6 +129,7 @@ export const useChainStore = defineStore(store_name, {
             try {
                 await Promise.all([
                     this.updateApy(label),
+                    this.updateGasPrice(label),
                 ]);
             } catch (error) {
                 console.error(error);
@@ -144,6 +155,21 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
+        async updateGasPrice(label: string) {
+            useFeedbackStore().setLoading('updateGasPrice');
+            this.trace('updateGasPrice');
+            const chain = this.getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const wei = await (chain.settings as EVMChainSettings).getGasPrice();
+                    (chain as EvmChainModel).gasPrice = wei;
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                useFeedbackStore().unsetLoading('updateGasPrice');
+            }
+        },
         async updateTokenList(label: string) {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
@@ -163,6 +189,7 @@ export const useChainStore = defineStore(store_name, {
         },
         // Commits ----
         setLoggedChain(network: string) {
+            this.setChain('current', network);
             this.setChain('logged', network);
         },
         setCurrentChain(network: string) {
@@ -173,9 +200,9 @@ export const useChainStore = defineStore(store_name, {
             if (network in settings) {
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
-                    this.__chains[label] = newChainModel(network);
+                    this.__chains[label] = newChainModel(network, settings[network].isNative());
                     void this.updateChainData(label);
-                    getAntelope().events.onChainChanged.next(
+                    getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },
                     );
                 }

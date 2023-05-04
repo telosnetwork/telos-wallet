@@ -27,7 +27,11 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { getAntelope } from '..';
 import { errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
-import { Action, Label } from 'src/antelope/types';
+import {
+    Action,
+    Label,
+    NativeTransactionResponse,
+} from 'src/antelope/types';
 import { getAccount, disconnect } from '@wagmi/core';
 
 export interface LoginNativeActionData {
@@ -251,14 +255,15 @@ export const useAccountStore = defineStore(store_name, {
             }
             return Promise.resolve(false);
         },
-
-        async sendAction({ account, data, name, actor, permission }: SendActionData) {
+        async sendAction({ account, data, name, actor, permission }: SendActionData): Promise<NativeTransactionResponse> {
             this.trace('sendAction', account, data, name, actor, permission);
             try {
                 useFeedbackStore().setLoading('account.sendAction');
                 console.error('Account.sendAction() not implemented', account, data, name, actor, permission);
+                return Promise.resolve({ hash: '0x0' });
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+                throw error;
             } finally {
                 useFeedbackStore().unsetLoading('account.sendAction');
             }
