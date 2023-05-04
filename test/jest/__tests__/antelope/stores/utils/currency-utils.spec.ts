@@ -121,6 +121,11 @@ describe('prettyPrintCurrency', () => {
             prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 1, 'en-US', false, undefined, undefined, 18),
         ).toBe('1.1');
 
+        // eztodo fix this case
+        expect(
+            prettyPrintCurrency(BigNumber.from(oneEthInWei), 0, 'en-US', false, undefined, undefined, 18),
+        ).toBe('1');
+
         expect(
             prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 4, 'en-US', false, undefined, undefined, 18),
         ).toBe('1.1000');
@@ -134,12 +139,17 @@ describe('prettyPrintCurrency', () => {
         ).toBe('1,500.0000');
 
         expect(
+            prettyPrintCurrency(BigNumber.from('4999999999999999999750'), 4, 'en-US', false, undefined, undefined, 18),
+        ).toBe('4,999.9999');
+
+        expect(
             prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, undefined, undefined, 18),
         ).toBe('1.5K');
 
         expect(
             prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, 'TLOS', undefined, 18),
         ).toBe('1.5K TLOS');
+
     });
 });
 
@@ -276,7 +286,7 @@ describe('roundCurrency', () => {
         const precisionFour = 4;
         const tlosDecimals = 18;
         const pointNineRepeatingBn = BigNumber.from('9'.repeat(tlosDecimals));
-        const roundedPointNineBn = BigNumber.from('9999'.concat('0'.repeat(tlosDecimals - precisionFour)));
+        const roundedPointNineBn = BigNumber.from('1'.concat('0'.repeat(18)));
         const roundedFourPrecision = roundCurrency(pointNineRepeatingBn, tlosDecimals, precisionFour);
         expect(roundedFourPrecision.eq(roundedPointNineBn)).toBe(true);
 

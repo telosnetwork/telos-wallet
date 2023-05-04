@@ -23,27 +23,6 @@ export default defineComponent({
         currencyTokenInputDecimals: 18,
         currencyTokenInputMaxValue: maxTlos,
 
-        currencyFiatInputValue: 0,
-        currencyFiatInputSymbol: 'USD',
-        currencyFiatInputMaxValue: 9999999, // 9.999M USD
-        currencyInputSecondaryValue: '',
-
-        // swappable input - primary amount is in TLOS (token), secondary in USD (fiat)
-        currencyTlosUsdInputValue: BigNumber.from('0'),
-        currencyTlosUsdInputSymbol: 'TLOS',
-        currencyTlosUsdInputDecimals: 18,
-        currencyTlosUsdInputSecondarySymbol: 'USD',
-        currencyTlosUsdInputConversionRate : 0.2,
-        currencyTlosUsdInputMaxValue: BigNumber.from('5000'.concat('0'.repeat(18))), // 5K TLOS
-
-        // swappable input - primary amount is in USD (fiat), secondary in TLOS (token)
-        currencyUsdTlosInputValue: 0,
-        currencyUsdTlosInputSymbol: 'USD',
-        currencyUsdTlosInputSecondarySymbol: 'TLOS',
-        currencyUsdTlosInputSecondaryDecimals: 18,
-        currencyUsdTlosInputConversionRate : 5,
-        currencyUsdTlosInputMaxValue: 5000, // 5K USD
-
         // swappable input - primary amount is in TLOS (token), secondary in USDT (token)
         currencyTlosUsdtInputValue: BigNumber.from('0'),
         currencyTlosUsdtInputSymbol: 'TLOS',
@@ -51,7 +30,7 @@ export default defineComponent({
         currencyTlosUsdtInputSecondarySymbol: 'USDT',
         currencyTlosUsdtInputSecondaryDecimals: 6,
         currencyTlosUsdtInputConversionRate: 0.19,
-        currencyTlosUsdtInputMaxValue: BigNumber.from('5000'.concat('0'.repeat(18))), // eztodo make variable
+        currencyTlosUsdtInputMaxValue: BigNumber.from('49295123412'.concat('0'.repeat(11))), // eztodo make variable
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
@@ -106,58 +85,6 @@ export default defineComponent({
                     class="q-mb-xl"
                 />
                 Input amount: {{ currencyTokenInputValue.toString() }} (as BigNumber)
-            </div>
-            <div class="col-3">
-                <CurrencyInput
-                    v-model="currencyFiatInputValue"
-                    :symbol="currencyFiatInputSymbol"
-                    :locale="currencyInputLocale"
-                    :max-value="currencyFiatInputMaxValue"
-                    :disabled="currencyInputIsDisabled"
-                    :readonly="currencyInputIsReadonly"
-                    :required="currencyInputIsRequired"
-                    label="Amount (fiat)"
-                    class="q-mb-xl"
-                />
-                Input amount: {{ currencyFiatInputValue }} (as Number)
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-3">
-                <CurrencyInput
-                    v-model="currencyTlosUsdInputValue"
-                    :symbol="currencyTlosUsdInputSymbol"
-                    :decimals="currencyTlosUsdInputDecimals"
-                    :secondary-currency-symbol="currencyTlosUsdInputSecondarySymbol"
-                    :secondary-currency-conversion-factor="currencyTlosUsdInputConversionRate"
-                    :max-value="currencyTlosUsdInputMaxValue"
-                    :locale="currencyInputLocale"
-                    :disabled="currencyInputIsDisabled"
-                    :readonly="currencyInputIsReadonly"
-                    :required="currencyInputIsRequired"
-                    label="Amount (TLOS/USD)"
-                    class="q-mb-xl"
-                />
-                Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
-            </div>
-            <div class="col-3">
-                <CurrencyInput
-                    v-model="currencyUsdTlosInputValue"
-                    :locale="currencyInputLocale"
-                    :symbol="currencyUsdTlosInputSymbol"
-                    :secondary-currency-symbol="currencyUsdTlosInputSecondarySymbol"
-                    :secondary-currency-decimals="currencyUsdTlosInputSecondaryDecimals"
-                    :secondary-currency-conversion-factor="currencyUsdTlosInputConversionRate"
-                    :max-value="currencyUsdTlosInputMaxValue"
-                    :disabled="currencyInputIsDisabled"
-                    :readonly="currencyInputIsReadonly"
-                    :required="currencyInputIsRequired"
-                    label="Amount (USD/TLOS)"
-                    class="q-mb-xl"
-                />
-                <!-- eztodo update styling to not need mb -->
-                <!--eztodo add inputs to test other combos of fiat and token-->
-                Input amount: {{ currencyUsdTlosInputValue }} (as number)
             </div>
             <div class="col-3">
                 <CurrencyInput

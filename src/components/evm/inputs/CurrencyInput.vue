@@ -5,7 +5,9 @@ import {
     getDecimalSeparatorForLocale,
     getLargeNumberSeparatorForLocale,
     getBigNumberFromLocalizedNumberString,
-    prettyPrintCurrency, convertCurrency, invertFloat,
+    prettyPrintCurrency,
+    convertCurrency,
+    invertFloat,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
@@ -22,6 +24,9 @@ export default defineComponent({
     },
     props: {
         modelValue: {
+            // eztodo update this comment
+            // eztodo add validators to decimals and stuff
+
             // if this is a BigNumber, the currency is treated as a token. Otherwise, it's treated as fiat.
             // note that modelValue always represents the primary currency,
             // e.g. if the modelValue (primary currency) is in TLOS, the emitted value will be the BigNumber amount of
@@ -32,7 +37,7 @@ export default defineComponent({
             // changes the way the user sees and enters the value.
             // also note that the secondary currency may be either fiat or token, depending on the presence of
             // the secondaryCurrencyDecimals prop
-            type: [BigNumber, Number] as PropType<BigNumber | number>,
+            type: BigNumber as PropType<BigNumber>,
             required: true,
         },
         symbol: {
@@ -40,15 +45,16 @@ export default defineComponent({
             required: true,
         },
         decimals: {
-            // the number of decimals used for the token. Leave undefined / value is ignored for fiat.
+            // the number of decimals used for the token. Use 2 for fiat values
             type: Number,
-            default: null,
+            required: true,
         },
         secondaryCurrencyConversionFactor: {
             // pertains to the optional 'swap' amount under the input.
             // only needed when there is a swappable secondary value, ignored otherwise.
             // this represents the conversion factor between the primary and secondary amounts,
             // e.g. if 1 TLOS = 0.20 USD, and the modelValue is in TLOS, the conversion factor is 0.20
+            // and to convert back from secondary to primary currency, (1 / secondaryCurrencyConversionFactor) is used
             type: [String, Number],
             default: null,
         },
@@ -58,7 +64,7 @@ export default defineComponent({
             default: '',
         },
         secondaryCurrencyDecimals: {
-            // the number of decimals used for the secondary currency. Leave undefined / value is ignored for fiat.
+            // the number of decimals used for the secondary currency. Use 2 for fiat values
             type: Number,
             default: null,
         },
@@ -74,8 +80,9 @@ export default defineComponent({
             type: String,
             default: '',
         },
-        maxValue: { // eztodo include number.max integer for fiat
-            type: [BigNumber, Number] as PropType<BigNumber | number>,
+        maxValue: {
+            // eztodo comment here
+            type: BigNumber as PropType<BigNumber>,
             default: null,
         },
     },
@@ -84,7 +91,21 @@ export default defineComponent({
     ],
     data: () => ({
         swapIcon: require('src/assets/icon--swap.svg'),
-        swapCurrencies: false, // whether the user has clicked the swap button
+
+        // whether the user has clicked the swap button
+        swapCurrencies: false,
+
+        // used to check if a new modelValue needs to be emitted when using a swappable currency.
+        // this is needed because in many cases, the conversion factor from primary to secondary currency will result in
+        // an irrational number of secondary currency being equivalent to the modelValue (primary currency amount),
+        // e.g. .19 USD === 1 TLOS => 5.263157......... (irrational) USD = 1 TLOS
+        // In these cases, there will be an infinite update loop as the logic to decide whether to emit relies on
+        // comparing the secondary value converted to the primary value with the new modelValue (primary amount);
+        // a small amount of precision is lost (by rounding) with every conversion (because irrational numbers cannot be
+        // accurately stored in a variable), leading to inequality. This is the same reason that, when a user enters an
+        // amount in a secondary currency, and the conversion rate from secondary to primary is irrational, we must pass
+        // a rounded number to whatever service is being called. This rounding is accurate to the token's max precision
+        savedSecondaryValue: BigNumber.from(0),
     }),
     computed: {
         inputElement(): HTMLInputElement {
@@ -122,62 +143,23 @@ export default defineComponent({
 
             return attrs;
         },
-        isFiat() {
-            return !(this.modelValue instanceof BigNumber);
-        },
         hasSwappableCurrency() {
-            return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencySymbol;
+            return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencySymbol && !!this.secondaryCurrencyDecimals;
         },
-        secondaryCurrencyIsFiat() {
-            return this.hasSwappableCurrency && this.secondaryCurrencyDecimals === null;
-        },
-        secondaryCurrencyAmount(): BigNumber | number {
+        secondaryCurrencyAmount(): BigNumber {
             if (!this.hasSwappableCurrency) {
                 return BigNumber.from(0);
             }
 
-            if (this.secondaryCurrencyIsFiat && typeof this.modelValue === 'number') {
-                // two fiat values
-                // eztodo this
-                // return this.secondaryCurrencyConversionFactor * Number(this.modelValue);
-                const converted = convertCurrency(
-                    parseUnits(this.modelValue.toString(), 2),
-                    2,
-                    2,
-                    this.secondaryCurrencyConversionFactor,
-                );
-
-                return +formatUnits(converted, 2);
-            } else if (this.secondaryCurrencyIsFiat && this.modelValue instanceof BigNumber) {
-                const converted = convertCurrency(
-                    this.modelValue as BigNumber,
-                    this.decimals,
-                    2,
-                    this.secondaryCurrencyConversionFactor,
-                );
-
-                return +formatUnits(converted, 2);
-            } else if (!this.secondaryCurrencyIsFiat && typeof this.modelValue === 'number') {
-                const modelAsBigNumber = parseUnits(this.modelValue.toString(), 2);
-                return convertCurrency(
-                    modelAsBigNumber,
-                    2,
-                    this.secondaryCurrencyDecimals,
-                    this.secondaryCurrencyConversionFactor,
-                );
-            } else {
-                // !this.secondaryCurrencyIsFiat && this.modelValue instanceof BigNumber
-                return convertCurrency(
-                    this.modelValue as BigNumber,
-                    this.decimals,
-                    this.secondaryCurrencyDecimals,
-                    this.secondaryCurrencyConversionFactor,
-                );
-            }
+            return convertCurrency(
+                this.modelValue,
+                this.decimals,
+                this.secondaryCurrencyDecimals,
+                this.secondaryCurrencyConversionFactor,
+            );
         },
         prettySecondaryValue() {
             // eztodo abbreviate large values using viters function
-
             if (!this.hasSwappableCurrency) {
                 return '';
             }
@@ -188,19 +170,14 @@ export default defineComponent({
             if (!this.swapCurrencies) {
                 symbol = this.secondaryCurrencySymbol;
 
-                if (!this.secondaryCurrencyIsFiat) {
-                    amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 4, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
-                } else {
-                    amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 2, this.locale);
-                }
+                // eztodo not quite right precision
+                amount = prettyPrintCurrency(this.secondaryCurrencyAmount, 2, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
+
             } else {
                 symbol = this.symbol;
 
-                if (this.modelValue instanceof BigNumber) {
-                    amount = prettyPrintCurrency(this.modelValue, 4, this.locale, false, undefined, undefined, this.decimals);
-                } else {
-                    amount = prettyPrintCurrency(this.modelValue, 2, this.locale);
-                }
+                // eztodo update precision
+                amount = prettyPrintCurrency(this.modelValue, 4, this.locale, false, undefined, undefined, this.decimals);
             }
 
             return `${amount} ${symbol}`;
@@ -222,8 +199,7 @@ export default defineComponent({
                 return this.errorText;
             }
 
-            const modelValueIsZero = this.modelValue instanceof BigNumber ? this.modelValue.isZero() : this.modelValue === 0;
-            if (this.isRequired && modelValueIsZero) {
+            if (this.isRequired && this.modelValue.isZero()) {
                 return 'This field is required'; // eztodo i18n
             }
 
@@ -241,24 +217,27 @@ export default defineComponent({
             return invertFloat(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
+            if (!this.maxValue) {
+                return '';
+            }
+
             let symbol: string;
             let amount: string;
 
-            if (this.swapCurrencies) {
-                const precision = this.secondaryCurrencyIsFiat ? 2 : 4;
-                const maxValueBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
                 const maxValueInSecondaryCurrency = convertCurrency(
-                    maxValueBn,
-                    this.decimals ?? 2,
-                    this.secondaryCurrencyDecimals ?? 2,
+                    this.maxValue,
+                    this.decimals,
+                    this.secondaryCurrencyDecimals,
                     this.secondaryCurrencyConversionFactor,
                 );
 
-                amount = prettyPrintCurrency(maxValueInSecondaryCurrency, precision, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2);
+                // eztodo look at precision
+                amount = prettyPrintCurrency(maxValueInSecondaryCurrency, 4, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals);
                 symbol = this.secondaryCurrencySymbol;
             } else {
-                const precision = this.isFiat ? 2 : 4;
-                amount = prettyPrintCurrency(this.maxValue, precision, this.locale, false, undefined, undefined, this.decimals ?? 2);
+                // eztodo look at precision
+                amount = prettyPrintCurrency(this.maxValue, 4, this.locale, false, undefined, undefined, this.decimals);
                 symbol = this.symbol;
             }
 
@@ -284,9 +263,14 @@ export default defineComponent({
         },
     },
     watch: {
-        modelValue(newValue: BigNumber | number, oldValue: BigNumber | number) {
-            const newValueIsBigNumber = newValue instanceof BigNumber;
-            const newValueIsDifferent = newValueIsBigNumber ? !newValue.eq(oldValue as BigNumber) : newValue !== oldValue;
+        modelValue(newValue: BigNumber, oldValue: BigNumber) {
+            let newValueIsDifferent;
+
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
+                newValueIsDifferent = !this.savedSecondaryValue.eq(newValue);
+            } else {
+                newValueIsDifferent = !newValue.eq(oldValue);
+            }
 
             if (newValueIsDifferent) {
                 // if user has just deleted the last character before the decimal separator
@@ -295,48 +279,53 @@ export default defineComponent({
 
                 let shouldSkipFormattingAndEmitting = false;
 
-                if (newValue instanceof BigNumber) {
-                    // formatUnits always adds a decimal separator and zero if input is an integer
-                    // as such, the user has just deleted the last character before the decimal separator
-                    // if the input value is equal to the modelValue (converted from BigNumber to a number string) plus a zero
-                    const newValueAsString = formatUnits(newValue, this.decimals);
-                    const inputValue = this.inputElement.value;
-                    const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
-                    const newValueIsEqualToInputValueWithZero = newValueAsString === `${inputValue}0`;
 
-                    if (lastCharacterOfInputIsDecimalSeparator && newValueIsEqualToInputValueWithZero) {
-                        shouldSkipFormattingAndEmitting = true;
-                    }
-                } else {
-                    // if the modelValue is a number, the user has deleted the last character before a decimal if
-                    // the input value is equal to the modelValue plus a decimal separator
-                    const newValueAsString = newValue.toString();
-                    const inputValue = this.inputElement.value;
-                    const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
-                    const newValueIsEqualToInputValueWithDecimalSeparator = inputValue === `${newValueAsString}${this.decimalSeparator}`;
+                // formatUnits always adds a decimal separator and zero if input is an integer
+                // as such, the user has just deleted the last character before the decimal separator
+                // if the input value is equal to the modelValue (converted from BigNumber to a number string) plus a zero
+                const newValueAsString = formatUnits(newValue, this.decimals);
+                const inputValue = this.inputElement.value;
+                const lastCharacterOfInputIsDecimalSeparator = inputValue[inputValue.length - 1] === this.decimalSeparator;
+                const newValueIsEqualToInputValueWithZero = newValueAsString === `${inputValue}0`;
 
-                    if (lastCharacterOfInputIsDecimalSeparator && newValueIsEqualToInputValueWithDecimalSeparator) {
-                        shouldSkipFormattingAndEmitting = true;
-                    }
+                if (lastCharacterOfInputIsDecimalSeparator && newValueIsEqualToInputValueWithZero) {
+                    shouldSkipFormattingAndEmitting = true;
                 }
+
 
                 if (!shouldSkipFormattingAndEmitting) {
                     let newInputValue: string;
                     const decimalsToShow = this.getNumberOfDecimalsToShow(newValue);
 
-                    if (this.swapCurrencies) {
-                        const newValueBn = newValue instanceof BigNumber ? newValue : parseUnits(newValue.toString(), this.decimals ?? 2);
-
+                    if (this.swapCurrencies && this.hasSwappableCurrency) {
                         const newValueInSecondaryCurrency = convertCurrency(
-                            newValueBn,
-                            this.decimals ?? 2,
-                            this.secondaryCurrencyDecimals ?? 2,
+                            newValue,
+                            this.decimals,
+                            this.secondaryCurrencyDecimals,
                             this.secondaryCurrencyConversionFactor,
                         );
 
-                        newInputValue = prettyPrintCurrency(newValueInSecondaryCurrency, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2, true);
+                        newInputValue = prettyPrintCurrency(
+                            newValueInSecondaryCurrency,
+                            decimalsToShow,
+                            this.locale,
+                            false,
+                            undefined,
+                            undefined,
+                            this.secondaryCurrencyDecimals,
+                            true,
+                        );
                     } else {
-                        newInputValue = prettyPrintCurrency(newValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals ?? 2, true);
+                        newInputValue = prettyPrintCurrency(
+                            newValue,
+                            decimalsToShow,
+                            this.locale,
+                            false,
+                            undefined,
+                            undefined,
+                            this.decimals,
+                            true,
+                        );
                     }
 
                     this.setInputValue(newInputValue);
@@ -345,8 +334,18 @@ export default defineComponent({
             }
         },
         locale() {
+            // eztodo also reset swapcurrencies
             const decimalsToShow = this.getNumberOfDecimalsToShow(this.modelValue);
-            const formatted = prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals, true);
+            const formatted = prettyPrintCurrency(
+                this.modelValue,
+                decimalsToShow,
+                this.locale,
+                false,
+                undefined,
+                undefined,
+                this.decimals,
+                true,
+            );
 
             this.setInputValue(formatted);
         },
@@ -365,11 +364,27 @@ export default defineComponent({
             let newInputValue: string;
 
             if (showSecondaryCurrency) {
-                const decimalsToShow = this.secondaryCurrencyIsFiat ? 2 : 4;
-                newInputValue = prettyPrintCurrency(this.secondaryCurrencyAmount, decimalsToShow, this.locale, false, undefined, undefined, this.secondaryCurrencyDecimals ?? 2);
+                // eztodo address precision
+                newInputValue = prettyPrintCurrency(
+                    this.secondaryCurrencyAmount,
+                    4,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.secondaryCurrencyDecimals,
+                );
             } else {
-                const decimalsToShow = this.isFiat ? 2 : 4;
-                newInputValue = prettyPrintCurrency(this.modelValue, decimalsToShow, this.locale, false, undefined, undefined, this.decimals ?? 2);
+                // eztodo address precision
+                newInputValue = prettyPrintCurrency(
+                    this.modelValue,
+                    4,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.decimals,
+                );
             }
 
             this.setInputValue(newInputValue);
@@ -399,46 +414,35 @@ export default defineComponent({
         handleInput() {
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
-            const emit = (val: BigNumber | number) => {
+            const emit = (val: BigNumber) => {
                 let newValIsDifferent: boolean;
 
-                if (this.swapCurrencies) {
+                if (this.swapCurrencies && this.hasSwappableCurrency) {
                     // val is the secondary currency amount; convert to primary currency and check against modelValue
-                    const modelValueAsBigNumber = this.modelValue instanceof BigNumber ? this.modelValue : parseUnits(this.modelValue.toString(), this.decimals ?? 2);
-                    const newSecondaryAmountAsBigNumber = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
+                    const newSecondaryConvertedToPrimary = convertCurrency(
+                        val,
+                        this.secondaryCurrencyDecimals ?? 2,
+                        this.decimals ?? 2,
+                        this.secondaryToPrimaryConversionRate,
+                    );
+                    this.savedSecondaryValue = newSecondaryConvertedToPrimary;
 
-                    console.log(modelValueAsBigNumber.toString());
-                    // eztodo consolidate with below
-                    const newSecondaryConvertedToPrimary = convertCurrency(newSecondaryAmountAsBigNumber, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
-                    console.log(newSecondaryConvertedToPrimary.toString());
-                    console.log('\n\n');
-
-                    // console.log(newSecondaryConvertedToPrimary.toString());
-
-                    newValIsDifferent = !modelValueAsBigNumber.eq(newSecondaryConvertedToPrimary);
-                    // console.log(newValIsDifferent);
+                    newValIsDifferent = !this.modelValue.eq(newSecondaryConvertedToPrimary);
                 } else {
-                    const newValIsBigNumber = val instanceof BigNumber;
-                    newValIsDifferent = newValIsBigNumber ? !val.eq(this.modelValue) : val !== this.modelValue;
+                    newValIsDifferent = !val.eq(this.modelValue);
                 }
 
                 if (newValIsDifferent) {
-                    if (this.swapCurrencies) {
+                    if (this.swapCurrencies && this.hasSwappableCurrency) {
                         // val is the secondary currency amount; convert to primary currency and emit
-                        const valueBn = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
-                        const secondaryConvertedToPrimary = convertCurrency(valueBn, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
+                        const secondaryConvertedToPrimary = convertCurrency(
+                            val,
+                            this.secondaryCurrencyDecimals,
+                            this.decimals,
+                            this.secondaryToPrimaryConversionRate,
+                        );
 
-                        // console.log(valueBn.toString());
-
-                        let emitValue;
-
-                        if (this.modelValue instanceof BigNumber) {
-                            emitValue = secondaryConvertedToPrimary;
-                        } else {
-                            emitValue = parseFloat(formatUnits(secondaryConvertedToPrimary, this.decimals ?? 2));
-                        }
-
-                        this.$emit('update:modelValue', emitValue);
+                        this.$emit('update:modelValue', secondaryConvertedToPrimary);
                     } else {
                         this.$emit('update:modelValue', val);
                     }
@@ -463,7 +467,7 @@ export default defineComponent({
                     this.setInputValue(zeroWithDecimalSeparator);
                 }
 
-                emit(this.isFiat ? 0 : BigNumber.from(0));
+                emit(BigNumber.from(0));
                 return;
             }
 
@@ -487,18 +491,17 @@ export default defineComponent({
                 // occur so as not to strip the decimal separator
                 let valueString: string;
 
-                if (this.swapCurrencies) {
-                    valueString = this.secondaryCurrencyIsFiat ? this.secondaryCurrencyAmount.toString() : formatUnits(this.secondaryCurrencyAmount, this.secondaryCurrencyDecimals ?? 2);
+                if (this.swapCurrencies && this.hasSwappableCurrency) {
+                    valueString = formatUnits(this.secondaryCurrencyAmount, this.secondaryCurrencyDecimals);
                 } else {
-                    valueString = this.isFiat ? this.modelValue.toString() : formatUnits(this.modelValue, this.decimals);
+                    valueString = formatUnits(this.modelValue, this.decimals);
                 }
 
                 const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === valueString.length - 1;
 
                 if (isDeletingLastCharacterAfterDecimal) {
-                    const emitValue = this.isFiat
-                        ? Number(this.inputElement.value.replaceAll(this.decimalSeparator, ''))
-                        : getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+                    // eztodo should this decimals thing account for secondary?
+                    const emitValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
                     // if the user has deleted the last number after a decimal, the value should be emitted but
                     // no further formatting should occur
                     emit(emitValue);
@@ -507,22 +510,14 @@ export default defineComponent({
                 return;
             }
 
-            let newValue: BigNumber | number;
+            let newValue: BigNumber;
 
             // eztodo comment for this block
             // eztodo disable maxamount and swap buttons if disabled or readonly; style text too
-            if (this.swapCurrencies) {
-                if (!this.secondaryCurrencyIsFiat) {
-                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
-                } else {
-                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-                }
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
+                newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
             } else {
-                if (!this.isFiat) {
-                    newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
-                } else {
-                    newValue = Number(this.inputElement.value.replace(this.largeNumberSeparatorRegex, ''));
-                }
+                newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
             }
 
             // get information needed to preserve user caret position in case commas/dots are added/removed
@@ -613,10 +608,10 @@ export default defineComponent({
 
                 let maxDecimals;
 
-                if (this.swapCurrencies) {
-                    maxDecimals = this.secondaryCurrencyIsFiat ? 2 : this.secondaryCurrencyDecimals;
+                if (this.swapCurrencies && this.hasSwappableCurrency) {
+                    maxDecimals = this.secondaryCurrencyDecimals;
                 } else {
-                    maxDecimals = this.isFiat ? 2 : this.decimals;
+                    maxDecimals = this.decimals;
                 }
 
                 const keypressIsDigit = numKeys.includes(event.key);
@@ -649,11 +644,11 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
-        getNumberOfDecimalsToShow(value: BigNumber | number) {
-            const valueString = (typeof value === 'number' ? value.toString() : formatUnits(value, this.decimals));
+        getNumberOfDecimalsToShow(value: BigNumber) {
+            const valueString = formatUnits(value, this.decimals);
             const fraction = valueString.split('.')[1];
 
-            if (!fraction) {
+            if (fraction === undefined) {
                 return 0;
             }
 
@@ -673,16 +668,38 @@ export default defineComponent({
         fillMaxValue() {
             let formattedMaxValue: string;
 
-            if (this.swapCurrencies) {
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
                 const precision = this.getNumberOfDecimalsToShow(this.secondaryCurrencyAmount);
-                const decimals = this.secondaryCurrencyIsFiat ? 2 : this.secondaryCurrencyDecimals;
-                const maxValueBn = this.maxValue instanceof BigNumber ? this.maxValue : parseUnits(this.maxValue.toString(), this.decimals ?? 2);
-                const maxValueInSecondaryCurrency = convertCurrency(maxValueBn, this.decimals ?? 2, this.secondaryCurrencyDecimals ?? 2, this.secondaryCurrencyConversionFactor);
-                formattedMaxValue = prettyPrintCurrency(maxValueInSecondaryCurrency, precision, this.locale, false, undefined, undefined, decimals, true);
+                const decimals = this.secondaryCurrencyDecimals; // eztodo review this decimals
+                const maxValueInSecondaryCurrency = convertCurrency(
+                    this.maxValue,
+                    this.decimals,
+                    this.secondaryCurrencyDecimals,
+                    this.secondaryCurrencyConversionFactor,
+                );
+                formattedMaxValue = prettyPrintCurrency(
+                    maxValueInSecondaryCurrency,
+                    precision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    decimals,
+                    true,
+                );
             } else {
                 const precision = this.getNumberOfDecimalsToShow(this.maxValue);
-                const decimals = this.isFiat ? undefined : (this.decimals ?? 2);
-                formattedMaxValue = prettyPrintCurrency(this.maxValue, precision, this.locale, undefined, undefined, undefined, decimals, true);
+                const decimals = this.decimals; // eztodo review this decimals
+                formattedMaxValue = prettyPrintCurrency(
+                    this.maxValue,
+                    precision,
+                    this.locale,
+                    undefined,
+                    undefined,
+                    undefined,
+                    decimals,
+                    true,
+                );
             }
 
             this.setInputValue(formattedMaxValue);

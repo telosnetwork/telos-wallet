@@ -24,18 +24,6 @@ export function getLargeNumberSeparatorForLocale(locale: string) {
     return nonDigitCharacters[0];
 }
 
-// export function convertFiatToTokens() {
-//
-// }
-//
-// export function convertTokensToFiat() {
-//
-// }
-//
-// export function convertTokensToTokens(sourceTokenAmount: BigNumber, sourceDecimals: number, destinationDecimals: number, conversionRate: number) {
-//     const sourceAmount
-// }
-
 export function getBigNumberFromLocalizedNumberString(formatted: string, decimals: number, locale: string): BigNumber {
     const decimalSeparator = getDecimalSeparatorForLocale(locale);
 
@@ -142,7 +130,8 @@ export function prettyPrintCurrency(
             { notation: abbreviate ? 'compact' : undefined },
         ).format(BigInt(integerString));
 
-        const formattedDecimal = decimalString.slice(0, tokenDecimals).padEnd(precision, '0');
+        const formattedDecimal = decimalString.slice(0, precision || 1).padEnd(precision, '0');
+
         let finalFormattedValue;
 
         if (abbreviate) {
@@ -158,8 +147,6 @@ export function prettyPrintCurrency(
         if (currency) {
             finalFormattedValue += ` ${currency}`;
         }
-
-        // debugger;
 
         return finalFormattedValue;
     }
@@ -249,14 +236,9 @@ export function roundCurrency(num: BigNumber, decimals: number, precision = 4) {
     }
 
 
-    const formattedParts = formatUnits(num, decimals).split('.');
-    // formatUnits always adds a decimal; no need to check for index of '.'
-    const integer = formattedParts[0];
-    let fractional = formattedParts[1];
+    const formatted = formatUnits(num, decimals);
 
-    fractional = fractional.slice(0, precision);
+    const rounded = new Decimal(formatted).toFixed(precision);
 
-    const roundedFormatted = `${integer}.${fractional}`;
-
-    return parseUnits(roundedFormatted, decimals);
+    return parseUnits(rounded, decimals);
 }
