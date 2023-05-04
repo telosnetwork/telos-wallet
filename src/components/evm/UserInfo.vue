@@ -186,7 +186,7 @@ export default defineComponent({
             font-weight: 400;
         }
 
-        :not(&--lightweight) {
+        &:not(&--lightweight) {
             @media only screen and (min-width: $breakpoint-lg-min) {
                 font-weight: 600;
             }
