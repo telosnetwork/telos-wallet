@@ -4,7 +4,9 @@ import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import { parseUnits, formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
-const maxTlos = BigNumber.from('9'.repeat(7).concat('0'.repeat(18))); // 9.999M TLOS
+const largeTlosOne = BigNumber.from('9'.repeat(7).concat('0'.repeat(18))); // 9.999M TLOS
+const largeTlosTwo = BigNumber.from('49295123412'.concat('0'.repeat(11)));
+const zeroBn = BigNumber.from('0');
 
 export default defineComponent({
     name: 'InputDemos',
@@ -12,34 +14,33 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
-        // eztodo make variable for bignumber from 0
         currencyInputLocale: 'en-US',
         currencyInputIsRequired: false,
         currencyInputIsDisabled: false,
         currencyInputIsReadonly: false,
 
-        currencyTokenInputValue: BigNumber.from('0'),
+        currencyTokenInputValue: zeroBn,
         currencyTokenInputSymbol: 'TLOS',
         currencyTokenInputDecimals: 18,
-        currencyTokenInputMaxValue: maxTlos,
+        currencyTokenInputMaxValue: largeTlosOne,
 
         // swappable input - primary amount is in TLOS, secondary in USDT
-        currencyTlosUsdtInputValue: BigNumber.from('0'),
+        currencyTlosUsdtInputValue: zeroBn,
         currencyTlosUsdtInputSymbol: 'TLOS',
         currencyTlosUsdtInputDecimals: 18,
         currencyTlosUsdtInputSecondarySymbol: 'USDT',
         currencyTlosUsdtInputSecondaryDecimals: 6,
         currencyTlosUsdtInputConversionRate: 0.19,
-        currencyTlosUsdtInputMaxValue: BigNumber.from('49295123412'.concat('0'.repeat(11))), // eztodo make variable
+        currencyTlosUsdtInputMaxValue: largeTlosTwo,
 
         // swappable input - primary amount is in TLOS, secondary in USD
-        currencyTlosUsdInputValue: BigNumber.from('0'),
+        currencyTlosUsdInputValue: zeroBn,
         currencyTlosUsdInputSymbol: 'TLOS',
         currencyTlosUsdInputDecimals: 18,
         currencyTlosUsdInputSecondarySymbol: 'USD',
         currencyTlosUsdInputSecondaryDecimals: 2,
         currencyTlosUsdInputConversionRate: 0.21,
-        currencyTlosUsdInputMaxValue: BigNumber.from('49295123412'.concat('0'.repeat(11))), // eztodo make variable
+        currencyTlosUsdInputMaxValue: largeTlosTwo,
     }),
     methods: {
         updateCurrencyInputLocale(event: InputEvent) {
@@ -111,7 +112,6 @@ export default defineComponent({
                     label="Amount (TLOS/USDT)"
                     class="q-mb-xl"
                 />
-                <!-- eztodo error when inputting usdt value-->
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
             </div>
             <div class="col-3">
@@ -130,7 +130,6 @@ export default defineComponent({
                     label="Amount (TLOS/USD)"
                     class="q-mb-xl"
                 />
-                <!-- eztodo error when inputting usdt value-->
                 Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
             </div>
         </div>

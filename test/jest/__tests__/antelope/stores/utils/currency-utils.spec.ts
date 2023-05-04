@@ -156,7 +156,6 @@ describe('prettyPrintCurrency', () => {
             prettyPrintCurrency(BigNumber.from(onePointOneEthInWei), 1, 'en-US', false, undefined, undefined, 18),
         ).toBe('1.1');
 
-        // eztodo fix this case
         expect(
             prettyPrintCurrency(BigNumber.from(oneEthInWei), 0, 'en-US', false, undefined, undefined, 18),
         ).toBe('1');

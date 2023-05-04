@@ -179,7 +179,3 @@ export function getLongDate(epoch: number): string {
     const offset = getFormattedUtcOffset(new Date(epoch));
     return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
 }
-
-// eztodo move this to currency utils
-// eztodo support bignumber?
-

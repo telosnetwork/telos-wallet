@@ -24,30 +24,24 @@ export default defineComponent({
     },
     props: {
         modelValue: {
-            // eztodo update this comment
-            // eztodo add validators to decimals and stuff
-
-            // if this is a BigNumber, the currency is treated as a token. Otherwise, it's treated as fiat.
             // note that modelValue always represents the primary currency,
             // e.g. if the modelValue (primary currency) is in TLOS, the emitted value will be the BigNumber amount of
             // TLOS (not the secondary currency, e.g. USD), even if the user has 'swapped' to enter USD
-            // If the modelValue is a number, the primary currency is treated as fiat, and thus the emitted value will
-            // always be a number (not a BigNumber).
             // This is to say that the 'swap' functionality does not change the behavior of modelValue, it only
-            // changes the way the user sees and enters the value.
-            // also note that the secondary currency may be either fiat or token, depending on the presence of
-            // the secondaryCurrencyDecimals prop
+            // changes the way the user sees and enters the value
             type: BigNumber as PropType<BigNumber>,
             required: true,
         },
         symbol: {
             type: String,
             required: true,
+            validator: (value: string) => value !== '',
         },
         decimals: {
             // the number of decimals used for the token. Use 2 for fiat values
             type: Number,
             required: true,
+            validator: (value: number) => value >= 0 && Number.isInteger(value),
         },
         secondaryCurrencyConversionFactor: {
             // pertains to the optional 'swap' amount under the input.
@@ -75,13 +69,13 @@ export default defineComponent({
         label: {
             type: String,
             default: '',
-        }, // eztodo make computed label text with asterisk if required?
+        },
         errorText: {
             type: String,
             default: '',
         },
         maxValue: {
-            // eztodo comment here
+            // represents the maximum amount that the user has available
             type: BigNumber as PropType<BigNumber>,
             default: null,
         },
@@ -91,6 +85,7 @@ export default defineComponent({
     ],
     data: () => ({
         swapIcon: require('src/assets/icon--swap.svg'),
+        inputIsDirty: false,
 
         // whether the user has clicked the swap button
         swapCurrencies: false,
@@ -207,13 +202,11 @@ export default defineComponent({
             return getDecimalSeparatorForLocale(this.locale);
         },
         visibleErrorText(): string {
-            // eztodo only show error state if input is dirty
-            // eztodo add validation rules?
             if (this.errorText) {
                 return this.errorText;
             }
 
-            if (this.isRequired && this.modelValue.isZero()) {
+            if (this.isRequired && this.modelValue.isZero() && this.inputIsDirty) {
                 return this.$t('global.required_field');
             }
 
@@ -231,6 +224,7 @@ export default defineComponent({
             return getFloatReciprocal(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
+            // eztodo abbreviate large values using viters function
             if (!this.maxValue) {
                 return '';
             }
@@ -397,17 +391,6 @@ export default defineComponent({
 
             this.setInputValue(formatted);
         },
-        decimals(newValue: number, oldValue: number) {
-            // eztodo review this
-            const inputHasDecimal = this.inputElement.value.indexOf(this.decimalSeparator) > -1;
-            if (newValue < oldValue && inputHasDecimal) {
-                let [integer, fraction] = this.inputElement.value.split(this.decimalSeparator);
-                fraction = fraction.slice(0, newValue);
-
-                this.setInputValue(`${integer}${fraction ? this.decimalSeparator : ''}${fraction}`);
-                this.handleInput();
-            }
-        },
         swapCurrencies(showSecondaryCurrency: boolean) {
             let newInputValue: string;
 
@@ -438,6 +421,10 @@ export default defineComponent({
     },
     methods: {
         setInputValue(val: string): void {
+            if (!this.inputIsDirty) {
+                this.inputIsDirty = true;
+            }
+
             this.inputElement.value = val;
 
             // set the indent amount for the symbol label inside the input
@@ -546,8 +533,8 @@ export default defineComponent({
                 const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === valueString.length - 1;
 
                 if (isDeletingLastCharacterAfterDecimal) {
-                    // eztodo should this decimals thing account for secondary?
-                    const emitValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
+                    const decimals = this.swapCurrencies && this.hasSwappableCurrency ? this.secondaryCurrencyDecimals : this.decimals;
+                    const emitValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, decimals, this.locale);
                     // if the user has deleted the last number after a decimal, the value should be emitted but
                     // no further formatting should occur
                     emit(emitValue);
@@ -558,8 +545,6 @@ export default defineComponent({
 
             let newValue: BigNumber;
 
-            // eztodo comment for this block
-            // eztodo disable maxamount and swap buttons if disabled or readonly; style text too
             if (this.swapCurrencies && this.hasSwappableCurrency) {
                 newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
             } else {
@@ -690,6 +675,9 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
+        handleBlur() {
+            this.inputIsDirty = true;
+        },
         focusInput() {
             this.inputElement.focus();
         },
@@ -738,6 +726,12 @@ export default defineComponent({
                 this.swapCurrencies = !this.swapCurrencies;
             }
         },
+
+        // can be called from outside the component to show an error state for empty input, e.g. when submitting form
+        // without filling out required fields
+        showEmptyError() {
+            this.inputIsDirty = true;
+        },
     },
 });
 </script>
@@ -785,6 +779,7 @@ export default defineComponent({
         inputmode="decimal"
         @keydown="handleKeydown"
         @input.stop="handleInput"
+        @blur="handleBlur"
     >
     <div v-if="hasSwappableCurrency" class="c-currency-input__currency-switcher" @click="handleSwapCurrencies">
         <InlineSvg
