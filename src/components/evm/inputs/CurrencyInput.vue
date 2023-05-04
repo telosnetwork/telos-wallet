@@ -214,7 +214,7 @@ export default defineComponent({
             }
 
             if (this.isRequired && this.modelValue.isZero()) {
-                return 'This field is required'; // eztodo i18n
+                return this.$t('global.required_field');
             }
 
             return '';
@@ -269,7 +269,7 @@ export default defineComponent({
                 symbol = this.symbol;
             }
 
-            return `${amount} ${symbol} Available`; // eztodo i18n
+            return `${amount} ${symbol} ${this.$t('global.available')}`;
         },
         primaryCurrencyDisplayPrecision() {
             // if the value represents fiat, show 2 decimals; else show 4
@@ -763,8 +763,7 @@ export default defineComponent({
         class="c-currency-input__amount-available"
         @click="fillMaxValue"
     >
-        <!--eztodo i18n-->
-        <ToolTip v-if="!isDisabled && !isReadonly" :text="'Click to fill max amount'" :hide-icon="true">
+        <ToolTip v-if="!isDisabled && !isReadonly" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
             {{ prettyMaxValue }}
         </ToolTip>
         <template v-else>
@@ -812,7 +811,7 @@ export default defineComponent({
     --symbol-left: 28px;
     $this: &;
 
-    width: 300px; // eztodo should this be different
+    width: 300px;
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
