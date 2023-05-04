@@ -309,12 +309,11 @@ export default defineComponent({
             }
 
             if (newValueIsDifferent) {
-                // if user has just deleted the last character before the decimal separator
+                // if user has just deleted the last character before the decimal separator,
                 // convert modelValue to string and check if inputValue is equal to it plus a decimal separator
                 // this is to prevent the decimal separator from being stripped if the user deletes the last character before it
 
                 let shouldSkipFormattingAndEmitting = false;
-
 
                 // formatUnits always adds a decimal separator and zero if input is an integer
                 // as such, the user has just deleted the last character before the decimal separator
@@ -328,14 +327,11 @@ export default defineComponent({
                     shouldSkipFormattingAndEmitting = true;
                 }
 
-
                 if (!shouldSkipFormattingAndEmitting) {
                     let newInputValue: string;
-                    const decimalsToShow = (this.swapCurrencies && this.hasSwappableCurrency) ?
-                        this.secondaryCurrencyDisplayPrecision :
-                        this.primaryCurrencyDisplayPrecision;
 
                     if (this.swapCurrencies && this.hasSwappableCurrency) {
+                        const decimalsToShow = this.secondaryCurrencyDisplayPrecision;
                         const newValueInSecondaryCurrency = convertCurrency(
                             newValue,
                             this.decimals,
@@ -354,6 +350,7 @@ export default defineComponent({
                             true,
                         );
                     } else {
+                        const decimalsToShow = this.primaryCurrencyDisplayPrecision;
                         newInputValue = prettyPrintCurrency(
                             newValue,
                             decimalsToShow,
@@ -372,18 +369,31 @@ export default defineComponent({
             }
         },
         locale() {
-            // eztodo also reset swapcurrencies
-            const decimalsToShow = this.getNumberOfDecimalsToShow(this.modelValue);
-            const formatted = prettyPrintCurrency(
-                this.modelValue,
-                decimalsToShow,
-                this.locale,
-                false,
-                undefined,
-                undefined,
-                this.decimals,
-                true,
-            );
+            let formatted;
+
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
+                formatted = prettyPrintCurrency(
+                    this.secondaryCurrencyAmount,
+                    this.secondaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.secondaryCurrencyDecimals,
+                    true,
+                );
+            } else {
+                formatted = prettyPrintCurrency(
+                    this.modelValue,
+                    this.primaryCurrencyDisplayPrecision,
+                    this.locale,
+                    false,
+                    undefined,
+                    undefined,
+                    this.decimals,
+                    true,
+                );
+            }
 
             this.setInputValue(formatted);
         },
@@ -680,28 +690,14 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
-        getNumberOfDecimalsToShow(value: BigNumber) {
-            const valueString = formatUnits(value, this.decimals);
-            const fraction = valueString.split('.')[1];
-
-            if (fraction === undefined) {
-                return 0;
-            }
-
-            let decimalsToShow: number;
-
-            if ((this.inputElement.value.indexOf(this.decimalSeparator) > -1 || this.inputElement.value === '') && fraction !== '0') {
-                decimalsToShow = fraction.length;
-            } else {
-                decimalsToShow = 0;
-            }
-
-            return decimalsToShow;
-        },
         focusInput() {
             this.inputElement.focus();
         },
         fillMaxValue() {
+            if (this.isDisabled || this.isReadonly) {
+                return;
+            }
+
             let formattedMaxValue: string;
 
             if (this.swapCurrencies && this.hasSwappableCurrency) {
@@ -737,6 +733,11 @@ export default defineComponent({
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },
+        handleSwapCurrencies() {
+            if (!this.isReadonly && !this.isDisabled) {
+                this.swapCurrencies = !this.swapCurrencies;
+            }
+        },
     },
 });
 </script>
@@ -747,7 +748,6 @@ export default defineComponent({
     :class="{
         [$attrs.class]: true,
         'c-currency-input': true,
-        'c-currency-input--wiggle': false,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
         'c-currency-input--disabled': !!inputElementAttrs.disabled,
@@ -764,9 +764,12 @@ export default defineComponent({
         @click="fillMaxValue"
     >
         <!--eztodo i18n-->
-        <ToolTip :text="'Click to fill max amount'" :hide-icon="true">
+        <ToolTip v-if="!isDisabled && !isReadonly" :text="'Click to fill max amount'" :hide-icon="true">
             {{ prettyMaxValue }}
         </ToolTip>
+        <template v-else>
+            {{ prettyMaxValue }}
+        </template>
     </div>
 
     <div class="c-currency-input__symbol">
@@ -784,7 +787,7 @@ export default defineComponent({
         @keydown="handleKeydown"
         @input.stop="handleInput"
     >
-    <div v-if="hasSwappableCurrency" class="c-currency-input__currency-switcher" @click="swapCurrencies = !swapCurrencies">
+    <div v-if="hasSwappableCurrency" class="c-currency-input__currency-switcher" @click="handleSwapCurrencies">
         <InlineSvg
             :src="swapIcon"
             class="c-currency-input__swap-icon"
@@ -800,7 +803,6 @@ export default defineComponent({
     <div v-if="!visibleErrorText && conversionRateText" class="c-currency-input__conversion-rate">
         {{ conversionRateText }}
     </div>
-<!--    eztodo add conversion rate text-->
 </div>
 
 </template>
@@ -836,7 +838,8 @@ export default defineComponent({
         }
     }
 
-    &--disabled {
+    &--disabled,
+    &--readonly {
         cursor: not-allowed;
     }
 
@@ -865,6 +868,12 @@ export default defineComponent({
         align-items: center;
         gap: 4px;
         cursor: pointer;
+
+        #{$this}--disabled &,
+        #{$this}--readonly & {
+            cursor: not-allowed;
+            color: var(--text-color-muted);
+        }
     }
 
     &__swap-icon {
@@ -897,7 +906,8 @@ export default defineComponent({
         top: 25px;
         left: var(--symbol-left);
 
-        #{$this}--disabled & {
+        #{$this}--disabled &,
+        #{$this}--readonly & {
             color: var(--text-color-muted);
         }
     }
@@ -913,6 +923,11 @@ export default defineComponent({
         font-size: 12px;
         font-weight: 400;
         line-height: 150%;
+
+        #{$this}--disabled &,
+        #{$this}--readonly &{
+            cursor: not-allowed;
+        }
     }
 
     &__input {
