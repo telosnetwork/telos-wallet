@@ -1,16 +1,28 @@
-// eztodo jsdocs, tests
-
 import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatUnits } from '@ethersproject/units';
 import Decimal from 'decimal.js';
 
+/**
+ * Given a locale string, returns the character used to separate integer and decimal portions of a number,
+ * e.g "." as in 123.456
+ * @param locale - standard locale code, such as "en-US"
+ * @returns {string} decimal separator character
+ */
 export function getDecimalSeparatorForLocale(locale: string) {
     const numberWithDecimalSeparator = 1.1;
     const formattedNumber = new Intl.NumberFormat(locale).format(numberWithDecimalSeparator);
     return formattedNumber.charAt(1); // Get the character between "1" and "1"
 }
 
+/**
+ * Given a locale string, returns the character used to separate groups of numbers in a large number,
+ * e.g "," as in 123,456,789.00
+ *
+ * @param { string } locale - standard locale code, such as "en-US"
+ *
+ * @returns {string} large number separator character
+ */
 export function getLargeNumberSeparatorForLocale(locale: string) {
     const largeNumber = 1000000;
     const formattedNumber = new Intl.NumberFormat(locale).format(largeNumber);
@@ -24,12 +36,32 @@ export function getLargeNumberSeparatorForLocale(locale: string) {
     return nonDigitCharacters[0];
 }
 
+/**
+ * Given a localized number string, returns a BigNumber
+ *
+ * @param {string} formatted - localized number string, e.g. "123,456.78"
+ * @param {number} decimals - number of decimals the number has, e.g. 2 for 123,456.78
+ * @param {string} locale - standard locale code, such as "en-US"
+ *
+ * @returns {BigNumber} BigNumber representation of the number
+ */
 export function getBigNumberFromLocalizedNumberString(formatted: string, decimals: number, locale: string): BigNumber {
     const decimalSeparator = getDecimalSeparatorForLocale(locale);
+    const largeNumberSeparator = getLargeNumberSeparatorForLocale(locale);
+    const notIntegerOrSeparatorRegex = new RegExp(`[^0-9${decimalSeparator}${largeNumberSeparator}]`, 'g');
+
+    if (formatted.match(notIntegerOrSeparatorRegex)) {
+        throw 'Invalid number format';
+    }
+
+    // if decimals is not a positive integer, throw an error
+    if (decimals % 1 !== 0 || decimals < 0) {
+        throw 'Invalid decimals value';
+    }
 
     // strip any character which is not an integer or decimal separator
-    const notIntegerOrSeparatorRegex = new RegExp(`[^0-9${decimalSeparator}]`, 'g');
-    let unformatted = formatted.replace(notIntegerOrSeparatorRegex, '');
+    const notIntegerOrDecimalSeparatorRegex = new RegExp(`[^0-9${decimalSeparator}]`, 'g');
+    let unformatted = formatted.replace(notIntegerOrDecimalSeparatorRegex, '');
 
     // if the decimal separator is anything but a dot, replace it with a dot to allow conversion to number
     if (decimalSeparator !== '.') {
@@ -111,7 +143,7 @@ export function prettyPrintCurrency(
                 ...decimalOptions,
             }).format(amount);
 
-        if (trimZeroes && finalFormattedValue.indexOf(decimalSeparator) > -1) {
+        if ((trimZeroes || precision === 0) && finalFormattedValue.indexOf(decimalSeparator) > -1) {
             finalFormattedValue = finalFormattedValue.replace(trailingZeroesRegex, '');
         }
 
@@ -140,7 +172,7 @@ export function prettyPrintCurrency(
             finalFormattedValue = `${formattedInteger}${decimalSeparator}${formattedDecimal}`;
         }
 
-        if (trimZeroes && finalFormattedValue.indexOf(decimalSeparator) > -1) {
+        if ((trimZeroes || precision === 0) && finalFormattedValue.indexOf(decimalSeparator) > -1) {
             finalFormattedValue = finalFormattedValue.replace(trailingZeroesRegex, '');
         }
 
@@ -153,7 +185,16 @@ export function prettyPrintCurrency(
 }
 
 
-// eztodo jsdocs
+/**
+ * Converts a currency amount from one token to another
+ *
+ * @param {BigNumber} tokenOneAmount - the amount of token one
+ * @param {number} tokenOneDecimals - the number of decimals token one has
+ * @param {number} tokenTwoDecimals - the number of decimals token two has
+ * @param {string|number} conversionFactor - the conversion rate from token one to token two
+ *
+ * @returns {BigNumber} the amount of token two equivalent to the amount of token one
+ */
 export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number) {
     const conversionRate = conversionFactor.toString();
     const leadingZeroesRegex = /^0+/g;
@@ -206,6 +247,15 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
     return denormalizedScaledAmountTwo.div(tenBn.pow(conversionRateScalingFactor.add(numberOfConversionRateDecimals)));
 }
 
+
+/**
+ * Inverts a floating point number, useful for taking a conversion rate from token A to token B and getting the
+ * conversion rate from token B to token A
+ *
+ * @param {number|string} float - the floating point number to invert
+ *
+ * @returns {string} the inverted floating point number rounded to 18 decimal places
+ */
 export function getFloatReciprocal(float: number | string) {
     const floatRegex = /^\d+(\.\d+)?$/g;
     const trailingZeroesRegex = /0+$/g;

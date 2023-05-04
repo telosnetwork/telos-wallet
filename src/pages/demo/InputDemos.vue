@@ -68,7 +68,7 @@ export default defineComponent({
         <select class="q-mb-md" @input="updateCurrencyInputLocale">
             <option value="en-US" selected>en-US</option>
             <option value="de-DE">de-DE</option>
-            <option value="in-IN">in-IN</option>
+            <option value="hi-IN">hi-IN</option>
         </select>
 
         <br>

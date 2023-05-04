@@ -1,6 +1,8 @@
 import {
-    convertCurrency,
+    convertCurrency, getBigNumberFromLocalizedNumberString,
+    getDecimalSeparatorForLocale,
     getFloatReciprocal,
+    getLargeNumberSeparatorForLocale,
     prettyPrintCurrency,
 } from 'src/antelope/stores/utils/currency-utils';
 import { BigNumber } from 'ethers';
@@ -11,6 +13,40 @@ import {
     oneThousandFiveHundredEthInWei,
 } from 'test/jest/testing-helpers';
 import { formatUnits } from 'ethers/lib/utils';
+
+describe('getDecimalSeparatorForLocale', () => {
+    it('should get the right decimal separator', () => {
+        expect(getDecimalSeparatorForLocale('en-US')).toBe('.');
+        expect(getDecimalSeparatorForLocale('hi-IN')).toBe('.');
+        expect(getDecimalSeparatorForLocale('de-DE')).toBe(',');
+    });
+});
+
+describe('getLargeNumberSeparatorForLocale', () => {
+    it('should get the right large number separator', () => {
+        expect(getLargeNumberSeparatorForLocale('en-US')).toBe(',');
+        expect(getLargeNumberSeparatorForLocale('hi-IN')).toBe(',');
+        expect(getLargeNumberSeparatorForLocale('de-DE')).toBe('.');
+    });
+});
+
+describe('getBigNumberFromLocalizedNumberString', () => {
+    it('should throw when passed an invalid value', () => {
+        const locale = 'en-US';
+
+        expect(() => getBigNumberFromLocalizedNumberString('213,456.789', 0, locale)).toThrow();
+        expect(() => getBigNumberFromLocalizedNumberString('213,456.789', 1.5, locale)).toThrow();
+
+        expect(() => getBigNumberFromLocalizedNumberString('213a456.789', 1, locale)).toThrow();
+        expect(() => getBigNumberFromLocalizedNumberString('', 1, locale)).toThrow();
+        expect(() => getBigNumberFromLocalizedNumberString('-5', 1, locale)).toThrow();
+    });
+
+    it('should correctly convert a localized string number to a BigNumber', () => {
+        expect(getBigNumberFromLocalizedNumberString('213,456.789', 6, 'en-US')).toEqual(BigNumber.from(213456789000));
+        expect(getBigNumberFromLocalizedNumberString('1', 18, 'en-US')).toEqual(BigNumber.from('1'.concat('0'.repeat(18))));
+    });
+});
 
 describe('prettyPrintCurrency', () => {
     it('should throw when passed an invalid value', () => {
@@ -252,7 +288,7 @@ describe('convertCurrency', () => {
     });
 });
 
-describe('invertFloat', () => {
+describe('getFloatReciprocal', () => {
     it('should throw when passed an invalid value', () => {
         expect(() => getFloatReciprocal(-1)).toThrow();
         expect(() => getFloatReciprocal('a')).toThrow();
