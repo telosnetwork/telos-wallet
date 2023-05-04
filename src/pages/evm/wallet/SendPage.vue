@@ -66,7 +66,6 @@ export default defineComponent({
     },
     computed: {
         loggedAccount() {
-            console.log('accountStore.loggedEvmAccount', accountStore.loggedEvmAccount);
             return accountStore.loggedEvmAccount;
         },
         gasFeeInSystemSym() {
@@ -278,9 +277,9 @@ export default defineComponent({
     <template v-slot:header>
         <div class="c-send-page__title-container">
             <div class="c-send-page__title"> {{ $t('evm_wallet.send') }}</div>
-            <div class="c-send-page__title-from">{{ $t('evm_wallet.from') }}</div>
+            <div class="c-send-page__title-from">{{ $t('global.from') }}</div>
             <UserInfo
-                class="c-send-page__title-address"
+                class="c-send-page__title-address c-user-info--lightweight"
                 :displayFullAddress="false"
                 :showAddress="true"
                 :showCopyBtn="false"
@@ -485,10 +484,6 @@ export default defineComponent({
 
     &__title-address {
         font-size: 16px;
-        .c-user-info__address {
-            margin-right: 0px;
-            font-weight: 400;
-        }
     }
 
     &__form-container {

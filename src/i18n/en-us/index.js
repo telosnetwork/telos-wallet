@@ -65,7 +65,6 @@ export default {
         stake: 'Stake',
         unstake: 'Unstake',
         copy: 'Copy',
-        from: 'from',
         link_to_send_aria: 'Link to Send page',
         link_to_receive_aria: 'Link to Receive page',
         link_to_buy_aria: 'External link to buy tokens',
