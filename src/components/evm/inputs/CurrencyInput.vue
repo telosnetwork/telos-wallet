@@ -404,14 +404,19 @@ export default defineComponent({
 
                 if (this.swapCurrencies) {
                     // val is the secondary currency amount; convert to primary currency and check against modelValue
-                    const modelValueAsBigNumber = this.modelValue instanceof BigNumber ? this.modelValue : parseUnits(this.modelValue.toString(), this.decimals);
+                    const modelValueAsBigNumber = this.modelValue instanceof BigNumber ? this.modelValue : parseUnits(this.modelValue.toString(), this.decimals ?? 2);
                     const newSecondaryAmountAsBigNumber = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
 
+                    console.log(modelValueAsBigNumber.toString());
                     // eztodo consolidate with below
                     const newSecondaryConvertedToPrimary = convertCurrency(newSecondaryAmountAsBigNumber, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
                     console.log(newSecondaryConvertedToPrimary.toString());
+                    console.log('\n\n');
+
+                    // console.log(newSecondaryConvertedToPrimary.toString());
 
                     newValIsDifferent = !modelValueAsBigNumber.eq(newSecondaryConvertedToPrimary);
+                    // console.log(newValIsDifferent);
                 } else {
                     const newValIsBigNumber = val instanceof BigNumber;
                     newValIsDifferent = newValIsBigNumber ? !val.eq(this.modelValue) : val !== this.modelValue;
@@ -420,14 +425,10 @@ export default defineComponent({
                 if (newValIsDifferent) {
                     if (this.swapCurrencies) {
                         // val is the secondary currency amount; convert to primary currency and emit
-                        let valueBn;
-                        if (val instanceof BigNumber) {
-                            valueBn = val;
-                        } else {
-                            valueBn = parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
-                        }
-
+                        const valueBn = val instanceof BigNumber ? val : parseUnits(val.toString(), this.secondaryCurrencyDecimals ?? 2);
                         const secondaryConvertedToPrimary = convertCurrency(valueBn, this.secondaryCurrencyDecimals ?? 2, this.decimals ?? 2, this.secondaryToPrimaryConversionRate);
+
+                        // console.log(valueBn.toString());
 
                         let emitValue;
 

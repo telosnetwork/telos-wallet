@@ -238,3 +238,25 @@ export function invertFloat(float: number | string) {
         .replace(trailingZeroesRegex, '')
         .replace(trailingDotRegex, '');
 }
+
+export function roundCurrency(num: BigNumber, decimals: number, precision = 4) {
+    if (!Number.isInteger(decimals) || decimals <= 0) {
+        throw 'Decimals must be a positive integer or zero';
+    }
+
+    if (!Number.isInteger(precision) || precision <= 0) {
+        throw 'Decimals must be a positive integer or zero';
+    }
+
+
+    const formattedParts = formatUnits(num, decimals).split('.');
+    // formatUnits always adds a decimal; no need to check for index of '.'
+    const integer = formattedParts[0];
+    let fractional = formattedParts[1];
+
+    fractional = fractional.slice(0, precision);
+
+    const roundedFormatted = `${integer}.${fractional}`;
+
+    return parseUnits(roundedFormatted, decimals);
+}
