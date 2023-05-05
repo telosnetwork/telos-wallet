@@ -51,12 +51,12 @@ export function getBigNumberFromLocalizedNumberString(formatted: string, decimal
     const notIntegerOrSeparatorRegex = new RegExp(`[^0-9${decimalSeparator}${largeNumberSeparator}]`, 'g');
 
     if (formatted.match(notIntegerOrSeparatorRegex)) {
-        throw 'Invalid number format';
+        throw new Error('Invalid number format');
     }
 
     // if decimals is not a positive integer, throw an error
     if (decimals % 1 !== 0 || decimals < 0) {
-        throw 'Invalid decimals value';
+        throw new Error('Invalid decimals value');
     }
 
     // strip any character which is not an integer or decimal separator
@@ -95,16 +95,16 @@ export function prettyPrintCurrency(
     trimZeroes?: boolean,
 ) {
     if (precision % 1 !== 0 || precision < 0) {
-        throw 'Precision must be a positive integer or zero';
+        throw new Error('Precision must be a positive integer or zero');
     }
 
     if (typeof tokenDecimals === 'number' && (tokenDecimals % 1 !== 0 || tokenDecimals < 0)) {
-        throw 'Token decimals must be a positive integer or zero';
+        throw new Error('Token decimals must be a positive integer or zero');
     }
 
     // require token decimals if type is BigNumber
     if (typeof amount !== 'number' && typeof tokenDecimals !== 'number') {
-        throw 'Token decimals is required for BigNumber amounts';
+        throw new Error('Token decimals is required for BigNumber amounts');
     }
 
     const decimalSeparator = getDecimalSeparatorForLocale(locale);
@@ -202,19 +202,19 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
     const floatRegex = /^\d+(\.\d+)?$/g;
 
     if (!Number.isInteger(tokenOneDecimals) || tokenOneDecimals <= 0) {
-        throw 'Token one decimals must be a positive integer or zero';
+        throw new Error('Token one decimals must be a positive integer or zero');
     }
 
     if (!Number.isInteger(tokenTwoDecimals) || tokenTwoDecimals <= 0) {
-        throw 'Token two decimals must be a positive integer or zero';
+        throw new Error('Token two decimals must be a positive integer or zero');
     }
 
     if (!floatRegex.test(conversionRate)) {
-        throw 'Conversion rate must be a positive floating point number or integer';
+        throw new Error('Conversion rate must be a positive floating point number or integer');
     }
 
     if (tokenOneAmount.lt(0)) {
-        throw 'Token one amount must be positive';
+        throw new Error('Token one amount must be positive');
     }
 
     const tenBn = BigNumber.from(10);
@@ -262,11 +262,11 @@ export function getFloatReciprocal(float: number | string) {
     const trailingDotRegex = /\.$/g;
 
     if (!floatRegex.test(float.toString())) {
-        throw 'Conversion rate must be a positive floating point number or integer';
+        throw new Error('Conversion rate must be a positive floating point number or integer');
     }
 
     if ([0, '0'].includes(float)) {
-        throw 'Error inverting: cannot divide by zero';
+        throw new Error('Error inverting: cannot divide by zero');
     }
 
     return new Decimal(1)
