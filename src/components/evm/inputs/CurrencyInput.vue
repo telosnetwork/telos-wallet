@@ -172,15 +172,20 @@ export default defineComponent({
 
             let amount: string;
             let symbol: string;
+            const maxLength = 6;
 
             if (!this.swapCurrencies) {
                 symbol = this.secondaryCurrencySymbol;
+                const truncate = formatUnits(
+                    this.secondaryCurrencyAmount,
+                    this.secondaryCurrencyDecimals,
+                ).split('.')[0].length > maxLength;
 
                 amount = prettyPrintCurrency(
                     this.secondaryCurrencyAmount,
                     this.secondaryCurrencyDisplayPrecision,
                     this.locale,
-                    false,
+                    truncate,
                     undefined,
                     undefined,
                     this.secondaryCurrencyDecimals,
@@ -188,6 +193,7 @@ export default defineComponent({
 
             } else {
                 symbol = this.symbol;
+
                 const convertedAmount = convertCurrency(
                     this.secondaryCurrencyAmount,
                     this.secondaryCurrencyDecimals,
@@ -195,11 +201,16 @@ export default defineComponent({
                     this.secondaryToPrimaryConversionRate,
                 );
 
+                const truncate = formatUnits(
+                    convertedAmount,
+                    this.decimals,
+                ).split('.')[0].length > maxLength;
+
                 amount = prettyPrintCurrency(
                     convertedAmount,
                     this.primaryCurrencyDisplayPrecision,
                     this.locale,
-                    false,
+                    truncate,
                     undefined,
                     undefined,
                     this.decimals,
