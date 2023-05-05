@@ -453,8 +453,6 @@ export default defineComponent({
             const numberOfOtherNumbers = length - numberOfSeparators - numberOfOnes;
             const leftIndent = Math.ceil((numberOfOtherNumbers * 8.5) + (numberOfSeparators * 2) + (numberOfOnes * 7));
 
-            // eztodo tweak this
-
             const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
             this.$el.style.setProperty('--symbol-left', leftAmount);
         },
