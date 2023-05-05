@@ -14,6 +14,9 @@ export default defineComponent({
         CurrencyInput,
     },
     data: () => ({
+        randomizeExchangeRatesInterval: null as null | ReturnType<typeof setInterval>,
+        randomizeExchangeRates: false,
+
         currencyInputLocale: 'en-US',
         currencyInputIsRequired: false,
         currencyInputIsDisabled: false,
@@ -30,7 +33,7 @@ export default defineComponent({
         currencyTlosUsdtInputDecimals: 18,
         currencyTlosUsdtInputSecondarySymbol: 'USDT',
         currencyTlosUsdtInputSecondaryDecimals: 6,
-        currencyTlosUsdtInputConversionRate: 0.19,
+        currencyTlosUsdtInputConversionRate: '0.19',
         currencyTlosUsdtInputMaxValue: largeTlosTwo,
 
         // swappable input - primary amount is in TLOS, secondary in USD
@@ -39,13 +42,36 @@ export default defineComponent({
         currencyTlosUsdInputDecimals: 18,
         currencyTlosUsdInputSecondarySymbol: 'USD',
         currencyTlosUsdInputSecondaryDecimals: 2,
-        currencyTlosUsdInputConversionRate: 0.21,
+        currencyTlosUsdInputConversionRate: '0.21',
         currencyTlosUsdInputMaxValue: largeTlosTwo,
     }),
     methods: {
+        setRandomizeExchangeRates(enable: boolean) {
+            if (enable && !this.randomizeExchangeRatesInterval) {
+                // set a timeout to randomize currencyTlosUsdInputConversionRate within 0.1 and 0.3
+                this.randomizeExchangeRatesInterval = setInterval(() => {
+                    const min = -0.03;
+                    const max =  0.03;
+                    const randomNumber = () => Math.random() * (max - min) + min;
+                    this.currencyTlosUsdInputConversionRate  = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
+                    // debugger;
+                    this.currencyTlosUsdtInputConversionRate = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
+                }, 3000);
+                this.randomizeExchangeRates = true;
+            } else if (!enable && this.randomizeExchangeRatesInterval) {
+                clearInterval(this.randomizeExchangeRatesInterval);
+                this.randomizeExchangeRatesInterval = null;
+                this.randomizeExchangeRates = false;
+            }
+        },
         updateCurrencyInputLocale(event: InputEvent) {
             const eventTarget = event.target as HTMLInputElement;
             this.currencyInputLocale = eventTarget.value;
+        },
+    },
+    watch: {
+        randomizeExchangeRates(newValue: boolean) {
+            this.setRandomizeExchangeRates(newValue);
         },
     },
 });
@@ -77,6 +103,7 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsDisabled">Disabled?</q-checkbox>
         <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
+        <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates?</q-checkbox>
     </div>
     <div class="col-1"></div>
     <div class="col-10">

@@ -176,9 +176,15 @@ export default defineComponent({
 
             } else {
                 symbol = this.symbol;
+                const convertedAmount = convertCurrency(
+                    this.secondaryCurrencyAmount,
+                    this.secondaryCurrencyDecimals,
+                    this.decimals,
+                    this.secondaryToPrimaryConversionRate,
+                );
 
                 amount = prettyPrintCurrency(
-                    this.modelValue,
+                    convertedAmount,
                     this.primaryCurrencyDisplayPrecision,
                     this.locale,
                     false,
@@ -216,7 +222,12 @@ export default defineComponent({
                 return '';
             }
 
-            return `@ ${this.secondaryCurrencyConversionFactor} ${this.secondaryCurrencySymbol} / ${this.symbol}`;
+            // round conversion rate to 4 decimal places and trim trailing zeroes
+            const roundedConversionRate = (+this.secondaryCurrencyConversionFactor)
+                .toFixed(4)
+                .replace(/0+$/g, '');
+
+            return `@ ${roundedConversionRate} ${this.secondaryCurrencySymbol} / ${this.symbol}`;
         },
         secondaryToPrimaryConversionRate(): string {
             // this.secondaryCurrencyConversionFactor is for converting primary to secondary; invert to convert
@@ -361,6 +372,11 @@ export default defineComponent({
                 }
             }
         },
+        secondaryCurrencyConversionFactor() {
+            if (this.swapCurrencies && this.hasSwappableCurrency) {
+                this.handleInput();
+            }
+        },
         locale() {
             let formatted;
 
@@ -453,8 +469,8 @@ export default defineComponent({
                     // val is the secondary currency amount; convert to primary currency and check against modelValue
                     const newSecondaryConvertedToPrimary = convertCurrency(
                         val,
-                        this.secondaryCurrencyDecimals ?? 2,
-                        this.decimals ?? 2,
+                        this.secondaryCurrencyDecimals,
+                        this.decimals,
                         this.secondaryToPrimaryConversionRate,
                     );
                     this.savedSecondaryValue = newSecondaryConvertedToPrimary;
