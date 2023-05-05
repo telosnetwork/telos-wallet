@@ -104,6 +104,14 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
         <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates?</q-checkbox>
+
+        <br>
+        <br>
+
+        <button @click="$refs.currencyTlosUsdInput.showEmptyError()">
+            Set empty error
+        </button>
+        <label>(Required must be true)</label>
     </div>
     <div class="col-1"></div>
     <div class="col-10">
@@ -143,6 +151,7 @@ export default defineComponent({
             </div>
             <div class="col-3">
                 <CurrencyInput
+                    ref="currencyTlosUsdInput"
                     v-model="currencyTlosUsdInputValue"
                     :locale="currencyInputLocale"
                     :symbol="currencyTlosUsdInputSymbol"
