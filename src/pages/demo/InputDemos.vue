@@ -67,7 +67,7 @@ export default defineComponent({
                     this.currencyTlosUsdInputConversionRate  = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
                     // debugger;
                     this.currencyTlosUsdtInputConversionRate = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
-                }, 3000);
+                }, 10000);
                 this.randomizeExchangeRates = true;
             } else if (!enable && this.randomizeExchangeRatesInterval) {
                 clearInterval(this.randomizeExchangeRatesInterval);
