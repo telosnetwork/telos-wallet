@@ -46,6 +46,14 @@ export default defineComponent({
         currencyTlosUsdInputSecondaryDecimals: 2,
         currencyTlosUsdInputConversionRate: '0.21',
         currencyTlosUsdInputMaxValue: largeTlosTwo,
+
+        // swappable input - primary amount is in TLOS, secondary in USD
+        currencyUsdUsdtInputValue: zeroBn,
+        currencyUsdUsdtInputSymbol: 'USD',
+        currencyUsdUsdtInputDecimals: 2,
+        currencyUsdUsdtInputSecondarySymbol: 'USDT',
+        currencyUsdUsdtInputSecondaryDecimals: 6,
+        currencyUsdUsdtInputConversionRate: '0.999903',
     }),
     methods: {
         setRandomizeExchangeRates(enable: boolean) {
@@ -119,7 +127,7 @@ export default defineComponent({
         <button @click="$refs.currencyTlosUsdInput.showEmptyError()">
             Set empty error
         </button>
-        <label>(Required must be true)</label>
+        <label>(Required must be true, affects 3rd input only)</label>
     </div>
     <div class="col-1"></div>
     <div class="col-10">
@@ -161,6 +169,8 @@ export default defineComponent({
                 />
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
             </div>
+        </div>
+        <div class="row q-mb-xl">
             <div class="col-3">
                 <CurrencyInput
                     ref="currencyTlosUsdInput"
@@ -181,6 +191,25 @@ export default defineComponent({
                     class="q-mb-xl"
                 />
                 Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
+            </div>
+            <div class="col-3">
+                <CurrencyInput
+                    v-model="currencyUsdUsdtInputValue"
+                    :locale="currencyInputLocale"
+                    :symbol="currencyUsdUsdtInputSymbol"
+                    :decimals="currencyUsdUsdtInputDecimals"
+                    :secondary-currency-symbol="currencyUsdUsdtInputSecondarySymbol"
+                    :secondary-currency-decimals="currencyUsdUsdtInputSecondaryDecimals"
+                    :secondary-currency-conversion-factor="currencyUsdUsdtInputConversionRate"
+                    :disabled="currencyInputIsDisabled"
+                    :readonly="currencyInputIsReadonly"
+                    :required="currencyInputIsRequired"
+                    :loading="currencyInputIsLoading"
+                    :error-text="currencyInputErrorMessage"
+                    label="Amount (USD/USDT)"
+                    class="q-mb-xl"
+                />
+                Input amount: {{ currencyUsdUsdtInputValue.toString() }} (as BigNumber)
             </div>
         </div>
     </div>
