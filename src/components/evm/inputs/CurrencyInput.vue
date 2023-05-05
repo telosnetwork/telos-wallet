@@ -82,6 +82,10 @@ export default defineComponent({
             type: BigNumber as PropType<BigNumber | null>,
             default: null,
         },
+        loading: {
+            type: Boolean,
+            default: false,
+        },
     },
     emits: [
         'update:modelValue',
@@ -695,7 +699,9 @@ export default defineComponent({
             this.inputIsDirty = true;
         },
         focusInput() {
-            this.inputElement.focus();
+            if (this.inputElement) {
+                this.inputElement.focus();
+            }
         },
         fillMaxValue() {
             if (this.isDisabled || this.isReadonly || !this.maxValue || this.maxValue.eq(this.modelValue)) {
@@ -768,12 +774,12 @@ export default defineComponent({
     }"
     @click="focusInput"
 >
-    <div class="c-currency-input__label-text">
+    <div v-if="!loading" class="c-currency-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
     <div
-        v-if="!!maxValue"
+        v-if="!!maxValue && !loading"
         class="c-currency-input__amount-available"
         @click="fillMaxValue"
     >
@@ -785,11 +791,12 @@ export default defineComponent({
         </template>
     </div>
 
-    <div class="c-currency-input__symbol">
+    <div v-if="!loading" class="c-currency-input__symbol">
         {{ swapCurrencies ? secondaryCurrencySymbol : symbol }}
     </div>
 
     <input
+        v-if="!loading"
         ref="input"
         v-bind="inputElementAttrs"
         :pattern="`${allowedCharactersRegex}*`"
@@ -801,7 +808,14 @@ export default defineComponent({
         @input.stop="handleInput"
         @blur="handleBlur"
     >
-    <div v-if="hasSwappableCurrency" class="c-currency-input__currency-switcher" @click="handleSwapCurrencies">
+    <q-spinner
+        v-else
+        color="primary"
+        size="md"
+        class="c-currency-input__spinner"
+    />
+
+    <div v-if="hasSwappableCurrency && !loading" class="c-currency-input__currency-switcher" @click="handleSwapCurrencies">
         <InlineSvg
             :src="swapIcon"
             class="c-currency-input__swap-icon"
@@ -810,11 +824,11 @@ export default defineComponent({
         {{ prettySecondaryValue }}
     </div>
 
-    <div class="c-currency-input__error-text">
+    <div v-if="!loading" class="c-currency-input__error-text">
         {{ visibleErrorText }}
     </div>
 
-    <div v-if="!visibleErrorText && conversionRateText" class="c-currency-input__conversion-rate">
+    <div v-if="!visibleErrorText && conversionRateText && !loading" class="c-currency-input__conversion-rate">
         {{ conversionRateText }}
     </div>
 </div>
@@ -864,6 +878,14 @@ export default defineComponent({
         #{$this}__label-text {
             color: $negative;
         }
+    }
+
+    &__spinner {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 16px;
+        margin: auto;
     }
 
     &__label-text {

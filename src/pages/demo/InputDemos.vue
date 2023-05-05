@@ -21,6 +21,7 @@ export default defineComponent({
         currencyInputIsRequired: false,
         currencyInputIsDisabled: false,
         currencyInputIsReadonly: false,
+        currencyInputIsLoading: false,
 
         currencyTokenInputValue: zeroBn,
         currencyTokenInputSymbol: 'TLOS',
@@ -103,6 +104,7 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsDisabled">Disabled?</q-checkbox>
         <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
+        <q-checkbox v-model="currencyInputIsLoading">Loading?</q-checkbox>
         <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates?</q-checkbox>
 
         <br>
@@ -126,6 +128,7 @@ export default defineComponent({
                     :disabled="currencyInputIsDisabled"
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
+                    :loading="currencyInputIsLoading"
                     label="Amount (Token)"
                     class="q-mb-xl"
                 />
@@ -144,6 +147,7 @@ export default defineComponent({
                     :disabled="currencyInputIsDisabled"
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
+                    :loading="currencyInputIsLoading"
                     label="Amount (TLOS/USDT)"
                     class="q-mb-xl"
                 />
@@ -163,6 +167,7 @@ export default defineComponent({
                     :disabled="currencyInputIsDisabled"
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
+                    :loading="currencyInputIsLoading"
                     label="Amount (TLOS/USD)"
                     class="q-mb-xl"
                 />
