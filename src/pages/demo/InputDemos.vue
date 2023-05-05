@@ -22,6 +22,7 @@ export default defineComponent({
         currencyInputIsDisabled: false,
         currencyInputIsReadonly: false,
         currencyInputIsLoading: false,
+        currencyInputErrorMessage: '',
 
         currencyTokenInputValue: zeroBn,
         currencyTokenInputSymbol: 'TLOS',
@@ -110,6 +111,11 @@ export default defineComponent({
         <br>
         <br>
 
+        <q-input v-model="currencyInputErrorMessage" label="Error message"/>
+
+        <br>
+        <br>
+
         <button @click="$refs.currencyTlosUsdInput.showEmptyError()">
             Set empty error
         </button>
@@ -129,6 +135,7 @@ export default defineComponent({
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
+                    :error-text="currencyInputErrorMessage"
                     label="Amount (Token)"
                     class="q-mb-xl"
                 />
@@ -148,6 +155,7 @@ export default defineComponent({
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
+                    :error-text="currencyInputErrorMessage"
                     label="Amount (TLOS/USDT)"
                     class="q-mb-xl"
                 />
@@ -168,6 +176,7 @@ export default defineComponent({
                     :readonly="currencyInputIsReadonly"
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
+                    :error-text="currencyInputErrorMessage"
                     label="Amount (TLOS/USD)"
                     class="q-mb-xl"
                 />
