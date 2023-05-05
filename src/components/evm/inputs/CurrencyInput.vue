@@ -44,13 +44,14 @@ export default defineComponent({
             validator: (value: number) => value >= 0 && Number.isInteger(value),
         },
         secondaryCurrencyConversionFactor: {
-            // pertains to the optional 'swap' amount under the input.
+            // pertains to the optional 'swap' amount under the input. must be a float or a string representing a float.
             // only needed when there is a swappable secondary value, ignored otherwise.
             // this represents the conversion factor between the primary and secondary amounts,
             // e.g. if 1 TLOS = 0.20 USD, and the modelValue is in TLOS, the conversion factor is 0.20
             // and to convert back from secondary to primary currency, (1 / secondaryCurrencyConversionFactor) is used
             type: [String, Number],
             default: null,
+            validator: (ratio: null | string | number) => ratio === null || (/^\d+(\.\d+)?$/g.test(ratio.toString())),
         },
         secondaryCurrencySymbol: {
             // symbol used for the secondary currency
@@ -61,10 +62,12 @@ export default defineComponent({
             // the number of decimals used for the secondary currency. Use 2 for fiat values
             type: Number,
             default: null,
+            validator: (value: number) => value === null || (value >= 0 && Number.isInteger(value)),
         },
         locale: {
             type: String,
             required: true,
+            validator: (value: string) => value !== '',
         },
         label: {
             type: String,
