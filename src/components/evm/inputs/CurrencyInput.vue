@@ -76,7 +76,7 @@ export default defineComponent({
         },
         maxValue: {
             // represents the maximum amount that the user has available
-            type: BigNumber as PropType<BigNumber>,
+            type: BigNumber as PropType<BigNumber | null>,
             default: null,
         },
     },
@@ -154,7 +154,6 @@ export default defineComponent({
             );
         },
         prettySecondaryValue() {
-            // eztodo abbreviate large values using viters function
             if (!this.hasSwappableCurrency) {
                 return '';
             }
@@ -224,7 +223,6 @@ export default defineComponent({
             return getFloatReciprocal(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
-            // eztodo abbreviate large values using viters function
             if (!this.maxValue) {
                 return '';
             }
@@ -325,13 +323,14 @@ export default defineComponent({
                     let newInputValue: string;
 
                     if (this.swapCurrencies && this.hasSwappableCurrency) {
-                        const decimalsToShow = this.secondaryCurrencyDisplayPrecision;
                         const newValueInSecondaryCurrency = convertCurrency(
                             newValue,
                             this.decimals,
                             this.secondaryCurrencyDecimals,
                             this.secondaryCurrencyConversionFactor,
                         );
+
+                        const decimalsToShow = formatUnits(newValue, this.decimals).split('.')[1].length;
 
                         newInputValue = prettyPrintCurrency(
                             newValueInSecondaryCurrency,
@@ -344,7 +343,7 @@ export default defineComponent({
                             true,
                         );
                     } else {
-                        const decimalsToShow = this.primaryCurrencyDisplayPrecision;
+                        const decimalsToShow = formatUnits(newValue, this.decimals).split('.')[1].length;
                         newInputValue = prettyPrintCurrency(
                             newValue,
                             decimalsToShow,
@@ -682,7 +681,7 @@ export default defineComponent({
             this.inputElement.focus();
         },
         fillMaxValue() {
-            if (this.isDisabled || this.isReadonly) {
+            if (this.isDisabled || this.isReadonly || !this.maxValue || this.maxValue.eq(this.modelValue)) {
                 return;
             }
 
@@ -695,9 +694,11 @@ export default defineComponent({
                     this.secondaryCurrencyDecimals,
                     this.secondaryCurrencyConversionFactor,
                 );
+                const maxValueDecimals = formatUnits(maxValueInSecondaryCurrency, this.decimals).split('.')[1].length;
+
                 formattedMaxValue = prettyPrintCurrency(
                     maxValueInSecondaryCurrency,
-                    this.secondaryCurrencyDisplayPrecision,
+                    maxValueDecimals,
                     this.locale,
                     false,
                     undefined,
@@ -706,9 +707,11 @@ export default defineComponent({
                     true,
                 );
             } else {
+                const maxValueDecimals = formatUnits(this.maxValue, this.decimals).split('.')[1].length;
+
                 formattedMaxValue = prettyPrintCurrency(
                     this.maxValue,
-                    this.primaryCurrencyDisplayPrecision,
+                    maxValueDecimals,
                     this.locale,
                     undefined,
                     undefined,
