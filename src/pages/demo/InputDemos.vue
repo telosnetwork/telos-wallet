@@ -115,7 +115,7 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
         <q-checkbox v-model="currencyInputIsLoading">Loading?</q-checkbox>
-        <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates?</q-checkbox>
+        <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates (every 10 secs)?</q-checkbox>
         <q-checkbox v-model="currencyInputMaxValueError">Show error if value exceeds max?</q-checkbox>
 
         <br>
