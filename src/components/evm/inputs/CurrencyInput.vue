@@ -86,6 +86,11 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
+        errorIfOverMax: {
+            // if true, the input will show an error if the user enters a value greater than maxValue
+            type: Boolean,
+            default: false,
+        },
     },
     emits: [
         'update:modelValue',
@@ -216,6 +221,10 @@ export default defineComponent({
         visibleErrorText(): string {
             if (this.errorText) {
                 return this.errorText;
+            }
+
+            if (this.errorIfOverMax && this.maxValue && this.maxValue.lt(this.modelValue)) {
+                return this.$t('evm_wallet.amount_exceeds_available_balance');
             }
 
             if (this.isRequired && this.modelValue.isZero() && this.inputIsDirty) {

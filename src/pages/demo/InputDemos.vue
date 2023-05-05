@@ -22,6 +22,7 @@ export default defineComponent({
         currencyInputIsDisabled: false,
         currencyInputIsReadonly: false,
         currencyInputIsLoading: false,
+        currencyInputMaxValueError: false,
         currencyInputErrorMessage: '',
 
         currencyTokenInputValue: zeroBn,
@@ -115,6 +116,7 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
         <q-checkbox v-model="currencyInputIsLoading">Loading?</q-checkbox>
         <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates?</q-checkbox>
+        <q-checkbox v-model="currencyInputMaxValueError">Show error if value exceeds max?</q-checkbox>
 
         <br>
         <br>
@@ -144,6 +146,7 @@ export default defineComponent({
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
                     :error-text="currencyInputErrorMessage"
+                    :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (Token)"
                     class="q-mb-xl"
                 />
@@ -164,6 +167,7 @@ export default defineComponent({
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
                     :error-text="currencyInputErrorMessage"
+                    :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USDT)"
                     class="q-mb-xl"
                 />
@@ -187,6 +191,7 @@ export default defineComponent({
                     :required="currencyInputIsRequired"
                     :loading="currencyInputIsLoading"
                     :error-text="currencyInputErrorMessage"
+                    :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USD)"
                     class="q-mb-xl"
                 />
