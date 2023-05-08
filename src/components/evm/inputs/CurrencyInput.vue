@@ -475,7 +475,10 @@ export default defineComponent({
             const numberOfSeparators = (val.match(this.largeNumberSeparatorRegex)?.length || 0) + (val.match(this.decimalSeparatorRegex)?.length || 0);
             const numberOfOnes = (val.match(/1/g) || []).length;
             const numberOfOtherNumbers = length - numberOfSeparators - numberOfOnes;
-            const leftIndent = Math.ceil((numberOfOtherNumbers * 8.5) + (numberOfSeparators * 2) + (numberOfOnes * 7));
+            const indent = Math.ceil((numberOfOtherNumbers * 8.5) + (numberOfSeparators * 2) + (numberOfOnes * 7));
+            const maxIndent = 252 - (8 * this.symbol.length); // 252 is the size of the input - padding
+
+            const leftIndent = indent > maxIndent ? maxIndent : indent;
 
             const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
             this.$el.style.setProperty('--symbol-left', leftAmount);
@@ -991,6 +994,7 @@ export default defineComponent({
         outline: none;
         background: none;
         margin-top: 24px;
+        width: 220px;
     }
 }
 </style>

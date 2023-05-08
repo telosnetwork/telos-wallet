@@ -134,7 +134,7 @@ export default defineComponent({
     <div class="col-1"></div>
     <div class="col-10">
         <div class="row q-mb-xl">
-            <div class="col-3">
+            <div class="col-12 q-mb-xl">
                 <CurrencyInput
                     v-model="currencyTokenInputValue"
                     :symbol="currencyTokenInputSymbol"
@@ -152,7 +152,7 @@ export default defineComponent({
                 />
                 Input amount: {{ currencyTokenInputValue.toString() }} (as BigNumber)
             </div>
-            <div class="col-3">
+            <div class="col-12 q-mb-xl">
                 <CurrencyInput
                     v-model="currencyTlosUsdtInputValue"
                     :locale="currencyInputLocale"
@@ -173,9 +173,8 @@ export default defineComponent({
                 />
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
             </div>
-        </div>
-        <div class="row q-mb-xl">
-            <div class="col-3">
+
+            <div class="col-12 q-mb-xl">
                 <CurrencyInput
                     ref="currencyTlosUsdInput"
                     v-model="currencyTlosUsdInputValue"
@@ -197,7 +196,7 @@ export default defineComponent({
                 />
                 Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
             </div>
-            <div class="col-3">
+            <div class="col-12 q-mb-xl">
                 <CurrencyInput
                     v-model="currencyUsdUsdtInputValue"
                     :locale="currencyInputLocale"
