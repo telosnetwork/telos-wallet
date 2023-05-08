@@ -39,6 +39,7 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
+import { fetchBalance, getAccount, getNetwork } from '@wagmi/core';
 
 export interface BalancesState {
     __balances:  { [label: Label]: Token[] };
@@ -61,12 +62,15 @@ export const useBalancesStore = defineStore(store_name, {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: ({ label, account }) => {
+                    debugger;
                     useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
             });
 
             // update logged balances every 10 seconds only if the user is logged
             setInterval(() => {
+                // debugger;
+                console.log(useAccountStore().loggedAccount);
                 if (useAccountStore().loggedAccount) {
                     useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
                 }
@@ -80,12 +84,12 @@ export const useBalancesStore = defineStore(store_name, {
                 const chain = useChainStore().getChain(label);
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
-                    if (account) {
+                    if (account?.account) {
                         this.__balances[label] = await chain_settings.getTokens(account?.account);
                     }
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
-                    if (account) {
+                    if (account?.account) {
                         this.__balances[label] = this.__balances[label] ?? [];
                         const evm = useEVMStore();
                         const tokens = await chain_settings.getTokenList();
@@ -124,6 +128,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         async updateSystemBalanceForAccount(label: string, address: string): Promise<EvmToken> {
+            debugger;
             const evm = useEVMStore();
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const provider = toRaw(evm.rpcProvider);
@@ -143,7 +148,15 @@ export const useBalancesStore = defineStore(store_name, {
                     token.price = price;
                     this.updateBalance(label, token);
                 });
-            } else {
+            } else if (localStorage.getItem('wagmi.connected')){
+                debugger;
+                const test = await fetchBalance({
+                    address: getAccount().address as `0x${string}`,
+                    chainId: getNetwork().chain?.id,
+                });
+                debugger;
+                console.log(test);
+            }else{
                 console.error('No provider');
             }
             return Promise.resolve(token);
