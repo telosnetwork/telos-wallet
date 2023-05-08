@@ -127,39 +127,49 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+
         async updateSystemBalanceForAccount(label: string, address: string): Promise<EvmToken> {
             debugger;
             const evm = useEVMStore();
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const provider = toRaw(evm.rpcProvider);
-            const token = chain_settings.getSystemToken();
+            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+            let token = chain_settings.getSystemToken();
             if (provider) {
-                provider.getBalance(address).then(async (balanceBn: BigNumber) => {
-                    token.balanceBn = balanceBn;
-                    token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-                    token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                    if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
-                        this.addNewBalance(label, token);
-                    } else {
-                        this.removeBalance(label, token);
-                    }
-                    const price = await chain_settings.getUsdPrice();
-                    token.fiatBalance = `${parseFloat(token.balance) * price}`;
-                    token.price = price;
-                    this.updateBalance(label, token);
-                });
+                const balanceBn = await provider.getBalance(address);
+                token = await this.setToken(label, balanceBn);
             } else if (localStorage.getItem('wagmi.connected')){
-                debugger;
-                const test = await fetchBalance({
+                const balanceBn = await fetchBalance({
                     address: getAccount().address as `0x${string}`,
                     chainId: getNetwork().chain?.id,
                 });
-                debugger;
-                console.log(test);
+                token = await this.setToken(label, balanceBn.value);
             }else{
                 console.error('No provider');
             }
-            return Promise.resolve(token);
+            debugger;
+            return token;
+        },
+
+        async setToken(label: string, balanceBn: BigNumber): Promise<EvmToken>{
+            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+            const token = chain_settings.getSystemToken();
+
+            token.balanceBn = balanceBn;
+            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+
+            if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
+                this.addNewBalance(label, token);
+            } else {
+                this.removeBalance(label, token);
+            }
+
+            const price = await chain_settings.getUsdPrice();
+            token.fiatBalance = `${parseFloat(token.balance) * price}`;
+            token.price = price;
+            this.updateBalance(label, token);
+
+            return token;
         },
         async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
