@@ -97,6 +97,8 @@ export default defineComponent({
     ],
     data: () => ({
         swapIcon: require('src/assets/icon--swap.svg'),
+
+        // whether the user has interacted with the input (pertains to validation)
         inputIsDirty: false,
 
         // whether the user has clicked the swap button
@@ -109,11 +111,12 @@ export default defineComponent({
         // this is needed because in many cases, the conversion factor from primary to secondary currency will result in
         // a non-terminating/irrational/extremely long decimal amount of secondary currency being equivalent to the
         // modelValue (primary currency amount),
-        // e.g. 0.19 USD === 1 TLOS => 1 USD === 5.(263157894736842105) TLOS (parens indicate repeating decimal)
-        // In these cases, there will be an infinite update loop as the logic to decide whether to emit relies on
-        // comparing the secondary value converted to the primary value with the new modelValue (i.e. primary amount);
+        // e.g. 0.19 USD === 1 TLOS => 1 USD === 5.263157894736842105... TLOS
+        // In these cases, there will be an infinite update loop because the logic to decide whether to emit relies on
+        // comparing the new modelValue (primary currency) with the secondary value converted to the primary currency,
+        // emitting only when the new value is not equal to the old value.
         // a small amount of precision is lost through rounding with every conversion (because these problematic numbers
-        // cannot be accurately stored in a variable), leading to inequality.
+        // cannot be accurately stored in a variable), leading to inequality where we would expect equality.
         // This rounding is accurate to 18 decimal places
         savedSecondaryValue: BigNumber.from(0),
     }),
@@ -332,6 +335,10 @@ export default defineComponent({
         },
     },
     watch: {
+        // as a refresher on modelValue, note that components implementing v-model do not update their own
+        // value; they emit values to their parent, which then updates the component's value through the modelValue prop
+        // So in this watcher, we must react to new values which could have been set programmatically by the parent,
+        // or may simply be the result of user input
         modelValue(newValue: BigNumber, oldValue: BigNumber) {
             let newValueIsDifferent;
 
@@ -412,11 +419,16 @@ export default defineComponent({
                 }
             }
         },
+
+        // when the exchange rate changes and the user has swapped currencies, we must emit a new modelValue as the
+        // value of the amount they've typed has changed
         secondaryCurrencyConversionFactor() {
             if (this.swapCurrencies && this.hasSwappableCurrency) {
                 this.handleInput();
             }
         },
+
+        // we must update the number formatting if the locale changes
         locale() {
             let formatted;
 
@@ -446,6 +458,9 @@ export default defineComponent({
 
             this.setInputValue(formatted);
         },
+
+        // when the user swaps currencies, the input text must be updated to reflect the new currency
+        // however the value has not actually changed, so nothing is emitted
         swapCurrencies(showSecondaryCurrency: boolean) {
             let newInputValue: string;
 
@@ -475,6 +490,8 @@ export default defineComponent({
         },
     },
     methods: {
+        // this method sets the text in the input element, but is not responsible for emitting a new modelValue; these
+        // may change independently of each other, like when the user swaps currencies
         setInputValue(val: string): void {
             if (!this.inputIsDirty) {
                 this.inputIsDirty = true;
@@ -496,10 +513,15 @@ export default defineComponent({
             const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
             this.$el.style.setProperty('--symbol-left', leftAmount);
         },
+
+        // this method sets the caret position in the input element
         setInputCaretPosition(val: number) {
             this.inputElement.selectionStart = val;
             this.inputElement.selectionEnd = val;
         },
+
+        // this method is responsible for emitting a new modelValue, as well as performing certain formatting tasks
+        // such as ensuring the user cannot paste invalid characters
         handleInput() {
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
@@ -627,6 +649,7 @@ export default defineComponent({
 
             let newValue: BigNumber;
 
+            // ultimately the new modelValue is determined by the text which is in the input element
             if (this.swapCurrencies && this.hasSwappableCurrency) {
                 newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
             } else {
@@ -643,6 +666,9 @@ export default defineComponent({
 
             emit(newValue);
         },
+
+        // handle keydown events; contains logic for ensuring only valid characters can be typed, handling deletion of
+        // decimal/large number separators, and other keystroke-related logic
         handleKeydown(event: KeyboardEvent) {
             const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             const modifierKeys: ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'];
@@ -757,14 +783,13 @@ export default defineComponent({
                 event.preventDefault();
             }
         },
+
+        // if the user has clicked into and then out of the input, the input is considered dirty
         handleBlur() {
             this.inputIsDirty = true;
         },
-        focusInput() {
-            if (this.inputElement) {
-                this.inputElement.focus();
-            }
-        },
+
+        // handle when the user clicks the maximum available amount above the input
         fillMaxValue() {
             if (this.isDisabled || this.isReadonly || !this.maxValue || this.maxValue.eq(this.modelValue)) {
                 return;
@@ -772,6 +797,8 @@ export default defineComponent({
 
             let formattedMaxValue: string;
 
+            // determine what text should be shown in the input; if the user has swapped currencies,
+            // show the max value in the secondary currency
             if (this.swapCurrencies && this.hasSwappableCurrency) {
                 const maxValueInSecondaryCurrency = convertCurrency(
                     this.maxValue,
@@ -809,14 +836,24 @@ export default defineComponent({
             this.setInputValue(formattedMaxValue);
             this.handleInput();
         },
+
+        // handle when the user clicks the secondary currency label under the input
         handleSwapCurrencies() {
             if (!this.isReadonly && !this.isDisabled) {
                 this.swapCurrencies = !this.swapCurrencies;
             }
         },
 
+        // focus the literal input element; may be useful to call from outside the component
+        focusInput() {
+            if (this.inputElement) {
+                this.inputElement.focus();
+            }
+        },
+
+
         // can be called from outside the component to show an error state for empty input, e.g. when submitting form
-        // without filling out required fields
+        // without filling out required fields. Has no effect unless the component is set to required
         showEmptyError() {
             this.inputIsDirty = true;
         },
