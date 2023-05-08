@@ -51,7 +51,12 @@ export default defineComponent({
                 class="q-mb-xs"
             />
         </div>
-        <div v-if="loading" class="c-wallet-page--loading">
+        <div
+            :class="{
+                'c-wallet-page__loading': true,
+                'c-wallet-page__loading--hide': !loading
+            }"
+        >
             <q-spinner-dots
                 color="primary"
                 size="2em"
@@ -72,9 +77,24 @@ export default defineComponent({
 }
 
 .c-wallet-page {
-    &--loading {
+    &__loading {
+        opacity: 1;
         text-align: center;
         margin-top: 20px;
+        // animation: fade-in 0.4s linear forwards 0.8s;
+        transition: opacity 0.4s linear 0.8s;
+        &--hide {
+            opacity: 0;
+        }
+    }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }
 </style>

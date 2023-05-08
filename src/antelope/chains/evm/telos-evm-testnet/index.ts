@@ -56,7 +56,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getSystemToken(): EvmToken {
-        return TOKEN;
+        return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
     }
 
     getUsdPrice(): Promise<number> {
@@ -93,5 +93,13 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getWtlosContractAddress() {
         return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
+    }
+
+    getImportantTokensIdList(): string[] {
+        return [
+            this.constructTokenId(TOKEN),
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
+        ];
     }
 }

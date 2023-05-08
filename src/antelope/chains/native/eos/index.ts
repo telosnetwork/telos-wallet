@@ -98,4 +98,8 @@ export default class EOS extends NativeChainSettings {
         }
         return true;
     }
+
+    getImportantTokensIdList(): string[] {
+        return [this.constructTokenId(TOKEN)];
+    }
 }

@@ -101,7 +101,7 @@ export const useBalancesStore = defineStore(store_name, {
                                             token.balanceBn = balanceBn;
                                             token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
                                             token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                                            if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
+                                            if (this.shouldAddTokenBalance(label, balanceBn, token)) {
                                                 this.addNewBalance(label, token);
                                             } else {
                                                 this.removeBalance(label, token);
@@ -123,26 +123,35 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+        shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: Token): boolean {
+            const importantTokens = useChainStore().getChain(label).settings.getImportantTokensIdList();
+            if (importantTokens.includes(token.tokenId)) {
+                // if the token is important, we always add it. Even with 0 balance.
+                return true;
+            } else {
+                return !balanceBn.isNegative() && !balanceBn.isZero();
+            }
+        },
         async updateSystemBalanceForAccount(label: string, address: string): Promise<EvmToken> {
             const evm = useEVMStore();
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const provider = toRaw(evm.rpcProvider);
             const token = chain_settings.getSystemToken();
             if (provider) {
-                provider.getBalance(address).then(async (balanceBn: BigNumber) => {
-                    token.balanceBn = balanceBn;
-                    token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-                    token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                    if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
-                        this.addNewBalance(label, token);
-                    } else {
-                        this.removeBalance(label, token);
-                    }
-                    const price = await chain_settings.getUsdPrice();
-                    token.fiatBalance = `${parseFloat(token.balance) * price}`;
-                    token.price = price;
-                    this.updateBalance(label, token);
-                });
+                const [balanceBn, price] = await Promise.all([
+                    provider.getBalance(address),
+                    chain_settings.getUsdPrice(),
+                ]);
+                token.balanceBn = balanceBn;
+                token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+                token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+                token.fiatBalance = `${parseFloat(token.balance) * price}`;
+                token.price = price;
+                if (this.shouldAddTokenBalance(label, balanceBn, token)) {
+                    this.addNewBalance(label, token);
+                } else {
+                    this.removeBalance(label, token);
+                }
             } else {
                 console.error('No provider');
             }
@@ -279,16 +288,24 @@ export const useBalancesStore = defineStore(store_name, {
             this.trace('updateBalance', label, token);
             const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
-                this.__balances[label][index] = {
-                    ...this.__balances[label][index],
-                    balance: token.balance,
-                    fullBalance: token.fullBalance,
-                    price: token.price,
-                    fiatBalance: token.fiatBalance,
-                } as Token;
-                this.sortBalances(label);
-                if (useAccountStore().currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
+                if (
+                    token.balance !== this.__balances[label][index].balance ||
+                    token.fullBalance !== this.__balances[label][index].fullBalance ||
+                    token.price !== this.__balances[label][index].price ||
+                    token.fiatBalance !== this.__balances[label][index].fiatBalance
+                ) {
+                    console.error('updateBalance', token.balance, token.fullBalance, token.price,  token.fiatBalance, '-------------------------');
+                    this.__balances[label][index] = {
+                        ...this.__balances[label][index],
+                        balance: token.balance,
+                        fullBalance: token.fullBalance,
+                        price: token.price,
+                        fiatBalance: token.fiatBalance,
+                    } as Token;
+                    this.sortBalances(label);
+                    if (useAccountStore().currentIsLogged && label === 'current') {
+                        this.__balances['logged'] = this.__balances[label];
+                    }
                 }
             }
         },
