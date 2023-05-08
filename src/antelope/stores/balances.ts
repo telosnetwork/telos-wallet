@@ -83,7 +83,7 @@ export const useBalancesStore = defineStore(store_name, {
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     if (account?.account) {
-                        this.__balances[label] = await chain_settings.getTokens(account?.account);
+                        this.__balances[label] = await chain_settings.getTokens(account.account);
                     }
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
