@@ -103,15 +103,18 @@ export default defineComponent({
         swapCurrencies: false,
 
         // used to check if a new modelValue needs to be emitted when using a swappable currency.
+        // note that it is an amount of secondary currency that has been converted to primary currency,
+        // e.g. if primary is TLOS and secondary is USD, this amount is stored as an amount of TLOS
+        //
         // this is needed because in many cases, the conversion factor from primary to secondary currency will result in
-        // a non-terminating decimal amount of secondary currency being equivalent to the modelValue (primary currency amount),
-        // e.g. 0.19 USD === 1 TLOS => 5.(263157894736842105) USD = 1 TLOS (parens indicate repeating decimal)
+        // a non-terminating/irrational/extremely long decimal amount of secondary currency being equivalent to the
+        // modelValue (primary currency amount),
+        // e.g. 0.19 USD === 1 TLOS => 1 USD === 5.(263157894736842105) TLOS (parens indicate repeating decimal)
         // In these cases, there will be an infinite update loop as the logic to decide whether to emit relies on
-        // comparing the secondary value converted to the primary value with the new modelValue (primary amount);
-        // a small amount of precision is lost (by rounding) with every conversion (because non-terminating numbers cannot be
-        // accurately stored in a variable), leading to inequality. This is the same reason that, when a user enters an
-        // amount in a secondary currency, and the conversion rate from secondary to primary is non-terminating, we must pass
-        // a rounded number to whatever service is being called. This rounding is accurate to 18 decimal places
+        // comparing the secondary value converted to the primary value with the new modelValue (i.e. primary amount);
+        // a small amount of precision is lost through rounding with every conversion (because these problematic numbers
+        // cannot be accurately stored in a variable), leading to inequality.
+        // This rounding is accurate to 18 decimal places
         savedSecondaryValue: BigNumber.from(0),
     }),
     computed: {
@@ -333,7 +336,17 @@ export default defineComponent({
             let newValueIsDifferent;
 
             if (this.swapCurrencies && this.hasSwappableCurrency) {
-                newValueIsDifferent = !this.savedSecondaryValue.eq(newValue);
+                // if the user has swapped currencies, we must compare the new modelValue (which is a primary currency
+                // amount) to the saved secondary value (see note above by savedSecondaryValue declaration)
+                if (this.maxValue && this.maxValue.eq(newValue)) {
+                    // if the user has just filled the max value, the saved secondary value will still be that number
+                    // converted to secondary currency, i.e. less accurate. In this case, update the saved secondary value
+                    // to the actual maxValue
+                    this.savedSecondaryValue = newValue;
+                    newValueIsDifferent = false;
+                } else {
+                    newValueIsDifferent = !this.savedSecondaryValue.eq(newValue);
+                }
             } else {
                 newValueIsDifferent = !newValue.eq(oldValue);
             }
@@ -518,7 +531,33 @@ export default defineComponent({
                             this.secondaryToPrimaryConversionRate,
                         );
 
-                        this.$emit('update:modelValue', secondaryConvertedToPrimary);
+                        if (this.maxValue) {
+                            const maxValueAsSecondary = convertCurrency(
+                                this.maxValue,
+                                this.decimals,
+                                this.secondaryCurrencyDecimals,
+                                this.secondaryCurrencyConversionFactor,
+                            );
+                            // this is needed because the conversion from primary to secondary currency is rounded;
+                            // the new value (val) will not be precisely equal to maxValue even if the user has just
+                            // filled in the max value into the input
+                            const maxValueConvertedBackToPrimary = convertCurrency(
+                                maxValueAsSecondary,
+                                this.secondaryCurrencyDecimals,
+                                this.decimals,
+                                this.secondaryToPrimaryConversionRate,
+                            );
+
+                            if (maxValueConvertedBackToPrimary.eq(secondaryConvertedToPrimary)) {
+                                // the new value to emit represents this.maxValue converted to secondary;
+                                // we should emit this.maxValue rather than the converted value, which is less precise
+                                this.$emit('update:modelValue', this.maxValue);
+                            } else {
+                                this.$emit('update:modelValue', secondaryConvertedToPrimary);
+                            }
+                        } else {
+                            this.$emit('update:modelValue', secondaryConvertedToPrimary);
+                        }
                     } else {
                         this.$emit('update:modelValue', val);
                     }
@@ -740,7 +779,7 @@ export default defineComponent({
                     this.secondaryCurrencyDecimals,
                     this.secondaryCurrencyConversionFactor,
                 );
-                const maxValueDecimals = formatUnits(maxValueInSecondaryCurrency, this.decimals).split('.')[1].length;
+                const maxValueDecimals = formatUnits(maxValueInSecondaryCurrency, this.secondaryCurrencyDecimals).split('.')[1].length;
 
                 formattedMaxValue = prettyPrintCurrency(
                     maxValueInSecondaryCurrency,
