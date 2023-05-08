@@ -42,8 +42,19 @@ export default defineComponent({
             handler() {
                 let token = this.token;
                 this.token = null;
-                if (this.balances.length > 0 && !token) {
-                    token = this.balances[0];
+                if (this.balances.length > 0) {
+                    // if there's a url parameter token with the token address, use that token
+                    const tokenAddress = this.$route.query.token;
+                    if (tokenAddress) {
+                        token = this.balances.find(t => t.address === tokenAddress) ?? token;
+
+                        // hide the token address from the url
+                        this.$router.replace({ name: 'evm-send', params: { token: undefined } });
+                    }
+
+                    if (!token) {
+                        token = this.balances[0];
+                    }
                 }
                 this.token = token;
             },
