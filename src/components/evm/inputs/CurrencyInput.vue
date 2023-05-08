@@ -266,7 +266,8 @@ export default defineComponent({
             return `@ ${roundedConversionRate} ${this.secondaryCurrencySymbol} / ${this.symbol}`;
         },
         secondaryToPrimaryConversionRate(): string {
-            // this.secondaryCurrencyConversionFactor is for converting primary to secondary; invert to convert
+            // this.secondaryCurrencyConversionFactor is for converting primary to secondary;
+            // invert to convert secondary to primary
             return getFloatReciprocal(this.secondaryCurrencyConversionFactor);
         },
         prettyMaxValue() {
@@ -310,6 +311,7 @@ export default defineComponent({
 
             return `${amount} ${symbol} ${this.$t('global.available')}`;
         },
+
         primaryCurrencyDisplayPrecision() {
             // if the value represents fiat, show 2 decimals; else show 4
             return this.decimals === 2 ? 2 : 4;
