@@ -122,6 +122,9 @@ export class TokenBalance {
 
     // Returns the fiat balance based on the current token price and balance
     get fiatBalance(): ethers.BigNumber {
-        return ethers.utils.parseEther(this.balance).mul(this.token.price);
+        const price = ethers.utils.parseUnits(this.token.price.toString(), 18);
+        const fiatDouble = this.balanceBn.mul(price);
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        return fiat;
     }
 }
