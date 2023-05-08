@@ -101,7 +101,7 @@ export default defineComponent({
     </div>
 </div>
 <div class="row">
-    <div class="col-1">
+    <div class="col-12 q-mb-xl">
         <label>Locale:&nbsp;</label><br>
         <select class="q-mb-md" @input="updateCurrencyInputLocale">
             <option value="en-US" selected>en-US</option>
@@ -114,6 +114,7 @@ export default defineComponent({
         <q-checkbox v-model="currencyInputIsDisabled">Disabled?</q-checkbox>
         <q-checkbox v-model="currencyInputIsReadonly">Readonly?</q-checkbox>
         <q-checkbox v-model="currencyInputIsRequired">Required?</q-checkbox>
+        <br>
         <q-checkbox v-model="currencyInputIsLoading">Loading?</q-checkbox>
         <q-checkbox v-model="randomizeExchangeRates">Simulate changing exchange rates (every 10 secs)?</q-checkbox>
         <q-checkbox v-model="currencyInputMaxValueError">Show error if value exceeds max?</q-checkbox>
@@ -121,7 +122,7 @@ export default defineComponent({
         <br>
         <br>
 
-        <q-input v-model="currencyInputErrorMessage" label="Error message"/>
+        <q-input v-model="currencyInputErrorMessage" label="Error message" class="c-input-demos__err-input"/>
 
         <br>
         <br>
@@ -131,8 +132,7 @@ export default defineComponent({
         </button>
         <label>(Required must be true, affects 3rd input only)</label>
     </div>
-    <div class="col-1"></div>
-    <div class="col-10">
+    <div class="col-12">
         <div class="row q-mb-xl">
             <div class="col-12 q-mb-xl">
                 <CurrencyInput
@@ -224,5 +224,9 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-
+.c-input-demos {
+    &__err-input {
+        max-width: 300px;
+    }
+}
 </style>
