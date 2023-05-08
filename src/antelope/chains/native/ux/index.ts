@@ -93,4 +93,8 @@ export default class UX extends NativeChainSettings {
         }
         return true;
     }
+
+    getImportantTokensIdList(): string[] {
+        return [this.constructTokenId(TOKEN)];
+    }
 }

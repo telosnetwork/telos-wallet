@@ -123,6 +123,13 @@ export default abstract class NativeChainSettings implements ChainSettings {
     abstract getTheme(): Theme;
     abstract getFiltersSupported(prop: string): boolean;
 
+    // new methods
+    abstract getImportantTokensIdList(): string[];
+
+    constructTokenId(token: NativeToken): string {
+        return `${token.symbol}-${token.contract}-${this.getNetwork()}`;
+    }
+
     async getApy(): Promise<string> {
         const response = await this.api.get('apy/native');
         return response.data as string;

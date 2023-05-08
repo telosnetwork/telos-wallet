@@ -97,6 +97,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getWeiPrecision(): number;
     abstract getExplorerUrl(): string;
     abstract getTrustedContractsBucket(): string;
+    abstract getImportantTokensIdList(): string[];
+
+    constructTokenId(token: EvmToken): string {
+        return `${token.symbol}-${token.address}-${this.getChainId()}`;
+    }
 
     getContract(address: string): EvmContract | false | null {
         const key = address.toLowerCase();

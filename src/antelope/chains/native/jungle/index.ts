@@ -93,4 +93,8 @@ export default class TelosTestnet extends NativeChainSettings {
         }
         return true;
     }
+
+    getImportantTokensIdList(): string[] {
+        return [this.constructTokenId(TOKEN)];
+    }
 }

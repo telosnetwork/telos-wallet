@@ -17,7 +17,7 @@ export default defineComponent({
         AddressQR,
         UserInfo,
     },
-    mounted() {
+    async mounted() {
         global.setShowBackBtn(true);
     },
     methods: {
