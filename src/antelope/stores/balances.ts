@@ -45,6 +45,8 @@ export interface BalancesState {
     __balances:  { [label: Label]: Token[] };
 }
 
+type addressString = `0x${string}`; // required wagmi type
+
 const store_name = 'balances';
 
 export const useBalancesStore = defineStore(store_name, {
@@ -97,9 +99,9 @@ export const useBalancesStore = defineStore(store_name, {
                         if(localStorage.getItem('wagmi.connected')){
                             tokens.map(async (token) => {
                                 const balanceBn = await fetchBalance({
-                                    address: getAccount().address as `0x${string}`,
+                                    address: getAccount().address as addressString,
                                     chainId: getNetwork().chain?.id,
-                                    token: token.address as `0x${string}`,
+                                    token: token.address as addressString,
                                 });
                                 token.balanceBn = balanceBn.value;
                                 token.balance = `${formatWei(balanceBn.value, token.decimals, 4)}`;
@@ -160,7 +162,7 @@ export const useBalancesStore = defineStore(store_name, {
                 token = await this.setToken(label, balanceBn);
             } else if (localStorage.getItem('wagmi.connected')){
                 const balanceBn = await fetchBalance({
-                    address: getAccount().address as `0x${string}`,
+                    address: getAccount().address as addressString,
                     chainId: getNetwork().chain?.id,
                 });
                 token = await this.setToken(label, balanceBn.value);
