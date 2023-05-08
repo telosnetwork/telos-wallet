@@ -40,6 +40,9 @@ export default defineComponent({
 
             return '0';
         },
+        isProduction() {
+            return process.env.NODE_ENV === 'production';
+        },
     },
     watch: {
         '$q.screen.lt.md'(newValue, oldValue) {
@@ -253,8 +256,13 @@ export default defineComponent({
                 />
                 {{ $t('global.sign_out') }}
             </li>
-
         </ul>
+
+        <div v-if="!isProduction" class="c-app-nav__demos-link">
+            <router-link :to="{ name: 'demos' }" class="text-white">
+                Component Demos
+            </router-link>
+        </div>
     </div>
 </nav>
 </template>
@@ -361,6 +369,12 @@ export default defineComponent({
         &--current-route#{$this}__icon--acorn path {
             stroke: $link-blue;
         }
+    }
+
+    &__demos-link {
+        position: absolute;
+        bottom: 24px;
+        left: 48px;
     }
 }
 </style>
