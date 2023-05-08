@@ -159,6 +159,9 @@ export default defineComponent({
         hasSwappableCurrency() {
             return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencySymbol && !!this.secondaryCurrencyDecimals;
         },
+        currenciesAreSwapped() {
+            return this.swapCurrencies && this.hasSwappableCurrency;
+        },
         secondaryCurrencyAmount(): BigNumber {
             if (!this.hasSwappableCurrency) {
                 return BigNumber.from(0);
@@ -274,7 +277,7 @@ export default defineComponent({
             let symbol: string;
             let amount: string;
 
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 const maxValueInSecondaryCurrency = convertCurrency(
                     this.maxValue,
                     this.decimals,
@@ -342,7 +345,7 @@ export default defineComponent({
         modelValue(newValue: BigNumber, oldValue: BigNumber) {
             let newValueIsDifferent;
 
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 // if the user has swapped currencies, we must compare the new modelValue (which is a primary currency
                 // amount) to the saved secondary value (see note above by savedSecondaryValue declaration)
                 if (this.maxValue && this.maxValue.eq(newValue)) {
@@ -380,7 +383,7 @@ export default defineComponent({
                 if (!shouldSkipFormattingAndEmitting) {
                     let newInputValue: string;
 
-                    if (this.swapCurrencies && this.hasSwappableCurrency) {
+                    if (this.currenciesAreSwapped) {
                         const newValueInSecondaryCurrency = convertCurrency(
                             newValue,
                             this.decimals,
@@ -423,7 +426,7 @@ export default defineComponent({
         // when the exchange rate changes and the user has swapped currencies, we must emit a new modelValue as the
         // value of the amount they've typed has changed
         secondaryCurrencyConversionFactor() {
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 this.handleInput();
             }
         },
@@ -432,7 +435,7 @@ export default defineComponent({
         locale() {
             let formatted;
 
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 formatted = prettyPrintCurrency(
                     this.secondaryCurrencyAmount,
                     this.secondaryCurrencyDisplayPrecision,
@@ -528,7 +531,7 @@ export default defineComponent({
             const emit = (val: BigNumber) => {
                 let newValIsDifferent: boolean;
 
-                if (this.swapCurrencies && this.hasSwappableCurrency) {
+                if (this.currenciesAreSwapped) {
                     // val is the secondary currency amount; convert to primary currency and check against modelValue
                     const newSecondaryConvertedToPrimary = convertCurrency(
                         val,
@@ -544,7 +547,7 @@ export default defineComponent({
                 }
 
                 if (newValIsDifferent) {
-                    if (this.swapCurrencies && this.hasSwappableCurrency) {
+                    if (this.currenciesAreSwapped) {
                         // val is the secondary currency amount; convert to primary currency and emit
                         const secondaryConvertedToPrimary = convertCurrency(
                             val,
@@ -628,7 +631,7 @@ export default defineComponent({
                 // occur so as not to strip the decimal separator
                 let valueString: string;
 
-                if (this.swapCurrencies && this.hasSwappableCurrency) {
+                if (this.currenciesAreSwapped) {
                     valueString = formatUnits(this.secondaryCurrencyAmount, this.secondaryCurrencyDecimals);
                 } else {
                     valueString = formatUnits(this.modelValue, this.decimals);
@@ -637,7 +640,7 @@ export default defineComponent({
                 const isDeletingLastCharacterAfterDecimal = this.inputElement.value.length === valueString.length - 1;
 
                 if (isDeletingLastCharacterAfterDecimal) {
-                    const decimals = this.swapCurrencies && this.hasSwappableCurrency ? this.secondaryCurrencyDecimals : this.decimals;
+                    const decimals = this.currenciesAreSwapped ? this.secondaryCurrencyDecimals : this.decimals;
                     const emitValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, decimals, this.locale);
                     // if the user has deleted the last number after a decimal, the value should be emitted but
                     // no further formatting should occur
@@ -650,7 +653,7 @@ export default defineComponent({
             let newValue: BigNumber;
 
             // ultimately the new modelValue is determined by the text which is in the input element
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.secondaryCurrencyDecimals, this.locale);
             } else {
                 newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
@@ -747,7 +750,7 @@ export default defineComponent({
 
                 let maxDecimals;
 
-                if (this.swapCurrencies && this.hasSwappableCurrency) {
+                if (this.currenciesAreSwapped) {
                     maxDecimals = this.secondaryCurrencyDecimals;
                 } else {
                     maxDecimals = this.decimals;
@@ -799,7 +802,7 @@ export default defineComponent({
 
             // determine what text should be shown in the input; if the user has swapped currencies,
             // show the max value in the secondary currency
-            if (this.swapCurrencies && this.hasSwappableCurrency) {
+            if (this.currenciesAreSwapped) {
                 const maxValueInSecondaryCurrency = convertCurrency(
                     this.maxValue,
                     this.decimals,
