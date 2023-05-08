@@ -64,9 +64,9 @@ export default defineComponent({
                     const min = -0.03;
                     const max =  0.03;
                     const randomNumber = () => Math.random() * (max - min) + min;
-                    this.currencyTlosUsdInputConversionRate  = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
-                    // debugger;
-                    this.currencyTlosUsdtInputConversionRate = (+this.currencyTlosUsdInputConversionRate + randomNumber()).toFixed(4);
+                    this.currencyTlosUsdInputConversionRate  = (+this.currencyTlosUsdInputConversionRate  + randomNumber()).toFixed(4);
+                    this.currencyTlosUsdtInputConversionRate = (+this.currencyTlosUsdtInputConversionRate + randomNumber()).toFixed(4);
+                    this.currencyUsdUsdtInputConversionRate  = (+this.currencyUsdUsdtInputConversionRate  + randomNumber()).toFixed(4);
                 }, 10000);
                 this.randomizeExchangeRates = true;
             } else if (!enable && this.randomizeExchangeRatesInterval) {
