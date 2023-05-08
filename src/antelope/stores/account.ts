@@ -144,7 +144,6 @@ export const useAccountStore = defineStore(store_name, {
         },
 
         async loginEVM({ network }: LoginEVMActionData): Promise<boolean> {
-            debugger;
             this.trace('loginEVM', network);
             let success = false;
             let address = null;
