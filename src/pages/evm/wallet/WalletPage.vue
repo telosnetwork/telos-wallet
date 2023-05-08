@@ -9,7 +9,7 @@ import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import { useBalancesStore, useFeedbackStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 
-const feddback = useFeedbackStore();
+const feedback = useFeedbackStore();
 
 export default defineComponent({
     name: 'WalletPage',
@@ -27,10 +27,10 @@ export default defineComponent({
             return useBalancesStore().loggedBalances as EvmToken[];
         },
         loadingStrings() {
-            return feddback.getLoadings;
+            return feedback.getLoadings;
         },
         loading() {
-            return feddback.isLoading('updateBalancesForAccount');
+            return feedback.isLoading('updateBalancesForAccount');
         },
     },
 });
