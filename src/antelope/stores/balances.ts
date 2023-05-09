@@ -37,9 +37,10 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, providers } from 'ethers';
 import { toRaw } from 'vue';
-import { fetchBalance, getAccount, getNetwork } from '@wagmi/core';
+import { SendTransactionResult, fetchBalance, getAccount, getContract, getNetwork, prepareSendTransaction, sendTransaction } from '@wagmi/core';
+import { parseEther } from 'ethers/lib/utils.js';
 
 export interface BalancesState {
     __balances:  { [label: Label]: Token[] };
@@ -252,22 +253,41 @@ export const useBalancesStore = defineStore(store_name, {
             token: EvmToken,
             to: string,
             amount: BigNumber,
-        ): Promise<EvmTransactionResponse> {
+        ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-                const evm = useEVMStore();
 
-                if (token.isSystem) {
-                    return evm.sendSystemToken(to, amount);
-                } else {
-                    const contract = await evm.getContract(token.address, 'erc20');
-                    if (contract) {
-                        const contractInstance = contract.getContractInstance();
-                        const amountInWei = amount.toString();
-                        return contractInstance.transfer(to, amountInWei);
+                if(localStorage.getItem('wagmi.connected')){
+                    const request = {
+                        to,
+                        value: amount,
+                    } as providers.TransactionRequest & {
+                        to: NonNullable<providers.TransactionRequest['to']>;
+                    };
+
+                    if(!token.isSystem){
+                        request.data = token.address;
+                    }
+                    const config = await prepareSendTransaction({
+                        request,
+                    });
+
+                    return await sendTransaction(config);
+                }else{
+                    const evm = useEVMStore();
+
+                    if (token.isSystem) {
+                        return evm.sendSystemToken(to, amount);
                     } else {
-                        throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
+                        const contract = await evm.getContract(token.address, 'erc20');
+                        if (contract) {
+                            const contractInstance = contract.getContractInstance();
+                            const amountInWei = amount.toString();
+                            return contractInstance.transfer(to, amountInWei);
+                        } else {
+                            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
+                        }
                     }
                 }
             } catch (error) {
