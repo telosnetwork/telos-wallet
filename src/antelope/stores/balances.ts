@@ -261,7 +261,7 @@ export const useBalancesStore = defineStore(store_name, {
                 if(localStorage.getItem('wagmi.connected')){
                     return await this.transferWalletConnect(token, to, amount);
                 }else{
-                    return await this.transferToken(token, to, amount);
+                    return await this.transferMetaMask(token, to, amount);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -295,7 +295,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
 
-        async transferToken(token: EvmToken, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
+        async transferMetaMask(token: EvmToken, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
             const evm = useEVMStore();
 
             if (token.isSystem) {
