@@ -22,6 +22,15 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     placeholder="0"
     type="text"
   />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
   <div
     class="c-currency-input__currency-switcher"
   >
@@ -68,6 +77,15 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     placeholder="0"
     type="text"
   />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
   <div
     class="c-currency-input__currency-switcher"
   >
@@ -114,6 +132,15 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     placeholder="0"
     type="text"
   />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
   <div
     class="c-currency-input__currency-switcher"
   >
@@ -160,6 +187,15 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are sw
     placeholder="0"
     type="text"
   />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
   <div
     class="c-currency-input__currency-switcher"
   >
