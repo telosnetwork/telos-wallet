@@ -11,15 +11,14 @@ const chainStoreMock = {
     }),
 };
 
+import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
+
 jest.mock('vue-router', () => ({
     useRoute: jest.fn(),
     useRouter: jest.fn(() => ({
         push: jest.fn(),
     })),
 }));
-
-
-import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 
 jest.mock('src/antelope', () => chainStoreMock);
 
@@ -61,11 +60,12 @@ describe('WalletPageHeader.vue', () => {
 
     describe('goToRoute', () => {
 
-        it('should call push with named route', async () => {
-            wrapper.vm.goToRoute('fake-route');
+        it('should call push with named route', () => {
+            const fakeRoute = 'fake-route';
+            wrapper.vm.goToRoute(fakeRoute);
 
             expect(wrapper.vm.router.push).toHaveBeenCalledTimes(1);
-            expect(wrapper.vm.router.push).toHaveBeenCalledWith({ name: 'fake-route' });
+            expect(wrapper.vm.router.push).toHaveBeenCalledWith({ name: fakeRoute });
         });
     });
 
