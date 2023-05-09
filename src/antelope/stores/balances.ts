@@ -39,7 +39,7 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers, providers } from 'ethers';
 import { toRaw } from 'vue';
-import { SendTransactionResult, fetchBalance, getAccount, getContract, getNetwork, prepareSendTransaction, sendTransaction } from '@wagmi/core';
+import { SendTransactionResult, fetchBalance, getAccount, getContract, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
 import { parseEther } from 'ethers/lib/utils.js';
 
 export interface BalancesState {
@@ -49,6 +49,7 @@ export interface BalancesState {
 type addressString = `0x${string}`; // required wagmi type
 
 const store_name = 'balances';
+const ERC_20 = 'erc20';
 
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
@@ -259,28 +260,34 @@ export const useBalancesStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('transferEVMTokens');
 
                 if(localStorage.getItem('wagmi.connected')){
-                    const request = {
-                        to,
-                        value: amount,
-                    } as providers.TransactionRequest & {
-                        to: NonNullable<providers.TransactionRequest['to']>;
-                    };
+                    if(token.isSystem){
 
-                    if(!token.isSystem){
-                        request.data = token.address;
+                        const config = await prepareSendTransaction({
+                            request: {
+                                to,
+                                value: amount,
+                            },
+                        });
+
+                        return await sendTransaction(config);
+                    }else{
+
+                        const config = await prepareWriteContract({
+                            address: token.address as addressString,
+                            abi: useEVMStore().getTokenABI(ERC_20),
+                            functionName: 'transfer',
+                            args: [to, amount],
+                        });
+
+                        return await writeContract(config);
                     }
-                    const config = await prepareSendTransaction({
-                        request,
-                    });
-
-                    return await sendTransaction(config);
                 }else{
                     const evm = useEVMStore();
 
                     if (token.isSystem) {
                         return evm.sendSystemToken(to, amount);
                     } else {
-                        const contract = await evm.getContract(token.address, 'erc20');
+                        const contract = await evm.getContract(token.address, ERC_20);
                         if (contract) {
                             const contractInstance = contract.getContractInstance();
                             const amountInWei = amount.toString();
