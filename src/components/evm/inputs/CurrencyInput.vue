@@ -613,15 +613,6 @@ export default defineComponent({
                 return;
             }
 
-            // remove extraneous decimal separators not handled in keydownHandler (i.e. from pasted values)
-            if ((this.inputElement.value?.match(this.decimalSeparatorRegex) ?? []).length > 1) {
-                const { value } = this.inputElement;
-                const afterFirstDecimalSeparatorIndex = value.indexOf(this.decimalSeparator) + 1;
-                const int = value.slice(0, afterFirstDecimalSeparatorIndex);
-                const fractional = value.slice(afterFirstDecimalSeparatorIndex).replaceAll(this.decimalSeparator, '');
-                this.setInputValue(int.concat(fractional));
-            }
-
             // don't format or emit if the user is about to type a decimal
             if (
                 [this.decimalSeparator, '0'].includes(this.inputElement.value[this.inputElement.value.length - 1]) &&
