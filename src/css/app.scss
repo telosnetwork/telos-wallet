@@ -1,3 +1,6 @@
+// importing components css
+@import 'components/notification';
+
 // app global css in Sass form
 @font-face {
   font-family: silka-regular-italic;
@@ -90,7 +93,7 @@ div.cleos-auth-dialog {
 .purpleGradient {
   background: linear-gradient(120deg, $gradientblue, $gradientPurple);
   color: $white;
-  transition: transform 0.3s;
+  transition: background 0.3s ease;
   &:hover {
     background: linear-gradient(120deg, $gradientPurple, $gradientblue);
   }
@@ -217,3 +220,5 @@ div.cleos-auth-dialog {
   text-overflow: ellipsis;
 }
 
+// importing components css
+@import 'components/notification'
