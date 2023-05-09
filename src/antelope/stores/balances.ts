@@ -259,48 +259,56 @@ export const useBalancesStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('transferEVMTokens');
 
                 if(localStorage.getItem('wagmi.connected')){
-                    if(token.isSystem){
-
-                        const config = await prepareSendTransaction({
-                            request: {
-                                to,
-                                value: amount,
-                            },
-                        });
-
-                        return await sendTransaction(config);
-                    }else{
-
-                        const config = await prepareWriteContract({
-                            address: token.address as addressString,
-                            abi: useEVMStore().getTokenABI(ERC_20),
-                            functionName: 'transfer',
-                            args: [to, amount],
-                        });
-
-                        return await writeContract(config);
-                    }
+                    return await this.transferWalletConnect(token, to, amount);
                 }else{
-                    const evm = useEVMStore();
-
-                    if (token.isSystem) {
-                        return evm.sendSystemToken(to, amount);
-                    } else {
-                        const contract = await evm.getContract(token.address, ERC_20);
-                        if (contract) {
-                            const contractInstance = contract.getContractInstance();
-                            const amountInWei = amount.toString();
-                            return contractInstance.transfer(to, amountInWei);
-                        } else {
-                            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
-                        }
-                    }
+                    return await this.transferToken(token, to, amount);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw new Error('antelope.balances.error_at_transfer_tokens');
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
+            }
+        },
+
+        async transferWalletConnect(token: EvmToken, to: string, amount: BigNumber): Promise<SendTransactionResult>{
+            if(token.isSystem){
+
+                const config = await prepareSendTransaction({
+                    request: {
+                        to,
+                        value: amount,
+                    },
+                });
+
+                return await sendTransaction(config);
+            }else{
+
+                const config = await prepareWriteContract({
+                    address: token.address as addressString,
+                    abi: useEVMStore().getTokenABI(ERC_20),
+                    functionName: 'transfer',
+                    args: [to, amount],
+                });
+
+                return await writeContract(config);
+            }
+        },
+
+        async transferToken(token: EvmToken, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
+            const evm = useEVMStore();
+
+            if (token.isSystem) {
+                return evm.sendSystemToken(to, amount);
+            } else {
+                const contract = await evm.getContract(token.address, ERC_20);
+                if (contract) {
+                    const contractInstance = contract.getContractInstance();
+                    const amountInWei = amount.toString();
+                    return contractInstance.transfer(to, amountInWei);
+                } else {
+                    throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
+                }
             }
         },
         // sorting ----------
