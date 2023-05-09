@@ -37,10 +37,9 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
-import { BigNumber, ethers, providers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
-import { SendTransactionResult, fetchBalance, getAccount, getContract, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
-import { parseEther } from 'ethers/lib/utils.js';
+import { SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
 
 export interface BalancesState {
     __balances:  { [label: Label]: Token[] };
