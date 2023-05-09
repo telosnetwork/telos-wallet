@@ -81,20 +81,10 @@ export default defineComponent({
         opacity: 1;
         text-align: center;
         margin-top: 20px;
-        // animation: fade-in 0.4s linear forwards 0.8s;
         transition: opacity 0.4s linear 0.8s;
         &--hide {
             opacity: 0;
         }
-    }
-}
-
-@keyframes fade-in {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
     }
 }
 </style>
