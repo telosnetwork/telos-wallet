@@ -30,7 +30,7 @@ const goToBuy = () => {
 
 <template>
 <div>
-    <BigFiatText :amount="props.totalBalance" class="q-mb-xl"/>
+    <BigFiatText :amount="totalBalance" class="q-mb-xl"/>
 
     <div class="c-wallet-page-header__links">
         <div

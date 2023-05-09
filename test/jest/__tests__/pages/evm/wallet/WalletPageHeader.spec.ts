@@ -11,51 +11,77 @@ const chainStoreMock = {
     }),
 };
 
+jest.mock('vue-router', () => ({
+    useRoute: jest.fn(),
+    useRouter: jest.fn(() => ({
+        push: jest.fn(),
+    })),
+}));
+
+
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 
 jest.mock('src/antelope', () => chainStoreMock);
 
 describe('WalletPageHeader.vue', () => {
-    const routerMock = {
-        push: jest.fn(),
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let wrapper: any;
 
-    it('should render properly', async () => {
-        const originalWindowOpen = window.open;
-
-        const wrapper = shallowMount(WalletPageHeader, {
-            global: {
-                mocks: {
-                    $router: routerMock,
-                },
+    beforeEach(() => {
+        wrapper = shallowMount(WalletPageHeader, {
+            props: {
+                totalBalance: 123456.78,
             },
         });
+    });
 
-        window.open = jest.fn();
-
+    it('should render properly', async () => {
         expect(wrapper.element).toMatchSnapshot();
+    });
 
-        const [
-            sendLink,
-            receiveLink,
-            buyLink,
-        ] = wrapper.findAll('.c-wallet-page-header__link');
+    it('should call goToRoute on click send', async () => {
+        const sendLink = wrapper.findAll('.c-wallet-page-header__link')[0];
+        const methodSpy = jest.spyOn(wrapper.vm, 'goToRoute');
 
         await sendLink.trigger('click');
-        await receiveLink.trigger('click');
-        await buyLink.trigger('click');
 
-        expect(routerMock.push).toHaveBeenCalledTimes(2);
-        expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
-            name: 'evm-send',
-        }));
-        expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
-            name: 'evm-receive',
-        }));
-
-        expect(window.open).toHaveBeenCalledTimes(1);
-        expect(window.open).toHaveBeenCalledWith(fakeBuyMoreLink, '_blank');
-
-        window.open = originalWindowOpen;
+        expect(methodSpy).toHaveBeenCalledTimes(1);
+        expect(methodSpy).toHaveBeenCalledWith('evm-send');
     });
+
+    it('should call goToRoute on click receive', async () => {
+        const receiveLink = wrapper.findAll('.c-wallet-page-header__link')[1];
+        const methodSpy = jest.spyOn(wrapper.vm, 'goToRoute');
+
+        await receiveLink.trigger('click');
+
+        expect(methodSpy).toHaveBeenCalledTimes(1);
+        expect(methodSpy).toHaveBeenCalledWith('evm-receive');
+    });
+
+    describe('goToRoute', () => {
+
+        it('should call push with named route', async () => {
+            wrapper.vm.goToRoute('fake-route');
+
+            expect(wrapper.vm.router.push).toHaveBeenCalledTimes(1);
+            expect(wrapper.vm.router.push).toHaveBeenCalledWith({ name: 'fake-route' });
+        });
+    });
+
+    describe('goToBuy', () => {
+
+        it('should call window.open', () => {
+            const originalWindowOpen = window.open;
+            window.open = jest.fn();
+
+            wrapper.vm.goToBuy();
+
+            expect(window.open).toHaveBeenCalledTimes(1);
+            expect(window.open).toHaveBeenCalledWith(fakeBuyMoreLink, '_blank');
+
+            window.open = originalWindowOpen;
+        });
+    });
+
 });
