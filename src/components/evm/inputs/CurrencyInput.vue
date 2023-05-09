@@ -694,6 +694,13 @@ export default defineComponent({
             const userIsDoingTextOperation =
                 ['a', 'v', 'x', 'c', 'z'].includes(event.key) && (event.ctrlKey || event.metaKey);
 
+            const isPaste = event.key === 'v' && (event.ctrlKey || event.metaKey);
+
+            if (isPaste) {
+                // paste logic is handled in handlePaste
+                return;
+            }
+
             if (!validKeystrokes.includes(event.key) && !userIsDoingTextOperation) {
                 event.preventDefault();
                 return;
@@ -787,6 +794,47 @@ export default defineComponent({
             if (invalidKeystroke) {
                 event.preventDefault();
             }
+        },
+
+        // handles pasting of text into the input
+        handlePaste(event: ClipboardEvent) {
+            const pastedData = event.clipboardData?.getData('text');
+            event.preventDefault();
+
+            if (!pastedData) {
+                // pasted content is not text; ignore it
+                return;
+            }
+
+            // strip all characters which are not numbers or a decimal separator
+            let formattedInput = pastedData.replace(this.notIntegerOrDecimalSeparatorRegex, '');
+
+            // ensure there is only one decimal separator by removing all but the last one
+            const lastIndexOfDecimalSeparator = formattedInput.lastIndexOf(this.decimalSeparator);
+            const beforeLastDecimalSeparator = formattedInput.slice(0, lastIndexOfDecimalSeparator).split(this.decimalSeparator).join('');
+            const afterLastDecimalSeparator = formattedInput.slice(lastIndexOfDecimalSeparator);
+            formattedInput = beforeLastDecimalSeparator + afterLastDecimalSeparator;
+
+            if (formattedInput[0] === this.decimalSeparator) {
+                formattedInput = '0' + formattedInput;
+            }
+
+            if (formattedInput[formattedInput.length - 1] === this.decimalSeparator) {
+                formattedInput = formattedInput + '0';
+            }
+
+            if (!formattedInput) {
+                // pasted content was not a number; ignore it
+                this.setInputValue('');
+            } else {
+                const decimals = this.currenciesAreSwapped ? this.secondaryCurrencyDecimals : this.decimals;
+                const formattedInputAsBigNumber = parseUnits(formattedInput, decimals);
+                const pretty = prettyPrintCurrency(formattedInputAsBigNumber, this.decimals, this.locale, false, undefined, false, decimals, true);
+
+                this.setInputValue(pretty);
+            }
+
+            this.handleInput();
         },
 
         // if the user has clicked into and then out of the input, the input is considered dirty
@@ -911,6 +959,7 @@ export default defineComponent({
         @keydown="handleKeydown"
         @input.stop="handleInput"
         @blur="handleBlur"
+        @paste="handlePaste"
     >
     <q-spinner
         v-show="loading"
