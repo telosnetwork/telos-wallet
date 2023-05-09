@@ -88,7 +88,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getStlosContractAddress() {
-        return '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd';
+        return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
     }
 
     getWtlosContractAddress() {
