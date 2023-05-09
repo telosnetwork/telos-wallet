@@ -1,43 +1,36 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
+import { computed } from 'vue';
 import InlineSvg from 'vue-inline-svg';
-
 import BigFiatText from 'components/evm/BigFiatText.vue';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { useRouter } from 'vue-router';
 
-export default defineComponent({
-    name: 'WalletPageHeader',
-    components: {
-        BigFiatText,
-        InlineSvg,
-    },
-    computed: {
-        // TODO return real balance
-        // https://github.com/telosnetwork/telos-wallet/issues/176
-        totalBalance() {
-            return 123456.78;
-        },
-        buyMoreLink() {
-            const chainStore = useChainStore();
-            return (chainStore.currentChain.settings as EVMChainSettings).getBuyMoreOfTokenLink();
-        },
-    },
-    methods: {
-        goToRoute(name: string) {
-            this.$router.push({ name });
-        },
-        goToBuy() {
-            window.open(this.buyMoreLink, '_blank')?.focus();
-        },
-    },
+const router = useRouter();
+
+const props = defineProps<{
+    totalBalance: number
+}>();
+
+const buyMoreLink = computed(() => {
+    const chainStore = useChainStore();
+    return (chainStore.currentChain.settings as EVMChainSettings).getBuyMoreOfTokenLink();
+
 });
+
+const goToRoute = (name: string) => {
+    router.push({ name });
+};
+
+const goToBuy = () => {
+    window.open(buyMoreLink.value, '_blank')?.focus();
+};
+
 </script>
 
 <template>
 <div>
-    <BigFiatText :amount="totalBalance" class="q-mb-xl"/>
+    <BigFiatText :amount="props.totalBalance" class="q-mb-xl"/>
 
     <div class="c-wallet-page-header__links">
         <div

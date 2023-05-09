@@ -1,8 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-
 import { EvmToken } from 'src/antelope/types';
-
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
@@ -21,7 +19,17 @@ export default defineComponent({
     },
     data: () => ({
         tabs: ['balance', 'transactions'],
+        totalFiatAmount: 0,
     }),
+    watch: {
+        allTokens(newBalances: EvmToken[]) {
+            let newFiatBalance = 0;
+            for (let balance of newBalances){
+                newFiatBalance += parseFloat(balance.fiatBalance);
+            }
+            this.totalFiatAmount = newFiatBalance;
+        },
+    },
     computed: {
         allTokens() {
             return useBalancesStore().loggedBalances as EvmToken[];
@@ -39,7 +47,7 @@ export default defineComponent({
 <template>
 <AppPage :tabs="tabs">
     <template v-slot:header>
-        <WalletPageHeader/>
+        <WalletPageHeader :total-balance="totalFiatAmount"/>
     </template>
 
     <template v-slot:balance>

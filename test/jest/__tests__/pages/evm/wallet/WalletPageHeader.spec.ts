@@ -20,10 +20,6 @@ describe('WalletPageHeader.vue', () => {
         push: jest.fn(),
     };
 
-    it('should have the correct name', () => {
-        expect(WalletPageHeader.name).toBe('WalletPageHeader');
-    });
-
     it('should render properly', async () => {
         const originalWindowOpen = window.open;
 
