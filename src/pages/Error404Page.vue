@@ -31,15 +31,6 @@ export default defineComponent({
     <div class="c-404-page__video-overlay" ></div>
     <div class="c-404-page__video-overlay 404-page__video-overlay--shaded" ></div>
 
-    <!--
-      layout: una sola columna principal con un ancho máximo de 550px o 90vw. Las filas:
-      - 1: fila con dos columnas col-6.
-        - La primera columna contiene el logo ("~assets/logo--telos-wallet.svg")
-        - La segunda columna contiene el texto grande "404" (font-size:73.61px)
-      - 2: fila con una columna col-12 mostrando un texto como título (H2)
-      - 3: fila con una columna col-12 mostrando un texto de explicación (p)
-      - 4: fila con una columna col-12 mostrando un botón de acción (q-btn) para ir al homepage (to="/")
-    -->
     <div class="c-404-page__layout q-pa-lg q-gutter-y-md q-mx-auto">
         <div class="c-404-page__layout-r1">
             <div class="c-404-page__layout-logo">
@@ -60,7 +51,7 @@ export default defineComponent({
         <div class="c-404-page__layout-r2">
             <div class="c-404-page__layout-r2-c1">
                 <h2 class="c-404-page__subtitle">
-                    Sorry, the page you're looking for can't be found.
+                    {{ $t('error404.subtitle') }}
                 </h2>
             </div>
         </div>
@@ -68,23 +59,19 @@ export default defineComponent({
         <div class="c-404-page__layout-r3">
             <div class="c-404-page__layout-r3-c1">
                 <p class="c-404-page__text">
-                    However, you can easily return to our home page simply clicking the button below.
+                    {{ $t('error404.text') }}
                 </p>
             </div>
         </div>
 
         <div class="c-404-page__layout-r4">
             <div class="c-404-page__layout-r4-c1">
-                <q-btn color="primary" to="/" class="q-mt-none">
-                    take me to the home page
+                <q-btn color="primary" to="/" class="c-404-page__button">
+                    {{ $t('error404.take_me_to_home') }}
                 </q-btn>
             </div>
         </div>
     </div>
-
-
-
-
 
 </div>
 </template>
@@ -95,18 +82,20 @@ export default defineComponent({
 
     &__video-wrapper {
         background-color: black;
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
+        position: absolute;
         overflow: hidden;
         z-index: -1;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
     }
 
     &__video {
         object-fit: cover;
         width: 100vw;
         height: 100vh;
-        position: fixed;
+        position: absolute;
         transform: rotate(180deg);
         top: 35vh;
         left: 0;
@@ -114,25 +103,30 @@ export default defineComponent({
 
     &__video-overlay {
         background: linear-gradient(0.4turn, #0a1d5f52, #814cdc52);
-        background-repeat: no-repeat;
-        background-size: cover;
         object-fit: cover;
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
-        left: 0;
+        position: absolute;
+        overflow: hidden;
         z-index: -1;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
     }
 
     // layout
 
     &__layout {
         max-width: 550px;
-        width: 90vw;
+        width: 100vw;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: initial;
+        margin-top: 0vh;
+
+        @media only screen and (min-width: $breakpoint-md-min) {
+            margin-top: 15vh;
+        }
     }
 
     &__layout-r1 {
@@ -150,12 +144,12 @@ export default defineComponent({
 
     &__layout-title {
         text-align: left;
-        margin-left: 10px;
+        margin-left: 25px;
     }
 
     &__logo {
         width: 100%;
-        max-width: 130px;
+        max-width: 115px;
     }
 
     &__title {
@@ -175,7 +169,10 @@ export default defineComponent({
         font-size: 16px;
         font-weight: 400;
         color: white;
-        line-height: 1.95rem;
+    }
+
+    &__button {
+        --q-primary: linear-gradient(106.63deg, #1AD6FF 0%, #8946DF 83.87%);
     }
 
 }

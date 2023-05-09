@@ -336,6 +336,9 @@ export default {
         placeholder: 'Search dApp',
     },
     error404: {
+        subtitle: 'Sorry, the page you\'re looking for can\'t be found.',
+        text: 'However, you can easily return to our home page simply clicking the button below.',
+        take_me_to_home: 'take me to the home page',
         oops: 'Oops. Nothing here...',
     },
     antelope: {
