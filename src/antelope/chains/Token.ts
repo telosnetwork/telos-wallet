@@ -5,30 +5,33 @@ export type EvmTokenType = 'ERC20' | 'ERC721' | 'ERC1155' | 'ERC777' | 'ERC827' 
 
 // A type to represent the source information for a token
 interface TokenSourceInfo {
-    symbol: string;
-    contract?: string;
-    address?: string;
-    chainId: string;
-    name: string;
-    decimals?: number;
-    type?: EvmTokenType;
-    logo?: string;
-    logoURI?: string;
-    metadata?: string;
-    precision?: number;
+    symbol: string;                // Token symbol
+    contract?: string;             // Token contract account name (for native)
+    address?: string;              // Token contract address (for EVM)
+    chainId: string;               // Chain ID (40 & 41 for Telos EVM) or hash (for native)
+    name: string;                  // Token name (as a title)
+    decimals?: number;             // Token amount of digits after the decimal point (as used in EVM)
+    precision?: number;            // Token amount of digits after the decimal point (as used in native)
+    type?: EvmTokenType;           // Token type (ERC20, ERC721, etc.)
+    logo?: string;                 // Token logo uri (as used in native)
+    logoURI?: string;              // Token logo uri (as used in EVM)
+    metadata?: string;             // Token contract metadata (as used in EVM)
+    isSystem: boolean;             // True if the token is the main system token
+    isNative: boolean;             // True if the token is a Antelope native blockchain token (false for EVM)
 }
 
 // A class to represent a blockchain token
 export class Token {
-    readonly id: string;
-    readonly symbol: string;
-    readonly name: string;
-    readonly logo?: string;
-    readonly contract: string;
-    readonly chainId: string;
-    readonly decimals: number;
-    readonly type?: EvmTokenType;
-    private _price: number;
+    readonly id: string;           // Unique ID for the token <symbol>-<contract>-<chainId>
+    readonly symbol: string;       // Token symbol
+    readonly name: string;         // Token name (as a title)
+    readonly logo?: string;        // Token logo uri
+    readonly contract: string;     // Token contract address (for EVM) or account name (for native)
+    readonly chainId: string;      // Chain ID (40 & 41 for Telos EVM) or hash (for native)
+    readonly decimals: number;     // Token amount of digits after the decimal point (same as precision for native)
+    readonly isSystem: boolean;    // True if the token is the system token
+    readonly isNative: boolean;    // True if the token is a native blockchain token
+    private _price: number;        // Token price in USD
 
     constructor(sourceInfo: TokenSourceInfo) {
         this.id = `${sourceInfo.symbol}-${sourceInfo.contract}-${sourceInfo.chainId}`;
@@ -37,19 +40,10 @@ export class Token {
         this.chainId = sourceInfo.chainId;
         this.name = sourceInfo.name;
         this.decimals = sourceInfo.decimals ?? sourceInfo.precision ?? 0;
-        this.type = sourceInfo.type;
+        this.isSystem = sourceInfo.isSystem;
+        this.isNative = sourceInfo.isNative;
         this.logo = sourceInfo.logo ?? sourceInfo.logoURI;
         this._price = 0;
-    }
-
-    // Returns true if the token is a native blockchain token
-    get isNative(): boolean {
-        return !this.type;
-    }
-
-    // Returns true if the token is an EVM token
-    get isEvm(): boolean {
-        return !!this.type;
     }
 
     // Returns the URI for the token logo
@@ -70,7 +64,8 @@ export class Token {
 
 // A class to represent an EVM blockchain token
 export class EvmToken extends Token {
-    private _metadata?: string;
+    private _metadata?: string;    // Token contract metadata
+    readonly type?: EvmTokenType;  // Token type (ERC20, ERC721, etc.)
 
     constructor(sourceInfo: TokenSourceInfo) {
         super(sourceInfo);
