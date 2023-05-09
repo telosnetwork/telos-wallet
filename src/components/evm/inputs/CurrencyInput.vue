@@ -900,7 +900,7 @@ export default defineComponent({
     </div>
 
     <input
-        v-if="!loading"
+        v-show="!loading"
         ref="input"
         v-bind="inputElementAttrs"
         :pattern="`${allowedCharactersRegex}*`"
@@ -913,7 +913,7 @@ export default defineComponent({
         @blur="handleBlur"
     >
     <q-spinner
-        v-else
+        v-show="loading"
         color="primary"
         size="md"
         class="c-currency-input__spinner"
