@@ -36,12 +36,6 @@ export default boot(({ app }) => {
     ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));
 
     // autologin --
-    ant.stores.account.autoLogin().then((loggedIn) => {
-        if (!loggedIn) {
-            if (window.location.pathname !== '/') {
-                app.config.globalProperties?.$router?.push({ path: '/' });
-            }
-        }
-    });
+    ant.stores.account.autoLogin();
 
 });
