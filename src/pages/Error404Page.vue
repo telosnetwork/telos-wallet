@@ -3,11 +3,34 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'Error404Page',
+    computed: {
+        isMobile() {
+            return this.$q.screen.lt.md;
+        },
+        isLandscape() {
+            return this.$q.screen.width > this.$q.screen.height;
+        },
+    },
+    watch: {
+        $route: {
+            immediate: true,
+            handler() {
+                console.log(this.$q.screen);
+                console.log(this.$q.screen.lt);
+                console.log(this.$q.screen.lt.md);
+            },
+        },
+    },
 });
 </script>
 
 <template>
-<div class="c-404-page">
+<div
+    :class="{
+        'c-404-page': true,
+        'landscape' : isMobile && isLandscape
+    }"
+>
     <div class="c-404-page__video-wrapper">
         <video
             id="bgvid"
@@ -134,10 +157,6 @@ export default defineComponent({
         justify-content: center;
     }
 
-    &__layout-title {
-        font-size: 73.61px;
-    }
-
     &__layout-logo {
         display: flex;
     }
@@ -150,12 +169,18 @@ export default defineComponent({
     &__logo {
         width: 100%;
         max-width: 115px;
+        .landscape & {
+            max-width: 80px;
+        }
     }
 
     &__title {
         font-size: 73.61px;
         font-weight: 400;
         color: white;
+        .landscape & {
+            font-size: 48px;
+        }
     }
 
     &__subtitle {
@@ -163,6 +188,10 @@ export default defineComponent({
         font-weight: 600;
         color: white;
         line-height: 1.95rem;
+        .landscape & {
+            font-size: 20px;
+            margin: 5px 0 0 0;
+        }
     }
 
     &__text {
