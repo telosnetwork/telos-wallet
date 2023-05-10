@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import InlineSvg from 'vue-inline-svg';
 import BigFiatText from 'components/evm/BigFiatText.vue';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useRouter } from 'vue-router';
 
 const router = useRouter();
 

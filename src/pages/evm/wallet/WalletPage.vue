@@ -18,7 +18,9 @@ const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 watch(allTokens, (newBalances: EvmToken[]) => {
     let newFiatBalance = 0;
     for (let balance of newBalances){
-        newFiatBalance += parseFloat(balance.fiatBalance);
+        if (balance.fiatBalance){
+            newFiatBalance += parseFloat(balance.fiatBalance);
+        }
     }
     totalFiatAmount.value = newFiatBalance;
 }, { deep: true });
