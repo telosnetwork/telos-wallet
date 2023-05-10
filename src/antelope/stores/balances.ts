@@ -39,7 +39,7 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
-import { SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
+import { FetchBalanceResult, SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
 
 export interface BalancesState {
     __balances:  { [label: Label]: Token[] };
@@ -96,56 +96,43 @@ export const useBalancesStore = defineStore(store_name, {
                         this.updateSystemBalanceForAccount(label, account.account);
                         this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
                         const evm = useEVMStore();
+                        let promises: Promise<void>[] = [];
 
                         if (localStorage.getItem('wagmi.connected')) {
-                            tokens.map(async (token) => {
-                                const balanceBn = await fetchBalance({
+
+                            promises = tokens.map(async (token) => {
+                                fetchBalance({
                                     address: getAccount().address as addressString,
                                     chainId: getNetwork().chain?.id,
                                     token: token.address as addressString,
+                                }).then((balanceBn: FetchBalanceResult) => {
+                                    this.processBalanceForToken(label, token, balanceBn.value);
                                 });
-                                token.balanceBn = balanceBn.value;
-                                token.balance = `${formatWei(balanceBn.value, token.decimals, 4)}`;
-                                token.fullBalance = `${formatWei(balanceBn.value, token.decimals, token.decimals)}`;
-                                if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
-                                    this.addNewBalance(label, token);
-                                } else {
-                                    this.removeBalance(label, token);
-                                }
-                                return token;
                             });
 
-                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                            this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
                         } else {
 
-                            const promises = tokens.map(token => evm.getContract(token.address)
+                            promises = tokens.map(token => evm.getContract(token.address)
                                 .then((contract) => {
                                     if (contract) {
                                         try {
                                             const contractInstance = contract.getContractInstance();
                                             const address = account.account;
                                             return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
-                                                token.balanceBn = balanceBn;
-                                                token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-                                                token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                                                if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
-                                                    this.addNewBalance(label, token);
-                                                } else {
-                                                    this.removeBalance(label, token);
-                                                }
+                                                this.processBalanceForToken(label, token, balanceBn);
                                             });
                                         } catch (e) {
                                             console.error(e);
                                         }
                                     }
-                                }));
-
-                            Promise.allSettled(promises).then(() => {
-                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
-                            });
+                                }),
+                            );
                         }
+
+                        Promise.allSettled(promises).then(() => {
+                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
+                            this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
+                        });
                     }
                 }
             } catch (error) {
@@ -153,46 +140,38 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
 
-        async updateSystemBalanceForAccount(label: string, address: string): Promise<EvmToken> {
+        async updateSystemBalanceForAccount(label: string, address: string): Promise<void> {
             const evm = useEVMStore();
             const provider = toRaw(evm.rpcProvider);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            let token = chain_settings.getSystemToken();
+            const token = chain_settings.getSystemToken();
+            const price = await chain_settings.getUsdPrice();
+            token.price = price;
             if (provider) {
                 const balanceBn = await provider.getBalance(address);
-                token = await this.setToken(label, balanceBn);
+                this.processBalanceForToken(label, token, balanceBn);
             } else if (localStorage.getItem('wagmi.connected')) {
                 const balanceBn = await fetchBalance({
                     address: getAccount().address as addressString,
                     chainId: getNetwork().chain?.id,
                 });
-                token = await this.setToken(label, balanceBn.value);
+                this.processBalanceForToken(label, token, balanceBn.value);
             } else {
                 console.error('No provider');
             }
-            return token;
         },
-
-        async setToken(label: string, balanceBn: BigNumber): Promise<EvmToken>{
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const token = chain_settings.getSystemToken();
-
+        processBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
             token.balanceBn = balanceBn;
             token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
             token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-
+            if (token.price > 0) {
+                token.fiatBalance = `${parseFloat(token.balance) * token.price}`;
+            }
             if (!token.balanceBn.isNegative() && !token.balanceBn.isZero()) {
                 this.addNewBalance(label, token);
             } else {
                 this.removeBalance(label, token);
             }
-
-            const price = await chain_settings.getUsdPrice();
-            token.fiatBalance = `${parseFloat(token.balance) * price}`;
-            token.price = price;
-            this.updateBalance(label, token);
-
-            return token;
         },
         async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
