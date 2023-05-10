@@ -339,6 +339,7 @@ export const useBalancesStore = defineStore(store_name, {
             if (index >= 0) {
                 this.__balances[label][index] = {
                     ...this.__balances[label][index],
+                    balanceBn: token.balanceBn,
                     balance: token.balance,
                     fullBalance: token.fullBalance,
                     price: token.price,
