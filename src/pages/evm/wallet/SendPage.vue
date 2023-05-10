@@ -64,13 +64,6 @@ export default defineComponent({
             handler() {
                 this.useFiat = false;
                 this.updateEstimatedGas();
-                this.setAllBalance();
-            },
-            immediate: true,
-        },
-        gasFeeInSystemSym: {
-            handler() {
-                this.setAllBalance();
             },
             immediate: true,
         },
@@ -133,7 +126,7 @@ export default defineComponent({
             return '';
         },
         amountInFiat(): string {
-            if (this.token && this.token.price && !this.useFiat) {
+            if (this.token && this.token.price && !this.useFiat && this.amount) {
                 const mult = multiplyFloat(this.amount, this.token.price);
                 const amount = ethers.utils.parseUnits(mult, this.token.decimals);
                 const fiat = `${formatWei(amount, this.token.decimals, 2)}`;
@@ -142,7 +135,7 @@ export default defineComponent({
             return '';
         },
         amountInTokens(): string {
-            if (this.token && this.token.price && this.useFiat) {
+            if (this.token && this.token.price && this.useFiat && this.amount) {
                 const veryPreciseResult = divideFloat(this.amount, this.token.price);
                 return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
@@ -234,7 +227,7 @@ export default defineComponent({
 
             this.useFiat = !this.useFiat;
         },
-        setAllBalance() {
+        setMaxBalance() {
             if (this.token) {
                 if (this.useFiat) {
                     this.amount = `${formatWei(this.availableInFiatBn, this.token.decimals, 2)}`;
@@ -320,7 +313,7 @@ export default defineComponent({
             <div v-if="!isMobile" class="c-send-page__row c-send-page__row--2 row c-send-page__available">
                 <q-space/>
                 <div class="col-auto">
-                    <span class="c-send-page__amount-available" @click="setAllBalance">
+                    <span class="c-send-page__amount-available" @click="setMaxBalance">
                         {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                     </span>
                 </div>
@@ -373,7 +366,7 @@ export default defineComponent({
                     <div v-if="isMobile" class="row c-send-page__available">
                         <q-space/>
                         <div class="col-auto">
-                            <span class="c-send-page__amount-available" @click="setAllBalance">
+                            <span class="c-send-page__amount-available" @click="setMaxBalance">
                                 {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                             </span>
                         </div>
