@@ -157,6 +157,9 @@ export default defineComponent({
             }
         },
         finalTokenAmount(): ethers.BigNumber {
+            if (!this.amount){
+                return ethers.BigNumber.from(0);
+            }
             let amount = this.amount;
             if (this.useFiat && this.token) {
                 amount = divideFloat(this.amount, this.token.price);
