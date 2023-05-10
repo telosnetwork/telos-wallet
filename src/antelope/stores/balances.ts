@@ -98,14 +98,7 @@ export const useBalancesStore = defineStore(store_name, {
                                         const contractInstance = contract.getContractInstance();
                                         const address = account.account;
                                         return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
-                                            token.balanceBn = balanceBn;
-                                            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-                                            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                                            if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                                                this.addNewBalance(label, token);
-                                            } else {
-                                                this.removeBalance(label, token);
-                                            }
+                                            this.proccessBalanceForToken(label, token, balanceBn);
                                         });
                                     } catch (e) {
                                         console.error(e);
@@ -121,6 +114,19 @@ export const useBalancesStore = defineStore(store_name, {
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+            }
+        },
+        proccessBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
+            token.balanceBn = balanceBn;
+            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+            if (token.price > 0) {
+                token.fiatBalance = `${parseFloat(token.balance) * token.price}`;
+            }
+            if (this.shouldAddTokenBalance(label, balanceBn, token)) {
+                this.addNewBalance(label, token);
+            } else {
+                this.removeBalance(label, token);
             }
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: Token): boolean {
@@ -142,16 +148,8 @@ export const useBalancesStore = defineStore(store_name, {
                     provider.getBalance(address),
                     chain_settings.getUsdPrice(),
                 ]);
-                token.balanceBn = balanceBn;
-                token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-                token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-                token.fiatBalance = `${parseFloat(token.balance) * price}`;
                 token.price = price;
-                if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                    this.addNewBalance(label, token);
-                } else {
-                    this.removeBalance(label, token);
-                }
+                this.proccessBalanceForToken(label, token, balanceBn);
             } else {
                 console.error('No provider');
             }
