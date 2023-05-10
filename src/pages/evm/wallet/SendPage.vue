@@ -215,7 +215,7 @@ export default defineComponent({
             }
         },
         toggleUseFiat() {
-            if (this.token) {
+            if (this.token && this.amount) {
                 if (this.useFiat) {
                     this.amount = divideFloat(this.amount, this.token.price);
                 } else {
