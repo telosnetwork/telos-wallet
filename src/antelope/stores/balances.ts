@@ -95,7 +95,6 @@ export const useBalancesStore = defineStore(store_name, {
                         const tokens = await chain_settings.getTokenList();
                         this.updateSystemBalanceForAccount(label, account.account);
                         this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
-<<<<<<< HEAD
                         const evm = useEVMStore();
                         let promises: Promise<void>[] = [];
 
@@ -125,19 +124,6 @@ export const useBalancesStore = defineStore(store_name, {
                                         } catch (e) {
                                             console.error(e);
                                         }
-=======
-                        const promises = tokens.map(token => evm.getContract(token.address)
-                            .then((contract) => {
-                                if (contract) {
-                                    try {
-                                        const contractInstance = contract.getContractInstance();
-                                        const address = account.account;
-                                        return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
-                                            this.proccessBalanceForToken(label, token, balanceBn);
-                                        });
-                                    } catch (e) {
-                                        console.error(e);
->>>>>>> 027124c (refactoring balances store)
                                     }
                                 }),
                             );
@@ -153,7 +139,6 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
-<<<<<<< HEAD
 
         async updateSystemBalanceForAccount(label: string, address: string): Promise<void> {
             const evm = useEVMStore();
@@ -173,19 +158,6 @@ export const useBalancesStore = defineStore(store_name, {
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
                 console.error('No provider');
-=======
-        proccessBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
-            token.balanceBn = balanceBn;
-            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-            if (token.price > 0) {
-                token.fiatBalance = `${parseFloat(token.balance) * token.price}`;
-            }
-            if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                this.addNewBalance(label, token);
-            } else {
-                this.removeBalance(label, token);
->>>>>>> 027124c (refactoring balances store)
             }
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: Token): boolean {
@@ -197,7 +169,6 @@ export const useBalancesStore = defineStore(store_name, {
                 return !balanceBn.isNegative() && !balanceBn.isZero();
             }
         },
-<<<<<<< HEAD
         processBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
             token.balanceBn = balanceBn;
             token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
@@ -209,22 +180,6 @@ export const useBalancesStore = defineStore(store_name, {
                 this.addNewBalance(label, token);
             } else {
                 this.removeBalance(label, token);
-=======
-        async updateSystemBalanceForAccount(label: string, address: string): Promise<EvmToken> {
-            const evm = useEVMStore();
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const provider = toRaw(evm.rpcProvider);
-            const token = chain_settings.getSystemToken();
-            if (provider) {
-                const [balanceBn, price] = await Promise.all([
-                    provider.getBalance(address),
-                    chain_settings.getUsdPrice(),
-                ]);
-                token.price = price;
-                this.proccessBalanceForToken(label, token, balanceBn);
-            } else {
-                console.error('No provider');
->>>>>>> 027124c (refactoring balances store)
             }
         },
         async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
