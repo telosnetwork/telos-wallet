@@ -24,7 +24,6 @@ watch(allTokens, (newBalances: EvmToken[]) => {
     }
     totalFiatAmount.value = newFiatBalance;
 }, { deep: true });
-
 </script>
 
 <template>
