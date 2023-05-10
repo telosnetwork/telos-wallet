@@ -98,7 +98,7 @@ export const useBalancesStore = defineStore(store_name, {
                                         const contractInstance = contract.getContractInstance();
                                         const address = account.account;
                                         return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
-                                            this.proccessBalanceForToken(label, token, balanceBn);
+                                            this.processBalanceForToken(label, token, balanceBn);
                                         });
                                     } catch (e) {
                                         console.error(e);
@@ -116,7 +116,7 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
-        proccessBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
+        processBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
             token.balanceBn = balanceBn;
             token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
             token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
@@ -149,7 +149,7 @@ export const useBalancesStore = defineStore(store_name, {
                     chain_settings.getUsdPrice(),
                 ]);
                 token.price = price;
-                this.proccessBalanceForToken(label, token, balanceBn);
+                this.processBalanceForToken(label, token, balanceBn);
             } else {
                 console.error('No provider');
             }
