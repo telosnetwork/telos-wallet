@@ -4,14 +4,23 @@ import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 import { ShapedTransactionRow, TransactionValueData } from 'src/antelope/types';
 import { stubWithSlot } from 'app/test/jest/testing-helpers';
 import { shallowMount } from '@vue/test-utils';
+import TableControls from 'components/evm/TableControls.vue';
 
 
 
 export default defineComponent({
     name: 'WalletTransactionsTab',
     components: {
+        TableControls,
         WalletTransactionRow,
     },
+    data: () => ({
+        pagination: {
+            page: 1,
+            rowsPerPage: 5,
+            rowsNumber: 114,
+        },
+    }),
     computed: {
         shapedTransactions(): ShapedTransactionRow[] {
             return [{
@@ -149,6 +158,10 @@ export default defineComponent({
     :transaction="transaction"
     class="c-wallet-tx-tab__row"
 />
+
+<div class="flex justify-center">
+    <TableControls :pagination="pagination" @pagination-updated="pagination = $event"/>
+</div>
 
 </template>
 
