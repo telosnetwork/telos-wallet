@@ -11,16 +11,6 @@ export default defineComponent({
             return this.$q.screen.width > this.$q.screen.height;
         },
     },
-    watch: {
-        $route: {
-            immediate: true,
-            handler() {
-                console.log(this.$q.screen);
-                console.log(this.$q.screen.lt);
-                console.log(this.$q.screen.lt.md);
-            },
-        },
-    },
 });
 </script>
 
@@ -28,7 +18,7 @@ export default defineComponent({
 <div
     :class="{
         'c-404-page': true,
-        'landscape' : isMobile && isLandscape
+        'c-404-page--landscape' : isMobile && isLandscape
     }"
 >
     <div class="c-404-page__video-wrapper">
@@ -52,7 +42,7 @@ export default defineComponent({
         </video>
     </div>
     <div class="c-404-page__video-overlay" ></div>
-    <div class="c-404-page__video-overlay 404-page__video-overlay--shaded" ></div>
+    <div class="c-404-page__video-overlay" ></div>
 
     <div class="c-404-page__layout q-pa-lg q-gutter-y-md q-mx-auto">
         <div class="c-404-page__layout-r1">
@@ -89,7 +79,7 @@ export default defineComponent({
 
         <div class="c-404-page__layout-r4">
             <div class="c-404-page__layout-r4-c1">
-                <q-btn color="primary" to="/" class="c-404-page__button">
+                <q-btn to="/" class="c-404-page__button purpleGradient">
                     {{ $t('error404.take_me_to_home') }}
                 </q-btn>
             </div>
@@ -102,6 +92,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .c-404-page {
+    // capture & in $this variable
+    $this: &;
+    max-height: 100vh;
+    overflow: hidden;
 
     &__video-wrapper {
         background-color: black;
@@ -169,7 +163,7 @@ export default defineComponent({
     &__logo {
         width: 100%;
         max-width: 115px;
-        .landscape & {
+        #{$this}--landscape & {
             max-width: 80px;
         }
     }
@@ -178,7 +172,7 @@ export default defineComponent({
         font-size: 73.61px;
         font-weight: 400;
         color: white;
-        .landscape & {
+        #{$this}--landscape & {
             font-size: 48px;
         }
     }
@@ -188,7 +182,7 @@ export default defineComponent({
         font-weight: 600;
         color: white;
         line-height: 1.95rem;
-        .landscape & {
+        #{$this}--landscape & {
             font-size: 20px;
             margin: 5px 0 0 0;
         }
@@ -198,10 +192,6 @@ export default defineComponent({
         font-size: 16px;
         font-weight: 400;
         color: white;
-    }
-
-    &__button {
-        --q-primary: linear-gradient(106.63deg, #1AD6FF 0%, #8946DF 83.87%);
     }
 
 }
