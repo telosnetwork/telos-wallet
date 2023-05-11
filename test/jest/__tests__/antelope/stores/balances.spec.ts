@@ -17,6 +17,9 @@ const tokenSys = {
     tokenId: 1,
 };
 
+const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
+const TOKEN_BALANCE = ethers.BigNumber.from('321'.concat('9'.repeat(18)));
+
 jest.mock('src/antelope/stores/evm', () => ({
     useEVMStore: jest.fn().mockImplementation(() => ({
         getContract: jest.fn().mockImplementation(() => ({
@@ -26,7 +29,7 @@ jest.mock('src/antelope/stores/evm', () => ({
                         transfer: jest.fn(),
                         balanceOf: jest.fn().mockImplementation(() => ({
                             then: jest.fn().mockImplementation((cb: any) => {
-                                cb(ethers.BigNumber.from('123'.concat('1'.repeat(18))));
+                                cb(TOKEN_BALANCE);
                             }),
                         })),
                     })),
@@ -38,7 +41,7 @@ jest.mock('src/antelope/stores/evm', () => ({
         rpcProvider: {
             getBalance: jest.fn().mockImplementation(() => ({
                 then: jest.fn().mockImplementation((cb: any) => {
-                    cb(ethers.BigNumber.from('321'.concat('9'.repeat(18))));
+                    cb(SYSTEM_TOKEN_BALANCE);
                 }),
             })),
         },
@@ -123,13 +126,15 @@ describe('Antelope Balance Store', () => {
             label: [
                 {
                     ...tokenSys,
-                    balance: '321.9999',
-                    fullBalance: '321.999999999999999999',
+                    balance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18).slice(0, 8),
+                    fullBalance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18),
+                    balanceBn: SYSTEM_TOKEN_BALANCE,
                 },
                 {
                     ...tokenList[0],
-                    balance: '123.1111',
-                    fullBalance: '123.111111111111111111',
+                    balance: ethers.utils.formatUnits(TOKEN_BALANCE, 18).slice(0, 8),
+                    fullBalance: ethers.utils.formatUnits(TOKEN_BALANCE, 18),
+                    balanceBn: TOKEN_BALANCE,
                 },
             ],
         };

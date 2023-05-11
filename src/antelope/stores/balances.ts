@@ -347,6 +347,7 @@ export const useBalancesStore = defineStore(store_name, {
             const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
                 if (
+                    token.balanceBn !== this.__balances[label][index].balanceBn ||
                     token.balance !== this.__balances[label][index].balance ||
                     token.fullBalance !== this.__balances[label][index].fullBalance ||
                     token.price !== this.__balances[label][index].price ||
@@ -354,6 +355,7 @@ export const useBalancesStore = defineStore(store_name, {
                 ) {
                     this.__balances[label][index] = {
                         ...this.__balances[label][index],
+                        balanceBn: token.balanceBn,
                         balance: token.balance,
                         fullBalance: token.fullBalance,
                         price: token.price,
