@@ -68,10 +68,13 @@ export default defineComponent({
             if (newState.open === false) {
                 this.$emit('toggleWalletConnect');
                 if (localStorage.getItem('wagmi.connected')){
+                    this.loginEvm();
+
                     const chainSettings = useChainStore().currentChain.settings;
                     const appChainId = chainSettings.getChainId();
                     const appNetworkName = chainSettings.getDisplay();
                     const walletConnectChainId = getNetwork().chain?.id.toString();
+
                     if (appChainId !== walletConnectChainId){
                         Notify.create({
                             color: 'negative',
@@ -79,7 +82,6 @@ export default defineComponent({
                             message: `Incorrect network detected! Connect to ${appNetworkName} before continuing.`,
                         });
                     }
-                    this.loginEvm();
                 }
             }
         });
