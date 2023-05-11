@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { formatWei } from 'src/antelope/stores/utils';
 
 // A type to represent the possible EVM token types
 export type EvmTokenType = 'ERC20' | 'ERC721' | 'ERC1155' | 'ERC777' | 'ERC827' | 'ERC1400' | 'ERC223';
@@ -123,3 +124,31 @@ export class TokenBalance {
         return fiat;
     }
 }
+
+export const token_run = async () => {
+    const t = new EvmToken({
+        symbol: 'TLOS',
+        contract: '',
+        chainId: '40',
+        name: 'Telos',
+        decimals: 18,
+        isSystem: true,
+        isNative: false,
+        logo: 'https://raw.githubusercontent.com/eoscafe/eos-airdrops/master/logos/telos.png',
+    });
+
+    t.updatePrice(0.5);
+    console.log('Token: ', t);
+
+    const b = new TokenBalance(t, ethers.utils.parseUnits('100', 18));
+    console.log('Token Balance: ', b);
+
+    const fiatBalance = b.fiatBalance;
+    const floatNum = `${formatWei(fiatBalance, 18, 4)}`;
+    console.log('Token Balance fiatBalance: ', floatNum, b.fiatBalance.toString());
+    // Token Balance fiatBalance:  50.0 50000000000000000000
+
+
+};
+
+
