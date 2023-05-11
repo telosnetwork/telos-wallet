@@ -126,17 +126,20 @@ export default defineComponent({
             return '';
         },
         amountInFiat(): string {
-            if (this.amount && this.token && this.token.price && !this.useFiat) {
-                const mult = multiplyFloat(this.amount, this.token.price);
-                const amount = ethers.utils.parseUnits(mult, this.token.decimals);
-                const fiat = `${formatWei(amount, this.token.decimals, 2)}`;
+            if (this.token && this.token.price && !this.useFiat) {
+                let fiat = '0.00';
+                if (this.amount){
+                    const mult = multiplyFloat(this.amount, this.token.price);
+                    const amount = ethers.utils.parseUnits(mult, this.token.decimals);
+                    fiat = `${formatWei(amount, this.token.decimals, 2)}`;
+                }
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
             return '';
         },
         amountInTokens(): string {
-            if (this.amount && this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = divideFloat(this.amount, this.token.price);
+            if (this.token && this.token.price && this.useFiat) {
+                const veryPreciseResult = this.amount ? divideFloat(this.amount, this.token.price) : '0';
                 return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
