@@ -4,5 +4,6 @@
     "baseUrl": ".",
     "allowJs": true,
     "strict": true,
+    "target": "ESNext",
   },
 }

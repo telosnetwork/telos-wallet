@@ -89,6 +89,8 @@ export default {
         contract_interaction: 'Contract interaction',
         aria_link_to_address: 'Link to block explorer address page',
         aria_link_to_transaction: 'Link to block explorer transaction page',
+        click_to_fill_max: 'Click to fill max amount',
+        amount_exceeds_available_balance: 'Balance too low',
     },
     global: {
         native: 'Native',
@@ -101,6 +103,8 @@ export default {
         from: 'from',
         with: 'with',
         more_info: 'More info',
+        required_field: 'This field is required',
+        available: 'Available',
     },
     notification:{
         success_title: 'Success',

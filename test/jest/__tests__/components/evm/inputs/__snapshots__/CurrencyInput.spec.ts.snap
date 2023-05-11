@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 1`] = `
+<div
+  class="undefined c-currency-input"
+>
+  <div
+    class="c-currency-input__label-text"
+  >
+    TLOS / USD
+  </div>
+  <!--v-if-->
+  <div
+    class="c-currency-input__symbol"
+  >
+    TLOS
+  </div>
+  <input
+    class="c-currency-input__input"
+    inputmode="decimal"
+    pattern="[0-9,.]*"
+    placeholder="0"
+    type="text"
+  />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
+  <div
+    class="c-currency-input__currency-switcher"
+  >
+    <inline-svg-stub
+      aria-hidden="true"
+      class="c-currency-input__swap-icon"
+      keepduringloading="true"
+      src=""
+      transformsource="[Function]"
+    />
+     0.00 USD
+  </div>
+  <div
+    class="c-currency-input__error-text"
+  />
+  <div
+    class="c-currency-input__conversion-rate"
+  >
+    @ 0.19 USD / TLOS
+  </div>
+</div>
+`;
+
+exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 2`] = `
+<div
+  class="undefined c-currency-input"
+  style="--symbol-left: 31px;"
+>
+  <div
+    class="c-currency-input__label-text"
+  >
+    TLOS / USD
+  </div>
+  <!--v-if-->
+  <div
+    class="c-currency-input__symbol"
+  >
+    TLOS
+  </div>
+  <input
+    class="c-currency-input__input"
+    inputmode="decimal"
+    pattern="[0-9,.]*"
+    placeholder="0"
+    type="text"
+  />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
+  <div
+    class="c-currency-input__currency-switcher"
+  >
+    <inline-svg-stub
+      aria-hidden="true"
+      class="c-currency-input__swap-icon"
+      keepduringloading="true"
+      src=""
+      transformsource="[Function]"
+    />
+     0.19 USD
+  </div>
+  <div
+    class="c-currency-input__error-text"
+  />
+  <div
+    class="c-currency-input__conversion-rate"
+  >
+    @ 0.19 USD / TLOS
+  </div>
+</div>
+`;
+
+exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 3`] = `
+<div
+  class="undefined c-currency-input"
+  style="--symbol-left: 59px;"
+>
+  <div
+    class="c-currency-input__label-text"
+  >
+    TLOS / USD
+  </div>
+  <!--v-if-->
+  <div
+    class="c-currency-input__symbol"
+  >
+    TLOS
+  </div>
+  <input
+    class="c-currency-input__input"
+    inputmode="decimal"
+    pattern="[0-9,.]*"
+    placeholder="0"
+    type="text"
+  />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
+  <div
+    class="c-currency-input__currency-switcher"
+  >
+    <inline-svg-stub
+      aria-hidden="true"
+      class="c-currency-input__swap-icon"
+      keepduringloading="true"
+      src=""
+      transformsource="[Function]"
+    />
+     285.00 USD
+  </div>
+  <div
+    class="c-currency-input__error-text"
+  />
+  <div
+    class="c-currency-input__conversion-rate"
+  >
+    @ 0.19 USD / TLOS
+  </div>
+</div>
+`;
+
+exports[`CurrencyInput.vue should emit the correct values when currencies are swapped 1`] = `
+<div
+  class="undefined c-currency-input"
+  style="--symbol-left: 52px;"
+>
+  <div
+    class="c-currency-input__label-text"
+  >
+    TLOS / USD
+  </div>
+  <!--v-if-->
+  <div
+    class="c-currency-input__symbol"
+  >
+    USD
+  </div>
+  <input
+    class="c-currency-input__input"
+    inputmode="decimal"
+    pattern="[0-9,.]*"
+    placeholder="0"
+    type="text"
+  />
+  <q-spinner-stub
+    class="c-currency-input__spinner"
+    color="primary"
+    size="md"
+    style="display: none;"
+  >
+    
+    
+  </q-spinner-stub>
+  <div
+    class="c-currency-input__currency-switcher"
+  >
+    <inline-svg-stub
+      aria-hidden="true"
+      class="c-currency-input__swap-icon"
+      keepduringloading="true"
+      src=""
+      transformsource="[Function]"
+    />
+     1.0000 TLOS
+  </div>
+  <div
+    class="c-currency-input__error-text"
+  />
+  <div
+    class="c-currency-input__conversion-rate"
+  >
+    @ 0.2 USD / TLOS
+  </div>
+</div>
+`;
