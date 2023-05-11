@@ -41,7 +41,12 @@ watch(allTokens, (newBalances: EvmToken[]) => {
                 class="q-mb-xs"
             />
         </div>
-        <div v-if="loading" class="c-wallet-page--loading">
+        <div
+            :class="{
+                'c-wallet-page__loading': true,
+                'c-wallet-page__loading--hide': !loading
+            }"
+        >
             <q-spinner-dots
                 color="primary"
                 size="2em"
@@ -62,9 +67,14 @@ watch(allTokens, (newBalances: EvmToken[]) => {
 }
 
 .c-wallet-page {
-    &--loading {
+    &__loading {
+        opacity: 1;
         text-align: center;
         margin-top: 20px;
+        transition: opacity 0.4s linear 0.8s;
+        &--hide {
+            opacity: 0;
+        }
     }
 }
 </style>

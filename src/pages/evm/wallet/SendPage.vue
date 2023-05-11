@@ -64,13 +64,6 @@ export default defineComponent({
             handler() {
                 this.useFiat = false;
                 this.updateEstimatedGas();
-                this.setAllBalance();
-            },
-            immediate: true,
-        },
-        gasFeeInSystemSym: {
-            handler() {
-                this.setAllBalance();
             },
             immediate: true,
         },
@@ -134,16 +127,19 @@ export default defineComponent({
         },
         amountInFiat(): string {
             if (this.token && this.token.price && !this.useFiat) {
-                const mult = multiplyFloat(this.amount, this.token.price);
-                const amount = ethers.utils.parseUnits(mult, this.token.decimals);
-                const fiat = `${formatWei(amount, this.token.decimals, 2)}`;
+                let fiat = '0.00';
+                if (this.amount){
+                    const mult = multiplyFloat(this.amount, this.token.price);
+                    const amount = ethers.utils.parseUnits(mult, this.token.decimals);
+                    fiat = `${formatWei(amount, this.token.decimals, 2)}`;
+                }
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
             return '';
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = divideFloat(this.amount, this.token.price);
+                const veryPreciseResult = this.amount ? divideFloat(this.amount, this.token.price) : '0';
                 return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
@@ -164,6 +160,9 @@ export default defineComponent({
             }
         },
         finalTokenAmount(): ethers.BigNumber {
+            if (!this.amount){
+                return ethers.BigNumber.from(0);
+            }
             let amount = this.amount;
             if (this.useFiat && this.token) {
                 amount = divideFloat(this.amount, this.token.price);
@@ -222,7 +221,7 @@ export default defineComponent({
             }
         },
         toggleUseFiat() {
-            if (this.token) {
+            if (this.token && this.amount) {
                 if (this.useFiat) {
                     this.amount = divideFloat(this.amount, this.token.price);
                 } else {
@@ -234,7 +233,7 @@ export default defineComponent({
 
             this.useFiat = !this.useFiat;
         },
-        setAllBalance() {
+        setMaxBalance() {
             if (this.token) {
                 if (this.useFiat) {
                     this.amount = `${formatWei(this.availableInFiatBn, this.token.decimals, 2)}`;
@@ -320,7 +319,7 @@ export default defineComponent({
             <div v-if="!isMobile" class="c-send-page__row c-send-page__row--2 row c-send-page__available">
                 <q-space/>
                 <div class="col-auto">
-                    <span class="c-send-page__amount-available" @click="setAllBalance">
+                    <span class="c-send-page__amount-available" @click="setMaxBalance">
                         {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                     </span>
                 </div>
@@ -373,7 +372,7 @@ export default defineComponent({
                     <div v-if="isMobile" class="row c-send-page__available">
                         <q-space/>
                         <div class="col-auto">
-                            <span class="c-send-page__amount-available" @click="setAllBalance">
+                            <span class="c-send-page__amount-available" @click="setMaxBalance">
                                 {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
                             </span>
                         </div>

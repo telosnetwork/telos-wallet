@@ -392,6 +392,7 @@ export const useEVMStore = defineStore(store_name, {
                 }
             }
 
+
             // We mark this address as not existing so we don't query it again
             chain_settings.setContractAsNotExisting(addressLower);
 

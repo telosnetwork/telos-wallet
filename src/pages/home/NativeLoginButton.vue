@@ -94,7 +94,7 @@ export default defineComponent({
             try {
                 await this.setEvmState();
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         },
 

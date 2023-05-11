@@ -13,4 +13,5 @@ export interface ChainSettings {
     getRPCEndpoint(): RpcEndpoint;
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
+    getImportantTokensIdList(): string[];
 }
