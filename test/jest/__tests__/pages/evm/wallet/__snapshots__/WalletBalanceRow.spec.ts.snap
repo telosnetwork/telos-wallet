@@ -36,15 +36,15 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
         
         3,642.0243 STLOS
         
-        <!--v-if-->
+        <tooltip-stub
+          icon="info"
+          warnings="evm_wallet.no_fiat_value"
+        >
+          
+          
+        </tooltip-stub>
       </div>
-      <span
-        class="c-wallet-balance-row__secondary-amount"
-      >
-        
-        $456,789,123.67 (@ $0.7732 / STLOS)
-        
-      </span>
+      <!--v-if-->
     </div>
     <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
@@ -179,26 +179,21 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
       >
         <tooltip-stub
           hide-icon="true"
-          text="456,789,123.67 USD"
-        >
-          
-          $456.79M
-          
-        </tooltip-stub>
-        <!--v-if-->
-      </div>
-      <span
-        class="c-wallet-balance-row__secondary-amount"
-      >
-        <tooltip-stub
-          hide-icon="true"
           text="3,642.0243 STLOS"
         >
           
-          3.64K STLOS
+          3.64K
           
         </tooltip-stub>
-      </span>
+        <tooltip-stub
+          icon="info"
+          warnings="evm_wallet.no_fiat_value"
+        >
+          
+          
+        </tooltip-stub>
+      </div>
+      <!--v-if-->
     </div>
     <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
@@ -333,26 +328,21 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       >
         <tooltip-stub
           hide-icon="true"
-          text="456,789,123.67 USD"
-        >
-          
-          $456.79M
-          
-        </tooltip-stub>
-        <!--v-if-->
-      </div>
-      <span
-        class="c-wallet-balance-row__secondary-amount"
-      >
-        <tooltip-stub
-          hide-icon="true"
           text="3,642.0243 STLOS"
         >
           
-          3.64K STLOS
+          3.64K
           
         </tooltip-stub>
-      </span>
+        <tooltip-stub
+          icon="info"
+          warnings="evm_wallet.no_fiat_value"
+        >
+          
+          
+        </tooltip-stub>
+      </div>
+      <!--v-if-->
     </div>
     <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
@@ -485,23 +475,23 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       <div
         class="c-wallet-balance-row__primary-amount"
       >
-        
-        $0.00
-        
-        <!--v-if-->
-      </div>
-      <span
-        class="c-wallet-balance-row__secondary-amount"
-      >
         <tooltip-stub
           hide-icon="true"
           text="3,642.0243 TLOS"
         >
           
-          3.64K TLOS
+          3.64K
           
         </tooltip-stub>
-      </span>
+        <tooltip-stub
+          icon="info"
+          warnings="evm_wallet.no_fiat_value"
+        >
+          
+          
+        </tooltip-stub>
+      </div>
+      <!--v-if-->
     </div>
     <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"
@@ -659,26 +649,21 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       >
         <tooltip-stub
           hide-icon="true"
-          text="12,345.67 USD"
-        >
-          
-          $12.35K
-          
-        </tooltip-stub>
-        <!--v-if-->
-      </div>
-      <span
-        class="c-wallet-balance-row__secondary-amount"
-      >
-        <tooltip-stub
-          hide-icon="true"
           text="3,642.0243 WTLOS"
         >
           
-          3.64K WTLOS
+          3.64K
           
         </tooltip-stub>
-      </span>
+        <tooltip-stub
+          icon="info"
+          warnings="evm_wallet.no_fiat_value"
+        >
+          
+          
+        </tooltip-stub>
+      </div>
+      <!--v-if-->
     </div>
     <q-btn-stub
       aria-label="evm_wallet.balance_row_actions_aria"

@@ -1,4 +1,4 @@
-const esModules = ['quasar', 'quasar/lang', 'lodash-es'].join('|');
+const esModules = ['quasar', 'quasar/lang', 'lodash-es', '@wagmi'].join('|');
 
 /* eslint-env node */
 module.exports = {

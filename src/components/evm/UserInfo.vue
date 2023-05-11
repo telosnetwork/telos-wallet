@@ -32,6 +32,10 @@ export default defineComponent({
             type: Boolean,
             default: true,
         },
+        lightweight: {
+            type: Boolean,
+            default: false,
+        },
     },
     components: {
         InlineSvg,
@@ -78,7 +82,14 @@ export default defineComponent({
 
 <template>
 <div class="c-user-info">
-    <div v-if="showAddress" class="c-user-info__address">{{ address }}</div>
+    <div
+        v-if="showAddress"
+        :class="{
+            'c-user-info__address': true,
+            'c-user-info__address--alone': !showCopyBtn && !showUserMenu,
+            'c-user-info__address--lightweight': lightweight,
+        }"
+    >{{ address }}</div>
     <q-btn
         v-if="showCopyBtn"
         flat
@@ -154,6 +165,8 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+
+
 .c-user-info {
     $this: &;
     display: flex;
@@ -161,13 +174,22 @@ export default defineComponent({
 
     &__address {
         font-weight: bold;
-
         font-size: 20px;
         line-height: 24px;
         margin-right: 16px;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
-            font-weight: 600;
+        &--alone {
+            margin-right: 0px;
+        }
+
+        &--lightweight {
+            font-weight: 400;
+        }
+
+        &:not(&--lightweight) {
+            @media only screen and (min-width: $breakpoint-lg-min) {
+                font-weight: 600;
+            }
         }
     }
 

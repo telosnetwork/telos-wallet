@@ -1,7 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
-import { getAntelope, useChainStore, useUserStore } from 'src/antelope';
+import UserInfo from 'components/evm/UserInfo.vue';
+import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
@@ -13,6 +14,7 @@ const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
 
 const ant = getAntelope();
 const userStore = useUserStore();
+const accountStore = useAccountStore();
 const chainStore = useChainStore();
 const global = useAppNavStore();
 
@@ -20,6 +22,7 @@ export default defineComponent({
     name: 'SendPage',
     components: {
         AppPage,
+        UserInfo,
     },
     data: () => ({
         address: '',
@@ -39,8 +42,19 @@ export default defineComponent({
             handler() {
                 let token = this.token;
                 this.token = null;
-                if (this.balances.length > 0 && !token) {
-                    token = this.balances[0];
+                if (this.balances.length > 0) {
+                    // if there's a url parameter token with the token address, use that token
+                    const tokenAddress = this.$route.query.token;
+                    if (tokenAddress) {
+                        token = this.balances.find(t => t.address === tokenAddress) ?? token;
+
+                        // hide the token address from the url
+                        this.$router.replace({ name: 'evm-send', params: { token: undefined } });
+                    }
+
+                    if (!token) {
+                        token = this.balances[0];
+                    }
                 }
                 this.token = token;
             },
@@ -62,6 +76,9 @@ export default defineComponent({
         },
     },
     computed: {
+        loggedAccount() {
+            return accountStore.loggedEvmAccount;
+        },
         gasFeeInSystemSym() {
             const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
             const gas = `${formatWei(this.estimatedGas.system, 18, 18)}`;
@@ -270,7 +287,17 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-send-page__title-container">
-            <p class="c-send-page__title"> {{ $t('evm_wallet.send') }}</p>
+            <div class="c-send-page__title"> {{ $t('evm_wallet.send') }}</div>
+            <div class="c-send-page__title-from">{{ $t('global.from') }}</div>
+            <UserInfo
+                class="c-send-page__title-address"
+                :displayFullAddress="false"
+                :showAddress="true"
+                :showCopyBtn="false"
+                :showUserMenu="false"
+                :lightweight="true"
+                :account="loggedAccount"
+            />
         </div>
     </template>
 
@@ -446,6 +473,7 @@ export default defineComponent({
 
 .c-send-page {
     &__title-container {
+        flex-direction: column;
         animation: #{$anim-slide-in-left};
         width: 100%;
         display: flex;
@@ -457,6 +485,17 @@ export default defineComponent({
     &__title {
         font-size: 2.4rem;
         font-weight: 600;
+        margin: 0px;
+    }
+
+    &__title-from {
+        font-size: 12px;
+        font-weight: 400;
+        margin: -7px 0px 0px 0px;
+    }
+
+    &__title-address {
+        font-size: 16px;
     }
 
     &__form-container {
