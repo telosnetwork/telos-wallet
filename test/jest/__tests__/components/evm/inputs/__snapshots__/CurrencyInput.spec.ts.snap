@@ -2,7 +2,7 @@
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 1`] = `
 <div
-  class="undefined c-currency-input"
+  class="c-currency-input"
 >
   <div
     class="c-currency-input__label-text"
@@ -56,7 +56,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 2`] = `
 <div
-  class="undefined c-currency-input"
+  class="c-currency-input"
   style="--symbol-left: 31px;"
 >
   <div
@@ -111,7 +111,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 3`] = `
 <div
-  class="undefined c-currency-input"
+  class="c-currency-input"
   style="--symbol-left: 59px;"
 >
   <div
@@ -166,8 +166,8 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are swapped 1`] = `
 <div
-  class="undefined c-currency-input"
-  style="--symbol-left: 52px;"
+  class="c-currency-input"
+  style="--symbol-left: 43px;"
 >
   <div
     class="c-currency-input__label-text"
