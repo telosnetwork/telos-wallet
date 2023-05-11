@@ -5,6 +5,8 @@ import { computed, defineComponent, inject, ref, watch } from 'vue';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
 import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
+import { getNetwork } from '@wagmi/core';
+import { Notify } from 'quasar';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -66,6 +68,17 @@ export default defineComponent({
             if (newState.open === false) {
                 this.$emit('toggleWalletConnect');
                 if (localStorage.getItem('wagmi.connected')){
+                    const chainSettings = useChainStore().currentChain.settings;
+                    const appChainId = chainSettings.getChainId();
+                    const appNetworkName = chainSettings.getDisplay();
+                    const walletConnectChainId = getNetwork().chain?.id.toString();
+                    if (appChainId !== walletConnectChainId){
+                        Notify.create({
+                            color: 'negative',
+                            icon: 'error',
+                            message: `Incorrect network detected! Connect to ${appNetworkName} before continuing.`,
+                        });
+                    }
                     this.loginEvm();
                 }
             }
