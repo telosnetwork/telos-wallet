@@ -77,8 +77,8 @@ export default defineComponent({
 
                     if (appChainId !== walletConnectChainId){
                         Notify.create({
-                            color: 'negative',
-                            icon: 'error',
+                            color: 'warning',
+                            icon: 'warning',
                             message: `Incorrect network detected! Connect to ${appNetworkName} before continuing.`,
                         });
                     }
