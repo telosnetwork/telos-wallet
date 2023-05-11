@@ -117,17 +117,6 @@ export function prettyPrintCurrency(
         maximumIntegerDigits: undefined,
     };
 
-    if (amount < 1 && amount > 0) {
-        decimalOptions.maximumIntegerDigits = 1;
-        decimalOptions.minimumIntegerDigits = 1;
-    } else if (abbreviate) {
-        const forceFractionDisplay = amount < 1000 && amount > -1000 ;
-
-        decimalOptions.maximumFractionDigits = forceFractionDisplay ? precision : 2;
-        decimalOptions.minimumFractionDigits = forceFractionDisplay ? precision : 2;
-        decimalOptions.maximumIntegerDigits = 3;
-    }
-
     const currencyOptions : Record<string, string | boolean | undefined> = {
         style: currency ? 'currency' : undefined,
         currencyDisplay: currency ? (displayCurrencyAsCode ? 'code' : 'symbol') : undefined,
@@ -135,6 +124,17 @@ export function prettyPrintCurrency(
     };
 
     if (typeof amount === 'number') {
+        if (amount < 1 && amount > 0) {
+            decimalOptions.maximumIntegerDigits = 1;
+            decimalOptions.minimumIntegerDigits = 1;
+        } else if (abbreviate) {
+            const forceFractionDisplay = amount < 1000 && amount > -1000 ;
+
+            decimalOptions.maximumFractionDigits = forceFractionDisplay ? precision : 2;
+            decimalOptions.minimumFractionDigits = forceFractionDisplay ? precision : 2;
+            decimalOptions.maximumIntegerDigits = 3;
+        }
+
         let finalFormattedValue = Intl.NumberFormat(
             locale,
             {
@@ -149,6 +149,17 @@ export function prettyPrintCurrency(
 
         return finalFormattedValue;
     } else {
+        if (amount.lt(1) && amount.gt(0)) {
+            decimalOptions.maximumIntegerDigits = 1;
+            decimalOptions.minimumIntegerDigits = 1;
+        } else if (abbreviate) {
+            const forceFractionDisplay = amount.lt(1000) && amount.gt(-1000);
+
+            decimalOptions.maximumFractionDigits = forceFractionDisplay ? precision : 2;
+            decimalOptions.minimumFractionDigits = forceFractionDisplay ? precision : 2;
+            decimalOptions.maximumIntegerDigits = 3;
+        }
+
         // Intl format method only takes number / bigint, and a BigNumber value cannot have a fractional amount,
         // and also decimals may be more places than maximum JS precision.
         // As such, decimals must be handled specially for BigNumber amounts.
