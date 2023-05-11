@@ -119,4 +119,8 @@ export default class Telos extends NativeChainSettings {
         }
         return true;
     }
+
+    getImportantTokensIdList(): string[] {
+        return [this.constructTokenId(TOKEN)];
+    }
 }

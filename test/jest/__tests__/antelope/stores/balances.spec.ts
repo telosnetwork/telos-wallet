@@ -57,6 +57,7 @@ jest.mock('src/antelope/stores/chain', () => ({
                 getTokenList: jest.fn().mockImplementation(() => tokenList),
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
                 getUsdPrice: jest.fn().mockImplementation(() => 1),
+                getImportantTokensIdList: jest.fn().mockImplementation(() => []),
             },
         })),
         loggedChain: {
