@@ -76,7 +76,7 @@ describe('CurrencyInput.vue', () => {
         });
         const inputElement = wrapper.find('input');
 
-        wrapper.find('.c-currency-input__currency-switcher').trigger('click');
+        await wrapper.find('.c-currency-input__currency-switcher').trigger('click');
         expect(wrapper.emitted('update:modelValue')?.length).toBe(undefined);
 
         await inputElement.setValue('0.2');

@@ -167,7 +167,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 exports[`CurrencyInput.vue should emit the correct values when currencies are swapped 1`] = `
 <div
   class="c-currency-input"
-  style="--symbol-left: 52px;"
+  style="--symbol-left: 43px;"
 >
   <div
     class="c-currency-input__label-text"
