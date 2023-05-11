@@ -206,7 +206,7 @@ export function prettyPrintCurrency(
  *
  * @returns {BigNumber} the amount of token two equivalent to the amount of token one
  */
-export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number) {
+export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number): BigNumber {
     const conversionRate = conversionFactor.toString();
     const leadingZeroesRegex = /^0+/g;
     const trailingZeroesRegex = /0+$/g;
@@ -220,7 +220,7 @@ export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: num
         throw new Error('Token two decimals must be a positive integer or zero');
     }
 
-    if (!floatRegex.test(conversionRate)) {
+    if (!floatRegex.test(conversionRate) || Number(conversionRate) <= 0) {
         throw new Error('Conversion rate must be a positive floating point number or integer');
     }
 
@@ -276,7 +276,7 @@ export function getFloatReciprocal(float: number | string) {
         throw new Error('Conversion rate must be a positive floating point number or integer');
     }
 
-    if ([0, '0'].includes(float)) {
+    if (parseFloat(float.toString()) === 0) {
         throw new Error('Error inverting: cannot divide by zero');
     }
 

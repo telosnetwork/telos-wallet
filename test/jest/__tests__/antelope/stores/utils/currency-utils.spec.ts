@@ -294,6 +294,9 @@ describe('getFloatReciprocal', () => {
         expect(() => getFloatReciprocal('')).toThrow();
         expect(() => getFloatReciprocal(0)).toThrow();
         expect(() => getFloatReciprocal('0')).toThrow();
+        expect(() => getFloatReciprocal('0.0')).toThrow();
+        expect(() => getFloatReciprocal(0.0)).toThrow();
+        expect(() => getFloatReciprocal('000')).toThrow();
     });
 
     it('should accurately invert floats', () => {

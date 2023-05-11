@@ -132,7 +132,7 @@ export default defineComponent({
             return [true, 'true', 'disabled'].includes(this.$attrs.disabled as string | boolean);
         },
         isReadonly(): boolean {
-            return [true, 'true', 'readonly'].includes(this .$attrs.readonly as string | boolean);
+            return [true, 'true', 'readonly'].includes(this.$attrs.readonly as string | boolean);
         },
         inputElementAttrs() {
             const attrs: Record<string, string> = {
@@ -907,9 +907,9 @@ export default defineComponent({
 
 <template>
 <div
-    :id="$attrs.id"
+    :id="($attrs.id as string)"
     :class="{
-        [$attrs.class]: true,
+        [$attrs.class as string]: !!$attrs.class,
         'c-currency-input': true,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
