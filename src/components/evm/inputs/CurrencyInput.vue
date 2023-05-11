@@ -907,9 +907,9 @@ export default defineComponent({
 
 <template>
 <div
-    :id="$attrs.id"
+    :id="($attrs.id as string)"
     :class="{
-        [$attrs.class]: !!$attrs.class,
+        [$attrs.class as string]: !!$attrs.class,
         'c-currency-input': true,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
