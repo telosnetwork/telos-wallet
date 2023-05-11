@@ -352,7 +352,6 @@ export const useBalancesStore = defineStore(store_name, {
                     token.price !== this.__balances[label][index].price ||
                     token.fiatBalance !== this.__balances[label][index].fiatBalance
                 ) {
-                    console.error('updateBalance', token.balance, token.fullBalance, token.price,  token.fiatBalance, '-------------------------');
                     this.__balances[label][index] = {
                         ...this.__balances[label][index],
                         balance: token.balance,

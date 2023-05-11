@@ -123,8 +123,16 @@ export default abstract class NativeChainSettings implements ChainSettings {
     abstract getTheme(): Theme;
     abstract getFiltersSupported(prop: string): boolean;
 
-    // new methods
+    /**
+     * Retrieves the list of IDs for the important tokens.
+     * These tokens will be displayed even when their balance is zero and will be considered system-basic tokens for the chain.
+     *
+     * @returns An array of strings representing the IDs of the important tokens.
+     * Each ID follows the format: <symbol>-<contract>-<chainId>.
+     */
     abstract getImportantTokensIdList(): string[];
+
+
 
     constructTokenId(token: NativeToken): string {
         return `${token.symbol}-${token.contract}-${this.getNetwork()}`;
