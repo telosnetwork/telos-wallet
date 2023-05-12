@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
-import { useEVMStore, usePlatformStore } from 'src/antelope';
-import { ethers } from 'ethers';
+import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 
 onMounted(() => {
-    window.addEventListener('focus', async () => {
-        if (!usePlatformStore().isMobile){
-            const provider = await useEVMStore().ensureProvider();
-            let webProvider = new ethers.providers.Web3Provider(provider);
-            webProvider = await useEVMStore().ensureCorrectChain(webProvider);
-        }
-    });
+    window.addEventListener('focus', checkNetwork);
 });
 </script>
 
