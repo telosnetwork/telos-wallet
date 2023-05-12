@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
-import { useEVMStore } from 'src/antelope';
+import { useEVMStore, usePlatformStore } from 'src/antelope';
 import { ethers } from 'ethers';
 
 onMounted(() => {
     window.addEventListener('focus', async () => {
-        if (!localStorage.getItem('wagmi.connected')){
+        if (!usePlatformStore().isMobile){
             const provider = await useEVMStore().ensureProvider();
-            let checkProvider = new ethers.providers.Web3Provider(provider);
-            checkProvider = await useEVMStore().ensureCorrectChain(checkProvider);
+            let webProvider = new ethers.providers.Web3Provider(provider);
+            webProvider = await useEVMStore().ensureCorrectChain(webProvider);
         }
     });
 });
