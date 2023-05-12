@@ -1,12 +1,17 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
+import { useEVMStore } from 'src/antelope';
+import { ethers } from 'ethers';
 
-export default defineComponent({
-    name: 'EVMLayout',
-    components: {
-        AppNav,
-    },
+onMounted(() => {
+    window.addEventListener('focus', async () => {
+        if (!localStorage.getItem('wagmi.connected')){
+            const provider = await useEVMStore().ensureProvider();
+            let checkProvider = new ethers.providers.Web3Provider(provider);
+            checkProvider = await useEVMStore().ensureCorrectChain(checkProvider);
+        }
+    });
 });
 </script>
 
