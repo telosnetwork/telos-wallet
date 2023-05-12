@@ -15,10 +15,11 @@ export default defineComponent({
         WalletTransactionRow,
     },
     data: () => ({
+        loading: true,
         pagination: {
             page: 1,
             rowsPerPage: 5,
-            rowsNumber: 114,
+            rowsNumber: 0,
         },
     }),
     computed: {
@@ -147,28 +148,90 @@ export default defineComponent({
                 gasFiatValue: 0.03,
             }];
         },
+        transactionsToShow() {
+            const { page, rowsPerPage } = this.pagination;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            return this.shapedTransactions.slice(start, end);
+        },
+        totalRowsText() {
+            if (this.loading) {
+                return '';
+            }
+
+            // eztodo: i18n
+            return `Viewing ${this.pagination.rowsPerPage} of ${this.shapedTransactions.length} transactions`;
+        },
+    },
+    created() {
+        setTimeout(() => {
+            this.pagination.rowsNumber = this.shapedTransactions.length;
+            this.loading = false;
+        }, 2000);
     },
 });
 </script>
 
 <template>
-<WalletTransactionRow
-    v-for="(transaction, index) in shapedTransactions"
-    :key="`tx-${index}`"
-    :transaction="transaction"
-    class="c-wallet-tx-tab__row"
-/>
+<div class="c-wallet-tx-tab">
+    <div class="c-wallet-tx-tab__header-container">
+        <!--eztodo i18n-->
+        <span class="c-wallet-tx-tab__header-text">Transactions</span>
+        <span v-if="totalRowsText">{{ totalRowsText }}</span>
+    </div>
 
-<div class="flex justify-center">
-    <TableControls :pagination="pagination" @pagination-updated="pagination = $event"/>
+    <template v-if="loading">
+        <q-skeleton
+            v-for="i of pagination.rowsPerPage"
+            :key="i"
+            type="QToolbar"
+            class="q-mb-lg"
+        />
+    </template>
+
+    <!--eztodo icons showing up late-->
+    <WalletTransactionRow
+        v-for="(transaction, index) in transactionsToShow"
+        v-else
+        :key="`tx-${index}`"
+        :transaction="transaction"
+        class="q-mb-lg"
+    />
+
+    <div class="flex justify-center q-my-xl">
+        <TableControls :pagination="pagination" @pagination-updated="pagination = $event"/>
+    </div>
 </div>
+
 
 </template>
 
 <style lang="scss">
 .c-wallet-tx-tab {
-    &__row {
-        margin: auto;
+    max-width: 1000px;
+    margin: auto;
+
+    &__header-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+        border-bottom: 2px solid $page-header;
+
+        @media only screen and (min-width: $breakpoint-sm-min) {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
     }
+
+    &__header-text {
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 130%;
+    }
+
 }
 </style>

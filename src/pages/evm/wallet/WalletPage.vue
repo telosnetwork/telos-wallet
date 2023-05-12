@@ -43,14 +43,12 @@ export default defineComponent({
     </template>
 
     <template v-slot:balance>
-        <div class="test">
-            <WalletBalanceRow
-                v-for="(token, index) in allTokens"
-                :key="`token-${index}`"
-                :token="token"
-                class="q-mb-xs"
-            />
-        </div>
+        <WalletBalanceRow
+            v-for="(token, index) in allTokens"
+            :key="`token-${index}`"
+            :token="token"
+            class="c-wallet-page__balance-row"
+        />
         <div v-if="loading" class="c-wallet-page--loading">
             <q-spinner-dots
                 color="primary"
@@ -66,15 +64,15 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.test {
-    max-width: 1000px;
-    margin: auto;
-}
-
 .c-wallet-page {
     &--loading {
         text-align: center;
         margin-top: 20px;
+    }
+
+    &__balance-row {
+        max-width: 1000px;
+        margin: auto;
     }
 }
 </style>

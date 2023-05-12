@@ -252,7 +252,7 @@ export default defineComponent({
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
         <div class="c-transaction-row__gas-icon-container">
-            <q-icon name="local_gas_station" size="xs" />
+            <q-icon name="local_gas_station" size="xs" class="c-transaction-row__gas-icon" />
         </div>
         <div class="c-transaction-row__gas-text">
             <span>{{ formatAmount(transaction.gasUsed ?? 0, chainTokenSymbol) }}</span>
@@ -464,12 +464,17 @@ export default defineComponent({
         align-items: center;
     }
 
+    &__gas-icon {
+        color: var(--text-color-muted);
+    }
+
     &__gas-text {
         display: flex;
         gap: 0;
         flex-shrink: 0;
         flex-direction: column;
         align-items: flex-start;
+        color: var(--text-color-muted);
     }
 
     &__mobile-tx-link {

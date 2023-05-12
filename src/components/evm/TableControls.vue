@@ -19,7 +19,11 @@ const props = defineProps({
 const emit = defineEmits(['pagination-updated']);
 
 const rowsPerPageOptions = [5, 10, 20, 50, 100];
+const showRowsPerPageDropdown = ref(false);
+const rowsPerPagePopup = ref<QPopupProxy>();
 
+
+// computed
 const pageText = computed(() => {
     const start = (props.pagination.page - 1) * props.pagination.rowsPerPage + 1;
     const end = Math.min(props.pagination.page * props.pagination.rowsPerPage, props.pagination.rowsNumber);
@@ -27,14 +31,11 @@ const pageText = computed(() => {
 });
 const totalPages = computed(() => Math.ceil(props.pagination.rowsNumber / props.pagination.rowsPerPage));
 
-
-const showRowsPerPageDropdown = ref(false);
-const rowsPerPagePopup = ref<QPopupProxy>();
-
-
+// methods
 function changeRowsPerPage(rowsPerPage: number) {
     emit('pagination-updated', {
         ...props.pagination,
+        page: 1,
         rowsPerPage,
     });
     rowsPerPagePopup.value?.hide();
@@ -133,13 +134,26 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
     width: 100%;
     max-width: 1000px;
     display: flex;
-    justify-content: space-between;
-    // eztodo stack on mobile
+    flex-direction: column;
+    gap: 24px;
+
+    @media only screen and (min-width: $breakpoint-md-min) {
+        justify-content: space-between;
+        flex-direction: row;
+    }
 
     &__left-container,
     &__right-container {
         display: flex;
         align-items: center;
+    }
+
+    &__right-container {
+        margin: auto;
+
+        @media only screen and (min-width: $breakpoint-md-min) {
+            margin: unset;
+        }
     }
 }
 </style>

@@ -100,6 +100,7 @@ export default defineComponent({
     flex-direction: column;
 
     &__tab-panels {
+        margin-top: 24px;
         flex-grow: 1;
     }
 
