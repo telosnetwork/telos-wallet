@@ -286,7 +286,7 @@ export default defineComponent({
                             `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
                         );
                     }
-                }).catch(async (err) => {
+                }).catch((err) => {
                     console.error(err);
                     ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
                     // TODO: verify in depth all error mesagged to know how to handle the feedback
