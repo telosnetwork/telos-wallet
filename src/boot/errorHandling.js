@@ -1,8 +1,8 @@
 import { boot } from 'quasar/wrappers';
 import { Notify } from 'quasar';
-import { getAntelope } from 'src/antelope';
 
-const errorNotification = function(error) {
+// to persist the notification and require user to dismiss pass `true` as second param
+const errorNotification = function(error, dismiss = false) {
     let errorStr;
     if (error !== undefined) {
         if (typeof error.startsWith !== 'function') {
@@ -19,7 +19,11 @@ const errorNotification = function(error) {
     Notify.create({
         color: 'negative',
         icon: 'error',
+        timeout: dismiss ? 0 : 5000,
         message: `${errorStr}`,
+        actions: dismiss ? [
+            { label: 'Dismiss', color: 'white' },
+        ] : [],
     });
 };
 

@@ -266,18 +266,10 @@ export default defineComponent({
                 const appNetworkName = chainSettings.getDisplay();
                 const walletConnectChainId = getNetwork().chain?.id.toString();
                 if (appChainId !== walletConnectChainId){
-                    Notify.create({
-                        color: 'red-8',
-                        textColor: 'white',
-                        icon: 'error',
-                        timeout: 0, //require user to dismiss
-                        message: `Incorrect network detected! Switch to ${appNetworkName} to complete transaction.`,
-                        actions: [
-                            { label: 'Dismiss', color: 'white' },
-                        ],
-                    });
+                    const errorMessage = `Incorrect network detected! Switch to ${appNetworkName} to complete transaction.`;
+                    (this as any).$errorNotification(errorMessage, true);
+                    return;
                 }
-                return;
             }else {
                 //if injected provider (Desktop) prompt to switch chains
                 await checkNetwork();
