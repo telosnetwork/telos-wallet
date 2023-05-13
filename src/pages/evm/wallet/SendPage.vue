@@ -259,7 +259,7 @@ export default defineComponent({
             }
         },
         async startTransfer() {
-            // if chain switch prompts have been dismissed notify user and prevent transaction
+            // if WalletConnect on wrong network, notify user and prevent transaction
             if (localStorage.getItem('wagmi.connected')){
                 const chainSettings = useChainStore().currentChain.settings;
                 const appChainId = chainSettings.getChainId();
