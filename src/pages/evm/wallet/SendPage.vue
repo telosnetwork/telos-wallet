@@ -8,6 +8,9 @@ import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antel
 import { useAppNavStore } from 'src/stores';
 import { divideFloat, multiplyFloat } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
+import { getNetwork } from '@wagmi/core';
+import { Notify } from 'quasar';
+import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -255,7 +258,31 @@ export default defineComponent({
                 }
             }
         },
-        startTransfer() {
+        async startTransfer() {
+            // if chain switch prompts have been dismissed notify user and prevent transaction
+            if (localStorage.getItem('wagmi.connected')){
+                const chainSettings = useChainStore().currentChain.settings;
+                const appChainId = chainSettings.getChainId();
+                const appNetworkName = chainSettings.getDisplay();
+                const walletConnectChainId = getNetwork().chain?.id.toString();
+                if (appChainId !== walletConnectChainId){
+                    Notify.create({
+                        color: 'red-8',
+                        textColor: 'white',
+                        icon: 'error',
+                        timeout: 0, //require user to dismiss
+                        message: `Incorrect network detected! Switch to ${appNetworkName} to complete transaction.`,
+                        actions: [
+                            { label: 'Dismiss', color: 'white' },
+                        ],
+                    });
+                }
+                return;
+            }else {
+                //if injected provider (Desktop) prompt to switch chains
+                await checkNetwork();
+            };
+
             const token = this.token;
             const amount = this.finalTokenAmount;
             const to = this.address;
@@ -267,7 +294,7 @@ export default defineComponent({
                             `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
                         );
                     }
-                }).catch((err) => {
+                }).catch(async (err) => {
                     console.error(err);
                     ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
                     // TODO: verify in depth all error mesagged to know how to handle the feedback
