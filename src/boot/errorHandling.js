@@ -35,6 +35,14 @@ const unexpectedErrorNotification = function(error) {
     });
 };
 
+const warningNotification = function(warning) {
+    Notify.create({
+        color: 'warning',
+        icon: 'warning',
+        message: warning,
+    });
+};
+
 const successNotification = function(message) {
     Notify.create({
         color: 'primary',
@@ -111,6 +119,8 @@ export default boot(({ app, store }) => {
     store['$errorNotification'] = app.config.globalProperties.$errorNotification;
     app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification.bind(store);
     store['$unexpectedErrorNotification'] = app.config.globalProperties.$unexpectedErrorNotification;
+    app.config.globalProperties.$warningNotification = warningNotification.bind(store);
+    store['$warningNotification'] = app.config.globalProperties.$warningNotification;
     app.config.globalProperties.$successNotification = successNotification.bind(store);
     store['$successNotification'] = app.config.globalProperties.$successNotification;
 

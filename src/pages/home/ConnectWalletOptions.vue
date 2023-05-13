@@ -76,11 +76,8 @@ export default defineComponent({
                     const walletConnectChainId = getNetwork().chain?.id.toString();
 
                     if (appChainId !== walletConnectChainId){
-                        Notify.create({
-                            color: 'warning',
-                            icon: 'warning',
-                            message: `Incorrect network detected! Connect to ${appNetworkName} before continuing.`,
-                        });
+                        const warningMessage = `Incorrect network detected! Connect to ${appNetworkName} before continuing.`;
+                        (this as any).$warningNotification(warningMessage);
                     }
                 }
             }
