@@ -72,7 +72,8 @@ export const useBalancesStore = defineStore(store_name, {
             // update logged balances every 10 seconds only if the user is logged
             setInterval(() => {
                 if (useAccountStore().loggedAccount) {
-                    useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    // useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    console.error('RESTORE ME');
                 }
             }, 10000);
 
@@ -157,30 +158,63 @@ export const useBalancesStore = defineStore(store_name, {
                 });
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
-                console.error('No provider');
+                throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
-        shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: Token): boolean {
+        shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: EvmToken): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getImportantTokensIdList();
+            let result = false;
             if (importantTokens.includes(token.tokenId)) {
                 // if the token is important, we always add it. Even with 0 balance.
-                return true;
+                result = true;
             } else {
-                return !balanceBn.isNegative() && !balanceBn.isZero();
+                result = !balanceBn.isNegative() && !balanceBn.isZero();
             }
+            this.trace('shouldAddTokenBalance', label, ethers.utils.formatUnits(balanceBn, token.decimals), token.symbol, '=>', result);
+            return result;
         },
         processBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
-            token.balanceBn = balanceBn;
-            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-            if (token.price > 0) {
-                token.fiatBalance = `${parseFloat(token.balance) * token.price}`;
-            }
+            this.trace('processBalanceForToken', label, ethers.utils.formatUnits(balanceBn, token.decimals), token.symbol);
+            const balance = `${formatWei(balanceBn, token.decimals, 4)}`;
+            const fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
+            const fiatBalance = token.price > 0 ? `${parseFloat(balance) * token.price}` : '';
+
+            const tokenBalance = {
+                ...token,
+                balanceBn,
+                balance,
+                fullBalance,
+                fiatBalance,
+            } as EvmToken;
+
             if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                this.addNewBalance(label, token);
+                this.addNewBalance(label, tokenBalance);
             } else {
-                this.removeBalance(label, token);
+                this.removeBalance(label, tokenBalance);
             }
+        },
+        async subscribeForTransactionReceipt(response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', response.hash);
+            const provider = toRaw(useEVMStore().rpcProvider);
+            if (provider) {
+                // instead of await, we use then() to return the response immediately
+                // and perform the balance update in the background
+                provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
+                    this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+                    if (receipt.status === 1) {
+                        const account = useAccountStore().loggedAccount;
+                        if (account?.account) {
+                            this.updateBalancesForAccount('logged', account);
+                        }
+                        // TODO: should we notify the user that the transaction succeeded?
+                    } else {
+                        // TODO: should we do something if the transaction failed?
+                    }
+                });
+            } else {
+                throw new AntelopeError('antelope.evm.error_no_provider');
+            }
+            return response;
         },
         async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
@@ -191,11 +225,13 @@ export const useBalancesStore = defineStore(store_name, {
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '');
+                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '')
+                        .then(this.subscribeForTransactionReceipt);
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount);
+                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount)
+                        .then(this.subscribeForTransactionReceipt);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -330,7 +366,8 @@ export const useBalancesStore = defineStore(store_name, {
         },
         // commits -----
         addNewBalance(label: string, balance: Token): void {
-            this.trace('addNewBalance', label, balance);
+            this.trace('addNewBalance', label, ethers.utils.formatUnits(balance.balanceBn, (balance as EvmToken).decimals));
+
             // if the balance already exists, we update it, if not, we add it
             if (this.__balances[label].find(b => b.tokenId === balance.tokenId)) {
                 this.updateBalance(label, balance);
@@ -343,9 +380,12 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         updateBalance(label: string, token: Token): void {
-            this.trace('updateBalance', label, token);
             const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
             if (index >= 0) {
+                this.trace('updateBalance', label,
+                    'new:', ethers.utils.formatUnits(token.balanceBn, (token as EvmToken).decimals),
+                    'old:', ethers.utils.formatUnits(this.__balances[label][index].balanceBn, (token as EvmToken).decimals),
+                );
                 if (
                     !token.balanceBn.eq(this.__balances[label][index].balanceBn) ||
                     token.balance !== this.__balances[label][index].balance ||
@@ -366,6 +406,8 @@ export const useBalancesStore = defineStore(store_name, {
                         this.__balances['logged'] = this.__balances[label];
                     }
                 }
+            } else {
+                this.trace('updateBalance', label, ethers.utils.formatUnits(token.balanceBn, (token as EvmToken).decimals));
             }
         },
         removeBalance(label: string, token: Token): void {
