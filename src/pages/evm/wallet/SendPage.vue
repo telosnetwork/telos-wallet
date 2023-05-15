@@ -53,6 +53,9 @@ export default defineComponent({
 
                         // hide the token address from the url
                         this.$router.replace({ name: 'evm-send', params: { token: undefined } });
+                    } else {
+                        // get from balances a fresh token object
+                        token = this.balances.find(t => t.address === token?.address) ?? token;
                     }
 
                     if (!token) {
@@ -69,6 +72,7 @@ export default defineComponent({
                 this.updateEstimatedGas();
             },
             immediate: true,
+            deep: true,
         },
     },
     computed: {
