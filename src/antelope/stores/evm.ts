@@ -104,10 +104,9 @@ export const useEVMStore = defineStore(store_name, {
                         evm.trace('provider.chainChanged', newNetwork);
                     });
                     provider.on('accountsChanged', async (accounts) => {
-                        const network = useChainStore().currentChain.settings.getNetwork();
-                        await useAccountStore().loginEVM({ network });
-                        useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
                         evm.trace('provider.accountsChanged', accounts);
+                        const network = useChainStore().currentChain.settings.getNetwork();
+                        useAccountStore().loginEVM({ network });
                     });
                 }
                 onEvmReady.next(true);
