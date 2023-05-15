@@ -13,7 +13,7 @@
     @media only screen and (max-width: $breakpoint-xs-max) {
       @content;
     }
-  }
+}
 
 @mixin sm-and-up {
     @media only screen and (min-width: $breakpoint-sm-min) {

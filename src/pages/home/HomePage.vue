@@ -184,7 +184,7 @@ export default defineComponent({
         }
     }
 
-    // guarantees wallet connet on top of footer
+    // guarantees wallet connect on top of footer
     &__footer {
         z-index: 2;
     }
