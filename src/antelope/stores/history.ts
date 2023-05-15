@@ -128,6 +128,7 @@ export const useHistoryStore = defineStore(store_name, {
                 const contract = await evm.getContract(
                     transaction.to,
                 );
+                debugger;
                 if (!contract) {
                     return transaction as ParsedEvmTransaction;
                 }
@@ -162,7 +163,7 @@ export const useHistoryStore = defineStore(store_name, {
             }
             return transaction as ParsedEvmTransaction;
         },
-        async shapeTransactions(label: Label, transactions: EvmTransaction[]): Promise<void> {
+        async shapeTransactions(label: Label, transactions: ParsedEvmTransaction[]): Promise<void> {
             const tlosToUsd = await getCoingeckoUsdPrice('telos');
 
             const shapedRowPromises: Promise<ShapedTransactionRow>[] = transactions.map(async (trx) => {
