@@ -290,7 +290,7 @@ export default defineComponent({
         transform: translateX(-100%);
         transition: 0.2s transform ease;
         background: $site-gradient;
-        z-index: 999;
+        z-index: $z-index--menu;
 
         &--open {
             transform: translateX(0);
@@ -313,7 +313,7 @@ export default defineComponent({
         color: var(--header-text-color);
         padding: 16px 24px;
         background-color: var(--header-bg-color);
-        z-index: 999;
+        z-index: $z-index--header-toolbar;
 
         @include md-and-up {
             left: 300px;
