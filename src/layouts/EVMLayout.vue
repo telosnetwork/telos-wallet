@@ -24,7 +24,7 @@ export default defineComponent({
     // offset content for fixed header
     margin-top: 64px;
 
-    @media only screen and (min-width: $breakpoint-md-min) {
+    @include md-and-up {
         // offset content for desktop menu
         margin-left: 300px;
         width: calc(100% - 300px);

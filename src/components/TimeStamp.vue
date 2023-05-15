@@ -30,11 +30,10 @@ const friendlyDate = computed(() => formatDistance(fromUnixTime(props.timestamp)
 
 <style lang="scss">
 .c-timestamp {
+    @include text--small;
+
     white-space: nowrap;
     width: max-content;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 16px;
 
     &--muted {
         color: var(--text-color-muted);
