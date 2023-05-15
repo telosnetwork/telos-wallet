@@ -48,7 +48,6 @@ import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { useAccountStore } from 'src/antelope/stores/account';
-import { useBalancesStore } from 'src/antelope/stores/balances';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
