@@ -263,10 +263,10 @@ export default defineComponent({
             if (localStorage.getItem('wagmi.connected')){
                 const chainSettings = useChainStore().currentChain.settings;
                 const appChainId = chainSettings.getChainId();
-                const appNetworkName = chainSettings.getDisplay();
+                const networkName = chainSettings.getDisplay();
                 const walletConnectChainId = getNetwork().chain?.id.toString();
                 if (appChainId !== walletConnectChainId){
-                    const errorMessage = `Incorrect network detected! Switch to ${appNetworkName} to complete transaction.`;
+                    const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
                     (this as any).$errorNotification(errorMessage, true);
                     return;
                 }

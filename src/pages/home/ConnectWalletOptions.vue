@@ -72,11 +72,11 @@ export default defineComponent({
 
                     const chainSettings = useChainStore().currentChain.settings;
                     const appChainId = chainSettings.getChainId();
-                    const appNetworkName = chainSettings.getDisplay();
+                    const networkName = chainSettings.getDisplay();
                     const walletConnectChainId = getNetwork().chain?.id.toString();
 
                     if (appChainId !== walletConnectChainId){
-                        const warningMessage = `Incorrect network detected! Connect to ${appNetworkName} before continuing.`;
+                        const warningMessage = this.$t('evm_wallet.incorrect_network', { networkName });;
                         (this as any).$warningNotification(warningMessage);
                     }
                 }
