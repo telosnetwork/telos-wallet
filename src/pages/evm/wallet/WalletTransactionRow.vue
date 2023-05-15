@@ -191,7 +191,7 @@ export default defineComponent({
 
         <div class="c-transaction-row__timestamp">
             <ToolTip :text="longDate" :hide-icon="true">
-                <TimeStamp :timestamp="transaction.epoch" :muted="true" />
+                <TimeStamp :timestamp="transaction.epoch" />
             </ToolTip>
 
             <template v-if="$q.screen.gt.xs">
@@ -287,7 +287,7 @@ export default defineComponent({
         'b'
         'c';
 
-    @media only screen and (min-width: $breakpoint-sm-min) {
+    @include sm-and-up {
         gap: 32px;
         grid-template: 'a b c' / auto auto max-content;
     }
@@ -298,7 +298,7 @@ export default defineComponent({
             grid-template: 'a b c' auto / min-content auto max-content;
             gap: 8px;
 
-            @media only screen and (min-width: $breakpoint-sm-min) {
+            @include sm-and-up {
                 grid-template:
                     'a b' auto
                     'c c' auto
@@ -310,7 +310,7 @@ export default defineComponent({
         &--third {
             margin-left: 24px;
 
-            @media only screen and (min-width: $breakpoint-sm-min) {
+            @include sm-and-up {
                 margin-left: unset;
             }
         }
@@ -320,7 +320,7 @@ export default defineComponent({
             flex-direction: column;
             gap: 8px;
 
-            @media only screen and (min-width: $breakpoint-sm-min) {
+            @include sm-and-up {
                 justify-content: center;
             }
         }
@@ -330,7 +330,7 @@ export default defineComponent({
             align-items: center;
             gap: 4px;
 
-            @media only screen and (min-width: $breakpoint-sm-min) {
+            @include sm-and-up {
                 justify-content: flex-end;
             }
         }
@@ -349,13 +349,15 @@ export default defineComponent({
         display: inline-flex;
         justify-content: center;
         align-items: center;
+        // align-self: center;
     }
 
     &__interaction-icon {
         height: 16px;
+        margin-top: 4px;
 
         path {
-            fill: $primary;
+            fill: var(--accent-color);
         }
 
         &--rotated {
@@ -364,8 +366,12 @@ export default defineComponent({
 
         &--red {
             path {
-                fill: $negative;
+                fill: var(--negative-color);
             }
+        }
+
+        @include sm-and-up {
+            margin-top: 8px;
         }
     }
 
@@ -374,23 +380,22 @@ export default defineComponent({
     }
 
     &__primary-interaction-text {
-        font-size: 12px;
-        line-height: 14px;
+        @include text--small;
+        color: var(--text-default-contrast);
 
-        @media only screen and (min-width: $breakpoint-sm-min) {
-            font-size: 16px;
-            line-height: 16px;
+        @include sm-and-up {
+            @include text--paragraph;
         }
     }
 
-    &__action-description {
-        font-weight: 600;
-    }
-
+    &__action-description,
     &__action-name {
-        font-weight: 600;
-        font-size: 14px;
-        line-height: 16px;
+        @include text--small-bold;
+        color: var(--text-hight-contrast);
+
+        @include sm-and-up {
+            @include text--paragraph-bold;
+        }
     }
 
     &__secondary-interaction-text {
@@ -405,9 +410,9 @@ export default defineComponent({
         justify-content: flex-end;
         width: max-content;
         margin-left: 24px;
-        color: var(--text-color-muted);
+        color: var(--text-low-contrast);
 
-        @media only screen and (min-width: $breakpoint-sm-min) {
+        @include sm-and-up {
             align-items: center;
             gap: 12px;
         }
@@ -417,11 +422,11 @@ export default defineComponent({
         display: flex;
         flex-direction: column;
 
-        @media only screen and (min-width: $breakpoint-sm-min) {
+        @include sm-and-up {
             align-items: flex-end;
         }
 
-        @media only screen and (min-width: $breakpoint-md-min) {
+        @include md-and-up {
             gap: 8px;
             flex-direction: row;
             align-items: center;
@@ -432,15 +437,15 @@ export default defineComponent({
     &__value {
         $value: &;
 
-        font-weight: 400;
-        font-size: 16px;
+        @include text--paragraph;
+
         width: max-content;
         display: inline-flex;
         align-items: center;
         gap: 8px;
 
         &--out {
-            color: $negative;
+            color: var(--negative-color);
         }
 
         &--out#{$value}--small {
@@ -448,7 +453,7 @@ export default defineComponent({
         }
 
         &--in {
-            color: $positive;
+            color: var(--positive-color);
         }
 
         &--in#{$value}--small {
@@ -456,13 +461,14 @@ export default defineComponent({
         }
 
         &--small {
-            font-size: 14px;
+            @include text--small;
         }
     }
 
     &__gas-icon-container {
         display: flex;
         align-items: center;
+        color: var(--text-default-contrast);
     }
 
     &__gas-text {
@@ -471,6 +477,7 @@ export default defineComponent({
         flex-shrink: 0;
         flex-direction: column;
         align-items: flex-start;
+        color: var(--text-default-contrast);
     }
 
     &__mobile-tx-link {
