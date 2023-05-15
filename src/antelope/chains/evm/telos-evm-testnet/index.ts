@@ -27,7 +27,7 @@ const RPC_ENDPOINT = {
 
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
-const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.caleos.io';
+const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
 export default class TelosEVMTestnet extends EVMChainSettings {
@@ -56,7 +56,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getSystemToken(): EvmToken {
-        return TOKEN;
+        return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
     }
 
     getUsdPrice(): Promise<number> {
@@ -88,10 +88,18 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getStlosContractAddress() {
-        return '0xa9991e4daa44922d00a78b6d986cdf628d46c4dd';
+        return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
     }
 
     getWtlosContractAddress() {
         return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
+    }
+
+    getImportantTokensIdList(): string[] {
+        return [
+            this.constructTokenId(TOKEN),
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
+        ];
     }
 }

@@ -1,12 +1,10 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
+import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 
-export default defineComponent({
-    name: 'EVMLayout',
-    components: {
-        AppNav,
-    },
+onMounted(() => {
+    window.addEventListener('focus', checkNetwork);
 });
 </script>
 

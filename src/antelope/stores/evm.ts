@@ -47,6 +47,8 @@ import {
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
+import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { useAccountStore } from 'src/antelope/stores/account';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -102,8 +104,10 @@ export const useEVMStore = defineStore(store_name, {
                     provider.on('chainChanged', (newNetwork) => {
                         evm.trace('provider.chainChanged', newNetwork);
                     });
-                    provider.on('accountsChanged', (accounts) => {
+                    provider.on('accountsChanged', async (accounts) => {
                         evm.trace('provider.accountsChanged', accounts);
+                        const network = useChainStore().currentChain.settings.getNetwork();
+                        useAccountStore().loginEVM({ network });
                     });
                 }
                 onEvmReady.next(true);
@@ -122,20 +126,17 @@ export const useEVMStore = defineStore(store_name, {
                     return getAccount().address as string;
                 }
 
-                const provider = await this.ensureProvider();
-
-                let checkProvider = new ethers.providers.Web3Provider(provider);
-                checkProvider = await this.ensureCorrectChain(checkProvider);
+                let checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
 
                 const accounts = await checkProvider.listAccounts();
                 if (accounts.length > 0) {
                     checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accounts[0];
                 } else {
-                    if (!provider.request) {
+                    if (!checkProvider.provider.request) {
                         throw new Error('antelope.evm.error_support_provider_request');
                     }
-                    const accessGranted = await provider.request({ method: 'eth_requestAccounts' });
+                    const accessGranted = await checkProvider.provider.request({ method: 'eth_requestAccounts' });
                     if (accessGranted.length < 1) {
                         return null;
                     }
@@ -234,6 +235,11 @@ export const useEVMStore = defineStore(store_name, {
                         4902,
                         -32603, // https://github.com/MetaMask/metamask-mobile/issues/2944
                     ];
+
+                    // if user rejects request to switch chains, disable repeated prompts
+                    if ((error as unknown as ExceptionError).code === 4001){ // 4001 - 'user rejected request'
+                        window.removeEventListener('focus', checkNetwork);
+                    }
 
                     if (chainNotAddedCodes.includes((error as unknown as ExceptionError).code)) {  // 'Chain <hex chain id> hasn't been added'
                         const p:RpcEndpoint = chainSettings.getRPCEndpoint();
@@ -391,6 +397,7 @@ export const useEVMStore = defineStore(store_name, {
                     return cached || null;
                 }
             }
+
 
             // We mark this address as not existing so we don't query it again
             chain_settings.setContractAsNotExisting(addressLower);

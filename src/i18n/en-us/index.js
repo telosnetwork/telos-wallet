@@ -89,6 +89,9 @@ export default {
         contract_interaction: 'Contract interaction',
         aria_link_to_address: 'Link to block explorer address page',
         aria_link_to_transaction: 'Link to block explorer transaction page',
+        click_to_fill_max: 'Click to fill max amount',
+        amount_exceeds_available_balance: 'Balance too low',
+        incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transaction',
     },
     global: {
         native: 'Native',
@@ -101,6 +104,8 @@ export default {
         from: 'from',
         with: 'with',
         more_info: 'More info',
+        required_field: 'This field is required',
+        available: 'Available',
     },
     notification:{
         success_title: 'Success',
@@ -336,6 +341,9 @@ export default {
         placeholder: 'Search dApp',
     },
     error404: {
+        subtitle: 'Sorry, the page you\'re looking for can\'t be found.',
+        text: 'However, you can easily return to our home page by simply clicking the button below.',
+        take_me_to_home: 'take me to the home page',
         oops: 'Oops. Nothing here...',
     },
     antelope: {

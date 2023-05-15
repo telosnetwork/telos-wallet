@@ -3,12 +3,12 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { prettyPrintCurrency } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmToken } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const userStore = useUserStore();
 const { fiatLocale, fiatCurrency } = userStore;
