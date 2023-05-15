@@ -27,7 +27,7 @@ const RPC_ENDPOINT = {
 
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
-const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.caleos.io';
+const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
 export default class TelosEVMTestnet extends EVMChainSettings {

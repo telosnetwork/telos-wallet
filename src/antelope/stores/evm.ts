@@ -48,6 +48,7 @@ import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { useAccountStore } from 'src/antelope/stores/account';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -103,8 +104,10 @@ export const useEVMStore = defineStore(store_name, {
                     provider.on('chainChanged', (newNetwork) => {
                         evm.trace('provider.chainChanged', newNetwork);
                     });
-                    provider.on('accountsChanged', (accounts) => {
+                    provider.on('accountsChanged', async (accounts) => {
                         evm.trace('provider.accountsChanged', accounts);
+                        const network = useChainStore().currentChain.settings.getNetwork();
+                        useAccountStore().loginEVM({ network });
                     });
                 }
                 onEvmReady.next(true);

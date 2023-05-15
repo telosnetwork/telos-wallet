@@ -85,7 +85,7 @@ export const useAccountStore = defineStore(store_name, {
     state: (): AccountState => (accountInitialState),
     getters: {
         isAuthenticated: state => !!state.__accounts['logged'],
-        loggedAccount: state => ({ ...state.__accounts['logged'] }),
+        loggedAccount: state => state.__accounts['logged'],
         loggedIsNative: state => state.__accounts['logged']?.isNative,
         loggedEvmAccount: state => (state.__accounts['logged']?.isNative ?
             null : state.__accounts['logged']) as EvmAccountModel,
