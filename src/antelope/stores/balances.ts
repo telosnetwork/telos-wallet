@@ -72,7 +72,8 @@ export const useBalancesStore = defineStore(store_name, {
             // update logged balances every 10 seconds only if the user is logged
             setInterval(() => {
                 if (useAccountStore().loggedAccount) {
-                    useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    // useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    console.error('RESTORE ME');
                 }
             }, 10000);
 
@@ -157,7 +158,7 @@ export const useBalancesStore = defineStore(store_name, {
                 });
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
-                console.error('No provider');
+                throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: EvmToken): boolean {
@@ -192,6 +193,29 @@ export const useBalancesStore = defineStore(store_name, {
                 this.removeBalance(label, tokenBalance);
             }
         },
+        async subscribeForTransactionReceipt(response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', response.hash);
+            const provider = toRaw(useEVMStore().rpcProvider);
+            if (provider) {
+                // instead of await, we use then() to return the response immediately
+                // and perform the balance update in the background
+                provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
+                    this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+                    if (receipt.status === 1) {
+                        const account = useAccountStore().loggedAccount;
+                        if (account?.account) {
+                            this.updateBalancesForAccount('logged', account);
+                        }
+                        // TODO: should we notify the user that the transaction succeeded?
+                    } else {
+                        // TODO: should we do something if the transaction failed?
+                    }
+                });
+            } else {
+                throw new AntelopeError('antelope.evm.error_no_provider');
+            }
+            return response;
+        },
         async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
             const label = 'logged';
@@ -201,11 +225,13 @@ export const useBalancesStore = defineStore(store_name, {
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '');
+                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '')
+                        .then(this.subscribeForTransactionReceipt);
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount);
+                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount)
+                        .then(this.subscribeForTransactionReceipt);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
