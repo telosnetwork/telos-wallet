@@ -1,0 +1,73 @@
+$site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
+$tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8));
+
+/*********************
+ *** Legacy Colors ***
+ *********************/
+$gradientblue: #1AD6FF;
+$gradientPurple: #8946DF;
+$lightBlue: #31C1EE;
+$gray: #CBCAF9;
+$white: #FFFFFF;
+$blackDark: #130C3F;
+$purple: #8946DF;
+$saveBtn: #2e1f4f;
+
+/************************
+ *** Dark/Light Mode ***
+ ************************/
+
+// Light Mode
+.body--light {
+    $page-header: #F7F5FF;
+    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
+    $high-contrast-text-color: #282828;
+    $default-contrast-text-color: #4D4D4D;
+    $low-contrast-text-color: #939393;
+    $menu-text: #fff;
+    $link-color: #646FD3;
+    $canvas: #fff;
+
+    --text-high-contrast: #{$high-contrast-text-color};
+    --text-default-contrast: #{$default-contrast-text-color};
+    --text-low-contrast: #{$low-contrast-text-color};
+    --link-color: #{$link-color};
+    --menu-text: #{$menu-text};
+
+    --text-color-hover: #{$primary};
+    --accent-color: #{$primary};
+    --negative-color: #{$negative};
+    --positive-color: #{$positive};
+
+    --negative-muted: #{rgba($negative, 0.5)};
+    --positive-muted: #{rgba($positive, 0.5)};
+
+    --bg-color: #{$canvas};
+    --bg-color-hover: #{$page-header};
+
+    --header-bg-color: #{$page-header};
+}
+
+// Dark Mode
+.body--dark {
+    $text-header: #F7F5FF;
+    $page-header: #2b0f46;
+    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
+    $ink: #fff;
+    $canvas: #313133;
+
+    --text-color: #{$ink};
+    --text-color-hover: #{darken($ink, 80%)};
+    --text-color-muted: #eeeeee;
+    --negative-muted: #{rgba($negative, 0.5)};
+    --positive-muted: #{rgba($positive, 0.5)};
+    --bg-color: #{$canvas};
+    --bg-color-hover: #{lighten($canvas, 80%)};
+    --header-text-color: #{$text-header};
+    --header-bg-color: #{$page-header};
+}
+
+body {
+    color: var(--text-color);
+    background-color: var(--bg-color);
+}

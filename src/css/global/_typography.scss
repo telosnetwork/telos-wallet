@@ -1,0 +1,157 @@
+// kmtodo move body text styles from _legacy-styles.scss
+
+@font-face {
+    font-family: silka-semibold;
+    font-style: semibold; // kmtodo not a valid option for font style
+    font-weight: semibold;  // kmtodo semibold is not valid option, try 600
+    src: url("~/css/fonts/silka-semibold-webfont.woff");
+}
+
+@font-face {
+    font-family: silka-regular;
+    font-style: normal;
+    font-weight: normal;
+    src: url("~/css/fonts/silka-regular-webfont.woff");
+}
+
+/* Font weight mixins */
+@mixin regular {
+    font-family: 'silka-regular', 'Roboto', sans-serif;
+    font-weight: semibold; // kmtodo semibold is not valid option, try 600
+}
+
+@mixin bold {
+    font-family: 'silka-semibold', 'Roboto', sans-serif;
+    font-weight: normal;
+}
+
+
+/* Typography mixins */
+@mixin text--header-1 {
+    @include bold;
+    font-size: 2.5rem;
+    line-height: 100%;
+
+    @include tiny-only {
+        font-size: 2rem;
+    }
+}
+
+@mixin text--header-2 {
+    @include bold;
+    font-size: 1.5rem;
+    line-height: 130%;
+}
+
+@mixin text--header-3 {
+    @include regular;
+    font-size: 1.5rem;
+    line-height: 130%;
+}
+
+@mixin text--header-4 {
+    @include bold;
+    font-size: 1.125rem;
+    line-height: 130%;
+
+    @media only screen and (min-width: $breakpoint-sm-min) {
+        font-size: 1.25rem;
+    }
+}
+
+@mixin text--header-5 {
+    @include bold;
+    font-size: 0.9rem;
+    line-height: 150%;
+    text-transform: uppercase;
+}
+
+@mixin text--paragraph {
+    @include regular;
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+@mixin text--paragraph-bold {
+    @include bold;
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+@mixin text--small {
+    @include regular;
+    font-size: 0.8rem;
+    line-height: 150%;
+}
+
+@mixin text--small-bold {
+    @include bold;
+    font-size: 0.8rem;
+    line-height: 150%;
+}
+
+/* Typography classes */
+.o-text--header-1, h1 {
+    @include text--header-1;
+}
+
+.o-text--header-2, h2 {
+    @include text--header-2;
+}
+
+.o-text--header-3, h3 {
+    @include text--header-3;
+}
+
+.o-text--header-4, h4 {
+    @include text--header-4;
+}
+
+.o-text--header-5, h5 {
+    @include text--header-5;
+}
+
+.o-text--paragraph, p {
+    @include text--paragraph;
+}
+
+.o-text--paragraph-bold {
+    @include text--paragraph-bold;
+}
+
+.o-text--small {
+    @include text--small;
+}
+
+.o-text--small-bold {
+    @include text--small-bold;
+}
+
+/* Utilities classes */
+.u-text--center {
+    text-align: center;
+}
+
+.u-text--high-contrast {
+    color: var(--text-high-contrast);
+}
+
+.u-text--default-contrast {
+    color: var(--text-default-contrast);
+}
+
+.u-text--low-contrast {
+    color: var(--text-low-contrast);
+}
+
+.u-text--alt-color {
+    color: var(--menu-text);
+}
+
+@mixin link-color {
+    color: var(--link-color);
+}
+
+.u-text--link-color {
+    color: var(--link-color);
+}

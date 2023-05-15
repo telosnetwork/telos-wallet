@@ -1,0 +1,34 @@
+/* Screen size mixins */
+
+/* Use this when the general mobile approach doesn't
+*  fit the screen
+*/
+@mixin tiny-only {
+    @media only screen and (max-width: 360px) {
+        @content;
+    }
+}
+
+@mixin mobile-only {
+    @media only screen and (max-width: $breakpoint-xs-max) {
+      @content;
+    }
+  }
+
+@mixin sm-and-up {
+    @media only screen and (min-width: $breakpoint-sm-min) {
+        @content;
+    }
+}
+
+@mixin md-and-up {
+    @media only screen and (min-width: $breakpoint-md-min) {
+        @content;
+    }
+}
+
+@mixin mobile-landscape {
+    @media only screen and (max-width: $breakpoint-sm-max) and (orientation: landscape) {
+        @content;
+    }
+}
