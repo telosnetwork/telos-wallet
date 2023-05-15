@@ -72,8 +72,7 @@ export const useBalancesStore = defineStore(store_name, {
             // update logged balances every 10 seconds only if the user is logged
             setInterval(() => {
                 if (useAccountStore().loggedAccount) {
-                    // useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
-                    console.error('RESTORE ME');
+                    useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
                 }
             }, 10000);
 
