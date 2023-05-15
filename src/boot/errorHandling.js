@@ -22,7 +22,7 @@ const errorNotification = function(error, dismiss = false) {
         timeout: dismiss ? 0 : 5000,
         message: `${errorStr}`,
         actions: dismiss ? [
-            { label: 'Dismiss', color: 'white' },
+            { label: this.$t('notification.dismiss_label'), color: 'white' },
         ] : [],
     });
 };
