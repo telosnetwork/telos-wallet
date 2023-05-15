@@ -8,8 +8,8 @@ import {
     EvmToken,
     EvmTransaction,
     HyperionAbiSignatureFilter,
-    HyperionActionsFilter,
     PriceChartData,
+    IndexerTransactionsFilter,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 import { ethers } from 'ethers';
@@ -20,6 +20,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External query API support
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+    protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerEndpoint() });
 
     // External trusted metadata bucket for EVM contracts
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
@@ -86,6 +87,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
+    abstract getIndexerEndpoint(): string;
     abstract getRPCEndpoint(): RpcEndpoint;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
@@ -122,58 +124,52 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
     }
 
-    async getTransactions(filter: HyperionActionsFilter): Promise<EvmTransaction[]> {
-        const account = filter.account || '';
-        const page = filter.page || 1;
-        const limit = filter.limit || 10;
-        const skip = Math.max(0, page - 1) * limit;
-        const notified = filter.notified || '';
-        const sort = filter.sort || 'desc';
-        const after = filter.after || '';
-        const before = filter.before || '';
-        const address = filter.address || '';
-        const block = filter.block || '';
-        const hash = filter.hash || '';
+    async getTransactions(filter: IndexerTransactionsFilter): Promise<EvmTransaction[]> {
+        const address = filter.address;
+        const limit = filter.limit;
+        const offset = filter.offset;
+        const includeAbi = filter.includeAbi;
+        const sort = filter.sort;
+        const includePagination = filter.includePagination;
+        const logTopic = filter.logTopic;
+        const full = filter.full;
 
         let aux = {};
-        if (account) {
-            aux = { account, ...aux };
-        }
-        if (limit) {
+
+        if (limit !== undefined) {
             aux = { limit, ...aux };
         }
-        if (skip) {
-            aux = { skip, ...aux };
+        if (offset !== undefined) {
+            aux = { offset, ...aux };
         }
-        if (notified) {
-            aux = { notified, ...aux };
+        if (includeAbi !== undefined) {
+            aux = { includeAbi, ...aux };
         }
-        if (sort) {
+        if (sort !== undefined) {
             aux = { sort, ...aux };
         }
-        if (after) {
-            aux = { after, ...aux };
+        if (includePagination !== undefined) {
+            aux = { includePagination, ...aux };
         }
-        if (before) {
-            aux = { before, ...aux };
+        if (logTopic !== undefined) {
+            aux = { logTopic, ...aux };
         }
-        if (address) {
-            aux = { address, ...aux };
-        }
-        if (block) {
-            aux = { block, ...aux };
-        }
-        if (hash) {
-            aux = { hash, ...aux };
-        }
-        if (filter.extras) {
-            aux = { ...aux, ...filter.extras };
+        if (full !== undefined) {
+            aux = { full, ...aux };
         }
 
+        // eztodo refer to https://api.teloscan.io/v1/address/0x160505F3dfD1cb58B91e322c828Ae0F74c043c3C/transactions
+        // eztodo figure out how to use contracts object in response
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
+        const url = `v1/address/${address}/transactions`;
 
-        return this.hyperion.get('/v2/evm/get_transactions', { params })
-            .then(response => response.data.transactions as EvmTransaction[]);
+        return await this.indexer.get(url, { params })
+            .then(response => response.data.results as EvmTransaction[])
+            .catch((error) => {
+                // eztodo better err handling
+                console.log(error);
+                return [];
+            });
     }
 
     async getTokenList(): Promise<EvmToken[]> {

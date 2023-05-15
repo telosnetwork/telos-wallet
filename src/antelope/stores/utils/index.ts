@@ -1,5 +1,5 @@
 export * from 'src/antelope/stores/utils/abi/signature';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -255,4 +255,15 @@ export function prettyPrintBalance(amount: number | string, locale: string, tiny
 * */
 export function prettyPrintFiatBalance(fiatAmount: number | string, locale: string, tiny: boolean, currency = 'USD') {
     return prettyPrintCurrency(+fiatAmount, 2, locale, tiny ? isAmountTooLarge(fiatAmount) : false, currency);
+}
+
+// eztodo docs
+export function getGasInTlos(gasUsed: string, gasPrice: string) {
+    // eztodo add validation
+    return formatWei(
+        BigNumber.from(gasPrice)
+            .mul(gasUsed).toLocaleString(),
+        WEI_PRECISION,
+        5,
+    );
 }

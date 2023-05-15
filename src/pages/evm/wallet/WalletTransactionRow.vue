@@ -11,7 +11,7 @@ import { useChainStore, useUserStore } from 'src/antelope';
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const userStore = useUserStore();
 
@@ -124,6 +124,13 @@ export default defineComponent({
         },
         chainTokenSymbol(): string {
             return this.chainSettings.getSystemToken().symbol;
+        },
+        gasInFiatText(): string {
+            if (this.transaction.gasUsed && [0, undefined].includes(this.transaction.gasFiatValue)) {
+                const symbol = getCurrencySymbol(userStore.fiatLocale, userStore.fiatCurrency);
+                return `< ${symbol}0.01 ${userStore.fiatCurrency}`;
+            }
+            return this.formatAmount(this.transaction.gasFiatValue ?? 0, undefined, true);
         },
     },
     methods: {
@@ -258,7 +265,7 @@ export default defineComponent({
         <div class="c-transaction-row__gas-text">
             <span>{{ formatAmount(transaction.gasUsed ?? 0, chainTokenSymbol) }}</span>
 
-            <span>{{ formatAmount(transaction.gasFiatValue ?? 0, undefined, true) }}</span>
+            <span>{{ gasInFiatText }}</span>
         </div>
 
         <div

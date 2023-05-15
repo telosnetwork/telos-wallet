@@ -38,7 +38,7 @@ export interface ShapedTransactionRow {
     toPrettyName?: string;
     valuesIn: TransactionValueData[];
     valuesOut: TransactionValueData[];
-    gasUsed?: number;
-    gasFiatValue?: number;
+    gasUsed?: number; // gas used in TLOS
+    gasFiatValue?: number; // gas used in Fiat
     failed?: boolean;
 }

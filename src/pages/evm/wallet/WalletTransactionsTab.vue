@@ -1,12 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
-import { ShapedTransactionRow, TransactionValueData } from 'src/antelope/types';
-import { stubWithSlot } from 'app/test/jest/testing-helpers';
-import { shallowMount } from '@vue/test-utils';
+import { ShapedTransactionRow } from 'src/antelope/types';
+
 import TableControls from 'components/evm/TableControls.vue';
+import { useAccountStore, useHistoryStore } from 'src/antelope';
 
 
+const historyStore = useHistoryStore();
+const accountStore = useAccountStore();
 
 export default defineComponent({
     name: 'WalletTransactionsTab',
@@ -23,7 +25,14 @@ export default defineComponent({
         },
     }),
     computed: {
-        shapedTransactions(): ShapedTransactionRow[] {
+        address() {
+            return accountStore.loggedEvmAccount?.address ?? '';
+        },
+        shapedTransactions() {
+            console.log(this.loading);
+            return historyStore.getShapedTransactions('current') ?? [];
+        },
+        shapedTransactionsOld(): ShapedTransactionRow[] {
             return [{
                 id: '0x'.concat('1'.repeat(40)),
                 epoch: 1681775186,
@@ -164,11 +173,20 @@ export default defineComponent({
             return `Viewing ${this.pagination.rowsPerPage} of ${this.shapedTransactions.length} transactions`;
         },
     },
-    created() {
-        setTimeout(() => {
-            this.pagination.rowsNumber = this.shapedTransactions.length;
-            this.loading = false;
-        }, 2000);
+    watch: {
+        shapedTransactions(newValue) {
+            this.pagination.rowsNumber = newValue.length;
+        },
+        async address (address) {
+            // address can be initially undefined; wait to load txs until it's defined
+            if (address) {
+                historyStore.setEVMFilter({ address });
+                await historyStore.queryNextPage();
+
+                // eztodo shapedTransactions might not be set yet i think
+                this.loading = false;
+            }
+        },
     },
 });
 </script>

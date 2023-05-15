@@ -365,7 +365,7 @@ export default {
             transaction_canceled: 'Transaction canceled',
         },
         history: {
-            error_fetching_trasactions: 'Error in fetching transactions',
+            error_fetching_transactions: 'Error in fetching transactions',
         },
         chain: {
             error_update_data: 'Error in updating data',

@@ -286,3 +286,24 @@ export function getFloatReciprocal(float: number | string) {
         .replace(trailingZeroesRegex, '')
         .replace(trailingDotRegex, '');
 }
+
+// eztodo docs
+export function getCurrencySymbol(locale: string, currencyCode: string) {
+    const formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currencyCode,
+        currencyDisplay: 'symbol',
+    });
+
+    const parts = formatter.formatToParts(123);
+
+    let symbol;
+    for(let i=0; i<parts.length; i++) {
+        if(parts[i].type === 'currency') {
+            symbol = parts[i].value;
+            break;
+        }
+    }
+
+    return symbol;
+}

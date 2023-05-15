@@ -25,20 +25,26 @@ import {
     AntelopeError,
     ParsedEvmTransaction,
     TRANSFER_SIGNATURES,
-    HyperionActionsFilter,
+    IndexerTransactionsFilter,
+    HyperionActionsFilter, ShapedTransactionRow,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
-import { formatWei } from 'src/antelope/stores/utils';
+import { formatWei, getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { getAntelope } from '..';
+import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { getCoingeckoUsdPrice } from 'src/api/price';
+import { parseUnits } from 'ethers/lib/utils';
 
 
 export interface HistoryState {
-    __filter: HyperionActionsFilter;
+    __native_filter: HyperionActionsFilter;
+    __evm_filter: IndexerTransactionsFilter;
     __transactions: { [label: Label]: EvmTransaction[] };
+    __shaped_transactions: { [label: Label]: ShapedTransactionRow[] };
 }
 
 const store_name = 'history';
@@ -46,8 +52,10 @@ const store_name = 'history';
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
     getters: {
-        getTransactions: state => (label: string) => state.__transactions[label],
-        getFilter: state => state.__filter,
+        getTransactions: state => (label: string): EvmTransaction[] => state.__transactions[label],
+        getNativeFilter: state => state.__native_filter,
+        getEVMFilter: state => state.__evm_filter,
+        getShapedTransactions: state => (label: string): ShapedTransactionRow[] => state.__shaped_transactions[label],
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -58,9 +66,9 @@ export const useHistoryStore = defineStore(store_name, {
                     const self = useHistoryStore();
                     if (account) {
                         if (account.isNative) {
-                            self.setFilter({ account: account.account });
+                            self.setNativeFilter({ account: account.account });
                         } else {
-                            self.setFilter({ address: account.account });
+                            self.setEVMFilter({ address: account.account });
                         }
                     }
                 },
@@ -77,14 +85,20 @@ export const useHistoryStore = defineStore(store_name, {
                     const chain_settings = chain.settings as EVMChainSettings;
 
                     // query the next page of transactions
-                    chain_settings.getTransactions(toRaw(this.__filter)).then(
+                    return chain_settings.getTransactions(toRaw(this.__evm_filter)).then(
                         async (transactions) => {
                             // Set as it comes for fast feedback
                             this.setTransactions(label, transactions);
 
                             // Proccess the transactions parsing on background
                             const promises = transactions.map(trx => this.processTransaction(trx));
-                            Promise.allSettled(promises).then(() => {
+                            Promise.allSettled(promises).then(async (parsedTransactionsResults) => {
+                                const parsedTransactions: ParsedEvmTransaction[] = parsedTransactionsResults
+                                    .filter((result): result is PromiseFulfilledResult<ParsedEvmTransaction> => result.status === 'fulfilled')
+                                    .map(result => result.value);
+
+                                await this.shapeTransactions(label, parsedTransactions);
+
                                 useFeedbackStore().unsetLoading('evm.switchChainInjected');
                                 this.trace('queryNextPage', label, 'done:', toRaw(this.getTransactions(label)));
                             });
@@ -92,7 +106,7 @@ export const useHistoryStore = defineStore(store_name, {
                     );
                 }
             } catch (e) {
-                throw new AntelopeError('antelope.history.error_fetching_trasactions');
+                throw new AntelopeError('antelope.history.error_fetching_transactions');
             }
         },
         async processTransaction(transaction: EvmTransaction): Promise<ParsedEvmTransaction> {
@@ -105,7 +119,7 @@ export const useHistoryStore = defineStore(store_name, {
                 }
                 const bn = ethers.BigNumber.from(transaction.value);
                 transaction.value = formatWei(bn, 18);
-                if (transaction.input_data === '0x') {
+                if (transaction.input === '0x') {
                     return transaction as ParsedEvmTransaction;
                 }
                 if(!transaction.to) {
@@ -118,7 +132,7 @@ export const useHistoryStore = defineStore(store_name, {
                     return transaction as ParsedEvmTransaction;
                 }
                 const trxDescription = await contract.parseTransaction(
-                    transaction.input_data,
+                    transaction.input,
                 );
                 const parsedTrx = transaction as ParsedEvmTransaction;
                 if (trxDescription) {
@@ -127,7 +141,7 @@ export const useHistoryStore = defineStore(store_name, {
                     parsedTrx.contract = contract;
                 }
                 // Get ERC20 transfer from main function call
-                const signature = transaction.input_data.substring(0, 10);
+                const signature = transaction.input.substring(0, 10);
                 if (
                     signature &&
                     TRANSFER_SIGNATURES.includes(signature) &&
@@ -148,19 +162,76 @@ export const useHistoryStore = defineStore(store_name, {
             }
             return transaction as ParsedEvmTransaction;
         },
+        async shapeTransactions(label: Label, transactions: EvmTransaction[]): Promise<void> {
+            const tlosToUsd = await getCoingeckoUsdPrice('telos');
+
+            const shapedRowPromises: Promise<ShapedTransactionRow>[] = transactions.map(async (trx) => {
+                /*
+                actionName
+                fromPrettyName
+                toPrettyName
+                x valuesIn
+                x valuesOut
+                gasFiatValue
+                failed
+                 */
+                // console.log(trx);
+                const gasInTlos = getGasInTlos(trx.gasused, trx.gasPrice);
+                const gasInTlosWei = parseUnits(gasInTlos, 18);
+                // debugger;
+                const gasInFiatBn = convertCurrency(gasInTlosWei, WEI_PRECISION, 2, tlosToUsd);
+                const gasInFiat = +formatWei(gasInFiatBn, 18, 2);
+                const shapedTx: Partial<ShapedTransactionRow> = {};
+
+                shapedTx.id = trx.hash ?? '';
+                shapedTx.epoch = trx.timestamp / 1000;
+                shapedTx.gasUsed = +gasInTlos;
+                shapedTx.gasFiatValue = gasInFiat;
+                shapedTx.to = trx.to;
+                shapedTx.from = trx.from;
+                shapedTx.valuesIn = [];
+                shapedTx.valuesOut = [];
+
+                // eztodo is gasused in tlos?
+                // console.log(+trx.gasused);
+
+                return shapedTx as ShapedTransactionRow;
+            });
+
+            let shaped: ShapedTransactionRow[] = [];
+
+            await Promise.all(shapedRowPromises).then((shapedRows) => {
+                shaped = shapedRows;
+            });
+
+            this.setShapedTransactions(label, shaped);
+        },
+
         // commits ---
-        setFilter(filter: HyperionActionsFilter) {
-            this.trace('setFilter', filter);
-            useHistoryStore().__filter = filter;
+        setNativeFilter(filter: HyperionActionsFilter) {
+            this.trace('setNativeFilter', filter);
+            useHistoryStore().__native_filter = filter;
+        },
+        setEVMFilter(filter: IndexerTransactionsFilter) {
+            this.trace('setEVMFilter', filter);
+            useHistoryStore().__evm_filter = filter;
         },
         setTransactions(label: Label, transactions: EvmTransaction[]) {
             this.trace('setTransactions', label, transactions);
             useHistoryStore().__transactions[label] = transactions;
+        },
+        setShapedTransactions(label: Label, transactions: ShapedTransactionRow[]) {
+            this.trace('setShapedTransactions', transactions);
+            this.__shaped_transactions[label] = transactions;
         },
     },
 });
 
 const historyInitialState: HistoryState = {
     __transactions: {},
-    __filter: {},
+    __native_filter: {},
+    __evm_filter: {
+        address: '',
+    },
+    __shaped_transactions: {},
 };
