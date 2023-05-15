@@ -88,7 +88,7 @@ export default defineComponent({
         background-color: black;
         position: absolute;
         overflow: hidden;
-        z-index: -1;
+        z-index: $z-index--video-wrapper;
         top: 0px;
         bottom: 0px;
         left: 0px;
@@ -110,7 +110,7 @@ export default defineComponent({
         object-fit: cover;
         position: absolute;
         overflow: hidden;
-        z-index: -1;
+        z-index: $z-index--video-overlay;
         top: 0px;
         bottom: 0px;
         left: 0px;

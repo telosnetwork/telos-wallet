@@ -186,10 +186,10 @@ export default defineComponent({
 
     // guarantees wallet connect on top of footer
     &__footer {
-        z-index: 2;
+        z-index: $z-index--footer;
     }
     &__connect-wallet {
-        z-index: 3;
+        z-index: $z-index--connect-wallet-popup;
     }
 }
 </style>
