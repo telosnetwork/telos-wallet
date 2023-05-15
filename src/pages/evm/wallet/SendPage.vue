@@ -8,6 +8,9 @@ import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antel
 import { useAppNavStore } from 'src/stores';
 import { divideFloat, multiplyFloat } from 'src/antelope/stores/utils';
 import { ethers } from 'ethers';
+import { getNetwork } from '@wagmi/core';
+import { Notify } from 'quasar';
+import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -255,7 +258,23 @@ export default defineComponent({
                 }
             }
         },
-        startTransfer() {
+        async startTransfer() {
+            // if WalletConnect on wrong network, notify user and prevent transaction
+            if (localStorage.getItem('wagmi.connected')){
+                const chainSettings = useChainStore().currentChain.settings;
+                const appChainId = chainSettings.getChainId();
+                const networkName = chainSettings.getDisplay();
+                const walletConnectChainId = getNetwork().chain?.id.toString();
+                if (appChainId !== walletConnectChainId){
+                    const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
+                    (this as any).$errorNotification(errorMessage, true);
+                    return;
+                }
+            }else {
+                //if injected provider (Desktop) prompt to switch chains
+                await checkNetwork();
+            };
+
             const token = this.token;
             const amount = this.finalTokenAmount;
             const to = this.address;

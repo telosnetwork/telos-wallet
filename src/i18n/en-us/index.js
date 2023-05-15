@@ -91,6 +91,7 @@ export default {
         aria_link_to_transaction: 'Link to block explorer transaction page',
         click_to_fill_max: 'Click to fill max amount',
         amount_exceeds_available_balance: 'Balance too low',
+        incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transaction',
     },
     global: {
         native: 'Native',

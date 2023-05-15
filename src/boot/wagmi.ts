@@ -5,7 +5,7 @@ import { w3mProvider, w3mConnectors, EthereumClient } from '@web3modal/ethereum'
 
 // create wagmi client and make globally available for autologin
 const projectId = process.env.PROJECT_ID || '';
-const chains = [telos, telosTestnet];
+const chains = process.env.NETWORK === 'mainnet' ? [telos, telosTestnet] : [telosTestnet, telos];
 const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
 const wagmi = createClient({
