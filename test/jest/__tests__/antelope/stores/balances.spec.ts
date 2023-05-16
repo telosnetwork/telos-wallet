@@ -37,6 +37,11 @@ jest.mock('src/antelope/stores/evm', () => ({
             }),
         })),
         toWei: jest.fn().mockImplementation((value: any) => value),
+        getERC20TokenBalance: jest.fn().mockImplementation(() => ({
+            then: jest.fn().mockImplementation((cb: any) => {
+                cb(TOKEN_BALANCE);
+            }),
+        })),
         sendSystemToken: jest.fn(),
         rpcProvider: {
             getBalance: jest.fn().mockImplementation(() => ({

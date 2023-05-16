@@ -11,8 +11,6 @@
  * them available for local querying.
  */
 
-
-
 import { defineStore } from 'pinia';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
 import {
@@ -111,22 +109,13 @@ export const useBalancesStore = defineStore(store_name, {
                             });
 
                         } else {
+                            promises = tokens
+                                .map(token => evm.getERC20TokenBalance(account.account, token.address)
+                                    .then((balanceBn: BigNumber) => {
+                                        this.processBalanceForToken(label, token, balanceBn);
+                                    }),
+                                );
 
-                            promises = tokens.map(token => evm.getContract(token.address)
-                                .then((contract) => {
-                                    if (contract) {
-                                        try {
-                                            const contractInstance = contract.getContractInstance();
-                                            const address = account.account;
-                                            return contractInstance.balanceOf(address).then((balanceBn: BigNumber) => {
-                                                this.processBalanceForToken(label, token, balanceBn);
-                                            });
-                                        } catch (e) {
-                                            console.error(e);
-                                        }
-                                    }
-                                }),
-                            );
                         }
 
                         Promise.allSettled(promises).then(() => {

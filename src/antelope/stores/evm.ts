@@ -12,6 +12,8 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ExternalProvider } from '@ethersproject/providers';
 import { BigNumber, ethers } from 'ethers';
+import Web3 from 'web3';
+import { AbiItem } from 'web3-utils';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
@@ -377,6 +379,7 @@ export const useEVMStore = defineStore(store_name, {
         // handles erc721 & erc20 (w/ stubs for erc1155)
         async getContract(address:string, suspectedToken = ''): Promise<EvmContract | null> {
             if (!address) {
+                this.trace('getContract', 'address is null', address);
                 return null;
             }
             const addressLower = address.toLowerCase();
@@ -385,6 +388,7 @@ export const useEVMStore = defineStore(store_name, {
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
+            console.log('--------------------------------------------');
             // If cached is null, it means this is the first time this address is queried
             if (cached !== null) {
                 if (
@@ -394,6 +398,7 @@ export const useEVMStore = defineStore(store_name, {
                     cached.token && cached.token?.type === suspectedToken
                 ) {
                     // this never return false
+                    this.trace('getContract', 'returning cached', addressLower, cached);
                     return cached || null;
                 }
             }
@@ -410,21 +415,25 @@ export const useEVMStore = defineStore(store_name, {
 
             const metadata = await this.checkBucket(address);
             if (metadata && creationInfo) {
+                this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
                 return await this.getVerifiedContract(addressLower, metadata, creationInfo, suspectedToken);
             }
 
             const contract = await this.getContractFromTokenList(address, creationInfo, suspectedToken);
             if (contract) {
+                this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
             }
 
             if (suspectedToken) {
                 const tokenData = await this.getTokenData(address, suspectedToken);
                 if (tokenData) {
+                    this.trace('getContract', 'returning contract from token data', address, tokenData);
                     return await this.getTokenContract(addressLower, tokenData, creationInfo);
                 }
             }
 
+            this.trace('getContract', 'returning empty contract', address, creationInfo);
             return await this.getEmptyContract(addressLower, creationInfo);
         },
 
@@ -534,6 +543,16 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return  new ethers.Contract(address, abi, provider);
+        },
+
+        async getERC20TokenBalance(account: string, address:string): Promise<ethers.BigNumber> {
+            const erc20ABI = this.getTokenABI('erc20') as AbiItem[];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const web3 = new Web3((window as any).ethereum);
+
+            const contract = new web3.eth.Contract(erc20ABI, address);
+            return contract.methods.balanceOf(account).call()
+                .then((balance: never) => ethers.BigNumber.from(balance));
         },
 
         async getTokenData(address:string, suspectedType:string): Promise<EvmToken> {
