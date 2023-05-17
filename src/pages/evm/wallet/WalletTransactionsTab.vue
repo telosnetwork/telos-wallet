@@ -11,6 +11,7 @@ const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
 const feedbackStore = useFeedbackStore();
 
+// eztodo no fiat value found use tooltip component
 export default defineComponent({
     name: 'WalletTransactionsTab',
     components: {

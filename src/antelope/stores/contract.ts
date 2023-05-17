@@ -17,10 +17,12 @@ import {
     isTracingAll,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { EvmContract2, EVMContractFactoryData } from 'src/antelope/stores/utils/contracts/EvmContract';
+import { Erc20Transfer, EvmContract2, EVMContractFactoryData } from 'src/antelope/stores/utils/contracts/EvmContract';
 import EVMContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { getTopicHash, TRANSFER_SIGNATURES } from 'src/antelope/stores/utils';
+import { EvmTransaction } from 'src/antelope/types';
 
 
 export interface ContractStoreState {
@@ -86,6 +88,37 @@ export const useContractStore = defineStore(store_name, {
             ){
                 this.cachedContracts[index] = contract;
             }
+        },
+
+        // eztodo no any
+        async getTransfersFromTransaction(raw: EvmTransaction) {
+            if (!raw.logs || raw.logs?.length === 0){
+                return [];
+            }
+
+            const logs = JSON.parse(raw.logs);
+            const transfers: Erc20Transfer[] = [];
+            for(let i = 0;i < logs.length; i++){
+                const log = logs[i];
+                const sig = log.topics[0].slice(0, 10);
+                if(TRANSFER_SIGNATURES.includes(sig)){
+                    const contract = await this.getContract(log.address);
+
+                    if (contract && contract.supportedInterfaces.includes('erc20')) {
+                        transfers.push({
+                            'index': log.logIndex,
+                            'address': contract.address,
+                            'value': log.data,
+                            'decimals': contract.properties?.decimals,
+                            'to': getTopicHash(log.topics[1]),
+                            'from': getTopicHash(log.topics[2]),
+                            'symbol': contract.properties?.symbol,
+                        });
+                    }
+                }
+            }
+            transfers.sort((a, b) => a.index - b.index);
+            return transfers;
         },
     },
 });

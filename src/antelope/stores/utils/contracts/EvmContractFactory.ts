@@ -51,6 +51,7 @@ export default class EVMContractFactory {
             },
             supportedInterfaces: data.supportedInterfaces ?? [],
             abi,
+            properties,
         });
     }
 

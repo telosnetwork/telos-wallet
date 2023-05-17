@@ -28,7 +28,7 @@ import {
     // HyperionActionsFilter,
     ShapedTransactionRow,
     ParsedIndexerAccountTransactionsContract,
-    EVMTransactionsPaginationData,
+    EVMTransactionsPaginationData, TransactionValueData,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
@@ -138,17 +138,69 @@ export const useHistoryStore = defineStore(store_name, {
                     const toPrettyName = contractStore.cachedContracts[tx.to.toLowerCase()]?.name ?? '';
                     const fromPrettyName = contractStore.cachedContracts[tx.from.toLowerCase()]?.name ?? '';
 
+                    const transfers = await contractStore.getTransfersFromTransaction(tx);
+                    const valuesIn: TransactionValueData[] = [];
+                    const valuesOut: TransactionValueData[] = [];
+
+                    if (tx.value) {
+                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
+                        const valueInFiat = +formatUnits(valueInFiatBn, 2);
+                        if (tx.from === this.__evm_filter.address) {
+                            valuesOut.push({
+                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                symbol: chainSettings.getSystemToken().symbol,
+                                fiatValue: valueInFiat, // eztodo
+                            });
+                        } else if (tx.to === this.__evm_filter.address) {
+                            valuesIn.push({
+                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                symbol: chainSettings.getSystemToken().symbol,
+                                fiatValue: valueInFiat, // eztodo
+                            });
+                        }
+                    }
+
+                    // eztodo make variables for tx.to/from === this.__evm_filter.address
+                    transfers.forEach((xfer) => {
+                        if (xfer.symbol && xfer.decimals) {
+                            if (xfer.from === this.__evm_filter.address) {
+                                // sent from user
+                                valuesOut.push({
+                                    amount: +formatUnits(xfer.value, xfer.decimals),
+                                    symbol: xfer.symbol,
+                                    fiatValue: undefined, // eztodo
+                                });
+                            } else {
+                                // sent to user
+                                valuesIn.push({
+                                    amount: +formatUnits(xfer.value, xfer.decimals),
+                                    symbol: xfer.symbol,
+                                    fiatValue: undefined, // eztodo
+                                });
+                            }
+                        }
+                    });
+
+                    let actionName = '';
+
+                    if (tx.value && transfers.length === 0) {
+                        if (tx.from === this.__evm_filter.address) {
+                            actionName = 'send';
+                        } else if (tx.to === this.__evm_filter.address) {
+                            actionName = 'receive';
+                        }
+                    }
 
                     shapedTransactionRows.push({
                         id: tx.hash,
                         epoch: tx.timestamp / 1000,
-                        actionName: '',
+                        actionName,
                         from: tx.from,
                         fromPrettyName,
                         to: tx.to,
                         toPrettyName,
-                        valuesIn: [],
-                        valuesOut: [],
+                        valuesIn,
+                        valuesOut,
                         gasUsed: gasUsedInTlos,
                         gasFiatValue: gasInUsd,
                         failed: tx.status !== '0x1',

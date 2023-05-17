@@ -1,7 +1,7 @@
 import { ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
-    AntelopeError,
+    AntelopeError, ContractCalldata,
     EvmABI,
     EvmContractCreationInfo,
     EvmContractCreationInfo2,
@@ -174,12 +174,13 @@ export default class EvmContract {
 
 
 export interface EVMContractConstructorData {
-    name: string,
-    abi?: EvmABI,
-    address: string,
-    creationInfo: EvmContractCreationInfo2,
-    verified: boolean,
-    supportedInterfaces: string[],
+    name: string;
+    abi?: EvmABI;
+    address: string;
+    creationInfo: EvmContractCreationInfo2;
+    verified: boolean;
+    supportedInterfaces: string[];
+    properties?: ContractCalldata;
 }
 
 export interface EVMContractFactoryData {
@@ -205,6 +206,7 @@ export class EvmContract2 {
     private readonly _creationInfo: EvmContractCreationInfo2;
     private readonly _interface: ContractInterface | null;
     private readonly _supportedInterfaces: string[]
+    private readonly _properties?: ContractCalldata;
 
     private _verified: boolean;
 
@@ -215,6 +217,7 @@ export class EvmContract2 {
         creationInfo,
         verified,
         supportedInterfaces = [],
+        properties,
     }: EVMContractConstructorData) {
         this._name = name;
         this._abi = abi;
@@ -222,6 +225,7 @@ export class EvmContract2 {
         this._creationInfo = creationInfo;
         this._interface = abi ? markRaw(new ethers.utils.Interface(abi)) : null;
         this._verified = verified;
+        this._properties = properties;
 
         const indexOfNone = supportedInterfaces.indexOf('none');
         this._supportedInterfaces = [];
@@ -276,6 +280,10 @@ export class EvmContract2 {
         return this._creationInfo?.creator;
     }
 
+    get properties() {
+        return this._properties;
+    }
+
     isNonFungible() {
         return (this._supportedInterfaces.includes('erc721'));
     }
@@ -292,4 +300,14 @@ export class EvmContract2 {
         );
     }
 
+}
+
+export interface Erc20Transfer {
+    index: number;
+    address: string;
+    value: string; // string representation of hex number
+    decimals?: number;
+    to: string;
+    from: string;
+    symbol?: string;
 }
