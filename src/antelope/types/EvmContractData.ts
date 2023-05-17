@@ -56,3 +56,68 @@ export interface VerifiedContractMetadata {
     }>,
     version: number;
 }
+
+
+
+
+
+
+
+
+
+
+export interface EvmContractCreationInfo2 {
+    block?: number | null;
+    creator?: string | null;
+    transaction?: string | null;
+}
+
+export interface ContractMetadata2 {
+    compiler?: {
+        version: string;
+    };
+    language?: string;
+    output?: {
+        abi: EvmABI;
+        devdoc: {
+            kind: string;
+            methods: Record<string, { details: string }>;
+            version: number;
+        };
+        userdoc: {
+            kind: string;
+            methods: Record<string, { details: string }>;
+            version: number;
+        }
+    };
+    settings?: {
+        compilationTarget: Record<string, string>;
+        evmVersion: string;
+        libraries: Record<string, string>;
+        metadata: {
+            bytecodeHash: string;
+            useLiteralContent: boolean;
+        };
+        optimizer: {
+            enabled: boolean;
+            runs: number;
+        };
+        remappings: Record<string, unknown>[]
+    }
+    sources?: Record<string, {
+        content: string;
+        keccak256: string;
+        license: string;
+    }>;
+    version?: number;
+}
+
+export interface ContractCalldata {
+    decimals?: number;
+    holders?: string; // string representation of number
+    marketdata_updated?: string; // epoch
+    name?: string;
+    price?: string; // string representation of number, USD price
+    supply?: string; // string representation of number
+    symbol?: string;
+}

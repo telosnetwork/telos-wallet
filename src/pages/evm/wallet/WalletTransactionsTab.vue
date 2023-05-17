@@ -4,11 +4,12 @@ import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 import { ShapedTransactionRow } from 'src/antelope/types';
 
 import TableControls from 'components/evm/TableControls.vue';
-import { useAccountStore, useHistoryStore } from 'src/antelope';
+import { useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 
 
 const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
+const feedbackStore = useFeedbackStore();
 
 export default defineComponent({
     name: 'WalletTransactionsTab',
@@ -17,7 +18,6 @@ export default defineComponent({
         WalletTransactionRow,
     },
     data: () => ({
-        loading: true,
         pagination: {
             page: 1,
             rowsPerPage: 5,
@@ -25,12 +25,16 @@ export default defineComponent({
         },
     }),
     computed: {
+        loading() {
+            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
+        },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
         },
         shapedTransactions() {
-            console.log(this.loading);
-            return historyStore.getShapedTransactions('current') ?? [];
+            // return [];
+            // eztodo refresh usd price?
+            return historyStore.getShapedTransactionRows('current') ?? [];
         },
         shapedTransactionsOld(): ShapedTransactionRow[] {
             return [{
@@ -180,11 +184,11 @@ export default defineComponent({
         async address (address) {
             // address can be initially undefined; wait to load txs until it's defined
             if (address) {
-                historyStore.setEVMFilter({ address });
-                await historyStore.queryNextPage();
+                historyStore.setEVMTransactionsFilter({ address });
+                await historyStore.fetchEVMTransactionsForAccount('current');
 
                 // eztodo shapedTransactions might not be set yet i think
-                this.loading = false;
+                // this.loading = false;
             }
         },
     },

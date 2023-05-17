@@ -25,7 +25,7 @@ import { errorToString } from 'src/antelope/config';
 import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
-import EvmContract from 'src/antelope/stores/utils/EvmContract';
+import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import {
     AntelopeError,
     erc1155Abi,

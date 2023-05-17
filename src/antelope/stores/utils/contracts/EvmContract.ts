@@ -1,9 +1,10 @@
-import { ethers } from 'ethers';
+import { ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
     AntelopeError,
     EvmABI,
     EvmContractCreationInfo,
+    EvmContractCreationInfo2,
     EvmContractData,
     EvmContractManagerI,
     EvmFormatedLog,
@@ -133,7 +134,6 @@ export default class EvmContract {
         }));
     }
 
-
     formatLog(log: EvmLog, parsedLog: ethers.utils.LogDescription): EvmFormatedLog {
         if(!parsedLog.signature) {
             console.error('No signature found for log! Check if this explodes. Returning EvmLog instead of EvmFormatedLog. ');
@@ -164,4 +164,132 @@ export default class EvmContract {
             throw new AntelopeError('antelope.utils.error_parsing_log_event', log);
         }
     }
+}
+
+
+
+
+
+
+
+
+export interface EVMContractConstructorData {
+    name: string,
+    abi?: EvmABI,
+    address: string,
+    creationInfo: EvmContractCreationInfo2,
+    verified: boolean,
+    supportedInterfaces: string[],
+}
+
+export interface EVMContractFactoryData {
+    address: string;
+    abi?: string | EvmABI
+    block?: number;
+    calldata?: string;
+    creator?: string;
+    decimals?: number | null;
+    fromTrace?: boolean;
+    metadata?: string;
+    name?: string;
+    supportedInterfaces?: string[];
+    symbol?: string;
+    traceAddress?: string;
+    transaction?: string;
+}
+
+export class EvmContract2 {
+    private readonly _name: string;
+    private readonly _abi?: EvmABI;
+    private readonly _address: string;
+    private readonly _creationInfo: EvmContractCreationInfo2;
+    private readonly _interface: ContractInterface | null;
+    private readonly _supportedInterfaces: string[]
+
+    private _verified: boolean;
+
+    constructor({
+        name,
+        abi,
+        address,
+        creationInfo,
+        verified,
+        supportedInterfaces = [],
+    }: EVMContractConstructorData) {
+        this._name = name;
+        this._abi = abi;
+        this._address = address;
+        this._creationInfo = creationInfo;
+        this._interface = abi ? markRaw(new ethers.utils.Interface(abi)) : null;
+        this._verified = verified;
+
+        const indexOfNone = supportedInterfaces.indexOf('none');
+        this._supportedInterfaces = [];
+        for(let i = 0; i < supportedInterfaces.length; i++){
+            if (i !== indexOfNone) {
+                this._supportedInterfaces.push(supportedInterfaces[i]);
+            }
+        }
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    get abi() {
+        return this._abi;
+    }
+
+    get address() {
+        return this._address;
+    }
+
+    get creationInfo() {
+        return this._creationInfo;
+    }
+
+    get interface() {
+        return this._interface;
+    }
+
+    get verified() {
+        return this._verified;
+    }
+
+    set verified(verified: boolean) {
+        this._verified = verified;
+    }
+
+    get supportedInterfaces() {
+        return this._supportedInterfaces;
+    }
+
+    get creationBlock() {
+        return this._creationInfo?.block;
+    }
+
+    get creationTrx() {
+        return this._creationInfo?.transaction;
+    }
+
+    get creator() {
+        return this._creationInfo?.creator;
+    }
+
+    isNonFungible() {
+        return (this._supportedInterfaces.includes('erc721'));
+    }
+
+    isToken() {
+        if(this._supportedInterfaces.length === 0) {
+            return false;
+        }
+
+        return (
+            this._supportedInterfaces.includes('erc721') ||
+            this._supportedInterfaces.includes('erc1155') ||
+            this._supportedInterfaces.includes('erc20')
+        );
+    }
+
 }

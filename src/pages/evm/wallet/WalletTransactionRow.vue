@@ -126,10 +126,12 @@ export default defineComponent({
             return this.chainSettings.getSystemToken().symbol;
         },
         gasInFiatText(): string {
-            if (this.transaction.gasUsed && [0, undefined].includes(this.transaction.gasFiatValue)) {
+            const gasIsMinisculeFiat = this.transaction.gasUsed && [0, undefined].includes(this.transaction.gasFiatValue);
+            if (gasIsMinisculeFiat) {
                 const symbol = getCurrencySymbol(userStore.fiatLocale, userStore.fiatCurrency);
                 return `< ${symbol}0.01 ${userStore.fiatCurrency}`;
             }
+
             return this.formatAmount(this.transaction.gasFiatValue ?? 0, undefined, true);
         },
     },

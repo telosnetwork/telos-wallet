@@ -37,6 +37,6 @@ const MAINNET = {
     CHAIN_NAME: 'telos',
 };
 
-const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;
+const env = MAINNET;
 
 module.exports = env;

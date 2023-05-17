@@ -6,12 +6,12 @@ import {
     EvmBlockData,
     EvmContractCreationInfo,
     EvmToken,
-    EvmTransaction,
+    // EvmTransaction,
     HyperionAbiSignatureFilter,
     PriceChartData,
-    IndexerTransactionsFilter,
+    IndexerTransactionsFilter, IndexerAccountTransactionsResponse,
 } from 'src/antelope/types';
-import EvmContract from 'src/antelope/stores/utils/EvmContract';
+import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -124,16 +124,17 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
     }
 
-    async getTransactions(filter: IndexerTransactionsFilter): Promise<EvmTransaction[]> {
+    async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
         const address = filter.address;
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;
         const sort = filter.sort;
-        const includePagination = filter.includePagination;
+        const includePagination = true;
         const logTopic = filter.logTopic;
-        const full = filter.full;
+        const full = filter.full ?? true;
 
+        // eztodo clean up
         let aux = {};
 
         if (limit !== undefined) {
@@ -164,12 +165,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const url = `v1/address/${address}/transactions`;
 
         return await this.indexer.get(url, { params })
-            .then(response => response.data.results as EvmTransaction[])
-            .catch((error) => {
-                // eztodo better err handling
-                console.log(error);
-                return [];
-            });
+            .then(response => response.data as IndexerAccountTransactionsResponse);
     }
 
     async getTokenList(): Promise<EvmToken[]> {
@@ -235,6 +231,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         };
         return this.hyperion.post('/evm', rpcPayload)
             .then(response => response.data as T);
+    }
+
+    getIndexer() {
+        return this.indexer;
     }
 
     async getGasPrice(): Promise<ethers.BigNumber> {

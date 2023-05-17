@@ -1,12 +1,12 @@
 /* eslint-disable indent */
 /**
- * Feedback: This store is ment to be used as a utility store to give feedback
+ * Feedback: This store is meant to be used as a utility store to give feedback
  * to the user about the internal state of the app and that includes:
  *
  * Loadings: by default, all async action-functions would call setLoading and
  * unsetLoading to keep track of the time from the call to the end of the function.
- * This is ment to show a loading icon to the user and can be used with custom
- * names insted of action names.
+ * This is meant to show a loading icon to the user and can be used with custom
+ * names instead of action names.
  *
  * Errors: all other stores can call setError and unsetError to keep track of errors
  * that happened inside the store. Each error will be identified by a name and
@@ -17,7 +17,7 @@
  * names for custom handlers. The app can set custom handlers for each error name
  *
  * Progress: this is meant to show a progress bar to the user. It will be used to
- * show the progress of a long running task, like a steps transaction (like a bridge
+ * show the progress of a long-running task, like a steps transaction (like a bridge
  * between blockchains) or a file upload, etc.
  *
 */
@@ -44,6 +44,7 @@ export interface FeedbackState {
 export const useFeedbackStore = defineStore('feedback', {
     state: (): FeedbackState => (feedbackiInitialState),
     getters: {
+        // eztodo use loading state?
         getLoadings: state => state.__loading,
         isLoading: state => (name: string) => state.__loading.includes(name),
         getErrors: state => state.__errors,
