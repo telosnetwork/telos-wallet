@@ -33,8 +33,6 @@ export default defineComponent({
             return accountStore.loggedEvmAccount?.address ?? '';
         },
         shapedTransactions() {
-            // return [];
-            // eztodo refresh usd price?
             return historyStore.getShapedTransactionRows('current') ?? [];
         },
         shapedTransactionsOld(): ShapedTransactionRow[] {
@@ -185,11 +183,8 @@ export default defineComponent({
         async address (address) {
             // address can be initially undefined; wait to load txs until it's defined
             if (address) {
-                historyStore.setEVMTransactionsFilter({ address });
+                historyStore.setEVMTransactionsFilter({ address, includeAbi: true });
                 await historyStore.fetchEVMTransactionsForAccount('current');
-
-                // eztodo shapedTransactions might not be set yet i think
-                // this.loading = false;
             }
         },
     },

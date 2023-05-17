@@ -23,6 +23,7 @@ import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getTopicHash, TRANSFER_SIGNATURES } from 'src/antelope/stores/utils';
 import { EvmTransaction } from 'src/antelope/types';
+import { ethers } from 'ethers';
 
 
 export interface ContractStoreState {
@@ -75,12 +76,13 @@ export const useContractStore = defineStore(store_name, {
             return this.$state.factory.buildContract(contract);
         },
 
-        addContractToCache(address: string, contractData: EVMContractFactoryData){
+        addContractToCache(address: string, contractData: EVMContractFactoryData): void {
             if (!address){
                 return;
             }
             const index = address.toString().toLowerCase();
             const contract = this.factory.buildContract(contractData);
+
             if(
                 typeof this.cachedContracts[index] === 'undefined'
                 || (contract.abi ?? []).length > 0 && !this.cachedContracts[index].abi
@@ -91,7 +93,7 @@ export const useContractStore = defineStore(store_name, {
         },
 
         // eztodo no any
-        async getTransfersFromTransaction(raw: EvmTransaction) {
+        async getTransfersFromTransaction(raw: EvmTransaction): Promise<Erc20Transfer[]> {
             if (!raw.logs || raw.logs?.length === 0){
                 return [];
             }
@@ -104,6 +106,7 @@ export const useContractStore = defineStore(store_name, {
                 if(TRANSFER_SIGNATURES.includes(sig)){
                     const contract = await this.getContract(log.address);
 
+                    // eztodo support 1155
                     if (contract && contract.supportedInterfaces.includes('erc20')) {
                         transfers.push({
                             'index': log.logIndex,
@@ -119,6 +122,40 @@ export const useContractStore = defineStore(store_name, {
             }
             transfers.sort((a, b) => a.index - b.index);
             return transfers;
+        },
+
+        async getFunctionNameFromTransaction(transaction: EvmTransaction, contractAddress: string): Promise<string> {
+            // debugger;
+            if (!contractAddress) {
+                return ''; // eztodo error
+            }
+            const contract = await this.getContract(contractAddress);
+
+            if (!contract || !contract.abi) {
+                // eztodo error
+                return '';
+            }
+
+            const functionSignature = transaction.input.slice(0, 10); // eztodo edge cases?
+
+            const iface = new ethers.utils.Interface(contract.abi);
+            console.log(iface.functions);
+
+            if (!iface) {
+                // eztodo error
+                return '';
+            }
+
+            const functionFragment = Object.values(iface.functions)
+                .find(fragment => iface.getSighash(fragment) === functionSignature);
+
+            if (functionFragment) {
+                console.log(functionFragment.name);  // This will log the function name
+                return functionFragment.name;
+            }
+
+            return ''; // eztodo error
+
         },
     },
 });

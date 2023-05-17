@@ -99,6 +99,7 @@ export const useHistoryStore = defineStore(store_name, {
                 const contracts = response.contracts;
                 const transactions = response.results;
 
+                // eztodo implement pagination instead of get all
                 // const paginationData = {
                 //     total: response.total_count,
                 //     more: response.more,
@@ -124,6 +125,9 @@ export const useHistoryStore = defineStore(store_name, {
                 const shapedTransactionRows: ShapedTransactionRow[] = [];
 
                 for (const tx of transactions) {
+                    const transfers = await contractStore.getTransfersFromTransaction(tx);
+                    const userAddress = this.__evm_filter.address;
+
                     const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
                     // eztodo move gas jawn to util
                     const gasUsedInTlos = +formatWei(
@@ -138,58 +142,74 @@ export const useHistoryStore = defineStore(store_name, {
                     const toPrettyName = contractStore.cachedContracts[tx.to.toLowerCase()]?.name ?? '';
                     const fromPrettyName = contractStore.cachedContracts[tx.from.toLowerCase()]?.name ?? '';
 
-                    const transfers = await contractStore.getTransfersFromTransaction(tx);
+                    // eztodo xfers needs to support erc 1155 too
                     const valuesIn: TransactionValueData[] = [];
                     const valuesOut: TransactionValueData[] = [];
 
-                    if (tx.value) {
-                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
-                        const valueInFiat = +formatUnits(valueInFiatBn, 2);
-                        if (tx.from === this.__evm_filter.address) {
-                            valuesOut.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
-                                symbol: chainSettings.getSystemToken().symbol,
-                                fiatValue: valueInFiat, // eztodo
-                            });
-                        } else if (tx.to === this.__evm_filter.address) {
-                            valuesIn.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
-                                symbol: chainSettings.getSystemToken().symbol,
-                                fiatValue: valueInFiat, // eztodo
-                            });
-                        }
-                    }
+                    const isFailed = tx.status !== '0x1';
+                    let functionName = '';
 
-                    // eztodo make variables for tx.to/from === this.__evm_filter.address
-                    transfers.forEach((xfer) => {
-                        if (xfer.symbol && xfer.decimals) {
-                            if (xfer.from === this.__evm_filter.address) {
-                                // sent from user
-                                valuesOut.push({
-                                    amount: +formatUnits(xfer.value, xfer.decimals),
-                                    symbol: xfer.symbol,
-                                    fiatValue: undefined, // eztodo
-                                });
-                            } else {
-                                // sent to user
-                                valuesIn.push({
-                                    amount: +formatUnits(xfer.value, xfer.decimals),
-                                    symbol: xfer.symbol,
-                                    fiatValue: undefined, // eztodo
-                                });
-                            }
-                        }
-                    });
+                    if (tx.to !== userAddress) {
+                        // if the user interacted with a contract, the 'to' field is that contract's address
+                        functionName = await contractStore.getFunctionNameFromTransaction(tx, tx.to ?? '');
+                    }
 
                     let actionName = '';
 
-                    if (tx.value && transfers.length === 0) {
-                        if (tx.from === this.__evm_filter.address) {
-                            actionName = 'send';
-                        } else if (tx.to === this.__evm_filter.address) {
-                            actionName = 'receive';
+                    if (!isFailed) {
+                        if (tx.value) {
+                            const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
+                            const valueInFiat = +formatUnits(valueInFiatBn, 2);
+
+                            if (tx.from === this.__evm_filter.address) {
+                                valuesOut.push({
+                                    amount: +formatUnits(tx.value, WEI_PRECISION),
+                                    symbol: chainSettings.getSystemToken().symbol,
+                                    fiatValue: valueInFiat,
+                                });
+                            }
+                            if (tx.to === this.__evm_filter.address) {
+                                valuesIn.push({
+                                    amount: +formatUnits(tx.value, WEI_PRECISION),
+                                    symbol: chainSettings.getSystemToken().symbol,
+                                    fiatValue: valueInFiat,
+                                });
+                            }
+                        }
+
+                        transfers.forEach((xfer) => {
+                            if (xfer.symbol && xfer.decimals) {
+                                if (xfer.from === this.__evm_filter.address) {
+                                    // sent from user
+                                    valuesOut.push({
+                                        amount: +formatUnits(xfer.value, xfer.decimals),
+                                        symbol: xfer.symbol,
+                                        fiatValue: undefined, // eztodo
+                                    });
+                                } else {
+                                    // sent to user
+                                    valuesIn.push({
+                                        amount: +formatUnits(xfer.value, xfer.decimals),
+                                        symbol: xfer.symbol,
+                                        fiatValue: undefined, // eztodo
+                                    });
+                                }
+                            }
+                        });
+
+                        if (tx.value && transfers.length === 0) {
+                            if (tx.from === userAddress) {
+                                actionName = 'send';
+                            } else if (tx.to === userAddress) {
+                                actionName = 'receive';
+                            }
+                        }
+
+                        if (functionName && !['send', 'receive'].includes(actionName)) {
+                            actionName = functionName;
                         }
                     }
+
 
                     shapedTransactionRows.push({
                         id: tx.hash,
@@ -203,7 +223,7 @@ export const useHistoryStore = defineStore(store_name, {
                         valuesOut,
                         gasUsed: gasUsedInTlos,
                         gasFiatValue: gasInUsd,
-                        failed: tx.status !== '0x1',
+                        failed: isFailed,
                     });
                 }
 
