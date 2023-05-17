@@ -22,7 +22,7 @@ import EVMContractFactory from 'src/antelope/stores/utils/contracts/EvmContractF
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getTopicHash, TRANSFER_SIGNATURES } from 'src/antelope/stores/utils';
-import { EvmTransaction } from 'src/antelope/types';
+import { AntelopeError, EvmTransaction } from 'src/antelope/types';
 import { ethers } from 'ethers';
 
 
@@ -52,7 +52,6 @@ export const useContractStore = defineStore(store_name, {
             }
 
             if (this.processing.includes(addressLower)) {
-                // eztodo switch to use feedbackstore
                 await new Promise(resolve => setTimeout(resolve, 300));
                 return this.getContract(address);
             }
@@ -67,8 +66,7 @@ export const useContractStore = defineStore(store_name, {
                     contract = response.data.results[0];
                 }
             } catch (e) {
-                // eztodo error handling
-                console.warn(`Could not retrieve contract ${address}: ${(e as Error).message}`);
+                console.warn(`Could not retrieve contract ${address}: ${e}`);
                 return null;
             }
             this.addContractToCache(address, contract);
@@ -77,8 +75,8 @@ export const useContractStore = defineStore(store_name, {
         },
 
         addContractToCache(address: string, contractData: EVMContractFactoryData): void {
-            if (!address){
-                return;
+            if (!address) {
+                throw new AntelopeError('antelope.contracts.address_required');
             }
             const index = address.toString().toLowerCase();
             const contract = this.factory.buildContract(contractData);
@@ -106,9 +104,7 @@ export const useContractStore = defineStore(store_name, {
 
                 if(TRANSFER_SIGNATURES.includes(sig)){
                     const contract = await this.getContract(log.address);
-                    console.log(contract?.supportedInterfaces);
 
-                    // eztodo support 1155
                     if (contract && contract.supportedInterfaces.includes('erc20')) {
                         transfers.push({
                             'index': log.logIndex,
@@ -128,23 +124,17 @@ export const useContractStore = defineStore(store_name, {
 
         async getFunctionNameFromTransaction(transaction: EvmTransaction, contractAddress: string): Promise<string> {
             if (!contractAddress) {
-                return ''; // eztodo error
+                throw new AntelopeError('antelope.contracts.address_required');
             }
             const contract = await this.getContract(contractAddress);
 
             if (!contract || !contract.abi) {
-                // eztodo error
-                return '';
+                throw new AntelopeError('antelope.contracts.invalid_contract');
             }
 
-            const functionSignature = transaction.input.slice(0, 10); // eztodo edge cases?
+            const functionSignature = transaction.input.slice(0, 10);
 
             const iface = new ethers.utils.Interface(contract.abi);
-
-            if (!iface) {
-                // eztodo error
-                return '';
-            }
 
             const functionFragment = Object.values(iface.functions)
                 .find(fragment => iface.getSighash(fragment) === functionSignature);

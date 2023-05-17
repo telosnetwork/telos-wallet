@@ -44,7 +44,6 @@ export interface FeedbackState {
 export const useFeedbackStore = defineStore('feedback', {
     state: (): FeedbackState => (feedbackiInitialState),
     getters: {
-        // eztodo use loading state?
         getLoadings: state => state.__loading,
         isLoading: state => (name: string) => state.__loading.includes(name),
         getErrors: state => state.__errors,

@@ -159,8 +159,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
             aux = { full, ...aux };
         }
 
-        // eztodo refer to https://api.teloscan.io/v1/address/0x160505F3dfD1cb58B91e322c828Ae0F74c043c3C/transactions
-        // eztodo figure out how to use contracts object in response
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
         const url = `v1/address/${address}/transactions`;
 

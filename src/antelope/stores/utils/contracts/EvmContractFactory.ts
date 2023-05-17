@@ -1,13 +1,13 @@
 import { erc1155Abi, erc20Abi, erc721Abi } from 'src/antelope/stores/utils/abi';
 import { EvmContract2, EVMContractFactoryData } from 'src/antelope/stores/utils/contracts/EvmContract';
-import { ContractCalldata, ContractMetadata2 } from 'src/antelope/types';
+import { AntelopeError, ContractCalldata, ContractMetadata2 } from 'src/antelope/types';
 
 export default class EVMContractFactory {
     buildContract(data: EVMContractFactoryData): EvmContract2 {
-        if(!data || !data.address) {
-            // eztodo error handling
-            throw new Error('No contract data found');
+        if (!data || !data.address) {
+            throw new AntelopeError('antelope.contracts.contract_data_required');
         }
+
         let verified = false;
         if (typeof data.abi !== 'undefined' && data.abi.length > 0) {
             data.abi = (typeof data.abi === 'string') ? JSON.parse(data.abi) : data.abi;
@@ -15,19 +15,19 @@ export default class EVMContractFactory {
             const metadata: ContractMetadata2 = JSON.parse(data.metadata);
             data.abi = metadata?.output?.abi;
         }
-        if (data.abi){
+        if (data.abi) {
             verified = true;
-        } else if(data.supportedInterfaces && data.supportedInterfaces.includes('erc20')) {
+        } else if (data.supportedInterfaces && data.supportedInterfaces.includes('erc20')) {
             data.abi = erc20Abi;
-        } else if(data.supportedInterfaces && data.supportedInterfaces.includes('erc721')) {
+        } else if (data.supportedInterfaces && data.supportedInterfaces.includes('erc721')) {
             data.abi = erc721Abi;
-        } else if(data.supportedInterfaces && data.supportedInterfaces.includes('erc1155')) {
+        } else if (data.supportedInterfaces && data.supportedInterfaces.includes('erc1155')) {
             data.abi = erc1155Abi;
         }
 
         const properties: ContractCalldata = (data.calldata) ? JSON.parse(data.calldata) : {};
 
-        if(!data.name){
+        if (!data.name) {
             if(properties?.name){
                 data.name = properties.name;
             } else if(data.metadata) {
@@ -53,21 +53,5 @@ export default class EVMContractFactory {
             abi,
             properties,
         });
-    }
-
-    buildEmptyContract(address: string) {
-        const contract = new EvmContract2({
-            address: address,
-            name: `0x${address.slice(0, 16)}...`,
-            verified: false,
-            creationInfo: {
-                creator: null,
-                transaction: null,
-                block: null,
-            },
-            supportedInterfaces: [],
-            abi: undefined,
-        });
-        return contract;
     }
 }

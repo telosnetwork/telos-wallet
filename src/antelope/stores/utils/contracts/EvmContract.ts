@@ -199,6 +199,7 @@ export interface EVMContractFactoryData {
     transaction?: string;
 }
 
+// eztodo rename
 export class EvmContract2 {
     private readonly _name: string;
     private readonly _abi?: EvmABI;

@@ -347,6 +347,11 @@ export default {
         oops: 'Oops. Nothing here...',
     },
     antelope: {
+        contracts: {
+            address_required: 'Contract address required',
+            invalid_contract: 'Contract or contract ABI missing',
+            contract_data_required: 'Contract data missing',
+        },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
             error_login: 'Error in login proccess',
