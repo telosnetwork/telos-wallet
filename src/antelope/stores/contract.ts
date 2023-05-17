@@ -92,7 +92,6 @@ export const useContractStore = defineStore(store_name, {
             }
         },
 
-        // eztodo no any
         async getTransfersFromTransaction(raw: EvmTransaction): Promise<Erc20Transfer[]> {
             if (!raw.logs || raw.logs?.length === 0){
                 return [];
@@ -100,11 +99,14 @@ export const useContractStore = defineStore(store_name, {
 
             const logs = JSON.parse(raw.logs);
             const transfers: Erc20Transfer[] = [];
-            for(let i = 0;i < logs.length; i++){
+
+            for (let i = 0; i < logs.length; i++){
                 const log = logs[i];
                 const sig = log.topics[0].slice(0, 10);
+
                 if(TRANSFER_SIGNATURES.includes(sig)){
                     const contract = await this.getContract(log.address);
+                    console.log(contract?.supportedInterfaces);
 
                     // eztodo support 1155
                     if (contract && contract.supportedInterfaces.includes('erc20')) {
