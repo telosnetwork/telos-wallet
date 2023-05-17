@@ -125,7 +125,6 @@ export const useContractStore = defineStore(store_name, {
         },
 
         async getFunctionNameFromTransaction(transaction: EvmTransaction, contractAddress: string): Promise<string> {
-            // debugger;
             if (!contractAddress) {
                 return ''; // eztodo error
             }
@@ -139,7 +138,6 @@ export const useContractStore = defineStore(store_name, {
             const functionSignature = transaction.input.slice(0, 10); // eztodo edge cases?
 
             const iface = new ethers.utils.Interface(contract.abi);
-            console.log(iface.functions);
 
             if (!iface) {
                 // eztodo error
@@ -149,13 +147,7 @@ export const useContractStore = defineStore(store_name, {
             const functionFragment = Object.values(iface.functions)
                 .find(fragment => iface.getSighash(fragment) === functionSignature);
 
-            if (functionFragment) {
-                console.log(functionFragment.name);  // This will log the function name
-                return functionFragment.name;
-            }
-
-            return ''; // eztodo error
-
+            return functionFragment?.name ?? '';
         },
     },
 });

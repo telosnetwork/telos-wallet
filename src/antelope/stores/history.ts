@@ -151,7 +151,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                     if (tx.to !== userAddress) {
                         // if the user interacted with a contract, the 'to' field is that contract's address
-                        functionName = await contractStore.getFunctionNameFromTransaction(tx, tx.to ?? '');
+                        functionName = await contractStore.getFunctionNameFromTransaction(tx, tx.to);
                     }
 
                     let actionName = '';
