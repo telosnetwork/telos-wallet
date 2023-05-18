@@ -205,10 +205,9 @@ export const useBalancesStore = defineStore(store_name, {
                         if (account?.account) {
                             this.updateBalancesForAccount('logged', account);
                         }
-                        // TODO: should we notify the user that the transaction succeeded?
-                    } else {
-                        // TODO: should we do something if the transaction failed?
                     }
+                    // TODO: should we notify the user that the transaction succeeded of failed?
+                    // https://github.com/telosnetwork/telos-wallet/issues/328
                 });
             } else {
                 throw new AntelopeError('antelope.evm.error_no_provider');
