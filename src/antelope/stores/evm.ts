@@ -388,7 +388,6 @@ export const useEVMStore = defineStore(store_name, {
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
-            console.log('--------------------------------------------');
             // If cached is null, it means this is the first time this address is queried
             if (cached !== null) {
                 if (
