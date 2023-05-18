@@ -23,26 +23,20 @@ import {
     Label,
     EvmTransaction,
     AntelopeError,
-    // TRANSFER_SIGNATURES,
     IndexerTransactionsFilter,
-    // HyperionActionsFilter,
     ShapedTransactionRow,
     ParsedIndexerAccountTransactionsContract,
-    EVMTransactionsPaginationData, TransactionValueData,
+    EVMTransactionsPaginationData, TransactionValueData, EvmSwapFunctionNames,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
-// import { formatWei, getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { BigNumber } from 'ethers';
-// import { useEVMStore } from 'src/antelope/stores/evm';
 import { getAntelope, useContractStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
-import { formatWei, getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
+import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
-// import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
-// import { getCoingeckoUsdPrice } from 'src/api/price';
-// import { parseUnits } from 'ethers/lib/utils';
+
 
 
 export interface HistoryState {
@@ -127,6 +121,7 @@ export const useHistoryStore = defineStore(store_name, {
                 for (const tx of transactions) {
                     const transfers = await contractStore.getTransfersFromTransaction(tx);
                     const userAddress = this.__evm_filter.address;
+                    const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                     const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
                     const gasUsedInTlos = getGasInTlos(tx.gasused, tx.gasPrice);
@@ -151,18 +146,18 @@ export const useHistoryStore = defineStore(store_name, {
                     let actionName = '';
 
                     if (!isFailed) {
-                        if (tx.value) {
+                        if (+tx.value) {
                             const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
                             const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
-                            if (tx.from === this.__evm_filter.address) {
+                            if (tx.from.toLowerCase() === userAddressLower) {
                                 valuesOut.push({
                                     amount: +formatUnits(tx.value, WEI_PRECISION),
                                     symbol: chainSettings.getSystemToken().symbol,
                                     fiatValue: valueInFiat,
                                 });
                             }
-                            if (tx.to === this.__evm_filter.address) {
+                            if (tx.to.toLowerCase() === userAddressLower) {
                                 valuesIn.push({
                                     amount: +formatUnits(tx.value, WEI_PRECISION),
                                     symbol: chainSettings.getSystemToken().symbol,
@@ -173,14 +168,14 @@ export const useHistoryStore = defineStore(store_name, {
 
                         transfers.forEach((xfer) => {
                             if (xfer.symbol && xfer.decimals) {
-                                if (xfer.from === this.__evm_filter.address) {
+                                if (xfer.from.toLowerCase() === userAddressLower) {
                                     // sent from user
                                     valuesOut.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
                                         symbol: xfer.symbol,
                                         fiatValue: undefined, // eztodo
                                     });
-                                } else {
+                                } else if (xfer.to.toLowerCase() === userAddressLower) {
                                     // sent to user
                                     valuesIn.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
@@ -191,16 +186,18 @@ export const useHistoryStore = defineStore(store_name, {
                             }
                         });
 
-                        if (tx.value && transfers.length === 0) {
-                            if (tx.from === userAddress) {
+                        if (+tx.value && transfers.length === 0) {
+                            if (tx.from.toLowerCase() === userAddressLower) {
                                 actionName = 'send';
-                            } else if (tx.to === userAddress) {
+                            } else if (tx.to.toLowerCase() === userAddressLower) {
                                 actionName = 'receive';
                             }
-                        }
 
-                        if (functionName && !['send', 'receive'].includes(actionName)) {
-                            actionName = functionName;
+                            if (functionName && !['send', 'receive'].includes(actionName)) {
+                                actionName = functionName;
+                            }
+                        } else if (EvmSwapFunctionNames.includes(functionName)) {
+                            actionName = 'swap';
                         }
                     }
 

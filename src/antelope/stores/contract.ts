@@ -111,8 +111,8 @@ export const useContractStore = defineStore(store_name, {
                             'address': contract.address,
                             'value': log.data,
                             'decimals': contract.properties?.decimals,
-                            'to': getTopicHash(log.topics[1]),
-                            'from': getTopicHash(log.topics[2]),
+                            'to': getTopicHash(log.topics[2]),
+                            'from': getTopicHash(log.topics[1]),
                             'symbol': contract.properties?.symbol,
                         });
                     }

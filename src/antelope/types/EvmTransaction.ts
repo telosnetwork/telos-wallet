@@ -42,11 +42,21 @@ export interface TransactionValueData {
     fiatValue?: number;
 }
 
+export const EvmSwapFunctionNames = [
+    'swapExactTokensForTokens',
+    'swapTokensForExactTokens',
+    'swapExactETHForTokens',
+    'swapTokensForExactETH',
+    'swapExactTokensForETH',
+    'swapETHForExactTokens',
+    'swapETHToTokens',
+];
+
 export interface ShapedTransactionRow {
     id: string;
     epoch: number;
     // action should be 'send', 'receive', 'swap', or some other action like 'approve'
-    // a swap is either 'swapExactTokensForTokens' or 'swapExactETHForTokens'
+    // a swap is any function in EvmSwapFunctionNames
     actionName: string;
     from: string; // address
     fromPrettyName?: string;

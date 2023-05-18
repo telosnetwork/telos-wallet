@@ -11,7 +11,6 @@ const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
 const feedbackStore = useFeedbackStore();
 
-// eztodo no fiat value found use tooltip component
 export default defineComponent({
     name: 'WalletTransactionsTab',
     components: {
@@ -181,12 +180,19 @@ export default defineComponent({
             this.pagination.rowsNumber = newValue.length;
         },
         async address (address) {
+            // eztodo also do this on created
             // address can be initially undefined; wait to load txs until it's defined
             if (address) {
                 historyStore.setEVMTransactionsFilter({ address, includeAbi: true });
                 await historyStore.fetchEVMTransactionsForAccount('current');
             }
         },
+    },
+    async created() {
+        if (this.address) {
+            historyStore.setEVMTransactionsFilter({ address: this.address, includeAbi: true });
+            await historyStore.fetchEVMTransactionsForAccount('current');
+        }
     },
 });
 </script>
