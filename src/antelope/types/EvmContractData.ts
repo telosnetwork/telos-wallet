@@ -4,14 +4,16 @@ import {
     EvmABI,
 } from '.';
 
-export interface EvmContractData {
+export interface EvmContractConstructorData {
     address: string;
     name: string;
-    manager: EvmContractManagerI;
+    manager?: EvmContractManagerI;
     creationInfo: EvmContractCreationInfo;
-    abi?: EvmABI;
+    abi?: EvmABI | string;
     token?: EvmToken;
     verified?: boolean;
+    supportedInterfaces: string[];
+    properties?: EvmContractCalldata;
 }
 
 export interface EvmContractManagerI {
@@ -22,58 +24,16 @@ export interface EvmContractManagerI {
 }
 
 export interface EvmContractCreationInfo {
-    creation_trx: string;
-    creator: string;
-    timestamp: string; // is in fact a string number like "1679649071"
-    block_num: number;
-    abi: string;
-}
-
-export interface VerifiedContractMetadata {
-    compiler: {
-        version: string;
-    },
-    language: string,
-    output: {
-        abi: EvmABI;
-    },
-    settings: {
-        compilationTarget: Record<string, string>;
-        evmVersion: string;
-        libraries: Record<string, unknown>;
-        metadata: {
-            bytecodeHash: string;
-        },
-        optimizer: {
-            enabled: boolean;
-            runs: number;
-        },
-        remappings: unknown[];
-    },
-    sources: Record<string, {
-        keccak256: string;
-        urls: string[];
-    }>,
-    version: number;
-}
-
-
-
-
-
-
-
-
-// eztodo rename
-
-export interface EvmContractCreationInfo2 {
     block?: number | null;
+    block_num?: number; // same as block, kept for legacy usage
     creator?: string | null;
-    transaction?: string | null;
+    transaction: string;
+    creation_trx: string; // same as transaction, kept for legacy usage
+    timestamp?: string; // string number like "1679649071"
+    abi?: string | EvmABI;
 }
-// eztodo rename
 
-export interface EvmContractMetadata2 {
+export interface EvmContractMetadata {
     compiler?: {
         version: string;
     };
@@ -123,16 +83,6 @@ export interface EvmContractCalldata {
     symbol?: string;
 }
 
-export interface EvmContractConstructorData {
-    name: string;
-    abi?: EvmABI;
-    address: string;
-    creationInfo: EvmContractCreationInfo2;
-    verified: boolean;
-    supportedInterfaces: string[];
-    properties?: EvmContractCalldata;
-}
-
 export interface EvmContractFactoryData {
     address: string;
     abi?: string | EvmABI
@@ -147,4 +97,6 @@ export interface EvmContractFactoryData {
     symbol?: string;
     traceAddress?: string;
     transaction?: string;
+    timestamp?: string;
+    manager?: EvmContractManagerI;
 }

@@ -17,7 +17,7 @@ import {
     isTracingAll,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { Erc20Transfer, EvmContract2 } from 'src/antelope/stores/utils/contracts/EvmContract';
+import EvmContract, { Erc20Transfer } from 'src/antelope/stores/utils/contracts/EvmContract';
 import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -28,7 +28,7 @@ import { ethers } from 'ethers';
 
 export interface ContractStoreState {
     factory: EvmContractFactory;
-    cachedContracts: Record<string, EvmContract2>
+    cachedContracts: Record<string, EvmContract>
     processing: string[];
 }
 
@@ -44,7 +44,7 @@ export const useContractStore = defineStore(store_name, {
             useFeedbackStore().setDebug(store_name, isTracingAll());
         },
 
-        async getContract(address: string): Promise<EvmContract2 | null> {
+        async getContract(address: string): Promise<EvmContract | null> {
             const addressLower = address.toLowerCase();
 
             if (typeof this.cachedContracts[addressLower] !== 'undefined') {

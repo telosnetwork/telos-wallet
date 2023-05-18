@@ -2,10 +2,9 @@ import { ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
     AntelopeError, EvmContractCalldata,
-    EvmABI, EvmContractConstructorData,
+    EvmABI,
     EvmContractCreationInfo,
-    EvmContractCreationInfo2,
-    EvmContractData,
+    EvmContractConstructorData,
     EvmContractManagerI,
     EvmFormatedLog,
     EvmLog,
@@ -13,79 +12,142 @@ import {
     EvmToken,
     TRANSFER_SIGNATURES,
 } from 'src/antelope/types';
+import { Interface } from 'ethers/lib/utils';
 
 
 export default class EvmContract {
+    private readonly _name: string;
+    private readonly _abi?: EvmABI | null;
+    private readonly _address: string;
+    private readonly _creationInfo?: EvmContractCreationInfo;
+    private readonly _interface?: ContractInterface | null;
+    private readonly _supportedInterfaces: string[];
+    private readonly _properties?: EvmContractCalldata;
+    private readonly _manager?: EvmContractManagerI;
+    private readonly _token?: EvmToken | null;
 
-    constructor({ address, creationInfo, name, abi, manager, token, verified }: EvmContractData) {
-        this.address = address;
-        this.name = name;
-        this.manager = manager;
-        if (abi){
-            this.abi = abi;
-            this.iface = markRaw(new ethers.utils.Interface(abi as EvmABI));
-        }
-        if (token){
-            this.token = token;
-        }
-        this.verified = verified ?? false;
-        this.sources = [];
-        this.creationInfo = creationInfo;
-    }
+    private _contract?: ethers.Contract | null;
+    private _verified?: boolean;
 
-    public address: string;
-    public name: string;
-    public abi: EvmABI | null = null;
-    public manager: EvmContractManagerI;
-    public iface:  ethers.utils.Interface | null = null;
-    public token: EvmToken | null = null;
-    public verified: boolean;
-    public sources: unknown[];
-    public creationInfo: EvmContractCreationInfo;
-    public contract: ethers.Contract | null = null;
+    constructor({
+        name,
+        abi,
+        address,
+        creationInfo,
+        verified,
+        supportedInterfaces = ['none'],
+        properties,
+        manager,
+        token,
+    }: EvmContractConstructorData) {
+        this._name = name;
+        this._address = address;
+        this._creationInfo = creationInfo;
+        this._verified = verified ?? false;
+        this._properties = properties;
+        this._manager = manager;
 
-
-    getName() {
-        return this.name;
-    }
-
-    setVerified(status: boolean) {
-        this.verified = status;
-    }
-
-    isVerified() {
-        return this.verified;
-    }
-
-    getCreationTrx() {
-        if (!this.creationInfo) {
-            return;
+        if (abi) {
+            this._abi = typeof abi === 'string' ? JSON.parse(abi) : abi;
+            this._interface = abi ? markRaw(new ethers.utils.Interface(abi)) : null;
         }
 
-        return this.creationInfo.creation_trx;
-    }
-
-    getCreator() {
-        if (!this.creationInfo) {
-            return;
+        if (token) {
+            this._token = token;
         }
 
-        return this.creationInfo.creator;
+        const indexOfNone = supportedInterfaces.indexOf('none');
+        this._supportedInterfaces = [];
+        for (let i = 0; i < supportedInterfaces.length; i++){
+            if (i !== indexOfNone) {
+                this._supportedInterfaces.push(supportedInterfaces[i]);
+            }
+        }
+    }
+
+
+    get name() {
+        return this._name;
+    }
+
+    get abi() {
+        return this._abi;
+    }
+
+    get address() {
+        return this._address;
+    }
+
+    get creationInfo() {
+        return this._creationInfo;
+    }
+
+    get iface() {
+        return this._interface;
+    }
+
+    get verified() {
+        return this._verified ?? false;
+    }
+
+    set verified(verified: boolean) {
+        this._verified = verified;
+    }
+
+    get supportedInterfaces() {
+        return this._supportedInterfaces;
+    }
+
+    get creationBlock() {
+        return this._creationInfo?.block;
+    }
+
+    get creationTrx() {
+        return this._creationInfo?.transaction;
+    }
+
+    get creator() {
+        return this._creationInfo?.creator;
+    }
+
+    get properties() {
+        return this._properties;
+    }
+
+    get token() {
+        return this._token;
+    }
+
+    isNonFungible() {
+        return (this._supportedInterfaces.includes('erc721'));
+    }
+
+    isToken() {
+        if(this._supportedInterfaces.length === 0) {
+            return false;
+        }
+
+        return (
+            this._supportedInterfaces.includes('erc721') ||
+            this._supportedInterfaces.includes('erc1155') ||
+            this._supportedInterfaces.includes('erc20')
+        );
     }
 
     getContractInstance() {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
-        const signer = this.manager.getSigner();
-        if (!this.contract || signer) {
-            this.contract = new ethers.Contract(this.address, this.abi, signer);
+        const signer = this._manager?.getSigner();
+
+        if (!this._contract || signer) {
+            this._contract = new ethers.Contract(this.address, this.abi, signer);
         }
-        return this.contract;
+        return this._contract;
     }
 
     async parseTransaction(data:string) {
-        if (this.iface) {
+        if (this.iface && this.iface instanceof Interface) {
             try {
                 return await this.iface.parseTransaction({ data });
             } catch (e) {
@@ -94,7 +156,7 @@ export default class EvmContract {
         } else {
             try {
                 // this functionIface is an interface for a single function signature as discovered via 4bytes.directory... only use it for this function
-                const functionIface = await this.manager.getFunctionIface(data);
+                const functionIface = await this._manager?.getFunctionIface(data);
                 if (functionIface) {
                     return functionIface.parseTransaction({ data });
                 }
@@ -106,7 +168,7 @@ export default class EvmContract {
     }
 
     async parseLogs(logs: EvmLogs): Promise<EvmFormatedLog[]> {
-        if (this.iface) {
+        if (this.iface && this.iface instanceof Interface) {
             const iface = this.iface;
             const parsedArray = await Promise.all(logs.map(async (log) => {
                 try {
@@ -146,13 +208,13 @@ export default class EvmContract {
             isTransfer: TRANSFER_SIGNATURES.includes(function_signature),
             logIndex: log.logIndex,
             address: log.address,
-            token: this.token,
+            token: this._token,
             name: parsedLog.signature,
         } as EvmFormatedLog;
     }
 
     async parseEvent(log: EvmLog): Promise<EvmFormatedLog> {
-        const eventIface = await this.manager.getEventIface(log.topics[0]);
+        const eventIface = await this._manager?.getEventIface(log.topics[0]);
         if (eventIface) {
             try {
                 const parsedLog:ethers.utils.LogDescription = eventIface.parseLog(log);
@@ -164,119 +226,6 @@ export default class EvmContract {
             throw new AntelopeError('antelope.utils.error_parsing_log_event', log);
         }
     }
-}
-
-
-
-
-
-
-
-
-
-
-// eztodo rename
-export class EvmContract2 {
-    private readonly _name: string;
-    private readonly _abi?: EvmABI;
-    private readonly _address: string;
-    private readonly _creationInfo: EvmContractCreationInfo2;
-    private readonly _interface: ContractInterface | null;
-    private readonly _supportedInterfaces: string[]
-    private readonly _properties?: EvmContractCalldata;
-
-    private _verified: boolean;
-
-    constructor({
-        name,
-        abi,
-        address,
-        creationInfo,
-        verified,
-        supportedInterfaces = [],
-        properties,
-    }: EvmContractConstructorData) {
-        this._name = name;
-        this._abi = abi;
-        this._address = address;
-        this._creationInfo = creationInfo;
-        this._interface = abi ? markRaw(new ethers.utils.Interface(abi)) : null;
-        this._verified = verified;
-        this._properties = properties;
-
-        const indexOfNone = supportedInterfaces.indexOf('none');
-        this._supportedInterfaces = [];
-        for(let i = 0; i < supportedInterfaces.length; i++){
-            if (i !== indexOfNone) {
-                this._supportedInterfaces.push(supportedInterfaces[i]);
-            }
-        }
-    }
-
-    get name() {
-        return this._name;
-    }
-
-    get abi() {
-        return this._abi;
-    }
-
-    get address() {
-        return this._address;
-    }
-
-    get creationInfo() {
-        return this._creationInfo;
-    }
-
-    get interface() {
-        return this._interface;
-    }
-
-    get verified() {
-        return this._verified;
-    }
-
-    set verified(verified: boolean) {
-        this._verified = verified;
-    }
-
-    get supportedInterfaces() {
-        return this._supportedInterfaces;
-    }
-
-    get creationBlock() {
-        return this._creationInfo?.block;
-    }
-
-    get creationTrx() {
-        return this._creationInfo?.transaction;
-    }
-
-    get creator() {
-        return this._creationInfo?.creator;
-    }
-
-    get properties() {
-        return this._properties;
-    }
-
-    isNonFungible() {
-        return (this._supportedInterfaces.includes('erc721'));
-    }
-
-    isToken() {
-        if(this._supportedInterfaces.length === 0) {
-            return false;
-        }
-
-        return (
-            this._supportedInterfaces.includes('erc721') ||
-            this._supportedInterfaces.includes('erc1155') ||
-            this._supportedInterfaces.includes('erc20')
-        );
-    }
-
 }
 
 export interface Erc20Transfer {

@@ -1,9 +1,9 @@
 import { erc1155Abi, erc20Abi, erc721Abi } from 'src/antelope/stores/utils/abi';
-import { EvmContract2 } from 'src/antelope/stores/utils/contracts/EvmContract';
-import { AntelopeError, EvmContractCalldata, EvmContractMetadata2, EvmContractFactoryData } from 'src/antelope/types';
+import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
+import { AntelopeError, EvmContractCalldata, EvmContractMetadata, EvmContractFactoryData } from 'src/antelope/types';
 
 export default class EvmContractFactory {
-    buildContract(data: EvmContractFactoryData): EvmContract2 {
+    buildContract(data: EvmContractFactoryData): EvmContract {
         if (!data || !data.address) {
             throw new AntelopeError('antelope.contracts.contract_data_required');
         }
@@ -12,7 +12,7 @@ export default class EvmContractFactory {
         if (typeof data.abi !== 'undefined' && data.abi.length > 0) {
             data.abi = (typeof data.abi === 'string') ? JSON.parse(data.abi) : data.abi;
         } else if (typeof data.metadata !== 'undefined' && data.metadata?.length > 0) {
-            const metadata: EvmContractMetadata2 = JSON.parse(data.metadata);
+            const metadata: EvmContractMetadata = JSON.parse(data.metadata);
             data.abi = metadata?.output?.abi;
         }
         if (data.abi) {
@@ -31,7 +31,7 @@ export default class EvmContractFactory {
             if(properties?.name){
                 data.name = properties.name;
             } else if(data.metadata) {
-                const metadata: EvmContractMetadata2 = JSON.parse(data.metadata);
+                const metadata: EvmContractMetadata = JSON.parse(data.metadata);
 
                 if(metadata?.settings?.compilationTarget){
                     data.name = Object.values(metadata?.settings?.compilationTarget)[0];
@@ -40,18 +40,23 @@ export default class EvmContractFactory {
         }
         const abi = typeof data.abi === 'string' ? JSON.parse(data.abi) : data.abi;
 
-        return new EvmContract2({
+        return new EvmContract({
             address: data.address,
             name: data.name ?? '',
             verified: verified,
             creationInfo: {
-                creator: data.creator,
-                transaction: data.transaction,
+                creator: data.creator ?? '',
+                transaction: data.transaction ?? '',
+                creation_trx: data.transaction ?? '',
                 block: data.block,
+                block_num: data.block,
+                timestamp: data.timestamp ?? '',
+                abi: data.abi,
             },
             supportedInterfaces: data.supportedInterfaces ?? [],
             abi,
             properties,
+            manager: data.manager,
         });
     }
 }

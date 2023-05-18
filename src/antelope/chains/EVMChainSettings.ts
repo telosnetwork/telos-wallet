@@ -6,7 +6,6 @@ import {
     EvmBlockData,
     EvmContractCreationInfo,
     EvmToken,
-    // EvmTransaction,
     HyperionAbiSignatureFilter,
     PriceChartData,
     IndexerTransactionsFilter, IndexerAccountTransactionsResponse,
