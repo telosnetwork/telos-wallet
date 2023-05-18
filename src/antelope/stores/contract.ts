@@ -90,12 +90,12 @@ export const useContractStore = defineStore(store_name, {
             }
         },
 
-        async getTransfersFromTransaction(raw: EvmTransaction): Promise<Erc20Transfer[]> {
-            if (!raw.logs || raw.logs?.length === 0){
+        async getTransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
+            if (!transaction.logs || transaction.logs?.length === 0){
                 return [];
             }
 
-            const logs = JSON.parse(raw.logs);
+            const logs = JSON.parse(transaction.logs);
             const transfers: Erc20Transfer[] = [];
 
             for (let i = 0; i < logs.length; i++){

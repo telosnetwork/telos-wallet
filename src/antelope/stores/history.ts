@@ -46,6 +46,9 @@ export interface HistoryState {
             transactions: EvmTransaction[],
         },
     }
+    __total_evm_transaction_count: {
+        [label: Label]: number,
+    },
     __shaped_evm_transaction_rows: {
         [label: Label]: ShapedTransactionRow[],
     };
@@ -63,6 +66,7 @@ export const useHistoryStore = defineStore(store_name, {
         getEVMTransactionsFilter: state => state.__evm_filter,
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
+        getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -93,11 +97,7 @@ export const useHistoryStore = defineStore(store_name, {
                 const contracts = response.contracts;
                 const transactions = response.results;
 
-                // eztodo implement pagination instead of get all
-                // const paginationData = {
-                //     total: response.total_count,
-                //     more: response.more,
-                // };
+                this.setEvmTransactionsRowCount(label, response.total_count);
 
                 const contractAddresses = Object.keys(contracts);
                 const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
@@ -120,7 +120,6 @@ export const useHistoryStore = defineStore(store_name, {
 
                 for (const tx of transactions) {
                     const transfers = await contractStore.getTransfersFromTransaction(tx);
-                    const userAddress = this.__evm_filter.address;
                     const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                     const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -138,7 +137,7 @@ export const useHistoryStore = defineStore(store_name, {
                     const isFailed = tx.status !== '0x1';
                     let functionName = '';
 
-                    if (tx.to !== userAddress) {
+                    if (tx.to.toLowerCase() !== userAddressLower) {
                         // if the user interacted with a contract, the 'to' field is that contract's address
                         functionName = await contractStore.getFunctionNameFromTransaction(tx, tx.to);
                     }
@@ -240,9 +239,9 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('setShapedTransactionRows', transactions);
             this.__shaped_evm_transaction_rows[label] = transactions;
         },
-        setEVMTransactionsPagination(label: Label, pagination: EVMTransactionsPaginationData) {
-            this.trace('setEVMTransactionsPagination', pagination);
-            this.__evm_transactions_pagination_data[label] = pagination;
+        setEvmTransactionsRowCount(label: Label, count: number) {
+            this.trace('setEvmTransactionsRowCount', count);
+            this.__total_evm_transaction_count[label] = count;
         },
     },
 });
@@ -252,6 +251,9 @@ const historyInitialState: HistoryState = {
         current: {
             transactions: [],
         },
+    },
+    __total_evm_transaction_count: {
+        current: 0,
     },
     __evm_filter: {
         address: '',
