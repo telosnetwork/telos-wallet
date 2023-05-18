@@ -5,6 +5,8 @@ export * from 'src/antelope/stores/utils/abi/erc20';
 export * from 'src/antelope/stores/utils/abi/supportsInterface';
 export * from 'src/antelope/stores/utils/abi/signature/transfer_signatures';
 
+export type StateMutabilityType = 'pure' | 'view' | 'nonpayable' | 'payable';
+
 export type EvmABI = EvmABIEntry[];
 
 export interface EvmABIEntry {
@@ -13,7 +15,7 @@ export interface EvmABIEntry {
     anonymous?: boolean;
     inputs?: EvmABIEntryInput[];
     outputs?: EvmABIEntryOutput[];
-    stateMutability?: string;
+    stateMutability?: StateMutabilityType;
     name: string;
     type: string;
 }
