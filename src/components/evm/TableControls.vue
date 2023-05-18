@@ -64,8 +64,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
 <template>
 <div class="c-table-controls">
     <div class="c-table-controls__left-container">
-        <!--// eztodo i18n-->
-        Rows per page:&nbsp;{{ pagination.rowsPerPage }}
+        {{ $t('global.rows_per_page') }}:&nbsp;{{ pagination.rowsPerPage }}
 
         <q-icon
             :name="showRowsPerPageDropdown ? 'expand_more' : 'expand_less'"

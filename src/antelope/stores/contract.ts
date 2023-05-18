@@ -17,17 +17,17 @@ import {
     isTracingAll,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { Erc20Transfer, EvmContract2, EVMContractFactoryData } from 'src/antelope/stores/utils/contracts/EvmContract';
-import EVMContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
+import { Erc20Transfer, EvmContract2 } from 'src/antelope/stores/utils/contracts/EvmContract';
+import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getTopicHash, TRANSFER_SIGNATURES } from 'src/antelope/stores/utils';
-import { AntelopeError, EvmTransaction } from 'src/antelope/types';
+import { AntelopeError, EvmContractFactoryData, EvmTransaction } from 'src/antelope/types';
 import { ethers } from 'ethers';
 
 
 export interface ContractStoreState {
-    factory: EVMContractFactory;
+    factory: EvmContractFactory;
     cachedContracts: Record<string, EvmContract2>
     processing: string[];
 }
@@ -74,7 +74,7 @@ export const useContractStore = defineStore(store_name, {
             return this.$state.factory.buildContract(contract);
         },
 
-        addContractToCache(address: string, contractData: EVMContractFactoryData): void {
+        addContractToCache(address: string, contractData: EvmContractFactoryData): void {
             if (!address) {
                 throw new AntelopeError('antelope.contracts.address_required');
             }
@@ -147,5 +147,5 @@ export const useContractStore = defineStore(store_name, {
 const contractInitialState: ContractStoreState = {
     cachedContracts: {},
     processing: [],
-    factory: new EVMContractFactory(),
+    factory: new EvmContractFactory(),
 };

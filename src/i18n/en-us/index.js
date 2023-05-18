@@ -92,6 +92,7 @@ export default {
         click_to_fill_max: 'Click to fill max amount',
         amount_exceeds_available_balance: 'Balance too low',
         incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transaction',
+        viewing_n_transactions: 'Viewing {rowsPerPage} of {totalRows} transactions',
     },
     global: {
         native: 'Native',
@@ -106,6 +107,8 @@ export default {
         more_info: 'More info',
         required_field: 'This field is required',
         available: 'Available',
+        transactions: 'Transactions',
+        rows_per_page: 'Rows per page',
     },
     notification:{
         success_title: 'Success',

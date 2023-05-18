@@ -64,15 +64,16 @@ export interface VerifiedContractMetadata {
 
 
 
-
+// eztodo rename
 
 export interface EvmContractCreationInfo2 {
     block?: number | null;
     creator?: string | null;
     transaction?: string | null;
 }
+// eztodo rename
 
-export interface ContractMetadata2 {
+export interface EvmContractMetadata2 {
     compiler?: {
         version: string;
     };
@@ -112,7 +113,7 @@ export interface ContractMetadata2 {
     version?: number;
 }
 
-export interface ContractCalldata {
+export interface EvmContractCalldata {
     decimals?: number;
     holders?: string; // string representation of number
     marketdata_updated?: string; // epoch
@@ -120,4 +121,30 @@ export interface ContractCalldata {
     price?: string; // string representation of number, USD price
     supply?: string; // string representation of number
     symbol?: string;
+}
+
+export interface EvmContractConstructorData {
+    name: string;
+    abi?: EvmABI;
+    address: string;
+    creationInfo: EvmContractCreationInfo2;
+    verified: boolean;
+    supportedInterfaces: string[];
+    properties?: EvmContractCalldata;
+}
+
+export interface EvmContractFactoryData {
+    address: string;
+    abi?: string | EvmABI
+    block?: number;
+    calldata?: string;
+    creator?: string;
+    decimals?: number | null;
+    fromTrace?: boolean;
+    metadata?: string;
+    name?: string;
+    supportedInterfaces?: string[];
+    symbol?: string;
+    traceAddress?: string;
+    transaction?: string;
 }

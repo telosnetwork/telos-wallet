@@ -134,7 +134,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const logTopic = filter.logTopic;
         const full = filter.full ?? true;
 
-        // eztodo clean up
         let aux = {};
 
         if (limit !== undefined) {

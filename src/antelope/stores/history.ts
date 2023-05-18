@@ -172,31 +172,29 @@ export const useHistoryStore = defineStore(store_name, {
                                     valuesOut.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
                                         symbol: xfer.symbol,
-                                        fiatValue: undefined, // eztodo
+                                        fiatValue: undefined,
                                     });
                                 } else if (xfer.to.toLowerCase() === userAddressLower) {
                                     // sent to user
                                     valuesIn.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
                                         symbol: xfer.symbol,
-                                        fiatValue: undefined, // eztodo
+                                        fiatValue: undefined,
                                     });
                                 }
                             }
                         });
 
-                        if (+tx.value && transfers.length === 0) {
+                        if (+tx.value && transfers.length === 0 && !functionName) {
                             if (tx.from.toLowerCase() === userAddressLower) {
                                 actionName = 'send';
                             } else if (tx.to.toLowerCase() === userAddressLower) {
                                 actionName = 'receive';
                             }
-
-                            if (functionName && !['send', 'receive'].includes(actionName)) {
-                                actionName = functionName;
-                            }
                         } else if (EvmSwapFunctionNames.includes(functionName)) {
                             actionName = 'swap';
+                        } else if (functionName) {
+                            actionName = functionName;
                         }
                     }
 

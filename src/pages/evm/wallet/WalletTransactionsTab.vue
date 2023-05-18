@@ -39,8 +39,13 @@ export default defineComponent({
                 return '';
             }
 
-            // eztodo: i18n
-            return `Viewing ${this.pagination.rowsPerPage} of ${this.pagination.rowsNumber} transactions`;
+            return this.$t(
+                'evm_wallet.viewing_n_transactions',
+                {
+                    rowsPerPage: this.pagination.rowsPerPage,
+                    totalRows: this.pagination.rowsNumber,
+                },
+            );
         },
     },
     watch: {
@@ -51,7 +56,6 @@ export default defineComponent({
             // address can be initially undefined; wait to load txs until it's defined
             this.getTransactions();
         },
-        // eztodo make pagination type
         pagination(newPagination: { page: number, rowsPerPage: number, rowsNumber: number }) {
             this.getTransactions();
         },
@@ -61,7 +65,7 @@ export default defineComponent({
     },
     methods: {
         async getTransactions() {
-            const offset = this.pagination.page * this.pagination.rowsPerPage;
+            const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             const limit = this.pagination.rowsPerPage;
             if (this.address) {
                 historyStore.setEVMTransactionsFilter({
@@ -81,8 +85,7 @@ export default defineComponent({
 <template>
 <div class="c-wallet-tx-tab">
     <div class="c-wallet-tx-tab__header-container">
-        <!--eztodo i18n-->
-        <span class="c-wallet-tx-tab__header-text">Transactions</span>
+        <span class="c-wallet-tx-tab__header-text">{{ $t('global.transactions') }}</span>
         <span v-if="totalRowsText">{{ totalRowsText }}</span>
     </div>
 
@@ -95,7 +98,6 @@ export default defineComponent({
         />
     </template>
 
-    <!--eztodo icons showing up late-->
     <WalletTransactionRow
         v-for="(transaction, index) in shapedTransactions"
         v-else
@@ -105,7 +107,7 @@ export default defineComponent({
     />
 
     <div class="flex justify-center q-my-xl">
-        <TableControls :pagination="pagination" @pagination-updated="pagination = $event"/>
+        <TableControls :pagination="pagination" @pagination-updated="pagination = $event" />
     </div>
 </div>
 

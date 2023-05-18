@@ -1,8 +1,8 @@
 import { ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
-    AntelopeError, ContractCalldata,
-    EvmABI,
+    AntelopeError, EvmContractCalldata,
+    EvmABI, EvmContractConstructorData,
     EvmContractCreationInfo,
     EvmContractCreationInfo2,
     EvmContractData,
@@ -173,31 +173,7 @@ export default class EvmContract {
 
 
 
-export interface EVMContractConstructorData {
-    name: string;
-    abi?: EvmABI;
-    address: string;
-    creationInfo: EvmContractCreationInfo2;
-    verified: boolean;
-    supportedInterfaces: string[];
-    properties?: ContractCalldata;
-}
 
-export interface EVMContractFactoryData {
-    address: string;
-    abi?: string | EvmABI
-    block?: number;
-    calldata?: string;
-    creator?: string;
-    decimals?: number | null;
-    fromTrace?: boolean;
-    metadata?: string;
-    name?: string;
-    supportedInterfaces?: string[];
-    symbol?: string;
-    traceAddress?: string;
-    transaction?: string;
-}
 
 // eztodo rename
 export class EvmContract2 {
@@ -207,7 +183,7 @@ export class EvmContract2 {
     private readonly _creationInfo: EvmContractCreationInfo2;
     private readonly _interface: ContractInterface | null;
     private readonly _supportedInterfaces: string[]
-    private readonly _properties?: ContractCalldata;
+    private readonly _properties?: EvmContractCalldata;
 
     private _verified: boolean;
 
@@ -219,7 +195,7 @@ export class EvmContract2 {
         verified,
         supportedInterfaces = [],
         properties,
-    }: EVMContractConstructorData) {
+    }: EvmContractConstructorData) {
         this._name = name;
         this._abi = abi;
         this._address = address;

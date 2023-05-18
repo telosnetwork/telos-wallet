@@ -257,9 +257,15 @@ export function prettyPrintFiatBalance(fiatAmount: number | string, locale: stri
     return prettyPrintCurrency(+fiatAmount, 2, locale, tiny ? isAmountTooLarge(fiatAmount) : false, currency);
 }
 
-// eztodo docs
+/**
+ * Converts gas price, which is in its own unit, to TLOS
+ *
+ * @param {string} gasUsed - amount of gas used as string representation of a number/hex
+ * @param {string} gasPrice - gas price in TLOS as string representation of a number/hex
+ *
+ * @return {string} gas in TLOS as a number string
+ */
 export function getGasInTlos(gasUsed: string, gasPrice: string) {
-    // eztodo add validation
     return formatWei(
         BigNumber.from(gasPrice)
             .mul(gasUsed).toLocaleString(),
