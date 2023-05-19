@@ -130,9 +130,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
             const tokenList = await this.getTokenList();
             const tokens: EvmToken[] = [];
 
-            for (const result_1 of balances.results) {
-                const token = tokenList.find(t => t.address.toLowerCase() === result_1.contract.toLowerCase());
-                const contractData = balances.contracts[result_1.contract] ?? {};
+            for (const result of balances.results) {
+                const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
+                const contractData = balances.contracts[result.contract] ?? {};
                 const callDataStr = contractData.calldata as string | object;
                 try {
                     if (typeof callDataStr === 'string') {
@@ -148,7 +148,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 }
 
                 if (token) {
-                    const balance = ethers.BigNumber.from(result_1.balance);
+                    const balance = ethers.BigNumber.from(result.balance);
                     token.balance = ethers.utils.formatUnits(balance, token.decimals);
                     token.balanceBn = balance;
                     token.fullBalance = token.balance;
