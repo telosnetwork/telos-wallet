@@ -104,16 +104,26 @@ export const useContractStore = defineStore(store_name, {
 
                 if(TRANSFER_SIGNATURES.includes(sig)){
                     const contract = await this.getContract(log.address);
+                    let to = getTopicHash(log.topics[2]);
+                    let from = getTopicHash(log.topics[1]);
+
+                    if (to.indexOf('0x') !== 0) {
+                        to = `0x${to}`;
+                    }
+
+                    if (from.indexOf('0x') !== 0) {
+                        from = `0x${from}`;
+                    }
 
                     if (contract && contract.supportedInterfaces.includes('erc20')) {
                         transfers.push({
-                            'index': log.logIndex,
-                            'address': contract.address,
-                            'value': log.data,
-                            'decimals': contract.properties?.decimals,
-                            'to': getTopicHash(log.topics[2]),
-                            'from': getTopicHash(log.topics[1]),
-                            'symbol': contract.properties?.symbol,
+                            index: log.logIndex,
+                            address: contract.address,
+                            value: log.data,
+                            decimals: contract.properties?.decimals,
+                            symbol: contract.properties?.symbol,
+                            to,
+                            from,
                         });
                     }
                 }
