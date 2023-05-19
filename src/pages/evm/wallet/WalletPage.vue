@@ -12,7 +12,6 @@ const tabs = ['balance', 'transactions'];
 const totalFiatAmount = ref(0);
 
 const allTokens = computed(() => useBalancesStore().loggedBalances as EvmToken[]);
-const loadingStrings = computed(() => feedback.getLoadings);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
 watch(allTokens, (newBalances: EvmToken[]) => {

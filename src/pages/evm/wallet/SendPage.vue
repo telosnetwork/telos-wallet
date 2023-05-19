@@ -73,10 +73,9 @@ export default defineComponent({
         },
         token: {
             async handler(newToken: EvmToken | null, oldToken: EvmToken | null) {
-                // TODO update after https://github.com/telosnetwork/telos-wallet/issues/316
                 if (newToken?.address !== oldToken?.address) {
                     this.updateEstimatedGas();
-                    this.fiatConversionRate = newToken?.address === '' ? await chainStore.loggedChain.settings.getUsdPrice() : undefined;
+                    this.fiatConversionRate = newToken?.price;
                 }
             },
             immediate: true,

@@ -184,6 +184,7 @@ export const useBalancesStore = defineStore(store_name, {
                 balance,
                 fullBalance,
                 fiatBalance,
+                price: token.price,
             } as EvmToken;
 
             if (this.shouldAddTokenBalance(label, balanceBn, token)) {

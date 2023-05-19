@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import {
     PriceChartData,
     PriceHistory,
@@ -16,6 +16,16 @@ export const getCoingeckoUsdPrice = async (
 
     return stats.data[tokenId]?.usd;
 };
+
+export async function getFiatPriceFromIndexer(
+    tokenSymbol: string,
+    fiatCode: string,
+    indexerAxios: AxiosInstance,
+): Promise<number> {
+    return Number(
+        (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data.results[0].price,
+    );
+}
 
 export const getCoingeckoPriceChartData = async (
     tokenId: string,
