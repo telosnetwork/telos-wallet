@@ -1,20 +1,4 @@
-// importing components css
-@import 'components/notification';
-
 // app global css in Sass form
-@font-face {
-  font-family: silka-regular-italic;
-  font-style: normal;
-  font-weight: normal;
-  src: url("./fonts/silka-regularitalic-webfont.woff");
-}
-
-@font-face {
-  font-family: silka-regular;
-  font-style: normal;
-  font-weight: normal;
-  src: url("./fonts/silka-regular-webfont.woff");
-}
 
 body {
   font-family: silka-regular;
@@ -78,7 +62,7 @@ div.cleos-auth-dialog {
     background-color: #00000000;
   }
 
-  .container:-webkit-scrollbar {
+  .container::-webkit-scrollbar {
     width: 1px;
     background-color: #0f0f0f3a;
   }
@@ -200,13 +184,6 @@ div.cleos-auth-dialog {
     border-color: #ffffff73;
   }
 }
-// .list-item {
-//   border: 1px solid #fafafa00;
-//   border-left: none;
-//   border-right: none;
-//   display: grid;
-//   grid-template-columns: 1fr auto 1fr;
-// }
 
 .display-grid {
   display: grid;
@@ -219,6 +196,3 @@ div.cleos-auth-dialog {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-// importing components css
-@import 'components/notification'

@@ -37,7 +37,7 @@ export default defineComponent({
             return accountStore.loggedEvmAccount?.address;
         },
         isMobile() {
-            return this.$q.screen.lt.md;
+            return this.$q.screen.lt.sm;
         },
         canvasSize() {
             const maxSize = Math.min(window.innerWidth, window.innerHeight) - 32;
@@ -51,18 +51,13 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-receive-page__title-container">
-            <p class="c-receive-page__title"> {{ $t('evm_wallet.receive') }}</p>
-            <p class="c-receive-page__subtitle"> {{ $t('evm_wallet.scan_qr') }}</p>
+            <h1 class="u-text--high-contrast"> {{ $t('evm_wallet.receive') }}</h1>
+            <p class="o-text--paragraph u-text--default-contrast"> {{ $t('evm_wallet.scan_qr') }}</p>
             <AddressQR :size="canvasSize" :address="address" class="c-receive-page__qr-code" />
         </div>
     </template>
 
-    <div
-        :class="{
-            'c-receive-page__user-info-container': true,
-            'c-receive-page__user-info-container--mobile': isMobile,
-        }"
-    >
+    <div class="c-receive-page__user-info-container">
         <UserInfo
             class="c-receive-page__user-info"
             :displayFullAddress="true"
@@ -85,11 +80,9 @@ export default defineComponent({
 
 <style lang="scss">
 .q-btn.wallet-btn {
+    @include text--header-5;
     width: auto;
     padding: 13px 24px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
     &+& {
         margin-left: 16px;
     }
@@ -105,18 +98,6 @@ export default defineComponent({
         align-items: center;
     }
 
-    &__title {
-        font-size: 2.4rem;
-        font-weight: 600;
-        margin-bottom: -7px;
-    }
-
-    &__subtitle {
-        font-size: 16px;
-        font-weight: 400;
-        text-align: center;
-    }
-
     &__qr-code {
         margin-top: 24px;
     }
@@ -127,10 +108,10 @@ export default defineComponent({
         align-items: center;
         flex-direction: column;
         margin-top: 24px;
-        padding-left: 32px;
+        padding-left: 0;
         text-align: center;
-        &--mobile {
-            padding-left: 0;
+        @include sm-and-up {
+            padding-left: 32px;
         }
         word-break: break-all;
     }

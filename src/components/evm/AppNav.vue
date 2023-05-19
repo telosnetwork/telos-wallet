@@ -144,7 +144,6 @@ export default defineComponent({
         :class="{
             'c-app-nav__menu-container': true,
             'c-app-nav__menu-container--open': menuIsOpen && $q.screen.lt.md,
-            'c-app-nav__menu-container--desktop': $q.screen.gt.sm,
         }"
     >
         <div class="flex justify-between">
@@ -166,7 +165,7 @@ export default defineComponent({
                 round
                 dense
                 icon="menu_open"
-                class="q-ma-md self-start"
+                class="self-start q-ma-md"
                 aria-haspopup="menu"
                 :aria-label="$t('nav.close_menu')"
                 :tabindex="menuItemTabIndex"
@@ -274,9 +273,9 @@ export default defineComponent({
     $this: &;
 
     &__back-button {
+        @include text--header-5;
         height: 32px;
-        font-size: 12.8px;
-        font-weight: 600;
+        color: var(--text-default-contrast);
         i {
             font-size: 1.15em;
         }
@@ -291,13 +290,13 @@ export default defineComponent({
         transform: translateX(-100%);
         transition: 0.2s transform ease;
         background: $site-gradient;
-        z-index: 999;
+        z-index: $z-index--menu;
 
         &--open {
             transform: translateX(0);
         }
 
-        &--desktop {
+        @include md-and-up {
             left: 0;
             width: 300px;
             transform: unset;
@@ -314,9 +313,9 @@ export default defineComponent({
         color: var(--header-text-color);
         padding: 16px 24px;
         background-color: var(--header-bg-color);
-        z-index: 999;
+        z-index: $z-index--header-toolbar;
 
-        @media only screen and (min-width: $breakpoint-md-min) {
+        @include md-and-up {
             left: 300px;
             justify-content: flex-end;
         }
@@ -335,9 +334,7 @@ export default defineComponent({
     }
 
     &__menu-item {
-        font-size: 16px;
-        line-height: 20px;
-        font-weight: 600;
+        @include text--paragraph-bold;
 
         cursor: pointer;
         display: flex;
@@ -347,15 +344,15 @@ export default defineComponent({
         width: max-content;
 
         &:hover {
-            color: $link-blue;
+            color: var(--link-color);
 
             // svg color overrides
             #{$this}__icon:not(#{$this}__icon--acorn) path {
-                fill: $link-blue;
+                fill: var(--link-color);
             }
 
             #{$this}__icon--acorn path {
-                stroke: $link-blue;
+                stroke: var(--link-color);
             }
         }
     }
@@ -363,11 +360,11 @@ export default defineComponent({
     &__icon {
         // svg color overrides
         &--current-route:not(#{$this}__icon--acorn) path {
-            fill: $link-blue;
+            fill: var(--link-color);
         }
 
         &--current-route#{$this}__icon--acorn path {
-            stroke: $link-blue;
+            stroke: var(--link-color);
         }
     }
 

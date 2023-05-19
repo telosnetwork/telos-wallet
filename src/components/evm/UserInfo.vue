@@ -2,7 +2,6 @@
 import { defineComponent } from 'vue';
 import { useAccountStore, getAntelope, useChainStore } from 'src/antelope';
 import InlineSvg from 'vue-inline-svg';
-import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
@@ -31,10 +30,6 @@ export default defineComponent({
         showUserMenu: {
             type: Boolean,
             default: true,
-        },
-        lightweight: {
-            type: Boolean,
-            default: false,
         },
     },
     components: {
@@ -73,9 +68,6 @@ export default defineComponent({
                 return this.account?.displayAddress;
             }
         },
-        isDarkMode() {
-            return this.$q.dark.isActive;
-        },
     },
 });
 </script>
@@ -84,11 +76,7 @@ export default defineComponent({
 <div class="c-user-info">
     <div
         v-if="showAddress"
-        :class="{
-            'c-user-info__address': true,
-            'c-user-info__address--alone': !showCopyBtn && !showUserMenu,
-            'c-user-info__address--lightweight': lightweight,
-        }"
+        class="o-text--header-4 u-text--default-contrast"
     >{{ address }}</div>
     <q-btn
         v-if="showCopyBtn"
@@ -105,7 +93,7 @@ export default defineComponent({
         flat
         dense
         icon="more_vert"
-        class="q-mr-sm c-user-info__menu-btn"
+        class="c-user-info__menu-btn"
         :aria-label="$t('nav.overflow_menu')"
     >
         <q-menu anchor="bottom end" self="top right" :offset="[0, 16]">
@@ -119,15 +107,12 @@ export default defineComponent({
                 >
                     <div class="c-user-info__icon-wraper"><InlineSvg
                         :src="require('src/assets/icon--acorn.svg')"
-                        :class="{
-                            'c-user-info__icon': true,
-                            'c-user-info__icon--acorn': true,
-                        }"
+                        class="c-user-info__icon c-user-info__icon--acorn"
                         height="24"
                         width="24"
                         aria-hidden="true"
                     /></div>
-                    <span class="c-user-info__menu-item-text">{{ $t('nav.teloscan') }}</span>
+                    <span class="o-text--header-5">{{ $t('nav.teloscan') }}</span>
                     <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
                 </li>
 
@@ -145,19 +130,8 @@ export default defineComponent({
                         width="24"
                         aria-hidden="true"
                     /></div>
-                    <span class="c-user-info__menu-item-text">{{ $t('global.sign_out') }}</span>
+                    <span class="o-text--header-5">{{ $t('global.sign_out') }}</span>
                 </li>
-
-                <!--li
-                    class="c-user-info__menu-item"
-                    role="menuitem"
-                    tabindex="2"
-                    @click="toggleDarkMode"
-                >
-                    <div class="c-user-info__icon-wraper"></div>
-                    <span class="c-user-info__menu-item-text">{{ isDarkMode ? $t('global.light_mode') : $t('global.dark_mode') }}</span>
-                </li-->
-
             </ul>
         </q-menu>
     </q-btn>
@@ -171,34 +145,17 @@ export default defineComponent({
     $this: &;
     display: flex;
     align-items: center;
-
-    &__address {
-        font-weight: bold;
-        font-size: 20px;
-        line-height: 24px;
-        margin-right: 16px;
-
-        &--alone {
-            margin-right: 0px;
-        }
-
-        &--lightweight {
-            font-weight: 400;
-        }
-
-        &:not(&--lightweight) {
-            @media only screen and (min-width: $breakpoint-lg-min) {
-                font-weight: 600;
-            }
-        }
+    gap: 8px;
+    &__menu-btn {
+        color: var(--text-default-contrast);
     }
 
     &__menu-items {
+        @include text--header-5;
+
         padding: 0px 0px;
         margin: 0px 0px;
         list-style: none;
-        text-transform: uppercase;
-        font-weight: bold;
         display: flex;
         flex-direction: column;
     }
@@ -208,9 +165,10 @@ export default defineComponent({
         flex-direction: row;
         align-items: center;
         justify-content: left;
+        gap: 8px;
         padding: 10px 18px;
         cursor: pointer;
-        color: var(--text-color);
+        color: var(--text-default-contrast);
         transition: background-color 0.1s ease-in-out;
         transition-property: background-color, color;
 
@@ -230,27 +188,20 @@ export default defineComponent({
         }
     }
 
-    &__menu-item-text {
-        margin-left: 8px;
-        font-size: 15px;
-        font-weight: 600;
-    }
-
     &__menu-item-min-icon {
         margin-left: auto;
         transform: scale(0.67);
-        margin-left: 5px;
     }
 
     &__icon {
         height: 24px;
         width: 24px;
         &:not(#{$this}__icon--acorn) path {
-            fill: var(--text-color);
+            fill: var(--text-default-contrast);
         }
 
         &#{$this}__icon--acorn path {
-            stroke: var(--text-color);
+            stroke: var(--text-default-contrast);
         }
     }
 

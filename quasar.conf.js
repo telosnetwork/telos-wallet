@@ -33,7 +33,7 @@ module.exports = function(/* ctx */) {
         boot: ['ual', 'hyperion', 'i18n', 'fuel', 'api', 'errorHandling', 'helpers', 'mixin', 'emitter', 'telosApi', 'antelope', 'wagmi'],
 
         // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
-        css: ['app.scss'],
+        css: ['index.scss'],
 
         // https://github.com/quasarframework/quasar/tree/dev/extras
         extras: [
@@ -68,6 +68,10 @@ module.exports = function(/* ctx */) {
                     '~': path.resolve(__dirname, 'src'),
                 };
 
+            },
+
+            scssLoaderOptions: {
+                additionalData: '@import "~src/css/global/global-index.scss";',
             },
 
             // transpile: false,

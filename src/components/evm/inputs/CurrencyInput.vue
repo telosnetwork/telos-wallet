@@ -1006,7 +1006,7 @@ export default defineComponent({
         border-color: transparent;
 
         #{$this}__label-text {
-            color: $primary;
+            color: var(--accent-color);
         }
     }
 
@@ -1016,11 +1016,11 @@ export default defineComponent({
     }
 
     &--error {
-        outline-color: $negative;
+        outline-color: var(--negative-color);
         border-color: transparent;
 
         #{$this}__label-text {
-            color: $negative;
+            color: var(--negative-color);
         }
     }
 
@@ -1033,10 +1033,10 @@ export default defineComponent({
     }
 
     &__label-text {
+        @include text--small;
         position: absolute;
         top: 4px;
-        color: var(--text-color-muted);
-        font-size: 12px;
+        color: var(--text-low-contrast);
         transition: color 0.3s ease;
     }
 
@@ -1052,32 +1052,32 @@ export default defineComponent({
         #{$this}--disabled &,
         #{$this}--readonly & {
             cursor: not-allowed;
-            color: var(--text-color-muted);
+            color: var(--text-low-contrast);
         }
     }
 
     &__swap-icon {
         path {
-            fill: $primary;
+            fill: var(--accent-color);
         }
     }
 
     &__error-text,
     &__conversion-rate {
+        @include text--small;
         position: absolute;
         bottom: -24px;
         width: max-content;
         right: 0;
         text-align: right;
-        font-size: 12px;
     }
 
     &__error-text {
-        color: $negative;
+        color: var(--negative-color);
     }
 
     &__conversion-rate {
-        color: var(--text-color-muted);
+        color: var(--text-low-contrast);
     }
 
     &__symbol {
@@ -1088,21 +1088,20 @@ export default defineComponent({
 
         #{$this}--disabled &,
         #{$this}--readonly & {
-            color: var(--text-color-muted);
+            color: var(--text-low-contrast);
         }
     }
 
     &__amount-available {
+        @include text--small;
+
         position: absolute;
         top: -24px;
         left: 0;
         right: 0;
         text-align: right;
         cursor: pointer;
-        color: $link-blue;
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 150%;
+        color: var(--link-color);
 
         #{$this}--disabled &,
         #{$this}--readonly &{

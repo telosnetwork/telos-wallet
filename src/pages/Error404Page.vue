@@ -3,24 +3,11 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'Error404Page',
-    computed: {
-        isMobile() {
-            return this.$q.screen.lt.md;
-        },
-        isLandscape() {
-            return this.$q.screen.width > this.$q.screen.height;
-        },
-    },
 });
 </script>
 
 <template>
-<div
-    :class="{
-        'c-404-page': true,
-        'c-404-page--landscape' : isMobile && isLandscape
-    }"
->
+<div class="c-404-page">
     <div class="c-404-page__video-wrapper">
         <video
             id="bgvid"
@@ -94,14 +81,14 @@ export default defineComponent({
 .c-404-page {
     // capture & in $this variable
     $this: &;
-    max-height: 100vh;
+    height: 100vh;
     overflow: hidden;
 
     &__video-wrapper {
         background-color: black;
         position: absolute;
         overflow: hidden;
-        z-index: -1;
+        z-index: $z-index--video-wrapper;
         top: 0px;
         bottom: 0px;
         left: 0px;
@@ -123,7 +110,7 @@ export default defineComponent({
         object-fit: cover;
         position: absolute;
         overflow: hidden;
-        z-index: -1;
+        z-index: $z-index--video-overlay;
         top: 0px;
         bottom: 0px;
         left: 0px;
@@ -134,14 +121,12 @@ export default defineComponent({
 
     &__layout {
         max-width: 550px;
-        width: 100vw;
-        height: 100vh;
         display: flex;
         flex-direction: column;
-        justify-content: initial;
-        margin-top: 0vh;
+        justify-content: center;
+        margin-top: 0;
 
-        @media only screen and (min-width: $breakpoint-md-min) {
+        @include md-and-up {
             margin-top: 15vh;
         }
     }
@@ -163,34 +148,26 @@ export default defineComponent({
     &__logo {
         width: 100%;
         max-width: 115px;
-        #{$this}--landscape & {
+        @include mobile-landscape {
             max-width: 80px;
         }
     }
 
     &__title {
-        font-size: 73.61px;
-        font-weight: 400;
+        @include text--header-1;
         color: white;
-        #{$this}--landscape & {
-            font-size: 48px;
-        }
     }
 
     &__subtitle {
-        font-size: 24px;
-        font-weight: 600;
+        @include text--header-2;
         color: white;
-        line-height: 1.95rem;
-        #{$this}--landscape & {
-            font-size: 20px;
+        @include mobile-landscape {
             margin: 5px 0 0 0;
         }
     }
 
     &__text {
-        font-size: 16px;
-        font-weight: 400;
+        @include text--paragraph;
         color: white;
     }
 

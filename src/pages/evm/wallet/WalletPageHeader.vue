@@ -138,11 +138,10 @@ const goToBuy = () => {
     }
 
     &__link-text {
+        @include text--header-4;
+        color: var(--text-high-contrast);
         text-align: center;
         width: max-content;
-        font-weight: 500;
-        line-height: 24px;
-        font-size: 20px;
     }
 }
 </style>
