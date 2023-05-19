@@ -27,7 +27,9 @@ const rowsPerPagePopup = ref<QPopupProxy>();
 const pageText = computed(() => {
     const start = (props.pagination.page - 1) * props.pagination.rowsPerPage + 1;
     const end = Math.min(props.pagination.page * props.pagination.rowsPerPage, props.pagination.rowsNumber);
-    return `${start}-${end} of ${props.pagination.rowsNumber}`;
+    const leftText = end === 0 ? '0' : `${start}-${end}`;
+
+    return `${leftText} of ${props.pagination.rowsNumber}`;
 });
 const totalPages = computed(() => Math.ceil(props.pagination.rowsNumber / props.pagination.rowsPerPage));
 
