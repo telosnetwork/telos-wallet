@@ -28,7 +28,7 @@ export default defineComponent({
             return appnav.showBackBtn;
         },
         showUserInfo() {
-            return !this.showBackButton;
+            return !this.showBackButton && this.loggedAccount;
         },
         loggedAccount() {
             return accountStore.loggedAccount;
