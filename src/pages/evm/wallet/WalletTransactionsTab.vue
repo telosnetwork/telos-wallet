@@ -85,7 +85,7 @@ export default defineComponent({
 <template>
 <div class="c-wallet-tx-tab">
     <div class="c-wallet-tx-tab__header-container">
-        <span class="c-wallet-tx-tab__header-text">{{ $t('global.transactions') }}</span>
+        <h2>{{ $t('global.transactions') }}</h2>
         <span v-if="totalRowsText">{{ totalRowsText }}</span>
     </div>
 
@@ -133,12 +133,5 @@ export default defineComponent({
             justify-content: space-between;
         }
     }
-
-    &__header-text {
-        font-weight: 600;
-        font-size: 20px;
-        line-height: 130%;
-    }
-
 }
 </style>
