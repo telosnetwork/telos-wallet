@@ -85,43 +85,53 @@ export const useBalancesStore = defineStore(store_name, {
                     const chain_settings = chain.settings as NativeChainSettings;
                     if (account?.account) {
                         this.__balances[label] = await chain_settings.getTokens(account.account);
+                        useFeedbackStore().unsetLoading('updateBalancesForAccount');
                     }
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
-                        this.__balances[label] = this.__balances[label] ?? [];
-                        const tokens = await chain_settings.getTokenList();
-                        await this.updateSystemBalanceForAccount(label, account.account);
+                        if (chain_settings.hasIndexSupport()) {
+                            if (account?.account) {
+                                this.__balances[label] = await chain_settings.getAllBalances(account.account);
+                                this.sortBalances(label);
+                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
+                            }
+                        } else {
+                            // In case the chain does not support index, we need to fetch the balances using Web3
+                            this.__balances[label] = this.__balances[label] ?? [];
+                            const tokens = await chain_settings.getTokenList();
+                            await this.updateSystemBalanceForAccount(label, account.account);
                         this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
                         const evm = useEVMStore();
                         let promises: Promise<void>[] = [];
 
-                        if (localStorage.getItem('wagmi.connected')) {
+                            if (localStorage.getItem('wagmi.connected')) {
 
-                            promises = tokens.map(async (token) => {
-                                fetchBalance({
-                                    address: getAccount().address as addressString,
-                                    chainId: getNetwork().chain?.id,
-                                    token: token.address as addressString,
-                                }).then((balanceBn: FetchBalanceResult) => {
-                                    this.processBalanceForToken(label, token, balanceBn.value);
+                                promises = tokens.map(async (token) => {
+                                    fetchBalance({
+                                        address: getAccount().address as addressString,
+                                        chainId: getNetwork().chain?.id,
+                                        token: token.address as addressString,
+                                    }).then((balanceBn: FetchBalanceResult) => {
+                                        this.processBalanceForToken(label, token, balanceBn.value);
+                                    });
                                 });
+
+                            } else {
+                                promises = tokens
+                                    .map(token => evm.getERC20TokenBalance(account.account, token.address)
+                                        .then((balanceBn: BigNumber) => {
+                                            this.processBalanceForToken(label, token, balanceBn);
+                                        }),
+                                    );
+
+                            }
+
+                            Promise.allSettled(promises).then(() => {
+                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
+                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
                             });
-
-                        } else {
-                            promises = tokens
-                                .map(token => evm.getERC20TokenBalance(account.account, token.address)
-                                    .then((balanceBn: BigNumber) => {
-                                        this.processBalanceForToken(label, token, balanceBn);
-                                    }),
-                                );
-
                         }
-
-                        Promise.allSettled(promises).then(() => {
-                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                            this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
-                        });
                     }
                 }
             } catch (error) {
