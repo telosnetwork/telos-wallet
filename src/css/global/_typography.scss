@@ -2,8 +2,7 @@
 
 @font-face {
     font-family: silka-semibold;
-    font-style: semibold; // kmtodo not a valid option for font style
-    font-weight: semibold;  // kmtodo semibold is not valid option, try 600
+    font-weight: 600;
     src: url("~/css/fonts/silka-semibold-webfont.woff");
 }
 
@@ -17,7 +16,6 @@
 /* Font weight mixins */
 @mixin regular {
     font-family: 'silka-regular', 'Roboto', sans-serif;
-    font-weight: semibold; // kmtodo semibold is not valid option, try 600
 }
 
 @mixin bold {
@@ -89,6 +87,13 @@
     font-size: 0.8rem;
     line-height: 150%;
 }
+
+// see also: NativeLayout.vue => <style> for native overrides
+body {
+    @include regular;
+    color: var(--text-color);
+}
+
 
 /* Typography classes */
 .o-text--header-1, h1 {

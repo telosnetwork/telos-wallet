@@ -93,6 +93,7 @@ export default {
         amount_exceeds_available_balance: 'Balance too low',
         incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transaction',
         viewing_n_transactions: 'Viewing {rowsPerPage} of {totalRows} transactions',
+        no_transactions_found: 'No transactions found',
     },
     global: {
         native: 'Native',

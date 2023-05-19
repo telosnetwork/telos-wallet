@@ -129,7 +129,7 @@ export default {
 </script>
 
 <template>
-<q-layout view="hHh Lpr fFf" class="">
+<q-layout view="hHh Lpr fFf" class="c-native-layout">
     <NativeLoginButton v-if="isUserAuthenticated" class="login-button"/>
     <div class="videoWrapper">
         <video
@@ -257,5 +257,11 @@ export default {
 
 .warningSign {
   background: #8946df;
+}
+</style>
+
+<style lang="scss">
+body .c-native-layout {
+    color: white;
 }
 </style>

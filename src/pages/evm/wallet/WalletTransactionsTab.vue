@@ -38,11 +38,12 @@ export default defineComponent({
             if (this.loading) {
                 return '';
             }
+            const rowsPerPage = Math.min(this.pagination.rowsPerPage, this.shapedTransactions.length);
 
             return this.$t(
                 'evm_wallet.viewing_n_transactions',
                 {
-                    rowsPerPage: this.pagination.rowsPerPage,
+                    rowsPerPage,
                     totalRows: this.pagination.rowsNumber,
                 },
             );
@@ -54,9 +55,10 @@ export default defineComponent({
         },
         address() {
             // address can be initially undefined; wait to load txs until it's defined
+            // also reload txs if the user switches accounts
             this.getTransactions();
         },
-        pagination(newPagination: { page: number, rowsPerPage: number, rowsNumber: number }) {
+        pagination() {
             this.getTransactions();
         },
     },
@@ -97,6 +99,13 @@ export default defineComponent({
             class="q-mb-lg"
         />
     </template>
+
+    <h5
+        v-else-if="shapedTransactions.length === 0"
+        class="text-center"
+    >
+        {{ $t('evm_wallet.no_transactions_found') }}
+    </h5>
 
     <WalletTransactionRow
         v-for="(transaction, index) in shapedTransactions"
