@@ -38,13 +38,13 @@ const formattedText = computed(() => {
     &__link {
         line-height: 24px;
         text-decoration: none;
-        color: $link-blue;
+        color: var(--link-color);
         display: inline-flex;
         align-items: center;
     }
 
     &__icon {
-        color: $link-blue;
+        color: var(--link-color);
         margin-left: 4px;
         transform: scale(0.67);
     }

@@ -53,6 +53,9 @@ export default defineComponent({
 
                         // hide the token address from the url
                         this.$router.replace({ name: 'evm-send', params: { token: undefined } });
+                    } else {
+                        // get from balances a fresh token object
+                        token = this.balances.find(t => t.address === token?.address) ?? token;
                     }
 
                     if (!token) {
@@ -69,6 +72,7 @@ export default defineComponent({
                 this.updateEstimatedGas();
             },
             immediate: true,
+            deep: true,
         },
     },
     computed: {
@@ -88,7 +92,7 @@ export default defineComponent({
             return this.balances[0];
         },
         isMobile(): boolean {
-            return this.$q.screen.lt.md;
+            return this.$q.screen.lt.sm;
         },
         balances(): EvmToken[] {
             return ant.stores.balances.getBalances('logged') as EvmToken[];
@@ -305,10 +309,10 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-send-page__title-container">
-            <div class="c-send-page__title"> {{ $t('evm_wallet.send') }}</div>
-            <div class="c-send-page__title-from">{{ $t('global.from') }}</div>
+            <div class="o-text--header-1 u-text--high-contrast"> {{ $t('evm_wallet.send') }}</div>
+            <div class="o-text--paragraph u-text--default-contrast">{{ $t('global.from') }}</div>
             <UserInfo
-                class="c-send-page__title-address"
+                class="c-send-page__title-addressu-text--default-contrast"
                 :displayFullAddress="false"
                 :showAddress="true"
                 :showCopyBtn="false"
@@ -345,16 +349,13 @@ export default defineComponent({
             </div>
             <div class="c-send-page__row c-send-page__row--3 row">
                 <!-- Token selection -->
-                <div class="col-12 col-md-auto">
+                <div class="col-12 col-sm-auto">
                     <q-select
                         v-model="token"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
-                        :class="{
-                            'c-send-page__token-selector': true,
-                            'c-send-page__token-selector--mobile': isMobile,
-                        }"
+                        class="c-send-page__token-selector"
                     >
                         <template v-slot:selected>
                             <span>{{ token?.symbol }}</span>
@@ -413,13 +414,13 @@ export default defineComponent({
                             <div v-if="token && token.price > 0" class="c-send-page__amount-fiat-footer">
                                 <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
                                     <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                    <span class="c-send-page__amount-fiat-text"> {{ amountInTokens }}</span>
+                                    <span class="o-text--small u-text--low-contrast"> {{ amountInTokens }}</span>
                                 </div>
                                 <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
                                     <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                    <span class="c-send-page__amount-fiat-text"> {{ amountInFiat }}</span>
+                                    <span class="o-text--small u-text--low-contrast"> {{ amountInFiat }}</span>
                                 </div>
-                                <div class="c-send-page__amount-fiat-rate">
+                                <div class="o-text--small u-text--low-contrast">
                                     {{ fiatRateText }}
                                 </div>
                             </div>
@@ -428,12 +429,9 @@ export default defineComponent({
 
                     <div
                         v-if="token && amount"
-                        :class="{
-                            'c-send-page__amount-symbol-container': true,
-                            'c-send-page__amount-symbol-container--mobile': isMobile,
-                        }"
+                        class="c-send-page__amount-symbol-container"
                     >
-                        <span class="c-send-page__amount-symbol">
+                        <span class="o-text--small u-text--low-contrast">
                             <span class="c-send-page__amount-transparent">{{ amount }} &nbsp;</span>
                             <span v-if="useFiat"> {{ fiatSymbol }} </span>
                             <span v-else> {{ token.symbol }} </span>
@@ -445,13 +443,13 @@ export default defineComponent({
                 <q-space/>
                 <div class="col-auto">
                     <div class="c-send-page__gas-fee">
-                        <div class="row c-send-page__gas-fee-title text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
+                        <div class="row o-text--header-5 u-text--default-contrast text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
                         <div class="row c-send-page__gas-fee-info">
                             <q-space/>
-                            <div class="col-auto q-mr-xs flex flex-column items-center justify-center"><q-icon name="local_gas_station" /></div>
+                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page__gas-icon" name="local_gas_station" /></div>
                             <div class="col-auto">
-                                <div class="row text-no-wrap"> {{ gasFeeInSystemSym }} </div>
-                                <div class="row text-no-wrap"> {{ gasFeeInFiat }} </div>
+                                <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInSystemSym }} </div>
+                                <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInFiat }} </div>
                             </div>
                         </div>
                     </div>
@@ -459,7 +457,7 @@ export default defineComponent({
             </div>
             <div class="c-send-page__row c-send-page__row--5 row">
                 <div class="col">
-                    <div class="row justify-end">
+                    <div class="justify-end row">
                         <q-btn
                             color="primary"
                             class="wallet-btn"
@@ -479,10 +477,7 @@ export default defineComponent({
 
 <style lang="scss">
 .q-btn.wallet-btn {
-    padding: 13px 24px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
+    @include text--header-5;
     &+& {
         margin-left: 16px;
     }
@@ -497,24 +492,9 @@ export default defineComponent({
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100px;
+        gap: 4px;
     }
 
-    &__title {
-        font-size: 2.4rem;
-        font-weight: 600;
-        margin: 0px;
-    }
-
-    &__title-from {
-        font-size: 12px;
-        font-weight: 400;
-        margin: -7px 0px 0px 0px;
-    }
-
-    &__title-address {
-        font-size: 16px;
-    }
 
     &__form-container {
         animation: #{$anim-slide-in-left};
@@ -554,9 +534,9 @@ export default defineComponent({
     }
 
     &__token-selector {
-        width: 140px;
-        &--mobile {
-            width: 100%;
+        width: 100%;
+        @include sm-and-up {
+            width: 140px;
         }
     }
 
@@ -577,12 +557,13 @@ export default defineComponent({
     }
 
     &__amount-symbol-container {
-        pointer-events: none;
-        position: absolute;
-        top: 25px;
+        top: 46px;
         left: 12px;
-        &--mobile {
-            top: 46px;
+
+        @include sm-and-up {
+            pointer-events: none;
+            position: absolute;
+            top: 25px;
             left: 12px;
         }
     }
@@ -594,19 +575,13 @@ export default defineComponent({
         color: transparent;
     }
 
-    &__amount-symbol {
-        font-weight: 400;
-        letter-spacing: 0.00937em;
-        outline: 0;
-        color: rgba(var(--text-color-rgb), 0.5)
-    }
 
     &__view-contract {
         display: flex;
         align-items: center;
         cursor: pointer;
         margin-top: 8px;
-        color: $link-blue;
+        color: var(--link-color);
         &--hidden {
             opacity: 0;
             pointer-events: none;
@@ -614,9 +589,8 @@ export default defineComponent({
     }
 
     &__view-contract-text {
+        @include text--small;
         margin-left: 2px;
-        font-size: 0.9rem;
-        font-weight: 500;
     }
 
     &__view-contract-min-icon {
@@ -636,34 +610,21 @@ export default defineComponent({
         flex-direction: row;
     }
 
-    &__amount-fiat-rate {
-        margin-top: 3px;
-        font-size: 0.9rem;
-        margin-right: -12px;
-    }
 
     &__amount-fiat-icon {
-        color: $link-blue;
+        color: var(--link-color);
         font-weight: bold;
     }
 
-    &__amount-fiat-text {
-        margin-top: 3px;
-        font-size: 0.9rem;
-        margin-left: 1px;
-    }
-
     &__amount-available {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: $available-color;
+        @include text--small;
+        color: var(--link-color);
         cursor: pointer;
     }
 
-    &__gas-fee-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
+    &__gas-icon {
+        color: var(--text-default-contrast);
     }
+
 }
 </style>

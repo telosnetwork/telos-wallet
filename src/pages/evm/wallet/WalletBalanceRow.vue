@@ -363,14 +363,12 @@ export default defineComponent({
     }
 
     &__left-container {
+        @include text--paragraph;
+        color: var(--text-default-contrast);
         display: flex;
         align-items: center;
         gap: 16px;
 
-        font-size: 16px;
-        font-weight: 400;
-        line-height: 24px;
-        color: var(--text-color);
         white-space: nowrap;
     }
 
@@ -397,7 +395,7 @@ export default defineComponent({
         width: 40px;
         display: none;
 
-        @media only screen and (min-width: $breakpoint-lg-min) {
+        @include md-and-up {
             display: block;
         }
 
@@ -414,17 +412,17 @@ export default defineComponent({
     }
 
     &__primary-amount {
+        @include text--header-4;
+        color: var(--text-high-contrast);
         display: flex;
         align-items: center;
         flex: 1 1 max-content;
         text-align: right;
-        font-size: 18px;
-        font-weight: 600;
-        line-height: 24px;
     }
 
     &__secondary-amount {
-        color: var(--text-color-muted);
+        @include text--small;
+        color: var(--text-default-contrast);
     }
 
     &__overflow {
@@ -443,24 +441,32 @@ export default defineComponent({
         gap: 12px;
         padding: 12px 16px;
         cursor: pointer;
-        color: var(--text-color);
+        color: var(--text-default-contrast);
         transition: background-color 0.1s ease-in-out;
         transition-property: background-color, color;
 
         &:hover {
             background-color: var(--bg-color-hover);
-            color: $primary;
 
             #{$this}__overflow-icon {
                 &:not(#{$this}__overflow-icon--stroke) path {
-                    fill: $primary;
+                    fill: var(--accent-color);
                 }
 
                 &#{$this}__overflow-icon--stroke path {
-                    stroke: $primary;
+                    stroke: var(--accent-color);
                 }
             }
+
+            #{$this}__overflow-text {
+                color: var(--accent-color);
+            }
         }
+    }
+
+    &__overflow-text {
+        @include text--header-5;
+        color: var(--text-default-contrast);
     }
 
     &__overflow-icon-wrapper {
@@ -471,24 +477,17 @@ export default defineComponent({
         align-items: center;
     }
 
-    &__overflow-text {
-        text-transform: uppercase;
-        font-weight: 600;
-        font-size: 14px;
-        line-height: 21px;
-    }
-
     &__overflow-icon {
         width: 16px;
 
         path {
-            fill: var(--text-color);
+            fill: var(--text-default-contrast);
         }
 
         &--stroke {
             path {
                 fill: transparent;
-                stroke: var(--text-color);
+                stroke: var(--text-default-contrast);
             }
         }
     }

@@ -77,7 +77,7 @@ export default defineComponent({
                         @show-wallet-options="showWalletOptions = true"
                     />
                 </div>
-                <div>
+                <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
                         :toggleWalletConnect="toggleWalletConnect"
@@ -85,7 +85,7 @@ export default defineComponent({
                         @close-wallet-options="showWalletOptions = false"
                     />
                 </div>
-                <q-footer bordered>
+                <q-footer bordered class="c-home__footer">
                     <q-toolbar class="bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
@@ -116,7 +116,7 @@ export default defineComponent({
 .c-home {
     position: relative;
     background: $site-gradient;
-    height: 100vh;
+    min-height: 100vh;
 
     &__page-container {
         // override inline style of unknown origin
@@ -133,9 +133,14 @@ export default defineComponent({
         width: 240px;
         margin: 0 auto 88px;
 
-        @media only screen and (min-width: $breakpoint-md-min) {
+        @include sm-and-up {
             margin: 128px auto 88px;
         }
+
+        @include mobile-landscape {
+            margin: 60px auto 88px;
+        }
+
     }
 
     &__button-container {
@@ -144,6 +149,10 @@ export default defineComponent({
         background-color: rgba(white, 0.1);
         max-width: 320px;
         margin: auto;
+        @include mobile-landscape {
+            // footer height + margin
+            margin: auto auto 90px;
+        }
     }
 
     &__network-toggle-container {
@@ -171,8 +180,16 @@ export default defineComponent({
 
         &--activated {
             background-color: white;
-            color: $link-blue;
+            color: var(--link-color);
         }
+    }
+
+    // guarantees wallet connect on top of footer
+    &__footer {
+        z-index: $z-index--footer;
+    }
+    &__connect-wallet {
+        z-index: $z-index--connect-wallet-popup;
     }
 }
 </style>

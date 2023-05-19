@@ -6,7 +6,6 @@ import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
 import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
 import { getNetwork } from '@wagmi/core';
-import { Notify } from 'quasar';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',

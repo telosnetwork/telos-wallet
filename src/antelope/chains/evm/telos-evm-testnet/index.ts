@@ -11,7 +11,7 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: '',
+    address: '___NATIVE_CURRENCY___',
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
@@ -102,4 +102,13 @@ export default class TelosEVMTestnet extends EVMChainSettings {
             this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
         ];
     }
+
+    getIndexerApiEndpoint(): string {
+        return 'https://api.testnet.teloscan.io/';
+    }
+
+    hasIndexSupport(): boolean {
+        return false;
+    }
+
 }

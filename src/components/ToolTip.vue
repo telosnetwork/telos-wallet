@@ -88,7 +88,7 @@ function setTooltipVisibility(enable: boolean) {
         height: 14px;
 
         path {
-            fill: $primary;
+            fill: var(--accent-color);
         }
 
         &--warning {
@@ -111,10 +111,8 @@ function setTooltipVisibility(enable: boolean) {
     }
 
     &__text {
+        @include text--small-bold;
         white-space: pre-line;
-        font-weight: 600;
-        font-size: 12px;
-        line-height: 14px;
     }
 }
 </style>

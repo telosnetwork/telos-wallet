@@ -1,5 +1,6 @@
 
 <script>
+import { useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 

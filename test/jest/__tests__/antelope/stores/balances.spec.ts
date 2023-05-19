@@ -17,6 +17,7 @@ const tokenSys = {
     tokenId: 1,
 };
 
+const FIAT_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(4)));
 const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
 const TOKEN_BALANCE = ethers.BigNumber.from('321'.concat('9'.repeat(18)));
 
@@ -37,6 +38,11 @@ jest.mock('src/antelope/stores/evm', () => ({
             }),
         })),
         toWei: jest.fn().mockImplementation((value: any) => value),
+        getERC20TokenBalance: jest.fn().mockImplementation(() => ({
+            then: jest.fn().mockImplementation((cb: any) => {
+                cb(TOKEN_BALANCE);
+            }),
+        })),
         sendSystemToken: jest.fn(),
         rpcProvider: {
             getBalance: jest.fn().mockImplementation(() => ({
@@ -58,6 +64,7 @@ jest.mock('src/antelope/stores/chain', () => ({
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
                 getUsdPrice: jest.fn().mockImplementation(() => 1),
                 getImportantTokensIdList: jest.fn().mockImplementation(() => []),
+                hasIndexSupport: jest.fn().mockImplementation(() => false),
             },
         })),
         loggedChain: {
@@ -126,15 +133,17 @@ describe('Antelope Balance Store', () => {
             label: [
                 {
                     ...tokenSys,
+                    balanceBn: SYSTEM_TOKEN_BALANCE,
                     balance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18).slice(0, 8),
                     fullBalance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18),
-                    balanceBn: SYSTEM_TOKEN_BALANCE,
+                    fiatBalance: ethers.utils.formatUnits(FIAT_BALANCE, 4),
                 },
                 {
                     ...tokenList[0],
+                    balanceBn: TOKEN_BALANCE,
                     balance: ethers.utils.formatUnits(TOKEN_BALANCE, 18).slice(0, 8),
                     fullBalance: ethers.utils.formatUnits(TOKEN_BALANCE, 18),
-                    balanceBn: TOKEN_BALANCE,
+                    fiatBalance: '',
                 },
             ],
         };
