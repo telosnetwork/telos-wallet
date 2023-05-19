@@ -101,9 +101,9 @@ export const useBalancesStore = defineStore(store_name, {
                             this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account);
-                        this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
-                        const evm = useEVMStore();
-                        let promises: Promise<void>[] = [];
+                            this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
+                            const evm = useEVMStore();
+                            let promises: Promise<void>[] = [];
 
                             if (localStorage.getItem('wagmi.connected')) {
 
