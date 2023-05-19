@@ -72,6 +72,7 @@ module.exports = function(/* ctx */) {
 
             scssLoaderOptions: {
                 additionalData: '@import "~src/css/global/global-index.scss";',
+                sourceMap: false, // prevent issue where changing style in devtools breaks page styles
             },
 
             // transpile: false,

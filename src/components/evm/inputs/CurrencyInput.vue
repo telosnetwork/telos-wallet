@@ -53,7 +53,7 @@ export default defineComponent({
             default: null,
             validator: (ratio: null | string | number) => ratio === null || (/^\d+(\.\d+)?$/g.test(ratio.toString())),
         },
-        secondaryCurrencySymbol: {
+        secondaryCurrencyCode: {
             // symbol used for the secondary currency
             type: String,
             default: '',
@@ -157,7 +157,7 @@ export default defineComponent({
             return attrs;
         },
         hasSwappableCurrency() {
-            return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencySymbol && !!this.secondaryCurrencyDecimals;
+            return !!this.secondaryCurrencyConversionFactor && !!this.secondaryCurrencyCode && !!this.secondaryCurrencyDecimals;
         },
         currenciesAreSwapped() {
             return this.swapCurrencies && this.hasSwappableCurrency;
@@ -184,7 +184,7 @@ export default defineComponent({
             const maxLength = 6;
 
             if (!this.swapCurrencies) {
-                symbol = this.secondaryCurrencySymbol;
+                symbol = this.secondaryCurrencyCode;
                 const truncate = formatUnits(
                     this.secondaryCurrencyAmount,
                     this.secondaryCurrencyDecimals,
@@ -263,7 +263,7 @@ export default defineComponent({
                 .toFixed(4)
                 .replace(/0+$/g, '');
 
-            return `@ ${roundedConversionRate} ${this.secondaryCurrencySymbol} / ${this.symbol}`;
+            return `@ ${roundedConversionRate} ${this.secondaryCurrencyCode} / ${this.symbol}`;
         },
         secondaryToPrimaryConversionRate(): string {
             // this.secondaryCurrencyConversionFactor is for converting primary to secondary;
@@ -295,7 +295,7 @@ export default defineComponent({
                     undefined,
                     this.secondaryCurrencyDecimals,
                 );
-                symbol = this.secondaryCurrencySymbol;
+                symbol = this.secondaryCurrencyCode;
             } else {
                 amount = prettyPrintCurrency(
                     this.maxValue,
@@ -935,7 +935,7 @@ export default defineComponent({
     </div>
 
     <div v-if="!loading" class="c-currency-input__symbol">
-        {{ swapCurrencies ? secondaryCurrencySymbol : symbol }}
+        {{ swapCurrencies ? secondaryCurrencyCode : symbol }}
     </div>
 
     <input
@@ -984,7 +984,7 @@ export default defineComponent({
     --symbol-left: 28px;
     $this: &;
 
-    width: 300px;
+    max-width: 400px;
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
@@ -995,10 +995,9 @@ export default defineComponent({
     transition-timing-function: ease;
     position: relative;
     cursor: text;
-    margin-top: 24px;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        border: 1px solid var(--text-color);
+        border: 1px solid var(--text-high-contrast);
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
@@ -1085,11 +1084,8 @@ export default defineComponent({
         position: absolute;
         top: 25px;
         left: var(--symbol-left);
+        color: var(--text-low-contrast);
 
-        #{$this}--disabled &,
-        #{$this}--readonly & {
-            color: var(--text-low-contrast);
-        }
     }
 
     &__amount-available {

@@ -6,11 +6,10 @@ import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/a
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
-import { divideFloat, multiplyFloat } from 'src/antelope/stores/utils';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
-import { Notify } from 'quasar';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -24,18 +23,20 @@ const global = useAppNavStore();
 export default defineComponent({
     name: 'SendPage',
     components: {
+        CurrencyInput,
         AppPage,
         UserInfo,
     },
     data: () => ({
         address: '',
+        fiatConversionRate: 0 as number | undefined,
         token: null as EvmToken | null,
-        amount: '',
-        useFiat: false,
-        userStore,
-        estimatedGas: { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) },
+        amount: BigNumber.from(0),
+        estimatedGas: {
+            system: ethers.BigNumber.from(0),
+            fiat: ethers.BigNumber.from(0),
+        },
         prettyPrintBalance,
-        tempCurrentBalance: '',
     }),
     mounted() {
         global.setShowBackBtn(true);
@@ -44,7 +45,7 @@ export default defineComponent({
         balances: {
             handler() {
                 let token = this.token;
-                this.token = null;
+
                 if (this.balances.length > 0) {
                     // if there's a url parameter token with the token address, use that token
                     const tokenAddress = this.$route.query.token;
@@ -62,14 +63,21 @@ export default defineComponent({
                         token = this.balances[0];
                     }
                 }
-                this.token = token;
+
+                if (this.token !== token) {
+                    this.token = token;
+                }
             },
             immediate: true,
+            deep: true,
         },
         token: {
-            handler() {
-                this.useFiat = false;
-                this.updateEstimatedGas();
+            async handler(newToken: EvmToken | null, oldToken: EvmToken | null) {
+                // TODO update after https://github.com/telosnetwork/telos-wallet/issues/316
+                if (newToken?.address !== oldToken?.address) {
+                    this.updateEstimatedGas();
+                    this.fiatConversionRate = newToken?.address === '' ? await chainStore.loggedChain.settings.getUsdPrice() : undefined;
+                }
             },
             immediate: true,
             deep: true,
@@ -100,6 +108,28 @@ export default defineComponent({
         showContractLink(): boolean {
             return !!this.token?.address;
         },
+        currencyInputSecondaryCurrencyBindings() {
+            const useSecondaryCurrency = !!this.fiatConversionRate;
+
+            if (!useSecondaryCurrency) {
+                return {};
+            }
+
+            return {
+                secondaryCurrencyCode: userStore.fiatCurrency,
+                secondaryCurrencyConversionFactor: this.fiatConversionRate,
+                secondaryCurrencyDecimals: 2,
+            };
+        },
+        fiatLocale() {
+            return userStore.fiatLocale;
+        },
+        tokenSymbol() {
+            return this.token?.symbol ?? 'TLOS';
+        },
+        tokenDecimals() {
+            return this.token?.decimals ?? 0;
+        },
         availableInTokensBn(): ethers.BigNumber {
             const zero = ethers.BigNumber.from(0);
             if (!this.token) {
@@ -110,106 +140,18 @@ export default defineComponent({
             }
             return this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
         },
-        availableInFiatBn(): ethers.BigNumber {
-            const zero = ethers.BigNumber.from(0);
-            if (!this.token) {
-                return zero;
-            }
-            const decimals = this.token.decimals;
-            const tokensBn = this.availableInTokensBn;
-            const priceBn = ethers.utils.parseUnits(this.token.price.toString(), decimals);
-            return tokensBn.mul(priceBn).div(ethers.utils.parseUnits('1', decimals));
-        },
-        availableDisplay(): string {
-            if (this.token) {
-                const decimals = this.token.decimals;
-                const amount = `${formatWei(this.useFiat ? this.availableInFiatBn : this.availableInTokensBn, decimals, decimals)}`;
-                if (this.useFiat) {
-                    return prettyPrintFiatBalance(amount, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
-                } else {
-                    return prettyPrintBalance(amount, userStore.fiatLocale, this.isMobile, this.token.symbol);
-                }
-            }
-            return '';
-        },
-        amountInFiat(): string {
-            if (this.token && this.token.price && !this.useFiat) {
-                let fiat = '0.00';
-                if (this.amount){
-                    const mult = multiplyFloat(this.amount, this.token.price);
-                    const amount = ethers.utils.parseUnits(mult, this.token.decimals);
-                    fiat = `${formatWei(amount, this.token.decimals, 2)}`;
-                }
-                return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
-            }
-            return '';
-        },
-        amountInTokens(): string {
-            if (this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = this.amount ? divideFloat(this.amount, this.token.price) : '0';
-                return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
-            }
-            return '';
-        },
-        fiatSymbol(): string {
-            return userStore.fiatCurrency;
-        },
-        fiatRateText(): string {
-            if (!this.token || !this.token.price) {
-                return '';
-            }
-            if (this.useFiat) {
-                const pretty = prettyPrintBalance(1 / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
-                return `(~ ${pretty} / ${userStore.fiatCurrency})`;
-            } else {
-                const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
-                return `(@ ${pretty} / ${this.token.symbol})`;
-            }
-        },
-        finalTokenAmount(): ethers.BigNumber {
-            if (!this.amount){
-                return ethers.BigNumber.from(0);
-            }
-            let amount = this.amount;
-            if (this.useFiat && this.token) {
-                amount = divideFloat(this.amount, this.token.price);
-            }
-            return ethers.utils.parseUnits(amount,  this.token?.decimals ?? 0);
-        },
-        useTextarea(): boolean {
-            return this.$q.screen.width < 500;
-        },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
             return regex.test(this.address);
         },
-        isAmountValid(): boolean {
-            if (this.token) {
-                const available = this.availableInTokensBn;
-                const amount = this.finalTokenAmount;
-                return !amount.isZero() && !amount.isNegative() && available.gte(amount);
-            } else {
-                return false;
-            }
-        },
         isFormValid(): boolean {
-            return this.isAddressValid && this.isAmountValid && this.isPrecisionCorrect;
-        },
-        isPrecisionCorrect(): boolean {
-            if (this.token) {
-                if (this.useFiat) {
-                    const result = (this.amount.split('.')[1]?.length ?? 0) <= 2;
-                    return result;
-                } else {
-                    const result = (this.amount.split('.')[1]?.length ?? 0) <= this.token.decimals;
-                    return result;
-                }
-            } else {
-                return true;
-            }
+            return this.isAddressValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
             return ant.stores.feedback.isLoading('transferTokens');
+        },
+        currencyInputIsLoading() {
+            return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
     },
     methods: {
@@ -227,30 +169,6 @@ export default defineComponent({
                 this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
             }
         },
-        toggleUseFiat() {
-            if (this.token && this.amount) {
-                if (this.useFiat) {
-                    this.amount = divideFloat(this.amount, this.token.price);
-                } else {
-                    this.amount = multiplyFloat(this.amount, this.token.price);
-                    const amount = ethers.utils.parseUnits(this.amount, this.token.decimals);
-                    this.amount = `${formatWei(amount, this.token.decimals, 2)}`;
-                }
-            }
-
-            this.useFiat = !this.useFiat;
-        },
-        setMaxBalance() {
-            if (this.token) {
-                if (this.useFiat) {
-                    this.amount = `${formatWei(this.availableInFiatBn, this.token.decimals, 2)}`;
-                } else {
-                    this.amount = `${formatWei(this.availableInTokensBn, this.token.decimals, 4)}`;
-                }
-            } else {
-                this.amount = '';
-            }
-        },
         viewTokenContract() {
             if (this.token) {
                 const explorerUrl = ant.stores.chain.loggedEvmChain?.settings.getExplorerUrl();
@@ -258,7 +176,12 @@ export default defineComponent({
                     window.open(explorerUrl + '/address/' + this.token.address, '_blank');
                     return;
                 } else {
-                    ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: ant.stores.chain.currentChain?.settings.getNetwork() }));
+                    ant.config.notifyErrorHandler(
+                        this.$t(
+                            'settings.no_explorer',
+                            { network: ant.stores.chain.currentChain?.settings.getNetwork() },
+                        ),
+                    );
                 }
             }
         },
@@ -274,14 +197,15 @@ export default defineComponent({
                     (this as any).$errorNotification(errorMessage, true);
                     return;
                 }
-            }else {
+            } else {
                 //if injected provider (Desktop) prompt to switch chains
                 await checkNetwork();
-            };
+            }
 
             const token = this.token;
-            const amount = this.finalTokenAmount;
+            const amount = this.amount;
             const to = this.address;
+
             if (this.isFormValid) {
                 ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
@@ -293,7 +217,7 @@ export default defineComponent({
                 }).catch((err) => {
                     console.error(err);
                     ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
-                    // TODO: verify in depth all error mesagged to know how to handle the feedback
+                    // TODO: verify in depth all error messages to know how to handle the feedback
                     // https://github.com/telosnetwork/telos-wallet/issues/273
                 });
             } else {
@@ -324,7 +248,9 @@ export default defineComponent({
     </template>
 
     <div class="c-send-page__form-container">
+        <q-spinner v-if="!balances?.length" />
         <q-form
+            v-else
             class="c-send-page__form"
         >
             <div class="c-send-page__row c-send-page__row--1 row">
@@ -333,23 +259,15 @@ export default defineComponent({
                         v-model="address"
                         outlined
                         autogrow
-                        :type="useTextarea ? 'textarea' : 'text'"
+                        :type="$q.screen.width < 500 ? 'textarea' : 'text'"
                         :label="$t('evm_wallet.receiving_account')"
                         :rules="[val => !!val || $t('evm_wallet.account_required')]"
                     />
                 </div>
             </div>
-            <div v-if="!isMobile" class="c-send-page__row c-send-page__row--2 row c-send-page__available">
-                <q-space/>
-                <div class="col-auto">
-                    <span class="c-send-page__amount-available" @click="setMaxBalance">
-                        {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
-                    </span>
-                </div>
-            </div>
             <div class="c-send-page__row c-send-page__row--3 row">
                 <!-- Token selection -->
-                <div class="col-12 col-sm-auto">
+                <div class="col-12 col-sm-auto c-send-page__token-selection-container">
                     <q-select
                         v-model="token"
                         outlined
@@ -369,7 +287,7 @@ export default defineComponent({
                                 <div>
                                     <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
                                     <q-item-label class="c-send-page__selector-op-balance" caption>
-                                        {{ prettyPrintBalance(scope.opt.balance, userStore.fiatLocale, isMobile, scope.opt.symbol) }}
+                                        {{ prettyPrintBalance(scope.opt.balance, fiatLocale, isMobile, scope.opt.symbol) }}
                                     </q-item-label>
                                 </div>
                             </q-item>
@@ -388,55 +306,19 @@ export default defineComponent({
                     </div>
                 </div>
                 <!-- Amount input -->
-                <div class="c-send-page__amount-col col">
-                    <div v-if="isMobile" class="row c-send-page__available">
-                        <q-space/>
-                        <div class="col-auto">
-                            <span class="c-send-page__amount-available" @click="setMaxBalance">
-                                {{ $t('evm_wallet.amount_available', { amount:availableDisplay }) }}
-                            </span>
-                        </div>
-                    </div>
-                    <q-input
+                <div class="col">
+                    <CurrencyInput
                         v-model="amount"
-                        outlined
-                        class="c-send-page__amount-input"
-                        :label="$t('evm_wallet.amount')"
-                        :rules="[
-                            val => !!val || $t('evm_wallet.amount_required'),
-                            val => isPrecisionCorrect || $t('evm_wallet.invalid_amount_precision', { precision: useFiat ? 2 : (token?.decimals ?? 0) })
-                        ]"
-                        type="number"
-                        step="0.01"
-                        pattern="[0-9]*\.?[0-9]+"
-                    >
-                        <template v-slot:hint>
-                            <div v-if="token && token.price > 0" class="c-send-page__amount-fiat-footer">
-                                <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
-                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                    <span class="o-text--small u-text--low-contrast"> {{ amountInTokens }}</span>
-                                </div>
-                                <div v-else class="c-send-page__amount-fiat" @click="toggleUseFiat">
-                                    <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
-                                    <span class="o-text--small u-text--low-contrast"> {{ amountInFiat }}</span>
-                                </div>
-                                <div class="o-text--small u-text--low-contrast">
-                                    {{ fiatRateText }}
-                                </div>
-                            </div>
-                        </template>
-                    </q-input>
-
-                    <div
-                        v-if="token && amount"
-                        class="c-send-page__amount-symbol-container"
-                    >
-                        <span class="o-text--small u-text--low-contrast">
-                            <span class="c-send-page__amount-transparent">{{ amount }} &nbsp;</span>
-                            <span v-if="useFiat"> {{ fiatSymbol }} </span>
-                            <span v-else> {{ token.symbol }} </span>
-                        </span>
-                    </div>
+                        v-bind="currencyInputSecondaryCurrencyBindings"
+                        :loading="currencyInputIsLoading"
+                        :locale="fiatLocale"
+                        :decimals="tokenDecimals"
+                        :symbol="tokenSymbol"
+                        :max-value="availableInTokensBn"
+                        :error-if-over-max="true"
+                        :label="$t('global.amount')"
+                        required="required"
+                    />
                 </div>
             </div>
             <div class="c-send-page__row c-send-page__row--4 row">
@@ -513,15 +395,15 @@ export default defineComponent({
     &__row {
         gap: 16px;
         &--1 {
-            margin-bottom: 5px;
+            margin-bottom: 24px;
         }
 
         &--2 {
-            margin-bottom: 0px;
+            margin-bottom: 0;
         }
 
         &--3 {
-            margin-bottom: 24px;
+            margin-bottom: 40px;
         }
 
         &--4 {
@@ -541,7 +423,7 @@ export default defineComponent({
     }
 
     &__selector-op-avatar {
-        padding: 0px 14px 0px 0px;
+        padding-right: 14px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -575,13 +457,19 @@ export default defineComponent({
         color: transparent;
     }
 
+    &__token-selection-container {
+        position: relative;
+        margin-bottom: 24px;
+    }
 
     &__view-contract {
+        position: absolute;
+        bottom: -24px;
         display: flex;
         align-items: center;
         cursor: pointer;
-        margin-top: 8px;
         color: var(--link-color);
+
         &--hidden {
             opacity: 0;
             pointer-events: none;

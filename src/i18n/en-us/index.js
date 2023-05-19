@@ -73,7 +73,6 @@ export default {
         receiving_account: 'Receiving Account',
         account_required: 'Account is required',
         token: 'Token',
-        amount: 'Amount',
         cancel: 'Cancel',
         estimated_fees: 'Estimated Fees',
         amount_available: '{amount} Available',
@@ -106,6 +105,7 @@ export default {
         more_info: 'More info',
         required_field: 'This field is required',
         available: 'Available',
+        amount: 'Amount',
     },
     notification:{
         success_title: 'Success',

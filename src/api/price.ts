@@ -14,7 +14,7 @@ export const getCoingeckoUsdPrice = async (
         getCoingeckoExchangeStatsUrl(tokenId),
     );
 
-    return stats.data[tokenId].usd;
+    return stats.data[tokenId]?.usd;
 };
 
 export const getCoingeckoPriceChartData = async (
