@@ -31,6 +31,7 @@ export default defineComponent({
             // changes the way the user sees and enters the value
             type: BigNumber as PropType<BigNumber>,
             required: true,
+            validator: (val: BigNumber) => !val.isNegative(),
         },
         symbol: {
             type: String,
@@ -81,6 +82,7 @@ export default defineComponent({
             // represents the maximum amount that the user has available
             type: BigNumber as PropType<BigNumber | null>,
             default: null,
+            validator: (val: BigNumber | null) => val === null || !val.isNegative(),
         },
         loading: {
             type: Boolean,
