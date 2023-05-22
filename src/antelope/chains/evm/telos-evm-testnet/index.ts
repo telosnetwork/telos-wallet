@@ -125,4 +125,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return false;
     }
 
+    getEvmNativeContractAccount(): string {
+        return 'eosio.evm';
+    }
+
 }

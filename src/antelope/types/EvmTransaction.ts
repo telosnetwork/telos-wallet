@@ -13,6 +13,14 @@ export interface EvmTransactionLog {
     transactionHash: string;
 }
 
+export interface TransactionBasicData {
+    contract: string;
+    from: string;
+    to: string;
+    value: string;
+    data: string;
+}
+
 export interface EvmTransaction {
     blockNumber: number;
     contractAddress?: string;

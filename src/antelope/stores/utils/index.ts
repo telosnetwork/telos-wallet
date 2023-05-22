@@ -25,10 +25,10 @@ export function divideFloat(a: string | number, b: string | number): string {
     const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
     const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
     const decimals = 2 * Math.max(a_decimals, b_decimals);
-    const A = ethers.utils.parseUnits(a.toString(), decimals);
-    const B = ethers.utils.parseUnits(b.toString(), b_decimals);
+    const A = ethers.utils.parseUnits((+a).toFixed(12), decimals);
+    const B = ethers.utils.parseUnits((+b).toFixed(12), b_decimals);
     const result = A.div(B);
-    return formatUnits(result.toString(), decimals-b_decimals);
+    return `${formatWei(result, decimals-b_decimals, 12)}`;
 }
 
 /**
@@ -41,10 +41,10 @@ export function multiplyFloat(a: string | number, b: string | number): string {
     const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
     const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
     const decimals = a_decimals + b_decimals;
-    const A = ethers.utils.parseUnits(a.toString(), decimals);
-    const B = ethers.utils.parseUnits(b.toString(), decimals);
+    const A = ethers.utils.parseUnits((+a).toFixed(12), decimals);
+    const B = ethers.utils.parseUnits((+b).toFixed(12), decimals);
     const result = A.mul(B);
-    return formatUnits(result.toString(), decimals+decimals);
+    return `${formatWei(result, decimals+decimals, 12)}`;
 }
 
 export function formatWei(bn: string | number | ethers.BigNumber, tokenDecimals: number, displayDecimals = 4): string {

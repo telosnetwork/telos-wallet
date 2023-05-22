@@ -2,8 +2,8 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
-import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { getAntelope, useAccountStore, useChainStore, useFeedbackStore, useUserStore } from 'src/antelope';
+import { TransactionBasicData, EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
@@ -19,6 +19,7 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
+const feedback = useFeedbackStore();
 const global = useAppNavStore();
 
 export default defineComponent({
@@ -48,7 +49,6 @@ export default defineComponent({
         balances: {
             handler() {
                 let token = this.token;
-
                 if (this.balances.length > 0) {
                     // if there's a url parameter token with the token address, use that token
                     const tokenAddress = this.$route.query.token;
@@ -152,26 +152,63 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferTokens');
+            return feedback.isLoading('transferTokens');
+        },
+        isLoadingGasEstimation(): boolean {
+            return feedback.isLoading('SendPage.updateEstimatedGas');
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
     },
     methods: {
-        // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
-        // https://github.com/telosnetwork/telos-wallet/issues/274
+
+        async getEstimatedGasLimit(isSystemToken: boolean): Promise<ethers.BigNumber> {
+            const chain_settings = chainStore.loggedEvmChain?.settings;
+            if (!this.token || !chain_settings) {
+                console.error('Unexpectd error: no token or chain settings');
+                return ethers.BigNumber.from(0);
+            }
+
+            // preparing dummie transfer
+            const from = ant.stores.account.loggedEvmAccount?.address;
+            const to = this.address || from;
+            const amountToSend = ethers.BigNumber.from('1');
+            const transaction: Partial<TransactionBasicData> = {
+                from,
+                to,
+            };
+
+            if (!isSystemToken) {
+                const abi = ant.stores.evm.getTokenABI('erc20');
+                const contract = await ant.stores.evm.getContractFromAbi(this.token.address, abi);
+                const transferFunction = contract.interface.encodeFunctionData('transfer', [to, amountToSend]);
+                transaction.data = transferFunction;
+                transaction.value = '0x0';
+            } else {
+                transaction.value = amountToSend.toHexString();
+            }
+
+            return chain_settings.getEstimatedGasLimit(transaction as TransactionBasicData)
+                .then(gasLimit => gasLimit).catch((error) => {
+                    console.error('Error getting gas limit: ', error);
+                    return ethers.BigNumber.from(0);
+                });
+        },
+
         async updateEstimatedGas() {
+            feedback.setLoading('SendPage.updateEstimatedGas');
             const chain_settings = chainStore.loggedEvmChain?.settings;
             if (chain_settings)  {
                 if (this.token?.isSystem) {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(await this.getEstimatedGasLimit(true));
                 } else {
-                    this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
+                    this.estimatedGas = await chain_settings.getEstimatedGas(await this.getEstimatedGasLimit(false));
                 }
             } else {
                 this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
             }
+            feedback.unsetLoading('SendPage.updateEstimatedGas');
         },
         viewTokenContract() {
             if (this.token) {
@@ -327,13 +364,16 @@ export default defineComponent({
                 <q-space/>
                 <div class="col-auto">
                     <div class="c-send-page__gas-fee">
-                        <div class="row o-text--header-5 u-text--default-contrast text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
+                        <div class="row c-send-page__gas-fee-title text-no-wrap">
+                            <q-spinner v-if="isLoadingGasEstimation" size="20px" color="primary" />
+                            <span class="q-ml-xs">{{ $t('evm_wallet.estimated_fees') }}</span>
+                        </div>
                         <div class="row c-send-page__gas-fee-info">
                             <q-space/>
-                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page__gas-icon" name="local_gas_station" /></div>
+                            <div class="col-auto q-mr-xs flex flex-column items-center justify-center"><q-icon name="local_gas_station" /></div>
                             <div class="col-auto">
-                                <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInSystemSym }} </div>
-                                <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInFiat }} </div>
+                                <div class="row text-no-wrap"> {{ gasFeeInSystemSym }} </div>
+                                <div class="row text-no-wrap"> {{ gasFeeInFiat }} </div>
                             </div>
                         </div>
                     </div>

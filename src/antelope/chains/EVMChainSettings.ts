@@ -2,6 +2,7 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import {
     AbiSignature,
+    TransactionBasicData,
     ChainSettings,
     EvmBlockData,
     EvmContractCreationInfo,
@@ -15,7 +16,7 @@ import {
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
-
+import { useFeedbackStore } from 'src/antelope/stores/feedback';
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -106,6 +107,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getExplorerUrl(): string;
     abstract getEcosystemUrl(): string;
     abstract getTrustedContractsBucket(): string;
+    abstract getEvmNativeContractAccount(): string;
     abstract getImportantTokensIdList(): string[];
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexSupport(): boolean;
@@ -310,7 +312,25 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }).then(response => ethers.BigNumber.from(response.result));
     }
 
-    async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
+    async getEstimatedGasLimit(transaction: TransactionBasicData): Promise<ethers.BigNumber> {
+        useFeedbackStore().setLoading('getEstimatedGasLimit');
+        const params = [{
+            from: transaction.from,
+            to: transaction.to,
+            value: transaction.value,
+            data: transaction.data,
+        }];
+        const result = await this.doRPC<{ result: string }>({
+            method: 'eth_estimateGas' as Method,
+            params,
+        });
+        const limit = ethers.BigNumber.from(result.result || '0');
+        useFeedbackStore().unsetLoading('getEstimatedGasLimit');
+        return limit;
+    }
+
+    async getEstimatedGas(limit: ethers.BigNumber): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
+        useFeedbackStore().setLoading('getEstimatedGas');
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
 
@@ -318,8 +338,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
         const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        useFeedbackStore().unsetLoading('getEstimatedGas');
         return { system, fiat };
     }
+
     async getLatestBlock(): Promise<ethers.BigNumber> {
         return this.doRPC<{result:string}>({
             method: 'eth_blockNumber' as Method,
