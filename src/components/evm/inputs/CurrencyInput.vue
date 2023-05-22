@@ -998,7 +998,7 @@ export default defineComponent({
     margin-top: 24px;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        border: 1px solid var(--text-color);
+        border: 1px solid var(--text-default-contrast);
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {

@@ -91,7 +91,7 @@
 // see also: NativeLayout.vue => <style> for native overrides
 body {
     @include regular;
-    color: var(--text-color);
+    color: var(--text-default-contrast);
 }
 
 
