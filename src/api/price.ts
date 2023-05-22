@@ -10,11 +10,15 @@ import {
 export const getCoingeckoUsdPrice = async (
     tokenId: string,
 ): Promise<number> => {
-    const stats: PriceStats = await axios.get(
-        getCoingeckoExchangeStatsUrl(tokenId),
-    );
+    try {
+        const stats: PriceStats = await axios.get(
+            getCoingeckoExchangeStatsUrl(tokenId),
+        );
 
-    return stats.data[tokenId].usd;
+        return stats.data[tokenId].usd;
+    } catch (e) {
+        return 0;
+    }
 };
 
 export const getCoingeckoPriceChartData = async (

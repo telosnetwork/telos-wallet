@@ -1,6 +1,14 @@
 import { ethers } from 'ethers';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 
+export interface TransactionBasicData {
+    contract: string;
+    from: string;
+    to: string;
+    value: string;
+    data: string;
+}
+
 export interface EvmTransaction {
     block: number;
     block_hash: string;
