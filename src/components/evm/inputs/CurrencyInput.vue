@@ -911,7 +911,6 @@ export default defineComponent({
 <template>
 <div
     :id="$attrs.id"
-    ref="root"
     :class="{
         [$attrs.class]: !!$attrs.class,
         'c-currency-input': true,
