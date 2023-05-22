@@ -7,11 +7,15 @@ import {
     EvmContractCreationInfo,
     EvmToken,
     HyperionAbiSignatureFilter,
+    IndexerAccountBalances,
+    IndexerTokenMarketData,
     PriceChartData,
-    IndexerTransactionsFilter, IndexerAccountTransactionsResponse,
+    IndexerTransactionsFilter,
+    IndexerAccountTransactionsResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
+
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -19,10 +23,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External query API support
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
-    protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerEndpoint() });
 
     // External trusted metadata bucket for EVM contracts
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+
+    // External indexer API support
+    protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerApiEndpoint() });
 
     // Token list promise
     tokenListPromise: Promise<EvmToken[]> | null = null;
@@ -60,9 +66,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // Axios Request Interceptor
         this.hyperion.interceptors.request.use(requestHandler);
+        this.indexer.interceptors.request.use(requestHandler);
 
         // Axios Response Interceptor
         this.hyperion.interceptors.response.use(responseHandler, erorrHandler);
+        this.indexer.interceptors.response.use(responseHandler, erorrHandler);
 
     }
 
@@ -86,7 +94,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
-    abstract getIndexerEndpoint(): string;
     abstract getRPCEndpoint(): RpcEndpoint;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
@@ -99,6 +106,66 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getExplorerUrl(): string;
     abstract getTrustedContractsBucket(): string;
     abstract getImportantTokensIdList(): string[];
+    abstract getIndexerApiEndpoint(): string;
+    abstract hasIndexSupport(): boolean;
+
+    async getAllBalances(account: string): Promise<EvmToken[]> {
+        if (!this.hasIndexSupport()) {
+            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        return Promise.all([
+            this.indexer.get(`v1/account/${account}/balances`, {
+                params: {
+                    limit: 50,
+                    offset: 0,
+                    includePagination: false,
+                },
+            }),
+            this.getUsdPrice(),
+        ]).then(([response, systemTokenPrice]) => {
+            // parse to IndexerAccountBalances
+            const balances = response.data as IndexerAccountBalances;
+
+            return this.getTokenList().then((tokenList:EvmToken[]) => {
+                const tokens: EvmToken[] = [];
+                for (const result of balances.results) {
+                    const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
+                    const contractData = balances.contracts[result.contract] ?? {};
+                    const callDataStr = contractData.calldata as unknown as string;
+                    try {
+                        if (typeof callDataStr === 'string') {
+                            const callData = JSON.parse(callDataStr);
+                            contractData.calldata = callData;
+                        } else if (token?.isSystem) {
+                            // system token systemTokenPrice
+                            contractData.calldata = {
+                                price: systemTokenPrice.toString(),
+                            } as IndexerTokenMarketData;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing calldata', `"${callDataStr}"`, e);
+                    }
+
+                    if (token) {
+                        const balance = ethers.BigNumber.from(result.balance);
+                        token.balance = ethers.utils.formatUnits(balance, token.decimals);
+                        token.balanceBn = balance;
+                        token.fullBalance = token.balance;
+                        if (typeof contractData.calldata === 'object') {
+                            token.price = parseFloat(contractData.calldata.price);
+                            token.fiatBalance = (token.price * parseFloat(token.balance)).toFixed(2);
+                        }
+                        tokens.push(token);
+                    }
+                }
+                return tokens;
+            });
+        }).catch((error) => {
+            console.error(error);
+            return [];
+        });
+    }
 
     constructTokenId(token: EvmToken): string {
         return `${token.symbol}-${token.address}-${this.getChainId()}`;
@@ -169,14 +236,17 @@ export default abstract class EVMChainSettings implements ChainSettings {
             return this.tokenListPromise;
         }
 
+        type PartialToken = {chainId:number, logoURI: string, address: string};
+
         const url =  'https://raw.githubusercontent.com/telosnetwork/token-list/main/telosevm.tokenlist.json';
         this.tokenListPromise = axios.get(url)
-            .then(results => results.data.tokens as unknown as {chainId:number, logoURI: string}[])
+            .then(results => results.data.tokens as unknown as PartialToken[])
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
             .then(tokens => tokens.map(t => ({
                 ...t,
                 logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
             })))
+            .then(tokens => [this.getSystemToken() as unknown as PartialToken].concat(tokens))
             .then(tokens => tokens.map(t => ({
                 // Token Id - '<symbol>-<address>-<chainId>'
                 tokenId: `${(t as EvmToken).symbol}-${(t as EvmToken).address}-${t.chainId}`,
@@ -192,7 +262,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 ...t,
             })))
             .then(tokens => tokens.map(t => t as unknown as EvmToken));
-
 
         return this.tokenListPromise;
     }

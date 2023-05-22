@@ -13,6 +13,7 @@ export * from 'src/antelope/types/Filters';
 export * from 'src/antelope/types/PriceData';
 export * from 'src/antelope/types/Proposals';
 export * from 'src/antelope/types/Producers';
+export * from 'src/antelope/types/IndexerTypes';
 export * from 'src/antelope/types/KeyAccounts';
 export * from 'src/antelope/types/Label';
 export * from 'src/antelope/types/Theme';

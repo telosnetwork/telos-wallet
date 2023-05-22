@@ -11,7 +11,7 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: '',
+    address: '___NATIVE_CURRENCY___',
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
@@ -46,10 +46,6 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getHyperionEndpoint(): string {
         return NETWORK_EVM_ENDPOINT;
-    }
-
-    getIndexerEndpoint(): string {
-        return INDEXER_ENDPOINT;
     }
 
     getRPCEndpoint(): RpcEndpoint {
@@ -107,4 +103,13 @@ export default class TelosEVMTestnet extends EVMChainSettings {
             this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
         ];
     }
+
+    getIndexerApiEndpoint(): string {
+        return INDEXER_ENDPOINT;
+    }
+
+    hasIndexSupport(): boolean {
+        return false;
+    }
+
 }
