@@ -36,7 +36,7 @@ export const getCoingeckoUsdPrice = async (
             priceCache[tokenId] = { lastFetchTime: now, lastPrice: price };
             return price;
         } else {
-            console.log(`Error: received status code ${stats.status} from Coingecko.`);
+            console.error(`Error: received status code ${stats.status} from Coingecko.`);
             return 0;
         }
     } catch (error) {
