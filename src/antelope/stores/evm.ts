@@ -42,7 +42,9 @@ import {
     ExceptionError,
     supportsInterfaceAbi,
     Token,
-    EvmTransactionResponse, EvmContractCreationInfo, EvmContractMetadata,
+    EvmTransactionResponse,
+    EvmContractCreationInfo,
+    EvmContractMetadata,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';

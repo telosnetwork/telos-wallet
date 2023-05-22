@@ -49,7 +49,7 @@ export default class EvmContract {
 
         if (abi) {
             this._abi = typeof abi === 'string' ? JSON.parse(abi) : abi;
-            this._interface = abi ? markRaw(new ethers.utils.Interface(abi)) : null;
+            this._interface = markRaw(new ethers.utils.Interface(abi));
         }
 
         if (token) {
@@ -123,7 +123,7 @@ export default class EvmContract {
     }
 
     isToken() {
-        if(this._supportedInterfaces.length === 0) {
+        if (this._supportedInterfaces.length === 0) {
             return false;
         }
 

@@ -484,7 +484,7 @@ export default defineComponent({
     }
 
     &__gas-icon {
-        color: var(--text-color-muted);
+        color: var(--text-low-contrast);
     }
 
     &__gas-text {
