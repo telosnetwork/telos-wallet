@@ -137,10 +137,13 @@ export default defineComponent({
         inputElementAttrs() {
             const attrs: Record<string, string> = {
                 ...this.$attrs,
+                class: '',
                 disabled: 'disabled',
                 readonly: 'readonly',
                 required: 'required',
             };
+
+            delete attrs.class;
 
             if (!this.isDisabled) {
                 delete attrs.disabled;
@@ -908,6 +911,7 @@ export default defineComponent({
 <template>
 <div
     :id="$attrs.id"
+    ref="root"
     :class="{
         [$attrs.class]: !!$attrs.class,
         'c-currency-input': true,
