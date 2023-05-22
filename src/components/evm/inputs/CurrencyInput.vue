@@ -984,7 +984,6 @@ export default defineComponent({
     --symbol-left: 28px;
     $this: &;
 
-    max-width: 400px;
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
