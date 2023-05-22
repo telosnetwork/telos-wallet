@@ -131,13 +131,19 @@ export default defineComponent({
         },
         availableInTokensBn(): ethers.BigNumber {
             const zero = ethers.BigNumber.from(0);
-            if (!this.token) {
+
+            if (!this.token || !this.token.balanceBn) {
                 return zero;
             }
-            if (!this.token.balanceBn) {
+
+            const availableMinusGas = this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
+
+            if (availableMinusGas.isNegative()) {
                 return zero;
             }
-            return this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
+
+            return availableMinusGas;
+
         },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
