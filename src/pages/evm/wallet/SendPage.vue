@@ -124,7 +124,7 @@ export default defineComponent({
             return userStore.fiatLocale;
         },
         tokenSymbol() {
-            return this.token?.symbol ?? 'TLOS';
+            return this.token?.symbol ?? chainStore.loggedChain.settings.getSystemToken().symbol;
         },
         tokenDecimals() {
             return this.token?.decimals ?? 0;
