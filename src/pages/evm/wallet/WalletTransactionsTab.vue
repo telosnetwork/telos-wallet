@@ -69,6 +69,7 @@ export default defineComponent({
         async getTransactions() {
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             const limit = this.pagination.rowsPerPage;
+
             if (this.address) {
                 historyStore.setEVMTransactionsFilter({
                     address: this.address,

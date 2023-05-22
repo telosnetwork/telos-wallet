@@ -55,7 +55,7 @@ export const EvmSwapFunctionNames = [
 export interface ShapedTransactionRow {
     id: string;
     epoch: number;
-    // action should be 'send', 'receive', 'swap', or some other action like 'approve'
+    // action should be 'send', 'receive', 'swap', 'contractCreation', or some other action like 'approve'
     // a swap is any function in EvmSwapFunctionNames
     actionName: string;
     from: string; // address

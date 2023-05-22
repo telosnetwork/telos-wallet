@@ -62,15 +62,17 @@ export const useContractStore = defineStore(store_name, {
             try {
                 const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
                 const response = await indexer.get(`/contract/${address}?full=true&includeAbi=true`);
+
                 if (response.data?.success && response.data.results.length > 0){
                     contract = response.data.results[0];
                 }
             } catch (e) {
                 console.warn(`Could not retrieve contract ${address}: ${e}`);
+                this.processing.splice(index, 1);
                 return null;
             }
             this.addContractToCache(address, contract);
-            this.processing = this.processing.splice(index, 1);
+            this.processing.splice(index, 1);
             return this.$state.factory.buildContract(contract);
         },
 
@@ -132,12 +134,7 @@ export const useContractStore = defineStore(store_name, {
             return transfers;
         },
 
-        async getFunctionNameFromTransaction(transaction: EvmTransaction, contractAddress: string): Promise<string> {
-            if (!contractAddress) {
-                throw new AntelopeError('antelope.contracts.address_required');
-            }
-            const contract = await this.getContract(contractAddress);
-
+        async getFunctionNameFromTransaction(transaction: EvmTransaction, contract: EvmContract): Promise<string> {
             if (!contract || !contract.abi) {
                 throw new AntelopeError('antelope.contracts.invalid_contract');
             }

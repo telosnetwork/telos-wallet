@@ -87,6 +87,7 @@ export default {
         swapped: 'Swapped',
         failed_contract_interaction: 'Failed contract interaction',
         contract_interaction: 'Contract interaction',
+        contract_creation: 'Contract creation',
         aria_link_to_address: 'Link to block explorer address page',
         aria_link_to_transaction: 'Link to block explorer transaction page',
         click_to_fill_max: 'Click to fill max amount',
@@ -352,7 +353,6 @@ export default {
     },
     antelope: {
         contracts: {
-            address_required: 'Contract address required',
             invalid_contract: 'Contract or contract ABI missing',
             contract_data_required: 'Contract data missing',
         },

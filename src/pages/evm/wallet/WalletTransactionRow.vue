@@ -70,11 +70,11 @@ export default defineComponent({
                 return false;
             }
 
-            return !['send', 'receive', 'swap'].includes(this.transaction.actionName);
+            return !['send', 'receive', 'swap', 'contractCreation'].includes(this.transaction.actionName);
         },
         actionHasDescriptiveText(): boolean {
             // only true for 'known actions' send, receive, and swap
-            return ['send', 'receive', 'swap'].includes(this.transaction.actionName);
+            return ['send', 'receive', 'swap', 'contractCreation'].includes(this.transaction.actionName);
         },
         actionDescriptiveText(): string {
             switch (this.transaction.actionName) {
@@ -84,6 +84,8 @@ export default defineComponent({
                 return this.$t('evm_wallet.received');
             case 'swap':
                 return this.$t('evm_wallet.swapped');
+            case 'contractCreation':
+                return this.$t('evm_wallet.contract_creation');
             default:
                 return '';
             }
@@ -177,6 +179,7 @@ export default defineComponent({
                     <span class="c-transaction-row__interaction-nowrap">
                         {{ actionPrepositionText }}
                         <ExternalLink
+                            v-if="transaction.actionName !== 'contractCreation'"
                             :text="interactedWithText"
                             :url="interactedWithUrl"
                             :purpose="$t('evm_wallet.aria_link_to_address')"

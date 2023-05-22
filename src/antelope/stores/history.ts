@@ -128,18 +128,24 @@ export const useHistoryStore = defineStore(store_name, {
                     const gasInUsd = +(formatUnits(gasInUsdBn, 2));
 
                     // all contracts in transactions are cached, no need to use getContract
-                    const toPrettyName = contractStore.cachedContracts[tx.to.toLowerCase()]?.name ?? '';
-                    const fromPrettyName = contractStore.cachedContracts[tx.from.toLowerCase()]?.name ?? '';
+                    const toPrettyName = contractStore.cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
+                    const fromPrettyName = contractStore.cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
 
                     const valuesIn: TransactionValueData[] = [];
                     const valuesOut: TransactionValueData[] = [];
 
                     const isFailed = tx.status !== '0x1';
+                    const isContractCreation = !tx.to && !!tx.contractAddress;
                     let functionName = '';
 
-                    if (tx.to.toLowerCase() !== userAddressLower) {
+                    if (!isContractCreation && tx.to && tx.to.toLowerCase() !== userAddressLower) {
                         // if the user interacted with a contract, the 'to' field is that contract's address
-                        functionName = await contractStore.getFunctionNameFromTransaction(tx, tx.to);
+                        const contract = await contractStore.getContract(tx.to);
+
+                        if (contract && contract.abi) {
+                            functionName = await contractStore.getFunctionNameFromTransaction(tx, contract);
+                        }
+
                     }
 
                     let actionName = '';
@@ -149,14 +155,14 @@ export const useHistoryStore = defineStore(store_name, {
                             const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
                             const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
-                            if (tx.from.toLowerCase() === userAddressLower) {
+                            if (tx.from?.toLowerCase() === userAddressLower) {
                                 valuesOut.push({
                                     amount: +formatUnits(tx.value, WEI_PRECISION),
                                     symbol: chainSettings.getSystemToken().symbol,
                                     fiatValue: valueInFiat,
                                 });
                             }
-                            if (tx.to.toLowerCase() === userAddressLower) {
+                            if (tx.to?.toLowerCase() === userAddressLower) {
                                 valuesIn.push({
                                     amount: +formatUnits(tx.value, WEI_PRECISION),
                                     symbol: chainSettings.getSystemToken().symbol,
@@ -167,14 +173,14 @@ export const useHistoryStore = defineStore(store_name, {
 
                         transfers.forEach((xfer) => {
                             if (xfer.symbol && xfer.decimals) {
-                                if (xfer.from.toLowerCase() === userAddressLower) {
+                                if (xfer.from?.toLowerCase() === userAddressLower) {
                                     // sent from user
                                     valuesOut.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
                                         symbol: xfer.symbol,
                                         fiatValue: undefined,
                                     });
-                                } else if (xfer.to.toLowerCase() === userAddressLower) {
+                                } else if (xfer.to?.toLowerCase() === userAddressLower) {
                                     // sent to user
                                     valuesIn.push({
                                         amount: +formatUnits(xfer.value, xfer.decimals),
@@ -185,10 +191,12 @@ export const useHistoryStore = defineStore(store_name, {
                             }
                         });
 
-                        if (+tx.value && transfers.length === 0 && !functionName) {
-                            if (tx.from.toLowerCase() === userAddressLower) {
+                        if (isContractCreation) {
+                            actionName = 'contractCreation';
+                        } else if (+tx.value && transfers.length === 0 && !functionName) {
+                            if (tx.from?.toLowerCase() === userAddressLower) {
                                 actionName = 'send';
-                            } else if (tx.to.toLowerCase() === userAddressLower) {
+                            } else if (tx.to?.toLowerCase() === userAddressLower) {
                                 actionName = 'receive';
                             }
                         } else if (EvmSwapFunctionNames.includes(functionName)) {
