@@ -73,7 +73,6 @@ export default {
         receiving_account: 'Receiving Account',
         account_required: 'Account is required',
         token: 'Token',
-        amount: 'Amount',
         cancel: 'Cancel',
         estimated_fees: 'Estimated Fees',
         amount_available: '{amount} Available',
@@ -111,6 +110,7 @@ export default {
         available: 'Available',
         transactions: 'Transactions',
         rows_per_page: 'Rows per page',
+        amount: 'Amount',
     },
     notification:{
         success_title: 'Success',

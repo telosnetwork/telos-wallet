@@ -62,15 +62,15 @@ export const useBalancesStore = defineStore(store_name, {
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
-                next: ({ label, account }) => {
-                    useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                next: async ({ label, account }) => {
+                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
             });
 
             // update logged balances every 10 seconds only if the user is logged
-            setInterval(() => {
+            setInterval(async () => {
                 if (useAccountStore().loggedAccount) {
-                    useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
                 }
             }, 10000);
 
@@ -100,7 +100,7 @@ export const useBalancesStore = defineStore(store_name, {
                             // In case the chain does not support index, we need to fetch the balances using Web3
                             this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();
-                            this.updateSystemBalanceForAccount(label, account.account);
+                            await this.updateSystemBalanceForAccount(label, account.account);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
                             const evm = useEVMStore();
                             let promises: Promise<void>[] = [];
@@ -135,6 +135,7 @@ export const useBalancesStore = defineStore(store_name, {
                     }
                 }
             } catch (error) {
+                useFeedbackStore().unsetLoading('updateBalancesForAccount');
                 console.error('Error: ', errorToString(error));
             }
         },
@@ -144,8 +145,8 @@ export const useBalancesStore = defineStore(store_name, {
             const provider = toRaw(evm.rpcProvider);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const token = chain_settings.getSystemToken();
-            const price = await chain_settings.getUsdPrice();
-            token.price = price;
+            token.price = await chain_settings.getUsdPrice();
+
             if (provider) {
                 const balanceBn = await provider.getBalance(address);
                 this.processBalanceForToken(label, token, balanceBn);
@@ -183,6 +184,7 @@ export const useBalancesStore = defineStore(store_name, {
                 balance,
                 fullBalance,
                 fiatBalance,
+                price: token.price,
             } as EvmToken;
 
             if (this.shouldAddTokenBalance(label, balanceBn, token)) {
@@ -235,7 +237,7 @@ export const useBalancesStore = defineStore(store_name, {
                 throw error;
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
-                useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
+                await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
             }
         },
         async transferNativeTokens(
