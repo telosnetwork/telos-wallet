@@ -9,8 +9,8 @@ const storeMock = {
         currentChain: {
             settings: {
                 getBuyMoreOfTokenLink: () => fakeBuyMoreLink,
-                getStlosContractAddress: () => fakeStlosContractAddress,
-                getWtlosContractAddress: () => fakeWtlosContractAddress,
+                getStakedNativeTokenAddress: () => fakeStlosContractAddress,
+                getWrappedNativeTokenAddress: () => fakeWtlosContractAddress,
                 getExplorerUrl: () => 'fake-url',
             },
         },
