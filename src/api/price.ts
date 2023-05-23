@@ -15,7 +15,7 @@ const priceCache: { [tokenId: string]: CachedPrice } = {};
 export const getCoingeckoUsdPrice = async (
     tokenId: string,
 ): Promise<number> => {
-  
+
     const now = Date.now();
 
     if (priceCache[tokenId] &&
