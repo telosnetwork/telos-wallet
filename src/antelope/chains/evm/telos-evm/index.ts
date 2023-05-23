@@ -2,6 +2,8 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { EvmToken, PriceChartData } from 'src/antelope/types';
+import { useUserStore } from 'src/antelope';
+import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '40';
@@ -60,8 +62,14 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
     }
 
-    getUsdPrice(): Promise<number> {
-        return api.getCoingeckoUsdPrice('telos');
+    async getUsdPrice(): Promise<number> {
+        if (this.hasIndexSupport()) {
+            const nativeTokenSymbol = this.getSystemToken().symbol;
+            const fiatCode = useUserStore().fiatCurrency;
+            return getFiatPriceFromIndexer(nativeTokenSymbol, fiatCode, this.indexer);
+        } else {
+            return api.getCoingeckoUsdPrice('telos');
+        }
     }
 
     getLargeLogoPath(): string {
