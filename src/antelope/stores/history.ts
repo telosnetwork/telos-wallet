@@ -131,8 +131,8 @@ export const useHistoryStore = defineStore(store_name, {
                     const gasInUsd = +(formatUnits(gasInUsdBn, 2));
 
                     // all contracts in transactions are cached, no need to use getContract
-                    const toPrettyName = contractStore.cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
-                    const fromPrettyName = contractStore.cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
+                    const toPrettyName = contractStore.__cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
+                    const fromPrettyName = contractStore.__cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
 
                     const valuesIn: TransactionValueData[] = [];
                     const valuesOut: TransactionValueData[] = [];
