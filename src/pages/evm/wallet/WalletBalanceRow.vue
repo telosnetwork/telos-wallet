@@ -170,7 +170,7 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
-            const tokenIsTlos  = !this.token.address; // TLOS is the only token with no address
+            const tokenIsTlos  = '___NATIVE_CURRENCY___';
             const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
             const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
