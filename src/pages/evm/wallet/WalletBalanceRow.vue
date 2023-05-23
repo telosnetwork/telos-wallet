@@ -171,8 +171,8 @@ export default defineComponent({
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
             const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
-            const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
-            const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
+            const tokenIsStlos = chainSettings.getStakedNativeTokenAddress() === this.token.address;
+            const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
             if (tokenIsTlos || tokenIsStlos) {

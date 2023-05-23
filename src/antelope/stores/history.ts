@@ -32,10 +32,11 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { getAntelope, useContractStore } from '..';
+import { getAntelope, useContractStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { getFiatPriceFromIndexer } from 'src/api/price';
 
 
 
@@ -85,8 +86,10 @@ export const useHistoryStore = defineStore(store_name, {
         // actions ---
         async fetchEVMTransactionsForAccount(label: Label = 'current') {
             const feedbackStore = useFeedbackStore();
+            const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
             const chain_settings = chain.settings as EVMChainSettings;
+            const indexer = chain_settings.getIndexer();
             const contractStore = useContractStore();
             const chainSettings = (chain.settings as EVMChainSettings);
 
@@ -171,25 +174,40 @@ export const useHistoryStore = defineStore(store_name, {
                             }
                         }
 
-                        transfers.forEach((xfer) => {
-                            if (xfer.symbol && xfer.decimals) {
-                                if (xfer.from?.toLowerCase() === userAddressLower) {
+                        for (const tokenXfer of transfers) {
+                            if (tokenXfer.symbol && tokenXfer.decimals) {
+                                let transferAmountInFiat: number | undefined;
+
+                                if (tokenXfer.symbol) {
+                                    const tokenFiatPrice = await getFiatPriceFromIndexer(
+                                        tokenXfer.symbol,
+                                        tokenXfer.address,
+                                        userStore.fiatCurrency,
+                                        indexer,
+                                    );
+
+                                    transferAmountInFiat = tokenFiatPrice ?
+                                        tokenFiatPrice * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
+                                        undefined;
+                                }
+
+                                if (tokenXfer.from?.toLowerCase() === userAddressLower) {
                                     // sent from user
                                     valuesOut.push({
-                                        amount: +formatUnits(xfer.value, xfer.decimals),
-                                        symbol: xfer.symbol,
-                                        fiatValue: undefined,
+                                        amount: +formatUnits(tokenXfer.value, tokenXfer.decimals),
+                                        symbol: tokenXfer.symbol,
+                                        fiatValue: transferAmountInFiat,
                                     });
-                                } else if (xfer.to?.toLowerCase() === userAddressLower) {
+                                } else if (tokenXfer.to?.toLowerCase() === userAddressLower) {
                                     // sent to user
                                     valuesIn.push({
-                                        amount: +formatUnits(xfer.value, xfer.decimals),
-                                        symbol: xfer.symbol,
-                                        fiatValue: undefined,
+                                        amount: +formatUnits(tokenXfer.value, tokenXfer.decimals),
+                                        symbol: tokenXfer.symbol,
+                                        fiatValue: transferAmountInFiat,
                                     });
                                 }
                             }
-                        });
+                        }
 
                         if (isContractCreation) {
                             actionName = 'contractCreation';

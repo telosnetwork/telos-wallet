@@ -62,13 +62,13 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
     }
 
-    getUsdPrice(): Promise<number> {
+    async getUsdPrice(): Promise<number> {
         if (this.hasIndexSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
-            return getFiatPriceFromIndexer(nativeTokenSymbol, fiatCode, this.indexer);
+            return await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
         } else {
-            return api.getCoingeckoUsdPrice('telos');
+            return await api.getCoingeckoUsdPrice('telos');
         }
     }
 
@@ -96,19 +96,19 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return 'https://www.telos.net/#buy-tlos-simplex';
     }
 
-    getStlosContractAddress() {
+    getStakedNativeTokenAddress() {
         return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
     }
 
-    getWtlosContractAddress() {
+    getWrappedNativeTokenAddress() {
         return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
     }
 
     getImportantTokensIdList(): string[] {
         return [
             this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as EvmToken),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as EvmToken),
         ];
     }
 
