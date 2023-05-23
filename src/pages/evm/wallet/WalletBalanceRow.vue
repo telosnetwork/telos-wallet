@@ -55,11 +55,7 @@ export default defineComponent({
             if (!isMobile) {
                 return false;
             } else {
-                const primaryAmountIsTooLarge =
-                    (typeof this.primaryAmount === 'number' && this.primaryAmount.toString().length > 6) ||
-                    (typeof this.primaryAmount === 'string' && this.primaryAmount.length > 6);
-
-                return primaryAmountIsTooLarge;
+                return this.primaryAmount.toString().length > 8;
             }
         },
         truncateSecondaryValue() {
@@ -68,11 +64,7 @@ export default defineComponent({
             if (!isMobile) {
                 return false;
             } else {
-                const secondaryAmountIsTooLarge =
-                    (typeof this.secondaryAmount === 'number' && this.secondaryAmount.toString().length > 7) ||
-                    (typeof this.secondaryAmount === 'string' && this.secondaryAmount.length > 7);
-
-                return secondaryAmountIsTooLarge;
+                return this.secondaryAmount.toString().length > 7;
             }
         },
         fiatRateText(): string {
@@ -395,7 +387,7 @@ export default defineComponent({
         width: 40px;
         display: none;
 
-        @include md-and-up {
+        @include sm-and-up {
             display: block;
         }
 
