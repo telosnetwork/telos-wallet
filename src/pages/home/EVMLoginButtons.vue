@@ -2,6 +2,7 @@
 import { usePlatformStore } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { defineComponent } from 'vue';
+import { token_run } from 'src/antelope/chains/Token';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -27,6 +28,7 @@ export default defineComponent({
     },
     mounted() {
         this.setDefaultEVMChain();
+        token_run();
     },
 });
 </script>
