@@ -27,9 +27,9 @@ import { ethers } from 'ethers';
 
 
 export interface ContractStoreState {
-    factory: EvmContractFactory;
-    cachedContracts: Record<string, EvmContract>
-    processing: string[];
+    __factory: EvmContractFactory;
+    __cachedContracts: Record<string, EvmContract>
+    __processing: string[];
 }
 
 const store_name = 'contract';
@@ -47,17 +47,17 @@ export const useContractStore = defineStore(store_name, {
         async getContract(address: string): Promise<EvmContract | null> {
             const addressLower = address.toLowerCase();
 
-            if (typeof this.cachedContracts[addressLower] !== 'undefined') {
-                return this.cachedContracts[addressLower];
+            if (typeof this.__cachedContracts[addressLower] !== 'undefined') {
+                return this.__cachedContracts[addressLower];
             }
 
-            if (this.processing.includes(addressLower)) {
+            if (this.__processing.includes(addressLower)) {
                 await new Promise(resolve => setTimeout(resolve, 300));
                 return this.getContract(address);
             }
-            this.processing.push(addressLower);
+            this.__processing.push(addressLower);
 
-            const index = this.processing.indexOf(addressLower);
+            const index = this.__processing.indexOf(addressLower);
             let contract = { address: address };
             try {
                 const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
@@ -68,28 +68,12 @@ export const useContractStore = defineStore(store_name, {
                 }
             } catch (e) {
                 console.warn(`Could not retrieve contract ${address}: ${e}`);
-                this.processing.splice(index, 1);
+                this.__processing.splice(index, 1);
                 return null;
             }
             this.addContractToCache(address, contract);
-            this.processing.splice(index, 1);
-            return this.$state.factory.buildContract(contract);
-        },
-
-        addContractToCache(address: string, contractData: EvmContractFactoryData): void {
-            if (!address) {
-                throw new AntelopeError('antelope.contracts.address_required');
-            }
-            const index = address.toString().toLowerCase();
-            const contract = this.factory.buildContract(contractData);
-
-            if(
-                typeof this.cachedContracts[index] === 'undefined'
-                || (contract.abi ?? []).length > 0 && !this.cachedContracts[index].abi
-                || (contract.abi ?? []).length > 0 &&(contract.abi ?? []).length > (this.cachedContracts[index].abi?.length ?? 0)
-            ){
-                this.cachedContracts[index] = contract;
-            }
+            this.__processing.splice(index, 1);
+            return this.$state.__factory.buildContract(contract);
         },
 
         async getTransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
@@ -148,11 +132,28 @@ export const useContractStore = defineStore(store_name, {
 
             return functionFragment?.name ?? '';
         },
+
+        // commits
+        addContractToCache(address: string, contractData: EvmContractFactoryData): void {
+            if (!address) {
+                throw new AntelopeError('antelope.contracts.address_required');
+            }
+            const index = address.toString().toLowerCase();
+            const contract = this.__factory.buildContract(contractData);
+
+            if(
+                typeof this.__cachedContracts[index] === 'undefined'
+                || (contract.abi ?? []).length > 0 && !this.__cachedContracts[index].abi
+                || (contract.abi ?? []).length > 0 && (contract.abi ?? []).length > (this.__cachedContracts[index].abi?.length ?? 0)
+            ){
+                this.__cachedContracts[index] = contract;
+            }
+        },
     },
 });
 
 const contractInitialState: ContractStoreState = {
-    cachedContracts: {},
-    processing: [],
-    factory: new EvmContractFactory(),
+    __cachedContracts: {},
+    __processing: [],
+    __factory: new EvmContractFactory(),
 };
