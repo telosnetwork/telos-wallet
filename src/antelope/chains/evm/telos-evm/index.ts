@@ -1,22 +1,24 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { EvmToken, PriceChartData } from 'src/antelope/types';
+import { PriceChartData } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo } from 'src/antelope/chains/Token';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '40';
 const NETWORK = 'telos-evm';
 const DISPLAY = 'Telos EVM Mainnet';
-const TOKEN = {
+const TOKEN = new TokenClass({
     name: 'Telos',
     symbol: 'TLOS',
+    network: NETWORK,
     decimals: 18,
     address: '',
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
     isSystem: true,
-} as EvmToken;
+} as TokenSourceInfo);
 
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -55,8 +57,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return api.getCoingeckoPriceChartData('telos');
     }
 
-    getSystemToken(): EvmToken {
-        return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
+    getSystemToken(): TokenClass {
+        return TOKEN;
     }
 
     getUsdPrice(): Promise<number> {
@@ -97,9 +99,9 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getImportantTokensIdList(): string[] {
         return [
-            this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as EvmToken),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
+            TOKEN.id,
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as TokenSourceInfo),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as TokenSourceInfo),
         ];
     }
 }

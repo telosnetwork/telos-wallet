@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 import {
-    EvmToken,
     EvmABI,
 } from '.';
+import { TokenSourceInfo } from 'src/antelope/chains/Token';
 
 export interface EvmContractData {
     address: string;
@@ -10,7 +10,7 @@ export interface EvmContractData {
     manager: EvmContractManagerI;
     creationInfo: EvmContractCreationInfo;
     abi?: EvmABI;
-    token?: EvmToken;
+    token?: TokenSourceInfo;
     verified?: boolean;
 }
 

@@ -1,9 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
-import { ShapedTransactionRow, TransactionValueData } from 'src/antelope/types';
-import { stubWithSlot } from 'app/test/jest/testing-helpers';
-import { shallowMount } from '@vue/test-utils';
+import { ShapedTransactionRow } from 'src/antelope/types';
 
 
 

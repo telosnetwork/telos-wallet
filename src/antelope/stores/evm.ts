@@ -32,15 +32,12 @@ import {
     ERC1155_TRANSFER_SIGNATURE,
     erc20Abi,
     erc721Abi,
-    erc721MetadataAbi,
     EvmABI,
     EvmContractCreationInfo,
     EvmContractManagerI,
     EvmLog,
-    EvmToken,
     ExceptionError,
     supportsInterfaceAbi,
-    Token,
     VerifiedContractMetadata,
     EvmTransactionResponse,
 } from 'src/antelope/types';
@@ -49,6 +46,7 @@ import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { useAccountStore } from 'src/antelope/stores/account';
+import { TokenClass, TokenSourceInfo } from 'src/antelope/chains/Token';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -318,20 +316,6 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async loadTokenMetadata(address:string, token:EvmToken, tokenId:string): Promise<Token> {
-            if(token.type === 'erc1155'){
-                const contract = await this.getContractFromAbi(address, erc1155Abi);
-                token.metadata = await contract.uri(tokenId);
-            } else {
-                const contract = await this.getContractFromAbi(address, erc721MetadataAbi);
-                token.metadata = await contract.tokenURI(tokenId);
-            }
-            if (token.metadata) {
-                token.metadata = token.metadata.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
-            }
-            return token;
-        },
-
         getTokenTypeFromLog(log:EvmLog): string {
             const sig = log.topics[0].substring(0, 10);
             const type = (log.topics.length === 4) ? 'erc721' : 'erc20';
@@ -376,6 +360,7 @@ export const useEVMStore = defineStore(store_name, {
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
         async getContract(address:string, suspectedToken = ''): Promise<EvmContract | null> {
+            console.log('getContract', address, suspectedToken);
             if (!address) {
                 return null;
             }
@@ -442,17 +427,15 @@ export const useEVMStore = defineStore(store_name, {
 
         async getVerifiedContract(address:string, metadata:VerifiedContractMetadata, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract> {
             const token = await this.getToken(address, suspectedType);
-            if(token){
-                token.type = suspectedType;
-                token.address = address;
+            if (!token) {
+                throw new AntelopeError('antelope.evm.error_getting_token', { address });
             }
-
             const contract = new EvmContract({
                 name: Object.values(metadata.settings.compilationTarget)[0],
                 address,
                 abi: metadata.output.abi,
                 manager: createManager(),
-                token: token,
+                token,
                 creationInfo,
                 verified: true,
             });
@@ -461,16 +444,16 @@ export const useEVMStore = defineStore(store_name, {
             return contract;
         },
 
-        async getTokenContract(address:string, tokenData:EvmToken, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
+        async getTokenContract(address:string, tokenData: TokenSourceInfo, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: tokenData.symbol ? `${tokenData.name} (${tokenData.symbol})` : tokenData.name ?? 'Unknown',
                 address,
-                abi: this.getTokenABI(tokenData.type ?? ''),
+                abi: this.getTokenABI(''),
                 manager: createManager(),
                 creationInfo,
                 token: Object.assign({
                     address,
-                }, tokenData),
+                }, tokenData) as TokenSourceInfo,
             });
 
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
@@ -536,10 +519,22 @@ export const useEVMStore = defineStore(store_name, {
             return  new ethers.Contract(address, abi, provider);
         },
 
-        async getTokenData(address:string, suspectedType:string): Promise<EvmToken> {
+        async getTokenData(address:string, suspectedType:string): Promise<TokenClass | null> {
+            console.log('getTokenData', address, suspectedType);
+            if (suspectedType.toLowerCase() === 'erc20') {
+                const chain = useChainStore().currentChain;
+                const list = await chain.settings.getTokenList();
+                const token = list.find(t => t.address.toLowerCase() === address.toLowerCase());
+                if (token) {
+                    return token;
+                }
+            }
+            return null;
+
+            /*
             const type = await this.isTokenType(address, suspectedType);
             if(type === ''){
-                return {} as EvmToken;
+                return {} as TokenClass;
             }
             const provider = this.__ethers_rpc_provider;
             if (!provider) {
@@ -566,32 +561,25 @@ export const useEVMStore = defineStore(store_name, {
             } catch (e) {
                 return {} as EvmToken;
             }
+            */
         },
 
-        async getToken(address:string, suspectedType:string): Promise<EvmToken> {
-            const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-            const tokens = await chain_settings.getTokenList();
-
-            let i = tokens.length;
-            while (i--) {
-                if (tokens[i].address?.toLowerCase() === address.toLowerCase()) {
-                    return tokens[i];
-                }
-            }
+        async getToken(address:string, suspectedType:string): Promise<TokenClass | null> {
             return await this.getTokenData(address, suspectedType);
         },
 
         async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
+            console.log('getContractFromTokenList', address, suspectedType);
             const token = await this.getToken(address, suspectedType);
             if (token) {
-                const abi = this.getTokenABI(token.type ?? '');
+                const abi = this.getTokenABI('erc20');
                 const token_contract = new EvmContract({
                     name: `${token.name} (${token.symbol})`,
                     address,
                     creationInfo,
                     abi,
                     manager: createManager(),
-                    token: { ...token, address } as EvmToken,
+                    token,
                 });
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
                 chain_settings.addContract(address, token_contract);

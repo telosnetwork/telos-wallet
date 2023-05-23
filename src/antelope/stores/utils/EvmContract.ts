@@ -9,10 +9,9 @@ import {
     EvmFormatedLog,
     EvmLog,
     EvmLogs,
-    EvmToken,
     TRANSFER_SIGNATURES,
 } from 'src/antelope/types';
-
+import { TokenSourceInfo } from 'src/antelope/chains/Token';
 
 export default class EvmContract {
 
@@ -37,7 +36,7 @@ export default class EvmContract {
     public abi: EvmABI | null = null;
     public manager: EvmContractManagerI;
     public iface:  ethers.utils.Interface | null = null;
-    public token: EvmToken | null = null;
+    public token: TokenSourceInfo | null = null;
     public verified: boolean;
     public sources: unknown[];
     public creationInfo: EvmContractCreationInfo;

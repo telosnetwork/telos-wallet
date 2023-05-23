@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { EvmToken } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import { useBalancesStore, useFeedbackStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
+import { TokenBalance } from 'src/antelope/chains/Token';
 
 const feedback = useFeedbackStore();
 const tabs = ['balance', 'transactions'];
 const totalFiatAmount = ref(0);
 
-const allTokens = computed(() => useBalancesStore().loggedBalances as EvmToken[]);
+const allBalances = computed(() => useBalancesStore().loggedBalances as TokenBalance[]);
 const loadingStrings = computed(() => feedback.getLoadings);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
-watch(allTokens, (newBalances: EvmToken[]) => {
+watch(allBalances, (newBalances: TokenBalance[]) => {
     let newFiatBalance = 0;
     for (let balance of newBalances){
-        if (balance.fiatBalance){
-            newFiatBalance += parseFloat(balance.fiatBalance);
+        if (balance.token.price.isAvailable) {
+            newFiatBalance += parseFloat(balance.fiatStr);
         }
     }
     totalFiatAmount.value = newFiatBalance;
@@ -35,9 +35,9 @@ watch(allTokens, (newBalances: EvmToken[]) => {
     <template v-slot:balance>
         <div class="test">
             <WalletBalanceRow
-                v-for="(token, index) in allTokens"
-                :key="`token-${index}`"
-                :token="token"
+                v-for="(balance, index) in allBalances"
+                :key="`balance-${index}`"
+                :balance="balance"
                 class="q-mb-xs"
             />
         </div>

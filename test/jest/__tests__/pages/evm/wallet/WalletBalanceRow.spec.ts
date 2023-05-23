@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { ethers } from 'ethers';
 
 const fakeBuyMoreLink = 'fake';
 const fakeStlosContractAddress = '0x'.concat('9'.repeat(40));
@@ -22,7 +23,7 @@ const storeMock = {
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { EvmToken } from 'src/antelope/types';
+import { TokenClass, TokenBalance, TokenSourceInfo } from 'src/antelope/chains/Token';
 
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
@@ -45,6 +46,13 @@ describe('WalletBalanceRow.vue', () => {
         },
     });
 
+    const createTokenBalance = (data: Partial<TokenSourceInfo>): TokenBalance => {
+        const token = new TokenClass(data as TokenSourceInfo);
+        const balanceBn = ethers.utils.parseUnits(data.fullBalance || '0', token.decimals);
+        const balance = new TokenBalance(token, balanceBn);
+        return balance;
+    };
+
     it('should have the correct name', () => {
         expect(WalletBalanceRow.name).toBe('WalletBalanceRow');
     });
@@ -58,7 +66,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
             },
             props: {
-                token: {
+                balance: createTokenBalance({
                     address: fakeStlosContractAddress,
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -66,7 +74,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                } as EvmToken,
+                }),
             },
         });
         expect(wrapper.element).toMatchSnapshot();
@@ -81,7 +89,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
             },
             props: {
-                token: {
+                balance: createTokenBalance({
                     address: fakeStlosContractAddress,
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -89,7 +97,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                } as EvmToken,
+                }),
             },
         });
         expect(wrapper.element).toMatchSnapshot();
@@ -124,14 +132,14 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         symbol: 'TLOS',
                         name: 'Telos',
                         logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    } as EvmToken,
+                    }),
                 },
             });
 
@@ -179,7 +187,7 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         address: fakeStlosContractAddress,
                         symbol: 'STLOS',
                         name: 'Staked TLOS',
@@ -187,7 +195,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    } as EvmToken,
+                    }),
                 },
             });
 
@@ -234,7 +242,7 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         address: fakeWtlosContractAddress,
                         symbol: 'WTLOS',
                         name: 'Wrapped TLOS',
@@ -242,7 +250,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    } as EvmToken,
+                    }),
                 },
             });
 
@@ -290,7 +298,7 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         address: fakeTokenContractAddress,
                         symbol: 'SHIB',
                         name: 'Shiba',
@@ -298,7 +306,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    } as EvmToken,
+                    }),
                 },
             });
 

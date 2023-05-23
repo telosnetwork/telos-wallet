@@ -11,6 +11,7 @@ import { ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
 import { Notify } from 'quasar';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { TokenBalance, TokenClass } from 'src/antelope/chains/Token';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -29,7 +30,7 @@ export default defineComponent({
     },
     data: () => ({
         address: '',
-        token: null as EvmToken | null,
+        selected: null as TokenBalance | null,
         amount: '',
         useFiat: false,
         userStore,
@@ -43,27 +44,27 @@ export default defineComponent({
     watch: {
         balances: {
             handler() {
-                let token = this.token;
-                this.token = null;
+                let tokenBalance = this.selected;
+                this.selected = null;
                 if (this.balances.length > 0) {
                     // if there's a url parameter token with the token address, use that token
                     const tokenAddress = this.$route.query.token;
                     if (tokenAddress) {
-                        token = this.balances.find(t => t.address === tokenAddress) ?? token;
+                        tokenBalance = this.balances.find(b => b.token.address === tokenAddress) ?? tokenBalance;
 
                         // hide the token address from the url
                         this.$router.replace({ name: 'evm-send', params: { token: undefined } });
                     }
 
-                    if (!token) {
-                        token = this.balances[0];
+                    if (!tokenBalance) {
+                        tokenBalance = this.balances[0];
                     }
                 }
-                this.token = token;
+                this.selected = tokenBalance;
             },
             immediate: true,
         },
-        token: {
+        selected: {
             handler() {
                 this.useFiat = false;
                 this.updateEstimatedGas();
@@ -72,6 +73,9 @@ export default defineComponent({
         },
     },
     computed: {
+        token(): TokenClass | undefined {
+            return this.selected?.token as TokenClass ?? undefined;
+        },
         loggedAccount() {
             return accountStore.loggedEvmAccount;
         },
@@ -84,37 +88,34 @@ export default defineComponent({
             const gasFiat = `${formatWei(this.estimatedGas.fiat, 18, 18)}`;
             return prettyPrintFiatBalance(gasFiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
         },
-        getSystemToken(): Token {
-            return this.balances[0];
+        getSystemToken(): TokenClass {
+            return this.balances[0].token;
         },
         isMobile(): boolean {
             return this.$q.screen.lt.sm;
         },
-        balances(): EvmToken[] {
-            return ant.stores.balances.getBalances('logged') as EvmToken[];
+        balances(): TokenBalance[] {
+            return ant.stores.balances.getBalances('logged') as TokenBalance[];
         },
         showContractLink(): boolean {
             return !!this.token?.address;
         },
         availableInTokensBn(): ethers.BigNumber {
             const zero = ethers.BigNumber.from(0);
-            if (!this.token) {
+            if (!this.selected) {
                 return zero;
             }
-            if (!this.token.balanceBn) {
+            if (!this.selected.balance) {
                 return zero;
             }
-            return this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
+            return this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
         },
         availableInFiatBn(): ethers.BigNumber {
             const zero = ethers.BigNumber.from(0);
             if (!this.token) {
                 return zero;
             }
-            const decimals = this.token.decimals;
-            const tokensBn = this.availableInTokensBn;
-            const priceBn = ethers.utils.parseUnits(this.token.price.toString(), decimals);
-            return tokensBn.mul(priceBn).div(ethers.utils.parseUnits('1', decimals));
+            return this.token.price.getAmountInFiat(this.availableInTokensBn);
         },
         availableDisplay(): string {
             if (this.token) {
@@ -132,9 +133,7 @@ export default defineComponent({
             if (this.token && this.token.price && !this.useFiat) {
                 let fiat = '0.00';
                 if (this.amount){
-                    const mult = multiplyFloat(this.amount, this.token.price);
-                    const amount = ethers.utils.parseUnits(mult, this.token.decimals);
-                    fiat = `${formatWei(amount, this.token.decimals, 2)}`;
+                    fiat = this.token.price.getAmountInFiatStr(this.amount, 2);
                 }
                 return prettyPrintFiatBalance(fiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
             }
@@ -142,8 +141,11 @@ export default defineComponent({
         },
         amountInTokens(): string {
             if (this.token && this.token.price && this.useFiat) {
-                const veryPreciseResult = this.amount ? divideFloat(this.amount, this.token.price) : '0';
-                return prettyPrintBalance(veryPreciseResult, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                let tokensAmount = '0';
+                if (this.amount) {
+                    tokensAmount = this.token.price.getAmountInTokensStr(this.amount, 4);
+                }
+                return prettyPrintBalance(tokensAmount, userStore.fiatLocale, this.isMobile, this.token.symbol);
             }
             return '';
         },
@@ -151,26 +153,26 @@ export default defineComponent({
             return userStore.fiatCurrency;
         },
         fiatRateText(): string {
-            if (!this.token || !this.token.price) {
+            if (!this.token || !this.token.price.isAvailable) {
                 return '';
             }
             if (this.useFiat) {
-                const pretty = prettyPrintBalance(1 / this.token.price, userStore.fiatLocale, this.isMobile, this.token.symbol);
+                const pretty = prettyPrintBalance(this.token.price.inverseStr, userStore.fiatLocale, this.isMobile, this.token.symbol);
                 return `(~ ${pretty} / ${userStore.fiatCurrency})`;
             } else {
-                const pretty = prettyPrintFiatBalance(this.token.price, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
+                const pretty = prettyPrintFiatBalance(this.token.price.str, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
                 return `(@ ${pretty} / ${this.token.symbol})`;
             }
         },
         finalTokenAmount(): ethers.BigNumber {
             if (!this.amount){
-                return ethers.BigNumber.from(0);
+                return ethers.constants.Zero;
             }
-            let amount = this.amount;
             if (this.useFiat && this.token) {
-                amount = divideFloat(this.amount, this.token.price);
+                return this.token.price.getAmountInTokens(this.amount);
+            } else {
+                return ethers.utils.parseUnits(this.amount,  this.token?.decimals ?? 0);
             }
-            return ethers.utils.parseUnits(amount,  this.token?.decimals ?? 0);
         },
         useTextarea(): boolean {
             return this.$q.screen.width < 500;
@@ -226,11 +228,9 @@ export default defineComponent({
         toggleUseFiat() {
             if (this.token && this.amount) {
                 if (this.useFiat) {
-                    this.amount = divideFloat(this.amount, this.token.price);
+                    this.amount = this.token.price.getAmountInTokensStr(this.amount, 4);
                 } else {
-                    this.amount = multiplyFloat(this.amount, this.token.price);
-                    const amount = ethers.utils.parseUnits(this.amount, this.token.decimals);
-                    this.amount = `${formatWei(amount, this.token.decimals, 2)}`;
+                    this.amount = this.token.price.getAmountInFiatStr(this.amount, 2);
                 }
             }
 
@@ -278,8 +278,8 @@ export default defineComponent({
             const token = this.token;
             const amount = this.finalTokenAmount;
             const to = this.address;
-            if (this.isFormValid) {
-                ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
+            if (this.isFormValid && token) {
+                ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
                         ant.config.notifySuccessfulTrxHandler(
@@ -347,7 +347,7 @@ export default defineComponent({
                 <!-- Token selection -->
                 <div class="col-12 col-sm-auto">
                     <q-select
-                        v-model="token"
+                        v-model="selected"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
@@ -407,7 +407,7 @@ export default defineComponent({
                         pattern="[0-9]*\.?[0-9]+"
                     >
                         <template v-slot:hint>
-                            <div v-if="token && token.price > 0" class="c-send-page__amount-fiat-footer">
+                            <div v-if="token && token.price.isAvailable" class="c-send-page__amount-fiat-footer">
                                 <div v-if="useFiat" class="c-send-page__amount-fiat" @click="toggleUseFiat">
                                     <q-icon size="xs" name="swap_vert" class="c-send-page__amount-fiat-icon" />
                                     <span class="o-text--small u-text--low-contrast"> {{ amountInTokens }}</span>

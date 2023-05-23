@@ -360,6 +360,7 @@ export default {
             error_getting_event_interface: 'Error trying to find event signature for event {hex}',
             error_invalid_address: 'Invalid address',
             error_getting_contract_creation: 'Error trying to get contract creation info',
+            error_getting_token: 'Error trying to get token info for address {address}',
             error_no_signer: 'No signer found',
             error_send_transaction: 'Error sending transaction',
             transaction_canceled: 'Transaction canceled',

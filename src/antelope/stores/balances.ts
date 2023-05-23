@@ -24,12 +24,9 @@ import { errorToString } from 'src/antelope/config';
 import { getAntelope } from '..';
 import {
     AntelopeError,
-    EvmToken,
     EvmTransactionResponse,
     Label,
-    NativeToken,
     NativeTransactionResponse,
-    Token,
     TransactionResponse,
 } from 'src/antelope/types';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
@@ -37,12 +34,13 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { toRaw } from 'vue';
 import { FetchBalanceResult, SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
+import { MarketData, MarketSourceInfo, TokenBalance, TokenClass } from 'src/antelope/chains/Token';
 
 export interface BalancesState {
-    __balances:  { [label: Label]: Token[] };
+    __balances:  { [label: Label]: TokenBalance[] };
 }
 
 type addressString = `0x${string}`; // required wagmi type
@@ -55,8 +53,6 @@ export const useBalancesStore = defineStore(store_name, {
     getters: {
         loggedBalances: state => state.__balances['logged'] ?? [],
         currentBalances: state => state.__balances['current'] ?? [],
-        nativeBalances: state => (state.__balances['current'] ?? []) as NativeToken[],
-        evmBalances: state => (state.__balances['current'] ?? []) as EvmToken[],
         getBalances: state => (label: string) => state.__balances[label] ?? [],
     },
     actions: {
@@ -86,7 +82,7 @@ export const useBalancesStore = defineStore(store_name, {
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     if (account?.account) {
-                        this.__balances[label] = await chain_settings.getTokens(account.account);
+                        this.__balances[label] = await chain_settings.getBalances(account.account);
                     }
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
@@ -112,7 +108,7 @@ export const useBalancesStore = defineStore(store_name, {
 
                         } else {
 
-                            promises = tokens.map(token => evm.getContract(token.address)
+                            promises = tokens.map(token => evm.getContract(token.address, 'erc20')
                                 .then((contract) => {
                                     if (contract) {
                                         try {
@@ -145,8 +141,10 @@ export const useBalancesStore = defineStore(store_name, {
             const provider = toRaw(evm.rpcProvider);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const token = chain_settings.getSystemToken();
-            const price = await chain_settings.getUsdPrice();
-            token.price = price;
+            const price = (await chain_settings.getUsdPrice()).toString();
+            const marketInfo = { price } as MarketSourceInfo;
+            const marketData = new MarketData(marketInfo);
+            token.market = marketData;
             if (provider) {
                 const balanceBn = await provider.getBalance(address);
                 this.processBalanceForToken(label, token, balanceBn);
@@ -160,29 +158,24 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('No provider');
             }
         },
-        shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: Token): boolean {
+        shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getImportantTokensIdList();
-            if (importantTokens.includes(token.tokenId)) {
+            if (importantTokens.includes(token.id)) {
                 // if the token is important, we always add it. Even with 0 balance.
                 return true;
             } else {
                 return !balanceBn.isNegative() && !balanceBn.isZero();
             }
         },
-        processBalanceForToken(label: string, token: EvmToken, balanceBn: BigNumber): void {
-            token.balanceBn = balanceBn;
-            token.balance = `${formatWei(balanceBn, token.decimals, 4)}`;
-            token.fullBalance = `${formatWei(balanceBn, token.decimals, token.decimals)}`;
-            if (token.price > 0) {
-                token.fiatBalance = `${parseFloat(token.balance) * token.price}`;
-            }
+        processBalanceForToken(label: string, token: TokenClass, balanceBn: BigNumber): void {
+            const tokenBalance = new TokenBalance(token, balanceBn);
             if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                this.addNewBalance(label, token);
+                this.addNewBalance(label, tokenBalance);
             } else {
-                this.removeBalance(label, token);
+                this.removeBalance(label, tokenBalance);
             }
         },
-        async transferTokens(token: Token, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
+        async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
             const label = 'logged';
             try {
@@ -191,11 +184,11 @@ export const useBalancesStore = defineStore(store_name, {
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferNativeTokens(chain_settings, account, token as NativeToken, to, amount, memo ?? '');
+                    return await this.transferNativeTokens(chain_settings, account, token, to, amount, memo ?? '');
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferEVMTokens(chain_settings, account, token as EvmToken, to, amount);
+                    return await this.transferEVMTokens(chain_settings, account, token, to, amount);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -208,7 +201,7 @@ export const useBalancesStore = defineStore(store_name, {
         async transferNativeTokens(
             settings: NativeChainSettings,
             account: AccountModel,
-            token: NativeToken,
+            token: TokenClass,
             to: string,
             amount: BigNumber,
             memo: string,
@@ -238,7 +231,7 @@ export const useBalancesStore = defineStore(store_name, {
         async transferEVMTokens(
             settings: EVMChainSettings,
             account: AccountModel,
-            token: EvmToken,
+            token: TokenClass,
             to: string,
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
@@ -259,7 +252,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
 
-        async transferWalletConnect(token: EvmToken, to: string, amount: BigNumber): Promise<SendTransactionResult>{
+        async transferWalletConnect(token: TokenClass, to: string, amount: BigNumber): Promise<SendTransactionResult>{
             if (token.isSystem) {
 
                 const config = await prepareSendTransaction({
@@ -283,7 +276,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
 
-        async transferMetaMask(token: EvmToken, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
+        async transferMetaMask(token: TokenClass, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
             const evm = useEVMStore();
 
             if (token.isSystem) {
@@ -300,16 +293,16 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         // sorting ----------
-        splitTokensBasedOnHasFiatValue(tokens: EvmToken[]): [EvmToken[], EvmToken[]] {
-            const tokenHasFiatValue = (token: EvmToken) => !!token.fiatBalance;
+        splitTokensBasedOnHasFiatValue(tokens: TokenBalance[]): [TokenBalance[], TokenBalance[]] {
+            const tokenHasFiatValue = (balance: TokenBalance) => balance.token.price.isAvailable;
 
-            const sortByFiatValue = (t1: EvmToken, t2: EvmToken) => {
-                const fiatValueOne = ethers.utils.parseUnits(t1.fiatBalance ?? '0', t1.decimals);
-                const fiatValueTwo = ethers.utils.parseUnits(t2.fiatBalance ?? '0', t2.decimals);
+            const sortByFiatValue = (b1: TokenBalance, b2: TokenBalance) => {
+                const fiatValueOne = b1.token.price.getAmountInFiat(b1.balance);
+                const fiatValueTwo = b2.token.price.getAmountInFiat(b2.balance);
                 return fiatValueOne.gt(fiatValueTwo) ? -1 : 1;
             };
 
-            const sortByTokenBalance = (t1: EvmToken, t2: EvmToken) => t1.balanceBn.gt(t2.balanceBn) ? -1 : 1;
+            const sortByTokenBalance = (b1: TokenBalance, b2: TokenBalance) => b1.balance.gt(b2.balance) ? -1 : 1;
 
             const tokensWithFiatValue   = tokens.filter(token => tokenHasFiatValue(token)).sort(sortByFiatValue);
             const tokensWithNoFiatValue = tokens.filter(token => !tokenHasFiatValue(token)).sort(sortByTokenBalance);
@@ -319,9 +312,7 @@ export const useBalancesStore = defineStore(store_name, {
         },
         sortBalances(label: string): void {
             this.trace('sortBalances', label);
-            // TODO: refactor this to be EVM agnostic
-            // https://github.com/telosnetwork/telos-wallet/issues/280
-            const allTokens = this.__balances[label] as EvmToken[];
+            const allTokens = this.__balances[label] as TokenBalance[];
             const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(allTokens);
             this.__balances[label] = [
                 ...tokensWithFiatValue,
@@ -329,10 +320,10 @@ export const useBalancesStore = defineStore(store_name, {
             ];
         },
         // commits -----
-        addNewBalance(label: string, balance: Token): void {
+        addNewBalance(label: string, balance: TokenBalance): void {
             this.trace('addNewBalance', label, balance);
             // if the balance already exists, we update it, if not, we add it
-            if (this.__balances[label].find(b => b.tokenId === balance.tokenId)) {
+            if (this.__balances[label].find(b => b.token.id === balance.token.id)) {
                 this.updateBalance(label, balance);
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
@@ -342,25 +333,14 @@ export const useBalancesStore = defineStore(store_name, {
                 }
             }
         },
-        updateBalance(label: string, token: Token): void {
-            this.trace('updateBalance', label, token);
-            const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
+        updateBalance(label: string, balance: TokenBalance): void {
+            this.trace('updateBalance', label, balance);
+            const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 if (
-                    !token.balanceBn.eq(this.__balances[label][index].balanceBn) ||
-                    token.balance !== this.__balances[label][index].balance ||
-                    token.fullBalance !== this.__balances[label][index].fullBalance ||
-                    token.price !== this.__balances[label][index].price ||
-                    token.fiatBalance !== this.__balances[label][index].fiatBalance
+                    !balance.amount.eq(this.__balances[label][index].amount)
                 ) {
-                    this.__balances[label][index] = {
-                        ...this.__balances[label][index],
-                        balanceBn: token.balanceBn,
-                        balance: token.balance,
-                        fullBalance: token.fullBalance,
-                        price: token.price,
-                        fiatBalance: token.fiatBalance,
-                    } as Token;
+                    this.__balances[label][index].balance = balance.amount;
                     this.sortBalances(label);
                     if (useAccountStore().currentIsLogged && label === 'current') {
                         this.__balances['logged'] = this.__balances[label];
@@ -368,9 +348,9 @@ export const useBalancesStore = defineStore(store_name, {
                 }
             }
         },
-        removeBalance(label: string, token: Token): void {
-            this.trace('removeBalance', label, token);
-            const index = this.__balances[label].findIndex(b => b.tokenId === token.tokenId);
+        removeBalance(label: string, balance: TokenBalance): void {
+            this.trace('removeBalance', label, balance);
+            const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 this.__balances[label].splice(index, 1);
             }

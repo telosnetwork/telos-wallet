@@ -5,12 +5,12 @@ import {
     ChainSettings,
     EvmBlockData,
     EvmContractCreationInfo,
-    EvmToken,
     EvmTransaction,
     HyperionAbiSignatureFilter,
     HyperionActionsFilter,
     PriceChartData,
 } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo } from 'src/antelope/chains/Token';
 import EvmContract from 'src/antelope/stores/utils/EvmContract';
 import { ethers } from 'ethers';
 
@@ -25,7 +25,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
 
     // Token list promise
-    tokenListPromise: Promise<EvmToken[]> | null = null;
+    tokenListPromise: Promise<TokenClass[]> | null = null;
 
     // EvmContracts cache mapped by address
     protected contracts: Record<string, EvmContract | false> = {};
@@ -82,7 +82,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return `~/assets/${this.network}/logo_sm.svg`;
     }
 
-    abstract getSystemToken(): EvmToken;
+    abstract getSystemToken(): TokenClass;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
@@ -99,8 +99,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getTrustedContractsBucket(): string;
     abstract getImportantTokensIdList(): string[];
 
-    constructTokenId(token: EvmToken): string {
-        return `${token.symbol}-${token.address}-${this.getChainId()}`;
+    constructTokenId(token: TokenSourceInfo): string {
+        return `${token.symbol}-${token.address}-${this.getNetwork()}`;
     }
 
     getContract(address: string): EvmContract | false | null {
@@ -176,7 +176,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(response => response.data.transactions as EvmTransaction[]);
     }
 
-    async getTokenList(): Promise<EvmToken[]> {
+    async getTokenList(): Promise<TokenClass[]> {
         if (this.tokenListPromise) {
             return this.tokenListPromise;
         }
@@ -187,23 +187,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(tokens => tokens.filter(({ chainId }) => chainId === +this.getChainId()))
             .then(tokens => tokens.map(t => ({
                 ...t,
+                network: this.getNetwork(),
                 logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
-            })))
-            .then(tokens => tokens.map(t => ({
-                // Token Id - '<symbol>-<address>-<chainId>'
-                tokenId: `${(t as EvmToken).symbol}-${(t as EvmToken).address}-${t.chainId}`,
-                // defaults value
-                logo: t.logoURI,
-                isNative: false,
-                isSystem: false,
-                price: 0,
-                balance: '',
-                fullBalance: '',
-                fiatBalance: '',
-                // actual token values
-                ...t,
-            })))
-            .then(tokens => tokens.map(t => t as unknown as EvmToken));
+            }) as unknown as TokenSourceInfo))
+            .then(tokens => tokens.map(t => new TokenClass(t)));
 
 
         return this.tokenListPromise;

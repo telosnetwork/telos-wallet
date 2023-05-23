@@ -43,12 +43,10 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
     AntelopeError,
     ChainSettings,
-    EvmToken,
     Label,
-    NativeToken,
-    Token,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
+import { TokenClass } from 'src/antelope/chains/Token';
 
 
 
@@ -69,20 +67,20 @@ export const settings: { [key: string]: ChainSettings } = {
 export interface ChainModel {
     apy: string;
     settings: ChainSettings;
-    tokens: Token[];
+    tokens: TokenClass[];
 }
 
 export interface EvmChainModel {
     apy: string;
     gasPrice: ethers.BigNumber;
     settings: EVMChainSettings;
-    tokens: EvmToken[];
+    tokens: TokenClass[];
 }
 
 export interface NativeChainModel {
     apy: string;
     settings: NativeChainSettings;
-    tokens: NativeToken[];
+    tokens: TokenClass[];
 }
 
 const newChainModel = (network: string, isNative: boolean): ChainModel => {
@@ -90,6 +88,7 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
         apy: '',
         settings: settings[network],
         tokens: [],
+        tokens2: [],
     } as ChainModel;
     if (!isNative) {
         (model as EvmChainModel).gasPrice = ethers.BigNumber.from(0);
@@ -175,11 +174,7 @@ export const useChainStore = defineStore(store_name, {
             this.trace('updateTokenList');
             const chain = this.getChain(label);
             try {
-                if (chain.settings.isNative()) {
-                    chain.tokens = await (chain.settings as NativeChainSettings).getTokenList();
-                } else {
-                    chain.tokens = await (chain.settings as EVMChainSettings).getTokenList();
-                }
+                chain.tokens = await chain.settings.getTokenList();
             } catch (error) {
                 console.error(error);
                 throw new Error('antelope.chain.error_token_list');
