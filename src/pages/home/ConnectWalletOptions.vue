@@ -68,7 +68,6 @@ export default defineComponent({
                 this.$emit('toggleWalletConnect');
                 if (localStorage.getItem('wagmi.connected')){
                     this.loginEvm();
-
                     const chainSettings = useChainStore().currentChain.settings;
                     const appChainId = chainSettings.getChainId();
                     const networkName = chainSettings.getDisplay();

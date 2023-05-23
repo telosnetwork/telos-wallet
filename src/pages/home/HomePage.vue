@@ -26,6 +26,13 @@ export default defineComponent({
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
     },
+
+    async mounted() {
+        // redirect for wallet connect see https://github.com/telosnetwork/telos-wallet/issues/343
+        if (localStorage.getItem('wagmi.connected')){
+            this.$router.push({ path: 'evm/wallet' });
+        }
+    },
 });
 </script>
 
