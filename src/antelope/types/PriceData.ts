@@ -16,6 +16,7 @@ export interface PriceHistory {
 export type DateTuple = [number | string, number];
 
 export interface PriceStats {
+  status: number;
   data: {
     [tokenId: string]: {
       last_updated_at: number;

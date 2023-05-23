@@ -5,18 +5,44 @@ import {
     PriceStats,
 } from 'src/antelope/types';
 
+interface CachedPrice {
+    lastFetchTime: number | null,
+    lastPrice: number | null,
+}
 
+const priceCache: { [tokenId: string]: CachedPrice } = {};
 
 export const getCoingeckoUsdPrice = async (
     tokenId: string,
 ): Promise<number> => {
+  
+    const now = Date.now();
+
+    if (priceCache[tokenId] &&
+        priceCache[tokenId].lastFetchTime &&
+        now - (priceCache[tokenId].lastFetchTime as number) < 60 * 1000 &&
+        priceCache[tokenId].lastPrice !== null
+    ) {
+        // If less than a minute has passed since the last fetch, return the cached price.
+        return priceCache[tokenId].lastPrice as number;
+    }
+
     try {
         const stats: PriceStats = await axios.get(
             getCoingeckoExchangeStatsUrl(tokenId),
         );
 
-        return stats.data[tokenId].usd;
-    } catch (e) {
+        if (stats && stats.status === 200) {
+            const price = stats.data[tokenId].usd;
+            priceCache[tokenId] = { lastFetchTime: now, lastPrice: price };
+            return price;
+        } else {
+            console.error(`Error: received status code ${stats.status} from Coingecko.`);
+            return 0;
+        }
+    } catch (error) {
+        console.error('Error: fetching from Coingecko failed.', error);
+
         return 0;
     }
 };
