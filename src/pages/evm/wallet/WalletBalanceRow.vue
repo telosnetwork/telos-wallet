@@ -6,7 +6,7 @@ import InlineSvg from 'vue-inline-svg';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { EvmToken } from 'src/antelope/types';
+import { EvmToken, NativeCurrencyAddress } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
@@ -170,7 +170,7 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
-            const tokenIsTlos  = '___NATIVE_CURRENCY___';
+            const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
             const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
             const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
@@ -222,7 +222,7 @@ export default defineComponent({
                 icon: require('assets/icon--arrow-diagonal.svg'),
                 url:  {
                     name: 'evm-send',
-                    query: { ...(this.token.address ? { token: this.token.address ?? '' } : {}) },
+                    query: { ...(this.token.address !== NativeCurrencyAddress ? { token: this.token.address ?? '' } : {}) },
                 },
             });
 

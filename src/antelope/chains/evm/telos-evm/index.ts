@@ -1,7 +1,7 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { EvmToken, PriceChartData } from 'src/antelope/types';
+import { EvmToken, NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
@@ -13,7 +13,7 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: '___NATIVE_CURRENCY___',
+    address: NativeCurrencyAddress,
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
