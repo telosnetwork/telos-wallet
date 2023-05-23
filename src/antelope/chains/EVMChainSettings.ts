@@ -123,44 +123,44 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 },
             }),
             this.getUsdPrice(),
-        ]).then(([response, systemTokenPrice]) => {
+        ]).then(async ([response, systemTokenPrice]) => {
             // parse to IndexerAccountBalances
             const balances = response.data as IndexerAccountBalances;
 
-            return this.getTokenList().then((tokenList:EvmToken[]) => {
-                const tokens: EvmToken[] = [];
-                for (const result of balances.results) {
-                    const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
-                    const contractData = balances.contracts[result.contract] ?? {};
-                    const callDataStr = contractData.calldata as unknown as string;
-                    try {
-                        if (typeof callDataStr === 'string') {
-                            const callData = JSON.parse(callDataStr);
-                            contractData.calldata = callData;
-                        } else if (token?.isSystem) {
-                            // system token systemTokenPrice
-                            contractData.calldata = {
-                                price: systemTokenPrice.toString(),
-                            } as IndexerTokenMarketData;
-                        }
-                    } catch (e) {
-                        console.error('Error parsing calldata', `"${callDataStr}"`, e);
-                    }
+            const tokenList = await this.getTokenList();
+            const tokens: EvmToken[] = [];
 
-                    if (token) {
-                        const balance = ethers.BigNumber.from(result.balance);
-                        token.balance = ethers.utils.formatUnits(balance, token.decimals);
-                        token.balanceBn = balance;
-                        token.fullBalance = token.balance;
-                        if (typeof contractData.calldata === 'object') {
-                            token.price = parseFloat(contractData.calldata.price);
-                            token.fiatBalance = (token.price * parseFloat(token.balance)).toFixed(2);
-                        }
-                        tokens.push(token);
+            for (const result of balances.results) {
+                const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
+                const contractData = balances.contracts[result.contract] ?? {};
+                const callDataStr = contractData.calldata as string | object;
+                try {
+                    if (typeof callDataStr === 'string') {
+                        contractData.calldata = JSON.parse(callDataStr);
+                    } else if (token?.isSystem) {
+                        // system token systemTokenPrice
+                        contractData.calldata = {
+                            price: systemTokenPrice,
+                        } as IndexerTokenMarketData;
                     }
+                } catch (e) {
+                    console.error('Error parsing calldata', `"${callDataStr}"`, e);
                 }
-                return tokens;
-            });
+
+                if (token) {
+                    const balance = ethers.BigNumber.from(result.balance);
+                    token.balance = ethers.utils.formatUnits(balance, token.decimals);
+                    token.balanceBn = balance;
+                    token.fullBalance = token.balance;
+
+                    if (typeof contractData.calldata === 'object') {
+                        token.price = +(contractData.calldata.price ?? 0);
+                        token.fiatBalance = (token.price * parseFloat(token.balance)).toFixed(2);
+                    }
+                    tokens.push(token);
+                }
+            }
+            return tokens;
         }).catch((error) => {
             console.error(error);
             return [];
@@ -321,6 +321,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
+
         const price = ethers.utils.parseUnits(tokenPrice.toString(), 18);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);

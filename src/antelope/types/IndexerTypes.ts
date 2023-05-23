@@ -16,17 +16,17 @@ export interface IndexerTokenInfo {
 }
 
 export interface IndexerTokenMarketData {
-    name: string;
-    price: string;
-    supply: string;
-    symbol: string;
-    volume: string;
-    holders: string;
-    decimals: number;
-    marketcap: string;
-    max_supply_ibc: string;
-    total_supply_ibc: string;
-    marketdata_updated: string;
+    name?: string;
+    price?: number;
+    supply?: string;
+    symbol?: string;
+    volume?: string;
+    holders?: string;
+    decimals?: number;
+    marketcap?: string;
+    max_supply_ibc?: string;
+    total_supply_ibc?: string;
+    marketdata_updated?: string;
 }
 
 export interface IndexerTokenBalance {

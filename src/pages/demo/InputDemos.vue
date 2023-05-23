@@ -148,7 +148,7 @@ export default defineComponent({
                     :error-text="currencyInputErrorMessage"
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (Token)"
-                    class="q-mb-xl"
+                    class="q-mb-xl c-input-demos__currency-input"
                 />
                 Input amount: {{ currencyTokenInputValue.toString() }} (as BigNumber)
             </div>
@@ -158,7 +158,7 @@ export default defineComponent({
                     :locale="currencyInputLocale"
                     :symbol="currencyTlosUsdtInputSymbol"
                     :decimals="currencyTlosUsdtInputDecimals"
-                    :secondary-currency-symbol="currencyTlosUsdtInputSecondarySymbol"
+                    :secondary-currency-code="currencyTlosUsdtInputSecondarySymbol"
                     :secondary-currency-decimals="currencyTlosUsdtInputSecondaryDecimals"
                     :secondary-currency-conversion-factor="currencyTlosUsdtInputConversionRate"
                     :max-value="currencyTlosUsdtInputMaxValue"
@@ -169,7 +169,7 @@ export default defineComponent({
                     :error-text="currencyInputErrorMessage"
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USDT)"
-                    class="q-mb-xl"
+                    class="q-mb-xl c-input-demos__currency-input"
                 />
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
             </div>
@@ -181,7 +181,7 @@ export default defineComponent({
                     :locale="currencyInputLocale"
                     :symbol="currencyTlosUsdInputSymbol"
                     :decimals="currencyTlosUsdInputDecimals"
-                    :secondary-currency-symbol="currencyTlosUsdInputSecondarySymbol"
+                    :secondary-currency-code="currencyTlosUsdInputSecondarySymbol"
                     :secondary-currency-decimals="currencyTlosUsdInputSecondaryDecimals"
                     :secondary-currency-conversion-factor="currencyTlosUsdInputConversionRate"
                     :max-value="currencyTlosUsdInputMaxValue"
@@ -192,7 +192,7 @@ export default defineComponent({
                     :error-text="currencyInputErrorMessage"
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USD)"
-                    class="q-mb-xl"
+                    class="q-mb-xl c-input-demos__currency-input"
                 />
                 Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
             </div>
@@ -202,7 +202,7 @@ export default defineComponent({
                     :locale="currencyInputLocale"
                     :symbol="currencyUsdUsdtInputSymbol"
                     :decimals="currencyUsdUsdtInputDecimals"
-                    :secondary-currency-symbol="currencyUsdUsdtInputSecondarySymbol"
+                    :secondary-currency-code="currencyUsdUsdtInputSecondarySymbol"
                     :secondary-currency-decimals="currencyUsdUsdtInputSecondaryDecimals"
                     :secondary-currency-conversion-factor="currencyUsdUsdtInputConversionRate"
                     :disabled="currencyInputIsDisabled"
@@ -211,7 +211,7 @@ export default defineComponent({
                     :loading="currencyInputIsLoading"
                     :error-text="currencyInputErrorMessage"
                     label="Amount (USD/USDT)"
-                    class="q-mb-xl"
+                    class="q-mb-xl c-input-demos__currency-input"
                 />
                 Input amount: {{ currencyUsdUsdtInputValue.toString() }} (as BigNumber)
             </div>
@@ -226,6 +226,10 @@ export default defineComponent({
 <style lang="scss">
 .c-input-demos {
     &__err-input {
+        max-width: 300px;
+    }
+
+    &__currency-input {
         max-width: 300px;
     }
 }
