@@ -1,11 +1,12 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { PriceChartData } from 'src/antelope/types/PriceData';
-import { Token } from 'src/antelope/types/Actions';
+import { TokenClass } from 'src/antelope/types';
 
 export interface ChainSettings {
     isNative(): boolean;
     getNetwork(): string;
-    getSystemToken(): Token;
+    getSystemToken(): TokenClass;
+    getTokenList(): Promise<TokenClass[]>;
     getDisplay(): string;
     getSmallLogoPath(): string;
     getLargeLogoPath(): string;

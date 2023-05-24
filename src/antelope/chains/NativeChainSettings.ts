@@ -26,7 +26,7 @@ import {
     GetTableRowsResponse,
     HyperionActionsFilter,
     KeyAccounts,
-    NativeToken,
+    TokenClass,
     PermissionLinks,
     PermissionLinksData,
     PriceChartData,
@@ -36,7 +36,10 @@ import {
     TableIndexType,
     Theme,
     TransactionV1,
+    TokenSourceInfo,
+    TokenBalance,
 } from 'src/antelope/types';
+import { ethers } from 'ethers';
 
 export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNyAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTgiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=';
 
@@ -53,7 +56,10 @@ export default abstract class NativeChainSettings implements ChainSettings {
     protected api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
 
     // Core eosio
-    protected eosioCore: APIClient = new APIClient({ url: this.getHyperionEndpoint() })
+    protected eosioCore: APIClient = new APIClient({ url: this.getHyperionEndpoint() });
+
+    // Token list promise
+    tokenListPromise: Promise<TokenClass[]> | null = null;
 
     constructor(network: string) {
         this.network = network;
@@ -109,7 +115,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return `~/assets/${this.network}/logo_sm.svg`;
     }
 
-    abstract getSystemToken(): NativeToken;
+    abstract getSystemToken(): TokenClass;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
@@ -134,7 +140,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
 
 
 
-    constructTokenId(token: NativeToken): string {
+    constructTokenId(token: TokenClass): string {
         return `${token.symbol}-${token.contract}-${this.getNetwork()}`;
     }
 
@@ -158,42 +164,47 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return response.data as AccountCreatorInfo;
     }
 
-    async getTokenList(): Promise<NativeToken[]> {
+    async getTokenList(): Promise<TokenClass[]> {
+        if (this.tokenListPromise) {
+            return this.tokenListPromise;
+        }
+
         const name = this.getNetwork();
         const url = `https://raw.githubusercontent.com/telosnetwork/token-list/main/tokens.${name}.json`;
-        const response = fetch(url)
+        this.tokenListPromise = fetch(url)
             .then(response => response.text())
-            .then((fileContent: string) => JSON.parse(fileContent) as NativeToken[])
-            .then(originals => originals.map(t => ({
+            .then((fileContent: string) => JSON.parse(fileContent) as TokenSourceInfo[])
+            .then(tokens => tokens.map(t => ({
                 ...t,
-                // Token Id - '<symbol>-<contract>-<chain-name>'
-                tokenId: `${t.symbol}-${t.contract}-${name}`,
-            }) as unknown as NativeToken))
+                network: this.getNetwork(),
+                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
+            }) as unknown as TokenSourceInfo))
+            .then(originals => originals.map(info => new TokenClass(info)))
             .catch((error) => {
                 console.error(error);
                 return [];
             });
-        return response;
+        return this.tokenListPromise;
     }
 
-    async getTokens(address?: string): Promise<NativeToken[]> {
-        if (address) {
-            const response = await this.hyperion.get('v2/state/get_tokens', {
-                params: { account: address },
-            });
-            const tokens = await this.getTokenList();
-            const balances = (response.data as { tokens: NativeToken[] }).tokens;
-            return balances.map((token: NativeToken) => {
-                const tk = tokens.find((t: NativeToken) => t.symbol === token.symbol) as NativeToken;
-                if (tk && tk.logo) {
-                    token.logo = tk?.logo;
-                } else {
-                    token.logo = DEFAULT_ICON;
-                }
-                return token;
-            });
-        }
-        return this.getTokenList();
+    async getBalances(address?: string): Promise<TokenBalance[]> {
+        const response = await this.hyperion.get('v2/state/get_tokens', {
+            params: { account: address },
+        });
+        const tokens: TokenClass[] = await this.getTokenList();
+        const balances = (response.data as { tokens: Partial<TokenSourceInfo>[] }).tokens;
+        return balances.map((tokeninfo: Partial<TokenSourceInfo>) => {
+            const amount = +(tokeninfo.amount ?? 0);
+            const tk = tokens.find((t: TokenClass) => t.symbol === tokeninfo.symbol) as TokenClass;
+            let balance = ethers.constants.Zero;
+            if (amount > 0 && tk) {
+                balance = ethers.utils.parseUnits(amount.toString(), tk.decimals);
+            }
+            const tokenBalance = new TokenBalance(tk, balance);
+            return tokenBalance;
+        },
+        // filtering by positive balances
+        ).filter((tokenBalance: TokenBalance) => tokenBalance.balance.gt(ethers.constants.Zero));
     }
 
     async getActions(filter: HyperionActionsFilter): Promise<GetActionsResponse> {

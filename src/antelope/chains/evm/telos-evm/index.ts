@@ -1,24 +1,26 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { EvmToken, NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
-import { useUserStore } from 'src/antelope';
+import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
+import { useUserStore } from 'src/antelope/stores/user';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '40';
 const NETWORK = 'telos-evm';
 const DISPLAY = 'Telos EVM Mainnet';
-const TOKEN = {
+const TOKEN = new TokenClass({
     name: 'Telos',
     symbol: 'TLOS',
+    network: NETWORK,
     decimals: 18,
     address: NativeCurrencyAddress,
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
     isSystem: true,
-} as EvmToken;
+} as TokenSourceInfo);
 
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -58,8 +60,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return api.getCoingeckoPriceChartData('telos');
     }
 
-    getSystemToken(): EvmToken {
-        return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
+    getSystemToken(): TokenClass {
+        return TOKEN;
     }
 
     async getUsdPrice(): Promise<number> {
@@ -107,8 +109,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     getImportantTokensIdList(): string[] {
         return [
             this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as EvmToken),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as TokenSourceInfo),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as TokenSourceInfo),
         ];
     }
 

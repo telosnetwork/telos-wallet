@@ -2,20 +2,22 @@
 import { ethers } from 'ethers';
 import { setActivePinia, createPinia } from 'pinia';
 import { useBalancesStore } from 'src/antelope/stores/balances';
+import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
-const tokenList = [{
+
+const tokenList = [new TokenClass({
     address: 'address-TEST',
     symbol: 'TEST',
     decimals: 18,
-    tokenId: 2,
-}];
+    network: 'testnet',
+} as TokenSourceInfo)];
 
-const tokenSys = {
+const tokenSys = new TokenClass({
     address: 'no-address',
     symbol: 'TLOS',
     decimals: 18,
-    tokenId: 1,
-};
+    network: 'testnet',
+} as TokenSourceInfo);
 
 const FIAT_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(4)));
 const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
@@ -129,23 +131,11 @@ describe('Antelope Balance Store', () => {
         const account = { account: 'address' };
         await store.updateBalancesForAccount(label, account);
 
+        const sysBalance = new TokenBalance(tokenSys, SYSTEM_TOKEN_BALANCE);
+        const tokenBalance = new TokenBalance(tokenList[0], TOKEN_BALANCE);
+
         const expected = {
-            label: [
-                {
-                    ...tokenSys,
-                    balanceBn: SYSTEM_TOKEN_BALANCE,
-                    balance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18).slice(0, 8),
-                    fullBalance: ethers.utils.formatUnits(SYSTEM_TOKEN_BALANCE, 18),
-                    fiatBalance: ethers.utils.formatUnits(FIAT_BALANCE, 4),
-                },
-                {
-                    ...tokenList[0],
-                    balanceBn: TOKEN_BALANCE,
-                    balance: ethers.utils.formatUnits(TOKEN_BALANCE, 18).slice(0, 8),
-                    fullBalance: ethers.utils.formatUnits(TOKEN_BALANCE, 18),
-                    fiatBalance: '',
-                },
-            ],
+            label: [sysBalance, tokenBalance],
         };
         expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
     });
