@@ -6,14 +6,14 @@ import {
     EvmBlockData,
     EvmContractCreationInfo,
     EvmToken,
-    EvmTransaction,
     HyperionAbiSignatureFilter,
-    HyperionActionsFilter,
     IndexerAccountBalances,
     IndexerTokenMarketData,
     PriceChartData,
+    IndexerTransactionsFilter,
+    IndexerAccountTransactionsResponse,
 } from 'src/antelope/types';
-import EvmContract from 'src/antelope/stores/utils/EvmContract';
+import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 
 
@@ -98,8 +98,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
     abstract getBuyMoreOfTokenLink(): string;
-    abstract getStlosContractAddress(): string;
-    abstract getWtlosContractAddress(): string;
+    abstract getStakedNativeTokenAddress(): string;
+    abstract getWrappedNativeTokenAddress(): string;
 
     // new methods
     abstract getWeiPrecision(): number;
@@ -190,58 +190,45 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
     }
 
-    async getTransactions(filter: HyperionActionsFilter): Promise<EvmTransaction[]> {
-        const account = filter.account || '';
-        const page = filter.page || 1;
-        const limit = filter.limit || 10;
-        const skip = Math.max(0, page - 1) * limit;
-        const notified = filter.notified || '';
-        const sort = filter.sort || 'desc';
-        const after = filter.after || '';
-        const before = filter.before || '';
-        const address = filter.address || '';
-        const block = filter.block || '';
-        const hash = filter.hash || '';
+    async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
+        const address = filter.address;
+        const limit = filter.limit;
+        const offset = filter.offset;
+        const includeAbi = filter.includeAbi;
+        const sort = filter.sort;
+        const includePagination = true;
+        const logTopic = filter.logTopic;
+        const full = filter.full ?? true;
 
         let aux = {};
-        if (account) {
-            aux = { account, ...aux };
-        }
-        if (limit) {
+
+        if (limit !== undefined) {
             aux = { limit, ...aux };
         }
-        if (skip) {
-            aux = { skip, ...aux };
+        if (offset !== undefined) {
+            aux = { offset, ...aux };
         }
-        if (notified) {
-            aux = { notified, ...aux };
+        if (includeAbi !== undefined) {
+            aux = { includeAbi, ...aux };
         }
-        if (sort) {
+        if (sort !== undefined) {
             aux = { sort, ...aux };
         }
-        if (after) {
-            aux = { after, ...aux };
+        if (includePagination !== undefined) {
+            aux = { includePagination, ...aux };
         }
-        if (before) {
-            aux = { before, ...aux };
+        if (logTopic !== undefined) {
+            aux = { logTopic, ...aux };
         }
-        if (address) {
-            aux = { address, ...aux };
-        }
-        if (block) {
-            aux = { block, ...aux };
-        }
-        if (hash) {
-            aux = { hash, ...aux };
-        }
-        if (filter.extras) {
-            aux = { ...aux, ...filter.extras };
+        if (full !== undefined) {
+            aux = { full, ...aux };
         }
 
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
+        const url = `v1/address/${address}/transactions`;
 
-        return this.hyperion.get('/v2/evm/get_transactions', { params })
-            .then(response => response.data.transactions as EvmTransaction[]);
+        return await this.indexer.get(url, { params })
+            .then(response => response.data as IndexerAccountTransactionsResponse);
     }
 
     async getTokenList(): Promise<EvmToken[]> {
@@ -309,6 +296,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         };
         return this.hyperion.post('/evm', rpcPayload)
             .then(response => response.data as T);
+    }
+
+    getIndexer() {
+        return this.indexer;
     }
 
     async getGasPrice(): Promise<ethers.BigNumber> {

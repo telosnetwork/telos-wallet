@@ -36,7 +36,7 @@ const friendlyDate = computed(() => formatDistance(fromUnixTime(props.timestamp)
     width: max-content;
 
     &--muted {
-        color: var(--text-color-muted);
+        color: var(--text-low-contrast);
     }
 }
 </style>

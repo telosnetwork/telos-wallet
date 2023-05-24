@@ -1001,7 +1001,7 @@ export default defineComponent({
     cursor: text;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        border: 1px solid var(--text-high-contrast);
+        border: 1px solid var(--text-default-contrast);
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
