@@ -18,7 +18,7 @@ export type EvmTokenType =
     typeof ERC1400_TYPE;
 
 // MarketSourceInfo is a type to represent all the information that can be retrieved from the market API
-// It is used to creat a MarketData class object
+// It is used to creat a TokenMarketData class object
 export interface MarketSourceInfo {
     volume?: string;                       // ej: '20637702616.664093',
     maxGlobalSupply?: never;               // ej: null ¿?
@@ -56,7 +56,7 @@ export interface TokenSourceInfo {
 }
 
 // A class to represent the price market information for a token
-export class MarketData {
+export class TokenMarketData {
     readonly info: MarketSourceInfo;        // Market information
     private _price: ethers.BigNumber;       // pre calculated Token price
 
@@ -72,8 +72,8 @@ export class MarketData {
 }
 
 export class TokenPrice {
-    private market: MarketData | null;
-    constructor(market: MarketData | null) {
+    readonly market: TokenMarketData | null;
+    constructor(market: TokenMarketData | null) {
         this.market = market;
     }
 
@@ -161,7 +161,6 @@ export class TokenClass implements TokenSourceInfo {
     readonly isSystem: boolean;            // True if the token is the system token
     readonly isNative: boolean;            // True if the token is a native blockchain token
     readonly type: EvmTokenType;           // Token type (ERC20, ERC721, etc.)
-    private _market: MarketData | null;    // Data relevan to the price of the token
     private _price: TokenPrice;            // Token price object
 
     constructor(sourceInfo: TokenSourceInfo) {
@@ -176,18 +175,16 @@ export class TokenClass implements TokenSourceInfo {
         this.logo = sourceInfo.logo ?? sourceInfo.logoURI;
         this.type = (sourceInfo.type?.toUpperCase() ?? ERC20_TYPE) as EvmTokenType;
         this.id = `${this.symbol}-${this.contract}-${this.network}`;
-        this._market = null;
         this._price = new TokenPrice(null);
     }
 
     // Sets the market data for the token to update token price
-    set market(market: MarketData | null) {
-        this._market = market;
+    set market(market: TokenMarketData | null) {
         this._price = new TokenPrice(market);
     }
 
-    get market(): MarketData | null {
-        return this._market;
+    get market(): TokenMarketData | null {
+        return this._price.market;
     }
 
     // Returns the URI for the token logo

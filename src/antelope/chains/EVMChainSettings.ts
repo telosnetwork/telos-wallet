@@ -15,7 +15,7 @@ import {
     TokenSourceInfo,
     TokenBalance,
     MarketSourceInfo,
-    MarketData,
+    TokenMarketData,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -161,7 +161,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     if (typeof contractData.calldata === 'object') {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { price } as MarketSourceInfo;
-                        const marketData = new MarketData(marketInfo);
+                        const marketData = new TokenMarketData(marketInfo);
                         token.market = marketData;
                     }
                 }

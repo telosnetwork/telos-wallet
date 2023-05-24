@@ -24,7 +24,7 @@ import {
     AntelopeError,
     EvmTransactionResponse,
     Label,
-    MarketData,
+    TokenMarketData,
     MarketSourceInfo,
     NativeTransactionResponse,
     TokenBalance,
@@ -146,7 +146,7 @@ export const useBalancesStore = defineStore(store_name, {
             const token = chain_settings.getSystemToken();
             const price = (await chain_settings.getUsdPrice()).toString();
             const marketInfo = { price } as MarketSourceInfo;
-            const marketData = new MarketData(marketInfo);
+            const marketData = new TokenMarketData(marketInfo);
             token.market = marketData;
 
             if (provider) {
