@@ -1,8 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
-import { parseUnits, formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
+
+import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
+import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 
 const largeTlosOne = BigNumber.from('9'.repeat(7).concat('0'.repeat(18))); // 9.999M TLOS
 const largeTlosTwo = BigNumber.from('49295123412'.concat('0'.repeat(11)));
@@ -11,9 +12,20 @@ const zeroBn = BigNumber.from('0');
 export default defineComponent({
     name: 'InputDemos',
     components: {
+        BaseTextInput,
         CurrencyInput,
     },
     data: () => ({
+        baseTextInputModel: '',
+        baseTextInputIsRequired: false,
+        baseTextInputIsReadonly: false,
+        baseTextInputIsDisabled: false,
+        baseTextInputIsLoading: false,
+        baseTextInputIsClearable: false,
+        baseTextInputHasError: false,
+        baseTextInputHasHint: false,
+        baseTextInputHasPrefix: false,
+
         randomizeExchangeRatesInterval: null as null | ReturnType<typeof setInterval>,
         randomizeExchangeRates: false,
 
@@ -92,6 +104,42 @@ export default defineComponent({
 <div class="row">
     <div class="col-12">
         <h3>Inputs</h3>
+    </div>
+</div>
+<hr>
+<div class="row q-mb-lg">
+    <div class="col-12">
+        <h5>Base Text Input</h5>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <q-checkbox v-model="baseTextInputIsRequired">Required?</q-checkbox>
+        <q-checkbox v-model="baseTextInputIsReadonly">Readonly?</q-checkbox>
+        <q-checkbox v-model="baseTextInputIsDisabled">Disabled?</q-checkbox>
+        <br>
+        <q-checkbox v-model="baseTextInputIsLoading">Loading?</q-checkbox>
+        <q-checkbox v-model="baseTextInputIsClearable">Clearable?</q-checkbox>
+        <q-checkbox v-model="baseTextInputHasError">Error?</q-checkbox>
+        <br>
+        <q-checkbox v-model="baseTextInputHasHint">Hint?</q-checkbox>
+        <q-checkbox v-model="baseTextInputHasPrefix">Prefix text?</q-checkbox>
+    </div>
+    <div class="col-xs-6 col-md-3 col-lg-2">
+        <BaseTextInput
+            v-model="baseTextInputModel"
+            :required="baseTextInputIsRequired"
+            :disable="baseTextInputIsDisabled"
+            :readonly="baseTextInputIsReadonly"
+            :loading="baseTextInputIsLoading"
+            :clearable="baseTextInputIsClearable"
+            :error="baseTextInputHasError"
+            :hint="baseTextInputHasHint ? 'Example hint' : ''"
+            :prefix="baseTextInputHasPrefix ? 'Prefix' : ''"
+            error-message="Example error message"
+            label="Example Label"
+            name="input-demos-base-text-input"
+        />
     </div>
 </div>
 <hr>
@@ -219,7 +267,6 @@ export default defineComponent({
     </div>
 
 </div>
-<hr>
 
 </template>
 
