@@ -28,9 +28,9 @@ export default class EvmContractFactory {
         const properties: EvmContractCalldata = (data.calldata) ? JSON.parse(data.calldata) : {};
 
         if (!data.name) {
-            if(properties?.name){
+            if (properties?.name){
                 data.name = properties.name;
-            } else if(data.metadata) {
+            } else if (data.metadata) {
                 const metadata: EvmContractMetadata = JSON.parse(data.metadata);
 
                 if(metadata?.settings?.compilationTarget){
@@ -45,7 +45,7 @@ export default class EvmContractFactory {
             name: data.name ?? '',
             verified: verified,
             creationInfo: {
-                creator: data.creator ?? '',
+                creator: data.creator,
                 transaction: data.transaction ?? '',
                 creation_trx: data.transaction ?? '',
                 block: data.block,
