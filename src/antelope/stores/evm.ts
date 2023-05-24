@@ -548,7 +548,6 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
-            console.log('getContractFromTokenList', address, suspectedType);
             const token = await this.getToken(address, suspectedType);
             if (token) {
                 const abi = this.getTokenABI(ERC20_TYPE);
