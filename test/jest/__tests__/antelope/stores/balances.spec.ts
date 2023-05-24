@@ -19,7 +19,6 @@ const tokenSys = new TokenClass({
     network: 'testnet',
 } as TokenSourceInfo);
 
-const FIAT_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(4)));
 const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
 const TOKEN_BALANCE = ethers.BigNumber.from('321'.concat('9'.repeat(18)));
 
