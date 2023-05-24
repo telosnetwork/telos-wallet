@@ -4,6 +4,7 @@ import { BigNumber } from 'ethers';
 
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
 
 const largeTlosOne = BigNumber.from('9'.repeat(7).concat('0'.repeat(18))); // 9.999M TLOS
 const largeTlosTwo = BigNumber.from('49295123412'.concat('0'.repeat(11)));
@@ -12,6 +13,7 @@ const zeroBn = BigNumber.from('0');
 export default defineComponent({
     name: 'InputDemos',
     components: {
+        AddressInput,
         BaseTextInput,
         CurrencyInput,
     },
@@ -25,6 +27,10 @@ export default defineComponent({
         baseTextInputHasError: false,
         baseTextInputHasHint: false,
         baseTextInputHasPrefix: false,
+
+        addressInputModel: '',
+        addressInputIsRequired: false,
+        addressInputIsDisabled: false,
 
         randomizeExchangeRatesInterval: null as null | ReturnType<typeof setInterval>,
         randomizeExchangeRates: false,
@@ -143,6 +149,26 @@ export default defineComponent({
     </div>
 </div>
 <hr>
+<div class="row q-mb-lg">
+    <div class="col-12">
+        <h5>Address Input</h5>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <q-checkbox v-model="addressInputIsRequired">Required?</q-checkbox>
+        <q-checkbox v-model="addressInputIsDisabled">Disabled?</q-checkbox>
+    </div>
+    <div class="col-xs-6 col-md-3 col-lg-2">
+        <AddressInput
+            v-model="addressInputModel"
+            :required="addressInputIsRequired"
+            :disabled="addressInputIsDisabled"
+            label="Address"
+            name="input-demos-address-input"
+        />
+    </div>
+</div>
 <div class="row q-mb-lg">
     <div class="col-12">
         <h5>Currency Input</h5>

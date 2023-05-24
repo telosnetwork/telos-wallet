@@ -137,6 +137,7 @@ export default defineComponent({
         anchor="bottom middle"
         self="center right"
     >
+        <!--        eztodo i18n-->
         <span class="u-text--pre">{{  $t('components.inputs.readonly') }}</span>
     </q-tooltip>
 </div>
