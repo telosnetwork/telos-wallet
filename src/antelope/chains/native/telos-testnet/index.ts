@@ -1,20 +1,20 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   '1eaa0824707c8c16bd25145493bf062aecddfeb56c736f6ba6397f3195f33c9f';
 const NETWORK = 'telos-testnet';
 const DISPLAY = 'Telos';
-const TOKEN = {
+const TOKEN = new TokenClass({
     symbol: 'TLOS',
     precision: 4,
     amount: 0,
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as NativeToken;
+} as TokenSourceInfo);
 const HYPERION_ENDPOINT = 'https://testnet.telos.net';
 const S3_PRODUCER_BUCKET = 'https://telos-producer-validation.s3.amazonaws.com';
 const RPC_ENDPOINT = {
@@ -82,7 +82,7 @@ export default class TelosTestnet extends NativeChainSettings {
         return api.getEmptyPriceChartData();
     }
 
-    getSystemToken(): NativeToken {
+    getSystemToken(): TokenClass {
         return TOKEN;
     }
 
@@ -114,6 +114,6 @@ export default class TelosTestnet extends NativeChainSettings {
     }
 
     getImportantTokensIdList(): string[] {
-        return [this.constructTokenId(TOKEN)];
+        return [TOKEN.id];
     }
 }

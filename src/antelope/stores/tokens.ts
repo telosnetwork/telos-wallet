@@ -10,10 +10,7 @@ import {
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import {
-    EvmToken,
-    Label,
-    NativeToken,
-    Token,
+    Label, TokenClass,
 } from 'src/antelope/types';
 import { getAntelope, useAccountStore } from '..';
 import { toRaw } from 'vue';
@@ -27,7 +24,7 @@ import { errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
 
 export interface TokensState {
-    __tokens:  { [label: Label]: Token[] };
+    __tokens:  { [label: Label]: TokenClass[] };
 }
 
 const store_name = 'tokens';
@@ -37,8 +34,6 @@ export const useTokensStore = defineStore(store_name, {
     getters: {
         loggedTokens: state => state.__tokens['logged'],
         currentTokens: state => state.__tokens['current'],
-        nativeTokens: state => state.__tokens['current'] as NativeToken[],
-        evmTokens: state => state.__tokens['current'] as EvmToken[],
         getTokens: state => (label: string) => state.__tokens[label],
     },
     actions: {
@@ -58,10 +53,10 @@ export const useTokensStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('updateTokensForNetwork');
                 const chain = useChainStore().getChain(label);
-                let tokens: Token[] = [];
+                let tokens: TokenClass[] = [];
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
-                    tokens = await chain_settings.getTokens();
+                    tokens = await chain_settings.getTokenList();
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     tokens = await chain_settings.getTokenList();

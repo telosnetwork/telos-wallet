@@ -43,10 +43,8 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
     AntelopeError,
     ChainSettings,
-    EvmToken,
     Label,
-    NativeToken,
-    Token,
+    TokenClass,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
 
@@ -69,20 +67,20 @@ export const settings: { [key: string]: ChainSettings } = {
 export interface ChainModel {
     apy: string;
     settings: ChainSettings;
-    tokens: Token[];
+    tokens: TokenClass[];
 }
 
 export interface EvmChainModel {
     apy: string;
     gasPrice: ethers.BigNumber;
     settings: EVMChainSettings;
-    tokens: EvmToken[];
+    tokens: TokenClass[];
 }
 
 export interface NativeChainModel {
     apy: string;
     settings: NativeChainSettings;
-    tokens: NativeToken[];
+    tokens: TokenClass[];
 }
 
 const newChainModel = (network: string, isNative: boolean): ChainModel => {

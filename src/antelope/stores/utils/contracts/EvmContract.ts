@@ -9,7 +9,7 @@ import {
     EvmFormatedLog,
     EvmLog,
     EvmLogs,
-    EvmToken,
+    TokenSourceInfo,
     TRANSFER_SIGNATURES,
 } from 'src/antelope/types';
 import { Interface } from 'ethers/lib/utils';
@@ -24,7 +24,7 @@ export default class EvmContract {
     private readonly _supportedInterfaces: string[];
     private readonly _properties?: EvmContractCalldata;
     private readonly _manager?: EvmContractManagerI;
-    private readonly _token?: EvmToken | null;
+    private readonly _token?: TokenSourceInfo | null;
 
     private _contract?: ethers.Contract | null;
     private _verified?: boolean;
