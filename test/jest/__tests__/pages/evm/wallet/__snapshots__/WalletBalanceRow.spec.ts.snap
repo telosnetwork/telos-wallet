@@ -75,7 +75,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
             >
               <inline-svg-stub
                 aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                class="c-wallet-balance-row__overflow-icon"
                 keepduringloading="true"
                 src=""
                 transformsource="[Function]"
@@ -85,7 +85,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.unstake
+              global.contract
             </span>
           </li>
           <li
@@ -107,29 +107,6 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
             <span
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-1"
-            >
-              global.contract
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-2"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-2"
             >
               evm_wallet.send
             </span>
@@ -224,7 +201,7 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
             >
               <inline-svg-stub
                 aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                class="c-wallet-balance-row__overflow-icon"
                 keepduringloading="true"
                 src=""
                 transformsource="[Function]"
@@ -234,7 +211,7 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.unstake
+              global.contract
             </span>
           </li>
           <li
@@ -256,29 +233,6 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
             <span
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-1"
-            >
-              global.contract
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-2"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-2"
             >
               evm_wallet.send
             </span>
@@ -373,7 +327,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             >
               <inline-svg-stub
                 aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                class="c-wallet-balance-row__overflow-icon"
                 keepduringloading="true"
                 src=""
                 transformsource="[Function]"
@@ -383,7 +337,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.unstake
+              global.contract
             </span>
           </li>
           <li
@@ -405,29 +359,6 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             <span
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-1"
-            >
-              global.contract
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-2"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-2"
             >
               evm_wallet.send
             </span>
@@ -522,7 +453,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             >
               <inline-svg-stub
                 aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                class="c-wallet-balance-row__overflow-icon"
                 keepduringloading="true"
                 src=""
                 transformsource="[Function]"
@@ -532,7 +463,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.stake
+              evm_wallet.buy
             </span>
           </li>
           <li
@@ -554,52 +485,6 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             <span
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-1"
-            >
-              evm_wallet.buy
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-2"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-2"
-            >
-              evm_wallet.wrap
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-3"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-3"
             >
               evm_wallet.send
             </span>
@@ -704,7 +589,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-0"
             >
-              evm_wallet.unwrap
+              global.contract
             </span>
           </li>
           <li
@@ -726,29 +611,6 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
             <span
               class="c-wallet-balance-row__overflow-text"
               id="overflow-text-1"
-            >
-              global.contract
-            </span>
-          </li>
-          <li
-            aria-labelledby="overflow-text-2"
-            class="c-wallet-balance-row__overflow-li"
-            tabindex="0"
-          >
-            <div
-              class="c-wallet-balance-row__overflow-icon-wrapper"
-            >
-              <inline-svg-stub
-                aria-hidden="true"
-                class="c-wallet-balance-row__overflow-icon"
-                keepduringloading="true"
-                src=""
-                transformsource="[Function]"
-              />
-            </div>
-            <span
-              class="c-wallet-balance-row__overflow-text"
-              id="overflow-text-2"
             >
               evm_wallet.send
             </span>

@@ -175,14 +175,14 @@ export default defineComponent({
             const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
-            if (tokenIsTlos || tokenIsStlos) {
-                items.push({
-                    label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
-                    icon: require('src/assets/icon--acorn.svg'),
-                    strokeIcon: true,
-                    url: { name: 'evm-staking' },
-                });
-            }
+            // if (tokenIsTlos || tokenIsStlos) {
+            //     items.push({
+            //         label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
+            //         icon: require('src/assets/icon--acorn.svg'),
+            //         strokeIcon: true,
+            //         url: { name: 'evm-staking' },
+            //     });
+            // }
 
             if (tokenIsTlos) {
                 items.push({
@@ -192,21 +192,21 @@ export default defineComponent({
                 });
             }
 
-            if (tokenIsTlos) {
-                items.push({
-                    label: this.$t('evm_wallet.wrap'),
-                    icon: require('src/assets/icon--wrap-tlos.svg'),
-                    url: { name: 'evm-wrap' },
-                });
-            }
+            // if (tokenIsTlos) {
+            //     items.push({
+            //         label: this.$t('evm_wallet.wrap'),
+            //         icon: require('src/assets/icon--wrap-tlos.svg'),
+            //         url: { name: 'evm-wrap' },
+            //     });
+            // }
 
-            if (tokenIsWtlos) {
-                items.push({
-                    label: this.$t('evm_wallet.unwrap'),
-                    icon: require('src/assets/icon--wrap-tlos.svg'),
-                    url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
-                });
-            }
+            // if (tokenIsWtlos) {
+            //     items.push({
+            //         label: this.$t('evm_wallet.unwrap'),
+            //         icon: require('src/assets/icon--wrap-tlos.svg'),
+            //         url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
+            //     });
+            // }
 
             if (!tokenIsTlos) {
                 items.push({

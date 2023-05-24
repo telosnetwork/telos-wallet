@@ -140,29 +140,30 @@ describe('WalletBalanceRow.vue', () => {
             expect(wrapper.element).toMatchSnapshot();
 
             const [
-                stakeLink,
+                // stakeLink,
                 buyLink,
-                wrapLink,
+                // wrapLink,
                 sendLink,
             ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
 
-            await stakeLink.trigger('click');
+            // await stakeLink.trigger('click');
             await buyLink.trigger('click');
-            await wrapLink.trigger('click');
+            // await wrapLink.trigger('click');
             await sendLink.trigger('click');
 
             expect(window.open).toHaveBeenCalledTimes(1);
-            expect(routerMock.push).toHaveBeenCalledTimes(3);
+            // expect(routerMock.push).toHaveBeenCalledTimes(3);
+            expect(routerMock.push).toHaveBeenCalledTimes(1);
+
+            // expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+            //     name: 'evm-staking',
+            // }));
+
+            // expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
+            //     name: 'evm-wrap',
+            // }));
 
             expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
-                name: 'evm-staking',
-            }));
-
-            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
-                name: 'evm-wrap',
-            }));
-
-            expect(routerMock.push.mock.calls[2][0]).toEqual(expect.objectContaining({
                 name: 'evm-send',
                 query: { },
             }));
@@ -196,23 +197,24 @@ describe('WalletBalanceRow.vue', () => {
             expect(wrapper.element).toMatchSnapshot();
 
             const [
-                stakeLink,
+                // stakeLink,
                 contractLink,
                 sendLink,
             ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
 
-            await stakeLink.trigger('click');
+            // await stakeLink.trigger('click');
             await contractLink.trigger('click');
             await sendLink.trigger('click');
 
             expect(window.open).toHaveBeenCalledTimes(1);
-            expect(routerMock.push).toHaveBeenCalledTimes(2);
+            // expect(routerMock.push).toHaveBeenCalledTimes(2);
+            expect(routerMock.push).toHaveBeenCalledTimes(1);
+
+            // expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+            //     name: 'evm-staking',
+            // }));
 
             expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
-                name: 'evm-staking',
-            }));
-
-            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
                 name: 'evm-send',
                 query: {
                     token: fakeStlosContractAddress,
@@ -251,24 +253,25 @@ describe('WalletBalanceRow.vue', () => {
             expect(wrapper.element).toMatchSnapshot();
 
             const [
-                unwrapLink,
+                // unwrapLink,
                 contractLink,
                 sendLink,
             ] = wrapper.findAll('.c-wallet-balance-row__overflow-li');
 
-            await unwrapLink.trigger('click');
+            // await unwrapLink.trigger('click');
             await contractLink.trigger('click');
             await sendLink.trigger('click');
 
             expect(window.open).toHaveBeenCalledTimes(1);
-            expect(routerMock.push).toHaveBeenCalledTimes(2);
+            // expect(routerMock.push).toHaveBeenCalledTimes(2);
+            expect(routerMock.push).toHaveBeenCalledTimes(1);
+
+            // expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
+            //     name: 'evm-wrap',
+            //     query: { tab: 'unwrap' },
+            // }));
 
             expect(routerMock.push.mock.calls[0][0]).toEqual(expect.objectContaining({
-                name: 'evm-wrap',
-                query: { tab: 'unwrap' },
-            }));
-
-            expect(routerMock.push.mock.calls[1][0]).toEqual(expect.objectContaining({
                 name: 'evm-send',
                 query: {
                     token: fakeWtlosContractAddress,
