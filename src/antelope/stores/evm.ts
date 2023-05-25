@@ -51,6 +51,9 @@ import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { useAccountStore } from 'src/antelope/stores/account';
+import { getAntelope } from '..';
+
+const ant = getAntelope();
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -172,13 +175,8 @@ export const useEVMStore = defineStore(store_name, {
                 }).then(
                     (transaction: ethers.providers.TransactionResponse) => transaction,
                 ).catch((error) => {
-                    if ('ACTION_REJECTED' === ((error as {code:string}).code)) {
-                        throw new AntelopeError('antelope.evm.transaction_canceled');
-                    } else {
-                        // unknown error we print on console
-                        console.error(error);
-                        throw new AntelopeError('antelope.evm.error_send_transaction', { error });
-                    }
+                    const str = ant.config.errorToStringHandler(error);
+                    throw new AntelopeError('antelope.evm.error_send_transaction', { error: str });
                 });
             } else {
                 console.error('Error sending transaction: No signer');

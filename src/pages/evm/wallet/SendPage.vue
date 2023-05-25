@@ -222,8 +222,6 @@ export default defineComponent({
                 }).catch((err) => {
                     console.error(err);
                     ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
-                    // TODO: verify in depth all error messages to know how to handle the feedback
-                    // https://github.com/telosnetwork/telos-wallet/issues/273
                 });
             } else {
                 ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
