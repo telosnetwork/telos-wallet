@@ -305,6 +305,9 @@ export default defineComponent({
     }
 
     &__info-container {
+        max-width: 100%;
+        min-width: 0;
+
         &--first {
             display: grid;
             grid-template: 'a b c' auto / min-content auto max-content;
@@ -421,10 +424,10 @@ export default defineComponent({
         align-items: flex-start;
         justify-content: flex-end;
         width: max-content;
-        margin-left: 24px;
         color: var(--text-low-contrast);
 
         @include sm-and-up {
+            margin-left: 24px;
             align-items: center;
             gap: 12px;
         }
@@ -438,7 +441,7 @@ export default defineComponent({
             align-items: flex-end;
         }
 
-        @include md-and-up {
+        @include sm-and-up {
             gap: 8px;
             flex-direction: row;
             align-items: center;
