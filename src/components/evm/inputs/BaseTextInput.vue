@@ -142,14 +142,6 @@ export default defineComponent({
             <slot name="append"></slot>
         </template>
     </q-input>
-    <q-tooltip
-        v-if="readonly"
-        anchor="bottom middle"
-        self="center right"
-    >
-        <!--        eztodo i18n-->
-        <span class="u-text--pre">{{  $t('components.inputs.readonly') }}</span>
-    </q-tooltip>
 </div>
 </template>
 
