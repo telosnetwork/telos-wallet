@@ -233,6 +233,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
         const url = `v1/address/${address}/transactions`;
 
+        // The following performs a GET request to the indexer endpoint.
+        // Then it pipes the response to the IndexerAccountTransactionsResponse type.
+        // Notice that the promise is not awaited, but returned instead immediately.
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransactionsResponse);
     }
