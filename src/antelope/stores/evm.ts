@@ -176,7 +176,11 @@ export const useEVMStore = defineStore(store_name, {
                     (transaction: ethers.providers.TransactionResponse) => transaction,
                 ).catch((error) => {
                     const str = ant.config.errorToStringHandler(error);
-                    throw new AntelopeError('antelope.evm.error_send_transaction', { error: str });
+                    if (str.includes('antelope.evm.error')) {
+                        throw new AntelopeError(str, { error });
+                    } else {
+                        throw new AntelopeError('antelope.evm.error_send_transaction', { error: str });
+                    }
                 });
             } else {
                 console.error('Error sending transaction: No signer');
