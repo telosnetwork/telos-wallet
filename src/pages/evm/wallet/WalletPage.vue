@@ -32,14 +32,12 @@ watch(allTokens, (newBalances: EvmToken[]) => {
     </template>
 
     <template v-slot:balance>
-        <div class="test">
-            <WalletBalanceRow
-                v-for="(token, index) in allTokens"
-                :key="`token-${index}`"
-                :token="token"
-                class="q-mb-xs"
-            />
-        </div>
+        <WalletBalanceRow
+            v-for="(token, index) in allTokens"
+            :key="`token-${index}`"
+            :token="token"
+            class="c-wallet-page__row q-mb-xs"
+        />
         <div
             :class="{
                 'c-wallet-page__loading': true,
@@ -60,12 +58,12 @@ watch(allTokens, (newBalances: EvmToken[]) => {
 </template>
 
 <style lang="scss">
-.test {
-    max-width: 1000px;
-    margin: auto;
-}
-
 .c-wallet-page {
+    &__row {
+        max-width: 800px;
+        margin: auto;
+    }
+
     &__loading {
         opacity: 1;
         text-align: center;

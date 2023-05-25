@@ -68,67 +68,42 @@ export default defineComponent({
             }
         },
         fiatRateText(): string {
-            if (!this.tokenBalanceFiat) {
-                return '';
-            }
-
-            const fiatAmount = this.token.price;
-            const pretty = prettyPrintCurrency(
-                fiatAmount,
+            return prettyPrintCurrency(
+                this.token.price,
                 4,
                 fiatLocale,
                 false,
                 fiatCurrency,
             );
-
-            return `(@ ${pretty} / ${this.token.symbol})`;
         },
         primaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.sm;
-
-            // on desktop, the top value is fiat if there is a fiat value for the token
-            // on mobile, the top (only) value is the token balance iff token has no reliable fiat value.
-            //            if there is a fiat value, the top number is the fiat amount
-            if (this.tokenHasFiatValue && isMobile) {
+            // the top value is fiat if there is a fiat value for the token
+            // the top (only) value is the token balance iff token has no reliable fiat value.
+            if (this.tokenHasFiatValue) {
                 return this.tokenBalanceFiat as number;
             } else {
-                return +(this.token.balance ?? 0);
+                return +(this.token.fullBalance ?? 0);
             }
         },
         prettyPrimaryAmount(): string {
-            const isMobile = this.$q.screen.lt.sm;
-
-            if (!isMobile) {
-                const formatted = prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale);
-
-                return `${formatted} ${this.token.symbol}`;
+            if (this.tokenHasFiatValue) {
+                return prettyPrintCurrency(
+                    +this.primaryAmount,
+                    2,
+                    fiatLocale,
+                    this.truncatePrimaryValue,
+                    fiatCurrency,
+                    false,
+                );
             } else {
-                if (this.tokenHasFiatValue) {
-                    if (this.truncatePrimaryValue) {
-                        return prettyPrintCurrency(+this.primaryAmount, 2, fiatLocale, true, fiatCurrency);
-                    } else {
-                        return prettyPrintCurrency(+this.primaryAmount, 2, fiatLocale, false, fiatCurrency);
-                    }
-                } else {
-                    if (this.truncatePrimaryValue) {
-                        return prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale, true);
-                    } else {
-                        return prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale);
-                    }
-                }
+                return prettyPrintCurrency(+this.primaryAmount, 4, fiatLocale, this.truncatePrimaryValue);
             }
         },
         secondaryAmount(): number | string {
-            const isMobile = this.$q.screen.lt.sm;
-
             if (!this.tokenHasFiatValue) {
                 return '';
             } else {
-                if (isMobile) {
-                    return +(this.token.balance ?? 0);
-                } else {
-                    return this.tokenBalanceFiat ?? 0;
-                }
+                return +(this.token.balance ?? 0);
             }
         },
         prettySecondaryAmount(): string {
@@ -137,20 +112,12 @@ export default defineComponent({
                 return '';
             }
 
-            const isMobile = this.$q.screen.lt.sm;
-
-            if (isMobile) {
-                if (this.truncateSecondaryValue) {
-                    return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
-                } else {
-                    const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
-
-                    return `${formatted} ${this.token.symbol}`;
-                }
+            if (this.truncateSecondaryValue) {
+                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
             } else {
-                const amount = prettyPrintCurrency(+this.secondaryAmount, 2, fiatLocale, false, fiatCurrency);
+                const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
 
-                return `${amount} ${this.fiatRateText}`;
+                return `${formatted} ${this.token.symbol}`;
             }
         },
         tooltipWarningText() {
@@ -163,8 +130,8 @@ export default defineComponent({
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
             const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
-            const tokenIsStlos = chainSettings.getStakedNativeTokenAddress() === this.token.address;
-            const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
+            // const tokenIsStlos = chainSettings.getStakedNativeTokenAddress() === this.token.address;
+            // const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
             // if (tokenIsTlos || tokenIsStlos) {
@@ -254,10 +221,9 @@ export default defineComponent({
             :alt="$t('evm_wallet.token_logo_alt')"
         >
         <div>
-            <p class="q-mb-xs">
-                {{ token.symbol }}
-            </p>
             {{ token.name }}
+            <br>
+            <span class="o-text--small">{{ fiatRateText }}</span>
         </div>
     </div>
 
