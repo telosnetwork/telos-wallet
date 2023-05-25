@@ -125,8 +125,8 @@ export class TokenPrice {
     }
 
     // this function transforms a token amount into fiat amount and returns it as string containing a float number
-    getAmountInFiatStr(amount: string, decimals = 2): string {
-        return `${formatWei(amount, this.decimals, decimals)}`;
+    getAmountInFiatStr(tokensAmount: string | number | ethers.BigNumber, decimals = 2): string {
+        return `${formatWei(this.getAmountInFiat(tokensAmount), this.decimals, decimals)}`;
     }
 
     // this function transforms a fiat amount into token amount and returns it as BigNumber
@@ -143,8 +143,21 @@ export class TokenPrice {
     }
 
     // this function transforms a fiat amount into token amount and returns it as string containing a float number
-    getAmountInTokensStr(amount: string, decimals = 4): string {
-        return `${formatWei(amount, this.decimals, decimals)}`;
+    getAmountInTokensStr(fiatAmount: string | number | ethers.BigNumber, decimals = 2): string {
+        return `${formatWei(this.getAmountInTokens(fiatAmount), this.decimals, decimals)}`;
+    }
+
+    // this function transforms a token amount into another given token amount and returns it as BigNumber
+    getAmountInThisToken(tokensAmount: string | number | ethers.BigNumber, targetToken: TokenClass): ethers.BigNumber {
+        // get the BigNumber value
+        let tokensAmountBn: ethers.BigNumber = ethers.constants.Zero;
+        if (typeof tokensAmount === 'string' || typeof tokensAmount === 'number') {
+            tokensAmountBn = ethers.utils.parseUnits(tokensAmount.toString(), this.decimals);
+        } else {
+            tokensAmountBn = tokensAmount;
+        }
+        const targetAmount = tokensAmountBn.mul(this.value).div(targetToken.price.value);
+        return targetAmount;
     }
 }
 
