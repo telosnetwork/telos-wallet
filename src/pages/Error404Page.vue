@@ -89,10 +89,10 @@ export default defineComponent({
         position: absolute;
         overflow: hidden;
         z-index: $z-index--video-wrapper;
-        top: 0px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
 
     &__video {
@@ -111,10 +111,10 @@ export default defineComponent({
         position: absolute;
         overflow: hidden;
         z-index: $z-index--video-overlay;
-        top: 0px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
 
     // layout
@@ -126,7 +126,7 @@ export default defineComponent({
         justify-content: center;
         margin-top: 0;
 
-        @include md-and-up {
+        @include sm-and-up {
             margin-top: 15vh;
         }
     }

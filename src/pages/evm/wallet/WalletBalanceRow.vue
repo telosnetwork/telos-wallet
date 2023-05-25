@@ -6,7 +6,7 @@ import InlineSvg from 'vue-inline-svg';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { EvmToken } from 'src/antelope/types';
+import { EvmToken, NativeCurrencyAddress } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
@@ -55,11 +55,7 @@ export default defineComponent({
             if (!isMobile) {
                 return false;
             } else {
-                const primaryAmountIsTooLarge =
-                    (typeof this.primaryAmount === 'number' && this.primaryAmount.toString().length > 6) ||
-                    (typeof this.primaryAmount === 'string' && this.primaryAmount.length > 6);
-
-                return primaryAmountIsTooLarge;
+                return this.primaryAmount.toString().length > 8;
             }
         },
         truncateSecondaryValue() {
@@ -68,11 +64,7 @@ export default defineComponent({
             if (!isMobile) {
                 return false;
             } else {
-                const secondaryAmountIsTooLarge =
-                    (typeof this.secondaryAmount === 'number' && this.secondaryAmount.toString().length > 7) ||
-                    (typeof this.secondaryAmount === 'string' && this.secondaryAmount.length > 7);
-
-                return secondaryAmountIsTooLarge;
+                return this.secondaryAmount.toString().length > 7;
             }
         },
         fiatRateText(): string {
@@ -170,19 +162,19 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
-            const tokenIsTlos  = !this.token.address; // TLOS is the only token with no address
-            const tokenIsStlos = chainSettings.getStlosContractAddress() === this.token.address;
-            const tokenIsWtlos = chainSettings.getWtlosContractAddress() === this.token.address;
+            const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
+            const tokenIsStlos = chainSettings.getStakedNativeTokenAddress() === this.token.address;
+            const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
-            if (tokenIsTlos || tokenIsStlos) {
-                items.push({
-                    label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
-                    icon: require('src/assets/icon--acorn.svg'),
-                    strokeIcon: true,
-                    url: { name: 'evm-staking' },
-                });
-            }
+            // if (tokenIsTlos || tokenIsStlos) {
+            //     items.push({
+            //         label: this.$t(`evm_wallet.${tokenIsTlos ? 'stake' : 'unstake'}`),
+            //         icon: require('src/assets/icon--acorn.svg'),
+            //         strokeIcon: true,
+            //         url: { name: 'evm-staking' },
+            //     });
+            // }
 
             if (tokenIsTlos) {
                 items.push({
@@ -192,21 +184,21 @@ export default defineComponent({
                 });
             }
 
-            if (tokenIsTlos) {
-                items.push({
-                    label: this.$t('evm_wallet.wrap'),
-                    icon: require('src/assets/icon--wrap-tlos.svg'),
-                    url: { name: 'evm-wrap' },
-                });
-            }
+            // if (tokenIsTlos) {
+            //     items.push({
+            //         label: this.$t('evm_wallet.wrap'),
+            //         icon: require('src/assets/icon--wrap-tlos.svg'),
+            //         url: { name: 'evm-wrap' },
+            //     });
+            // }
 
-            if (tokenIsWtlos) {
-                items.push({
-                    label: this.$t('evm_wallet.unwrap'),
-                    icon: require('src/assets/icon--wrap-tlos.svg'),
-                    url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
-                });
-            }
+            // if (tokenIsWtlos) {
+            //     items.push({
+            //         label: this.$t('evm_wallet.unwrap'),
+            //         icon: require('src/assets/icon--wrap-tlos.svg'),
+            //         url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
+            //     });
+            // }
 
             if (!tokenIsTlos) {
                 items.push({
@@ -222,7 +214,7 @@ export default defineComponent({
                 icon: require('assets/icon--arrow-diagonal.svg'),
                 url:  {
                     name: 'evm-send',
-                    query: { ...(this.token.address ? { token: this.token.address ?? '' } : {}) },
+                    query: { ...(this.token.address !== NativeCurrencyAddress ? { token: this.token.address ?? '' } : {}) },
                 },
             });
 
@@ -395,7 +387,7 @@ export default defineComponent({
         width: 40px;
         display: none;
 
-        @include md-and-up {
+        @include sm-and-up {
             display: block;
         }
 

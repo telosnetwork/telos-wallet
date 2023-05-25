@@ -86,11 +86,14 @@ export default {
         swapped: 'Swapped',
         failed_contract_interaction: 'Failed contract interaction',
         contract_interaction: 'Contract interaction',
+        contract_creation: 'Contract creation',
         aria_link_to_address: 'Link to block explorer address page',
         aria_link_to_transaction: 'Link to block explorer transaction page',
         click_to_fill_max: 'Click to fill max amount',
         amount_exceeds_available_balance: 'Balance too low',
-        incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transaction',
+        incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transactions',
+        viewing_n_transactions: 'Viewing {rowsPerPage} of {totalRows} transactions',
+        no_transactions_found: 'No transactions found',
     },
     global: {
         native: 'Native',
@@ -105,6 +108,8 @@ export default {
         more_info: 'More info',
         required_field: 'This field is required',
         available: 'Available',
+        transactions: 'Transactions',
+        rows_per_page: 'Rows per page',
         amount: 'Amount',
     },
     notification:{
@@ -347,6 +352,10 @@ export default {
         oops: 'Oops. Nothing here...',
     },
     antelope: {
+        contracts: {
+            invalid_contract: 'Contract or contract ABI missing',
+            contract_data_required: 'Contract data missing',
+        },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
             error_login: 'Error in login proccess',
@@ -365,7 +374,7 @@ export default {
             transaction_canceled: 'Transaction canceled',
         },
         history: {
-            error_fetching_trasactions: 'Error in fetching transactions',
+            error_fetching_transactions: 'Error in fetching transactions',
         },
         chain: {
             error_update_data: 'Error in updating data',

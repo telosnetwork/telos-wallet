@@ -27,7 +27,7 @@ import { errorToString } from 'src/antelope/config';
 import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
-import EvmContract from 'src/antelope/stores/utils/EvmContract';
+import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import {
     AntelopeError,
     erc1155Abi,
@@ -36,15 +36,15 @@ import {
     erc721Abi,
     erc721MetadataAbi,
     EvmABI,
-    EvmContractCreationInfo,
     EvmContractManagerI,
     EvmLog,
     EvmToken,
     ExceptionError,
     supportsInterfaceAbi,
     Token,
-    VerifiedContractMetadata,
     EvmTransactionResponse,
+    EvmContractCreationInfo,
+    EvmContractMetadata,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
@@ -407,7 +407,7 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.setContractAsNotExisting(addressLower);
 
             // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
-            const creationInfo:EvmContractCreationInfo = await this.getContractCreation(addressLower);
+            const creationInfo: EvmContractCreationInfo = await this.getContractCreation(addressLower);
 
             // The the contract passes the creation info check,
             // we overwrite the previous call to set contract as not existing with the actual EvmContract
@@ -436,7 +436,7 @@ export const useEVMStore = defineStore(store_name, {
             return await this.getEmptyContract(addressLower, creationInfo);
         },
 
-        async checkBucket(address:string): Promise<VerifiedContractMetadata | null> {
+        async checkBucket(address:string): Promise<EvmContractMetadata | null> {
             const checksumAddress = toChecksumAddress(address);
             try {
                 const currentChain = useChainStore().currentChain.settings as unknown as EVMChainSettings;
@@ -448,28 +448,34 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async getVerifiedContract(address:string, metadata:VerifiedContractMetadata, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract> {
+        async getVerifiedContract(
+            address:string,
+            metadata: EvmContractMetadata,
+            creationInfo: EvmContractCreationInfo,
+            suspectedType:string,
+        ): Promise<EvmContract> {
             const token = await this.getToken(address, suspectedType);
-            if(token){
+            if (token){
                 token.type = suspectedType;
                 token.address = address;
             }
 
             const contract = new EvmContract({
-                name: Object.values(metadata.settings.compilationTarget)[0],
+                name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
                 address,
-                abi: metadata.output.abi,
+                abi: metadata.output?.abi,
                 manager: createManager(),
                 token: token,
                 creationInfo,
                 verified: true,
+                supportedInterfaces: [token?.type ?? 'none'],
             });
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             chain_settings.addContract(address, contract);
             return contract;
         },
 
-        async getTokenContract(address:string, tokenData:EvmToken, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
+        async getTokenContract(address:string, tokenData:EvmToken, creationInfo: EvmContractCreationInfo): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: tokenData.symbol ? `${tokenData.name} (${tokenData.symbol})` : tokenData.name ?? 'Unknown',
                 address,
@@ -479,6 +485,7 @@ export const useEVMStore = defineStore(store_name, {
                 token: Object.assign({
                     address,
                 }, tokenData),
+                supportedInterfaces: [tokenData.type ?? 'none'],
             });
 
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
@@ -486,12 +493,13 @@ export const useEVMStore = defineStore(store_name, {
             return contract;
         },
 
-        async getEmptyContract(address:string, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
+        async getEmptyContract(address:string, creationInfo: EvmContractCreationInfo): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: `0x${address.slice(0, 16)}...`,
                 address,
                 creationInfo,
                 manager: createManager(),
+                supportedInterfaces: [],
             });
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
             chain_settings.addContract(address, contract);
@@ -599,7 +607,7 @@ export const useEVMStore = defineStore(store_name, {
             return await this.getTokenData(address, suspectedType);
         },
 
-        async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
+        async getContractFromTokenList(address:string, creationInfo: EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
             const token = await this.getToken(address, suspectedType);
             if (token) {
                 const abi = this.getTokenABI(token.type ?? '');
@@ -610,6 +618,7 @@ export const useEVMStore = defineStore(store_name, {
                     abi,
                     manager: createManager(),
                     token: { ...token, address } as EvmToken,
+                    supportedInterfaces: [token.type ?? 'none'],
                 });
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
                 chain_settings.addContract(address, token_contract);

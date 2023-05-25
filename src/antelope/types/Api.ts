@@ -25,6 +25,8 @@ import {
     HyperionActionsFilter,
 } from 'src/antelope/types';
 
+export const NativeCurrencyAddress = '___NATIVE_CURRENCY___';
+
 export type AccountCreatorInfo = {
   creator: string;
   timestamp: string;
