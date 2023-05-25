@@ -1,8 +1,22 @@
 import { Authenticator } from 'universal-authenticator-library';
 import { App } from 'vue';
 import { getAntelope } from '..';
+import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
+    wrapError(description: string, error: unknown): AntelopeError {
+        if (error instanceof AntelopeError) {
+            return error as AntelopeError;
+        }
+        const str = this.errorToStringHandler(error);
+        // if it matches antelope.*.error_*
+        if (str.match(/^antelope\.[a-z0-9_]+\.error_/)) {
+            return new AntelopeError(str, { error });
+        } else {
+            return new AntelopeError(description, { error: str });
+        }
+    }
+
     // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
     private __notify_success_handler: (message: string) => void = alert;
@@ -10,7 +24,7 @@ export class AntelopeConfig {
 
     // transaction attempts handlers --
     private __notify_successful_trx_handler: (link: string) => void = alert;
-    private __notify_failed_trx_handler: (message: string) => void = alert;
+    private __notify_failed_trx_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
 
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
@@ -132,7 +146,7 @@ export class AntelopeConfig {
         this.__notify_successful_trx_handler = handler;
     }
 
-    public setNotifyFailedTrxHandler(handler: (message: string) => void) {
+    public setNotifyFailedTrxHandler(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
         this.__notify_failed_trx_handler = handler;
     }
 

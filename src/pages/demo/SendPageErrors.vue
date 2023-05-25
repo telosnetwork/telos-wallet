@@ -1,7 +1,5 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import AppPage from 'components/evm/AppPage.vue';
-import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
@@ -22,11 +20,9 @@ const chainStore = useChainStore();
 const global = useAppNavStore();
 
 export default defineComponent({
-    name: 'SendPage',
+    name: 'SendPageErrors',
     components: {
         CurrencyInput,
-        AppPage,
-        UserInfo,
     },
     data: () => ({
         address: '',
@@ -212,7 +208,7 @@ export default defineComponent({
             const amount = this.amount;
             const to = this.address;
 
-            if (this.isFormValid) {
+            if (true || this.isFormValid) {
                 ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
@@ -239,30 +235,15 @@ export default defineComponent({
 </script>
 
 <template>
-<AppPage>
-    <template v-slot:header>
-        <div class="c-send-page__title-container">
-            <div class="o-text--header-1 u-text--high-contrast"> {{ $t('evm_wallet.send') }}</div>
-            <div class="o-text--paragraph u-text--default-contrast">{{ $t('global.from') }}</div>
-            <UserInfo
-                class="c-send-page__title-addressu-text--default-contrast"
-                :displayFullAddress="false"
-                :showAddress="true"
-                :showCopyBtn="false"
-                :showUserMenu="false"
-                :lightweight="true"
-                :account="loggedAccount"
-            />
-        </div>
-    </template>
+<div>
 
-    <div class="c-send-page__form-container">
+    <div class="c-send-page-errors__form-container">
         <q-spinner v-if="!balances?.length" />
         <q-form
             v-else
-            class="c-send-page__form"
+            class="c-send-page-errors__form"
         >
-            <div class="c-send-page__row c-send-page__row--1 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--1 row">
                 <div class="col">
                     <q-input
                         v-model="address"
@@ -274,28 +255,28 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--3 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--3 row">
                 <!-- Token selection -->
-                <div class="col-12 col-sm-auto c-send-page__token-selection-container">
+                <div class="col-12 col-sm-auto c-send-page-errors__token-selection-container">
                     <q-select
                         v-model="token"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
-                        class="c-send-page__token-selector"
+                        class="c-send-page-errors__token-selector"
                     >
                         <template v-slot:selected>
                             <span>{{ token?.symbol }}</span>
                         </template>
 
                         <template v-slot:option="scope">
-                            <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
-                                <div class="c-send-page__selector-op-avatar">
-                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
+                            <q-item class="c-send-page-errors__selector-op" v-bind="scope.itemProps">
+                                <div class="c-send-page-errors__selector-op-avatar">
+                                    <img class="c-send-page-errors__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
                                 </div>
                                 <div>
-                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
-                                    <q-item-label class="c-send-page__selector-op-balance" caption>
+                                    <q-item-label class="c-send-page-errors__selector-op-name">{{ scope.opt.name }}</q-item-label>
+                                    <q-item-label class="c-send-page-errors__selector-op-balance" caption>
                                         {{ prettyPrintBalance(scope.opt.balance, fiatLocale, isMobile, scope.opt.symbol) }}
                                     </q-item-label>
                                 </div>
@@ -304,14 +285,14 @@ export default defineComponent({
                     </q-select>
                     <div
                         :class="{
-                            'c-send-page__view-contract': true,
-                            'c-send-page__view-contract--hidden': !showContractLink,
+                            'c-send-page-errors__view-contract': true,
+                            'c-send-page-errors__view-contract--hidden': !showContractLink,
                         }"
                         @click="viewTokenContract"
                     >
-                        <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
+                        <span class="c-send-page-errors__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-space v-if="!isMobile"/>
-                        <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
+                        <q-icon size="xs" name="launch" class="c-send-page-errors__view-contract-min-icon" />
                     </div>
                 </div>
                 <!-- Amount input -->
@@ -330,14 +311,14 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--4 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--4 row">
                 <q-space/>
                 <div class="col-auto">
-                    <div class="c-send-page__gas-fee">
+                    <div class="c-send-page-errors__gas-fee">
                         <div class="row o-text--header-5 u-text--default-contrast text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
-                        <div class="row c-send-page__gas-fee-info">
+                        <div class="row c-send-page-errors__gas-fee-info">
                             <q-space/>
-                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page__gas-icon" name="local_gas_station" /></div>
+                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page-errors__gas-icon" name="local_gas_station" /></div>
                             <div class="col-auto">
                                 <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInSystemSym }} </div>
                                 <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInFiat }} </div>
@@ -346,15 +327,14 @@ export default defineComponent({
                     </div>
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--5 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--5 row">
                 <div class="col">
                     <div class="justify-end row">
                         <q-btn
-                            color="primary"
+                            :color="(!isFormValid || isLoading) ? 'negative' : 'primary'"
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
                             :loading="isLoading"
-                            :disable="!isFormValid || isLoading"
                             @click="startTransfer"
                         />
                     </div>
@@ -363,12 +343,12 @@ export default defineComponent({
         </q-form>
     </div>
 
-</AppPage>
+</div>
 </template>
 
 <style lang="scss">
 
-.c-send-page {
+.c-send-page-errors {
     &__title-container {
         flex-direction: column;
         animation: #{$anim-slide-in-left};
