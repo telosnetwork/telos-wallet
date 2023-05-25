@@ -1,57 +1,95 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ComputedRef, ref } from 'vue';
 
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 import { getAddress } from 'ethers/lib/utils';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
+    modelValue: string,
     label: string,
     name: string,
-    required?: boolean,
     disabled?: boolean,
-    readonly?: boolean,
 }>();
 
+const emit = defineEmits(['update:modelValue', 'update:isValid']);
+const { t } = useI18n();
+
 // data
-const modelValue = ref<string | null>('');
+const inputIsDirty = ref<boolean>(false);
+const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const lowercaseAddressRegex = /^0x[a-f0-9]{40}$/;
 
-// computed
-const modelIsBlank = computed(() => [null, ''].includes(modelValue.value));
 
-const inputIsValidAddress = computed(() => {
-    if (modelIsBlank.value) {
-        return true;
+// computed
+const showLowercaseWarning = computed(
+    () => addressIsValidLowercase(props.modelValue),
+);
+
+const addressIsInvalidChecksum = computed(() =>
+    addressRegex.test(props.modelValue) &&
+    !addressIsValidLowercase(props.modelValue) &&
+    !addressIsValidChecksum(props.modelValue),
+);
+
+const errorMessage = computed(() => {
+    // required error is handled by base input component
+    if (addressIsInvalidChecksum.value) {
+        return t('forms.errors.invalidChecksum');
+    } else if (inputIsDirty.value && !validateAddress(props.modelValue)) {
+        return t('forms.errors.invalidAddress');
+    }
+
+
+    return '';
+});
+
+const inputHint = computed(() => showLowercaseWarning.value ? 'Input is lowercase, verify that it\'s correct' : '');
+
+
+// methods
+function addressIsValidLowercase(address: string): boolean {
+    return lowercaseAddressRegex.test(address);
+}
+
+function addressIsValidChecksum(address: string): boolean {
+    if (address.substring(0, 2) !== '0x') {
+        return false;
     }
 
     try {
-        getAddress(modelValue.value as string);
+        // this method will throw an exception if the address is not a valid checksum
+        // however it allows addresses without a '0x' prefix
+        getAddress(address);
         return true;
     } catch {
         return false;
     }
-});
+}
 
-const errorMessage = computed(() => inputIsValidAddress.value ? '' : 'Invalid address');
+function validateAddress(address: string): boolean {
+    return addressIsValidLowercase(address) || addressIsValidChecksum(address);
+}
 
-const showLowercaseWarning = computed(
-    () => !modelIsBlank.value && lowercaseAddressRegex.test(modelValue.value as string),
-);
-
+function handleModelValueUpdate(newVal: string | null) {
+    emit('update:modelValue', newVal === null ? '' : newVal);
+    emit('update:isValid', validateAddress(newVal ?? ''));
+}
 </script>
 
 <template>
 <BaseTextInput
-    v-model="modelValue"
+    :model-value="modelValue"
     :label="label"
     :name="name"
-    :required="required"
+    :required="true"
     :disable="disabled"
-    :readonly="readonly"
+    :error-message="errorMessage"
+    :error="!!errorMessage"
+    :warning="showLowercaseWarning"
+    :hint="inputHint"
     placeholder="0x0000000000000000000000000000000000000000"
+    @blur="inputIsDirty = true"
+    @update:model-value="handleModelValueUpdate"
 />
 </template>
-
-<style lang="scss">
-
-</style>

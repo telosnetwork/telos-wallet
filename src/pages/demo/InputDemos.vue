@@ -29,8 +29,8 @@ export default defineComponent({
         baseTextInputHasPrefix: false,
 
         addressInputModel: '',
-        addressInputIsRequired: false,
         addressInputIsDisabled: false,
+        addressInputIsValid: false,
 
         randomizeExchangeRatesInterval: null as null | ReturnType<typeof setInterval>,
         randomizeExchangeRates: false,
@@ -154,21 +154,25 @@ export default defineComponent({
         <h5>Address Input</h5>
     </div>
 </div>
-<div class="row">
+<div class="row q-mb-lg">
     <div class="col-12">
-        <q-checkbox v-model="addressInputIsRequired">Required?</q-checkbox>
         <q-checkbox v-model="addressInputIsDisabled">Disabled?</q-checkbox>
     </div>
     <div class="col-xs-6 col-md-3 col-lg-2">
         <AddressInput
+            ref="addressInput"
             v-model="addressInputModel"
-            :required="addressInputIsRequired"
             :disabled="addressInputIsDisabled"
             label="Address"
             name="input-demos-address-input"
+            @update:isValid="addressInputIsValid = $event"
         />
+        address value: {{ addressInputModel }}
+        <br>
+        address is valid: {{ addressInputIsValid }}
     </div>
 </div>
+<hr>
 <div class="row q-mb-lg">
     <div class="col-12">
         <h5>Currency Input</h5>

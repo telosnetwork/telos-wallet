@@ -203,6 +203,8 @@ export default {
             unique: 'Repeated values are not allowed',
             token: 'The field must contain between 2 and 6 characters',
             tokenDecimals: 'The decimals must be between 2 and 9',
+            invalidChecksum: 'Invalid checksum, check the address',
+            invalidAddress: '',
         },
         hints: {
             selectCountrie: 'Please select your country',

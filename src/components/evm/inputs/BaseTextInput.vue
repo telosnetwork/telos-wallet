@@ -14,6 +14,10 @@ export default defineComponent({
             type: String,
             default: null,
         },
+        warning: {
+            type: Boolean,
+            default: false,
+        },
     },
     data: () => ({
         isDirty: false,
@@ -36,8 +40,7 @@ export default defineComponent({
             let requiredRule = [];
 
             if (this.isRequired) {
-                // eztodo i18n
-                requiredRule.push((val: string) => (val?.length ?? 0) > 0 || 'This field is required');
+                requiredRule.push((val: string) => (val?.length ?? 0) > 0 || this.$t('forms.errors.required'));
             }
 
             const mergedRules = [
@@ -63,6 +66,8 @@ export default defineComponent({
             delete filteredAttrs.size; // size=undefined causes DOM warnings
 
             const attrs: Record<string, unknown> = {
+                color: (this.warning && !this.error) ? 'warning' : 'primary',
+                labelColor: this.warning ? 'warning' : undefined,
                 ...this.$attrs,
                 ...quasarProps,
                 errorMessage,
@@ -117,13 +122,18 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="c-base-input q-mx-sm">
+<div
+    :class="{
+        'c-base-input': true,
+        'c-base-input--warning': warning,
+        'q-mx-sm q-mb-sm': true,
+    }"
+>
     <q-input
         ref="input"
         :model-value="modelValue"
         :reactive-rules="true"
         v-bind="inputElementBindings"
-        color="primary"
         @update:modelValue="handleChange"
         @blur="this.isDirty = true"
     >
@@ -142,3 +152,14 @@ export default defineComponent({
     </q-tooltip>
 </div>
 </template>
+
+<style lang="scss">
+.c-base-input {
+    &--warning {
+        // quasar override
+        .q-field__messages {
+            color: $warning;
+        }
+    }
+}
+</style>
