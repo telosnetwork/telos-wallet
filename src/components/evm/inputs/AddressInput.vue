@@ -89,6 +89,7 @@ function handleModelValueUpdate(newVal: string | null) {
     :error="!!errorMessage"
     :warning="showLowercaseWarning"
     :hint="inputHint"
+    :type="$q.screen.width < 500 ? 'textarea' : 'text'"
     autogrow
     placeholder="0x0000000000000000000000000000000000000000"
     @blur="inputIsDirty = true"
