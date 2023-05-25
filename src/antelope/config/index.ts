@@ -19,34 +19,51 @@ export class AntelopeConfig {
     private __localization_handler: (key: string) => string = (key: string) => key;
 
     // error to string handler --
-    private __error_to_string_handler: (catched: unknown) => string = (catched: unknown) => {
+    private __error_to_string_handler: (error: unknown) => string = (error: unknown) => {
         try {
-            if (typeof catched === 'string') {
-                return catched;
+
+            type EVMError = {code:string};
+            const evmErr = error as EVMError;
+
+            switch (evmErr.code) {
+            case 'CALL_EXCEPTION':          return 'antelope.evm.error_call_exception';
+            case 'INSUFFICIENT_FUNDS':      return 'antelope.evm.error_insufficient_funds';
+            case 'MISSING_NEW':             return 'antelope.evm.error_missing_new';
+            case 'NONCE_EXPIRED':           return 'antelope.evm.error_nonce_expired';
+            case 'NUMERIC_FAULT':           return 'antelope.evm.error_numeric_fault';
+            case 'REPLACEMENT_UNDERPRICED': return 'antelope.evm.error_replacement_underpriced';
+            case 'TRANSACTION_REPLACED':    return 'antelope.evm.error_transaction_replaced';
+            case 'UNPREDICTABLE_GAS_LIMIT': return 'antelope.evm.error_unpredictable_gas_limit';
+            case 'USER_REJECTED':           return 'antelope.evm.error_user_rejected';
+            case 'ACTION_REJECTED':         return 'antelope.evm.error_transaction_canceled';
             }
-            if (typeof catched === 'number') {
-                return catched.toString();
+
+            if (typeof error === 'string') {
+                return error;
             }
-            if (typeof catched === 'boolean') {
-                return catched.toString();
+            if (typeof error === 'number') {
+                return error.toString();
             }
-            if (catched instanceof Error) {
-                return catched.message;
+            if (typeof error === 'boolean') {
+                return error.toString();
             }
-            if (typeof catched === 'undefined') {
+            if (error instanceof Error) {
+                return error.message;
+            }
+            if (typeof error === 'undefined') {
                 return 'undefined';
             }
-            if (typeof catched === 'object') {
-                if (catched === null) {
+            if (typeof error === 'object') {
+                if (error === null) {
                     return 'null';
                 }
-                if (Array.isArray(catched)) {
-                    return catched.map(a => this.__error_to_string_handler(a)).join(', ');
+                if (Array.isArray(error)) {
+                    return error.map(a => this.__error_to_string_handler(a)).join(', ');
                 }
-                return JSON.stringify(catched);
+                return JSON.stringify(error);
             }
             return 'unknown';
-        } catch (error) {
+        } catch (er) {
             return 'error';
         }
     }
