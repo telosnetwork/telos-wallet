@@ -53,8 +53,6 @@ import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { getAntelope } from '..';
 
-const ant = getAntelope();
-
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
 export const evmEvents = {
@@ -139,7 +137,7 @@ export const useEVMStore = defineStore(store_name, {
                     return accounts[0];
                 } else {
                     if (!checkProvider.provider.request) {
-                        throw new Error('antelope.evm.error_support_provider_request');
+                        throw new AntelopeError('antelope.evm.error_support_provider_request');
                     }
                     const accessGranted = await checkProvider.provider.request({ method: 'eth_requestAccounts' });
                     if (accessGranted.length < 1) {
@@ -150,10 +148,10 @@ export const useEVMStore = defineStore(store_name, {
                 }
             } catch (error) {
                 if ((error as unknown as ExceptionError).code === 4001) {
-                    throw new Error('antelope.evm.connect_rejected');
+                    throw new AntelopeError('antelope.evm.connect_rejected');
                 } else {
                     console.error('Error:', error);
-                    throw new Error('antelope.evm.error_login');
+                    throw new AntelopeError('antelope.evm.error_login');
                 }
             } finally {
                 useFeedbackStore().unsetLoading('evm.login');
@@ -175,16 +173,12 @@ export const useEVMStore = defineStore(store_name, {
                 }).then(
                     (transaction: ethers.providers.TransactionResponse) => transaction,
                 ).catch((error) => {
-                    const str = ant.config.errorToStringHandler(error);
-                    if (str.includes('antelope.evm.error')) {
-                        throw new AntelopeError(str, { error });
-                    } else {
-                        throw new AntelopeError('antelope.evm.error_send_transaction', { error: str });
-                    }
+                    console.error(error);
+                    throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
                 });
             } else {
                 console.error('Error sending transaction: No signer');
-                throw new Error('antelope.evm.error_no_signer');
+                throw new AntelopeError('antelope.evm.error_no_signer');
             }
         },
         // auxiliar
@@ -226,7 +220,7 @@ export const useEVMStore = defineStore(store_name, {
                 const chainIdParam = `0x${chainId.toString(16)}`;
                 if (!provider.request) {
                     useFeedbackStore().unsetLoading('evm.switchChainInjected');
-                    throw new Error('antelope.evm.error_support_provider_request');
+                    throw new AntelopeError('antelope.evm.error_support_provider_request');
                 }
                 try {
                     await provider.request({
@@ -250,7 +244,7 @@ export const useEVMStore = defineStore(store_name, {
                         const rpcUrl = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
                         try {
                             if (!provider.request) {
-                                throw new Error('antelope.evm.error_support_provider_request');
+                                throw new AntelopeError('antelope.evm.error_support_provider_request');
                             }
                             const payload = {
                                 method: 'wallet_addEthereumChain',
@@ -271,17 +265,17 @@ export const useEVMStore = defineStore(store_name, {
                             return true;
                         } catch (e) {
                             if ((e as unknown as ExceptionError).code === 4001) {
-                                throw new Error('antelope.evm.add_chain_rejected');
+                                throw new AntelopeError('antelope.evm.error_add_chain_rejected');
                             } else {
                                 console.error('Error:', e);
-                                throw new Error('antelope.evm.error_add_chain');
+                                throw new AntelopeError('antelope.evm.error_add_chain');
                             }
                         }
                     } else if ((error as unknown as ExceptionError).code === 4001) {
-                        throw new Error('antelope.evm.switch_chain_rejected');
+                        throw new AntelopeError('antelope.evm.error_switch_chain_rejected');
                     } else {
                         console.error('Error:', error);
-                        throw new Error('antelope.evm.error_switch_chain');
+                        throw new AntelopeError('antelope.evm.error_switch_chain');
                     }
                 } finally {
                     useFeedbackStore().unsetLoading('evm.switchChainInjected');

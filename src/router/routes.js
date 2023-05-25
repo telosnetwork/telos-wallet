@@ -64,6 +64,11 @@ const routes = [
                 name: 'demos.inputs',
                 component: () => import('pages/demo/InputDemos.vue'),
             },
+            {
+                path: 'send-errors',
+                name: 'demos.send-errors',
+                component: () => import('pages/demo/SendPageErrors.vue'),
+            },
         ],
     },
 
