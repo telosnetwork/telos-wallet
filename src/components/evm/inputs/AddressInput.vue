@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ComputedRef, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 import { getAddress } from 'ethers/lib/utils';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 
 const props = defineProps<{
     modelValue: string,
@@ -14,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue', 'update:isValid']);
 const { t } = useI18n();
+const { screen } = useQuasar();
 
 // data
 const inputIsDirty = ref<boolean>(false);
@@ -39,7 +41,6 @@ const errorMessage = computed(() => {
     } else if (inputIsDirty.value && !validateAddress(props.modelValue)) {
         return t('forms.errors.invalidAddress');
     }
-
 
     return '';
 });
@@ -88,6 +89,7 @@ function handleModelValueUpdate(newVal: string | null) {
     :error="!!errorMessage"
     :warning="showLowercaseWarning"
     :hint="inputHint"
+    autogrow
     placeholder="0x0000000000000000000000000000000000000000"
     @blur="inputIsDirty = true"
     @update:model-value="handleModelValueUpdate"

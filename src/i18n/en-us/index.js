@@ -71,7 +71,6 @@ export default {
         balance_row_actions_aria: 'Balance row actions',
         no_fiat_value: 'No reliable fiat value found',
         receiving_account: 'Receiving Account',
-        account_required: 'Account is required',
         token: 'Token',
         cancel: 'Cancel',
         estimated_fees: 'Estimated Fees',
