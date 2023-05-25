@@ -1,9 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
 import {
+    NativeCurrencyAddress,
     PriceChartData,
     PriceHistory,
     PriceStats,
 } from 'src/antelope/types';
+import { useChainStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 interface CachedPrice {
     lastFetchTime: number | null,
@@ -47,12 +50,19 @@ export const getCoingeckoUsdPrice = async (
 
 export async function getFiatPriceFromIndexer(
     tokenSymbol: string,
+    tokenAddress: string,
     fiatCode: string,
     indexerAxios: AxiosInstance,
 ): Promise<number> {
-    return Number(
-        (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data.results[0].price,
+    const wrappedNativeSymbol = (useChainStore().loggedChain.settings as EVMChainSettings).getWrappedNativeTokenAddress();
+    const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedNativeSymbol : tokenAddress;
+    const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data;
+
+    const tokenMarketData = response.results.find(
+        (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
+
+    return tokenMarketData?.price ?? 0;
 }
 
 export const getCoingeckoPriceChartData = async (

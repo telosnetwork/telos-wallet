@@ -16,7 +16,7 @@
 
 <style lang="scss">
 .c-demo-layout {
-    color: var(--text-color);
+    color: var(--text-default-contrast);
     margin: 24px;
 }
 </style>

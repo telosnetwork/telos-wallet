@@ -1,7 +1,7 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { EvmToken, PriceChartData } from 'src/antelope/types';
+import { EvmToken, NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
@@ -13,7 +13,7 @@ const TOKEN = {
     name: 'Telos',
     symbol: 'TLOS',
     decimals: 18,
-    address: '___NATIVE_CURRENCY___',
+    address: NativeCurrencyAddress,
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
@@ -30,6 +30,7 @@ const RPC_ENDPOINT = {
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
+const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
 export default class TelosEVMTestnet extends EVMChainSettings {
@@ -65,9 +66,9 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         if (this.hasIndexSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
-            return getFiatPriceFromIndexer(nativeTokenSymbol, fiatCode, this.indexer);
+            return await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
         } else {
-            return api.getCoingeckoUsdPrice('telos');
+            return await api.getCoingeckoUsdPrice('telos');
         }
     }
 
@@ -95,24 +96,24 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return 'https://www.telos.net/#buy-tlos-simplex';
     }
 
-    getStlosContractAddress() {
+    getStakedNativeTokenAddress() {
         return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
     }
 
-    getWtlosContractAddress() {
+    getWrappedNativeTokenAddress() {
         return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
     }
 
     getImportantTokensIdList(): string[] {
         return [
             this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStlosContractAddress() } as EvmToken),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWtlosContractAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as EvmToken),
+            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as EvmToken),
         ];
     }
 
     getIndexerApiEndpoint(): string {
-        return 'https://api.testnet.teloscan.io/';
+        return INDEXER_ENDPOINT;
     }
 
     hasIndexSupport(): boolean {

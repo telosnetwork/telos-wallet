@@ -11,7 +11,7 @@ import { useChainStore, useUserStore } from 'src/antelope';
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const userStore = useUserStore();
 
@@ -70,11 +70,11 @@ export default defineComponent({
                 return false;
             }
 
-            return !['send', 'receive', 'swap'].includes(this.transaction.actionName);
+            return !['send', 'receive', 'swap', 'contractCreation'].includes(this.transaction.actionName);
         },
         actionHasDescriptiveText(): boolean {
             // only true for 'known actions' send, receive, and swap
-            return ['send', 'receive', 'swap'].includes(this.transaction.actionName);
+            return ['send', 'receive', 'swap', 'contractCreation'].includes(this.transaction.actionName);
         },
         actionDescriptiveText(): string {
             switch (this.transaction.actionName) {
@@ -84,6 +84,8 @@ export default defineComponent({
                 return this.$t('evm_wallet.received');
             case 'swap':
                 return this.$t('evm_wallet.swapped');
+            case 'contractCreation':
+                return this.$t('evm_wallet.contract_creation');
             default:
                 return '';
             }
@@ -124,6 +126,15 @@ export default defineComponent({
         },
         chainTokenSymbol(): string {
             return this.chainSettings.getSystemToken().symbol;
+        },
+        gasInFiatText(): string {
+            const gasIsMinisculeFiat = this.transaction.gasUsed && [0, undefined].includes(this.transaction.gasFiatValue);
+            if (gasIsMinisculeFiat) {
+                const symbol = getCurrencySymbol(userStore.fiatLocale, userStore.fiatCurrency);
+                return `< ${symbol}0.01 ${userStore.fiatCurrency}`;
+            }
+
+            return this.formatAmount(this.transaction.gasFiatValue ?? 0, undefined, true);
         },
     },
     methods: {
@@ -168,6 +179,7 @@ export default defineComponent({
                     <span class="c-transaction-row__interaction-nowrap">
                         {{ actionPrepositionText }}
                         <ExternalLink
+                            v-if="transaction.actionName !== 'contractCreation'"
                             :text="interactedWithText"
                             :url="interactedWithUrl"
                             :purpose="$t('evm_wallet.aria_link_to_address')"
@@ -253,12 +265,12 @@ export default defineComponent({
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
         <div class="c-transaction-row__gas-icon-container">
-            <q-icon name="local_gas_station" size="xs" />
+            <q-icon name="local_gas_station" size="xs" class="c-transaction-row__gas-icon" />
         </div>
         <div class="c-transaction-row__gas-text">
             <span>{{ formatAmount(transaction.gasUsed ?? 0, chainTokenSymbol) }}</span>
 
-            <span>{{ formatAmount(transaction.gasFiatValue ?? 0, undefined, true) }}</span>
+            <span>{{ gasInFiatText }}</span>
         </div>
 
         <div
@@ -472,6 +484,10 @@ export default defineComponent({
         display: flex;
         align-items: center;
         color: var(--text-default-contrast);
+    }
+
+    &__gas-icon {
+        color: var(--text-low-contrast);
     }
 
     &__gas-text {
