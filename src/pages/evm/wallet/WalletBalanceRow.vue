@@ -68,6 +68,10 @@ export default defineComponent({
             }
         },
         fiatRateText(): string {
+            if (!this.token.price) {
+                return '';
+            }
+
             return prettyPrintCurrency(
                 this.token.price,
                 4,
