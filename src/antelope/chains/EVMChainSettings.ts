@@ -96,6 +96,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     abstract getSystemToken(): TokenClass;
+    abstract getStakedSystemToken(): TokenClass;
+    abstract getWrappedSystemToken(): TokenClass;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
@@ -103,10 +105,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
     abstract getBuyMoreOfTokenLink(): string;
-    abstract getStakedNativeTokenAddress(): string;
-    abstract getWrappedNativeTokenAddress(): string;
-
-    // new methods
     abstract getWeiPrecision(): number;
     abstract getExplorerUrl(): string;
     abstract getTrustedContractsBucket(): string;

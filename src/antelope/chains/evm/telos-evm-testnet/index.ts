@@ -22,6 +22,26 @@ const TOKEN = new TokenClass({
     isSystem: true,
 } as TokenSourceInfo);
 
+const S_TOKEN = new TokenClass({
+    name: 'Staked Telos',
+    symbol: 'STLOS',
+    network: NETWORK,
+    decimals: 18,
+    address: '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD',
+    isNative: false,
+    isSystem: false,
+} as TokenSourceInfo);
+
+const W_TOKEN = new TokenClass({
+    name: 'Wrapped Telos',
+    symbol: 'WTLOS',
+    network: NETWORK,
+    decimals: 18,
+    address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+    isNative: false,
+    isSystem: false,
+} as TokenSourceInfo);
+
 const RPC_ENDPOINT = {
     protocol: 'https',
     host: 'testnet.telos.net',
@@ -64,6 +84,14 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return TOKEN;
     }
 
+    getStakedSystemToken(): TokenClass {
+        return S_TOKEN;
+    }
+
+    getWrappedSystemToken(): TokenClass {
+        return W_TOKEN;
+    }
+
     async getUsdPrice(): Promise<number> {
         if (this.hasIndexSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
@@ -98,20 +126,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return 'https://www.telos.net/#buy-tlos-simplex';
     }
 
-    getStakedNativeTokenAddress() {
-        return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
-    }
-
-    getWrappedNativeTokenAddress() {
-        return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
-    }
-
     getImportantTokensIdList(): string[] {
-        return [
-            this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as TokenSourceInfo),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as TokenSourceInfo),
-        ];
+        return [TOKEN.id, S_TOKEN.id, W_TOKEN.id];
     }
 
     getIndexerApiEndpoint(): string {
