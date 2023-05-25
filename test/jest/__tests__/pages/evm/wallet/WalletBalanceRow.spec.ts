@@ -66,6 +66,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
+                    price: 0.19,
                 } as EvmToken,
             },
         });
@@ -89,6 +90,7 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
+                    price: 0.19,
                 } as EvmToken,
             },
         });
@@ -131,6 +133,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
+                        price: 0.19,
                         address: NativeCurrencyAddress,
                     } as EvmToken,
                 },
@@ -189,6 +192,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
+                        price: 0.19,
                     } as EvmToken,
                 },
             });
@@ -245,6 +249,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
+                        price: 0.19,
                     } as EvmToken,
                 },
             });

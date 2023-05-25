@@ -16,12 +16,13 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
+      Staked TLOS 
+      <br />
+      <span
+        class="o-text--small"
       >
-        STLOS
-      </p>
-       Staked TLOS
+        $0.1900
+      </span>
     </div>
   </div>
   <div
@@ -34,7 +35,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices 1`] = `
         class="c-wallet-balance-row__primary-amount"
       >
         
-        3,642.0243 STLOS
+        3,642.0243
         
         <tooltip-stub
           icon="info"
@@ -137,12 +138,13 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices 1`] = `
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
+      Staked TLOS 
+      <br />
+      <span
+        class="o-text--small"
       >
-        STLOS
-      </p>
-       Staked TLOS
+        $0.1900
+      </span>
     </div>
   </div>
   <div
@@ -263,12 +265,13 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
+      Staked TLOS 
+      <br />
+      <span
+        class="o-text--small"
       >
-        STLOS
-      </p>
-       Staked TLOS
+        $0.1900
+      </span>
     </div>
   </div>
   <div
@@ -389,12 +392,13 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
+      Telos 
+      <br />
+      <span
+        class="o-text--small"
       >
-        TLOS
-      </p>
-       Telos
+        $0.1900
+      </span>
     </div>
   </div>
   <div
@@ -515,12 +519,13 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
+      Wrapped TLOS 
+      <br />
+      <span
+        class="o-text--small"
       >
-        WTLOS
-      </p>
-       Wrapped TLOS
+        $0.1900
+      </span>
     </div>
   </div>
   <div
@@ -641,12 +646,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      <p
-        class="q-mb-xs"
-      >
-        SHIB
-      </p>
-       Shiba
+      Shiba 
+      <br />
+      <span
+        class="o-text--small"
+      />
     </div>
   </div>
   <div
