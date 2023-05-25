@@ -203,7 +203,7 @@ export default {
             token: 'The field must contain between 2 and 6 characters',
             tokenDecimals: 'The decimals must be between 2 and 9',
             invalidChecksum: 'Invalid checksum, check the address',
-            invalidAddress: '',
+            invalidAddress: 'Invalid address',
         },
         hints: {
             selectCountrie: 'Please select your country',
