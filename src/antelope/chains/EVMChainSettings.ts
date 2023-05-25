@@ -233,7 +233,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
         const url = `v1/address/${address}/transactions`;
 
-        return await this.indexer.get(url, { params })
+        return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransactionsResponse);
     }
 
@@ -252,8 +252,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
             }) as unknown as TokenSourceInfo))
             .then(tokens => tokens.map(t => new TokenClass(t)))
-
-            // Por último concatenamos el token del sistema this.getSystemToken()
             .then(tokens => [this.getSystemToken(), ...tokens]);
 
         return this.tokenListPromise;
