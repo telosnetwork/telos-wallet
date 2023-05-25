@@ -47,7 +47,7 @@ export default defineComponent({
             return !this.token.logoURI;
         },
         tokenBalanceFiat(): number | null {
-            return this.token.price.isAvailable ? +this.token.price.str : null;
+            return this.token.price.isAvailable ? +this.token.price.getAmountInFiatStr(this.balance.amount) : null;
         },
         tokenHasFiatValue(): boolean {
             return this.token.price.isAvailable;

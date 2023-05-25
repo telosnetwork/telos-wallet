@@ -160,7 +160,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     // If we have market data we use it
                     if (typeof contractData.calldata === 'object') {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
-                        const marketInfo = { price } as MarketSourceInfo;
+                        const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
                         token.market = marketData;
                     }
