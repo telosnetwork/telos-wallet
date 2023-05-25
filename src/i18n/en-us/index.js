@@ -204,6 +204,7 @@ export default {
             tokenDecimals: 'The decimals must be between 2 and 9',
             invalidChecksum: 'Invalid checksum, check the address',
             invalidAddress: 'Invalid address',
+            lowercaseAddress: 'Input is lowercase, verify that it\'s correct',
         },
         hints: {
             selectCountrie: 'Please select your country',

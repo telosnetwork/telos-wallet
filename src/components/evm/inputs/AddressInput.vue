@@ -45,7 +45,7 @@ const errorMessage = computed(() => {
     return '';
 });
 
-const inputHint = computed(() => showLowercaseWarning.value ? 'Input is lowercase, verify that it\'s correct' : '');
+const inputHint = computed(() => showLowercaseWarning.value ? t('forms.errors.lowercaseAddress') : '');
 
 
 // methods
