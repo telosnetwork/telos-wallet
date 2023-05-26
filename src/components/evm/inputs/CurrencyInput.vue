@@ -1035,11 +1035,15 @@ export default defineComponent({
     }
 
     &--ios {
-        padding: 0;
+        padding: 0 4px;
 
         #{$this}__symbol {
-            top: 25px;
+            top: 24px;
             left: calc(var(--symbol-left) + 4px);
+        }
+
+        #{$this}__label-text {
+            left: 12px;
         }
     }
 
