@@ -1038,12 +1038,12 @@ export default defineComponent({
         padding: 0 4px;
 
         #{$this}__symbol {
-            top: 28px;
-            left: calc(var(--symbol-left) - 4px);
+            top: 27px;
+            left: calc(var(--symbol-left) - 2px);
         }
 
         #{$this}__label-text {
-            left: 13px;
+            left: 14px;
         }
     }
 
