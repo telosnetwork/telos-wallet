@@ -1036,7 +1036,8 @@ export default defineComponent({
 
     &--ios {
         #{$this}__symbol {
-            bottom: -4px;
+            bottom: -8px;
+            color: red !important;
             left: calc(var(--symbol-left) + 4px);
         }
     }
