@@ -1000,9 +1000,7 @@ export default defineComponent({
     padding: 0 12px;
     border-radius: 4px;
     box-shadow: 0 0 0 1px var(--text-low-contrast);
-    transition-property: outline-color, border-color;
-    transition-duration: 0.3s;
-    transition-timing-function: ease;
+    transition: box-shadow 0.3s ease;
     position: relative;
     cursor: text;
 
@@ -1038,7 +1036,7 @@ export default defineComponent({
 
     &--ios {
         #{$this}__symbol {
-            top: 42px;
+            top: 32px;
             left: calc(var(--symbol-left) + 4px);
         }
     }
