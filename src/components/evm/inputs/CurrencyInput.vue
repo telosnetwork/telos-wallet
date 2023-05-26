@@ -1039,6 +1039,7 @@ export default defineComponent({
 
         #{$this}__symbol {
             top: 27px;
+            left: calc(var(--symbol-left) + 2px);
         }
 
         #{$this}__label-text {
