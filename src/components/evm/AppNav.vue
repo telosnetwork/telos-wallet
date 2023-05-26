@@ -276,7 +276,7 @@ export default defineComponent({
 
     &__back-button {
         @include text--header-5;
-        height: 32px;
+        height: 30px;
         color: var(--text-default-contrast);
         i {
             font-size: 1.15em;

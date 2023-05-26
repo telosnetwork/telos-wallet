@@ -1035,8 +1035,10 @@ export default defineComponent({
     }
 
     &--ios {
+        padding: 0 8px;
+
         #{$this}__symbol {
-            top: 28px;
+            top: 26px;
             left: calc(var(--symbol-left) + 4px);
         }
     }
