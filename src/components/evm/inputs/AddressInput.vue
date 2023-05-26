@@ -54,12 +54,12 @@ function addressIsValidLowercase(address: string): boolean {
 }
 
 function addressIsValidChecksum(address: string): boolean {
-    if (address.substring(0, 2) !== '0x') {
+    if (address.substring(0, 2) !== '0x' || addressIsValidLowercase(address)) {
         return false;
     }
 
     try {
-        // this method will throw an exception if the address is not a valid checksum
+        // this method will throw an exception if the address is not a valid checksum, or if the address is all lower
         // however it allows addresses without a '0x' prefix
         getAddress(address);
         return true;
@@ -87,7 +87,8 @@ function handleModelValueUpdate(newVal: string | null) {
     :disable="disabled"
     :error-message="errorMessage"
     :error="!!errorMessage"
-    :warning="showLowercaseWarning"
+    :warning="addressIsValidLowercase(props.modelValue)"
+    :success="addressIsValidChecksum(modelValue)"
     :hint="inputHint"
     :type="$q.screen.width < 500 ? 'textarea' : 'text'"
     autogrow

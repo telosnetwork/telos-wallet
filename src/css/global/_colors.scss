@@ -34,10 +34,11 @@ $saveBtn: #2e1f4f;
     --link-color: #{$link-color};
     --menu-text: #{$menu-text};
 
-    --text-color-hover: #{$primary};
     --accent-color: #{$primary};
     --negative-color: #{$negative};
     --positive-color: #{$positive};
+    --warning-color-ui: #{$warning};
+    --warning-color-text: #804A00;
 
     --negative-muted: #{rgba($negative, 0.5)};
     --positive-muted: #{rgba($positive, 0.5)};

@@ -14,7 +14,13 @@ export default defineComponent({
             type: String,
             default: null,
         },
+        // gives the input a yellow warning state
         warning: {
+            type: Boolean,
+            default: false,
+        },
+        // gives the input a green success state
+        success: {
             type: Boolean,
             default: false,
         },
@@ -66,12 +72,12 @@ export default defineComponent({
             delete filteredAttrs.size; // size=undefined causes DOM warnings
 
             const attrs: Record<string, unknown> = {
-                color: (this.warning && !this.error) ? 'warning' : 'primary',
-                labelColor: this.warning ? 'warning' : undefined,
                 ...this.$attrs,
                 ...quasarProps,
                 errorMessage,
                 error,
+                color: this.inputColor,
+                labelColor: this.inputColor,
                 disabled: 'disabled',
                 readonly: 'readonly',
                 required: 'required',
@@ -95,6 +101,28 @@ export default defineComponent({
             }
 
             return attrs;
+        },
+        inputColor(): string {
+            if (this.error) {
+                return 'negative';
+            } else if (this.warning) {
+                return 'warning';
+            } else if (this.success) {
+                return 'positive';
+            } else {
+                return '';
+            }
+        },
+        inputIcon(): string {
+            if (this.error) {
+                return '';
+            } else if (this.warning) {
+                return 'warning';
+            } else if (this.success) {
+                return 'check';
+            } else {
+                return '';
+            }
         },
     },
     watch: {
@@ -125,8 +153,10 @@ export default defineComponent({
 <div
     :class="{
         'c-base-input': true,
+        'c-base-input--pristine': !isDirty,
         'c-base-input--warning': warning,
-        'q-mx-sm q-mb-sm': true,
+        'c-base-input--success': success,
+        'q-mb-sm': true,
     }"
 >
     <q-input
@@ -134,23 +164,65 @@ export default defineComponent({
         :model-value="modelValue"
         :reactive-rules="true"
         v-bind="inputElementBindings"
+        outlined
+        stack-label
         @update:modelValue="handleChange"
         @blur="this.isDirty = true"
     >
-
         <template #append>
-            <slot name="append"></slot>
+            <q-icon
+                v-if="inputIcon"
+                :name="inputIcon"
+                :color="inputColor"
+            />
+            <slot v-else name="append"></slot>
         </template>
+
     </q-input>
 </div>
 </template>
 
 <style lang="scss">
 .c-base-input {
+
+    // quasar overrides
+    .q-field__label {
+        margin-left: 4px;
+    }
+
     &--warning {
-        // quasar override
         .q-field__messages {
-            color: $warning;
+            @include warning-text;
+        }
+
+        .q-field--outlined {
+            .q-field__control::before {
+                border-color: var(--warning-color-ui);
+            }
+        }
+
+        .q-field--outlined.q-field--highlighted {
+            .q-field__control::after {
+                border-color: var(--warning-color-ui);
+            }
+        }
+    }
+
+    &--success {
+        .q-field__messages {
+            @include positive-text;
+        }
+
+        .q-field--outlined {
+            .q-field__control::before {
+                border-color: var(--positive-color);
+            }
+        }
+
+        .q-field--outlined.q-field--highlighted {
+            .q-field__control::after {
+               border-color: var(--positive-color);
+            }
         }
     }
 }
