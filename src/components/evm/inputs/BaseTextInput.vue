@@ -142,7 +142,6 @@ export default defineComponent({
 <div
     :class="{
         'c-base-input': true,
-        'c-base-input--pristine': !isDirty,
         'c-base-input--warning': warning,
         'c-base-input--success': success,
         'c-base-input--error': error,
@@ -163,7 +162,6 @@ export default defineComponent({
             <q-icon
                 v-if="inputIcon"
                 :name="inputIcon"
-                :color="inputColor"
             />
             <slot v-else name="append"></slot>
         </template>
