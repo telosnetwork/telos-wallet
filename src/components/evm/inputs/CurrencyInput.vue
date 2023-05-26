@@ -1040,10 +1040,6 @@ export default defineComponent({
         #{$this}__symbol {
             top: 27px;
         }
-
-        #{$this}__label-text {
-            left: 14px;
-        }
     }
 
     &__spinner {
@@ -1058,6 +1054,7 @@ export default defineComponent({
         @include text--small;
         position: absolute;
         top: 4px;
+        left: 14px;
         color: var(--text-low-contrast);
         transition: color 0.3s ease;
     }
