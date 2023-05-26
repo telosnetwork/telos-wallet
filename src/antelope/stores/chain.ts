@@ -118,6 +118,7 @@ export const useChainStore = defineStore(store_name, {
         // TODO: remove the 'as EVMChainSettings' when the native chains are implemented
         // https://github.com/telosnetwork/telos-wallet/issues/246
         getExplorerUrl: () => (network: string) => (settings[network] as EVMChainSettings).getExplorerUrl(),
+        getEcosystemUrl: () => (network: string) => (settings[network] as EVMChainSettings).getEcosystemUrl(),
     },
     actions: {
         trace: createTraceFunction(store_name),

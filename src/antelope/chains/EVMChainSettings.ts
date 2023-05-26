@@ -104,6 +104,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     // new methods
     abstract getWeiPrecision(): number;
     abstract getExplorerUrl(): string;
+    abstract getEcosystemUrl(): string;
     abstract getTrustedContractsBucket(): string;
     abstract getImportantTokensIdList(): string[];
     abstract getIndexerApiEndpoint(): string;
