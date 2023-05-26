@@ -19,6 +19,11 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
+        // gives the input a yellow warning state
+        warningText: {
+            type: String,
+            default: '',
+        },
         // gives the input a green success state
         success: {
             type: Boolean,
@@ -76,6 +81,7 @@ export default defineComponent({
                 ...quasarProps,
                 errorMessage,
                 error,
+                hint: this.warning ? this.warningText : this.hint,
                 color: '',
                 labelColor: '',
                 disabled: 'disabled',
@@ -172,6 +178,7 @@ export default defineComponent({
 
 <style lang="scss">
 .c-base-input {
+    $this: &;
 
     // quasar overrides
     .q-field__label {
@@ -198,7 +205,7 @@ export default defineComponent({
         }
     }
 
-    &--warning {
+    &--warning:not(#{$this}--error) {
         .q-field__messages,
         .q-field__label {
             @include warning-text;
@@ -221,7 +228,7 @@ export default defineComponent({
         }
     }
 
-    &--success {
+    &--success:not(#{$this}--error):not(#{$this}--warning) {
         .q-field__messages,
         .q-field__label,
         .q-icon {

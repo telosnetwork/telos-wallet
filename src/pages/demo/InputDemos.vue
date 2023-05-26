@@ -27,6 +27,8 @@ export default defineComponent({
         baseTextInputHasError: false,
         baseTextInputHasHint: false,
         baseTextInputHasPrefix: false,
+        baseTextInputHasWarning: false,
+        baseTextInputIsSuccessful: false,
 
         addressInputModel: '',
         addressInputIsDisabled: false,
@@ -74,8 +76,13 @@ export default defineComponent({
         currencyUsdUsdtInputSecondaryDecimals: 6,
         currencyUsdUsdtInputConversionRate: '0.999903',
     }),
+    computed: {
+        baseInputWarningText(): string {
+            return this.baseTextInputHasWarning ? 'Warning text' : '';
+        },
+    },
     methods: {
-        setRandomizeExchangeRates(enable: boolean) {
+        setRandomizeExchangeRates(enable: boolean): void {
             if (enable && !this.randomizeExchangeRatesInterval) {
                 // set a timeout to randomize currencyTlosUsdInputConversionRate within 0.1 and 0.3
                 this.randomizeExchangeRatesInterval = setInterval(() => {
@@ -93,7 +100,7 @@ export default defineComponent({
                 this.randomizeExchangeRates = false;
             }
         },
-        updateCurrencyInputLocale(event: InputEvent) {
+        updateCurrencyInputLocale(event: InputEvent): void {
             const eventTarget = event.target as HTMLInputElement;
             this.currencyInputLocale = eventTarget.value;
         },
@@ -126,12 +133,14 @@ export default defineComponent({
         <br>
         <q-checkbox v-model="baseTextInputIsLoading">Loading?</q-checkbox>
         <q-checkbox v-model="baseTextInputIsClearable">Clearable?</q-checkbox>
-        <q-checkbox v-model="baseTextInputHasError">Error?</q-checkbox>
-        <br>
         <q-checkbox v-model="baseTextInputHasHint">Hint?</q-checkbox>
         <q-checkbox v-model="baseTextInputHasPrefix">Prefix text?</q-checkbox>
+        <br>
+        <q-checkbox v-model="baseTextInputHasError">Error?</q-checkbox>
+        <q-checkbox v-model="baseTextInputHasWarning">Warning?</q-checkbox>
+        <q-checkbox v-model="baseTextInputIsSuccessful">Success?</q-checkbox>
     </div>
-    <div class="col-xs-6 col-md-3 col-lg-2">
+    <div class="col-xs-12 col-md-3 col-lg-2">
         <BaseTextInput
             v-model="baseTextInputModel"
             :required="baseTextInputIsRequired"
@@ -140,7 +149,10 @@ export default defineComponent({
             :loading="baseTextInputIsLoading"
             :clearable="baseTextInputIsClearable"
             :error="baseTextInputHasError"
+            :warning="baseTextInputHasWarning"
+            :success="baseTextInputIsSuccessful"
             :hint="baseTextInputHasHint ? 'Example hint' : ''"
+            :warning-text="baseInputWarningText"
             :prefix="baseTextInputHasPrefix ? 'Prefix' : ''"
             error-message="Example error message"
             label="Example Label"
@@ -158,7 +170,7 @@ export default defineComponent({
     <div class="col-12">
         <q-checkbox v-model="addressInputIsDisabled">Disabled?</q-checkbox>
     </div>
-    <div class="col-xs-6 col-md-3 col-lg-2">
+    <div class="col-xs-12 col-md-3 col-lg-2">
         <AddressInput
             ref="addressInput"
             v-model="addressInputModel"

@@ -45,7 +45,7 @@ const errorMessage = computed(() => {
     return '';
 });
 
-const inputHint = computed(() => showLowercaseWarning.value ? t('forms.errors.lowercaseAddress') : '');
+const warningText = computed(() => showLowercaseWarning.value ? t('forms.errors.lowercaseAddress') : '');
 
 
 // methods
@@ -92,9 +92,9 @@ function handleModelValueUpdate(newVal: string | null) {
     :disable="disabled"
     :error-message="errorMessage"
     :error="!!errorMessage"
-    :warning="addressIsValidLowercase(props.modelValue)"
+    :warning="showLowercaseWarning"
     :success="addressIsValidChecksum(modelValue)"
-    :hint="inputHint"
+    :warning-text="warningText"
     :type="$q.screen.width < 500 ? 'textarea' : 'text'"
     autogrow
     placeholder="0x0000000000000000000000000000000000000000"
