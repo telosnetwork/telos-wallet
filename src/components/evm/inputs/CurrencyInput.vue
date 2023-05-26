@@ -1036,7 +1036,7 @@ export default defineComponent({
 
     &--ios {
         #{$this}__symbol {
-            top: 6px;
+            bottom: 6px;
         }
     }
 
