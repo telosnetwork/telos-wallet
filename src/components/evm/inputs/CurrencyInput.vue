@@ -999,13 +999,13 @@ export default defineComponent({
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
-    box-shadow: 0 0 0 1px var(--text-low-contrast);
+    box-shadow: 0 0 0 1px $grey-5;
     transition: box-shadow 0.3s ease;
     position: relative;
     cursor: text;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        box-shadow: 0 0 0 1px var(--text-default-contrast);
+        box-shadow: 0 0 0 1px $grey-5;
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
@@ -1035,10 +1035,10 @@ export default defineComponent({
     }
 
     &--ios {
-        padding: 0 8px;
+        padding: 0;
 
         #{$this}__symbol {
-            top: 26px;
+            top: 25px;
             left: calc(var(--symbol-left) + 4px);
         }
     }
