@@ -999,8 +999,7 @@ export default defineComponent({
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
-    border: 1px solid $grey-5;
-    outline: 2px solid transparent;
+    box-shadow: 0 0 0 1px var(--text-low-contrast);
     transition-property: outline-color, border-color;
     transition-duration: 0.3s;
     transition-timing-function: ease;
@@ -1008,16 +1007,20 @@ export default defineComponent({
     cursor: text;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        border: 1px solid var(--text-default-contrast);
+        box-shadow: 0 0 0 1px var(--text-default-contrast);
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
-        outline-color: $primary;
-        border-color: transparent;
+        box-shadow: 0 0 0 2px var(--accent-color);
+
 
         #{$this}__label-text {
             color: var(--accent-color);
         }
+    }
+
+    &:focus-within#{$this}--error {
+        box-shadow: 0 0 0 2px var(--negative-color);
     }
 
     &--disabled,
@@ -1026,8 +1029,7 @@ export default defineComponent({
     }
 
     &--error {
-        outline-color: var(--negative-color);
-        border-color: transparent;
+        box-shadow: 0 0 0 1px var(--negative-color);
 
         #{$this}__label-text {
             color: var(--negative-color);
@@ -1036,7 +1038,7 @@ export default defineComponent({
 
     &--ios {
         #{$this}__symbol {
-            bottom: -8px;
+            bottom: -50px;
             color: red !important;
             left: calc(var(--symbol-left) + 4px);
         }
