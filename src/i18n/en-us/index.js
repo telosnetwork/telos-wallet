@@ -71,7 +71,6 @@ export default {
         balance_row_actions_aria: 'Balance row actions',
         no_fiat_value: 'No reliable fiat value found',
         receiving_account: 'Receiving Account',
-        account_required: 'Account is required',
         token: 'Token',
         cancel: 'Cancel',
         estimated_fees: 'Estimated Fees',
@@ -203,6 +202,9 @@ export default {
             unique: 'Repeated values are not allowed',
             token: 'The field must contain between 2 and 6 characters',
             tokenDecimals: 'The decimals must be between 2 and 9',
+            invalidChecksum: 'Invalid checksum, check the address',
+            invalidAddress: 'Invalid address',
+            lowercaseAddress: 'Address is lowercase, verify that it\'s correct',
         },
         hints: {
             selectCountrie: 'Please select your country',

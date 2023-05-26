@@ -174,15 +174,15 @@ export default defineComponent({
 
         &:hover {
             background-color: var(--bg-color-hover);
-            color: var(--text-color-hover);
+            color: var(--accent-color);
 
             #{$this}__icon {
                 &:not(#{$this}__icon--acorn) path {
-                    fill: var(--text-color-hover);
+                    fill: var(--accent-color);
                 }
 
                 &#{$this}__icon--acorn path {
-                    stroke: var(--text-color-hover);
+                    stroke: var(--accent-color);
                 }
             }
         }

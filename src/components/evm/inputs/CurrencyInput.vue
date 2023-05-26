@@ -1037,6 +1037,7 @@ export default defineComponent({
 
     &__label-text {
         @include text--small;
+
         position: absolute;
         top: 4px;
         color: var(--text-low-contrast);
@@ -1068,6 +1069,7 @@ export default defineComponent({
     &__error-text,
     &__conversion-rate {
         @include text--small;
+
         position: absolute;
         bottom: -24px;
         width: max-content;
@@ -1097,10 +1099,10 @@ export default defineComponent({
 
         position: absolute;
         top: -24px;
-        left: 0;
         right: 0;
-        text-align: right;
+        width: max-content;
         cursor: pointer;
+        padding: 0 0 8px 8px; // make clickable area slightly larger
         color: var(--link-color);
 
         #{$this}--disabled &,

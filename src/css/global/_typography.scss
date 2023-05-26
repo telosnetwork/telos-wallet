@@ -133,30 +133,110 @@ body {
 }
 
 /* Utilities classes */
-.u-text--center {
-    text-align: center;
+@mixin link-color-text {
+    color: var(--link-color) !important;
 }
 
-.u-text--high-contrast {
-    color: var(--text-high-contrast);
+@mixin high-contrast-text {
+    color: var(--text-high-contrast) !important;
 }
 
-.u-text--default-contrast {
-    color: var(--text-default-contrast);
+@mixin default-contrast-text {
+    color: var(--text-default-contrast) !important;
 }
 
-.u-text--low-contrast {
+@mixin low-contrast-text {
+    color: var(--text-low-contrast) !important;
+}
+
+@mixin alt-color-text {
+    color: var(--menu-text) !important;
+}
+
+@mixin alt-color-text {
+    color: var(--menu-text) !important;
+}
+
+@mixin accent-text {
+    color: var(--accent-color) !important;
+}
+
+@mixin positive-text {
+    color: var(--positive-color) !important;
+}
+
+@mixin warning-text {
+    color: var(--warning-color-text) !important;
+}
+
+@mixin error-text {
+    color: var(--negative-color) !important;
+}
+
+.u-text {
+    // alignment
+    &--center {
+        text-align: center;
+    }
+
+    &--right {
+        text-align: right;
+    }
+
+    // color
+    &--high-contrast {
+        @include high-contrast-text;
+    }
+
+    &--default-contrast {
+        @include default-contrast-text;
+    }
+
+    &--low-contrast {
+        @include low-contrast-text;
+    }
+
+    &--alt-color {
+        @include alt-color-text;
+    }
+
+    &--link-color {
+        @include link-color-text;
+    }
+
+    &--accent {
+        @include accent-text;
+    }
+
+    &--positive {
+        @include positive-text;
+    }
+
+    &--warning {
+        @include warning-text;
+    }
+
+    &--error {
+        @include error-text;
+    }
+}
+
+
+// quasar overrides
+.q-field .q-field__label {
+    @include text--small;
+
+    transform: translateY(-60%) scale(1); // remove 0.75 scaling and update Y position accordingly
+}
+
+.q-field:not(.q-field--highlighted) .q-field__label {
     color: var(--text-low-contrast);
 }
 
-.u-text--alt-color {
-    color: var(--menu-text);
+.q-field.q-field--highlighted .q-field__label {
+    color: var(--accent-color);
 }
 
-@mixin link-color {
-    color: var(--link-color);
-}
-
-.u-text--link-color {
-    color: var(--link-color);
+.q-field.q-field--error .q-field__label {
+    color: var(--negative-color);
 }

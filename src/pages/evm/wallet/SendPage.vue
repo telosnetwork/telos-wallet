@@ -10,6 +10,7 @@ import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -23,12 +24,14 @@ const global = useAppNavStore();
 export default defineComponent({
     name: 'SendPage',
     components: {
+        AddressInput,
         CurrencyInput,
         AppPage,
         UserInfo,
     },
     data: () => ({
         address: '',
+        addressIsValid: false,
         fiatConversionRate: 0 as number | undefined,
         token: null as EvmToken | null,
         amount: BigNumber.from(0),
@@ -145,12 +148,8 @@ export default defineComponent({
             return availableMinusGas;
 
         },
-        isAddressValid(): boolean {
-            const regex = /^0x[a-fA-F0-9]{40}$/;
-            return regex.test(this.address);
-        },
         isFormValid(): boolean {
-            return this.isAddressValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
+            return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
             return ant.stores.feedback.isLoading('transferTokens');
@@ -260,13 +259,11 @@ export default defineComponent({
         >
             <div class="c-send-page__row c-send-page__row--1 row">
                 <div class="col">
-                    <q-input
+                    <AddressInput
                         v-model="address"
-                        outlined
-                        autogrow
-                        :type="$q.screen.width < 500 ? 'textarea' : 'text'"
+                        name="send-page-address-input"
                         :label="$t('evm_wallet.receiving_account')"
-                        :rules="[val => !!val || $t('evm_wallet.account_required')]"
+                        @update:isValid="addressIsValid = $event"
                     />
                 </div>
             </div>
@@ -464,7 +461,7 @@ export default defineComponent({
 
     &__token-selection-container {
         position: relative;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
     }
 
     &__view-contract {
