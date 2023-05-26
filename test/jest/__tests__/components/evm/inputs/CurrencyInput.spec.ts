@@ -3,6 +3,12 @@ import { shallowMount } from '@vue/test-utils';
 import { BigNumber } from 'ethers';
 import { oneEthInWei, oneThousandFiveHundredEthInWei, stubWithSlot } from 'test/jest/testing-helpers';
 
+jest.mock('src/antelope', () => ({
+    usePlatformStore: () => ({
+        isIOSMobile: false,
+    }),
+}));
+
 describe('CurrencyInput.vue', () => {
     const stubs = {
         'ToolTip': stubWithSlot('ToolTip'),
