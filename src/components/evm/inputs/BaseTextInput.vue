@@ -76,8 +76,8 @@ export default defineComponent({
                 ...quasarProps,
                 errorMessage,
                 error,
-                color: this.inputColor,
-                labelColor: this.inputColor,
+                color: '',
+                labelColor: '',
                 disabled: 'disabled',
                 readonly: 'readonly',
                 required: 'required',
@@ -101,17 +101,6 @@ export default defineComponent({
             }
 
             return attrs;
-        },
-        inputColor(): string {
-            if (this.error) {
-                return 'negative';
-            } else if (this.warning) {
-                return 'warning';
-            } else if (this.success) {
-                return 'positive';
-            } else {
-                return '';
-            }
         },
         inputIcon(): string {
             if (this.error) {
@@ -156,6 +145,7 @@ export default defineComponent({
         'c-base-input--pristine': !isDirty,
         'c-base-input--warning': warning,
         'c-base-input--success': success,
+        'c-base-input--error': error,
         'q-mb-sm': true,
     }"
 >
@@ -190,9 +180,34 @@ export default defineComponent({
         margin-left: 4px;
     }
 
+    &--error {
+        .q-field__messages,
+        .q-field__label,
+        .q-icon {
+            @include error-text;
+        }
+
+        .q-field--outlined {
+            .q-field__control::before {
+                border-color: var(--negative-color);
+            }
+        }
+
+        .q-field--outlined.q-field--highlighted {
+            .q-field__control::after {
+                border-color: var(--negative-color);
+            }
+        }
+    }
+
     &--warning {
-        .q-field__messages {
+        .q-field__messages,
+        .q-field__label {
             @include warning-text;
+        }
+
+        .q-icon {
+            color: var(--warning-color-ui);
         }
 
         .q-field--outlined {
@@ -209,7 +224,9 @@ export default defineComponent({
     }
 
     &--success {
-        .q-field__messages {
+        .q-field__messages,
+        .q-field__label,
+        .q-icon {
             @include positive-text;
         }
 
