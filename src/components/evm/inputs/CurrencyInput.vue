@@ -1,6 +1,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
+import { BigNumber } from 'ethers';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
+import { usePlatformStore } from 'src/antelope';
+import InlineSvg from 'vue-inline-svg';
+
 import {
     getDecimalSeparatorForLocale,
     getLargeNumberSeparatorForLocale,
@@ -9,11 +14,9 @@ import {
     convertCurrency,
     getFloatReciprocal,
 } from 'src/antelope/stores/utils/currency-utils';
-import { BigNumber } from 'ethers';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import ToolTip from 'components/ToolTip.vue';
-import InlineSvg from 'vue-inline-svg';
 
+const platformStore = usePlatformStore();
 
 export default defineComponent({
     name: 'CurrencyInput',
@@ -342,6 +345,9 @@ export default defineComponent({
         },
         decimalSeparatorRegex(): RegExp {
             return new RegExp(`[${this.decimalSeparator}]`, 'g');
+        },
+        isIOS() {
+            return platformStore.isIOSMobile;
         },
     },
     watch: {
@@ -919,6 +925,7 @@ export default defineComponent({
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
         'c-currency-input--disabled': !!inputElementAttrs.disabled,
+        'c-currency-input--ios': isIOS,
     }"
     @click="focusInput"
 >
@@ -1024,6 +1031,12 @@ export default defineComponent({
 
         #{$this}__label-text {
             color: var(--negative-color);
+        }
+    }
+
+    &--ios {
+        #{$this}__symbol {
+            top: 6px;
         }
     }
 
