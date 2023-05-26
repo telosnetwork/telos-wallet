@@ -73,6 +73,11 @@ function validateAddress(address: string): boolean {
 }
 
 function handleModelValueUpdate(newVal: string | null) {
+    if (!inputIsDirty.value && validateAddress(props.modelValue) && !validateAddress(newVal ?? '')) {
+        // handle the scenario where the user has entered a valid address, then modified the value to be invalid
+        // without clicking away. in this case we want to show an error state
+        inputIsDirty.value = true;
+    }
     emit('update:modelValue', newVal === null ? '' : newVal);
     emit('update:isValid', validateAddress(newVal ?? ''));
 }
