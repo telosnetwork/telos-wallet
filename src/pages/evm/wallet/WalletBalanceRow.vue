@@ -3,20 +3,21 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { useChainStore, useUserStore } from 'src/antelope';
+import { useChainStore, useEVMStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmToken, NativeCurrencyAddress } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
-import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { prettyPrintCurrency, promptAddToMetamask } from 'src/antelope/stores/utils/currency-utils';
 
+const evmStore = useEVMStore();
 const userStore = useUserStore();
 const { fiatLocale, fiatCurrency } = userStore;
 
 interface OverflowMenuItem {
     label: string;
     icon: string;
-    url: string | { name: string, query?: Record<string, string> };
+    url?: string | { name: string, query?: Record<string, string> };
     strokeIcon?: boolean;
 }
 
@@ -40,7 +41,7 @@ export default defineComponent({
                 return require('src/assets/logo--tlos.svg');
             }
         },
-        grayLogo() {
+        grayLogo(): boolean {
             return !this.token.logoURI;
         },
         tokenBalanceFiat(): number | null {
@@ -58,7 +59,7 @@ export default defineComponent({
                 return this.primaryAmount.toString().length > 8;
             }
         },
-        truncateSecondaryValue() {
+        truncateSecondaryValue(): boolean {
             const isMobile = this.$q.screen.lt.sm;
 
             if (!isMobile) {
@@ -153,7 +154,7 @@ export default defineComponent({
                 return `${amount} ${this.fiatRateText}`;
             }
         },
-        tooltipWarningText() {
+        tooltipWarningText(): string[] | undefined {
             return !this.tokenHasFiatValue ? [`${this.$t('evm_wallet.no_fiat_value')}`] : undefined;
         },
         overflowMenuItems(): OverflowMenuItem[] {
@@ -218,22 +219,57 @@ export default defineComponent({
                 },
             });
 
+            if (this.token.address !== NativeCurrencyAddress && evmStore.isMetamaskSupported) {
+                items.push({
+                    label: 'Add to metamask', // eztodo i18n
+                    icon: require('assets/logo--metamask.svg'),
+                    strokeIcon: true,
+                });
+            }
+
             return items;
         },
     },
     methods: {
-        formatTooltipBalance(amount: number, isFiat: boolean) {
+        formatTooltipBalance(amount: number, isFiat: boolean): string {
             const decimals = isFiat ? 2 : 4;
             const symbol = isFiat ? fiatCurrency : this.token.symbol;
 
             return `${prettyPrintCurrency(amount, decimals, fiatLocale)} ${symbol}`;
         },
-        goToLink(url: string | object) {
+        goToLink(url: string | object): void {
             if (typeof url === 'object') {
                 this.$router.push(url);
             } else {
                 window.open(url, '_blank');
             }
+        },
+        promptAddToMetamask() {
+            const {
+                address,
+                symbol,
+                logoURI,
+                decimals,
+            } = this.token;
+
+            if (logoURI) {
+                promptAddToMetamask(address, symbol, logoURI, 'ERC20', decimals)
+                    .catch((error) => {
+                        let err: string;
+
+                        if (error.code === 4001) {
+                            err = this.$t('evm_wallet.rejected_metamask_prompt');
+                        } else {
+                            err = this.$t('evm_wallet.error_adding_token_to_metamask');
+                        }
+
+                        // workaround for typescript bug saying $errorNotification does not exist, despite it working
+                        // in other files with the same setup
+                        type thisType = { $errorNotification: (str: string) => void };
+                        (this as unknown as thisType).$errorNotification(err);
+                    });
+            }
+
         },
     },
 });
@@ -308,11 +344,12 @@ export default defineComponent({
                     <li
                         v-for="(item, index) in overflowMenuItems"
                         :key="`overflow-item-${index}`"
+                        v-close-popup
                         class="c-wallet-balance-row__overflow-li"
                         tabindex="0"
                         :aria-labelledby="`overflow-text-${index}`"
-                        @click="goToLink(item.url)"
-                        @keydown.enter.space="goToLink(item.url)"
+                        @click="item.url ? goToLink(item.url) : promptAddToMetamask()"
+                        @keydown.enter.space="item.url ? goToLink(item.url) : promptAddToMetamask()"
                     >
                         <div class="c-wallet-balance-row__overflow-icon-wrapper">
                             <InlineSvg
@@ -445,8 +482,11 @@ export default defineComponent({
                     fill: var(--accent-color);
                 }
 
-                &#{$this}__overflow-icon--stroke path {
-                    stroke: var(--accent-color);
+                &#{$this}__overflow-icon--stroke {
+                    path,
+                    polygon {
+                        stroke: var(--accent-color);
+                    }
                 }
             }
 
@@ -477,7 +517,8 @@ export default defineComponent({
         }
 
         &--stroke {
-            path {
+            path,
+            polygon {
                 fill: transparent;
                 stroke: var(--text-default-contrast);
             }

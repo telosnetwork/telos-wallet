@@ -93,6 +93,8 @@ export default {
         incorrect_network: 'Incorrect network detected! Switch to {networkName} to complete transactions',
         viewing_n_transactions: 'Viewing {rowsPerPage} of {totalRows} transactions',
         no_transactions_found: 'No transactions found',
+        rejected_metamask_prompt: 'The MetaMask prompt was rejected',
+        error_adding_token_to_metamask: 'Error adding token to MetaMask',
     },
     global: {
         native: 'Native',
