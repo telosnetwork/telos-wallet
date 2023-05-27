@@ -171,7 +171,7 @@ export default defineComponent({
 
             if (this.token.address !== NativeCurrencyAddress && evmStore.isMetamaskSupported) {
                 items.push({
-                    label: 'Add to metamask', // eztodo i18n
+                    label: this.$t('evm_wallet.add_to_metamask'),
                     icon: require('assets/logo--metamask.svg'),
                     strokeIcon: true,
                 });
