@@ -3,11 +3,13 @@ import { defineComponent } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope } from 'src/antelope';
+import { getAntelope, useChainStore } from 'src/antelope';
 import { useAppNavStore } from 'src/stores';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
+const chainStore = useChainStore();
+
 const appnav = useAppNavStore();
 
 export default defineComponent({
@@ -88,6 +90,10 @@ export default defineComponent({
                     (this.$refs['last-link'] as HTMLElement)?.focus();
                 }
             }
+        },
+        gotoEcosystem() {
+            const network = this.loggedAccount.network;
+            window.open(chainStore.getEcosystemUrl(network), '_blank');
         },
     },
 });
@@ -259,6 +265,19 @@ export default defineComponent({
             </li>
         </ul>
 
+        <ul class="c-app-nav__menu-links">
+            <li
+                class="c-app-nav__menu-link"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="gotoEcosystem()"
+                @keypress.space.enter="gotoEcosystem()"
+            >
+                {{ $t('nav.ecosystem') }}
+                <q-icon size="16px" name="launch" />
+            </li>
+        </ul>
+
         <div v-if="!isProduction" class="c-app-nav__demos-link">
             <router-link :to="{ name: 'demos' }" class="text-white">
                 Component Demos
@@ -367,6 +386,28 @@ export default defineComponent({
 
         &--current-route#{$this}__icon--acorn path {
             stroke: var(--link-color);
+        }
+    }
+
+    &__menu-links {
+        margin-top: 80px;
+        list-style: none;
+    }
+
+    &__menu-link {
+        @include text--small-bold;
+
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        width: max-content;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 

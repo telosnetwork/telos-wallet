@@ -59,10 +59,6 @@ export default defineComponent({
                 ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: this.account.network }));
             }
         },
-        gotoEcosystem() {
-            const network =  this.account.network;
-            window.open(chainStore.getEcosystemUrl(network), '_blank');
-        },
     },
     computed: {
         address() {
@@ -119,21 +115,6 @@ export default defineComponent({
                     <h5>{{ $t('nav.teloscan') }}</h5>
                     <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
                 </li>
-
-                <li
-                    class="c-user-info__menu-item"
-                    role="menuitem"
-                    tabindex="0"
-                    @click="gotoEcosystem()"
-                    @keypress.space.enter="gotoEcosystem()"
-                >
-                    <div class="c-user-info__icon-wrapper">
-                        <q-icon name="dashboard" size="sm" />
-                    </div>
-                    <h5 class="q-mt-xs">{{ $t('nav.ecosystem') }}</h5>
-                    <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
-                </li>
-
                 <li
                     class="c-user-info__menu-item"
                     role="menuitem"
