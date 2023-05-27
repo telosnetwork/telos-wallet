@@ -51,9 +51,14 @@ export default defineComponent({
 <AppPage>
     <template v-slot:header>
         <div class="c-receive-page__title-container">
-            <h1 class="u-text--high-contrast"> {{ $t('evm_wallet.receive') }}</h1>
-            <p class="o-text--paragraph u-text--default-contrast"> {{ $t('evm_wallet.scan_qr') }}</p>
-            <AddressQR :size="canvasSize" :address="address" class="c-receive-page__qr-code" />
+            <h1 class="u-text--high-contrast q-my-lg"> {{ $t('evm_wallet.receive') }}</h1>
+            <p class="o-text--paragraph u-text--default-contrast q-mb-md"> {{ $t('evm_wallet.scan_qr') }}</p>
+            <AddressQR
+                v-if="address"
+                :size="canvasSize"
+                :address="address"
+                class="c-receive-page__qr-code"
+            />
         </div>
     </template>
 

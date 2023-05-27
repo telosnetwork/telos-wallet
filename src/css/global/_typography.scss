@@ -96,6 +96,14 @@ body {
 
 
 /* Typography classes */
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+    margin: 0;
+}
 .o-text--header-1, h1 {
     @include text--header-1;
 }

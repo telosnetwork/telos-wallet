@@ -50,6 +50,7 @@ export default {
         open_menu: 'Open menu',
         logout: 'Log Out',
         teloscan: 'Teloscan',
+        ecosystem: 'Ecosystem',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',

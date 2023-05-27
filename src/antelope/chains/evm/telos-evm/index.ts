@@ -29,6 +29,7 @@ const RPC_ENDPOINT = {
 
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://teloscan.io';
+const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const NETWORK_EVM_ENDPOINT = 'https://mainnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts.s3.amazonaws.com';
@@ -86,6 +87,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getExplorerUrl(): string {
         return EXPLORER_URL;
+    }
+
+    getEcosystemUrl(): string {
+        return ECOSYSTEM_URL;
     }
 
     getTrustedContractsBucket(): string {

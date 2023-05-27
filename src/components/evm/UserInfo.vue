@@ -105,17 +105,16 @@ export default defineComponent({
                     @click="gotoTeloscan()"
                     @keypress.space.enter="gotoTeloscan()"
                 >
-                    <div class="c-user-info__icon-wraper"><InlineSvg
+                    <div class="c-user-info__icon-wrapper"><InlineSvg
                         :src="require('src/assets/icon--acorn.svg')"
                         class="c-user-info__icon c-user-info__icon--acorn"
                         height="24"
                         width="24"
                         aria-hidden="true"
                     /></div>
-                    <span class="o-text--header-5">{{ $t('nav.teloscan') }}</span>
+                    <h5>{{ $t('nav.teloscan') }}</h5>
                     <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
                 </li>
-
                 <li
                     class="c-user-info__menu-item"
                     role="menuitem"
@@ -123,14 +122,14 @@ export default defineComponent({
                     @click="logout"
                     @keypress.space.enter="logout"
                 >
-                    <div class="c-user-info__icon-wraper"><InlineSvg
+                    <div class="c-user-info__icon-wrapper"><InlineSvg
                         :src="require('src/assets/icon--logout.svg')"
                         class="c-user-info__icon"
                         height="24"
                         width="24"
                         aria-hidden="true"
                     /></div>
-                    <span class="o-text--header-5">{{ $t('global.sign_out') }}</span>
+                    <h5>{{ $t('global.sign_out') }}</h5>
                 </li>
             </ul>
         </q-menu>
@@ -205,7 +204,7 @@ export default defineComponent({
         }
     }
 
-    &__icon-wraper {
+    &__icon-wrapper {
         display: inline-block;
         height: 24px;
         width: 24px;
