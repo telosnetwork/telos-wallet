@@ -1,24 +1,46 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { EvmToken, NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
-import { useUserStore } from 'src/antelope';
+import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
+import { useUserStore } from 'src/antelope/stores/user';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '41';
 const NETWORK = 'telos-evm-testnet';
 const DISPLAY = 'Telos EVM Testnet';
-const TOKEN = {
+const TOKEN = new TokenClass({
     name: 'Telos',
     symbol: 'TLOS',
+    network: NETWORK,
     decimals: 18,
     address: NativeCurrencyAddress,
     logo: LOGO,
     logoURI: LOGO,
     isNative: false,
     isSystem: true,
-} as EvmToken;
+} as TokenSourceInfo);
+
+const S_TOKEN = new TokenClass({
+    name: 'Staked Telos',
+    symbol: 'STLOS',
+    network: NETWORK,
+    decimals: 18,
+    address: '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD',
+    isNative: false,
+    isSystem: false,
+} as TokenSourceInfo);
+
+const W_TOKEN = new TokenClass({
+    name: 'Wrapped Telos',
+    symbol: 'WTLOS',
+    network: NETWORK,
+    decimals: 18,
+    address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+    isNative: false,
+    isSystem: false,
+} as TokenSourceInfo);
 
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -59,8 +81,16 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return api.getCoingeckoPriceChartData('telos');
     }
 
-    getSystemToken(): EvmToken {
-        return { ...TOKEN, tokenId: this.constructTokenId(TOKEN) } as EvmToken;
+    getSystemToken(): TokenClass {
+        return TOKEN;
+    }
+
+    getStakedSystemToken(): TokenClass {
+        return S_TOKEN;
+    }
+
+    getWrappedSystemToken(): TokenClass {
+        return W_TOKEN;
     }
 
     async getUsdPrice(): Promise<number> {
@@ -101,20 +131,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return 'https://www.telos.net/#buy-tlos-simplex';
     }
 
-    getStakedNativeTokenAddress() {
-        return '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
-    }
-
-    getWrappedNativeTokenAddress() {
-        return '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9';
-    }
-
     getImportantTokensIdList(): string[] {
-        return [
-            this.constructTokenId(TOKEN),
-            this.constructTokenId({ symbol: 'STLOS', address: this.getStakedNativeTokenAddress() } as EvmToken),
-            this.constructTokenId({ symbol: 'WTLOS', address: this.getWrappedNativeTokenAddress() } as EvmToken),
-        ];
+        return [TOKEN.id, S_TOKEN.id, W_TOKEN.id];
     }
 
     getIndexerApiEndpoint(): string {

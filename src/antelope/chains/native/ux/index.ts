@@ -1,20 +1,20 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
+import { TokenClass, TokenSourceInfo, PriceChartData, Theme } from 'src/antelope/types';
 
 const CHAIN_ID =
   '8fc6dce7942189f842170de953932b1f66693ad3788f766e777b6f9d22335c02';
 const NETWORK = 'ux';
 const DISPLAY = 'UX';
-const TOKEN = {
+const TOKEN = new TokenClass({
     symbol: 'UTX',
     precision: 4,
     amount: 0,
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as NativeToken;
+} as TokenSourceInfo);
 const HYPERION_ENDPOINT = 'https://ux.eosusa.io';
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -63,7 +63,7 @@ export default class UX extends NativeChainSettings {
         return api.getEmptyPriceChartData();
     }
 
-    getSystemToken(): NativeToken {
+    getSystemToken(): TokenClass {
         return TOKEN;
     }
 
@@ -95,6 +95,6 @@ export default class UX extends NativeChainSettings {
     }
 
     getImportantTokensIdList(): string[] {
-        return [this.constructTokenId(TOKEN)];
+        return [TOKEN.id];
     }
 }

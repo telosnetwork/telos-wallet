@@ -1,5 +1,5 @@
 import { API } from '@greymass/eosio';
-import { ethers } from 'ethers';
+import { TokenSourceInfo } from 'src/antelope/types/TokenClass';
 
 export interface ActionData {
     actions: Action[];
@@ -116,51 +116,9 @@ export type AccountDetails = {
     actions: Action[];
     links: string[];
     query_time_ms: number;
-    tokens: Token[];
+    tokens: TokenSourceInfo[];
     total_actions: number;
 };
-
-// TODO: review this TokenBalance and Token interfaces ingeneral to be more EVM/Native Agnostic
-// https://github.com/telosnetwork/telos-wallet/issues/280
-export interface TokenBalance {
-    amount: number; // do we need this?
-    value: string;  // string value simplified to 4 decimal places - no formating
-    full: string;   // value with 18 decimal places - no formating
-    pretty: string; // value with 4 decimal places - formated with commas and dots (depends on locale)
-    tiny: string;   // value with 4 decimal places - formated for the shortest space possible (i.e. 1.234K, 1.5M, etc)
-    fiat: string;   // fiat value, with 2 decimal places - formated with commas and dots (depends on locale)
-}
-
-export interface Token {
-    tokenId: string;
-    symbol: string;
-    name: string;
-    logo?: string;
-    isNative: boolean;
-    isSystem: boolean;
-    price: number;
-    amount?: number;
-    balance: string;
-    balanceBn: ethers.BigNumber;
-    fullBalance: string;
-    fiatBalance: string;
-}
-
-export interface EvmToken extends Token {
-    address: string;
-    chainId: number;
-    metadata?: string;
-    hasMetadata?:boolean;
-    logoURI?: string;
-    decimals: number;
-    type?: string;
-}
-
-export interface NativeToken extends Token {
-    precision: number;
-    contract: string;
-}
-
 
 interface Key {
     key: string;

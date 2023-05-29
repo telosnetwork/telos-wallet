@@ -15,7 +15,6 @@ import {
 import {
     AccountDetails,
     Action,
-    Token,
     PermissionLinks,
     TableByScope,
     TransactionV1,
@@ -23,6 +22,7 @@ import {
     ActionData,
     Get_actions,
     HyperionActionsFilter,
+    TokenSourceInfo,
 } from 'src/antelope/types';
 
 export const NativeCurrencyAddress = '___NATIVE_CURRENCY___';
@@ -98,7 +98,7 @@ export type ApiClient = {
     getKeyAccounts: (key: PublicKey) => Promise<{ account_names: Name[] }>;
     getHyperionAccountData: (address: string) => Promise<AccountDetails>;
     getCreator: (address: string) => Promise<unknown>;
-    getTokens: (address: string) => Promise<Token[]>;
+    getTokens: (address: string) => Promise<TokenSourceInfo[]>;
     getTransactions: (filter: HyperionActionsFilter) => Promise<Action[]>;
     getTransaction: (address: string) => Promise<ActionData>;
     getTransactionV1: (id: string) => Promise<TransactionV1>;

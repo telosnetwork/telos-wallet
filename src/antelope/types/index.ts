@@ -16,6 +16,7 @@ export * from 'src/antelope/types/Producers';
 export * from 'src/antelope/types/IndexerTypes';
 export * from 'src/antelope/types/KeyAccounts';
 export * from 'src/antelope/types/Label';
+export * from 'src/antelope/types/TokenClass';
 export * from 'src/antelope/types/Theme';
 export * from 'src/antelope/types/TransactionV1';
 

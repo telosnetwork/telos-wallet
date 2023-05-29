@@ -6,7 +6,7 @@ import InlineSvg from 'vue-inline-svg';
 import { useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { EvmToken, NativeCurrencyAddress } from 'src/antelope/types';
+import { NativeCurrencyAddress, TokenBalance, TokenClass } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
@@ -27,12 +27,15 @@ export default defineComponent({
         InlineSvg,
     },
     props: {
-        token: {
-            type: Object as PropType<EvmToken>,
+        balance: {
+            type: Object as PropType<TokenBalance>,
             required: true,
         },
     },
     computed: {
+        token(): TokenClass {
+            return this.balance.token;
+        },
         tokenLogo(): string {
             if (this.token.logoURI) {
                 return this.token.logoURI;
@@ -44,10 +47,10 @@ export default defineComponent({
             return !this.token.logoURI;
         },
         tokenBalanceFiat(): number | null {
-            return this.tokenHasFiatValue ? parseFloat(this.token.fiatBalance) : null;
+            return this.token.price.isAvailable ? +this.token.price.getAmountInFiatStr(this.balance.amount) : null;
         },
         tokenHasFiatValue(): boolean {
-            return !!this.token.fiatBalance;
+            return this.token.price.isAvailable;
         },
         truncatePrimaryValue(): boolean {
             const isMobile = this.$q.screen.lt.sm;
@@ -72,7 +75,7 @@ export default defineComponent({
                 return '';
             }
 
-            const fiatAmount = this.token.price;
+            const fiatAmount = +this.token.price.str;
             const pretty = prettyPrintCurrency(
                 fiatAmount,
                 4,
@@ -92,7 +95,7 @@ export default defineComponent({
             if (this.tokenHasFiatValue && isMobile) {
                 return this.tokenBalanceFiat as number;
             } else {
-                return +(this.token.balance ?? 0);
+                return +this.balance.str;
             }
         },
         prettyPrimaryAmount(): string {
@@ -125,7 +128,7 @@ export default defineComponent({
                 return '';
             } else {
                 if (isMobile) {
-                    return +(this.token.balance ?? 0);
+                    return +this.balance.str;
                 } else {
                     return this.tokenBalanceFiat ?? 0;
                 }
@@ -163,8 +166,8 @@ export default defineComponent({
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
             const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
-            const tokenIsStlos = chainSettings.getStakedNativeTokenAddress() === this.token.address;
-            const tokenIsWtlos = chainSettings.getWrappedNativeTokenAddress() === this.token.address;
+            const tokenIsStlos = chainSettings.getStakedSystemToken().address === this.token.address;
+            const tokenIsWtlos = chainSettings.getWrappedSystemToken().address === this.token.address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
             // if (tokenIsTlos || tokenIsStlos) {
