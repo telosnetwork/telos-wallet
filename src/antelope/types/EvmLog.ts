@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { EvmToken } from '.';
+import { TokenSourceInfo } from '.';
 
 export interface EvmLog {
     address: string;
@@ -21,6 +21,6 @@ export interface EvmFormatedLog extends ethers.utils.LogDescription {
     isTransfer: boolean;
     logIndex: string,
     address: string,
-    token: EvmToken | null,
+    token: TokenSourceInfo | null,
     name: string,
 }

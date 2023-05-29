@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
-import { ShapedTransactionRow } from 'src/antelope/types';
 
 import TableControls from 'components/evm/TableControls.vue';
 import { useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
