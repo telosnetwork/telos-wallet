@@ -18,6 +18,7 @@ const priceCache: { [tokenId: string]: CachedPrice } = {};
 export const getCoingeckoUsdPrice = async (
     tokenId: string,
 ): Promise<number> => {
+
     const now = Date.now();
 
     if (priceCache[tokenId] &&
@@ -44,6 +45,7 @@ export const getCoingeckoUsdPrice = async (
         }
     } catch (error) {
         console.error('Error: fetching from Coingecko failed.', error);
+
         return 0;
     }
 };
