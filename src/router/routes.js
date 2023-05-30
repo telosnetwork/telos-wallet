@@ -1,31 +1,76 @@
 const routes = [
     {
-        path: "/",
-        component: () => import("layouts/MainLayout.vue"),
-        children: [{ path: "", component: () => import("pages/Home.vue") }]
+        path: '/',
+        name: 'home',
+        component: () => import('pages/home/HomePage.vue'),
     },
     {
-        path: "/balance",
-        component: () => import("layouts/MainLayout.vue"),
-        children: [{ path: "", component: () => import("pages/Balance.vue") }]
+        path: '/native',
+        component: () => import('layouts/NativeLayout.vue'),
+        children: [
+            {
+                path: 'balance',
+                component: () => import('pages/native/BalanceInfo.vue'),
+            },
+            {
+                path: 'dappsearch',
+                component: () => import('pages/native/DappSearch.vue'),
+            },
+            {
+                path: 'profile',
+                component: () => import('pages/native/SettingsPage.vue'),
+            },
+        ],
     },
     {
-        path: "/dappsearch",
-        component: () => import("layouts/MainLayout.vue"),
-        children: [{ path: "", component: () => import("pages/DappSearch.vue") }]
-    },
-    {
-        path: "/profile",
-        component: () => import("layouts/MainLayout.vue"),
-        children: [{ path: "", component: () => import("pages/Settings.vue") }]
+        path: '/evm',
+        component: () => import('layouts/EVMLayout.vue'),
+        children: [
+            {
+                path: 'wallet',
+                name: 'evm-wallet',
+                component: () => import('pages/evm/wallet/WalletPage.vue'),
+            },
+            {
+                path: 'send',
+                name: 'evm-send',
+                component: () => import('pages/evm/wallet/SendPage.vue'),
+            },
+            {
+                path: 'receive',
+                name: 'evm-receive',
+                component: () => import('pages/evm/wallet/ReceivePage.vue'),
+            },
+            // {
+            //     path: 'staking',
+            //     name: 'evm-staking',
+            //     component: () => import('pages/evm/staking/StakingPage.vue'),
+            // },
+            // {
+            //     path: 'wrap',
+            //     name: 'evm-wrap',
+            //     component: () => import('pages/evm/wrap/WrapPage.vue'),
+            // },
+        ],
     },
 
-    // Always leave this as last one,
-    // but you can also remove it
     {
-        path: '/(.*)*',
-        component: () => import("pages/Error404.vue")
-    }
+        path: '/demos',
+        name: 'demos',
+        component: () => import('pages/demo/DemoLayout.vue'),
+        children: [
+            {
+                path: 'inputs',
+                name: 'demos.inputs',
+                component: () => import('pages/demo/InputDemos.vue'),
+            },
+        ],
+    },
+
+    {
+        path: '/:catchAll(.*)',
+        component: () => import('pages/Error404Page.vue'),
+    },
 ];
 
 export default routes;
