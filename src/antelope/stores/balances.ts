@@ -47,7 +47,7 @@ export interface BalancesState {
 type addressString = `0x${string}`; // required wagmi type
 
 const store_name = 'balances';
-const ERC_20 = 'erc20';
+// const ERC20_TYPE   = 'ERC20';
 
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
@@ -298,7 +298,7 @@ export const useBalancesStore = defineStore(store_name, {
 
                 const config = await prepareWriteContract({
                     address: token.address as addressString,
-                    abi: useEVMStore().getTokenABI(ERC_20),
+                    abi: useEVMStore().getTokenABI(token.type), //TEST
                     functionName: 'transfer',
                     args: [to, amount],
                 });
@@ -313,7 +313,7 @@ export const useBalancesStore = defineStore(store_name, {
             if (token.isSystem) {
                 return evm.sendSystemToken(to, amount);
             } else {
-                const contract = await evm.getContract(token.address, ERC_20);
+                const contract = await evm.getContract(token.address, token.type); //TEST
                 if (contract) {
                     const contractInstance = contract.getContractInstance();
                     const amountInWei = amount.toString();
