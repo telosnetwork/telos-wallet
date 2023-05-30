@@ -1,6 +1,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
+import { BigNumber } from 'ethers';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
+import { usePlatformStore } from 'src/antelope';
+import InlineSvg from 'vue-inline-svg';
+
 import {
     getDecimalSeparatorForLocale,
     getLargeNumberSeparatorForLocale,
@@ -9,11 +14,9 @@ import {
     convertCurrency,
     getFloatReciprocal,
 } from 'src/antelope/stores/utils/currency-utils';
-import { BigNumber } from 'ethers';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import ToolTip from 'components/ToolTip.vue';
-import InlineSvg from 'vue-inline-svg';
 
+const platformStore = usePlatformStore();
 
 export default defineComponent({
     name: 'CurrencyInput',
@@ -342,6 +345,9 @@ export default defineComponent({
         },
         decimalSeparatorRegex(): RegExp {
             return new RegExp(`[${this.decimalSeparator}]`, 'g');
+        },
+        isIOS() {
+            return platformStore.isIOSMobile;
         },
     },
     watch: {
@@ -919,6 +925,7 @@ export default defineComponent({
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
         'c-currency-input--disabled': !!inputElementAttrs.disabled,
+        'c-currency-input--ios': isIOS,
     }"
     @click="focusInput"
 >
@@ -992,25 +999,26 @@ export default defineComponent({
     height: 56px;
     padding: 0 12px;
     border-radius: 4px;
-    border: 1px solid $grey-5;
-    outline: 2px solid transparent;
-    transition-property: outline-color, border-color;
-    transition-duration: 0.3s;
-    transition-timing-function: ease;
+    box-shadow: 0 0 0 1px $grey-5;
+    transition: box-shadow 0.3s ease;
     position: relative;
     cursor: text;
 
     &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        border: 1px solid var(--text-default-contrast);
+        box-shadow: 0 0 0 1px $grey-5;
     }
 
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
-        outline-color: $primary;
-        border-color: transparent;
+        box-shadow: 0 0 0 2px var(--accent-color);
+
 
         #{$this}__label-text {
             color: var(--accent-color);
         }
+    }
+
+    &:focus-within#{$this}--error {
+        box-shadow: 0 0 0 2px var(--negative-color);
     }
 
     &--disabled,
@@ -1019,11 +1027,18 @@ export default defineComponent({
     }
 
     &--error {
-        outline-color: var(--negative-color);
-        border-color: transparent;
+        box-shadow: 0 0 0 1px var(--negative-color);
 
         #{$this}__label-text {
             color: var(--negative-color);
+        }
+    }
+
+    &--ios {
+        padding: 0 8px;
+
+        #{$this}__symbol {
+            top: 27px;
         }
     }
 
@@ -1040,6 +1055,7 @@ export default defineComponent({
 
         position: absolute;
         top: 4px;
+        left: 14px;
         color: var(--text-low-contrast);
         transition: color 0.3s ease;
     }
