@@ -19,7 +19,7 @@ export default class EvmContract {
     private readonly _name: string;
     private readonly _abi?: EvmABI | null;
     private readonly _address: string;
-    private readonly _creationInfo?: EvmContractCreationInfo;
+    private readonly _creationInfo?: EvmContractCreationInfo | null;
     private readonly _interface?: ContractInterface | null;
     private readonly _supportedInterfaces: string[];
     private readonly _properties?: EvmContractCalldata;
