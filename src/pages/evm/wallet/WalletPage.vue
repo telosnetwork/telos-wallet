@@ -32,7 +32,7 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
     </template>
 
     <template v-slot:balance>
-        <div class="test">
+        <div class="c-wallet-page__row">
             <WalletBalanceRow
                 v-for="(balance, index) in allBalances"
                 :key="`balance-${index}`"
