@@ -258,8 +258,8 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(this.subscribeForTransactionReceipt);
                 }
             } catch (error) {
-                console.error('Error: ', errorToString(error));
-                throw error;
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
@@ -289,8 +289,8 @@ export const useBalancesStore = defineStore(store_name, {
                     permission: 'active',
                 });
             } catch (error) {
-                console.error('Error: ', errorToString(error));
-                throw error;
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferNativeTokens');
             }
@@ -313,7 +313,8 @@ export const useBalancesStore = defineStore(store_name, {
                     return await this.transferMetaMask(token, to, amount);
                 }
             } catch (error) {
-                throw new AntelopeError('antelope.balances.error_at_transfer_tokens');
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
