@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers';
-import { Notify } from 'quasar';
+import { Dialog, Notify } from 'quasar';
 
 // to persist the notification and require user to dismiss pass `true` as second param
 const errorNotification = function(error, dismiss = false) {
@@ -92,7 +92,7 @@ const successfulTransactionNotification = function(link) {
     });
 };
 
-const failedTransactionNotification = function(message) {
+const failedTransactionNotification = function(message, payload) {
     Notify.create({
         timeout: 0,
         message: html
@@ -103,9 +103,27 @@ const failedTransactionNotification = function(message) {
         html: true,
         classes: 'c-notify',
         actions: [{
-            label: this.$t('notification.success_see_trx_label'),
-            iconRight: 'launch',
-            class: 'c-notify__action-btn c-notify__action-btn--hide',
+            label: this.$t('notification.error_see_details_label'),
+            class: 'c-notify__action-btn ' + (payload ? ' ' : 'c-notify__action-btn--hide'),
+            handler: () => {
+                let content = '';
+                try {
+                    content = JSON.stringify(payload, null, 2);
+                } catch (e) {
+                    try {
+                        content = payload.toString();
+                    } catch (e) {
+                        content = payload + ' ';
+                    }
+                }
+
+                Dialog.create({
+                    class: 'c-notify__dialog',
+                    title: this.$t('notification.error_details_title'),
+                    message: '<q-card-section>' + content + '</q-card-section>',
+                    html: true,
+                });
+            },
         }, {
             label: this.$t('notification.dismiss_label'),
             class: 'c-notify__action-btn',
@@ -129,6 +147,5 @@ export default boot(({ app, store }) => {
     app.config.globalProperties.$failedTransactionNotification = failedTransactionNotification.bind(store);
     store['$t'] = app.config.globalProperties.$t;
 });
-
 
 
