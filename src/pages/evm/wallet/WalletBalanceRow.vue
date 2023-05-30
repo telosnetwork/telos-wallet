@@ -114,12 +114,7 @@ export default defineComponent({
             if (!this.tokenHasFiatValue) {
                 return '';
             } else {
-                const isMobile = this.$q.screen.lt.sm;
-                if (isMobile) {
-                    return +this.balance.str;
-                } else {
-                    return this.tokenBalanceFiat ?? 0;
-                }
+                return +this.balance.str;
             }
         },
         prettySecondaryAmount(): string {
