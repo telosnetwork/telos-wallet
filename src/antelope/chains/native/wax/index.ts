@@ -1,20 +1,20 @@
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { NativeToken, PriceChartData, Theme } from 'src/antelope/types';
+import { PriceChartData, Theme, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
 const CHAIN_ID =
   '1064487b3cd1a897ce03ae5b6a865651747e2e152090f99c1d19d44e01aea5a4';
 const NETWORK = 'wax';
 const DISPLAY = 'WAX';
-const TOKEN = {
+const TOKEN = new TokenClass({
     symbol: 'WAX',
     precision: 4,
     amount: 0,
     contract: 'eosio.token',
     isNative: true,
     isSystem: true,
-} as NativeToken;
+} as TokenSourceInfo);
 const HYPERION_ENDPOINT = 'https://wax.eosusa.io';
 const RPC_ENDPOINT = {
     protocol: 'https',
@@ -63,7 +63,7 @@ export default class EOS extends NativeChainSettings {
         return api.getCoingeckoPriceChartData('wax');
     }
 
-    getSystemToken(): NativeToken {
+    getSystemToken(): TokenClass {
         return TOKEN;
     }
 
@@ -95,6 +95,6 @@ export default class EOS extends NativeChainSettings {
     }
 
     getImportantTokensIdList(): string[] {
-        return [this.constructTokenId(TOKEN)];
+        return [TOKEN.id];
     }
 }

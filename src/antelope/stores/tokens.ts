@@ -2,7 +2,6 @@
  * Tokens: This store is responsible for fetching and providing a list of tokens for the current network.
  */
 
-
 import { defineStore } from 'pinia';
 import {
     createTraceFunction,
@@ -10,10 +9,7 @@ import {
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import {
-    EvmToken,
-    Label,
-    NativeToken,
-    Token,
+    Label, TokenClass,
 } from 'src/antelope/types';
 import { getAntelope, useAccountStore } from '..';
 import { toRaw } from 'vue';
@@ -21,13 +17,11 @@ import {
     ChainModel,
     useChainStore,
 } from 'src/antelope/stores/chain';
-import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
 
 export interface TokensState {
-    __tokens:  { [label: Label]: Token[] };
+    __tokens:  { [label: Label]: TokenClass[] };
 }
 
 const store_name = 'tokens';
@@ -37,8 +31,6 @@ export const useTokensStore = defineStore(store_name, {
     getters: {
         loggedTokens: state => state.__tokens['logged'],
         currentTokens: state => state.__tokens['current'],
-        nativeTokens: state => state.__tokens['current'] as NativeToken[],
-        evmTokens: state => state.__tokens['current'] as EvmToken[],
         getTokens: state => (label: string) => state.__tokens[label],
     },
     actions: {
@@ -58,23 +50,18 @@ export const useTokensStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('updateTokensForNetwork');
                 const chain = useChainStore().getChain(label);
-                let tokens: Token[] = [];
-                if (chain.settings.isNative()) {
-                    const chain_settings = chain.settings as NativeChainSettings;
-                    tokens = await chain_settings.getTokens();
-                } else {
-                    const chain_settings = chain.settings as EVMChainSettings;
-                    tokens = await chain_settings.getTokenList();
-                    this.__tokens[label] = tokens;
-                }
+                let tokens: TokenClass[] = [];
+                tokens = await chain.settings.getTokenList();
+                this.__tokens[label] = tokens;
                 const accountStore = useAccountStore();
                 if (accountStore.currentIsLogged && label === 'current') {
                     this.__tokens['logged'] = tokens;
                 }
                 this.trace('updateTokensForNetwork', 'token: ', tokens);
-
             } catch (error) {
                 console.error('Error: ', errorToString(error));
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokensForNetwork');
             }
         },
     },

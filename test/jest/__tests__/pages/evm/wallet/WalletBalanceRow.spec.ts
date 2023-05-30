@@ -1,16 +1,38 @@
 import { shallowMount } from '@vue/test-utils';
+import { ethers } from 'ethers';
+import { MarketSourceInfo, NativeCurrencyAddress, TokenBalance, TokenClass, TokenMarketData, TokenSourceInfo } from 'src/antelope/types';
 
 const fakeBuyMoreLink = 'fake';
 const fakeStlosContractAddress = '0x'.concat('9'.repeat(40));
 const fakeWtlosContractAddress = '0x'.concat('8'.repeat(40));
 const fakeTokenContractAddress = '0x'.concat('7'.repeat(40));
+
+const fakeStakedToken = new TokenClass({
+    name: 'Staked TLOS',
+    symbol: 'STLOS',
+    network: 'NETWORK',
+    decimals: 18,
+    address: fakeStlosContractAddress,
+    logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+} as TokenSourceInfo);
+
+
+const fakeWrappedToken = new TokenClass({
+    name: 'Wrapped TLOS',
+    symbol: 'WTLOS',
+    network: 'NETWORK',
+    decimals: 18,
+    address: fakeWtlosContractAddress,
+    logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+} as TokenSourceInfo);
+
 const storeMock = {
     useChainStore: () => ({
         currentChain: {
             settings: {
                 getBuyMoreOfTokenLink: () => fakeBuyMoreLink,
-                getStakedNativeTokenAddress: () => fakeStlosContractAddress,
-                getWrappedNativeTokenAddress: () => fakeWtlosContractAddress,
+                getStakedSystemToken: () => fakeStakedToken,
+                getWrappedSystemToken: () => fakeWrappedToken,
                 getExplorerUrl: () => 'fake-url',
             },
         },
@@ -22,8 +44,6 @@ const storeMock = {
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { EvmToken, NativeCurrencyAddress } from 'src/antelope/types';
-
 import { stubWithSlot } from 'test/jest/testing-helpers';
 
 jest.mock('src/antelope', () => storeMock);
@@ -45,11 +65,22 @@ describe('WalletBalanceRow.vue', () => {
         },
     });
 
+    const createTokenBalance = (_token: Partial<TokenSourceInfo>, price?: string): TokenBalance => {
+        const token = new TokenClass(_token as TokenSourceInfo);
+        const market = new TokenMarketData({ price } as MarketSourceInfo);
+        if (price) {
+            token.market = market;
+        }
+        const balanceBn = ethers.utils.parseUnits(_token.fullBalance || '0', token.decimals);
+        const balance = new TokenBalance(token, balanceBn);
+        return balance;
+    };
+
     it('should have the correct name', () => {
         expect(WalletBalanceRow.name).toBe('WalletBalanceRow');
     });
 
-    it('should render correctly on desktop devices', () => {
+    it('should render correctly on desktop devices (Staked TLOS 1)', () => {
         const wrapper = shallowMount(WalletBalanceRow, {
             global: {
                 stubs,
@@ -58,7 +89,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
             },
             props: {
-                token: {
+                balance: createTokenBalance({
                     address: fakeStlosContractAddress,
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -66,14 +97,15 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                    price: 0.19,
-                } as EvmToken,
+                },
+                '0.19',
+                ),
             },
         });
         expect(wrapper.element).toMatchSnapshot();
     });
 
-    it('should render correctly on mobile devices', () => {
+    it('should render correctly on mobile devices (Staked TLOS 2)', () => {
         const wrapper = shallowMount(WalletBalanceRow, {
             global: {
                 stubs,
@@ -82,7 +114,7 @@ describe('WalletBalanceRow.vue', () => {
                 },
             },
             props: {
-                token: {
+                balance: createTokenBalance({
                     address: fakeStlosContractAddress,
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
@@ -90,8 +122,9 @@ describe('WalletBalanceRow.vue', () => {
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',
-                    price: 0.19,
-                } as EvmToken,
+                },
+                '0.19',
+                ),
             },
         });
         expect(wrapper.element).toMatchSnapshot();
@@ -126,16 +159,17 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         symbol: 'TLOS',
                         name: 'Telos',
                         logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                        price: 0.19,
                         address: NativeCurrencyAddress,
-                    } as EvmToken,
+                    },
+                    '0.19',
+                    ),
                 },
             });
 
@@ -184,16 +218,11 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
-                        address: fakeStlosContractAddress,
-                        symbol: 'STLOS',
-                        name: 'Staked TLOS',
-                        logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
-                        decimals: 18,
+                    balance: createTokenBalance({
+                        ... fakeStakedToken.sourceInfo,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                        price: 0.19,
-                    } as EvmToken,
+                    }),
                 },
             });
 
@@ -241,16 +270,13 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
-                        address: fakeWtlosContractAddress,
-                        symbol: 'WTLOS',
-                        name: 'Wrapped TLOS',
-                        logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
-                        decimals: 18,
+                    balance: createTokenBalance({
+                        ... fakeWrappedToken.sourceInfo,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                        price: 0.19,
-                    } as EvmToken,
+                    },
+                    '0.19',
+                    ),
                 },
             });
 
@@ -299,7 +325,7 @@ describe('WalletBalanceRow.vue', () => {
                     },
                 },
                 props: {
-                    token: {
+                    balance: createTokenBalance({
                         address: fakeTokenContractAddress,
                         symbol: 'SHIB',
                         name: 'Shiba',
@@ -307,7 +333,7 @@ describe('WalletBalanceRow.vue', () => {
                         decimals: 18,
                         balance: '3642.0243',
                         fullBalance: '3642.024318091460206147',
-                    } as EvmToken,
+                    }),
                 },
             });
 

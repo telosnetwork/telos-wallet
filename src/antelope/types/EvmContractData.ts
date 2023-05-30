@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import {
-    EvmToken,
+    TokenSourceInfo,
     EvmABI,
 } from '.';
 
@@ -10,7 +10,7 @@ export interface EvmContractConstructorData {
     manager?: EvmContractManagerI;
     creationInfo: EvmContractCreationInfo;
     abi?: EvmABI | string;
-    token?: EvmToken;
+    token?: TokenSourceInfo;
     verified?: boolean;
     supportedInterfaces: string[];
     properties?: EvmContractCalldata;

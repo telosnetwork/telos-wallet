@@ -54,8 +54,8 @@ export async function getFiatPriceFromIndexer(
     fiatCode: string,
     indexerAxios: AxiosInstance,
 ): Promise<number> {
-    const wrappedNativeSymbol = (useChainStore().loggedChain.settings as EVMChainSettings).getWrappedNativeTokenAddress();
-    const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedNativeSymbol : tokenAddress;
+    const wrappedSystemAddress = (useChainStore().loggedChain.settings as EVMChainSettings).getWrappedSystemToken().address;
+    const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedSystemAddress : tokenAddress;
     const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data;
 
     const tokenMarketData = response.results.find(
