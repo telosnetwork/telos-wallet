@@ -43,7 +43,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices (Staked
         class="c-wallet-balance-row__secondary-amount"
       >
         
-        691.9800 STLOS
+        3,642.0243 STLOS
         
       </span>
     </div>
