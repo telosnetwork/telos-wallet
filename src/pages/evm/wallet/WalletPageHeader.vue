@@ -15,7 +15,6 @@ const props = defineProps<{
 const buyMoreLink = computed(() => {
     const chainStore = useChainStore();
     return (chainStore.currentChain.settings as EVMChainSettings).getBuyMoreOfTokenLink();
-
 });
 
 const goToRoute = (name: string) => {

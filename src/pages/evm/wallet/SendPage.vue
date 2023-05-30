@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
-import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
@@ -33,11 +33,11 @@ export default defineComponent({
         address: '',
         addressIsValid: false,
         fiatConversionRate: 0 as number | undefined,
-        token: null as EvmToken | null,
+        selected: null as TokenBalance | null,
         amount: BigNumber.from(0),
         estimatedGas: {
-            system: ethers.BigNumber.from(0),
-            fiat: ethers.BigNumber.from(0),
+            system: ethers.constants.Zero,
+            fiat: ethers.constants.Zero,
         },
         prettyPrintBalance,
     }),
@@ -47,38 +47,37 @@ export default defineComponent({
     watch: {
         balances: {
             handler() {
-                let token = this.token;
-
+                let tokenBalance = this.selected;
+                this.selected = null;
                 if (this.balances.length > 0) {
                     // if there's a url parameter token with the token address, use that token
                     const tokenAddress = this.$route.query.token;
                     if (tokenAddress) {
-                        token = this.balances.find(t => t.address === tokenAddress) ?? token;
+                        tokenBalance = this.balances.find(b => b.token.address === tokenAddress) ?? tokenBalance;
 
                         // hide the token address from the url
                         this.$router.replace({ name: 'evm-send', params: { token: undefined } });
-                    } else {
-                        // get from balances a fresh token object
-                        token = this.balances.find(t => t.address === token?.address) ?? token;
                     }
 
-                    if (!token) {
-                        token = this.balances[0];
+                    if (!tokenBalance) {
+                        tokenBalance = this.balances.find(b => b.token.address === NativeCurrencyAddress) ?? tokenBalance;
+                    }
+
+
+                    if (!tokenBalance) {
+                        tokenBalance = this.balances[0];
                     }
                 }
-
-                if (this.token !== token) {
-                    this.token = token;
-                }
+                this.selected = tokenBalance;
             },
             immediate: true,
             deep: true,
         },
         token: {
-            async handler(newToken: EvmToken | null, oldToken: EvmToken | null) {
+            async handler(newToken: TokenClass | null, oldToken: TokenClass | null) {
                 if (newToken?.address !== oldToken?.address) {
                     this.updateEstimatedGas();
-                    this.fiatConversionRate = newToken?.price;
+                    this.fiatConversionRate = newToken ? +newToken.price.str : undefined;
                 }
             },
             immediate: true,
@@ -86,6 +85,9 @@ export default defineComponent({
         },
     },
     computed: {
+        token(): TokenClass | undefined {
+            return this.selected?.token as TokenClass ?? undefined;
+        },
         loggedAccount() {
             return accountStore.loggedEvmAccount;
         },
@@ -98,14 +100,11 @@ export default defineComponent({
             const gasFiat = `${formatWei(this.estimatedGas.fiat, 18, 18)}`;
             return prettyPrintFiatBalance(gasFiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
         },
-        getSystemToken(): Token {
-            return this.balances[0];
-        },
         isMobile(): boolean {
             return this.$q.screen.lt.sm;
         },
-        balances(): EvmToken[] {
-            return ant.stores.balances.getBalances('logged') as EvmToken[];
+        balances(): TokenBalance[] {
+            return ant.stores.balances.getBalances('logged');
         },
         showContractLink(): boolean {
             return !!this.token?.address;
@@ -133,20 +132,17 @@ export default defineComponent({
             return this.token?.decimals ?? 0;
         },
         availableInTokensBn(): ethers.BigNumber {
-            const zero = ethers.BigNumber.from(0);
-
-            if (!this.token || !this.token.balanceBn) {
-                return zero;
+            if (!this.selected) {
+                return ethers.constants.Zero;
             }
-
-            const availableMinusGas = this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
-
-            if (availableMinusGas.isNegative()) {
-                return zero;
+            if (!this.selected.balance) {
+                return ethers.constants.Zero;
             }
-
-            return availableMinusGas;
-
+            return this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
+        },
+        isAddressValid(): boolean {
+            const regex = /^0x[a-fA-F0-9]{40}$/;
+            return regex.test(this.address);
         },
         isFormValid(): boolean {
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
@@ -170,7 +166,7 @@ export default defineComponent({
                     this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
                 }
             } else {
-                this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
+                this.estimatedGas = { system: ethers.constants.Zero, fiat: ethers.constants.Zero };
             }
         },
         viewTokenContract() {
@@ -206,12 +202,12 @@ export default defineComponent({
                 await checkNetwork();
             }
 
-            const token = this.token;
+            const token = this.token as TokenClass;
             const amount = this.amount;
             const to = this.address;
 
             if (this.isFormValid) {
-                ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
+                ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
                         ant.config.notifySuccessfulTrxHandler(
@@ -271,7 +267,7 @@ export default defineComponent({
                 <!-- Token selection -->
                 <div class="col-12 col-sm-auto c-send-page__token-selection-container">
                     <q-select
-                        v-model="token"
+                        v-model="selected"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
@@ -284,12 +280,12 @@ export default defineComponent({
                         <template v-slot:option="scope">
                             <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
                                 <div class="c-send-page__selector-op-avatar">
-                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
+                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.token.logoURI" alt="Token Logo">
                                 </div>
                                 <div>
-                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.name }}</q-item-label>
+                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.token.name }}</q-item-label>
                                     <q-item-label class="c-send-page__selector-op-balance" caption>
-                                        {{ prettyPrintBalance(scope.opt.balance, fiatLocale, isMobile, scope.opt.symbol) }}
+                                        {{ prettyPrintBalance(scope.opt.str, fiatLocale, isMobile, scope.opt.token.symbol) }}
                                     </q-item-label>
                                 </div>
                             </q-item>
