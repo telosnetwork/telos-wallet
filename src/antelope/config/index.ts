@@ -23,7 +23,7 @@ export class AntelopeConfig {
     private __notify_success_copy_handler: () => void = alert;
     private __notify_failure_message_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
     private __notify_disconnected_handler: () => void = alert;
-    private __notify_neutral_message_handler: (message: string) => void = alert;
+    private __notify_neutral_message_handler: (message: string) => (() => void) = () => (() => void 0);
 
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
@@ -152,7 +152,7 @@ export class AntelopeConfig {
         this.__notify_disconnected_handler = handler;
     }
 
-    public setNotifyNeutralMessageHandler(handler: (message: string) => void) {
+    public setNotifyNeutralMessageHandler(handler: (message: string) => (() => void)) {
         this.__notify_neutral_message_handler = handler;
     }
 
