@@ -17,14 +17,13 @@ export class AntelopeConfig {
         }
     }
 
-    // notifucation handlers --
-    private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
-    private __notify_success_handler: (message: string) => void = alert;
-    private __notify_warning_handler: (message: string) => void = alert;
-
-    // transaction attempts handlers --
+    // notification handlers --
     private __notify_successful_trx_handler: (link: string) => void = alert;
-    private __notify_failed_trx_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_success_message_handler: (message: string, payload?: never) => void = alert;
+    private __notify_success_copy_handler: () => void = alert;
+    private __notify_failure_message_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_disconnected_handler: () => void = alert;
+    private __notify_neutral_message_handler: (message: string) => void = alert;
 
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
@@ -96,25 +95,28 @@ export class AntelopeConfig {
     get app() {
         return this.__app;
     }
-
-    get notifyErrorHandler() {
-        return this.__notify_error_handler;
-    }
-
-    get notifySuccessHandler() {
-        return this.__notify_success_handler;
-    }
-
-    get notifyWarningHandler() {
-        return this.__notify_warning_handler;
-    }
-
     get notifySuccessfulTrxHandler() {
         return this.__notify_successful_trx_handler;
     }
 
-    get notifyFailedTrxHandler() {
-        return this.__notify_failed_trx_handler;
+    get notifySuccessMessageHandler() {
+        return this.__notify_success_message_handler;
+    }
+
+    get notifySuccessCopyHandler() {
+        return this.__notify_success_copy_handler;
+    }
+
+    get notifyFailureMessage() {
+        return this.__notify_failure_message_handler;
+    }
+
+    get notifyDisconnectedHandler() {
+        return this.__notify_disconnected_handler;
+    }
+
+    get notifyNeutralMessageHandler() {
+        return this.__notify_neutral_message_handler;
     }
 
     get authenticatorsGetter() {
@@ -130,24 +132,28 @@ export class AntelopeConfig {
     }
 
     // setting notifucation handlers --
-    public setNotifyErrorHandler(handler: (message: string) => void) {
-        this.__notify_error_handler = handler;
-    }
-
-    public setNotifySuccessHandler(handler: (message: string) => void) {
-        this.__notify_success_handler = handler;
-    }
-
-    public setNotifyWarningHandler(handler: (message: string) => void) {
-        this.__notify_warning_handler = handler;
-    }
-
     public setNotifySuccessfulTrxHandler(handler: (link: string) => void) {
         this.__notify_successful_trx_handler = handler;
     }
 
-    public setNotifyFailedTrxHandler(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
-        this.__notify_failed_trx_handler = handler;
+    public setNotifySuccessMessageHandler(handler: (message: string, payload?: never) => void) {
+        this.__notify_success_message_handler = handler;
+    }
+
+    public setNotifySuccessCopyHandler(handler: () => void) {
+        this.__notify_success_copy_handler = handler;
+    }
+
+    public setnotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+        this.__notify_failure_message_handler = handler;
+    }
+
+    public setNotifyDisconnectedHandler(handler: () => void) {
+        this.__notify_disconnected_handler = handler;
+    }
+
+    public setNotifyNeutralMessageHandler(handler: (message: string) => void) {
+        this.__notify_neutral_message_handler = handler;
     }
 
     // setting authenticators getter --
