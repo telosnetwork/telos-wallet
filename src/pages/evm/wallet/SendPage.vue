@@ -194,7 +194,7 @@ export default defineComponent({
                     window.open(explorerUrl + '/address/' + this.token.address, '_blank');
                     return;
                 } else {
-                    ant.config.notifyErrorHandler(
+                    ant.config.notifyFailureMessage(
                         this.$t(
                             'settings.no_explorer',
                             { network: ant.stores.chain.currentChain?.settings.getNetwork() },
@@ -241,7 +241,7 @@ export default defineComponent({
                 const walletConnectChainId = getNetwork().chain?.id.toString();
                 if (appChainId !== walletConnectChainId){
                     const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                    (this as any).$errorNotification(errorMessage, true);
+                    ant.config.notifyFailureMessage(errorMessage);
                     return;
                 }
             } else {
@@ -265,13 +265,13 @@ export default defineComponent({
                     console.error(err);
                     if (err instanceof AntelopeError) {
                         const evmErr = err as AntelopeError;
-                        ant.config.notifyFailedTrxHandler(this.$t(evmErr.message), evmErr.payload);
+                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
                     } else {
-                        ant.config.notifyFailedTrxHandler(this.$t('evm_wallet.general_error'));
+                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
                     }
                 });
             } else {
-                ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
+                ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));
             }
         },
     },

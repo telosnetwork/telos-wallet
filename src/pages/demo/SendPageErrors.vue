@@ -1,14 +1,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import AppPage from 'components/evm/AppPage.vue';
+import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
-import { EvmToken, Token, TransactionResponse } from 'src/antelope/types';
+import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
-import { AntelopeError } from 'src/antelope/types';
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -22,16 +24,18 @@ const global = useAppNavStore();
 export default defineComponent({
     name: 'SendPageErrors',
     components: {
+        AddressInput,
         CurrencyInput,
     },
     data: () => ({
         address: '',
+        addressIsValid: false,
         fiatConversionRate: 0 as number | undefined,
-        token: null as EvmToken | null,
+        selected: null as TokenBalance | null,
         amount: BigNumber.from(0),
         estimatedGas: {
-            system: ethers.BigNumber.from(0),
-            fiat: ethers.BigNumber.from(0),
+            system: ethers.constants.Zero,
+            fiat: ethers.constants.Zero,
         },
         prettyPrintBalance,
     }),
@@ -41,38 +45,37 @@ export default defineComponent({
     watch: {
         balances: {
             handler() {
-                let token = this.token;
-
+                let tokenBalance = this.selected;
+                this.selected = null;
                 if (this.balances.length > 0) {
                     // if there's a url parameter token with the token address, use that token
                     const tokenAddress = this.$route.query.token;
                     if (tokenAddress) {
-                        token = this.balances.find(t => t.address === tokenAddress) ?? token;
+                        tokenBalance = this.balances.find(b => b.token.address === tokenAddress) ?? tokenBalance;
 
                         // hide the token address from the url
                         this.$router.replace({ name: 'evm-send', params: { token: undefined } });
-                    } else {
-                        // get from balances a fresh token object
-                        token = this.balances.find(t => t.address === token?.address) ?? token;
                     }
 
-                    if (!token) {
-                        token = this.balances[0];
+                    if (!tokenBalance) {
+                        tokenBalance = this.balances.find(b => b.token.address === NativeCurrencyAddress) ?? tokenBalance;
+                    }
+
+
+                    if (!tokenBalance) {
+                        tokenBalance = this.balances[0];
                     }
                 }
-
-                if (this.token !== token) {
-                    this.token = token;
-                }
+                this.selected = tokenBalance;
             },
             immediate: true,
             deep: true,
         },
         token: {
-            async handler(newToken: EvmToken | null, oldToken: EvmToken | null) {
+            async handler(newToken: TokenClass | null, oldToken: TokenClass | null) {
                 if (newToken?.address !== oldToken?.address) {
                     this.updateEstimatedGas();
-                    this.fiatConversionRate = newToken?.price;
+                    this.fiatConversionRate = newToken ? +newToken.price.str : undefined;
                 }
             },
             immediate: true,
@@ -80,6 +83,9 @@ export default defineComponent({
         },
     },
     computed: {
+        token(): TokenClass | undefined {
+            return this.selected?.token as TokenClass ?? undefined;
+        },
         loggedAccount() {
             return accountStore.loggedEvmAccount;
         },
@@ -92,14 +98,11 @@ export default defineComponent({
             const gasFiat = `${formatWei(this.estimatedGas.fiat, 18, 18)}`;
             return prettyPrintFiatBalance(gasFiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
         },
-        getSystemToken(): Token {
-            return this.balances[0];
-        },
         isMobile(): boolean {
             return this.$q.screen.lt.sm;
         },
-        balances(): EvmToken[] {
-            return ant.stores.balances.getBalances('logged') as EvmToken[];
+        balances(): TokenBalance[] {
+            return ant.stores.balances.getBalances('logged');
         },
         showContractLink(): boolean {
             return !!this.token?.address;
@@ -127,27 +130,20 @@ export default defineComponent({
             return this.token?.decimals ?? 0;
         },
         availableInTokensBn(): ethers.BigNumber {
-            const zero = ethers.BigNumber.from(0);
-
-            if (!this.token || !this.token.balanceBn) {
-                return zero;
+            if (!this.selected) {
+                return ethers.constants.Zero;
             }
-
-            const availableMinusGas = this.token.balanceBn.sub(this.token.isSystem ? this.estimatedGas.system : ethers.BigNumber.from(0));
-
-            if (availableMinusGas.isNegative()) {
-                return zero;
+            if (!this.selected.balance) {
+                return ethers.constants.Zero;
             }
-
-            return availableMinusGas;
-
+            return this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
         },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
             return regex.test(this.address);
         },
         isFormValid(): boolean {
-            return this.isAddressValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
+            return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
             return ant.stores.feedback.isLoading('transferTokens');
@@ -168,7 +164,7 @@ export default defineComponent({
                     this.estimatedGas = await chain_settings.getEstimatedGas(GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER);
                 }
             } else {
-                this.estimatedGas = { system: ethers.BigNumber.from(0), fiat: ethers.BigNumber.from(0) };
+                this.estimatedGas = { system: ethers.constants.Zero, fiat: ethers.constants.Zero };
             }
         },
         viewTokenContract() {
@@ -178,7 +174,7 @@ export default defineComponent({
                     window.open(explorerUrl + '/address/' + this.token.address, '_blank');
                     return;
                 } else {
-                    ant.config.notifyErrorHandler(
+                    ant.config.notifyFailureMessage(
                         this.$t(
                             'settings.no_explorer',
                             { network: ant.stores.chain.currentChain?.settings.getNetwork() },
@@ -204,12 +200,12 @@ export default defineComponent({
                 await checkNetwork();
             }
 
-            const token = this.token;
+            const token = this.token as TokenClass;
             const amount = this.amount;
             const to = this.address;
 
             // this code should not beallowed in case of invalid form, but for testing purposes we allow it here
-            ant.stores.balances.transferTokens(token as Token, to, amount).then((trx: TransactionResponse) => {
+            ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                 const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                 if(chain_settings) {
                     ant.config.notifySuccessfulTrxHandler(
@@ -217,13 +213,12 @@ export default defineComponent({
                     );
                 }
             }).catch((err) => {
+                console.error(err);
                 if (err instanceof AntelopeError) {
                     const evmErr = err as AntelopeError;
-                    console.error('Getting a well known AntelopeError:', evmErr);
-                    ant.config.notifyFailedTrxHandler(this.$t(evmErr.message), evmErr.payload);
+                    ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
                 } else {
-                    console.error('Getting an unknown error:', err);
-                    ant.config.notifyFailedTrxHandler(this.$t('evm_wallet.general_error'));
+                    ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
                 }
             });
 
@@ -234,7 +229,7 @@ export default defineComponent({
 </script>
 
 <template>
-<div>
+<AppPage>
 
     <div class="c-send-page-errors__form-container">
         <q-spinner v-if="!balances?.length" />
@@ -244,13 +239,11 @@ export default defineComponent({
         >
             <div class="c-send-page-errors__row c-send-page-errors__row--1 row">
                 <div class="col">
-                    <q-input
+                    <AddressInput
                         v-model="address"
-                        outlined
-                        autogrow
-                        :type="$q.screen.width < 500 ? 'textarea' : 'text'"
+                        name="send-page-address-input"
                         :label="$t('evm_wallet.receiving_account')"
-                        :rules="[val => !!val || $t('evm_wallet.account_required')]"
+                        @update:isValid="addressIsValid = $event"
                     />
                 </div>
             </div>
@@ -258,7 +251,7 @@ export default defineComponent({
                 <!-- Token selection -->
                 <div class="col-12 col-sm-auto c-send-page-errors__token-selection-container">
                     <q-select
-                        v-model="token"
+                        v-model="selected"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
@@ -271,12 +264,12 @@ export default defineComponent({
                         <template v-slot:option="scope">
                             <q-item class="c-send-page-errors__selector-op" v-bind="scope.itemProps">
                                 <div class="c-send-page-errors__selector-op-avatar">
-                                    <img class="c-send-page-errors__selector-op-icon" :src="scope.opt.logoURI" alt="Token Logo">
+                                    <img class="c-send-page-errors__selector-op-icon" :src="scope.opt.token.logoURI" alt="Token Logo">
                                 </div>
                                 <div>
-                                    <q-item-label class="c-send-page-errors__selector-op-name">{{ scope.opt.name }}</q-item-label>
+                                    <q-item-label class="c-send-page-errors__selector-op-name">{{ scope.opt.token.name }}</q-item-label>
                                     <q-item-label class="c-send-page-errors__selector-op-balance" caption>
-                                        {{ prettyPrintBalance(scope.opt.balance, fiatLocale, isMobile, scope.opt.symbol) }}
+                                        {{ prettyPrintBalance(scope.opt.str, fiatLocale, isMobile, scope.opt.token.symbol) }}
                                     </q-item-label>
                                 </div>
                             </q-item>
@@ -342,10 +335,17 @@ export default defineComponent({
         </q-form>
     </div>
 
-</div>
+</AppPage>
 </template>
 
 <style lang="scss">
+.q-btn.wallet-btn {
+    @include text--header-5;
+    &+& {
+        margin-left: 16px;
+    }
+}
+
 
 .c-send-page-errors {
     &__title-container {
@@ -440,7 +440,7 @@ export default defineComponent({
 
     &__token-selection-container {
         position: relative;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
     }
 
     &__view-contract {

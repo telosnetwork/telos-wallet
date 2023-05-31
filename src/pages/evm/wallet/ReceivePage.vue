@@ -26,7 +26,7 @@ export default defineComponent({
         },
         copyToClipboard() {
             navigator.clipboard.writeText(accountStore.loggedEvmAccount?.address);
-            ant.config.notifySuccessHandler(this.$t('settings.copied_ok'));
+            ant.config.notifySuccessCopyHandler();
         },
     },
     computed: {

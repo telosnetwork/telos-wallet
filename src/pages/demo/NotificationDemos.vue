@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getAntelope } from 'src/antelope';
 import { defineComponent } from 'vue';
 /*
 we need three columns for the three different types of notifications:
@@ -15,44 +16,111 @@ we need three columns for the three different types of notifications:
     - Transaction Error
     - Internet connection error
 */
+
+const ant = getAntelope();
+
 export default defineComponent({
     name: 'NotificationDemos',
     components: {
     },
     data: () => ({
+        version: 0,
     }),
     computed: {
     },
     methods: {
         // InProgress -----
         notifyInProgress_sending() {
-            // TODO: implement
+            console.debug('notifyInProgress_sending()');
+            const quantity = '123.0427 TLOS';
+            const address = '0x8a7C...3b0F';
+            (this as any).$notifyNeutralMessage(
+                this.$t('notification.neutral_message_sending', { quantity, address }),
+            );
         },
         notifyInProgress_staking() {
-            // TODO: implement
+            console.debug('notifyInProgress_staking()');
+            const quantity = '123.0427 TLOS';
+            (this as any).$notifyNeutralMessage(
+                this.$t('notification.neutral_message_staking', { quantity }),
+            );
         },
         notifyInProgress_unstaking() {
-            // TODO: implement
+            console.debug('notifyInProgress_unstaking()');
+            const quantity = '123.0427 TLOS';
+            (this as any).$notifyNeutralMessage(
+                this.$t('notification.neutral_message_unstaking', { quantity }),
+            );
         },
         notifyInProgress_revoking() {
-            // TODO: implement
+            console.debug('notifyInProgress_revoking()');
+            const symbol = 'ETH';
+            const address = '0x8a7C...3b0F';
+            (this as any).$notifyNeutralMessage(
+                this.$t('notification.neutral_message_revoking', { symbol, address }),
+            );
         },
         // Success -----
         notifySuccess_transfer() {
-            // TODO: implement
+            (this as any).$notifySuccessTransaction('https://www.teloscan.io/tx/0x4ee306e0046f3adb37d2943e1954835cbaa85a21e57046c5229b7fbb7f504e94');
         },
         notifySuccess_revoking() {
-            // TODO: implement
+            const address = '0x8a7C...3b0F';
+            const symbol = 'ETH';
+            (this as any).$notifySuccessMessage(
+                this.$t('notification.success_message_revoking', { address, symbol }),
+            );
         },
         notifySuccess_copied() {
-            // TODO: implement
+            console.debug('notifySuccess_copied()');
+            (this as any).$notifySuccessCopy();
         },
         // Error -----
-        notifyError_transaction() {
-            // TODO: implement
+        notifyError_user_rejected() {
+            console.debug('notifyError_user_rejected()');
+            (this as any).$notifyFailure(this.$t('antelope.evm.error_user_rejected'));
+        },
+        notifyError_numeric_fault() {
+            console.debug('notifyError_numeric_fault()');
+            (this as any).$notifyFailure(this.$t('antelope.evm.error_numeric_fault'),
+                {
+                    code: 4001,
+                    message: 'A numeric operation failed',
+                    data: {
+                        originalError: {
+                            code: 3,
+                            data: {
+                                message: 'A numeric operation failed',
+                            },
+                            message: 'A numeric operation failed',
+                        },
+                    },
+                },
+            );
+        },
+        notifyError_call_exception() {
+            console.debug('notifyError_call_exception()');
+            (this as any).$notifyFailure(this.$t('antelope.evm.error_call_exception'),
+                {
+                    code: 4001,
+                    message: 'An error occurred while calling the smart contract function',
+                    data: {
+                        originalError: {
+                            code: 3,
+                            data: {
+                                message: 'An error occurred while calling the smart contract function',
+                            },
+                        },
+                        contract: {
+                            address: '0x8a7C3423b0F6eCfA4A56e6aD8A6F8Bd8dC8eE8f4',
+                        },
+                    },
+                },
+            );
         },
         notifyError_connection() {
-            // TODO: implement
+            console.debug('notifyError_connection()');
+            (this as any).$notifyDisconnected();
         },
     },
     watch: {
@@ -89,7 +157,9 @@ export default defineComponent({
                 <q-btn class="q-mt-sm q-mr-sm" color="positive" @click="notifySuccess_copied">Copied to clipboard success</q-btn>
             </div>
             <div class="col-4 column items-start">
-                <q-btn class="q-mt-sm q-mr-sm" color="negative" @click="notifyError_transaction">Transaction Error</q-btn>
+                <q-btn class="q-mt-sm q-mr-sm" color="negative" @click="notifyError_user_rejected">User rejected</q-btn>
+                <q-btn class="q-mt-sm q-mr-sm" color="negative" @click="notifyError_numeric_fault">Numeric fault</q-btn>
+                <q-btn class="q-mt-sm q-mr-sm" color="negative" @click="notifyError_call_exception">Call exception</q-btn>
                 <q-btn class="q-mt-sm q-mr-sm" color="negative" @click="notifyError_connection">Internet connection error</q-btn>
             </div>
         </div>

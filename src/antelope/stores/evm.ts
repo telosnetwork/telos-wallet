@@ -537,10 +537,10 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getToken(address:string, suspectedType:string): Promise<TokenClass | null> {
-            if (suspectedType === ERC20_TYPE) {
+            if (suspectedType.toUpperCase() === ERC20_TYPE) {
                 const chain = useChainStore().currentChain;
                 const list = await chain.settings.getTokenList();
-                const token = list.find(t => t.address.toLowerCase() === address.toLowerCase());
+                const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
                 if (token) {
                     return token;
                 }
