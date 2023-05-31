@@ -146,7 +146,7 @@ const notifyMessage = function(type, icon, title, message, payload) {
 
     let random = Math.floor(Math.random() * 1000000);
 
-    Notify.create({
+    return Notify.create({
         timeout,
         position,
         message: html
@@ -162,7 +162,7 @@ const notifyMessage = function(type, icon, title, message, payload) {
 };
 
 const notifySuccessTransaction = function(link) {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'success',
         checkIcon,
         this.$t('notification.success_title_trx').toUpperCase(),
@@ -172,7 +172,7 @@ const notifySuccessTransaction = function(link) {
 };
 
 const notifySuccessMessage = function(message, payload) {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'success',
         checkIcon,
         this.$t('notification.success_title_trx').toUpperCase(),
@@ -182,7 +182,7 @@ const notifySuccessMessage = function(message, payload) {
 };
 
 const notifySuccessCopy = function() {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'success',
         checkIcon,
         this.$t('notification.success_title_copied').toUpperCase(),
@@ -191,7 +191,7 @@ const notifySuccessCopy = function() {
 };
 
 const notifyFailure = function(message, payload) {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'error',
         crossIcon,
         this.$t('notification.error_title').toUpperCase(),
@@ -201,7 +201,7 @@ const notifyFailure = function(message, payload) {
 };
 
 const notifyDisconnected = function() {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'error',
         discoIcon,
         this.$t('notification.error_title_disconnect'),
@@ -210,7 +210,7 @@ const notifyDisconnected = function() {
 };
 
 const notifyNeutralMessage = function(message) {
-    notifyMessage.bind(this)(
+    return notifyMessage.bind(this)(
         'neutral',
         null,
         null,

@@ -11,6 +11,7 @@ import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import { Notify } from 'quasar';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -210,9 +211,24 @@ export default defineComponent({
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
-                        ant.config.notifySuccessfulTrxHandler(
-                            `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                        // we send the notification before the transaction is mined
+                        const quantity = `${formatWei(amount, token.decimals, 18)} ${token.symbol}`;
+                        const address = to.substring(0, 6) + '...' + to.substring(to.length - 4, to.length);
+                        const dismiss = ant.config.notifyNeutralMessageHandler(
+                            this.$t('notification.neutral_message_sending', { quantity, address }),
                         );
+
+                        // we wait for the transaction to be mined and then we send the success notification
+                        trx.wait().then((receipt) => {
+                            ant.config.notifySuccessfulTrxHandler(
+                                `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                            );
+                        }).catch((err) => {
+                            console.error(err);
+                        }).finally(() => {
+                            // we dismiss the first notification
+                            dismiss();
+                        });
                     }
                 }).catch((err) => {
                     console.error(err);
