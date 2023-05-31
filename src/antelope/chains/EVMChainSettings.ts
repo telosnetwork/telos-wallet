@@ -29,7 +29,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
 
     // External trusted metadata bucket for EVM contracts
-    protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+    protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getTrustedContractsBucket() });
 
     // External indexer API support
     protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerApiEndpoint() });

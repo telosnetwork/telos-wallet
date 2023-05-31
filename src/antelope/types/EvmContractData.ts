@@ -8,7 +8,7 @@ export interface EvmContractConstructorData {
     address: string;
     name: string;
     manager?: EvmContractManagerI;
-    creationInfo: EvmContractCreationInfo;
+    creationInfo?: EvmContractCreationInfo | null;
     abi?: EvmABI | string;
     token?: TokenSourceInfo;
     verified?: boolean;

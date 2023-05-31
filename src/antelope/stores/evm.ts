@@ -347,17 +347,17 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async getContractCreation(address:string): Promise<EvmContractCreationInfo> {
+        async getContractCreation(address:string): Promise<EvmContractCreationInfo | null> {
             if (!address) {
                 console.error('address is null', address);
                 throw new AntelopeError('antelope.evm.error_invalid_address', { address });
             }
             try {
                 const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-                return chain_settings.getContractCreation(address);
+                return await chain_settings.getContractCreation(address);
             } catch (e) {
-                console.error(e);
-                throw new AntelopeError('antelope.evm.error_getting_contract_creation', { address });
+                console.error(new AntelopeError('antelope.evm.error_getting_contract_creation', { address }));
+                return null;
             }
         },
 
@@ -395,8 +395,7 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.setContractAsNotExisting(addressLower);
 
             // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
-            const creationInfo: EvmContractCreationInfo = await this.getContractCreation(addressLower);
-
+            const creationInfo = await this.getContractCreation(addressLower);
             // The the contract passes the creation info check,
             // we overwrite the previous call to set contract as not existing with the actual EvmContract
 
@@ -406,7 +405,7 @@ export const useEVMStore = defineStore(store_name, {
                 return await this.getVerifiedContract(addressLower, metadata, creationInfo, suspectedToken);
             }
 
-            const contract = await this.getContractFromTokenList(address, creationInfo, suspectedToken);
+            const contract = await this.getContractFromTokenList(address, suspectedToken, creationInfo);
             if (contract) {
                 this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
@@ -468,7 +467,7 @@ export const useEVMStore = defineStore(store_name, {
             return contract;
         },
 
-        async getEmptyContract(address:string, creationInfo: EvmContractCreationInfo): Promise<EvmContract> {
+        async getEmptyContract(address:string, creationInfo: EvmContractCreationInfo | null): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: `0x${address.slice(0, 16)}...`,
                 address,
@@ -538,7 +537,7 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getToken(address:string, suspectedType:string): Promise<TokenClass | null> {
-            if (suspectedType.toUpperCase() === ERC20_TYPE) {
+            if (suspectedType === ERC20_TYPE) {
                 const chain = useChainStore().currentChain;
                 const list = await chain.settings.getTokenList();
                 const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
@@ -549,7 +548,7 @@ export const useEVMStore = defineStore(store_name, {
             return null;
         },
 
-        async getContractFromTokenList(address:string, creationInfo:EvmContractCreationInfo, suspectedType:string): Promise<EvmContract | null> {
+        async getContractFromTokenList(address:string, suspectedType:string, creationInfo:EvmContractCreationInfo | null): Promise<EvmContract | null> {
             const token = await this.getToken(address, suspectedType);
             if (token) {
                 const abi = this.getTokenABI(ERC20_TYPE);

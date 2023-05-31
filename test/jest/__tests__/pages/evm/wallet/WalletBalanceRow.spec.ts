@@ -41,6 +41,9 @@ const storeMock = {
         fiatLocale: 'en-US',
         fiatCurrency: 'USD',
     }),
+    useEVMStore: () => ({
+        isMetamaskSupported: false,
+    }),
 };
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
@@ -53,6 +56,10 @@ describe('WalletBalanceRow.vue', () => {
         'ToolTip': stubWithSlot('ToolTip'),
         'q-menu': stubWithSlot('q-menu'),
         'q-btn': stubWithSlot('q-btn'),
+    };
+
+    const directives = {
+        'close-popup': ()  => '',
     };
 
     const qScreenMock = (isMobile: boolean) => ({
@@ -84,6 +91,7 @@ describe('WalletBalanceRow.vue', () => {
         const wrapper = shallowMount(WalletBalanceRow, {
             global: {
                 stubs,
+                directives,
                 mocks: {
                     ...qScreenMock(false),
                 },
@@ -109,6 +117,7 @@ describe('WalletBalanceRow.vue', () => {
         const wrapper = shallowMount(WalletBalanceRow, {
             global: {
                 stubs,
+                directives,
                 mocks: {
                     ...qScreenMock(true),
                 },
@@ -153,6 +162,7 @@ describe('WalletBalanceRow.vue', () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
+                    directives,
                     mocks: {
                         $router: routerMock,
                         ...qScreenMock(true),
@@ -212,6 +222,7 @@ describe('WalletBalanceRow.vue', () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
+                    directives,
                     mocks: {
                         $router: routerMock,
                         ...qScreenMock(true),
@@ -264,6 +275,7 @@ describe('WalletBalanceRow.vue', () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
+                    directives,
                     mocks: {
                         $router: routerMock,
                         ...qScreenMock(true),
@@ -319,6 +331,7 @@ describe('WalletBalanceRow.vue', () => {
             const wrapper = shallowMount(WalletBalanceRow, {
                 global: {
                     stubs,
+                    directives,
                     mocks: {
                         $router: routerMock,
                         ...qScreenMock(true),
