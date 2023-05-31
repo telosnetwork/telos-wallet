@@ -278,7 +278,8 @@ export const useEVMStore = defineStore(store_name, {
                             }
                         }
                     } else if ((error as unknown as ExceptionError).code === 4001) {
-                        throw new Error('antelope.evm.switch_chain_rejected');
+                        console.error(new Error('antelope.evm.switch_chain_rejected'));
+                        return false;
                     } else {
                         console.error('Error:', error);
                         throw new Error('antelope.evm.error_switch_chain');
