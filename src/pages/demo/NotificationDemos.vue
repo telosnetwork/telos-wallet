@@ -1,21 +1,6 @@
 <script lang="ts">
 import { getAntelope } from 'src/antelope';
 import { defineComponent } from 'vue';
-/*
-we need three columns for the three different types of notifications:
-- In progress
-    - Sending tokens
-    - Staking tokens
-    - Unstaking tokens
-    - Revoking awollance
-- Success
-    - Transfer tokens success
-    - Revoking awollance success
-    - Copied to clipboard success
-- Error:
-    - Transaction Error
-    - Internet connection error
-*/
 
 const ant = getAntelope();
 
