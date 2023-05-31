@@ -27,6 +27,11 @@ const DISPLAY_MAP = true;
 const THEME = {};
 
 export default class UX extends NativeChainSettings {
+
+    isProduction(): boolean {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }

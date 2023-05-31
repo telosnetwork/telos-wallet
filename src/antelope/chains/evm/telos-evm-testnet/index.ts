@@ -57,6 +57,11 @@ const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
 export default class TelosEVMTestnet extends EVMChainSettings {
+
+    isProduction(): boolean {
+        return false;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }

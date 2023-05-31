@@ -53,6 +53,11 @@ const THEME = {
 };
 
 export default class Telos extends NativeChainSettings {
+
+    isProduction(): boolean {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }

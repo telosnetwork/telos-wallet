@@ -43,7 +43,7 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            return process.env.NODE_ENV === 'production';
+            return chainStore.loggedChain.settings.isProduction();
         },
     },
     watch: {

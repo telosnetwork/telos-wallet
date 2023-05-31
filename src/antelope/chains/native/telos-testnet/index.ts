@@ -46,6 +46,11 @@ const THEME = {
 };
 
 export default class TelosTestnet extends NativeChainSettings {
+
+    isProduction(): boolean {
+        return false;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }
