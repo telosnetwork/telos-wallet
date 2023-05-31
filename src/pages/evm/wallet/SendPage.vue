@@ -462,7 +462,6 @@ export default defineComponent({
 
     &__view-contract {
         position: absolute;
-        bottom: -24px;
         display: flex;
         align-items: center;
         cursor: pointer;
