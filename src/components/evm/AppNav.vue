@@ -43,7 +43,7 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            return chainStore.loggedChain.settings.isProduction();
+            return process.env.CHAIN_NAME === 'telos';
         },
     },
     watch: {
