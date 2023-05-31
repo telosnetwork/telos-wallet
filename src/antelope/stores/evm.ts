@@ -130,11 +130,10 @@ export const useEVMStore = defineStore(store_name, {
                     return getAccount().address as string;
                 }
 
-                let checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
+                const checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
 
                 const accounts = await checkProvider.listAccounts();
                 if (accounts.length > 0) {
-                    checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accounts[0];
                 } else {
                     if (!checkProvider.provider.request) {
@@ -144,7 +143,6 @@ export const useEVMStore = defineStore(store_name, {
                     if (accessGranted.length < 1) {
                         return null;
                     }
-                    checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accessGranted[0];
                 }
             } catch (error) {
