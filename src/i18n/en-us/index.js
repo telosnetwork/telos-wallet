@@ -121,7 +121,7 @@ export default {
         success_title_copied: 'Copied',
         success_message_trx: 'Your transaction has been processed. For detailed information, click the link below.',
         success_message_revoking: 'Revoking <b>{symbol}</b> allowance for <b>{address}</b> was successful.',
-        success_message_copied: 'Your account name has been copied to the clipboard.',
+        success_message_copied: 'Your account address has been copied to the clipboard.',
         success_see_trx_label: 'See Transaction',
         dismiss_label: 'Dismiss',
         error_title: 'ooops',
