@@ -13,7 +13,8 @@ export function toStringNumber(value: number | string): string {
     if (typeof value === 'string') {
         return value;
     } else if (typeof value === 'number') {
-        return value.toFixed(18);
+        const num = new Decimal(value);
+        return num.toFixed(18);
     } else {
         throw new Error('Invalid value type: ' + typeof value);
     }
