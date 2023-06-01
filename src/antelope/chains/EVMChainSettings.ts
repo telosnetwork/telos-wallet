@@ -304,9 +304,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
-
-        console.log(typeof tokenPrice.toFixed, typeof tokenPrice, tokenPrice);
-
         const price = ethers.utils.parseUnits(tokenPrice.toFixed(16), 18);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
