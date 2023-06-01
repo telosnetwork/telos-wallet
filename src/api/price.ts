@@ -62,7 +62,6 @@ export async function getFiatPriceFromIndexer(
         (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-<<<<<<< HEAD
     if (!tokenMarketData.updated || !tokenMarketData.price) {
         return 0;
     }
@@ -79,9 +78,6 @@ export async function getFiatPriceFromIndexer(
     }
     // if indexer data is stale use coingecko data
     return 0;
-=======
-    return +(tokenMarketData?.price ?? 0);
->>>>>>> 4f767c5cc0881a5846866bed2fa8cf3a5c56ebcb
 }
 
 export const getCoingeckoPriceChartData = async (

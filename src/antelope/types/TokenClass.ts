@@ -2,6 +2,8 @@ import { ethers } from 'ethers';
 import { formatWei } from 'src/antelope/stores/utils';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
+export const TOKEN_PRICE_DECIMALS = 18;
+
 // A type to represent the possible EVM token types
 export const ERC20_TYPE   = 'ERC20';
 export const ERC721_TYPE  = 'ERC721';
@@ -64,7 +66,7 @@ export class TokenMarketData {
     constructor(sourceInfo: MarketSourceInfo) {
         this.info = sourceInfo;
         try {
-            this._price = ethers.utils.parseUnits(sourceInfo.price ?? '0', sourceInfo.decimals || 18);
+            this._price = ethers.utils.parseUnits(sourceInfo.price, TOKEN_PRICE_DECIMALS);
         } catch (e) {
             console.error('TokenMarketData: error parsing price from MarketSourceInfo. price', sourceInfo.price, 'decimals', sourceInfo.decimals, '\nError:', e);
             this._price = ethers.constants.Zero;
@@ -98,23 +100,21 @@ export class TokenPrice {
 
     // Returns the token price as string containing a float number
     get str(): string {
-        // TODO: avoid cientific notation on .str
-        // https://github.com/telosnetwork/telos-wallet/issues/359
-        return ethers.utils.formatUnits(this.value, this.decimals);
+        return ethers.utils.formatUnits(this.value, TOKEN_PRICE_DECIMALS);
     }
 
     // Returns the inverse of the token price as BigNumber
     get inverse(): ethers.BigNumber {
-        return ethers.utils.parseUnits('1', this.decimals * 2).div(this.value);
+        return ethers.utils.parseUnits('1', TOKEN_PRICE_DECIMALS * 2).div(this.value);
     }
 
     // Returns the inverse of the token price as string containing a float number
     get inverseStr(): string {
-        return ethers.utils.formatUnits(this.inverse, this.decimals);
+        return ethers.utils.formatUnits(this.inverse, TOKEN_PRICE_DECIMALS);
     }
 
     get isAvailable(): boolean {
-        return this.market !== null;
+        return this.market !== null && this.market.price.gt(ethers.constants.Zero);
     }
 
     // this supports the token.price.toString() expression
@@ -138,7 +138,7 @@ export class TokenPrice {
 
     // this function transforms a token amount into fiat amount and returns it as string containing a float number
     getAmountInFiatStr(tokensAmount: string | number | ethers.BigNumber, decimals = 2): string {
-        return `${formatWei(this.getAmountInFiat(tokensAmount), this.decimals, decimals)}`;
+        return `${formatWei(this.getAmountInFiat(tokensAmount), TOKEN_PRICE_DECIMALS, decimals)}`;
     }
 
     // this function transforms a fiat amount into token amount and returns it as BigNumber
@@ -292,13 +292,13 @@ export class TokenBalance {
     get fiatBalance(): ethers.BigNumber {
         const price = this.token.price.value;
         const fiatDouble = this.balance.mul(price);
-        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', this.token.decimals));
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', this.decimals));
         return fiat;
     }
 
     get fiatStr(): string {
         const fiat = this.fiatBalance;
-        return `${formatWei(fiat, this.token.decimals, 2)}`;
+        return `${formatWei(fiat, TOKEN_PRICE_DECIMALS, 2)}`;
     }
 
     get id(): string {
