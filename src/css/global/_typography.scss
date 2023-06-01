@@ -1,0 +1,250 @@
+// kmtodo move body text styles from _legacy-styles.scss
+
+@font-face {
+    font-family: silka-semibold;
+    font-weight: 600;
+    src: url("~/css/fonts/silka-semibold-webfont.woff");
+}
+
+@font-face {
+    font-family: silka-regular;
+    font-style: normal;
+    font-weight: normal;
+    src: url("~/css/fonts/silka-regular-webfont.woff");
+}
+
+/* Font weight mixins */
+@mixin regular {
+    font-family: 'silka-regular', 'Roboto', sans-serif;
+}
+
+@mixin bold {
+    font-family: 'silka-semibold', 'Roboto', sans-serif;
+    font-weight: normal;
+}
+
+
+/* Typography mixins */
+@mixin text--header-1 {
+    @include bold;
+    font-size: 2.5rem;
+    line-height: 100%;
+
+    @include tiny-only {
+        font-size: 2rem;
+    }
+}
+
+@mixin text--header-2 {
+    @include bold;
+    font-size: 1.5rem;
+    line-height: 130%;
+}
+
+@mixin text--header-3 {
+    @include regular;
+    font-size: 1.5rem;
+    line-height: 130%;
+}
+
+@mixin text--header-4 {
+    @include bold;
+    font-size: 1.125rem;
+    line-height: 130%;
+
+    @media only screen and (min-width: $breakpoint-sm-min) {
+        font-size: 1.25rem;
+    }
+}
+
+@mixin text--header-5 {
+    @include bold;
+    font-size: 0.9rem;
+    line-height: 150%;
+    text-transform: uppercase;
+}
+
+@mixin text--paragraph {
+    @include regular;
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+@mixin text--paragraph-bold {
+    @include bold;
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+@mixin text--small {
+    @include regular;
+    font-size: 0.8rem;
+    line-height: 150%;
+}
+
+@mixin text--small-bold {
+    @include bold;
+    font-size: 0.8rem;
+    line-height: 150%;
+}
+
+// see also: NativeLayout.vue => <style> for native overrides
+body {
+    @include regular;
+    color: var(--text-default-contrast);
+}
+
+
+/* Typography classes */
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+    margin: 0;
+}
+.o-text--header-1, h1 {
+    @include text--header-1;
+}
+
+.o-text--header-2, h2 {
+    @include text--header-2;
+}
+
+.o-text--header-3, h3 {
+    @include text--header-3;
+}
+
+.o-text--header-4, h4 {
+    @include text--header-4;
+}
+
+.o-text--header-5, h5 {
+    @include text--header-5;
+}
+
+.o-text--paragraph, p {
+    @include text--paragraph;
+}
+
+.o-text--paragraph-bold {
+    @include text--paragraph-bold;
+}
+
+.o-text--small {
+    @include text--small;
+}
+
+.o-text--small-bold {
+    @include text--small-bold;
+}
+
+/* Utilities classes */
+@mixin link-color-text {
+    color: var(--link-color) !important;
+}
+
+@mixin high-contrast-text {
+    color: var(--text-high-contrast) !important;
+}
+
+@mixin default-contrast-text {
+    color: var(--text-default-contrast) !important;
+}
+
+@mixin low-contrast-text {
+    color: var(--text-low-contrast) !important;
+}
+
+@mixin alt-color-text {
+    color: var(--menu-text) !important;
+}
+
+@mixin alt-color-text {
+    color: var(--menu-text) !important;
+}
+
+@mixin accent-text {
+    color: var(--accent-color) !important;
+}
+
+@mixin positive-text {
+    color: var(--positive-color) !important;
+}
+
+@mixin warning-text {
+    color: var(--warning-color-text) !important;
+}
+
+@mixin error-text {
+    color: var(--negative-color) !important;
+}
+
+.u-text {
+    // alignment
+    &--center {
+        text-align: center;
+    }
+
+    &--right {
+        text-align: right;
+    }
+
+    // color
+    &--high-contrast {
+        @include high-contrast-text;
+    }
+
+    &--default-contrast {
+        @include default-contrast-text;
+    }
+
+    &--low-contrast {
+        @include low-contrast-text;
+    }
+
+    &--alt-color {
+        @include alt-color-text;
+    }
+
+    &--link-color {
+        @include link-color-text;
+    }
+
+    &--accent {
+        @include accent-text;
+    }
+
+    &--positive {
+        @include positive-text;
+    }
+
+    &--warning {
+        @include warning-text;
+    }
+
+    &--error {
+        @include error-text;
+    }
+}
+
+
+// quasar overrides
+.q-field .q-field__label {
+    @include text--small;
+
+    transform: translateY(-60%) scale(1); // remove 0.75 scaling and update Y position accordingly
+}
+
+.q-field:not(.q-field--highlighted) .q-field__label {
+    color: var(--text-low-contrast);
+}
+
+.q-field.q-field--highlighted .q-field__label {
+    color: var(--accent-color);
+}
+
+.q-field.q-field--error .q-field__label {
+    color: var(--negative-color);
+}

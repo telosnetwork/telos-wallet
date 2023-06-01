@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BigFiatText.vue should render correctly 1`] = `
+<div
+  class="o-text--header-1 u-text--center u-text--high-contrast"
+>
+  $12,345.00
+</div>
+`;

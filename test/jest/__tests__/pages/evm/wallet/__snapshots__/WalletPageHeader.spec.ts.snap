@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WalletPageHeader.vue should render properly 1`] = `
+<div>
+  <big-fiat-text-stub
+    amount="123456.78"
+    class="q-mb-xl"
+  />
+  <div
+    class="c-wallet-page-header__links"
+  >
+    <div
+      aria-label="evm_wallet.link_to_send_aria"
+      class="c-wallet-page-header__link"
+      role="link"
+      tabindex="0"
+    >
+      <inline-svg-stub
+        alt="evm_wallet.send_icon_alt"
+        aria-hidden="true"
+        class="c-wallet-page-header__icon"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+      <span
+        class="c-wallet-page-header__link-text"
+      >
+        evm_wallet.send
+      </span>
+    </div>
+    <div
+      aria-label="evm_wallet.link_to_receive_aria"
+      class="c-wallet-page-header__link"
+      role="link"
+      tabindex="0"
+    >
+      <inline-svg-stub
+        alt="evm_wallet.receive_icon_alt"
+        aria-hidden="true"
+        class="c-wallet-page-header__icon c-wallet-page-header__icon--rotated"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+      <span
+        class="c-wallet-page-header__link-text"
+      >
+        evm_wallet.receive
+      </span>
+    </div>
+    <div
+      aria-label="evm_wallet.link_to_buy_aria"
+      class="c-wallet-page-header__link"
+      role="link"
+      tabindex="0"
+    >
+      <inline-svg-stub
+        alt="evm_wallet.buy_icon_alt"
+        aria-hidden="true"
+        class="c-wallet-page-header__icon"
+        keepduringloading="true"
+        src=""
+        transformsource="[Function]"
+      />
+      <span
+        class="c-wallet-page-header__link-text"
+      >
+        evm_wallet.buy
+      </span>
+    </div>
+  </div>
+</div>
+`;
