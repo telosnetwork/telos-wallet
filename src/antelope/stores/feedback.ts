@@ -105,7 +105,7 @@ export const createTraceFunction = (store_name: string) => function(action: stri
 };
 
 
-export const isTracingAll = () => false;
+export const isTracingAll = () => true;
 export const createInitFunction = (store_name: string, debug?: boolean) => function() {
     useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
 };
