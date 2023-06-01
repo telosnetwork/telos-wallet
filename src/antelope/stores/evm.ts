@@ -105,16 +105,17 @@ export const useEVMStore = defineStore(store_name, {
                 evm.setSupportsMetaMask(provider?.isMetaMask ?? false);
                 if (provider) {
                     evm.setExternalProvider(provider);
-                    const chainSettings = useChainStore().currentChain.settings;
-                    const network = chainSettings.getNetwork();
+
                     provider.on('chainChanged', (newNetwork) => {
+                        const chainSettings = useChainStore().currentChain.settings;
                         // if manually switched back to current app network, reload account
                         if (parseInt(newNetwork, 16) === parseInt(chainSettings.getChainId())){
-                            useAccountStore().loginEVM({ network });
+                            useAccountStore().loginEVM({ network: chainSettings.getNetwork() });
                         }
                         evm.trace('provider.chainChanged', newNetwork);
                     });
                     provider.on('accountsChanged', async (accounts) => {
+                        const network = useChainStore().currentChain.settings.getNetwork();
                         evm.trace('provider.accountsChanged', accounts);
                         useAccountStore().loginEVM({ network });
                     });
