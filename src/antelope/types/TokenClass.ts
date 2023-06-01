@@ -63,7 +63,12 @@ export class TokenMarketData {
 
     constructor(sourceInfo: MarketSourceInfo) {
         this.info = sourceInfo;
-        this._price = ethers.utils.parseUnits(sourceInfo.price ?? '0', sourceInfo.decimals || 18);
+        try {
+            this._price = ethers.utils.parseUnits(sourceInfo.price ?? '0', sourceInfo.decimals || 18);
+        } catch (e) {
+            console.error('TokenMarketData: error parsing price from MarketSourceInfo. price', sourceInfo.price, 'decimals', sourceInfo.decimals, '\nError:', e);
+            this._price = ethers.constants.Zero;
+        }
     }
 
     // Returns the token price
