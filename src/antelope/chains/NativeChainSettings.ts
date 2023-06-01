@@ -115,7 +115,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return `~/assets/${this.network}/logo_sm.svg`;
     }
 
-    abstract isProduction(): boolean;
+    abstract isMainnet(): boolean;
     abstract getSystemToken(): TokenClass;
     abstract getChainId(): string;
     abstract getDisplay(): string;

@@ -4,7 +4,7 @@ import { TokenClass } from 'src/antelope/types';
 
 export interface ChainSettings {
     isNative(): boolean;
-    isProduction(): boolean;
+    isMainnet(): boolean;
     getNetwork(): string;
     getSystemToken(): TokenClass;
     getTokenList(): Promise<TokenClass[]>;

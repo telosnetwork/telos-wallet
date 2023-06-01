@@ -54,7 +54,7 @@ const THEME = {
 
 export default class Telos extends NativeChainSettings {
 
-    isProduction(): boolean {
+    isMainnet(): boolean {
         return true;
     }
 

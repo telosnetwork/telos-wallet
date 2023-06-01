@@ -28,7 +28,7 @@ const THEME = {};
 
 export default class UX extends NativeChainSettings {
 
-    isProduction(): boolean {
+    isMainnet(): boolean {
         return true;
     }
 

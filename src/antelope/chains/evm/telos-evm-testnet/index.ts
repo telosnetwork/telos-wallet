@@ -58,7 +58,7 @@ const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.co
 
 export default class TelosEVMTestnet extends EVMChainSettings {
 
-    isProduction(): boolean {
+    isMainnet(): boolean {
         return false;
     }
 

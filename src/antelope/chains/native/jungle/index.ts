@@ -28,7 +28,7 @@ const THEME = {};
 
 export default class TelosTestnet extends NativeChainSettings {
 
-    isProduction(): boolean {
+    isMainnet(): boolean {
         return false;
     }
 
