@@ -40,6 +40,7 @@ import {
     TokenBalance,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNyAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTgiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSI4IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=';
 
@@ -198,7 +199,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
             const tk = tokens.find((t: TokenClass) => t.symbol === tokeninfo.symbol) as TokenClass;
             let balance = ethers.constants.Zero;
             if (amount > 0 && tk) {
-                balance = ethers.utils.parseUnits(amount.toFixed(16), tk.decimals);
+                balance = ethers.utils.parseUnits(toStringNumber(amount), tk.decimals);
             }
             const tokenBalance = new TokenBalance(tk, balance);
             return tokenBalance;
