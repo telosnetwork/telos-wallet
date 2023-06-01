@@ -305,7 +305,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
 
-        const price = ethers.utils.parseUnits(tokenPrice.toString(), 18);
+        console.log(typeof tokenPrice.toFixed, typeof tokenPrice, tokenPrice);
+
+        const price = ethers.utils.parseUnits(tokenPrice.toFixed(16), 18);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
         const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));

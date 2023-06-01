@@ -22,11 +22,13 @@ export const WEI_PRECISION = 18;
  * @returns a string representing the result of the division also as a float number
  */
 export function divideFloat(a: string | number, b: string | number): string {
-    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
-    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const a_str = (+a).toFixed(16);
+    const b_str = (+b).toFixed(16);
+    const a_decimals = a_str.split('.')[1] ? a_str.split('.')[1].length : 0;
+    const b_decimals = b_str.split('.')[1] ? b_str.split('.')[1].length : 0;
     const decimals = 2 * Math.max(a_decimals, b_decimals);
-    const A = ethers.utils.parseUnits(a.toString(), decimals);
-    const B = ethers.utils.parseUnits(b.toString(), b_decimals);
+    const A = ethers.utils.parseUnits(a_str, decimals);
+    const B = ethers.utils.parseUnits(b_str, b_decimals);
     const result = A.div(B);
     return formatUnits(result.toString(), decimals-b_decimals);
 }
@@ -38,11 +40,13 @@ export function divideFloat(a: string | number, b: string | number): string {
  * @returns a string representing the result of the multiplication also as a float number
  */
 export function multiplyFloat(a: string | number, b: string | number): string {
-    const a_decimals = a.toString().split('.')[1] ? a.toString().split('.')[1].length : 0;
-    const b_decimals = b.toString().split('.')[1] ? b.toString().split('.')[1].length : 0;
+    const a_str = (+a).toFixed(16);
+    const b_str = (+b).toFixed(16);
+    const a_decimals = a_str.split('.')[1] ? a_str.split('.')[1].length : 0;
+    const b_decimals = b_str.split('.')[1] ? b_str.split('.')[1].length : 0;
     const decimals = a_decimals + b_decimals;
-    const A = ethers.utils.parseUnits(a.toString(), decimals);
-    const B = ethers.utils.parseUnits(b.toString(), decimals);
+    const A = ethers.utils.parseUnits(a_str, decimals);
+    const B = ethers.utils.parseUnits(b_str, decimals);
     const result = A.mul(B);
     return formatUnits(result.toString(), decimals+decimals);
 }

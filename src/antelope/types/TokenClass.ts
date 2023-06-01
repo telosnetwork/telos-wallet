@@ -122,7 +122,7 @@ export class TokenPrice {
         // get the BigNumber value
         let tokensAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof tokensAmount === 'string' || typeof tokensAmount === 'number') {
-            tokensAmountBn = ethers.utils.parseUnits(tokensAmount.toString(), this.decimals);
+            tokensAmountBn = ethers.utils.parseUnits((+tokensAmount).toFixed(16), this.decimals);
         } else {
             tokensAmountBn = tokensAmount;
         }
@@ -140,7 +140,7 @@ export class TokenPrice {
         // get the BigNumber value
         let fiatAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof fiatAmount === 'string' || typeof fiatAmount === 'number') {
-            fiatAmountBn = ethers.utils.parseUnits(fiatAmount.toString(), this.decimals);
+            fiatAmountBn = ethers.utils.parseUnits((+fiatAmount).toFixed(16), this.decimals);
         } else {
             fiatAmountBn = fiatAmount;
         }
@@ -158,7 +158,7 @@ export class TokenPrice {
         // get the BigNumber value
         let tokensAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof tokensAmount === 'string' || typeof tokensAmount === 'number') {
-            tokensAmountBn = ethers.utils.parseUnits(tokensAmount.toString(), this.decimals);
+            tokensAmountBn = ethers.utils.parseUnits((+tokensAmount).toFixed(16), this.decimals);
         } else {
             tokensAmountBn = tokensAmount;
         }
@@ -270,6 +270,11 @@ export class TokenBalance {
 
     // amount is an alias for balance
     get amount(): ethers.BigNumber {
+        return this.balance;
+    }
+
+    // value is an alias for balance
+    get value(): ethers.BigNumber {
         return this.balance;
     }
 

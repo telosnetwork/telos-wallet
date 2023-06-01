@@ -62,7 +62,7 @@ export async function getFiatPriceFromIndexer(
         (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-    return tokenMarketData?.price ?? 0;
+    return +(tokenMarketData?.price ?? 0);
 }
 
 export const getCoingeckoPriceChartData = async (
