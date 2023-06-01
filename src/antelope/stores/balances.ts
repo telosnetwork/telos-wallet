@@ -91,6 +91,10 @@ export const useBalancesStore = defineStore(store_name, {
                         if (chain_settings.hasIndexSupport()) {
                             if (account?.account) {
                                 this.__balances[label] = await chain_settings.getBalances(account.account);
+                                // if new account with no index records display default zero TLOS balance
+                                if (this.__balances[label].length === 0){
+                                    await this.updateSystemBalanceForAccount(label, account.account);
+                                }
                                 this.sortBalances(label);
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
