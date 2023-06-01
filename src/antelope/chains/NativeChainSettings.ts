@@ -198,9 +198,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
             const tk = tokens.find((t: TokenClass) => t.symbol === tokeninfo.symbol) as TokenClass;
             let balance = ethers.constants.Zero;
             if (amount > 0 && tk) {
-                // TODO: avoid cientific notation on amount.toString()
-                // https://github.com/telosnetwork/telos-wallet/issues/359
-                balance = ethers.utils.parseUnits(amount.toString(), tk.decimals);
+                balance = ethers.utils.parseUnits(amount.toFixed(16), tk.decimals);
             }
             const tokenBalance = new TokenBalance(tk, balance);
             return tokenBalance;

@@ -207,7 +207,7 @@ export function prettyPrintCurrency(
  * @returns {BigNumber} the amount of token two equivalent to the amount of token one
  */
 export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number): BigNumber {
-    const conversionRate = conversionFactor.toString();
+    const conversionRate = (+conversionFactor).toFixed(16);
     const leadingZeroesRegex = /^0+/g;
     const trailingZeroesRegex = /0+$/g;
     const floatRegex = /^\d+(\.\d+)?$/g;

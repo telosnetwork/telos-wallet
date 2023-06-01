@@ -293,13 +293,13 @@ export const useEVMStore = defineStore(store_name, {
         },
         // utils ---
         toWei(value: string | number, decimals = 18): string {
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), decimals.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : (+value).toFixed(16), decimals.toFixed(16));
             const amountInWei = bigAmount.toString();
             return amountInWei;
         },
         toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
             const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), dec.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : (+value).toFixed(16), dec.toFixed(16));
             return bigAmount;
         },
         // Evm Contract Managment
