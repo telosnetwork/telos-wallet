@@ -198,8 +198,6 @@ export const useBalancesStore = defineStore(store_name, {
                     // TODO: should we notify the user that the transaction succeeded of failed?
                     // https://github.com/telosnetwork/telos-wallet/issues/328
                 });
-            } else {
-                throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return response;
         },
@@ -291,7 +289,6 @@ export const useBalancesStore = defineStore(store_name, {
                         value: amount,
                     },
                 });
-
                 return await sendTransaction(config);
             } else {
 

@@ -97,10 +97,14 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         if (this.hasIndexSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
-            return await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
-        } else {
-            return await api.getCoingeckoUsdPrice('telos');
+            const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
+
+            if (fiatPrice !== 0) {
+                return fiatPrice;
+            }
         }
+
+        return await api.getCoingeckoUsdPrice('telos');
     }
 
     getLargeLogoPath(): string {
