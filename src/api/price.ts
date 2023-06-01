@@ -72,7 +72,7 @@ export async function getFiatPriceFromIndexer(
     const diffInMilliseconds = Math.abs(lastPriceUpdated - now);
     const diffInMinutes = diffInMilliseconds / (1000 * 60);
 
-    // use indexer data if it is no more than 10 minutes old
+    // only use indexer data if it is no more than 10 minutes old
     if (diffInMinutes < 10) {
         return tokenMarketData.price;
     }
