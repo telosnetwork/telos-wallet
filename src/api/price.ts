@@ -76,7 +76,7 @@ export async function getFiatPriceFromIndexer(
     if (diffInMinutes < 10) {
         return tokenMarketData.price;
     }
-
+// if indexer data is stale use coingecko data
     return 0;
 }
 
