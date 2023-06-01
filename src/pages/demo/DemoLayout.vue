@@ -8,6 +8,9 @@
         <li>
             <router-link :to="{ name: 'demos.inputs' }">Inputs</router-link>
         </li>
+        <li>
+            <router-link :to="{ name: 'demos.nfts' }">NFTs</router-link>
+        </li>
     </ul>
 
     <router-view />

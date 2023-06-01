@@ -51,6 +51,7 @@ export default {
         logout: 'Log Out',
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
+        nfts: 'Inventory (NFTs)',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',
@@ -98,6 +99,7 @@ export default {
         add_to_metamask: 'Add to MetaMask',
         rejected_metamask_prompt: 'The MetaMask prompt was rejected',
         error_adding_token_to_metamask: 'Error adding token to MetaMask',
+        inventory: 'Inventory',
     },
     global: {
         native: 'Native',
