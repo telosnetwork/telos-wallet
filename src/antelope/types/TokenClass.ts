@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { formatWei } from 'src/antelope/stores/utils';
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 // A type to represent the possible EVM token types
 export const ERC20_TYPE   = 'ERC20';
@@ -122,7 +123,7 @@ export class TokenPrice {
         // get the BigNumber value
         let tokensAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof tokensAmount === 'string' || typeof tokensAmount === 'number') {
-            tokensAmountBn = ethers.utils.parseUnits((+tokensAmount).toFixed(16), this.decimals);
+            tokensAmountBn = ethers.utils.parseUnits(toStringNumber(tokensAmount), this.decimals);
         } else {
             tokensAmountBn = tokensAmount;
         }
@@ -140,7 +141,7 @@ export class TokenPrice {
         // get the BigNumber value
         let fiatAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof fiatAmount === 'string' || typeof fiatAmount === 'number') {
-            fiatAmountBn = ethers.utils.parseUnits((+fiatAmount).toFixed(16), this.decimals);
+            fiatAmountBn = ethers.utils.parseUnits(toStringNumber(fiatAmount), this.decimals);
         } else {
             fiatAmountBn = fiatAmount;
         }
@@ -158,7 +159,7 @@ export class TokenPrice {
         // get the BigNumber value
         let tokensAmountBn: ethers.BigNumber = ethers.constants.Zero;
         if (typeof tokensAmount === 'string' || typeof tokensAmount === 'number') {
-            tokensAmountBn = ethers.utils.parseUnits((+tokensAmount).toFixed(16), this.decimals);
+            tokensAmountBn = ethers.utils.parseUnits(toStringNumber(tokensAmount), this.decimals);
         } else {
             tokensAmountBn = tokensAmount;
         }

@@ -19,6 +19,7 @@ import {
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -304,7 +305,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
-        const price = ethers.utils.parseUnits(tokenPrice.toFixed(16), 18);
+        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), 18);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
         const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));

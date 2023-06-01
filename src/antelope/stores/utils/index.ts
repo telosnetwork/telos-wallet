@@ -7,7 +7,7 @@ import {
     EvmABIEntry,
 } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
-
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
@@ -22,8 +22,8 @@ export const WEI_PRECISION = 18;
  * @returns a string representing the result of the division also as a float number
  */
 export function divideFloat(a: string | number, b: string | number): string {
-    const a_str = (+a).toFixed(16);
-    const b_str = (+b).toFixed(16);
+    const a_str = toStringNumber(a);
+    const b_str = toStringNumber(b);
     const a_decimals = a_str.split('.')[1] ? a_str.split('.')[1].length : 0;
     const b_decimals = b_str.split('.')[1] ? b_str.split('.')[1].length : 0;
     const decimals = 2 * Math.max(a_decimals, b_decimals);
@@ -40,8 +40,8 @@ export function divideFloat(a: string | number, b: string | number): string {
  * @returns a string representing the result of the multiplication also as a float number
  */
 export function multiplyFloat(a: string | number, b: string | number): string {
-    const a_str = (+a).toFixed(16);
-    const b_str = (+b).toFixed(16);
+    const a_str = toStringNumber(a);
+    const b_str = toStringNumber(b);
     const a_decimals = a_str.split('.')[1] ? a_str.split('.')[1].length : 0;
     const b_decimals = b_str.split('.')[1] ? b_str.split('.')[1].length : 0;
     const decimals = a_decimals + b_decimals;
