@@ -107,7 +107,7 @@ export default defineComponent({
             return ant.stores.balances.getBalances('logged');
         },
         showContractLink(): boolean {
-            return !!this.token?.address;
+            return this.token?.address !== NativeCurrencyAddress;
         },
         currencyInputSecondaryCurrencyBindings() {
             const useSecondaryCurrency = !!this.fiatConversionRate;
@@ -462,7 +462,6 @@ export default defineComponent({
 
     &__view-contract {
         position: absolute;
-        bottom: -24px;
         display: flex;
         align-items: center;
         cursor: pointer;
