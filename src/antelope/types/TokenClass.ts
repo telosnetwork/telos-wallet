@@ -281,13 +281,13 @@ export class TokenBalance {
     get fiatBalance(): ethers.BigNumber {
         const price = this.token.price.value;
         const fiatDouble = this.balance.mul(price);
-        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', this.token.decimals));
         return fiat;
     }
 
     get fiatStr(): string {
         const fiat = this.fiatBalance;
-        return `${formatWei(fiat, 18, 2)}`;
+        return `${formatWei(fiat, this.token.decimals, 2)}`;
     }
 
     get id(): string {
