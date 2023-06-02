@@ -107,11 +107,6 @@ export const useEVMStore = defineStore(store_name, {
                     evm.setExternalProvider(provider);
 
                     provider.on('chainChanged', (newNetwork) => {
-                        const chainSettings = useChainStore().currentChain.settings;
-                        // if manually switched back to current app network, reload account
-                        if (parseInt(newNetwork, 16) === parseInt(chainSettings.getChainId())){
-                            useAccountStore().loginEVM({ network: chainSettings.getNetwork() });
-                        }
                         evm.trace('provider.chainChanged', newNetwork);
                     });
                     provider.on('accountsChanged', async (accounts) => {
