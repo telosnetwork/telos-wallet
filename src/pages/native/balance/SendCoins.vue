@@ -58,7 +58,7 @@ export default {
     transition-show="slide-up"
     transition-hide="slide-down"
 >
-    <div class="main-background">
+    <div class="main-background native-font-color">
         <div class="dialogPage">
             <div class="dialogPageContent">
                 <div class="dialogPageHeading">

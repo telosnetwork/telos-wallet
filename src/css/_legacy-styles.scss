@@ -42,6 +42,10 @@ div.cleos-auth-dialog {
   border-bottom-left-radius: unset;
 }
 
+.native-font-color {
+    color: var(--native-contrast-text-color);
+}
+
 @media only screen and (min-width: 1000px) {
   .telosLogo {
     padding: 2.5em 5em 0.875em 4em;
@@ -111,6 +115,7 @@ div.cleos-auth-dialog {
 
 .popupCard {
   @extend .main-background-overlay;
+  color: var(--native-contrast-text-color);
   background-color: rgba($blackDark, 0.9);
   max-width: 600px !important;
   padding: 20px;
