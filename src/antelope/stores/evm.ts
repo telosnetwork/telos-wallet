@@ -53,6 +53,7 @@ import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { useAccountStore } from 'src/antelope/stores/account';
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -293,13 +294,13 @@ export const useEVMStore = defineStore(store_name, {
         },
         // utils ---
         toWei(value: string | number, decimals = 18): string {
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), decimals.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(decimals));
             const amountInWei = bigAmount.toString();
             return amountInWei;
         },
         toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
             const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), dec.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(dec));
             return bigAmount;
         },
         // Evm Contract Managment
