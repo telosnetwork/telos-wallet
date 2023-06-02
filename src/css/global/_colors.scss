@@ -24,6 +24,7 @@ $saveBtn: #2e1f4f;
     $high-contrast-text-color: #282828;
     $default-contrast-text-color: #4D4D4D;
     $low-contrast-text-color: #939393;
+    $native-contrast-text-color: #F7F5FF;
     $menu-text: #fff;
     $link-color: #646FD3;
     $canvas: #fff;
@@ -31,6 +32,7 @@ $saveBtn: #2e1f4f;
     --text-high-contrast: #{$high-contrast-text-color};
     --text-default-contrast: #{$default-contrast-text-color};
     --text-low-contrast: #{$low-contrast-text-color};
+    --native-contrast-text-color: #{$native-contrast-text-color};
     --link-color: #{$link-color};
     --menu-text: #{$menu-text};
 

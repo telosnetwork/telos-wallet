@@ -38,7 +38,7 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
-import { FetchBalanceResult, SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
+import { FetchBalanceResult, SendTransactionResult, fetchBalance, getAccount, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
