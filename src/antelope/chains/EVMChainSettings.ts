@@ -113,7 +113,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract hasIndexSupport(): boolean;
 
     async getBalances(account: string): Promise<TokenBalance[]> {
-        debugger;
         if (!this.hasIndexSupport()) {
             console.error('Indexer API not supported for this chain:', this.getNetwork());
             return [];
