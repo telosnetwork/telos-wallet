@@ -53,6 +53,7 @@ import { getAccount } from '@wagmi/core';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { useAccountStore } from 'src/antelope/stores/account';
+import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -105,12 +106,13 @@ export const useEVMStore = defineStore(store_name, {
                 evm.setSupportsMetaMask(provider?.isMetaMask ?? false);
                 if (provider) {
                     evm.setExternalProvider(provider);
+
                     provider.on('chainChanged', (newNetwork) => {
                         evm.trace('provider.chainChanged', newNetwork);
                     });
                     provider.on('accountsChanged', async (accounts) => {
-                        evm.trace('provider.accountsChanged', accounts);
                         const network = useChainStore().currentChain.settings.getNetwork();
+                        evm.trace('provider.accountsChanged', accounts);
                         useAccountStore().loginEVM({ network });
                     });
                 }
@@ -130,11 +132,10 @@ export const useEVMStore = defineStore(store_name, {
                     return getAccount().address as string;
                 }
 
-                let checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
+                const checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
 
                 const accounts = await checkProvider.listAccounts();
                 if (accounts.length > 0) {
-                    checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accounts[0];
                 } else {
                     if (!checkProvider.provider.request) {
@@ -144,7 +145,6 @@ export const useEVMStore = defineStore(store_name, {
                     if (accessGranted.length < 1) {
                         return null;
                     }
-                    checkProvider = await this.ensureCorrectChain(checkProvider);
                     return accessGranted[0];
                 }
             } catch (error) {
@@ -278,7 +278,8 @@ export const useEVMStore = defineStore(store_name, {
                             }
                         }
                     } else if ((error as unknown as ExceptionError).code === 4001) {
-                        throw new Error('antelope.evm.switch_chain_rejected');
+                        console.error(new Error('antelope.evm.switch_chain_rejected'));
+                        return false;
                     } else {
                         console.error('Error:', error);
                         throw new Error('antelope.evm.error_switch_chain');
@@ -293,13 +294,13 @@ export const useEVMStore = defineStore(store_name, {
         },
         // utils ---
         toWei(value: string | number, decimals = 18): string {
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), decimals.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(decimals));
             const amountInWei = bigAmount.toString();
             return amountInWei;
         },
         toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
             const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : value.toString(), dec.toString());
+            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(dec));
             return bigAmount;
         },
         // Evm Contract Managment

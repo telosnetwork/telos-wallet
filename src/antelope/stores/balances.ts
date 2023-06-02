@@ -91,6 +91,10 @@ export const useBalancesStore = defineStore(store_name, {
                         if (chain_settings.hasIndexSupport()) {
                             if (account?.account) {
                                 this.__balances[label] = await chain_settings.getBalances(account.account);
+                                // if new account with no index records display default zero TLOS balance
+                                if (this.__balances[label].length === 0){
+                                    await this.updateSystemBalanceForAccount(label, account.account);
+                                }
                                 this.sortBalances(label);
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
@@ -108,7 +112,7 @@ export const useBalancesStore = defineStore(store_name, {
                                 promises = tokens.map(async (token) => {
                                     fetchBalance({
                                         address: getAccount().address as addressString,
-                                        chainId: getNetwork().chain?.id,
+                                        chainId: +chain_settings.getChainId(),
                                         token: token.address as addressString,
                                     }).then((balanceBn: FetchBalanceResult) => {
                                         this.processBalanceForToken(label, token, balanceBn.value);
@@ -154,7 +158,7 @@ export const useBalancesStore = defineStore(store_name, {
             } else if (localStorage.getItem('wagmi.connected')) {
                 const balanceBn = await fetchBalance({
                     address: getAccount().address as addressString,
-                    chainId: getNetwork().chain?.id,
+                    chainId: +chain_settings.getChainId(),
                 });
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
@@ -198,8 +202,6 @@ export const useBalancesStore = defineStore(store_name, {
                     // TODO: should we notify the user that the transaction succeeded of failed?
                     // https://github.com/telosnetwork/telos-wallet/issues/328
                 });
-            } else {
-                throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return response;
         },
@@ -291,7 +293,6 @@ export const useBalancesStore = defineStore(store_name, {
                         value: amount,
                     },
                 });
-
                 return await sendTransaction(config);
             } else {
 
