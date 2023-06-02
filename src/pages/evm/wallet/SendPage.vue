@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
@@ -19,6 +19,7 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
+const balanceStore = useBalancesStore();
 const global = useAppNavStore();
 
 export default defineComponent({
@@ -75,6 +76,8 @@ export default defineComponent({
         },
         token: {
             async handler(newToken: TokenClass | null, oldToken: TokenClass | null) {
+                this.updateTokenTransferConfig(this.isFormValid, newToken, this.address, this.amount);
+
                 if (newToken?.address !== oldToken?.address) {
                     this.updateEstimatedGas();
                     this.fiatConversionRate = newToken ? +newToken.price.str : undefined;
@@ -82,6 +85,15 @@ export default defineComponent({
             },
             immediate: true,
             deep: true,
+        },
+        isFormValid(isValid: boolean) {
+            this.updateTokenTransferConfig(isValid, this.token, this.address, this.amount);
+        },
+        address(newAddress) {
+            this.updateTokenTransferConfig(this.isFormValid, this.token, newAddress, this.amount);
+        },
+        amount(newAmount) {
+            this.updateTokenTransferConfig(this.isFormValid, this.token, this.address, newAmount);
         },
     },
     computed: {
@@ -183,6 +195,32 @@ export default defineComponent({
                         ),
                     );
                 }
+            }
+        },
+        updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null | undefined, address: string, amount: BigNumber) {
+            // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
+            // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
+            // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
+
+            if (!formIsValid || !token?.address || !localStorage.getItem('wagmi.connected')) {
+                balanceStore.clearAllWagmiTokenTransferConfigs('logged');
+                return;
+            }
+
+
+            if (this.token?.isSystem) {
+                balanceStore.prepareWagmiSystemTokenTransferConfig(
+                    'logged',
+                    address,
+                    amount,
+                );
+            } else {
+                balanceStore.prepareWagmiTokenTransferConfig(
+                    'logged',
+                    token,
+                    address,
+                    amount,
+                );
             }
         },
         async startTransfer() {
