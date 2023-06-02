@@ -112,7 +112,7 @@ export const useBalancesStore = defineStore(store_name, {
                                 promises = tokens.map(async (token) => {
                                     fetchBalance({
                                         address: getAccount().address as addressString,
-                                        chainId: getNetwork().chain?.id,
+                                        chainId: +chain_settings.getChainId(),
                                         token: token.address as addressString,
                                     }).then((balanceBn: FetchBalanceResult) => {
                                         this.processBalanceForToken(label, token, balanceBn.value);
@@ -158,7 +158,7 @@ export const useBalancesStore = defineStore(store_name, {
             } else if (localStorage.getItem('wagmi.connected')) {
                 const balanceBn = await fetchBalance({
                     address: getAccount().address as addressString,
-                    chainId: getNetwork().chain?.id,
+                    chainId: +chain_settings.getChainId(),
                 });
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
