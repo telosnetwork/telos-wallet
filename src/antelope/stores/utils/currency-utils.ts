@@ -4,6 +4,24 @@ import { formatUnits } from '@ethersproject/units';
 import Decimal from 'decimal.js';
 
 /**
+ * Given a number or string, returns a string representation of the number with up to 18 decimal places
+ * @param value - number or string to convert to string
+ * @returns {string} string representation of the number
+ */
+
+export function toStringNumber(value: number | string): string {
+    if (typeof value === 'string') {
+        return value;
+    } else if (typeof value === 'number') {
+        const num = new Decimal(value);
+        return num.toFixed(18);
+    } else {
+        throw new Error('Invalid value type: ' + typeof value);
+    }
+}
+
+
+/**
  * Given a locale string, returns the character used to separate integer and decimal portions of a number,
  * e.g "." as in 123.456
  * @param locale - standard locale code, such as "en-US"
@@ -207,7 +225,7 @@ export function prettyPrintCurrency(
  * @returns {BigNumber} the amount of token two equivalent to the amount of token one
  */
 export function convertCurrency(tokenOneAmount: BigNumber, tokenOneDecimals: number, tokenTwoDecimals: number, conversionFactor: string | number): BigNumber {
-    const conversionRate = conversionFactor.toString();
+    const conversionRate = toStringNumber(conversionFactor);
     const leadingZeroesRegex = /^0+/g;
     const trailingZeroesRegex = /0+$/g;
     const floatRegex = /^\d+(\.\d+)?$/g;

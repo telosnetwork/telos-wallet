@@ -77,8 +77,6 @@ export default defineComponent({
             }
 
             return prettyPrintCurrency(
-                // TODO: avoid cientific notation on this.token.price.str
-                // https://github.com/telosnetwork/telos-wallet/issues/359
                 +this.token.price.str,
                 4,
                 fiatLocale,
@@ -92,8 +90,6 @@ export default defineComponent({
             if (this.tokenHasFiatValue) {
                 return this.tokenBalanceFiat as number;
             } else {
-                // TODO: avoid cientific notation on this.token.price.str
-                // https://github.com/telosnetwork/telos-wallet/issues/359
                 return +this.balance.str;
             }
         },
