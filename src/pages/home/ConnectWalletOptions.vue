@@ -37,13 +37,13 @@ export default defineComponent({
         const toggleWalletConnectModal = async () => {
             // if already connected, trigger autologin
             if (localStorage.getItem('wagmi.connected')){
-                await connectToWalletConnect();
+                await login();
             }else {
                 await (web3Modal.value as Web3Modal).openModal();
             }
         };
 
-        const connectToWalletConnect = async () => {
+        const login = async () => {
             globalProps.$emitter.emit('toggleWalletConnect');
 
             loginEvm();
@@ -68,7 +68,7 @@ export default defineComponent({
             supportsMetamask,
             loginEvm,
             toggleWalletConnectModal,
-            connectToWalletConnect,
+            login,
             redirectToMetamaskDownload,
             wagmiClient,
         };
@@ -86,7 +86,7 @@ export default defineComponent({
 
         this.web3Modal.subscribeModal(async (newState) => {
             if (newState.open === false && localStorage.getItem('wagmi.connected')) {
-                await this.connectToWalletConnect();
+                await this.login();
             }
         });
     },
