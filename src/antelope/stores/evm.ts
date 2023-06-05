@@ -219,7 +219,6 @@ export const useEVMStore = defineStore(store_name, {
             this.trace('switchChainInjected');
             useFeedbackStore().setLoading('evm.switchChainInjected');
             const provider = this.__external_provider;
-
             if (provider) {
                 const chainSettings = useChainStore().loggedChain.settings as unknown as EVMChainSettings;
                 const chainId = parseInt(chainSettings.getChainId(), 10);
