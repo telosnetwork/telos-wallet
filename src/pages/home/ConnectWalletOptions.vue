@@ -79,9 +79,16 @@ export default defineComponent({
             // MetaMask
             'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
         ];
+
         const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerAllowList };
 
         this.web3Modal = new Web3Modal(options, this.wagmiClient);
+
+        this.web3Modal.subscribeModal(async (newState) => {
+            if (newState.open === false && localStorage.getItem('wagmi.connected')) {
+                await this.connectToWalletConnect();
+            }
+        });
     },
 });
 </script>
