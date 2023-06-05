@@ -166,6 +166,12 @@ export default defineComponent({
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
     },
+    created() {
+        this.clearTokenTransferConfigs();
+    },
+    unmounted() {
+        this.clearTokenTransferConfigs();
+    },
     methods: {
         // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
         // https://github.com/telosnetwork/telos-wallet/issues/274
@@ -197,13 +203,16 @@ export default defineComponent({
                 }
             }
         },
+        clearTokenTransferConfigs() {
+            balanceStore.clearAllWagmiTokenTransferConfigs('logged');
+        },
         updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null | undefined, address: string, amount: BigNumber) {
             // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
             // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
             // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
 
             if (!formIsValid || !token?.address || !localStorage.getItem('wagmi.connected')) {
-                balanceStore.clearAllWagmiTokenTransferConfigs('logged');
+                this.clearTokenTransferConfigs();
                 return;
             }
 
