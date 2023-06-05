@@ -67,6 +67,7 @@ export default defineComponent({
             web3Modal,
             supportsMetamask,
             loginEvm,
+            toggleWalletConnectModal,
             connectToWalletConnect,
             redirectToMetamaskDownload,
             wagmiClient,
@@ -78,16 +79,9 @@ export default defineComponent({
             // MetaMask
             'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
         ];
-
         const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerAllowList };
 
         this.web3Modal = new Web3Modal(options, this.wagmiClient);
-
-        this.web3Modal.subscribeModal(async (newState) => {
-            if (newState.open === false) {
-
-            }
-        });
     },
 });
 </script>
@@ -115,7 +109,7 @@ export default defineComponent({
             >
             {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
         </div>
-        <div class="wallet-options__option" @click="connectToWalletConnect">
+        <div class="wallet-options__option" @click="toggleWalletConnectModal">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
