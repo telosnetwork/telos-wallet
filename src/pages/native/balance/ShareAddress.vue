@@ -203,7 +203,7 @@ export default {
         },
         copyToClipboard(str) {
             copyToClipboard(str).then(() => {
-                this.$successNotification(this.$t('components.copied_ok'));
+                this.$successNotification(this.$t('settings.copied_ok'));
             });
         },
     },

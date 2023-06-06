@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers';
-import { Notify } from 'quasar';
+import { Dialog, Notify } from 'quasar';
 
 // to persist the notification and require user to dismiss pass `true` as second param
 const errorNotification = function(error, dismiss = false) {
@@ -51,12 +51,14 @@ const successNotification = function(message) {
     });
 };
 
+// ---------- new notification layouts ---------------
 
 const crossIcon = require('src/assets/icon--cross.svg');
 const checkIcon = require('src/assets/icon--check.svg');
+const discoIcon = require('src/assets/icon--disconnected.svg');
 
 const html = `
-    <div class="c-notify__container c-notify__container--{type}">
+    <div class="c-notify__container c-notify__container--{type} c-notify__container--{random}">
         <div class="c-notify__header"></div>
         <div class="c-notify__title">
             <img src='{svg}' class="c-notify__icon" />
@@ -67,68 +69,180 @@ const html = `
         </div>
     </div>
 `;
-const successfulTransactionNotification = function(link) {
-    Notify.create({
-        timeout: 5000,
+
+const notifyMessage = function(type, icon, title, message, payload) {
+
+    // action buttons
+    const actions = [];
+    const dismiss_btn = {
+        label: this.$t('notification.dismiss_label'),
+        class: 'c-notify__action-btn',
+    };
+    const link_btn = {
+        label: this.$t('notification.success_see_trx_label'),
+        color: 'positive',
+        iconRight: 'launch',
+        class: 'c-notify__action-btn',
+        handler: () => {
+            window.open(payload, '_blank');
+        },
+    };
+    const details_btn = {
+        label: this.$t('notification.error_see_details_label'),
+        class: 'c-notify__action-btn ',
+        handler: () => {
+            let content = '';
+            try {
+                content = JSON.stringify(payload, null, 2);
+            } catch (e) {
+                try {
+                    content = payload.toString();
+                } catch (e) {
+                    content = payload + ' ';
+                }
+            }
+
+            Dialog.create({
+                class: 'c-notify__dialog',
+                title: this.$t('notification.error_details_title'),
+                message: '<q-card-section>' + content + '</q-card-section>',
+                html: true,
+            });
+        },
+    };
+    const hidden_btn = {
+        label: 'hidden',
+        class: 'c-notify__action-btn c-notify__action-btn--hide',
+    };
+
+    // adding buttons
+    if (typeof payload === 'string' && type === 'success') {
+        actions.push(link_btn);
+    } else if (typeof payload === 'object' && type === 'error') {
+        actions.push(details_btn);
+    } else {
+        actions.push(hidden_btn);
+    }
+    actions.push(dismiss_btn);
+    if (type === 'neutral') {
+        // if neutral, no buttons
+        actions.splice(0, actions.length);
+    }
+
+    let final_message = message;
+    if (Array.isArray(message)) {
+        final_message = message.map(m => ` <${m.tag ?? 'span'} class="${m.class}">${m.text}</${m.tag ?? 'span'}> `).join('');
+    }
+
+    let timeout = 4000;
+    if (type === 'error') {
+        timeout = 0;
+    }
+
+    let position = 'bottom';
+    if (type === 'neutral') {
+        position = 'bottom-right';
+    }
+
+    let random = Math.floor(Math.random() * 1000000);
+
+    return Notify.create({
+        timeout,
+        position,
         message: html
-            .replace('{svg}', checkIcon)
-            .replace('{type}', 'success')
-            .replace('{title}', this.$t('notification.success_title'))
-            .replace('{message}', this.$t('notification.success_message')),
+            .replace('{svg}', icon)
+            .replace('{type}', type)
+            .replace('{title}', title)
+            .replace('{random}', random)
+            .replace('{message}', final_message),
         html: true,
         classes: 'c-notify',
-        actions: [{
-            label: this.$t('notification.success_see_trx_label'),
-            color: 'positive',
-            iconRight: 'launch',
-            class: 'c-notify__action-btn',
-            handler: () => {
-                window.open(link, '_blank');
-            },
-        }, {
-            label: this.$t('notification.dismiss_label'),
-            class: 'c-notify__action-btn',
-        }],
+        actions,
     });
 };
 
-const failedTransactionNotification = function(message) {
-    Notify.create({
-        timeout: 0,
-        message: html
-            .replace('{svg}', crossIcon)
-            .replace('{type}', 'error')
-            .replace('{title}', this.$t('notification.error_title'))
-            .replace('{message}', message),
-        html: true,
-        classes: 'c-notify',
-        actions: [{
-            label: this.$t('notification.success_see_trx_label'),
-            iconRight: 'launch',
-            class: 'c-notify__action-btn c-notify__action-btn--hide',
-        }, {
-            label: this.$t('notification.dismiss_label'),
-            class: 'c-notify__action-btn',
-        }],
-    });
+const notifySuccessTransaction = function(link) {
+    return notifyMessage.bind(this)(
+        'success',
+        checkIcon,
+        this.$t('notification.success_title_trx').toUpperCase(),
+        this.$t('notification.success_message_trx'),
+        link,
+    );
 };
 
+const notifySuccessMessage = function(message, payload) {
+    return notifyMessage.bind(this)(
+        'success',
+        checkIcon,
+        this.$t('notification.success_title_trx').toUpperCase(),
+        message,
+        payload,
+    );
+};
+
+const notifySuccessCopy = function() {
+    return notifyMessage.bind(this)(
+        'success',
+        checkIcon,
+        this.$t('notification.success_title_copied').toUpperCase(),
+        this.$t('notification.success_message_copied'),
+    );
+};
+
+const notifyFailure = function(message, payload) {
+    return notifyMessage.bind(this)(
+        'error',
+        crossIcon,
+        this.$t('notification.error_title').toUpperCase(),
+        message,
+        payload,
+    );
+};
+
+const notifyDisconnected = function() {
+    return notifyMessage.bind(this)(
+        'error',
+        discoIcon,
+        this.$t('notification.error_title_disconnect'),
+        this.$t('notification.error_message_disconnect'),
+    );
+};
+
+const notifyNeutralMessage = function(message) {
+    return notifyMessage.bind(this)(
+        'neutral',
+        null,
+        null,
+        message,
+    );
+};
 
 export default boot(({ app, store }) => {
-    app.config.globalProperties.$errorNotification = errorNotification.bind(store);
-    store['$errorNotification'] = app.config.globalProperties.$errorNotification;
-    app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification.bind(store);
-    store['$unexpectedErrorNotification'] = app.config.globalProperties.$unexpectedErrorNotification;
-    app.config.globalProperties.$warningNotification = warningNotification.bind(store);
-    store['$warningNotification'] = app.config.globalProperties.$warningNotification;
-    app.config.globalProperties.$successNotification = successNotification.bind(store);
-    store['$successNotification'] = app.config.globalProperties.$successNotification;
+    app.config.globalProperties.$errorNotification            = errorNotification.bind(store);
+    app.config.globalProperties.$unexpectedErrorNotification  = unexpectedErrorNotification.bind(store);
+    app.config.globalProperties.$warningNotification          = warningNotification.bind(store);
+    app.config.globalProperties.$successNotification          = successNotification.bind(store);
+    store['$errorNotification']                               = app.config.globalProperties.$errorNotification;
+    store['$unexpectedErrorNotification']                     = app.config.globalProperties.$unexpectedErrorNotification;
+    store['$warningNotification']                             = app.config.globalProperties.$warningNotification;
+    store['$successNotification']                             = app.config.globalProperties.$successNotification;
+
+    // new Message notifications handlers
+    app.config.globalProperties.$notifySuccessTransaction = notifySuccessTransaction.bind(store);
+    app.config.globalProperties.$notifySuccessMessage     = notifySuccessMessage.bind(store);
+    app.config.globalProperties.$notifySuccessCopy        = notifySuccessCopy.bind(store);
+    app.config.globalProperties.$notifyFailure            = notifyFailure.bind(store);
+    app.config.globalProperties.$notifyDisconnected       = notifyDisconnected.bind(store);
+    app.config.globalProperties.$notifyNeutralMessage     = notifyNeutralMessage.bind(store);
+    store['$notifySuccessTransaction']                    = app.config.globalProperties.$notifySuccessTransaction;
+    store['$notifySuccessMessage']                        = app.config.globalProperties.$notifySuccessMessage;
+    store['$notifySuccessCopy']                           = app.config.globalProperties.$notifySuccessCopy;
+    store['$notifyFailure']                               = app.config.globalProperties.$notifyFailure;
+    store['$notifyDisconnected']                          = app.config.globalProperties.$notifyDisconnected;
+    store['$notifyNeutralMessage']                        = app.config.globalProperties.$notifyNeutralMessage;
 
     // transaction notifications handlers
-    app.config.globalProperties.$successfulTransactionNotification = successfulTransactionNotification.bind(store);
-    app.config.globalProperties.$failedTransactionNotification = failedTransactionNotification.bind(store);
     store['$t'] = app.config.globalProperties.$t;
+
 });
-
-
-

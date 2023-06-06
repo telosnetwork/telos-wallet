@@ -31,23 +31,35 @@
     &__container {
         &--success {
             --notify-color: #{$notify-success};
+            --c-notify__title--display: flex;
+            --c-notify__message--padding: 0 2rem;
+            --c-notify__header--animation: consuming-bar 5s linear forwards;
         }
         &--error {
             --notify-color: #{$notify-error};
+            --c-notify__title--display: flex;
+            --c-notify__message--padding: 0 2rem;
         }
-        display: flex;
+        &--neutral {
+            --notify-color: #{$notify-neutral};
+            --c-notify__title--display: none;
+            --c-notify__message--padding: 1.2rem 2rem;
+            --c-notify__header--animation: consuming-bar 5s linear forwards;
+        }
+            display: flex;
         flex-direction: column;
     }
     &__header {
         height: 8px;
         background-color: var(--notify-color);
+        // we need to animate the with from 100% 100% to 0% in 5s and stay there
+        animation: var(--c-notify__header--animation);
     }
     &__title {
-        display: flex;
+        display: var(--c-notify__title--display);
         align-items: center;
         padding: 1rem;
         justify-content: center;
-        text-transform: uppercase;
         font-size: 24px;
         img {
             width: 2.1rem;
@@ -61,7 +73,7 @@
     }
     &__message {
         color: var(--text-color, #000);
-        padding: 0 2rem;
+        padding: var(--c-notify__message--padding);
         text-align: center;
         span {
             font-size: 16px;
@@ -75,4 +87,18 @@
             pointer-events: none;
         }
     }
+    &__dialog {
+        width: 900px;
+        max-width: calc(100vw - 48px) !important;
+    }
 }
+
+@keyframes consuming-bar {
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
