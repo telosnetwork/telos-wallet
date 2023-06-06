@@ -1,6 +1,9 @@
 /* eslint-disable jest/no-disabled-tests */
 import { shallowMount } from '@vue/test-utils';
 
+const NETWORK = 'test-network';
+const WARNING_MESSAGE = 'warning-message';
+
 const storeMock = {
     useAccountStore: () => ({
         loginEVM: () => jest.fn(),
@@ -8,7 +11,7 @@ const storeMock = {
     useChainStore: () => ({
         currentChain: {
             settings: {
-                getNetwork: () => 'test-network',
+                getNetwork: () => NETWORK,
                 getChainId: () => '99',
                 getDisplay: () => 'TEST-ID',
             },
@@ -25,6 +28,11 @@ const storeMock = {
 const wagmiMock = {
     getAccount: () => 'wagmiAccount',
     getNetwork: () =>  ({ chain: { id: 99 } }),
+};
+
+const wagmiMockWrongNetwork = {
+    getAccount: () => 'wagmiAccount',
+    getNetwork: () =>  ({ chain: { id: 11 } }),
 };
 
 const web3ModalMock = {
@@ -44,6 +52,16 @@ jest.mock('src/antelope', () => storeMock);
 jest.mock('@wagmi/core', () => wagmiMock);
 jest.mock('@web3modal/html', () => web3ModalMock);
 
+const mountComponent = () => shallowMount(ConnectWalletOptions, {
+    props: {
+        toggleWalletConnect: false,
+    },
+    mocks: {
+        $t :  () => WARNING_MESSAGE,
+        $warningNotification: jest.fn(),
+    },
+});
+
 describe('ConnectWalletOptions.vue', () => {
 
     describe('Component name', () => {
@@ -56,11 +74,7 @@ describe('ConnectWalletOptions.vue', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let wrapper: any;
         beforeEach(() => {
-            wrapper = shallowMount(ConnectWalletOptions, {
-                props: {
-                    toggleWalletConnect: false,
-                },
-            });
+            wrapper = mountComponent();
         });
 
         describe('loginEvm', () => {
@@ -70,7 +84,7 @@ describe('ConnectWalletOptions.vue', () => {
                 wrapper.vm.loginEvm();
 
                 wrapper.vm.$nextTick(() => {
-                    expect(methodSpy).toHaveBeenCalled();
+                    expect(methodSpy).toHaveBeenCalledWith(NETWORK);
                 });
             });
 
@@ -114,6 +128,38 @@ describe('ConnectWalletOptions.vue', () => {
 
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalled();
+                });
+            });
+        });
+
+        describe('login', () => {
+            it('emits "toggleWalletConnect"', async () => {
+                await wrapper.vm.login();
+
+                wrapper.vm.$nextTick(() => {
+                    expect(wrapper.vm.emitted).toBe('toggleWalletConnect');
+                });
+            });
+
+            it('calls loginEVM', async () => {
+                const methodSpy = jest.spyOn(wrapper.vm, 'loginEvm');
+
+                await wrapper.vm.login();
+
+                wrapper.vm.$nextTick(() => {
+                    expect(methodSpy).toHaveBeenCalled();
+                });
+            });
+
+            it('if app id does not match current walletconnect network id, warning notification is called', async () => {
+                jest.mock('@wagmi/core', () => wagmiMockWrongNetwork);
+                wrapper = mountComponent();
+                // const methodSpy = jest.spyOn(wrapper.vm.mocks, '$warningMessage');
+
+                await wrapper.vm.login();
+
+                wrapper.vm.$nextTick(() => {
+                    expect(wrapper.vm.mocks.$warningMessage).toHaveBeenCalledWith(WARNING_MESSAGE);
                 });
             });
         });
