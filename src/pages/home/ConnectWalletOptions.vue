@@ -57,7 +57,6 @@ export default defineComponent({
                 const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
                 globalProps.$warningNotification(warningMessage);
             }
-            console.log('MAAAAAAAADE IT');
         };
 
         const redirectToMetamaskDownload = () => {

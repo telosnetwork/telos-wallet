@@ -64,20 +64,24 @@ describe('ConnectWalletOptions.vue', () => {
         });
 
         describe('loginEvm', () => {
-            it.skip('should call accountStore loginEVM method', () => {
+            it('should call accountStore loginEVM method', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
 
                 wrapper.vm.loginEvm();
 
-                expect(methodSpy).toHaveBeenCalled();
+                wrapper.vm.$nextTick(() => {
+                    expect(methodSpy).toHaveBeenCalled();
+                });
             });
 
-            it.skip('should call chain store getNetwork method', () => {
+            it('should call chain store getNetwork method', () => {
                 const methodSpy = jest.spyOn(storeMock.useChainStore().currentChain.settings, 'getNetwork');
 
                 wrapper.vm.loginEvm();
 
-                expect(methodSpy).toHaveBeenCalled();
+                wrapper.vm.$nextTick(() => {
+                    expect(methodSpy).toHaveBeenCalled();
+                });
             });
         });
 
