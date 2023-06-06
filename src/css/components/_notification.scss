@@ -76,7 +76,7 @@
         padding: var(--c-notify__message--padding);
         text-align: center;
         span {
-            font-size: 16px;
+            @include text--paragraph;
         }
     }
     &__action-btn {

@@ -92,12 +92,17 @@ const notifyMessage = function(type, icon, title, message, payload) {
         class: 'c-notify__action-btn ',
         handler: () => {
             let content = '';
+            // We try to parse the payload to obtain a content string
             try {
+                // First we try to parse the payload as JSON
                 content = JSON.stringify(payload, null, 2);
             } catch (e) {
+                // If it fails, we discard the error and try to executes toString() from the payload
                 try {
                     content = payload.toString();
                 } catch (e) {
+                    // If it fails, likely the payload is null (or some unknown object with no toString function),
+                    // so we set the content to a forced string to have something to show
                     content = payload + ' ';
                 }
             }
