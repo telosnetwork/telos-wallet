@@ -13,7 +13,7 @@ const storeMock = {
             settings: {
                 getNetwork: () => NETWORK,
                 getChainId: () => '99',
-                getDisplay: () => 'TEST-ID',
+                getDisplay: () => NETWORK,
             },
         },
     }),
@@ -158,6 +158,7 @@ describe('ConnectWalletOptions.vue', () => {
                 await wrapper.vm.login();
 
                 wrapper.vm.$nextTick(() => {
+                    expect(wrapper.vm.mocks.$t).toHaveBeenCalledWith('evm_wallet.incorrect_network', { network: NETWORK });
                     expect(wrapper.vm.mocks.$warningMessage).toHaveBeenCalledWith(WARNING_MESSAGE);
                 });
             });
