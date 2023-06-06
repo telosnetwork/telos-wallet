@@ -154,7 +154,6 @@ describe('ConnectWalletOptions.vue', () => {
             it('if app id does not match current walletconnect network id, warning notification is called', async () => {
                 jest.mock('@wagmi/core', () => wagmiMockWrongNetwork);
                 wrapper = mountComponent();
-                // const methodSpy = jest.spyOn(wrapper.vm.mocks, '$warningMessage');
 
                 await wrapper.vm.login();
 
