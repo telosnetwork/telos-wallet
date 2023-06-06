@@ -15,7 +15,7 @@ export default defineComponent({
             type: Boolean,
         },
     },
-    setup(props){
+    setup(props, { emit }){
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const wagmiClient = inject('$wagmi') as EthereumClient;
         const web3Modal = ref<Web3Modal>();
@@ -44,7 +44,7 @@ export default defineComponent({
         };
 
         const login = async () => {
-            globalProps.$emitter.emit('toggleWalletConnect');
+            emit('toggleWalletConnect');
 
             loginEvm();
 
@@ -57,6 +57,7 @@ export default defineComponent({
                 const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
                 globalProps.$warningNotification(warningMessage);
             }
+            console.log('MAAAAAAAADE IT');
         };
 
         const redirectToMetamaskDownload = () => {

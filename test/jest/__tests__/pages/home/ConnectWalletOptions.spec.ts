@@ -6,7 +6,13 @@ const storeMock = {
         loginEVM: () => jest.fn(),
     }),
     useChainStore: () => ({
-        currentChain: { settings: { getNetwork: () => 'test-network' } },
+        currentChain: {
+            settings: {
+                getNetwork: () => 'test-network',
+                getChainId: () => '99',
+                getDisplay: () => 'TEST-ID',
+            },
+        },
     }),
     useEVMStore: () => ({
         isMetamaskSupported: true,
@@ -18,6 +24,7 @@ const storeMock = {
 
 const wagmiMock = {
     getAccount: () => 'wagmiAccount',
+    getNetwork: () =>  ({ chain: { id: 99 } }),
 };
 
 const web3ModalMock = {
@@ -85,22 +92,25 @@ describe('ConnectWalletOptions.vue', () => {
             });
         });
 
-        describe('connectToWalletConnect', () => {
-            it('calls openModal if web3Modal is instantiated', () => {
+        describe('toggleWalletConnectModal', () => {
+            it('calls openModal if not currently connected', async () => {
                 const methodSpy = jest.spyOn(wrapper.vm.web3Modal, 'openModal');
 
-                wrapper.vm.connectToWalletConnect();
+                wrapper.vm.toggleWalletConnectModal();
 
                 expect(methodSpy).toHaveBeenCalled();
             });
 
-            it('returns if web3modal is undefined', () => {
-                wrapper.vm.web3Modal = undefined;
-                const methodSpy = jest.spyOn(wrapper.vm, 'connectToWalletConnect');
+            it('calls login if already connected', async () => {
+                localStorage.setItem('wagmi.connected', 'true');
 
-                wrapper.vm.connectToWalletConnect();
+                const methodSpy = jest.spyOn(wrapper.vm, 'login');
 
-                expect(methodSpy).toHaveReturned();
+                await wrapper.vm.toggleWalletConnectModal();
+
+                wrapper.vm.$nextTick(() => {
+                    expect(methodSpy).toHaveBeenCalled();
+                });
             });
         });
     });
