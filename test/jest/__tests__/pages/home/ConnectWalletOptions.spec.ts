@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-disabled-tests */
 import { shallowMount } from '@vue/test-utils';
 
 const NETWORK = 'test-network';
