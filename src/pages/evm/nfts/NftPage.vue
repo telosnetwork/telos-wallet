@@ -6,6 +6,15 @@ import NftTile from 'pages/evm/nfts/NftTile.vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 
 // eztodo move to demo route
+/*
+Types of NFT states:
+- image with thumbnail
+- image without thumbnail
+- video with cover image
+- video without cover image
+- audio with cover image
+- audio without cover image
+ */
 const nfts: ShapedNFT[] = [{
     name: 'Cool Picture',
     id: '123456',
@@ -13,6 +22,13 @@ const nfts: ShapedNFT[] = [{
     collectionOwnerName: 'NFT Creator 1',
     imageSrcFull: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/1440.webp',
     imageSrcIcon: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/280.webp',
+}, {
+    name: 'Small Picture',
+    id: '613432',
+    collectionOwnerAddress: '0x0000000000000000000000000000000000000000',
+    collectionOwnerName: 'NFT Creator 1',
+    imageSrcFull: 'https://www.gardenersnet.com/flower/gallery/vinca.jpg',
+    imageSrcIcon: 'https://www.gardenersnet.com/flower/gallery/vinca.jpg',
 }, {
     name: 'Cool Video',
     id: '0987',
@@ -39,6 +55,14 @@ const nfts: ShapedNFT[] = [{
     collectionOwnerName: 'NFT Creator 5',
     imageSrcFull: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/1440.webp',
     imageSrcIcon: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/280.webp',
+    audioSrc: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
+},  {
+    name: 'MP3 w/o Image',
+    id: '82457',
+    collectionOwnerAddress: '0x4444444444444444444444444444444444444444',
+    collectionOwnerName: 'NFT Creator 5',
+    imageSrcFull: '',
+    imageSrcIcon: '',
     audioSrc: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
 }, {
     name: 'Cool GIF',
@@ -71,26 +95,47 @@ const showNftsAsTiles = ref(true);
         <h1>{{ $t('evm_wallet.inventory') }}</h1>
     </template>
 
-    <q-checkbox v-model="showNftsAsTiles">Show as tile?</q-checkbox>
+    <div class="c-nft-page">
+        <q-checkbox v-model="showNftsAsTiles">Show as tile?</q-checkbox>
 
-    <template v-if="showNftsAsTiles">
-        <div class="col-xs-12 col-6">
+        <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
             <NftTile
                 v-for="nft in nfts"
                 :key="nft.id"
                 :nft="nft"
+                class="c-nft-page__nft-tile"
             />
         </div>
 
-    </template>
-
-    <div v-else>
-        nft table view placeholder
+        <div v-else>
+            nft table view placeholder
+        </div>
     </div>
-
 </AppPage>
 </template>
 
 <style lang="scss">
+.c-nft-page {
+    max-width: 1000px;
+    margin: auto;
 
+    &__tiles-container {
+        max-width: 100%;
+        display: grid;
+        grid-template-columns: 100%;
+        gap: 16px;
+
+        @include sm-and-up {
+            grid-template-columns: 50% 50%;
+        }
+
+        @include md-and-up {
+            grid-template-columns: 33% 33% 33%;
+        }
+    }
+
+    &__nft-tile {
+        //max-width: 50%;
+    }
+}
 </style>

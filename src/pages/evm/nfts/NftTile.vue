@@ -1,75 +1,34 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-
 import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { computed } from 'vue';
+import { useChainStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
-const genericHeadphoneIcon = ''; // eztodo replace with real icon
-const genericImageIcon = '';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import ExternalLink from 'components/ExternalLink.vue';
+
+const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const props = defineProps<{
     nft: ShapedNFT,
 }>();
 
 // computed
-// const showImagePlaceholder = computed(() => {
-//
-// });
-//
-// const showAudioPlaceholder = computed(() => {
-//
-// });
+const creatorLinkText = computed(() => props.nft.collectionOwnerName ?? props.nft.collectionOwnerAddress);
+const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.collectionOwnerAddress}`);
 
-
-// the icon to display in the corner to indicate an NFT is a non-image type
-// used for the 'name' attribute of q-icon
-const nft = computed(() => props.nft);
-
-const mediaOverlayIcon = computed(() => {
-    if (nft.value.audioSrc && nft.value.imageSrcFull) {
-        return 'headphones';
-    }
-
-    // video NFTs always have imageSrcFull due to shaping process
-    if (nft.value.videoSrc) {
-        return 'play_arrow';
-    }
-
-    return '';
-});
-
-const fullSizeIconName = computed(() => {
-    if (!nft.value.imageSrcFull && nft.value.audioSrc) {
-        return 'headphones';
-    }
-
-    if (!nft.value.imageSrcFull) {
-        return 'image';
-    }
-
-    return '';
-});
 
 </script>
 
 <template>
 <div class="c-nft-tile">
-    <div class="c-nft-tile__media-container">
-        <video v-if="nft.videoSrc" autoplay="autoplay">
-            <source :src="nft.videoSrc">
-        </video>
-        <img
-            v-else-if="nft.imageSrcFull"
-            :src="nft.imageSrcFull"
-            :alt="`NFT Image - ${nft.name} ${nft.id}`"
-            class="c-nft-tile__image"
-        >
-        <q-icon
-            v-else
-            :name="fullSizeIconName"
-            size="xl"
-            color="primary"
-        />
-
+    <NftViewer :nft="nft" :preview-mode="true" class="c-nft-tile__viewer" />
+    <div class="c-nft-tile__text-container">
+        <h4>
+            <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>
+            <span class="u-text--default-contrast">{{nft.id}}</span>
+        </h4>
+        <ExternalLink :text="creatorLinkText" :url="creatorLinkUrl" />
     </div>
 </div>
 </template>
@@ -80,7 +39,14 @@ const fullSizeIconName = computed(() => {
     border: 1px solid $page-header;
     padding: 16px 24px;
 
-    &__image {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+
+
+    &__viewer {
         margin: auto;
     }
 }
