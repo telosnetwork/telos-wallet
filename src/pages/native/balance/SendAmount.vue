@@ -189,7 +189,7 @@ export default {
     transition-show="slide-up"
     transition-hide="slide-down"
 >
-    <div v-if="selectedCoin" class="main-background">
+    <div v-if="selectedCoin" class="main-background native-font-color">
         <div class="dialogPage">
             <div class="dialogPageContent">
                 <div class="dialogPageHeading">

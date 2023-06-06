@@ -37,12 +37,12 @@ export default defineComponent({
         {{ $t('home.connect_with_wallet') }}
     </q-btn>
 
-    <q-btn
+    <!-- <q-btn
         text-color="white"
         outline
         :label="$t('home.view_any_account')"
         @click="viewAnyAccount"
-    />
+    /> -->
 </div>
 </template>
 

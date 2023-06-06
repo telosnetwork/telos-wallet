@@ -29,7 +29,7 @@ import {
     NativeTransactionResponse,
     TokenBalance,
     TokenClass,
-    TransactionResponse,
+    TransactionResponse, EvmABI,
 } from 'src/antelope/types';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
@@ -38,10 +38,23 @@ import { useEVMStore } from 'src/antelope/stores/evm';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
-import { FetchBalanceResult, SendTransactionResult, fetchBalance, getAccount, getNetwork, prepareSendTransaction, prepareWriteContract, sendTransaction, writeContract } from '@wagmi/core';
+import {
+    FetchBalanceResult,
+    SendTransactionResult,
+    fetchBalance,
+    getAccount,
+    prepareSendTransaction,
+    prepareWriteContract,
+    sendTransaction,
+    writeContract,
+    PrepareSendTransactionResult,
+    PrepareWriteContractResult,
+} from '@wagmi/core';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
+    __wagmiSystemTokenTransferConfig: { [label: Label]: PrepareSendTransactionResult | null };
+    __wagmiTokenTransferConfig: { [label: Label]: PrepareWriteContractResult<EvmABI, 'transfer', number> | null };
 }
 
 type addressString = `0x${string}`; // required wagmi type
@@ -91,6 +104,10 @@ export const useBalancesStore = defineStore(store_name, {
                         if (chain_settings.hasIndexSupport()) {
                             if (account?.account) {
                                 this.__balances[label] = await chain_settings.getBalances(account.account);
+                                // if new account with no index records display default zero TLOS balance
+                                if (this.__balances[label].length === 0){
+                                    await this.updateSystemBalanceForAccount(label, account.account);
+                                }
                                 this.sortBalances(label);
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
@@ -108,7 +125,7 @@ export const useBalancesStore = defineStore(store_name, {
                                 promises = tokens.map(async (token) => {
                                     fetchBalance({
                                         address: getAccount().address as addressString,
-                                        chainId: getNetwork().chain?.id,
+                                        chainId: +chain_settings.getChainId(),
                                         token: token.address as addressString,
                                     }).then((balanceBn: FetchBalanceResult) => {
                                         this.processBalanceForToken(label, token, balanceBn.value);
@@ -154,7 +171,7 @@ export const useBalancesStore = defineStore(store_name, {
             } else if (localStorage.getItem('wagmi.connected')) {
                 const balanceBn = await fetchBalance({
                     address: getAccount().address as addressString,
-                    chainId: getNetwork().chain?.id,
+                    chainId: +chain_settings.getChainId(),
                 });
                 this.processBalanceForToken(label, token, balanceBn.value);
             } else {
@@ -198,10 +215,30 @@ export const useBalancesStore = defineStore(store_name, {
                     // TODO: should we notify the user that the transaction succeeded of failed?
                     // https://github.com/telosnetwork/telos-wallet/issues/328
                 });
-            } else {
-                throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return response;
+        },
+        async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: BigNumber): Promise<void> {
+            const config = await prepareSendTransaction({
+                request: {
+                    to,
+                    value: amount,
+                },
+            });
+
+            this.setWagmiSystemTokenTransferConfig(config, label);
+            this.setWagmiTokenTransferConfig(null, label);
+        },
+        async prepareWagmiTokenTransferConfig(label: Label, token: TokenClass, to: string, amount: BigNumber): Promise<void> {
+            const config = (await prepareWriteContract({
+                address: token.address as addressString,
+                abi: useEVMStore().getTokenABI(token.type),
+                functionName: 'transfer',
+                args: [to, amount],
+            })) as PrepareWriteContractResult<EvmABI, 'transfer', number>;
+
+            this.setWagmiTokenTransferConfig(config, label);
+            this.setWagmiSystemTokenTransferConfig(null, label);
         },
         async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             this.trace('transferTokens', token, to, amount.toString(), memo);
@@ -217,7 +254,7 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferEVMTokens(chain_settings, account, token, to, amount)
+                    return await this.transferEVMTokens(label, chain_settings, account, token, to, amount)
                         .then(this.subscribeForTransactionReceipt);
                 }
             } catch (error) {
@@ -259,6 +296,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         async transferEVMTokens(
+            label: Label,
             settings: EVMChainSettings,
             account: AccountModel,
             token: TokenClass,
@@ -270,37 +308,32 @@ export const useBalancesStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('transferEVMTokens');
 
                 if (localStorage.getItem('wagmi.connected')) {
-                    return await this.transferWalletConnect(token, to, amount);
+                    return await this.transferWalletConnect(label, token);
                 } else {
                     return await this.transferMetaMask(token, to, amount);
                 }
             } catch (error) {
-                console.error('Error: ', errorToString(error));
-                throw new Error('antelope.balances.error_at_transfer_tokens');
+                throw new AntelopeError('antelope.balances.error_at_transfer_tokens');
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
         },
 
-        async transferWalletConnect(token: TokenClass, to: string, amount: BigNumber): Promise<SendTransactionResult>{
+        async transferWalletConnect(label: Label, token: TokenClass): Promise<SendTransactionResult> {
             if (token.isSystem) {
+                const config = this.__wagmiSystemTokenTransferConfig[label];
 
-                const config = await prepareSendTransaction({
-                    request: {
-                        to,
-                        value: amount,
-                    },
-                });
+                if (!config) {
+                    throw new AntelopeError('antelope.balances.error_system_token_transfer_config');
+                }
 
                 return await sendTransaction(config);
             } else {
+                const config = this.__wagmiTokenTransferConfig[label];
 
-                const config = await prepareWriteContract({
-                    address: token.address as addressString,
-                    abi: useEVMStore().getTokenABI(token.type),
-                    functionName: 'transfer',
-                    args: [to, amount],
-                });
+                if (!config) {
+                    throw new AntelopeError('antelope.balances.error_token_transfer_config');
+                }
 
                 return await writeContract(config);
             }
@@ -388,9 +421,33 @@ export const useBalancesStore = defineStore(store_name, {
                 this.__balances['logged'] = this.__balances[label];
             }
         },
+        clearAllWagmiTokenTransferConfigs(label: Label) {
+            this.trace('clearAllWagmiTokenTransferConfigs', label);
+
+            this.setWagmiSystemTokenTransferConfig(null, label);
+            this.setWagmiTokenTransferConfig(null, label);
+        },
+        setWagmiSystemTokenTransferConfig(config: PrepareSendTransactionResult | null, label: Label) {
+            this.trace('setWagmiSystemTokenTransferConfig', config, label);
+
+            this.__wagmiSystemTokenTransferConfig[label] = config;
+        },
+        setWagmiTokenTransferConfig(config: PrepareWriteContractResult<EvmABI, 'transfer', number> | null, label: Label) {
+            this.trace('setWagmiTokenTransferConfig', config, label);
+
+            this.__wagmiTokenTransferConfig[label] = config;
+        },
     },
 });
 
 const balancesInitialState: BalancesState = {
     __balances: {},
+    __wagmiSystemTokenTransferConfig: {
+        current: null,
+        logged: null,
+    },
+    __wagmiTokenTransferConfig: {
+        current: null,
+        logged: null,
+    },
 };

@@ -62,7 +62,22 @@ export async function getFiatPriceFromIndexer(
         (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-    return tokenMarketData?.price ?? 0;
+    if (!tokenMarketData.updated || !tokenMarketData.price) {
+        return 0;
+    }
+
+    const lastPriceUpdated = (new Date(+tokenMarketData.updated)).getTime();
+    const now = (new Date()).getTime();
+
+    const diffInMilliseconds = Math.abs(lastPriceUpdated - now);
+    const diffInMinutes = diffInMilliseconds / (1000 * 60);
+
+    // only use indexer data if it is no more than 10 minutes old
+    if (diffInMinutes < 10) {
+        return tokenMarketData.price;
+    }
+    // if indexer data is stale use coingecko data
+    return 0;
 }
 
 export const getCoingeckoPriceChartData = async (

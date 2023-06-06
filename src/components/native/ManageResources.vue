@@ -368,9 +368,6 @@ export default {
   flex-basis: 15rem;
   height: 3rem;
 }
-// .popupCard {
-//   position: relative;
-// }
 .exitBtn {
   position: absolute;
   // right: 0px;

@@ -295,7 +295,6 @@ export default {
         withdraw_from_rex: 'Withdraw {amount} TLOS from REX',
         is_staked_to_REX: '{amount} TLOS is staked to REX',
         is_withdrawn_from_REX: '{amount} TLOS is withdrawn from REX',
-        select_a_coin: 'Select a coin',
         send_amount: 'Send Amount',
         confirm_send: 'Confirm Send',
         for_ethereum_wallet_users: 'Ethereum Wallet users: to view TLOS balance in wallet, add TLOS '+
@@ -403,6 +402,8 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+            error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
+            error_token_transfer_config: 'Error getting Wagmi token transfer config',
         },
     },
 };

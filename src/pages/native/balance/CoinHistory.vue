@@ -158,7 +158,7 @@ export default {
     transition-show="slide-left"
     transition-hide="slide-right"
 >
-    <div v-if="selectedCoin" class="main-background">
+    <div v-if="selectedCoin" class="main-background native-font-color">
         <q-layout view="hhh Lpr fFf" container class="main-background-overlay">
             <div class="dialogPage">
                 <div class="dialogPageContent">
