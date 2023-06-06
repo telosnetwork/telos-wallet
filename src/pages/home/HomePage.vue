@@ -127,11 +127,12 @@ export default defineComponent({
         display: flex;
         flex-direction: column;
         padding: 32px 24px 0;
+        min-height: 40rem;
     }
 
     &__logo {
         width: 240px;
-        margin: 0 auto 88px;
+        margin: 0 auto;
 
         @include sm-and-up {
             margin: 128px auto 88px;
