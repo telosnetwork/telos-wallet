@@ -192,5 +192,20 @@ export default defineComponent({
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
     }
+
+    @media only screen and (max-height: 800px) {
+        .c-home {
+            &__container{
+                min-height: unset;
+            }
+            &__logo{
+                margin-top: unset;
+                margin-bottom: unset;
+            }
+            &__button-container{
+                margin-top: 2rem;
+            }
+        }
+    }
 }
 </style>
