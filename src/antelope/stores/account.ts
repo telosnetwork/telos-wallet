@@ -213,7 +213,6 @@ export const useAccountStore = defineStore(store_name, {
                     }
                 }
                 this.setLoggedAccount(null);
-                getAntelope().events.onLoggedOut.next();
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {

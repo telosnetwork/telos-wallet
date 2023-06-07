@@ -64,6 +64,11 @@ const routes = [
                 name: 'demos.inputs',
                 component: () => import('pages/demo/InputDemos.vue'),
             },
+            {
+                path: 'multichain',
+                name: 'demos.multichain',
+                component: () => import('pages/demo/MultichainHomePage.vue'),
+            },
         ],
     },
 

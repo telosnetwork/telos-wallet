@@ -5,12 +5,17 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
+    props: {
+        network: {
+            required: true,
+            type: String,
+        },
+    },
     setup(props, { emit }){
 
         const setDefaultEVMChain = () => {
-            const network: string = process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet' ;
             const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
+            chainStore.setCurrentChain(props.network);
         };
 
         const viewAnyAccount = () => {};

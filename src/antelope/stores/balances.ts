@@ -71,10 +71,12 @@ export const useBalancesStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+            const self = useBalancesStore();
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
-                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    self.__balances[label] = [];
+                    await self.updateBalancesForAccount(label, toRaw(account));
                 },
             });
 

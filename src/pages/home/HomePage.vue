@@ -25,6 +25,9 @@ export default defineComponent({
 
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
+        network(): string {
+            return process.env.CHAIN_NAME === 'telos' ? 'telos-evm' : 'telos-evm-testnet';
+        },
     },
 });
 </script>
@@ -73,6 +76,7 @@ export default defineComponent({
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
+                        :network="network"
                         @toggle-wallet-connect="toggleWalletConnect = true"
                         @show-wallet-options="showWalletOptions = true"
                     />

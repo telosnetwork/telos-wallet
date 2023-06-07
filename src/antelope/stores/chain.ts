@@ -37,6 +37,7 @@ import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
 import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
+import BNBSmartChain from 'src/antelope/chains/evm/binance';
 import { getAntelope } from '..';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -60,6 +61,7 @@ export const settings: { [key: string]: ChainSettings } = {
     'telos-testnet': new TelosTestnet('telos-testnet'),
     'jungle': new Jungle('jungle'),
     // EVM chains
+    'binance': new BNBSmartChain('binance'),
     'telos-evm': new TelosEVM('telos-evm'),
     'telos-evm-testnet': new TelosEVMTestnet('telos-evm-testnet'),
 };
