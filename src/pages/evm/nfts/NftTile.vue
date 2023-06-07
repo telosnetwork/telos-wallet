@@ -6,8 +6,11 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
+import { useRouter } from 'vue-router';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
+const router = useRouter();
 
 const props = defineProps<{
     nft: ShapedNFT,
@@ -18,11 +21,28 @@ const creatorLinkText = computed(() => props.nft.collectionOwnerName ?? props.nf
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.collectionOwnerAddress}`);
 
 
+// methods
+function goToNftDetailPage() {
+    router.push({
+        name: '',
+        query: {
+            contract: '', // eztodo add contract ady
+            tokenId: '', // eztodo
+        },
+    });
+}
+
 </script>
 
 <template>
-<div class="c-nft-tile">
-    <NftViewer :nft="nft" :preview-mode="true" class="c-nft-tile__viewer" />
+<div
+    class="c-nft-tile"
+    role="link"
+    tabindex="0"
+    @click="goToNftDetailPage"
+    @keypress.space.enter="goToNftDetailPage"
+>
+    <NftViewer :nft="nft" :preview-mode="true" />
     <div class="c-nft-tile__text-container">
         <h4>
             <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>
@@ -35,19 +55,17 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
 
 <style lang="scss">
 .c-nft-tile {
+    cursor: pointer;
+
     border-radius: 4px;
     border: 1px solid $page-header;
     padding: 16px 24px;
 
     display: flex;
-    height: 100%;
+    min-height: 320px;
+    width: 320px;
     flex-direction: column;
     justify-content: space-between;
     gap: 16px;
-
-
-    &__viewer {
-        margin: auto;
-    }
 }
 </style>

@@ -6,6 +6,7 @@ import NftTile from 'pages/evm/nfts/NftTile.vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 
 // eztodo move to demo route
+// eztodo post in chat solution for different nft types
 /*
 Types of NFT states:
 - image with thumbnail
@@ -35,6 +36,7 @@ const nfts: ShapedNFT[] = [{
     collectionOwnerAddress: '0x1111111111111111111111111111111111111111',
     collectionOwnerName: 'NFT Creator 2',
     videoSrc: 'https://v.ftcdn.net/03/27/66/38/700_F_327663872_S1AbV0TvAyrsbatojIUrfe6Egqanl3q3_ST.mp4',
+    imageSrcFull: 'https://4.bp.blogspot.com/-q9pjOVNcCU8/TcqOj6TuQfI/AAAAAAAAAN8/xlXjfoWS7j8/s1600/purple+pair+flowers+wallpaper.jpg',
 }, {
     name: 'Cool Image with URI',
     id: '51234',
@@ -53,8 +55,8 @@ const nfts: ShapedNFT[] = [{
     id: '83546',
     collectionOwnerAddress: '0x4444444444444444444444444444444444444444',
     collectionOwnerName: 'NFT Creator 5',
-    imageSrcFull: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/1440.webp',
-    imageSrcIcon: 'http://nfts.telos.net/40/0x2d7d3B1f9569037635eDfbE04C640BB4556A4EA6/5655/280.webp',
+    imageSrcFull: 'https://4.bp.blogspot.com/-Mf_LhHkjckk/Ux1fSdz8DZI/AAAAAAAAGTY/lpYisOBjgZ0/s1600/dahlia-flower-2-top-10-best-beautiful-spectacular-world-wallpaper-free.jpg',
+    imageSrcIcon: 'https://4.bp.blogspot.com/-Mf_LhHkjckk/Ux1fSdz8DZI/AAAAAAAAGTY/lpYisOBjgZ0/s1600/dahlia-flower-2-top-10-best-beautiful-spectacular-world-wallpaper-free.jpg',
     audioSrc: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
 },  {
     name: 'MP3 w/o Image',
@@ -96,14 +98,13 @@ const showNftsAsTiles = ref(true);
     </template>
 
     <div class="c-nft-page">
-        <q-checkbox v-model="showNftsAsTiles">Show as tile?</q-checkbox>
+        <q-checkbox v-model="showNftsAsTiles" class="q-mb-lg">Show as tile?</q-checkbox>
 
         <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
             <NftTile
                 v-for="nft in nfts"
                 :key="nft.id"
                 :nft="nft"
-                class="c-nft-page__nft-tile"
             />
         </div>
 
@@ -120,22 +121,19 @@ const showNftsAsTiles = ref(true);
     margin: auto;
 
     &__tiles-container {
-        max-width: 100%;
+        width: max-content;
+        margin: auto;
         display: grid;
-        grid-template-columns: 100%;
         gap: 16px;
+        grid-template-columns: 1fr;
 
-        @include sm-and-up {
-            grid-template-columns: 50% 50%;
+        @media only screen and (min-width: 700px) {
+            grid-template-columns: 1fr 1fr;
         }
 
-        @include md-and-up {
-            grid-template-columns: 33% 33% 33%;
+        @media only screen and (min-width: 1400px) {
+            grid-template-columns: 1fr 1fr 1fr;
         }
-    }
-
-    &__nft-tile {
-        //max-width: 50%;
     }
 }
 </style>
