@@ -187,7 +187,7 @@ export default {
     transition-show="slide-left"
     transition-hide="slide-right"
 >
-    <div class="main-background">
+    <div class="main-background native-font-color">
         <div class="dialogPage">
             <div class="dialogPageContent">
                 <div class="dialogPageHeading">
