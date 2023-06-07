@@ -57,6 +57,7 @@ const routes = [
     {
         path: '/demos',
         name: 'demos',
+        meta: { notInProduction: true },
         component: () => import('pages/demo/DemoLayout.vue'),
         children: [
             {
