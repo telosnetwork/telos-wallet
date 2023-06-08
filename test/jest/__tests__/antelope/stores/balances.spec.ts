@@ -60,12 +60,14 @@ jest.mock('src/antelope/stores/chain', () => ({
         getChain: jest.fn().mockImplementation(() => ({
             settings: {
                 isNative: jest.fn(),
+                getNetwork: jest.fn().mockImplementation(() => 'testnet'),
                 getTokens: jest.fn(),
                 getTokenList: jest.fn().mockImplementation(() => tokenList),
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
                 getUsdPrice: jest.fn().mockImplementation(() => 1),
                 getImportantTokensIdList: jest.fn().mockImplementation(() => []),
-                hasIndexSupport: jest.fn().mockImplementation(() => false),
+                hasIndexerSupport: jest.fn().mockImplementation(() => false),
+                isIndexerHealthy: jest.fn().mockImplementation(() => false),
             },
         })),
         loggedChain: {

@@ -6,13 +6,13 @@ import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope/stores/user';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
-const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
-const CHAIN_ID = '40';
-const NETWORK = 'telos-evm';
-const DISPLAY = 'Telos EVM Mainnet';
+const LOGO = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png';
+const CHAIN_ID = '56';
+const NETWORK = 'binance';
+const DISPLAY = 'BNB Smart Chain';
 const TOKEN = new TokenClass({
-    name: 'Telos',
-    symbol: 'TLOS',
+    name: 'BNB Smart Chain',
+    symbol: 'BNB',
     network: NETWORK,
     decimals: 18,
     address: NativeCurrencyAddress,
@@ -44,19 +44,19 @@ const W_TOKEN = new TokenClass({
 
 const RPC_ENDPOINT = {
     protocol: 'https',
-    host: 'mainnet.telos.net',
+    host: 'bsc-dataseed.binance.org',
     port: 443,
-    path: '/evm',
+    path: '',
 };
 
 const WEI_PRECISION = 18;
-const EXPLORER_URL = 'https://teloscan.io';
+const EXPLORER_URL = 'https://bscscan.com';
 const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const NETWORK_EVM_ENDPOINT = 'https://mainnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts.s3.amazonaws.com';
 
-export default class TelosEVMTestnet extends EVMChainSettings {
+export default class BNBSmartChain extends EVMChainSettings {
     getNetwork(): string {
         return NETWORK;
     }
@@ -78,7 +78,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getPriceData(): Promise<PriceChartData> {
-        return api.getCoingeckoPriceChartData('telos');
+        return api.getCoingeckoPriceChartData('bnb');
     }
 
     getSystemToken(): TokenClass {
@@ -94,7 +94,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     async getUsdPrice(): Promise<number> {
-        if (this.hasIndexerSupport()) {
+        if (this.hasIndexSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
             const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
@@ -132,7 +132,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getBuyMoreOfTokenLink(): string {
-        return 'https://www.telos.net/#buy-tlos-simplex';
+        return '';
     }
 
     getImportantTokensIdList(): string[] {
@@ -143,7 +143,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return INDEXER_ENDPOINT;
     }
 
-    hasIndexerSupport(): boolean {
-        return true;
+    hasIndexSupport(): boolean {
+        return false;
     }
 }
