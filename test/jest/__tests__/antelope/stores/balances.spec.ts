@@ -5,18 +5,20 @@ import { useBalancesStore } from 'src/antelope/stores/balances';
 import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
 
+const TEST_NETWORK = 'testnet';
+
 const tokenList = [new TokenClass({
     address: 'address-TEST',
     symbol: 'TEST',
     decimals: 18,
-    network: 'testnet',
+    network: TEST_NETWORK,
 } as TokenSourceInfo)];
 
 const tokenSys = new TokenClass({
     address: 'no-address',
     symbol: 'TLOS',
     decimals: 18,
-    network: 'testnet',
+    network: TEST_NETWORK,
 } as TokenSourceInfo);
 
 const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
@@ -60,7 +62,6 @@ jest.mock('src/antelope/stores/chain', () => ({
         getChain: jest.fn().mockImplementation(() => ({
             settings: {
                 isNative: jest.fn(),
-                getNetwork: jest.fn().mockImplementation(() => 'testnet'),
                 getTokens: jest.fn(),
                 getTokenList: jest.fn().mockImplementation(() => tokenList),
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
@@ -68,6 +69,7 @@ jest.mock('src/antelope/stores/chain', () => ({
                 getImportantTokensIdList: jest.fn().mockImplementation(() => []),
                 hasIndexerSupport: jest.fn().mockImplementation(() => false),
                 isIndexerHealthy: jest.fn().mockImplementation(() => false),
+                getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
             },
         })),
         loggedChain: {
