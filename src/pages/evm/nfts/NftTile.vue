@@ -73,6 +73,10 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
     justify-content: space-between;
     gap: 16px;
 
+    @include tiny-only {
+        width: 288px;
+    }
+
     &__link {
         height: 100%;
     }

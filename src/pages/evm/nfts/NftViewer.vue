@@ -176,7 +176,7 @@ const iconOverlayName = computed(() => {
         content: '';
 
         border-radius: 50%;
-        background: white;
+        background: #FFFFFFA0;
     }
 
     &__overlay-icon {
