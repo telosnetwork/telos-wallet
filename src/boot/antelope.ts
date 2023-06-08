@@ -37,4 +37,8 @@ export default boot(({ app }) => {
     // autologin --
     ant.stores.account.autoLogin();
 
+    // constants --
+    ant.config.setIndexerHealthThresholdSeconds(10);
+    ant.config.setIndexerHealthCheckInterval(5000);
+
 });

@@ -19,6 +19,9 @@ export class AntelopeConfig {
     // indexer health threshold --
     private __indexer_health_threshold = 10;
 
+    // indexer health check interval --
+    private __indexer_health_check_interval = 1000 * 60 * 5;
+
     // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
     private __notify_success_handler: (message: string) => void = alert;
@@ -107,6 +110,10 @@ export class AntelopeConfig {
         return this.__indexer_health_threshold;
     }
 
+    get indexerHealthCheckInterval() {
+        return this.__indexer_health_check_interval;
+    }
+
     get notifyErrorHandler() {
         return this.__notify_error_handler;
     }
@@ -156,6 +163,28 @@ export class AntelopeConfig {
     }
 
     // setting notifucation handlers --
+    // setting indexer constants --
+    public setIndexerHealthThresholdSeconds(threshold: number) {
+        this.__indexer_health_threshold = threshold;
+    }
+
+    public setIndexerHealthCheckInterval(interval: number) {
+        this.__indexer_health_check_interval = interval;
+    }
+
+    // setting notification handlers --
+    public setNotifyErrorHandler(handler: (message: string) => void) {
+        this.__notify_error_handler = handler;
+    }
+
+    public setNotifySuccessHandler(handler: (message: string) => void) {
+        this.__notify_success_handler = handler;
+    }
+
+    public setNotifyWarningHandler(handler: (message: string) => void) {
+        this.__notify_warning_handler = handler;
+    }
+
     public setNotifySuccessfulTrxHandler(handler: (link: string) => void) {
         this.__notify_successful_trx_handler = handler;
     }
