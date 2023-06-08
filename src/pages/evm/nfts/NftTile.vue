@@ -1,48 +1,56 @@
 <script setup lang="ts">
-import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
+import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
-import { useRouter } from 'vue-router';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const router = useRouter();
+const { t } = useI18n();
 
 const props = defineProps<{
     nft: ShapedNFT,
 }>();
 
+// data
+const nftDetailsRoute = {
+    name: 'evm-nft-details',
+    query: {
+        contract: props.nft.contractAddress,
+        tokenId: props.nft.id,
+    },
+};
+
 // computed
-const creatorLinkText = computed(() => props.nft.collectionOwnerName ?? props.nft.collectionOwnerAddress);
-const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.collectionOwnerAddress}`);
+const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
+const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 
-
-// methods
-function goToNftDetailPage() {
-    router.push({
-        name: '',
-        query: {
-            contract: '', // eztodo add contract ady
-            tokenId: '', // eztodo
-        },
-    });
-}
 
 </script>
 
 <template>
+<!--eztodo i18n-->
 <div
     class="c-nft-tile"
-    role="link"
-    tabindex="0"
-    @click="goToNftDetailPage"
-    @keypress.space.enter="goToNftDetailPage"
 >
-    <NftViewer :nft="nft" :preview-mode="true" />
+    <router-link
+        :to="nftDetailsRoute"
+        :aria-label="t('nft.link_to_nft_details', { name: nft.name})"
+        class="c-nft-tile__link"
+    >
+        <NftViewer
+            :nft="nft"
+            :preview-mode="true"
+        />
+    </router-link>
+
     <div class="c-nft-tile__text-container">
         <h4>
             <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>
@@ -55,8 +63,6 @@ function goToNftDetailPage() {
 
 <style lang="scss">
 .c-nft-tile {
-    cursor: pointer;
-
     border-radius: 4px;
     border: 1px solid $page-header;
     padding: 16px 24px;
@@ -67,5 +73,9 @@ function goToNftDetailPage() {
     flex-direction: column;
     justify-content: space-between;
     gap: 16px;
+
+    &__link {
+        height: 100%;
+    }
 }
 </style>

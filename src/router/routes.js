@@ -44,7 +44,12 @@ const routes = [
             {
                 path: 'nfts',
                 name: 'evm-nfts',
-                component: () => import('pages/evm/nfts/NftPage.vue'),
+                component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
+            },
+            {
+                path: 'nft-details',
+                name: 'evm-nft-details',
+                component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
             // {
             //     path: 'staking',
@@ -68,11 +73,6 @@ const routes = [
                 path: 'inputs',
                 name: 'demos.inputs',
                 component: () => import('pages/demo/InputDemos.vue'),
-            },
-            {
-                path: 'nfts',
-                name: 'demos.nfts',
-                component: () => import('pages/demo/NftDemos.vue'),
             },
         ],
     },

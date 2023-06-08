@@ -62,7 +62,7 @@ export async function getFiatPriceFromIndexer(
         (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-    if (!tokenMarketData.updated || !tokenMarketData.price) {
+    if (!tokenMarketData?.updated || !tokenMarketData.price) {
         return 0;
     }
 

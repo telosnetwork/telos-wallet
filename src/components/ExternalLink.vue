@@ -29,7 +29,7 @@ const formattedText = computed(() => {
     class="c-external-link__link"
 >
     {{ formattedText }}
-    <q-icon size="xs" name="launch" class="c-external-link__icon"/>
+    <q-icon size="xs" name="o_launch" class="c-external-link__icon"/>
 </a>
 </template>
 

@@ -60,7 +60,6 @@ const nftType = computed(() => {
     }
 });
 
-const coverImageIsUri = computed(() => props.nft.imageSrcFull?.startsWith('data:'));
 const showCoverImage = computed(() => nftType.value === nftTypes.image || props.previewMode);
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
@@ -82,11 +81,11 @@ const iconOverlayName = computed(() => {
     }
 
     if (nftType.value === nftTypes.video) {
-        return 'play_arrow';
+        return 'o_play_arrow';
     }
 
     if (nftType.value === nftTypes.audio) {
-        return 'headphones';
+        return 'o_headphones';
     }
 
     return 'image_not_supported';
@@ -111,7 +110,7 @@ const iconOverlayName = computed(() => {
 
             <q-icon
                 :name="iconOverlayName"
-                size="xl"
+                size="lg"
                 color="primary"
                 class="c-nft-viewer__overlay-icon"
             />

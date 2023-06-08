@@ -69,7 +69,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -168,7 +168,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -267,7 +267,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -366,7 +366,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -453,7 +453,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -540,7 +540,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -635,7 +635,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -730,7 +730,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -825,7 +825,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -920,7 +920,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -1077,7 +1077,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
@@ -1234,7 +1234,7 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     >
       <q-icon-stub
         class="c-transaction-row__gas-icon"
-        name="local_gas_station"
+        name="o_local_gas_station"
         size="xs"
       >
         
