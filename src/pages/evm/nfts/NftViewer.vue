@@ -33,6 +33,9 @@ Possible NFT configurations after shaping:
 
 import { computed } from 'vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     nft: ShapedNFT,
@@ -64,10 +67,11 @@ const showCoverImage = computed(() => nftType.value === nftTypes.image || props.
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
 const imageAlt = computed(() => {
+    const details = `${props.nft.name} ${props.nft.id}`;
     if (nftType.value === nftTypes.image) {
-        return `NFT - ${props.nft.name} ${props.nft.id}`;
+        return t('nft.img_alt', { nftInfo: details });
     } else if (nftType.value === nftTypes.video && props.previewMode) {
-        return `Video NFT cover - ${props.nft.name} ${props.nft.id}`;
+        return t('nft.img_alt_video_nft', { nftInfo: details });
     }
 
     return '';

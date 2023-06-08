@@ -120,8 +120,8 @@ export default {
     },
     nft : {
         link_to_nft_details: 'Go to NFT details page for {name}',
-        img_alt_video_cover: 'NFT - {nftInfo}',
-        img_alt_nft: 'Video NFT cover - {nftInfo}',
+        img_alt: 'NFT - {nftInfo}',
+        img_alt_video_nft: 'Video NFT cover - {nftInfo}',
     },
     notification:{
         success_title: 'Success',
