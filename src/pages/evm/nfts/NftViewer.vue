@@ -92,7 +92,7 @@ const iconOverlayName = computed(() => {
         return 'o_headphones';
     }
 
-    return 'image_not_supported';
+    return 'o_image_not_supported';
 });
 
 </script>
