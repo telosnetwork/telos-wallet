@@ -5,8 +5,7 @@ import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 
-// eztodo move to demo route
-// eztodo post in chat solution for different nft types
+
 /*
 Types of NFT states:
 - image with thumbnail

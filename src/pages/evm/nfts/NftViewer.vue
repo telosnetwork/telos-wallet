@@ -94,7 +94,6 @@ const iconOverlayName = computed(() => {
 </script>
 
 <template>
-<!--eztodo i18n for all alt attrs-->
 <div class="c-nft-viewer">
     <div v-if="showCoverImage" class="c-nft-viewer__image-container">
         <img

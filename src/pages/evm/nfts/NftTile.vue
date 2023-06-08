@@ -36,7 +36,6 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
 </script>
 
 <template>
-<!--eztodo i18n-->
 <div
     class="c-nft-tile"
 >
