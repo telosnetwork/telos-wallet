@@ -139,7 +139,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     isIndexerHealthy(): boolean {
         return (
             this._indexerHealthState.state.success &&
-            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThreshold
+            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
         );
     }
 
