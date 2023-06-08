@@ -4,10 +4,10 @@ import { getAntelope } from '..';
 
 export class AntelopeConfig {
     // indexer health threshold --
-    private __indexer_health_threshold = 10;
+    private __indexer_health_threshold = 10; // 10 seconds
 
     // indexer health check interval --
-    private __indexer_health_check_interval = 1000 * 60 * 5;
+    private __indexer_health_check_interval = 1000 * 60 * 5; // 5 minutes expressed in milliseconds
 
     // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
@@ -72,7 +72,7 @@ export class AntelopeConfig {
         return this.__app;
     }
 
-    get indexerHealthThreshold() {
+    get indexerHealthThresholdSeconds() {
         return this.__indexer_health_threshold;
     }
 
