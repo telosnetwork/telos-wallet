@@ -101,7 +101,8 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
-                        if (chain_settings.hasIndexSupport()) {
+                        if (chain_settings.isIndexerHealthy()) {
+                            this.trace('updateBalancesForAccount', 'Indexer OK!');
                             if (account?.account) {
                                 this.__balances[label] = await chain_settings.getBalances(account.account);
                                 // if new account with no index records display default zero TLOS balance
@@ -112,6 +113,7 @@ export const useBalancesStore = defineStore(store_name, {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
                         } else {
+                            this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
                             this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();

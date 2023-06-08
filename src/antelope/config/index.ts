@@ -3,6 +3,9 @@ import { App } from 'vue';
 import { getAntelope } from '..';
 
 export class AntelopeConfig {
+    // indexer health threshold --
+    private __indexer_health_threshold = 10;
+
     // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
     private __notify_success_handler: (message: string) => void = alert;
@@ -64,6 +67,10 @@ export class AntelopeConfig {
 
     get app() {
         return this.__app;
+    }
+
+    get indexerHealthThreshold() {
+        return this.__indexer_health_threshold;
     }
 
     get notifyErrorHandler() {
