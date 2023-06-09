@@ -67,12 +67,23 @@ const routes = [
     {
         path: '/demos',
         name: 'demos',
+        meta: { notInProduction: true },
         component: () => import('pages/demo/DemoLayout.vue'),
         children: [
             {
                 path: 'inputs',
                 name: 'demos.inputs',
                 component: () => import('pages/demo/InputDemos.vue'),
+            },
+            {
+                path: 'send-errors',
+                name: 'demos.send-errors',
+                component: () => import('pages/demo/SendPageErrors.vue'),
+            },
+            {
+                path: 'notif',
+                name: 'demos.notifications',
+                component: () => import('pages/demo/NotificationDemos.vue'),
             },
         ],
     },

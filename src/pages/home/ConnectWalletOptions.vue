@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
 import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
@@ -15,14 +15,15 @@ export default defineComponent({
             type: Boolean,
         },
     },
-    setup(props){
+    setup(props, { emit }){
+        const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const wagmiClient = inject('$wagmi') as EthereumClient;
         const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
-        watch(() => props.toggleWalletConnect, (newVal) => {
+        watch(() => props.toggleWalletConnect, async (newVal) => {
             if (newVal) {
-                connectToWalletConnect();
+                await toggleWalletConnectModal();
             };
         });
 
@@ -33,9 +34,28 @@ export default defineComponent({
             accountStore.loginEVM({ network });
         };
 
-        const connectToWalletConnect = async () => {
-            if(web3Modal.value) {
-                await web3Modal.value.openModal();
+        const toggleWalletConnectModal = async () => {
+            // if already connected, trigger autologin
+            if (localStorage.getItem('wagmi.connected')){
+                await login();
+            }else {
+                await (web3Modal.value as Web3Modal).openModal();
+            }
+        };
+
+        const login = async () => {
+            emit('toggleWalletConnect');
+
+            loginEvm();
+
+            const chainSettings = useChainStore().currentChain.settings;
+            const appChainId = chainSettings.getChainId();
+            const networkName = chainSettings.getDisplay();
+            const walletConnectChainId = getNetwork().chain?.id.toString();
+
+            if (appChainId !== walletConnectChainId){
+                const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
+                globalProps.$warningNotification(warningMessage);
             }
         };
 
@@ -47,7 +67,8 @@ export default defineComponent({
             web3Modal,
             supportsMetamask,
             loginEvm,
-            connectToWalletConnect,
+            toggleWalletConnectModal,
+            login,
             redirectToMetamaskDownload,
             wagmiClient,
         };
@@ -64,21 +85,8 @@ export default defineComponent({
         this.web3Modal = new Web3Modal(options, this.wagmiClient);
 
         this.web3Modal.subscribeModal(async (newState) => {
-            if (newState.open === false) {
-                this.$emit('toggleWalletConnect');
-                if (localStorage.getItem('wagmi.connected')){
-                    this.loginEvm();
-
-                    const chainSettings = useChainStore().currentChain.settings;
-                    const appChainId = chainSettings.getChainId();
-                    const networkName = chainSettings.getDisplay();
-                    const walletConnectChainId = getNetwork().chain?.id.toString();
-
-                    if (appChainId !== walletConnectChainId){
-                        const warningMessage = this.$t('evm_wallet.incorrect_network', { networkName });;
-                        (this as any).$warningNotification(warningMessage);
-                    }
-                }
+            if (newState.open === false && localStorage.getItem('wagmi.connected')) {
+                await this.login();
             }
         });
     },
@@ -108,7 +116,7 @@ export default defineComponent({
             >
             {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
         </div>
-        <div class="wallet-options__option" @click="connectToWalletConnect">
+        <div class="wallet-options__option" @click="toggleWalletConnectModal">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"

@@ -260,7 +260,7 @@ export const useAccountStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading('account.sendAction');
                 console.error('Account.sendAction() not implemented', account, data, name, actor, permission);
-                return Promise.resolve({ hash: '0x0' });
+                return Promise.resolve({ hash: '0x0' } as NativeTransactionResponse);
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw error;

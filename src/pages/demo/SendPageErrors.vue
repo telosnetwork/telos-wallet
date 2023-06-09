@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { useAppNavStore } from 'src/stores';
@@ -11,7 +11,6 @@ import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
-import { Notify } from 'quasar';
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -20,16 +19,13 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
-const balanceStore = useBalancesStore();
 const global = useAppNavStore();
 
 export default defineComponent({
-    name: 'SendPage',
+    name: 'SendPageErrors',
     components: {
         AddressInput,
         CurrencyInput,
-        AppPage,
-        UserInfo,
     },
     data: () => ({
         address: '',
@@ -77,8 +73,6 @@ export default defineComponent({
         },
         token: {
             async handler(newToken: TokenClass | null, oldToken: TokenClass | null) {
-                this.updateTokenTransferConfig(this.isFormValid, newToken, this.address, this.amount);
-
                 if (newToken?.address !== oldToken?.address) {
                     this.updateEstimatedGas();
                     this.fiatConversionRate = newToken ? +newToken.price.str : undefined;
@@ -86,15 +80,6 @@ export default defineComponent({
             },
             immediate: true,
             deep: true,
-        },
-        isFormValid(isValid: boolean) {
-            this.updateTokenTransferConfig(isValid, this.token, this.address, this.amount);
-        },
-        address(newAddress) {
-            this.updateTokenTransferConfig(this.isFormValid, this.token, newAddress, this.amount);
-        },
-        amount(newAmount) {
-            this.updateTokenTransferConfig(this.isFormValid, this.token, this.address, newAmount);
         },
     },
     computed: {
@@ -120,7 +105,7 @@ export default defineComponent({
             return ant.stores.balances.getBalances('logged');
         },
         showContractLink(): boolean {
-            return this.token?.address !== NativeCurrencyAddress;
+            return !!this.token?.address;
         },
         currencyInputSecondaryCurrencyBindings() {
             const useSecondaryCurrency = !!this.fiatConversionRate;
@@ -163,25 +148,9 @@ export default defineComponent({
         isLoading(): boolean {
             return ant.stores.feedback.isLoading('transferTokens');
         },
-        configIsLoading() {
-            let config;
-
-            if (this.token?.isSystem) {
-                config = balanceStore.__wagmiSystemTokenTransferConfig['logged'];
-            } else {
-                config = balanceStore.__wagmiTokenTransferConfig['logged'];
-            }
-            return this.isFormValid && !config;
-        },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
-    },
-    created() {
-        this.clearTokenTransferConfigs();
-    },
-    unmounted() {
-        this.clearTokenTransferConfigs();
     },
     methods: {
         // TODO: resolve a better dynamic gas estimation. Currently, it's just hardcoded
@@ -214,35 +183,6 @@ export default defineComponent({
                 }
             }
         },
-        clearTokenTransferConfigs() {
-            balanceStore.clearAllWagmiTokenTransferConfigs('logged');
-        },
-        updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null | undefined, address: string, amount: BigNumber) {
-            // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
-            // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
-            // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
-
-            if (!formIsValid || !token?.address || !localStorage.getItem('wagmi.connected')) {
-                this.clearTokenTransferConfigs();
-                return;
-            }
-
-
-            if (this.token?.isSystem) {
-                balanceStore.prepareWagmiSystemTokenTransferConfig(
-                    'logged',
-                    address,
-                    amount,
-                );
-            } else {
-                balanceStore.prepareWagmiTokenTransferConfig(
-                    'logged',
-                    token,
-                    address,
-                    amount,
-                );
-            }
-        },
         async startTransfer() {
             // if WalletConnect on wrong network, notify user and prevent transaction
             if (localStorage.getItem('wagmi.connected')){
@@ -252,7 +192,7 @@ export default defineComponent({
                 const walletConnectChainId = getNetwork().chain?.id.toString();
                 if (appChainId !== walletConnectChainId){
                     const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                    ant.config.notifyFailureMessage(errorMessage);
+                    (this as any).$errorNotification(errorMessage, true);
                     return;
                 }
             } else {
@@ -264,41 +204,24 @@ export default defineComponent({
             const amount = this.amount;
             const to = this.address;
 
-            if (this.isFormValid) {
-                ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
-                    const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
-                    if(chain_settings) {
-                        // we send the notification before the transaction is mined
-                        const quantity = `${formatWei(amount, token.decimals, 18)} ${token.symbol}`;
-                        const address = to.substring(0, 6) + '...' + to.substring(to.length - 4, to.length);
-                        const dismiss = ant.config.notifyNeutralMessageHandler(
-                            this.$t('notification.neutral_message_sending', { quantity, address }),
-                        );
+            // this code should not beallowed in case of invalid form, but for testing purposes we allow it here
+            ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
+                const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
+                if(chain_settings) {
+                    ant.config.notifySuccessfulTrxHandler(
+                        `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                    );
+                }
+            }).catch((err) => {
+                console.error(err);
+                if (err instanceof AntelopeError) {
+                    const evmErr = err as AntelopeError;
+                    ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
+                } else {
+                    ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
+                }
+            });
 
-                        // we wait for the transaction to be mined and then we send the success notification
-                        trx.wait().then((receipt) => {
-                            ant.config.notifySuccessfulTrxHandler(
-                                `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
-                            );
-                        }).catch((err) => {
-                            console.error(err);
-                        }).finally(() => {
-                            // we dismiss the first notification
-                            dismiss();
-                        });
-                    }
-                }).catch((err) => {
-                    console.error(err);
-                    if (err instanceof AntelopeError) {
-                        const evmErr = err as AntelopeError;
-                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
-                    } else {
-                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
-                    }
-                });
-            } else {
-                ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));
-            }
         },
     },
 
@@ -307,29 +230,14 @@ export default defineComponent({
 
 <template>
 <AppPage>
-    <template v-slot:header>
-        <div class="c-send-page__title-container">
-            <div class="o-text--header-1 u-text--high-contrast"> {{ $t('evm_wallet.send') }}</div>
-            <div class="o-text--paragraph u-text--default-contrast">{{ $t('global.from') }}</div>
-            <UserInfo
-                class="c-send-page__title-addressu-text--default-contrast"
-                :displayFullAddress="false"
-                :showAddress="true"
-                :showCopyBtn="false"
-                :showUserMenu="false"
-                :lightweight="true"
-                :account="loggedAccount"
-            />
-        </div>
-    </template>
 
-    <div class="c-send-page__form-container">
+    <div class="c-send-page-errors__form-container">
         <q-spinner v-if="!balances?.length" />
         <q-form
             v-else
-            class="c-send-page__form"
+            class="c-send-page-errors__form"
         >
-            <div class="c-send-page__row c-send-page__row--1 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--1 row">
                 <div class="col">
                     <AddressInput
                         v-model="address"
@@ -339,28 +247,28 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--3 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--3 row">
                 <!-- Token selection -->
-                <div class="col-12 col-sm-auto c-send-page__token-selection-container">
+                <div class="col-12 col-sm-auto c-send-page-errors__token-selection-container">
                     <q-select
                         v-model="selected"
                         outlined
                         :label="$t('evm_wallet.token')"
                         :options="balances"
-                        class="c-send-page__token-selector"
+                        class="c-send-page-errors__token-selector"
                     >
                         <template v-slot:selected>
                             <span>{{ token?.symbol }}</span>
                         </template>
 
                         <template v-slot:option="scope">
-                            <q-item class="c-send-page__selector-op" v-bind="scope.itemProps">
-                                <div class="c-send-page__selector-op-avatar">
-                                    <img class="c-send-page__selector-op-icon" :src="scope.opt.token.logoURI" alt="Token Logo">
+                            <q-item class="c-send-page-errors__selector-op" v-bind="scope.itemProps">
+                                <div class="c-send-page-errors__selector-op-avatar">
+                                    <img class="c-send-page-errors__selector-op-icon" :src="scope.opt.token.logoURI" alt="Token Logo">
                                 </div>
                                 <div>
-                                    <q-item-label class="c-send-page__selector-op-name">{{ scope.opt.token.name }}</q-item-label>
-                                    <q-item-label class="c-send-page__selector-op-balance" caption>
+                                    <q-item-label class="c-send-page-errors__selector-op-name">{{ scope.opt.token.name }}</q-item-label>
+                                    <q-item-label class="c-send-page-errors__selector-op-balance" caption>
                                         {{ prettyPrintBalance(scope.opt.str, fiatLocale, isMobile, scope.opt.token.symbol) }}
                                     </q-item-label>
                                 </div>
@@ -369,14 +277,14 @@ export default defineComponent({
                     </q-select>
                     <div
                         :class="{
-                            'c-send-page__view-contract': true,
-                            'c-send-page__view-contract--hidden': !showContractLink,
+                            'c-send-page-errors__view-contract': true,
+                            'c-send-page-errors__view-contract--hidden': !showContractLink,
                         }"
                         @click="viewTokenContract"
                     >
-                        <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
+                        <span class="c-send-page-errors__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-space v-if="!isMobile"/>
-                        <q-icon size="xs" name="o_launch" class="c-send-page__view-contract-min-icon" />
+                        <q-icon size="xs" name="launch" class="c-send-page-errors__view-contract-min-icon" />
                     </div>
                 </div>
                 <!-- Amount input -->
@@ -395,14 +303,14 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--4 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--4 row">
                 <q-space/>
                 <div class="col-auto">
-                    <div class="c-send-page__gas-fee">
+                    <div class="c-send-page-errors__gas-fee">
                         <div class="row o-text--header-5 u-text--default-contrast text-no-wrap">{{ $t('evm_wallet.estimated_fees') }}</div>
-                        <div class="row c-send-page__gas-fee-info">
+                        <div class="row c-send-page-errors__gas-fee-info">
                             <q-space/>
-                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page__gas-icon" name="local_gas_station" /></div>
+                            <div class="flex items-center justify-center col-auto q-mr-xs flex-column"><q-icon class="c-send-page-errors__gas-icon" name="local_gas_station" /></div>
                             <div class="col-auto">
                                 <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInSystemSym }} </div>
                                 <div class="row text-no-wrap o-text--small u-text--default-contrast"> {{ gasFeeInFiat }} </div>
@@ -411,15 +319,14 @@ export default defineComponent({
                     </div>
                 </div>
             </div>
-            <div class="c-send-page__row c-send-page__row--5 row">
+            <div class="c-send-page-errors__row c-send-page-errors__row--5 row">
                 <div class="col">
                     <div class="justify-end row">
                         <q-btn
-                            color="primary"
+                            :color="(!isFormValid || isLoading) ? 'negative' : 'primary'"
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
-                            :loading="isLoading || configIsLoading"
-                            :disable="!isFormValid || isLoading"
+                            :loading="isLoading"
                             @click="startTransfer"
                         />
                     </div>
@@ -440,7 +347,7 @@ export default defineComponent({
 }
 
 
-.c-send-page {
+.c-send-page-errors {
     &__title-container {
         flex-direction: column;
         animation: #{$anim-slide-in-left};
@@ -538,6 +445,7 @@ export default defineComponent({
 
     &__view-contract {
         position: absolute;
+        bottom: -24px;
         display: flex;
         align-items: center;
         cursor: pointer;

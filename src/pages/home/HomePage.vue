@@ -127,11 +127,12 @@ export default defineComponent({
         display: flex;
         flex-direction: column;
         padding: 32px 24px 0;
+        min-height: 40rem;
     }
 
     &__logo {
         width: 240px;
-        margin: 0 auto 88px;
+        margin: 0 auto;
 
         @include sm-and-up {
             margin: 128px auto 88px;
@@ -190,6 +191,21 @@ export default defineComponent({
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
+    }
+
+    @media only screen and (max-height: 800px) {
+        .c-home {
+            &__container{
+                min-height: unset;
+            }
+            &__logo{
+                margin-top: unset;
+                margin-bottom: unset;
+            }
+            &__button-container{
+                margin-top: 2rem;
+            }
+        }
     }
 }
 </style>
