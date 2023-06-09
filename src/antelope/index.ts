@@ -21,6 +21,7 @@ import { useHistoryStore } from 'src/antelope/stores/history';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { useEVMStore } from 'src/antelope/stores/evm';
+import { useNftsStore } from 'src/antelope/stores/nfts';
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
@@ -84,6 +85,7 @@ export class Antelope {
             feedback: useFeedbackStore(),
             platform: usePlatformStore(),
             evm: useEVMStore(),
+            nfts: useNftsStore(),
         };
     }
 
