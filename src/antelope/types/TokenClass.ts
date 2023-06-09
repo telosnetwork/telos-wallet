@@ -68,7 +68,6 @@ export class TokenMarketData {
         try {
             this._price = ethers.utils.parseUnits(sourceInfo.price, TOKEN_PRICE_DECIMALS);
         } catch (e) {
-            console.error('TokenMarketData: error parsing price from MarketSourceInfo. price', sourceInfo.price, 'decimals', sourceInfo.decimals, '\nError:', e);
             this._price = ethers.constants.Zero;
         }
     }

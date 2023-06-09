@@ -204,7 +204,7 @@ export const useBalancesStore = defineStore(store_name, {
             if (provider) {
                 // instead of await, we use then() to return the response immediately
                 // and perform the balance update in the background
-                provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
+                const whenConfirmed = provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
                     this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
                     if (receipt.status === 1) {
                         const account = useAccountStore().loggedAccount;
@@ -212,9 +212,14 @@ export const useBalancesStore = defineStore(store_name, {
                             this.updateBalancesForAccount('logged', account);
                         }
                     }
-                    // TODO: should we notify the user that the transaction succeeded of failed?
-                    // https://github.com/telosnetwork/telos-wallet/issues/328
+                    return receipt;
                 });
+
+                // we add the wait method to the response,
+                // so that the caller can subscribe to the confirmation event
+                response.wait = async () => whenConfirmed;
+            } else {
+                throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return response;
         },
@@ -258,8 +263,8 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(this.subscribeForTransactionReceipt);
                 }
             } catch (error) {
-                console.error('Error: ', errorToString(error));
-                throw error;
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
@@ -289,8 +294,8 @@ export const useBalancesStore = defineStore(store_name, {
                     permission: 'active',
                 });
             } catch (error) {
-                console.error('Error: ', errorToString(error));
-                throw error;
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferNativeTokens');
             }
@@ -304,6 +309,7 @@ export const useBalancesStore = defineStore(store_name, {
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
+
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
 
@@ -313,7 +319,8 @@ export const useBalancesStore = defineStore(store_name, {
                     return await this.transferMetaMask(token, to, amount);
                 }
             } catch (error) {
-                throw new AntelopeError('antelope.balances.error_at_transfer_tokens');
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
