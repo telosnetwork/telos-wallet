@@ -25,5 +25,12 @@ export default function (/* { store, ssrContext } */) {
         history: createHistory(process.env.VUE_ROUTER_BASE),
     });
 
+    // this prevents the general public from accessing the demo pages
+    Router.beforeEach((to, from) => {
+        if (to.meta.notInProduction && process.env.NODE_ENV === 'production') {
+            return { name: 'home' };
+        }
+    });
+
     return Router;
 }
