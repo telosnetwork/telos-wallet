@@ -29,26 +29,31 @@ const routes = [
             {
                 path: 'wallet',
                 name: 'evm-wallet',
+                meta: { showBackButton: false },
                 component: () => import('pages/evm/wallet/WalletPage.vue'),
             },
             {
                 path: 'send',
                 name: 'evm-send',
+                meta: { showBackButton: true },
                 component: () => import('pages/evm/wallet/SendPage.vue'),
             },
             {
                 path: 'receive',
                 name: 'evm-receive',
+                meta: { showBackButton: true },
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
             {
-                path: 'nfts',
-                name: 'evm-nfts',
+                path: 'nft-inventory',
+                name: 'evm-nft-inventory',
+                meta: { showBackButton: false },
                 component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
             },
             {
                 path: 'nft-details',
                 name: 'evm-nft-details',
+                meta: { showBackButton: true },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
             // {

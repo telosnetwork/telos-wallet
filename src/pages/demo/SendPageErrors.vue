@@ -1,11 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import AppPage from 'components/evm/AppPage.vue';
-import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
-import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
@@ -19,7 +16,6 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
-const global = useAppNavStore();
 
 export default defineComponent({
     name: 'SendPageErrors',
@@ -39,9 +35,6 @@ export default defineComponent({
         },
         prettyPrintBalance,
     }),
-    mounted() {
-        global.setShowBackBtn(true);
-    },
     watch: {
         balances: {
             handler() {
