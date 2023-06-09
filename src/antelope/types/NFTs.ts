@@ -10,12 +10,20 @@ export interface IndexerNftResponse {
     transaction: string; // tx hash
 }
 
+export interface NftAttribute {
+    label: string;
+    text: string;
+}
+
 // NFT which has been processed for display in the UI
 export interface ShapedNFT {
     name: string;
     id: string;
+    description?: string;
+    ownerAddress: string;
     contractAddress: string;
     contractPrettyName?: string;
+    attributes: NftAttribute[];
     imageSrcFull?: string; // if this is empty, the UI will display a generic image icon
     imageSrcIcon?: string; // as a result of shaping, this will always have a value if imageSrcFull is defined
 
