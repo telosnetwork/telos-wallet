@@ -68,7 +68,7 @@ const ownerLink = computed(() => {
             </NftDetailsCard>
 
             <NftDetailsCard title="Owner" class="c-nft-details__header-card">
-                <ExternalLink :text="nft.ownerAddress" :url="contractLink" />
+                <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
             </NftDetailsCard>
 
             <NftDetailsCard v-if="nft.description" title="Description" class="c-nft-details__header-card">
