@@ -198,7 +198,7 @@ const nftsInitialState: NftsState = {
                 id: '93532',
                 contractAddress: '0x6666666666666666666666666666666666666666',
                 contractPrettyName: 'NFT Creator 7',
-                description: 'This one smells funny, you\'ll know what I mean when you read the attributes >:)',
+                description: 'This is a special one. It has a long attribute.',
                 ownerAddress: '0x160505F3dfD1cb58B91e322c828Ae0F74c043c3C',
                 attributes: [{
                     label: 'Level of Detail',
