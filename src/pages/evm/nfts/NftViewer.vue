@@ -31,9 +31,10 @@ Possible NFT configurations after shaping:
           show headphones icon in the center when not hovering
  */
 
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
 
@@ -49,6 +50,10 @@ const nftTypes = {
     audio: 'audio',
     none: 'none',
 };
+
+const videoIsPlaying = ref(false);
+const videoIsAtEnd = ref(false);
+const videoElement = ref<HTMLVideoElement | null>(null);
 
 // computed
 const nftType = computed(() => {
@@ -78,14 +83,20 @@ const imageAlt = computed(() => {
 });
 
 const iconOverlayName = computed(() => {
-    const showIconOverlay = props.previewMode && nftType.value !== nftTypes.image;
+    const showIconOverlay =
+        (props.previewMode && nftType.value !== nftTypes.image) ||
+        (nftType.value === nftTypes.video && !videoIsPlaying.value);
 
     if (!showIconOverlay) {
         return '';
     }
 
     if (nftType.value === nftTypes.video) {
-        return 'o_play_arrow';
+        if (videoIsAtEnd.value) {
+            return 'o_replay';
+        } else {
+            return 'o_play_arrow';
+        }
     }
 
     if (nftType.value === nftTypes.audio) {
@@ -94,6 +105,19 @@ const iconOverlayName = computed(() => {
 
     return 'o_image_not_supported';
 });
+
+
+// methods
+function playVideo() {
+    if (videoElement.value === null) {
+        return;
+    }
+
+    if (!videoIsPlaying.value) {
+        videoElement.value.play();
+    }
+
+}
 
 </script>
 
@@ -112,20 +136,22 @@ const iconOverlayName = computed(() => {
             class="c-nft-viewer__image"
         >
         <div v-else class="c-nft-viewer__placeholder-image"></div>
-
-        <template v-if="iconOverlayName">
-            <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
-
-            <q-icon
-                :name="iconOverlayName"
-                size="lg"
-                color="primary"
-                class="c-nft-viewer__overlay-icon"
-            />
-        </template>
     </div>
 
-    <div v-else-if="nftType === nftTypes.video" class="c-nft-viewer__video-container">
+    <div
+        v-else-if="nftType === nftTypes.video"
+        class="c-nft-viewer__video-container"
+        @click="playVideo"
+    >
+        <video
+            ref="videoElement"
+            :src="nft.videoSrc"
+            :controls="videoIsPlaying"
+            class="c-nft-viewer__video"
+            @play="videoIsPlaying = true; videoIsAtEnd = false"
+            @pause="videoIsPlaying = false; videoIsAtEnd = false"
+            @ended="videoIsPlaying = false; videoIsAtEnd = true"
+        ></video>
         <!-- Implement video here https://github.com/telosnetwork/telos-wallet/issues/347 -->
     </div>
 
@@ -136,17 +162,38 @@ const iconOverlayName = computed(() => {
     <div v-else-if="nftType === nftTypes.none" class="c-nft-viewer__blank-container">
 
     </div>
+
+    <template v-if="iconOverlayName">
+        <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
+
+        <q-icon
+            :name="iconOverlayName"
+            size="lg"
+            color="primary"
+            class="c-nft-viewer__overlay-icon"
+        />
+    </template>
 </div>
 </template>
 
 <style lang="scss">
 .c-nft-viewer {
+    $this: &;
+
+    position: relative;
     height: 100%;
     width: 100%;
     max-height: 432px;
 
     &--preview {
         max-height: 270px;
+    }
+
+    &:hover:not(#{$this}--preview) {
+        #{$this}__overlay-icon-bg,
+        #{$this}__overlay-icon {
+            transform: scale(1.1);
+        }
     }
 
     &__image-container,
@@ -162,7 +209,6 @@ const iconOverlayName = computed(() => {
         display: flex;
         justify-content: center;
         align-items: center;
-        position: relative;
     }
 
     &__image {
@@ -171,6 +217,11 @@ const iconOverlayName = computed(() => {
         width: auto;
         max-width: 100%;
         max-height: 100%;
+    }
+
+    &__overlay-icon-bg,
+    &__overlay-icon {
+        transition: transform 0.2s ease;
     }
 
     &__overlay-icon-bg {
@@ -183,6 +234,7 @@ const iconOverlayName = computed(() => {
         height: 64px;
         width: 64px;
         content: '';
+        pointer-events: none;
 
         border-radius: 50%;
         background: #FFFFFFA0;
@@ -195,6 +247,7 @@ const iconOverlayName = computed(() => {
         bottom: 0;
         left: 0;
         margin: auto;
+        pointer-events: none;
     }
 
     &__placeholder-image {
@@ -207,6 +260,12 @@ const iconOverlayName = computed(() => {
 
     &__video-container {
 
+    }
+
+    &__video {
+        //pointer-events: none;
+        width: 100%;
+        cursor: pointer;
     }
 
     &__audio-container {

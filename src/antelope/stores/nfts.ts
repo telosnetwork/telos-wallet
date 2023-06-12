@@ -110,8 +110,8 @@ const nftsInitialState: NftsState = {
                     label: 'Time It Took to Make',
                     text: 'A year and a half of nonstop work',
                 }],
-                videoSrc: 'https://v.ftcdn.net/03/27/66/38/700_F_327663872_S1AbV0TvAyrsbatojIUrfe6Egqanl3q3_ST.mp4',
-                imageSrcFull: 'https://4.bp.blogspot.com/-q9pjOVNcCU8/TcqOj6TuQfI/AAAAAAAAAN8/xlXjfoWS7j8/s1600/purple+pair+flowers+wallpaper.jpg',
+                videoSrc: 'https://joy1.videvo.net/videvo_files/video/free/2014-07/large_watermarked/Waterfall_h264_preview.mp4',
+                imageSrcFull: 'https://joy1.videvo.net/videvo_files/video/free/2014-07/thumbnails/Waterfall_h264_small.jpg',
             }],
             '0x2222222222222222222222222222222222222222': [{
                 name: 'Cool Image with URI',
