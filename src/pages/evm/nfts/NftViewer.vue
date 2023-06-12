@@ -98,7 +98,12 @@ const iconOverlayName = computed(() => {
 </script>
 
 <template>
-<div class="c-nft-viewer">
+<div
+    :class="{
+        'c-nft-viewer': true,
+        'c-nft-viewer--preview': previewMode,
+    }"
+>
     <div v-if="showCoverImage" class="c-nft-viewer__image-container">
         <img
             v-if="!showPlaceholderCoverImage"
@@ -138,7 +143,11 @@ const iconOverlayName = computed(() => {
 .c-nft-viewer {
     height: 100%;
     width: 100%;
-    max-height: 270px;
+    max-height: 432px;
+
+    &--preview {
+        max-height: 270px;
+    }
 
     &__image-container,
     &__image,

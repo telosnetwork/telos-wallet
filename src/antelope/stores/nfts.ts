@@ -39,7 +39,6 @@ export const useNftsStore = defineStore(store_name, {
             const nftsForContract = this.__nfts[label][contract];
 
             const nft = nftsForContract.find(({ id: nftId }) => nftId === id);
-            debugger;
             return nft;
         },
 
@@ -209,7 +208,7 @@ const nftsInitialState: NftsState = {
                     text: 'Here\'s the thing. This is a piece of digital art. Digital art has no scent per se, but what I can do is tell you about how it makes me feel, and try to map that onto an olfactory sensation. It makes me feel like I am writing this description to make sure we handle long strings alright. How about that?',
                 }, {
                     label: 'Time It Took to Make',
-                    text: 'Who knows man, I usually track time by how many songs I listened to while making it, but I was listening to the same some over and over. Sorry',
+                    text: 'Who knows man, I usually track time by how many songs I listened to while making it, but I was listening to the same song over and over. Sorry',
                 }],
                 imageSrcFull: 'https://res.cloudinary.com/demo/image/upload/fl_awebp/bored_animation.webp',
                 imageSrcIcon: 'https://res.cloudinary.com/demo/image/upload/fl_awebp/bored_animation.webp',
