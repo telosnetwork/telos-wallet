@@ -50,7 +50,7 @@ export const useNftsStore = defineStore(store_name, {
             // need to handle nft not found, perhaps log antelope error
             // await this.getNftsFromContract(label, contract);
 
-            const nftsForContract = this.__nfts[label].contracts[contract];
+            const nftsForContract = this.__nfts[label].contracts[contract] || [];
 
             return nftsForContract.find(({ id: nftId }) => nftId === id);
         },
