@@ -205,7 +205,7 @@ const nftsInitialState: NftsState = {
                     text: 'Yowza!',
                 }, {
                     label: 'Vibe',
-                    text: 'Here\'s the thing. This is a piece of digital art. What I can do is tell you about how it makes me feel. It makes me feel like I am writing this description to make sure we handle long strings correctly. How about that? I think the vibe is just fine for this particular piece. regardless, I have to keep typing to this gets nice and lengthy. NFTs are a very cool invention, and this piece is a testament to that fact.',
+                    text: 'Here\'s the thing. This is a piece of digital art. What I can do is tell you about how it makes me feel. It makes me feel like I am writing this description to make sure we handle long strings correctly. How about that? I think the vibe is just fine for this particular piece. Regardless, I have to keep typing until this gets nice and lengthy. NFTs are a very cool invention, and this piece is a testament to that fact. Telos is an exceedingly fast and advanced blockchain, and the tEVM is extremely powerful with extraordinarily low gas fees. That is why it is a great platform for NFTs.',
                 }, {
                     label: 'Time It Took to Make',
                     text: 'Who knows man, I usually track time by how many songs I listened to while making it, but I was listening to the same song over and over. Sorry',
