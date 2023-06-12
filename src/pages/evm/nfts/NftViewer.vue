@@ -1,40 +1,8 @@
 <script setup lang="ts">
-/*
-Possible NFT configurations after shaping:
-- no media
-    - display full-size no media placeholder
-- image
-    - display image
-- video
-    - preview mode
-        - show cover image with play icon in center
-    - regular mode:
-        - display cover image with play icon in the center. on hover icon should grow slightly
-        - on click, play video (no loop)
-        - on hover, show controls
-        - after video completes, show replay icon in center. on hover icon should grow slightly
-- audio with cover image
-    - show image
-    - preview mode:
-        - show cover image with headphones icon in the center
-    - regular mode:
-        - show audio controls under the image (no loop)
-        - on hover of image, show play icon in the center
-        - on click, play audio
-        - on hover while playing, show pause icon
-        - after audio completes, show replay icon
-- audio without cover image
-    - preview mode:
-        - show gray tile with headphones icon
-    - regular mode:
-        - same as audio with cover image, but show no image;
-          show headphones icon in the center when not hovering
- */
 
 import { computed, ref } from 'vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
 
 const { t } = useI18n();
 
@@ -57,7 +25,6 @@ const videoElement = ref<HTMLVideoElement | null>(null);
 
 const audioIsPlaying = ref(false);
 const audioIsAtEnd = ref(false);
-const audioElement = ref<HTMLAudioElement | null>(null);
 
 // computed
 const nftType = computed(() => {
@@ -234,7 +201,6 @@ function playVideo() {
     &__image-container,
     &__video-container,
     &__blank-container {
-        //flex: 0 1 100%;
         width: 100%;
     }
 
