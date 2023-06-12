@@ -79,6 +79,7 @@ const ownerLink = computed(() => {
 
     <div v-if="!nft">
         <!--eztodo loading state-->
+        <!--eztodo not found state-->
         NFT not found placeholder
     </div>
 
