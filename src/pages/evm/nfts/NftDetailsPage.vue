@@ -16,12 +16,17 @@ const nftStore = useNftsStore();
 const chainStore = useChainStore();
 
 const nft = ref<ShapedNFT | null>(null);
+const loading = ref(true);
 
 // eztodo handle invalid state / no query params / invalid query params
 
 onBeforeMount(() => {
     nftStore.getNftDetails('current', route.query.contract as string, route.query.id as string).then((nftResponse) => {
-        nft.value = nftResponse ?? null;
+        // eztodo remove fake loading time
+        setTimeout(() => {
+            nft.value = nftResponse ?? null;
+            loading.value = false;
+        }, 1500);
     });
 });
 
@@ -53,9 +58,13 @@ const ownerLink = computed(() => {
     <!--eztodo i18n-->
     <template v-slot:header>
         <div v-if="!nft">
-            <!--eztodo loading state-->
-            <!--eztodo not found state-->
-            NFT not found placeholder
+            <div v-if="loading" class="q-mt-xl flex flex-center">
+                <q-spinner size="lg" />
+            </div>
+            <div v-else>
+                <!--eztodo not found state-->
+                NFT not found placeholder
+            </div>
         </div>
         <div v-else class="c-nft-details__header-container">
             <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
@@ -78,9 +87,13 @@ const ownerLink = computed(() => {
     </template>
 
     <div v-if="!nft">
-        <!--eztodo loading state-->
-        <!--eztodo not found state-->
-        NFT not found placeholder
+        <div v-if="loading" class="q-mt-xl flex flex-center">
+            <q-spinner size="lg" />
+        </div>
+        <div v-else>
+            <!--eztodo not found state-->
+            NFT not found placeholder
+        </div>
     </div>
 
     <div v-else>

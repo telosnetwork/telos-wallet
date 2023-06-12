@@ -21,10 +21,13 @@ watch(
     (newValue) => {
         const address = newValue?.loggedAccount?.account;
         if (address) {
-            nftStore.fetchNFtsForAccount('current', address).then(() => {
-                nfts.value = nftStore.getAccountNfts('current', address);
-                loading.value = false;
-            });
+            // eztodo remove fake loading time
+            setTimeout(() => {
+                nftStore.fetchNFtsForAccount('current', address).then(() => {
+                    nfts.value = nftStore.getAccountNfts('current', address);
+                    loading.value = false;
+                });
+            }, 2000);
         }
     },
     {
@@ -40,7 +43,9 @@ watch(
         <h1>{{ $t('evm_wallet.inventory') }}</h1>
     </template>
 
-    <div v-if="loading">loading placeholder</div>
+    <div v-if="loading" class="q-mt-xl flex flex-center">
+        <q-spinner size="lg" />
+    </div>
 
     <div v-else class="c-nft-page">
         <q-checkbox v-model="showNftsAsTiles" class="q-mb-lg">Show as tile?</q-checkbox>
