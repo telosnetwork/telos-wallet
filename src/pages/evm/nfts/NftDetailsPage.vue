@@ -54,6 +54,7 @@ const ownerLink = computed(() => {
     <template v-slot:header>
         <div v-if="!nft">
             <!--eztodo loading state-->
+            <!--eztodo not found state-->
             NFT not found placeholder
         </div>
         <div v-else class="c-nft-details__header-container">
