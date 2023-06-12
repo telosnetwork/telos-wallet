@@ -55,6 +55,10 @@ const videoIsPlaying = ref(false);
 const videoIsAtEnd = ref(false);
 const videoElement = ref<HTMLVideoElement | null>(null);
 
+const audioIsPlaying = ref(false);
+const audioIsAtEnd = ref(false);
+const audioElement = ref<HTMLAudioElement | null>(null);
+
 // computed
 const nftType = computed(() => {
     if (props.nft.imageSrcFull && !props.nft.audioSrc && !props.nft.videoSrc) {
@@ -68,7 +72,11 @@ const nftType = computed(() => {
     }
 });
 
-const showCoverImage = computed(() => nftType.value === nftTypes.image || props.previewMode);
+const showCoverImage = computed(() =>
+    nftType.value === nftTypes.image ||
+    props.previewMode ||
+    nftType.value === nftTypes.audio,
+);
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
 const imageAlt = computed(() => {
@@ -85,7 +93,8 @@ const imageAlt = computed(() => {
 const iconOverlayName = computed(() => {
     const showIconOverlay =
         (props.previewMode && nftType.value !== nftTypes.image) ||
-        (nftType.value === nftTypes.video && !videoIsPlaying.value);
+        (nftType.value === nftTypes.video && !videoIsPlaying.value) ||
+        (nftType.value === nftTypes.audio && !props.nft.imageSrcFull);
 
     if (!showIconOverlay) {
         return '';
@@ -109,70 +118,88 @@ const iconOverlayName = computed(() => {
 
 // methods
 function playVideo() {
-    if (videoElement.value === null) {
+    if (videoElement.value === null || props.previewMode) {
         return;
     }
 
     if (!videoIsPlaying.value) {
         videoElement.value.play();
     }
-
 }
 
 </script>
 
 <template>
+<!--eztodo consider a11y-->
 <div
     :class="{
         'c-nft-viewer': true,
         'c-nft-viewer--preview': previewMode,
+        'c-nft-viewer--video': nftType === nftTypes.video,
     }"
 >
-    <div v-if="showCoverImage" class="c-nft-viewer__image-container">
-        <img
-            v-if="!showPlaceholderCoverImage"
-            :src="nft.imageSrcFull"
-            :alt="imageAlt"
-            class="c-nft-viewer__image"
+    <div class="c-nft-viewer__media-container">
+        <div v-if="showCoverImage" class="c-nft-viewer__image-container">
+            <img
+                v-if="!showPlaceholderCoverImage"
+                :src="nft.imageSrcFull"
+                :alt="imageAlt"
+                class="c-nft-viewer__image"
+            >
+            <div v-else class="c-nft-viewer__placeholder-image"></div>
+        </div>
+
+        <div
+            v-else-if="nftType === nftTypes.video"
+            class="c-nft-viewer__video-container"
+            @click="playVideo"
         >
-        <div v-else class="c-nft-viewer__placeholder-image"></div>
+            <video
+                ref="videoElement"
+                :src="nft.videoSrc"
+                :controls="videoIsPlaying"
+                class="c-nft-viewer__video"
+                @play="videoIsPlaying = true; videoIsAtEnd = false"
+                @pause="videoIsPlaying = false; videoIsAtEnd = false"
+                @ended="videoIsPlaying = false; videoIsAtEnd = true"
+            ></video>
+        </div>
+
+        <div v-else-if="nftType === nftTypes.none" class="c-nft-viewer__blank-container">
+
+        </div>
+
+        <template v-if="iconOverlayName">
+            <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
+
+            <q-icon
+                :name="iconOverlayName"
+                size="lg"
+                color="primary"
+                class="c-nft-viewer__overlay-icon"
+            />
+        </template>
+
     </div>
 
-    <div
-        v-else-if="nftType === nftTypes.video"
-        class="c-nft-viewer__video-container"
-        @click="playVideo"
-    >
-        <video
-            ref="videoElement"
-            :src="nft.videoSrc"
-            :controls="videoIsPlaying"
-            class="c-nft-viewer__video"
-            @play="videoIsPlaying = true; videoIsAtEnd = false"
-            @pause="videoIsPlaying = false; videoIsAtEnd = false"
-            @ended="videoIsPlaying = false; videoIsAtEnd = true"
-        ></video>
-        <!-- Implement video here https://github.com/telosnetwork/telos-wallet/issues/347 -->
-    </div>
 
-    <div v-else-if="nftType === nftTypes.audio" class="c-nft-viewer__audio-container">
-        <!-- Implement audio here https://github.com/telosnetwork/telos-wallet/issues/347 -->
-    </div>
+    <audio
+        v-if="nftType === nftTypes.audio && !previewMode"
+        controls
+        :src="nft.audioSrc"
+        class="c-nft-viewer__audio"
+        @play="audioIsPlaying = true; audioIsAtEnd = false"
+        @pause="audioIsPlaying = false; audioIsAtEnd = false"
+        @ended="audioIsPlaying = false; audioIsAtEnd = true"
+    ></audio>
 
-    <div v-else-if="nftType === nftTypes.none" class="c-nft-viewer__blank-container">
+    <!--<div-->
+    <!--    class="c-nft-viewer__audio-container"-->
+    <!--    @click="playAudio"-->
+    <!--&gt;-->
+    <!--    &lt;!&ndash; Implement audio here https://github.com/telosnetwork/telos-wallet/issues/347 &ndash;&gt;-->
 
-    </div>
-
-    <template v-if="iconOverlayName">
-        <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
-
-        <q-icon
-            :name="iconOverlayName"
-            size="lg"
-            color="primary"
-            class="c-nft-viewer__overlay-icon"
-        />
-    </template>
+    <!--</div>-->
 </div>
 </template>
 
@@ -181,27 +208,33 @@ function playVideo() {
     $this: &;
 
     position: relative;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
-    max-height: 432px;
+    gap: 8px;
 
     &--preview {
         max-height: 270px;
     }
 
-    &:hover:not(#{$this}--preview) {
+    &--video:hover:not(#{$this}--preview) {
         #{$this}__overlay-icon-bg,
         #{$this}__overlay-icon {
             transform: scale(1.1);
         }
     }
 
-    &__image-container,
-    &__image,
-    &__video-container,
-    &__audio-container,
-    &__blank-container {
+    &__media-container {
+        position: relative;
         height: 100%;
+        width: 100%;
+    }
+
+    &__image-container,
+    &__video-container,
+    &__blank-container {
+        //flex: 0 1 100%;
         width: 100%;
     }
 
@@ -209,6 +242,9 @@ function playVideo() {
         display: flex;
         justify-content: center;
         align-items: center;
+        margin: auto;
+        height: 100%;
+        max-height: 432px;
     }
 
     &__image {
@@ -254,22 +290,31 @@ function playVideo() {
         height: 100%;
         width: 100%;
         min-height: 270px;
+        max-width: 432px;
         border-radius: 4px;
         background-color: var(--header-bg-color);
+        border: 1px solid darken($page-header, 5%);
     }
 
     &__video-container {
-
+        margin: auto;
     }
 
     &__video {
-        //pointer-events: none;
         width: 100%;
         cursor: pointer;
     }
 
     &__audio-container {
 
+    }
+
+    &__audio {
+        width: 100%;
+        margin: auto;
+        max-width: 432px;
+        display: block;
+        flex-shrink: 0;
     }
 
     &__blank-container {

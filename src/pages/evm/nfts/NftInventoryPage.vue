@@ -26,7 +26,8 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Highly detailed!',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
+        text: 'Somewhat cheesy with hints of spring water',
         text: 'Somewhat cheesy with hints of spring water',
     }, {
         label: 'Time It Took to Make',
@@ -45,7 +46,7 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Low :(',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Woody top notes, grassy finish',
     }, {
         label: 'Time It Took to Make',
@@ -64,7 +65,7 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Not really applicable',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Very digital, reminiscent of ozone',
     }, {
         label: 'Time It Took to Make',
@@ -83,7 +84,7 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Who makes these attributes...?',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Just... off. Not quite right ya know?',
     }, {
         label: 'Time It Took to Make',
@@ -102,11 +103,11 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: '7',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Floral yet somehow also like acrylic paint.',
     }, {
         label: 'Time It Took to Make',
-        text: 'What do you think? It took several time units',
+        text: 'It took several time units',
     }],
     audioSrc: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
 }, {
@@ -120,7 +121,7 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Medium-ish',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Ever smelled naphtha?',
     }, {
         label: 'Time It Took to Make',
@@ -140,7 +141,7 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Grainier than a field of wheat',
     }, {
-        label: 'Scent',
+        label: 'Vibe',
         text: 'Like a field of wheat',
     }, {
         label: 'Time It Took to Make',
@@ -159,8 +160,8 @@ const nfts: ShapedNFT[] = [{
         label: 'Level of Detail',
         text: 'Yowza!',
     }, {
-        label: 'Scent',
-        text: 'Here\'s the thing. This is a piece of digital art. Digital art has no scent per se, but what I can do is tell you about how it makes me feel, and try to map that onto an olfactory sensation. It makes me feel like I am writing this description to make sure we handle long strings alright. How about that?',
+        label: 'Vibe',
+        text: 'Here\'s the thing. This is a piece of digital art. What I can do is tell you about how it makes me feel. It makes me feel like I am writing this description to make sure we handle long strings correctly. How about that? I think the vibe is just fine for this particular piece. regardless, I have to keep typing to this gets nice and lengthy. NFTs are a very cool invention, and this piece is a testament to that fact.',
     }, {
         label: 'Time It Took to Make',
         text: 'Who knows man, I usually track time by how many songs I listened to while making it, but I was listening to the same some over and over. Sorry',
