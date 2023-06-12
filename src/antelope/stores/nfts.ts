@@ -183,7 +183,7 @@ const nftsInitialState: NftsState = {
                         text: 'Medium-ish',
                     }, {
                         label: 'Vibe',
-                        text: 'Ever smelled naphtha?',
+                        text: 'Rather chill with a dash of angst',
                     }, {
                         label: 'Time It Took to Make',
                         text: 'I don\'t know, I didn\'t make it',
