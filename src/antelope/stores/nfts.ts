@@ -10,7 +10,6 @@ import { Label } from 'src/antelope/types';
 
 import { useFeedbackStore } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
-import account from 'src/store/account';
 
 
 export interface NftsState {
@@ -35,18 +34,9 @@ export const useNftsStore = defineStore(store_name, {
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
         },
-        async getNftsFromContract(label: Label, contract: string): Promise<void> {
+        async fetchNftsForContract(label: Label, contract: string): Promise<void> {
             // get NFTs from indexer here
             // this.setContractNfts(label, contract, nfts);
-        },
-        async getNftDetails(label: Label, contract: string, id: string) {
-            // initial state temporarily contains all mock data
-            // await this.getNftsFromContract(label, contract);
-
-            const nftsForContract = this.__nfts[label].contracts[contract];
-
-            const nft = nftsForContract.find(({ id: nftId }) => nftId === id);
-            return nft;
         },
         async fetchNFtsForAccount(label: Label, address: string) {
             // replace all of this logic with real fetch & set
@@ -55,12 +45,20 @@ export const useNftsStore = defineStore(store_name, {
             ).flat();
             this.setAccountNfts(label, address, nfts);
         },
+        async getNftDetails(label: Label, contract: string, id: string) {
+            // initial state temporarily contains all mock data
+            // need to handle nft not found, perhaps log antelope error
+            // await this.getNftsFromContract(label, contract);
+
+            const nftsForContract = this.__nfts[label].contracts[contract];
+
+            return nftsForContract.find(({ id: nftId }) => nftId === id);
+        },
 
         // Commits ----
         setContractNfts(label: Label, contract: string, nfts: ShapedNFT[]) {
             this.__nfts[label].contracts[contract] = nfts;
         },
-
         setAccountNfts(label: Label, address: string, nfts: ShapedNFT[]) {
             this.__nfts[label].accounts[address] = nfts;
         },
