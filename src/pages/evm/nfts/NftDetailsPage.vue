@@ -22,8 +22,6 @@ const chainStore = useChainStore();
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 
-// eztodo nft with no attributes
-// eztodo nft with no media
 
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
@@ -182,6 +180,10 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else>
+                <p v-if="!nft.attributes?.length">
+                    {{ $t('nft.no_attributes') }}
+                </p>
+
                 <NftDetailsCard
                     v-for="(attribute, index) in nft.attributes"
                     :key="`nft-attr-${index}`"
@@ -193,7 +195,6 @@ const ownerLink = computed(() => {
             </template>
         </div>
     </div>
-
 </AppPage>
 </template>
 

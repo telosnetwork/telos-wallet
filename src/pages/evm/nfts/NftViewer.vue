@@ -40,9 +40,8 @@ const nftType = computed(() => {
 });
 
 const showCoverImage = computed(() =>
-    nftType.value === nftTypes.image ||
-    props.previewMode ||
-    nftType.value === nftTypes.audio,
+    [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) ||
+    props.previewMode,
 );
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
@@ -61,7 +60,8 @@ const iconOverlayName = computed(() => {
     const showIconOverlay =
         (props.previewMode && nftType.value !== nftTypes.image) ||
         (nftType.value === nftTypes.video && !videoIsPlaying.value) ||
-        (nftType.value === nftTypes.audio && !props.nft.imageSrcFull);
+        (nftType.value === nftTypes.audio && !props.nft.imageSrcFull) ||
+        nftType.value === nftTypes.none;
 
     if (!showIconOverlay) {
         return '';
@@ -146,7 +146,6 @@ function playVideo() {
                 class="c-nft-viewer__overlay-icon"
             />
         </template>
-
     </div>
 
 
