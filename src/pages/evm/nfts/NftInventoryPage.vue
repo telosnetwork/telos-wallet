@@ -187,6 +187,7 @@ const showNftsAsTiles = ref(true);
     </template>
 
     <div class="c-nft-page">
+        <!--TODO remove this i18n entry-->
         <q-checkbox v-model="showNftsAsTiles" class="q-mb-lg">{{ $t('nft.tile_toggle_radio_label') }}</q-checkbox>
 
         <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">

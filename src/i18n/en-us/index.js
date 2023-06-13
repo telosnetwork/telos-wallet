@@ -123,7 +123,7 @@ export default {
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
         details_page_title: 'NFT Details Page',
-        tile_toggle_radio_label: 'Show as tile?'
+        tile_toggle_radio_label: 'Show as tile?',
     },
     notification:{
         success_title_trx: 'Success',
