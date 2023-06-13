@@ -200,6 +200,25 @@ export default defineComponent({
                 />
                 {{ $t('nav.wallet') }}
             </li>
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-nfts')"
+                @keypress.space.enter="goTo('evm-nfts')"
+            >
+                <InlineSvg
+                    :src="require('src/assets/icon--nft.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-nfts',
+                    }"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ $t('nav.nfts') }}
+            </li>
 
             <li
                 v-if="false"

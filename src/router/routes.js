@@ -41,6 +41,16 @@ const routes = [
                 name: 'evm-receive',
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
+            {
+                path: 'nfts',
+                name: 'evm-nfts',
+                component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
+            },
+            {
+                path: 'nft-details',
+                name: 'evm-nft-details',
+                component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
+            },
             // {
             //     path: 'staking',
             //     name: 'evm-staking',

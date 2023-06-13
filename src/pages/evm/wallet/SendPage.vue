@@ -376,7 +376,7 @@ export default defineComponent({
                     >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-space v-if="!isMobile"/>
-                        <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
+                        <q-icon size="xs" name="o_launch" class="c-send-page__view-contract-min-icon" />
                     </div>
                 </div>
                 <!-- Amount input -->

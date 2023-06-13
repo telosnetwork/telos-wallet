@@ -136,6 +136,10 @@ export default defineComponent({
     &__body {
         padding: 24px;
 
+        @include tiny-only {
+            padding: 16px;
+        }
+
         @include md-and-up {
             padding: 32px;
         }

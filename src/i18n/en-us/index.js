@@ -51,6 +51,7 @@ export default {
         logout: 'Log Out',
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
+        nfts: 'Inventory (NFTs)',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',
@@ -98,6 +99,7 @@ export default {
         add_to_metamask: 'Add to MetaMask',
         rejected_metamask_prompt: 'The MetaMask prompt was rejected',
         error_adding_token_to_metamask: 'Error adding token to MetaMask',
+        inventory: 'Inventory',
     },
     global: {
         native: 'Native',
@@ -115,6 +117,13 @@ export default {
         transactions: 'Transactions',
         rows_per_page: 'Rows per page',
         amount: 'Amount',
+    },
+    nft : {
+        link_to_nft_details: 'Go to NFT details page for {name}',
+        img_alt: 'NFT - {nftInfo}',
+        img_alt_video_nft: 'Video NFT cover - {nftInfo}',
+        details_page_title: 'NFT Details Page',
+        tile_toggle_radio_label: 'Show as tile?',
     },
     notification:{
         success_title_trx: 'Success',

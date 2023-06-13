@@ -113,7 +113,7 @@ export default defineComponent({
                         aria-hidden="true"
                     /></div>
                     <h5>{{ $t('nav.teloscan') }}</h5>
-                    <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
+                    <q-icon size="xs" name="o_launch" class="c-user-info__menu-item-min-icon" />
                 </li>
                 <li
                     class="c-user-info__menu-item"
