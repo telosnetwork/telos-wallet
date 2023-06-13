@@ -44,3 +44,10 @@ export interface IndexerAccountBalances {
     };
     results: IndexerTokenBalance[];
 }
+
+export interface IndexerHealthResponse {
+    success: boolean;
+    blockNumber: number;
+    blockTimestamp: string;
+    secondsBehind: number;
+}

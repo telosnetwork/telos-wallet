@@ -16,6 +16,16 @@ export class AntelopeConfig {
             return new AntelopeError(description, { error: str });
         }
     }
+    // indexer health threshold --
+    private __indexer_health_threshold = 10; // 10 seconds
+
+    // indexer health check interval --
+    private __indexer_health_check_interval = 1000 * 60 * 5; // 5 minutes expressed in milliseconds
+
+    // notifucation handlers --
+    private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
+    private __notify_success_handler: (message: string) => void = alert;
+    private __notify_warning_handler: (message: string) => void = alert;
 
     // notification handlers --
     private __notify_successful_trx_handler: (link: string) => void = alert;
@@ -95,6 +105,27 @@ export class AntelopeConfig {
     get app() {
         return this.__app;
     }
+
+    get indexerHealthThresholdSeconds() {
+        return this.__indexer_health_threshold;
+    }
+
+    get indexerHealthCheckInterval() {
+        return this.__indexer_health_check_interval;
+    }
+
+    get notifyErrorHandler() {
+        return this.__notify_error_handler;
+    }
+
+    get notifySuccessHandler() {
+        return this.__notify_success_handler;
+    }
+
+    get notifyWarningHandler() {
+        return this.__notify_warning_handler;
+    }
+
     get notifySuccessfulTrxHandler() {
         return this.__notify_successful_trx_handler;
     }
@@ -131,7 +162,28 @@ export class AntelopeConfig {
         return this.__error_to_string_handler;
     }
 
-    // setting notifucation handlers --
+    // setting indexer constants --
+    public setIndexerHealthThresholdSeconds(threshold: number) {
+        this.__indexer_health_threshold = threshold;
+    }
+
+    public setIndexerHealthCheckInterval(interval: number) {
+        this.__indexer_health_check_interval = interval;
+    }
+
+    // setting notification handlers --
+    public setNotifyErrorHandler(handler: (message: string) => void) {
+        this.__notify_error_handler = handler;
+    }
+
+    public setNotifySuccessHandler(handler: (message: string) => void) {
+        this.__notify_success_handler = handler;
+    }
+
+    public setNotifyWarningHandler(handler: (message: string) => void) {
+        this.__notify_warning_handler = handler;
+    }
+
     public setNotifySuccessfulTrxHandler(handler: (link: string) => void) {
         this.__notify_successful_trx_handler = handler;
     }

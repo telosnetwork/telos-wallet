@@ -16,11 +16,12 @@ import {
     TokenBalance,
     MarketSourceInfo,
     TokenMarketData,
+    IndexerHealthResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
-
+import { getAntelope } from 'src/antelope';
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -34,6 +35,15 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External indexer API support
     protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerApiEndpoint() });
+
+    // indexer health check promise
+    protected _indexerHealthState: {
+        promise: Promise<IndexerHealthResponse> | null;
+        state: IndexerHealthResponse
+    } = {
+        promise: null,
+        state: this.deathHealthResponse,
+    };
 
     // Token list promise
     tokenListPromise: Promise<TokenClass[]> | null = null;
@@ -77,6 +87,64 @@ export default abstract class EVMChainSettings implements ChainSettings {
         this.hyperion.interceptors.response.use(responseHandler, erorrHandler);
         this.indexer.interceptors.response.use(responseHandler, erorrHandler);
 
+        // Check indexer health state periodically
+        this.updateIndexerHealthState();
+        // this setTimeout is a work arround because we can't call getAntelope() function before it initializes
+        setTimeout(() => {
+            setInterval(() => {
+                this.updateIndexerHealthState();
+            }, getAntelope().config.indexerHealthCheckInterval);
+        }, 1000);
+    }
+
+    get deathHealthResponse() {
+        return {
+            success: false,
+            blockNumber: 0,
+            blockTimestamp: '',
+            secondsBehind: Number.POSITIVE_INFINITY,
+        } as IndexerHealthResponse;
+    }
+
+    async updateIndexerHealthState() {
+        // resolve if this chain has indexer api support and is working fine
+
+        const promise =
+            Promise.resolve(this.hasIndexerSupport())
+                .then(hasIndexerSupport =>
+                    hasIndexerSupport ?
+                        this.indexer.get('/v1/health') :
+                        Promise.resolve({ data: this.deathHealthResponse } as AxiosResponse<IndexerHealthResponse>),
+                )
+                .then(response => response.data as unknown as IndexerHealthResponse)
+                .catch((error) => {
+                    console.error('Indexer API not working for this chain:', this.getNetwork(), error);
+                    return this.deathHealthResponse as IndexerHealthResponse;
+                });
+
+        // initial state
+        this._indexerHealthState = {
+            promise,
+            state: this.deathHealthResponse,
+        };
+
+        // update indexer health state
+        promise.then((state) => {
+            this._indexerHealthState.state = state;
+        });
+
+        return promise;
+    }
+
+    isIndexerHealthy(): boolean {
+        return (
+            this._indexerHealthState.state.success &&
+            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+        );
+    }
+
+    get indexerHealthState(): IndexerHealthResponse {
+        return this._indexerHealthState.state;
     }
 
     isNative() {
@@ -111,10 +179,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getTrustedContractsBucket(): string;
     abstract getImportantTokensIdList(): string[];
     abstract getIndexerApiEndpoint(): string;
-    abstract hasIndexSupport(): boolean;
+    abstract hasIndexerSupport(): boolean;
 
     async getBalances(account: string): Promise<TokenBalance[]> {
-        if (!this.hasIndexSupport()) {
+        if (!this.hasIndexerSupport()) {
             console.error('Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
