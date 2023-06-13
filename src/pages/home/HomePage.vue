@@ -85,6 +85,16 @@ export default defineComponent({
                         @close-wallet-options="showWalletOptions = false"
                     />
                 </div>
+                <div v-if="tab === 'left'" class="c-home__external-link">
+                    <a
+                        href="https://docs.telos.net/overview/getting-started/wallet-introduction"
+                        target="_blank"
+                        class="c-home__external-link-text"
+                    >
+                        {{$t('home.wallet_introduction')}}
+                    </a>
+                    <q-icon size="16px" name="launch" />
+                </div>
                 <q-footer bordered class="c-home__footer">
                     <q-toolbar class="bg-dark flex-center">
                         <a
@@ -182,6 +192,27 @@ export default defineComponent({
         &--activated {
             background-color: white;
             color: var(--link-color);
+        }
+    }
+
+    &__external-link {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        margin-top: 24px;
+        color: white
+    }
+
+    &__external-link-text {
+        @include text--small;
+        color: white;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 
