@@ -9,8 +9,12 @@ import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import NumberedList from 'components/NumberedList.vue';
+import { isValidAddressFormat } from 'src/antelope/stores/utils';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
+const { t: $t } = useI18n();
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
@@ -19,9 +23,14 @@ const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 
 // eztodo handle invalid state / no query params / invalid query params
+// eztodo nft with no attributes
+// eztodo nft with no media
+
+const contractAddress = route.query.contract as string;
+const nftId = route.query.id as string;
 
 onBeforeMount(() => {
-    nftStore.getNftDetails('current', route.query.contract as string, route.query.id as string).then((nftResponse) => {
+    nftStore.getNftDetails('current', contractAddress, nftId).then((nftResponse) => {
         // eztodo remove fake loading time
         setTimeout(() => {
             nft.value = nftResponse ?? null;
@@ -35,12 +44,15 @@ const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getEx
 
 
 // computed
+const contractAddressIsValid = computed(
+    () => isValidAddressFormat(contractAddress),
+);
 const contractLink = computed(() => {
-    if (!nft.value) {
+    if (!contractAddressIsValid.value) {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.contractAddress}`;
+    return `${explorerUrl}/address/${contractAddress}`;
 });
 
 const ownerLink = computed(() => {
@@ -55,9 +67,14 @@ const ownerLink = computed(() => {
 
 <template>
 <AppPage>
-    <!--eztodo i18n-->
+    <!--eztodo i18n everywhere-->
     <template v-slot:header>
-        <div class="c-nft-details__header-container">
+        <div
+            :class="{
+                'c-nft-details__header-container': true,
+                'c-nft-details__header-container--grid': nft !== null || loading,
+            }"
+        >
             <template v-if="loading">
                 <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
                     <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
@@ -77,7 +94,12 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else-if="nft === null">
-                not found placeholder
+                <h1 class="u-text--center q-mb-md u-text--high-contrast">
+                    {{ $t('nft.collectible_not_found_header') }}
+                </h1>
+                <p class="q-mb-xl">
+                    {{ $t('nft.collectible_not_found_subheader') }}
+                </p>
             </template>
 
             <template v-else>
@@ -105,9 +127,27 @@ const ownerLink = computed(() => {
     <div class="c-nft-details__body-container">
         <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
         <!--eztodo not found state-->
-        <h4 v-else class="q-mb-lg">Attributes</h4>
+        <h4
+            v-else
+            :class="{
+                'q-mb-lg': true,
+                'u-text--center': nft === null,
+            }"
+        >
+            <template v-if="nft === null">
+                We recommend verifying the following:
+            </template>
+            <template v-else>
+                Attributes
+            </template>
+        </h4>
 
-        <div class="c-nft-details__attributes-container">
+        <div
+            :class="{
+                'c-nft-details__attributes-container': true,
+                'c-nft-details__attributes-container--not-found': nft === null && !loading,
+            }"
+        >
             <template v-if="loading">
                 <q-skeleton
                     v-for="index in 9"
@@ -117,7 +157,37 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else-if="nft === null">
+                <NumberedList>
+                    <template v-slot:1>
+                        <p>
+                            {{ $t('nft.collectible_not_found_contract_part_1') }}
+                            <span class="o-text--paragraph-bold">
+                                {{ $t('nft.collectible_not_found_contract_part_2_bold') }}
+                            </span>
+                            {{ $t('nft.collectible_not_found_contract_part_3') }}
 
+                            <template v-if="contractAddressIsValid">
+                                {{ $t('nft.collectible_not_found_contract_part_4') }}
+                                <br>
+                                <ExternalLink :text="contractAddress" :url="contractLink" />
+                            </template>
+
+                            <template v-else>
+                                {{ $t('nft.collectible_not_found_contract_invalid') }}
+                            </template>
+                        </p>
+                    </template>
+
+                    <template v-slot:2>
+                        <p>
+                            {{ $t('nft.collectible_not_found_nft_id_part_1') }}
+                            <span class="o-text--paragraph-bold">
+                                {{ $t('global.id') }}
+                            </span>
+                            {{ $t('nft.collectible_not_found_nft_id_part_3') }}
+                        </p>
+                    </template>
+                </NumberedList>
             </template>
 
             <template v-else>
@@ -138,35 +208,39 @@ const ownerLink = computed(() => {
 
 <style lang="scss">
 .c-nft-details {
+    $this: &;
+
     &__header-container {
-        display: grid;
-        grid-template-areas:
+        &--grid {
+            display: grid;
+            grid-template-areas:
                 'a'
                 'b'
                 'c'
                 'd'
                 'e';
-        gap: 8px;
-        width: 100%;
+            gap: 8px;
+            width: 100%;
 
-        @include sm-and-up {
-            grid-template-areas:
+            @include sm-and-up {
+                grid-template-areas:
                 'a a'
                 'b b'
                 'c d'
                 'e e';
-            max-width: 432px;
-        }
+                max-width: 432px;
+            }
 
-        @include md-and-up {
-            grid-template-areas:
+            @include md-and-up {
+                grid-template-areas:
                 'a a a b b'
                 'a a a c d'
                 'a a a e e'
                 'a a a . .';
-            max-width: 1000px;
-            width: max-content;
-            grid-template-columns: repeat(5, 1fr);
+                max-width: 1000px;
+                width: max-content;
+                grid-template-columns: repeat(5, 1fr);
+            }
         }
     }
 
@@ -224,12 +298,19 @@ const ownerLink = computed(() => {
         gap: 8px;
         grid-template-columns: 1fr;
 
-        @include sm-and-up {
-            grid-template-columns: 1fr 1fr;
+        &:not(#{$this}__attributes-container--not-found) {
+            @include sm-and-up {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            @include md-and-up {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
         }
 
-        @include md-and-up {
-            grid-template-columns: 1fr 1fr 1fr;
+        &--not-found {
+            max-width: 400px;
+            margin: auto;
         }
     }
 
