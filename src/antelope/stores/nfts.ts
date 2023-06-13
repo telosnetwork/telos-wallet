@@ -14,8 +14,8 @@ import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback'
 
 export interface NftsState {
     __nfts: {
-        // each entry should be a contract address and a list of its NFTs
         [label: Label]: {
+            // each entry should be a contract address and a list of its NFTs
             contracts: Record<string, ShapedNFT[]>,
             accounts: Record<string, ShapedNFT[]>,
         },
