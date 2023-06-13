@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ExternalLink from 'components/ExternalLink.vue';
 
 const props = defineProps<{
     title: string,

@@ -51,7 +51,7 @@ export default {
         logout: 'Log Out',
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
-        nfts: 'Inventory (NFTs)',
+        nfts: 'Digital Collectibles',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',

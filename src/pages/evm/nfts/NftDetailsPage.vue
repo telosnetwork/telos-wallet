@@ -57,57 +57,79 @@ const ownerLink = computed(() => {
 <AppPage>
     <!--eztodo i18n-->
     <template v-slot:header>
-        <div v-if="!nft">
-            <div v-if="loading" class="q-mt-xl flex flex-center">
-                <q-spinner size="lg" />
-            </div>
-            <div v-else>
-                <!--eztodo not found state-->
-                NFT not found placeholder
-            </div>
-        </div>
-        <div v-else class="c-nft-details__header-container">
-            <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
-            <NftDetailsCard title="Collection" class="c-nft-details__header-card">
-                <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
-            </NftDetailsCard>
+        <div class="c-nft-details__header-container">
+            <template v-if="loading">
+                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                </div>
+                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                </div>
+                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                </div>
+                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                </div>
+                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                </div>
+            </template>
 
-            <NftDetailsCard title="ID" class="c-nft-details__header-card">
-                {{ nft.id }}
-            </NftDetailsCard>
+            <template v-else-if="nft === null">
+                not found placeholder
+            </template>
 
-            <NftDetailsCard title="Owner" class="c-nft-details__header-card">
-                <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
-            </NftDetailsCard>
+            <template v-else>
+                <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
+                <NftDetailsCard title="Collection" class="c-nft-details__header-card">
+                    <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
+                </NftDetailsCard>
 
-            <NftDetailsCard v-if="nft.description" title="Description" class="c-nft-details__header-card">
-                {{ nft.description }}
-            </NftDetailsCard>
+                <NftDetailsCard title="ID" class="c-nft-details__header-card">
+                    {{ nft.id }}
+                </NftDetailsCard>
+
+                <NftDetailsCard title="Owner" class="c-nft-details__header-card">
+                    <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
+                </NftDetailsCard>
+
+                <NftDetailsCard v-if="nft.description" title="Description" class="c-nft-details__header-card">
+                    {{ nft.description }}
+                </NftDetailsCard>
+            </template>
+
         </div>
     </template>
 
-    <div v-if="!nft">
-        <div v-if="loading" class="q-mt-xl flex flex-center">
-            <q-spinner size="lg" />
-        </div>
-        <div v-else>
-            <!--eztodo not found state-->
-            NFT not found placeholder
-        </div>
-    </div>
-
-    <div v-else>
-        <h4 class="q-mb-lg">Attributes</h4>
+    <div class="c-nft-details__body-container">
+        <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
+        <!--eztodo not found state-->
+        <h4 v-else class="q-mb-lg">Attributes</h4>
 
         <div class="c-nft-details__attributes-container">
-            <NftDetailsCard
-                v-for="(attribute, index) in nft.attributes"
-                :key="`nft-attr-${index}`"
-                :title="attribute.label"
-                class="q-mb-sm"
-            >
-                {{ attribute.text }}
-            </NftDetailsCard>
+            <template v-if="loading">
+                <q-skeleton
+                    v-for="index in 9"
+                    :key="`nft-detail-body-skeleton-${index}`"
+                    class="c-nft-details__attribute-skeleton"
+                />
+            </template>
+
+            <template v-else-if="nft === null">
+
+            </template>
+
+            <template v-else>
+                <NftDetailsCard
+                    v-for="(attribute, index) in nft.attributes"
+                    :key="`nft-attr-${index}`"
+                    :title="attribute.label"
+                    class="q-mb-sm"
+                >
+                    {{ attribute.text }}
+                </NftDetailsCard>
+            </template>
         </div>
     </div>
 
@@ -148,6 +170,11 @@ const ownerLink = computed(() => {
         }
     }
 
+    &__body-container {
+        margin: auto;
+        max-width: 1000px;
+    }
+
     &__viewer {
         grid-area: a;
     }
@@ -168,6 +195,28 @@ const ownerLink = computed(() => {
         &:nth-of-type(5) {
             grid-area: e;
         }
+
+        &--placeholder {
+            margin: auto;
+            height: 80px;
+            width: 100%;
+
+            &:first-of-type {
+                grid-area: a;
+                width: 270px;
+                height: 270px;
+
+                @include md-and-up {
+                    width: 432px;
+                    height: 432px;
+                }
+            }
+        }
+    }
+
+    &__header-skeleton {
+        height: 100%;
+        width: 100%;
     }
 
     &__attributes-container {
@@ -182,6 +231,17 @@ const ownerLink = computed(() => {
         @include md-and-up {
             grid-template-columns: 1fr 1fr 1fr;
         }
+    }
+
+    &__body-header-skeleton {
+        width: 100%;
+        height: 50px;
+        max-width: 250px;
+        margin-bottom: 24px;
+    }
+
+    &__attribute-skeleton {
+        height: 100px;
     }
 }
 </style>

@@ -159,14 +159,6 @@ function playVideo() {
         @pause="audioIsPlaying = false; audioIsAtEnd = false"
         @ended="audioIsPlaying = false; audioIsAtEnd = true"
     ></audio>
-
-    <!--<div-->
-    <!--    class="c-nft-viewer__audio-container"-->
-    <!--    @click="playAudio"-->
-    <!--&gt;-->
-    <!--    &lt;!&ndash; Implement audio here https://github.com/telosnetwork/telos-wallet/issues/347 &ndash;&gt;-->
-
-    <!--</div>-->
 </div>
 </template>
 
