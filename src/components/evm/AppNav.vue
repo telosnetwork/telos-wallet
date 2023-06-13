@@ -73,7 +73,9 @@ export default defineComponent({
             this.menuIsOpen = false;
         },
         goBack() {
-            this.$router.back();
+            const parent = this.$route.meta.parent as string;
+
+            this.$router.push({ name: parent });
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {

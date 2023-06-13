@@ -35,13 +35,13 @@ const routes = [
             {
                 path: 'send',
                 name: 'evm-send',
-                meta: { showBackButton: true },
+                meta: { showBackButton: true, parent: 'evm-wallet' },
                 component: () => import('pages/evm/wallet/SendPage.vue'),
             },
             {
                 path: 'receive',
                 name: 'evm-receive',
-                meta: { showBackButton: true },
+                meta: { showBackButton: true, parent: 'evm-wallet' },
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
             {
@@ -53,7 +53,7 @@ const routes = [
             {
                 path: 'collectible-details',
                 name: 'evm-nft-details',
-                meta: { showBackButton: true },
+                meta: { showBackButton: true, parent: 'evm-nft-inventory' },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
             // {
