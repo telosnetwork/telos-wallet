@@ -162,7 +162,6 @@ export class AntelopeConfig {
         return this.__error_to_string_handler;
     }
 
-    // setting notifucation handlers --
     // setting indexer constants --
     public setIndexerHealthThresholdSeconds(threshold: number) {
         this.__indexer_health_threshold = threshold;
