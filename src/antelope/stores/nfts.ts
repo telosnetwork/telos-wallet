@@ -34,10 +34,10 @@ export const useNftsStore = defineStore(store_name, {
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
         },
-        async fetchNftsForContract(label: Label, contract: string): Promise<void> {
-            // get NFTs from indexer here
-            // this.setContractNfts(label, contract, nfts);
-        },
+        // async fetchNftsForContract(label: Label, contract: string): Promise<void> {
+        //     // get NFTs from indexer here
+        //     // this.setContractNfts(label, contract, nfts);
+        // },
         async fetchNFtsForAccount(label: Label, address: string) {
             // replace all of this logic with real fetch & set
             const nfts: ShapedNFT[] = Object.keys(this.__nfts[label].contracts).map(
