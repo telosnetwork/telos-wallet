@@ -1,9 +1,11 @@
 <script setup lang="ts">
 
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { useI18n } from 'vue-i18n';
+import { usePlatformStore } from 'src/antelope';
 
+const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
 
 const props = defineProps<{
@@ -25,6 +27,8 @@ const videoElement = ref<HTMLVideoElement | null>(null);
 
 
 // computed
+const isIos = computed(() => platformStore.isIOSMobile);
+
 const nftType = computed(() => {
     if (props.nft.imageSrcFull && !props.nft.audioSrc && !props.nft.videoSrc) {
         return nftTypes.image;
@@ -57,7 +61,7 @@ const imageAlt = computed(() => {
 const iconOverlayName = computed(() => {
     const showIconOverlay =
         (props.previewMode && nftType.value !== nftTypes.image) ||
-        (nftType.value === nftTypes.video && !videoIsPlaying.value) ||
+        (nftType.value === nftTypes.video && !videoIsPlaying.value && !isIos.value) ||
         (nftType.value === nftTypes.audio && !props.nft.imageSrcFull) ||
         nftType.value === nftTypes.none;
 
@@ -83,7 +87,10 @@ const iconOverlayName = computed(() => {
 
 // methods
 function playVideo() {
-    toggleVideoPlay(true);
+    if (!isIos.value) {
+        // prevent weird iOS behavior where video pauses and unpauses quickly
+        toggleVideoPlay(true);
+    }
 }
 
 function toggleVideoPlay(playOnly?: boolean) {
@@ -131,16 +138,14 @@ function toggleVideoPlay(playOnly?: boolean) {
             <video
                 ref="videoElement"
                 :src="nft.videoSrc"
-                :controls="videoIsPlaying"
+                :controls="videoIsPlaying || isIos"
+                :poster="nft.imageSrcFull"
+                playsinline
                 class="c-nft-viewer__video"
                 @play="videoIsPlaying = true; videoIsAtEnd = false"
                 @pause="videoIsPlaying = false; videoIsAtEnd = false"
                 @ended="videoIsPlaying = false; videoIsAtEnd = true"
             ></video>
-        </div>
-
-        <div v-else-if="nftType === nftTypes.none" class="c-nft-viewer__blank-container">
-
         </div>
 
         <template v-if="iconOverlayName">
