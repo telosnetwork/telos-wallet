@@ -122,6 +122,8 @@ export default {
         link_to_nft_details: 'Go to NFT details page for {name}',
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
+        details_page_title: 'NFT Details Page',
+        tile_toggle_radio_label: 'Show as tile?'
     },
     notification:{
         success_title_trx: 'Success',
