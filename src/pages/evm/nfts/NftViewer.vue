@@ -23,8 +23,6 @@ const videoIsPlaying = ref(false);
 const videoIsAtEnd = ref(false);
 const videoElement = ref<HTMLVideoElement | null>(null);
 
-const audioIsPlaying = ref(false);
-const audioIsAtEnd = ref(false);
 
 // computed
 const nftType = computed(() => {
@@ -163,9 +161,6 @@ function toggleVideoPlay(playOnly?: boolean) {
         controls
         :src="nft.audioSrc"
         class="c-nft-viewer__audio"
-        @play="audioIsPlaying = true; audioIsAtEnd = false"
-        @pause="audioIsPlaying = false; audioIsAtEnd = false"
-        @ended="audioIsPlaying = false; audioIsAtEnd = true"
     ></audio>
 </div>
 </template>
