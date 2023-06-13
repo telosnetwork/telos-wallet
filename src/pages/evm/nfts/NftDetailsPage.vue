@@ -22,7 +22,6 @@ const chainStore = useChainStore();
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 
-// eztodo handle invalid state / no query params / invalid query params
 // eztodo nft with no attributes
 // eztodo nft with no media
 
@@ -30,13 +29,15 @@ const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
 onBeforeMount(() => {
-    nftStore.getNftDetails('current', contractAddress, nftId).then((nftResponse) => {
-        // eztodo remove fake loading time
-        setTimeout(() => {
-            nft.value = nftResponse ?? null;
-            loading.value = false;
-        }, 1500);
-    });
+    if (contractAddress && nftId) {
+        nftStore.getNftDetails('current', contractAddress, nftId).then((nftResponse) => {
+            // remove fake loading time
+            setTimeout(() => {
+                nft.value = nftResponse ?? null;
+                loading.value = false;
+            }, 1500);
+        });
+    }
 });
 
 // data
@@ -67,7 +68,6 @@ const ownerLink = computed(() => {
 
 <template>
 <AppPage>
-    <!--eztodo i18n everywhere-->
     <template v-slot:header>
         <div
             :class="{
@@ -76,19 +76,11 @@ const ownerLink = computed(() => {
             }"
         >
             <template v-if="loading">
-                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
-                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
-                </div>
-                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
-                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
-                </div>
-                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
-                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
-                </div>
-                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
-                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
-                </div>
-                <div class="c-nft-details__header-card c-nft-details__header-card--placeholder">
+                <div
+                    v-for="index in 5"
+                    :key="`nft-details-page-${index}`"
+                    class="c-nft-details__header-card c-nft-details__header-card--placeholder"
+                >
                     <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
                 </div>
             </template>
@@ -126,7 +118,6 @@ const ownerLink = computed(() => {
 
     <div class="c-nft-details__body-container">
         <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
-        <!--eztodo not found state-->
         <h4
             v-else
             :class="{
@@ -135,10 +126,10 @@ const ownerLink = computed(() => {
             }"
         >
             <template v-if="nft === null">
-                We recommend verifying the following:
+                {{ $t('nft.collectible_not_found_recommendation') }}
             </template>
             <template v-else>
-                Attributes
+                {{ $t('global.attributes') }}
             </template>
         </h4>
 

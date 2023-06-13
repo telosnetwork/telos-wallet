@@ -118,6 +118,7 @@ export default {
         rows_per_page: 'Rows per page',
         amount: 'Amount',
         id: 'ID',
+        attributes: 'Attributes',
     },
     nft : {
         link_to_nft_details: 'Go to NFT details page for {name}',
@@ -126,6 +127,7 @@ export default {
         details_page_title: 'NFT Details Page',
         collectible_not_found_header: 'Collectible not found',
         collectible_not_found_subheader: 'We couldn\'t find the digital collectible you\'re looking for. ',
+        collectible_not_found_recommendation: 'We recommend verifying the following:',
         collectible_not_found_contract_part_1: 'Is the collectible\'s',
         collectible_not_found_contract_part_2_bold: 'contract address',
         collectible_not_found_contract_part_3: 'correct?',
