@@ -126,6 +126,7 @@ export default {
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
         details_page_title: 'NFT Details Page',
         no_attributes: 'This collectible has no attributes',
+        play_video: 'Toggle video play/pause',
         collectible_not_found_header: 'Collectible not found',
         collectible_not_found_subheader: 'We couldn\'t find the digital collectible you\'re looking for. ',
         collectible_not_found_recommendation: 'We recommend verifying the following:',

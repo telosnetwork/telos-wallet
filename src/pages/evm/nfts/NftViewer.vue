@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 import { ShapedNFT } from 'src/antelope/types/NFTs';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
+const { t: $t } = useI18n();
 
 const props = defineProps<{
     nft: ShapedNFT,
@@ -48,9 +48,9 @@ const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 const imageAlt = computed(() => {
     const details = `${props.nft.name} ${props.nft.id}`;
     if (nftType.value === nftTypes.image) {
-        return t('nft.img_alt', { nftInfo: details });
+        return $t('nft.img_alt', { nftInfo: details });
     } else if (nftType.value === nftTypes.video && props.previewMode) {
-        return t('nft.img_alt_video_nft', { nftInfo: details });
+        return $t('nft.img_alt_video_nft', { nftInfo: details });
     }
 
     return '';
@@ -85,12 +85,18 @@ const iconOverlayName = computed(() => {
 
 // methods
 function playVideo() {
+    toggleVideoPlay(true);
+}
+
+function toggleVideoPlay(playOnly?: boolean) {
     if (videoElement.value === null || props.previewMode) {
         return;
     }
 
-    if (!videoIsPlaying.value) {
+    if (!videoIsPlaying.value || playOnly) {
         videoElement.value.play();
+    } else {
+        videoElement.value.pause();
     }
 }
 
@@ -119,7 +125,11 @@ function playVideo() {
         <div
             v-else-if="nftType === nftTypes.video"
             class="c-nft-viewer__video-container"
+            tabindex="0"
+            role="button"
+            :aria-label="$t('nft.play_video')"
             @click="playVideo"
+            @keypress.space.enter.prevent="toggleVideoPlay(false)"
         >
             <video
                 ref="videoElement"

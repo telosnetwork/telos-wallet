@@ -21,7 +21,7 @@ watch(
     (newValue) => {
         const address = newValue?.loggedAccount?.account;
         if (address) {
-            // eztodo remove fake loading time
+            // remove fake loading time
             setTimeout(() => {
                 nftStore.fetchNFtsForAccount('current', address).then(() => {
                     nfts.value = nftStore.getAccountNfts('current', address);
