@@ -45,13 +45,13 @@ const routes = [
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
             {
-                path: 'nft-inventory',
+                path: 'collectible-inventory',
                 name: 'evm-nft-inventory',
                 meta: { showBackButton: false },
                 component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
             },
             {
-                path: 'nft-details',
+                path: 'collectible-details',
                 name: 'evm-nft-details',
                 meta: { showBackButton: true },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
