@@ -61,7 +61,6 @@ export default defineComponent({
                 :name="tab"
                 :label="tab.charAt(0).toUpperCase() + tab.slice(1)"
                 :to="{ query: { tab: tab.toLowerCase() } }"
-                exact
                 replace
             />
         </q-tabs>

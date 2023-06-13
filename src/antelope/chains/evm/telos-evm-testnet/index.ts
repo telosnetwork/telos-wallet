@@ -94,7 +94,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     async getUsdPrice(): Promise<number> {
-        if (this.hasIndexSupport()) {
+        if (this.hasIndexerSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
             const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
@@ -143,8 +143,8 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return INDEXER_ENDPOINT;
     }
 
-    hasIndexSupport(): boolean {
-        return false;
+    hasIndexerSupport(): boolean {
+        return true;
     }
 
 }
