@@ -103,7 +103,6 @@ function toggleVideoPlay(playOnly?: boolean) {
 </script>
 
 <template>
-<!--eztodo consider a11y-->
 <div
     :class="{
         'c-nft-viewer': true,
