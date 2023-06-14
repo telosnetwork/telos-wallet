@@ -1,6 +1,6 @@
 <script lang="ts">
 import { usePlatformStore } from 'src/antelope';
-import { useChainStore } from 'src/antelope/stores/chain';
+import { useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 
 export default defineComponent({

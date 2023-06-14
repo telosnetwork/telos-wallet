@@ -38,6 +38,8 @@ import {
     TransactionV1,
     TokenSourceInfo,
     TokenBalance,
+    NFTClass,
+    IndexerTransactionsFilter,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
@@ -47,6 +49,7 @@ export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhla
 const abortController = new AbortController();
 
 export default abstract class NativeChainSettings implements ChainSettings {
+
     // Short Name of the network
     protected network: string;
 
@@ -139,7 +142,9 @@ export default abstract class NativeChainSettings implements ChainSettings {
      */
     abstract getImportantTokensIdList(): string[];
 
-
+    async getNFTsInventory(filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        throw new Error('Method not implemented yet getNFTsInventory()' + JSON.stringify(filter));
+    }
 
     constructTokenId(token: TokenClass): string {
         return `${token.symbol}-${token.contract}-${this.getNetwork()}`;

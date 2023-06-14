@@ -16,12 +16,18 @@ import {
     TokenBalance,
     MarketSourceInfo,
     TokenMarketData,
-    IndexerHealthResponse,
+    NFTClass,
+    IndexerNftResponse,
+    NFTContractClass,
+    IndexerNftItemResult,
+    NFTItemClass,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
+import { IndexerHealthResponse } from 'src/antelope/types';
 import { getAntelope } from 'src/antelope';
+
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -238,6 +244,46 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error(error);
             return [];
         });
+    }
+
+    getNFTsInventory(filter: IndexerTransactionsFilter): NFTClass[] | PromiseLike<NFTClass[]> {
+        if (!this.hasIndexerSupport()) {
+            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        const params = {
+            ... filter,
+            address: undefined,
+        };
+        return this.indexer.get(`v1/account/${filter.address}/nfts`, { params })
+            .then(response => response.data as IndexerNftResponse)
+            .then((response) => {
+                // iterate over the contracts and parse json the calldata using try catch
+                for (const contract of Object.values(response.contracts)) {
+                    try {
+                        contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${contract.calldata}"`, e);
+                    }
+                }
+                const nfts = [] as NFTClass[];
+                for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
+                    try {
+                        item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
+                    }
+                    const contract_source = response.contracts[item_source.contract];
+                    const contract = new NFTContractClass(contract_source);
+                    const item = new NFTItemClass(item_source, contract);
+                    const nft = new NFTClass(item);
+                    nfts.push(nft);
+                }
+                return nfts;
+            }).catch((error) => {
+                console.error(error);
+                return [];
+            });
     }
 
     constructTokenId(token: TokenSourceInfo): string {

@@ -17,14 +17,9 @@ import { AbiItem } from 'web3-utils';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 
-import {
-    createTraceFunction,
-    isTracingAll,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
 import { errorToString } from 'src/antelope/config';
-import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
@@ -50,11 +45,14 @@ import {
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { getAccount } from '@wagmi/core';
-import { usePlatformStore } from 'src/antelope/stores/platform';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
-import { useAccountStore } from 'src/antelope/stores/account';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
-
+import {
+    useAccountStore,
+    useChainStore,
+    useFeedbackStore,
+    usePlatformStore,
+} from 'src/antelope';
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
 export const evmEvents = {

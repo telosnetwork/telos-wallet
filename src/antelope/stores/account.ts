@@ -16,15 +16,13 @@
 import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
-import { useChainStore } from 'src/antelope/stores/chain';
+import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { FuelUserWrapper } from 'src/api/fuel';
 import {
-    createInitFunction,
-    createTraceFunction,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
-import { useEVMStore } from 'src/antelope/stores/evm';
-import { getAntelope } from '..';
+    useEVMStore,
+} from 'src/antelope';
+import { getAntelope, useChainStore } from 'src/antelope';
 import { errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {

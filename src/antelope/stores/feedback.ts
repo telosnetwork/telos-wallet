@@ -23,7 +23,7 @@
 */
 
 import { defineStore } from 'pinia';
-import { getAntelope } from '..';
+import { getAntelope } from 'src/antelope';
 
 export interface FeedbackProggress {
     percent: number;

@@ -18,9 +18,8 @@ import { AccountModel } from 'src/antelope/stores/account';
 import {
     createTraceFunction,
     isTracingAll,
-    useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { getAntelope } from '..';
+import { getAntelope, useFeedbackStore } from 'src/antelope';
 
 export type AccountList = Array<AccountId>;
 

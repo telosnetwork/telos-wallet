@@ -32,7 +32,7 @@ Possible NFT configurations after shaping:
  */
 
 import { computed } from 'vue';
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

@@ -1,6 +1,5 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
-import { PriceChartData } from 'src/antelope/types/PriceData';
-import { TokenClass } from 'src/antelope/types';
+import { PriceChartData, TokenClass } from 'src/antelope/types';
 
 export interface ChainSettings {
     isNative(): boolean;

@@ -8,19 +8,22 @@ import installPinia from 'src/antelope/stores';
 import { AccountModel } from 'src/antelope/stores/account';
 import { ChainModel } from 'src/antelope/stores/chain';
 
-import { useAccountStore } from 'src/antelope/stores/account';
-import { useChainStore } from 'src/antelope/stores/chain';
-import { useUserStore } from 'src/antelope/stores/user';
-import { useProfileStore } from 'src/antelope/stores/profile';
-import { useResourcesStore } from 'src/antelope/stores/resources';
-import { useRexStore } from 'src/antelope/stores/rex';
-import { useTokensStore } from 'src/antelope/stores/tokens';
-import { useContractStore } from 'src/antelope/stores/contract';
-import { useBalancesStore } from 'src/antelope/stores/balances';
-import { useHistoryStore } from 'src/antelope/stores/history';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
-import { usePlatformStore } from 'src/antelope/stores/platform';
-import { useEVMStore } from 'src/antelope/stores/evm';
+import {
+    useAccountStore,
+    useBalancesStore,
+    useChainStore,
+    useContractStore,
+    useEVMStore,
+    useFeedbackStore,
+    useHistoryStore,
+    useNFTsStore,
+    usePlatformStore,
+    useProfileStore,
+    useResourcesStore,
+    useRexStore,
+    useTokensStore,
+    useUserStore,
+} from 'src/antelope';
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
@@ -84,6 +87,7 @@ export class Antelope {
             feedback: useFeedbackStore(),
             platform: usePlatformStore(),
             evm: useEVMStore(),
+            nft: useNFTsStore(),
         };
     }
 
@@ -120,4 +124,5 @@ export { useHistoryStore } from 'src/antelope/stores/history';
 export { useFeedbackStore } from 'src/antelope/stores/feedback';
 export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useEVMStore } from 'src/antelope/stores/evm';
+export { useNFTsStore } from 'src/antelope/stores/nfts';
 
