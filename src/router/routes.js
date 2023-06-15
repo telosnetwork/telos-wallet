@@ -90,6 +90,11 @@ const routes = [
                 name: 'demos.notifications',
                 component: () => import('pages/demo/NotificationDemos.vue'),
             },
+            {
+                path: 'nfts',
+                name: 'demos.nfts',
+                component: () => import('pages/demo/NftDemos.vue'),
+            },
         ],
     },
 
