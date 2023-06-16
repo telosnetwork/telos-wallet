@@ -39,7 +39,6 @@ const routes = [
                 name: 'evm-send',
                 meta: {
                     requiresAuth: true,
-                    showBackButton: true,
                     parent: 'evm-wallet',
                 },
                 component: () => import('pages/evm/wallet/SendPage.vue'),
@@ -49,7 +48,6 @@ const routes = [
                 name: 'evm-receive',
                 meta: {
                     requiresAuth: true,
-                    showBackButton: true,
                     parent: 'evm-wallet',
                 },
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
@@ -67,7 +65,6 @@ const routes = [
                 name: 'evm-nft-details',
                 meta: {
                     requiresAuth: false,
-                    showBackButton: true,
                     parent: 'evm-nft-inventory',
                 },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),

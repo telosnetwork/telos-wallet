@@ -70,7 +70,7 @@ export class Antelope {
 
         if (!chainStore.currentChain) {
             if (!process.env.CHAIN_NAME) {
-                // eztodo error chain name
+                console.error('No chain name specified in environment config; the application will not run correctly');
             } else {
                 const network: string = chainNetworkNames[process.env.CHAIN_NAME];
 

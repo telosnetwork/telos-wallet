@@ -29,7 +29,7 @@ export default defineComponent({
             return this.$q.screen.lt.md && !this.showBackButton;
         },
         showBackButton() {
-            return this.$route.meta.showBackButton;
+            return !!this.$route.meta.parent;
         },
         showUserInfo() {
             return !this.showBackButton && this.loggedAccount;
