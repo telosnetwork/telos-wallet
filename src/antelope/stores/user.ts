@@ -167,6 +167,7 @@ export const useUserStore = defineStore(store_name, {
         },
         handleAccountLoggedOut(){
             try {
+                this.removeUser(this.__user_id);
                 this.__user_name = '';
                 this.__user_id = '';
                 this.__user_accounts = [];

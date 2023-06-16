@@ -24,7 +24,7 @@ export default defineComponent({
         watch(() => props.toggleWalletConnect, async (newVal) => {
             if (newVal) {
                 await toggleWalletConnectModal();
-            };
+            }
         });
 
         const loginEvm = () => {
@@ -35,10 +35,11 @@ export default defineComponent({
         };
 
         const toggleWalletConnectModal = async () => {
+            emit('walletConnectButtonClicked');
             // if already connected, trigger autologin
             if (localStorage.getItem('wagmi.connected')){
                 await login();
-            }else {
+            } else {
                 await (web3Modal.value as Web3Modal).openModal();
             }
         };
@@ -53,7 +54,7 @@ export default defineComponent({
             const networkName = chainSettings.getDisplay();
             const walletConnectChainId = getNetwork().chain?.id.toString();
 
-            if (appChainId !== walletConnectChainId){
+            if (appChainId !== walletConnectChainId) {
                 const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
                 globalProps.$warningNotification(warningMessage);
             }

@@ -30,6 +30,15 @@ export default function (/* { store, ssrContext } */) {
         if (to.meta.notInProduction && process.env.NODE_ENV === 'production') {
             return { name: 'home' };
         }
+
+        // eztodo verify with native as well
+        if (to.meta.requiresAuth) {
+            const isAuthenticated = !!localStorage.getItem('account');
+
+            if (!isAuthenticated) {
+                return { name: 'home' };
+            }
+        }
     });
 
     return Router;

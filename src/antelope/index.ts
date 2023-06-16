@@ -2,7 +2,7 @@ import { App } from 'vue';
 import { Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig } from 'src/antelope/config/';
+import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
 import installPinia from 'src/antelope/stores';
 
 import { AccountModel } from 'src/antelope/stores/account';
@@ -65,6 +65,18 @@ export class Antelope {
                 store.init();
             }
         });
+
+        const chainStore = useChainStore();
+
+        if (!chainStore.currentChain) {
+            if (!process.env.CHAIN_NAME) {
+                // eztodo error chain name
+            } else {
+                const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+
+                chainStore.setCurrentChain(network);
+            }
+        }
 
         // Initializing store
         stores.user.loadUsers();

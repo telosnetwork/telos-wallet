@@ -277,3 +277,14 @@ export function getGasInTlos(gasUsed: string, gasPrice: string) {
         5,
     );
 }
+
+// eztodo jsdoc
+export function getShortenedHash(hash: string) {
+    const textIsAddress = /^0x[0-9a-fA-F]+$/.test(hash);
+
+    if (textIsAddress) {
+        return hash.slice(0, 6) + '...' + hash.slice(-4);
+    } else {
+        throw new Error('Invalid hash ' + hash);
+    }
+}

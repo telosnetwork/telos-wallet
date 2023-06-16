@@ -49,6 +49,7 @@ export default {
         close_menu: 'Close menu',
         open_menu: 'Open menu',
         logout: 'Log Out',
+        login: 'Log In',
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
         nfts: 'Digital Collectibles',
