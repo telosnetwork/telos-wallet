@@ -5,13 +5,12 @@ import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
-import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
 import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
-import { Notify } from 'quasar';
+
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -21,7 +20,6 @@ const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
 const balanceStore = useBalancesStore();
-const global = useAppNavStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -43,9 +41,6 @@ export default defineComponent({
         },
         prettyPrintBalance,
     }),
-    mounted() {
-        global.setShowBackBtn(true);
-    },
     watch: {
         balances: {
             handler() {

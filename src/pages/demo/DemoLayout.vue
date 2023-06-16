@@ -18,6 +18,9 @@
         <li>
             <router-link :to="{ name: 'demos.notifications' }">Notifications</router-link>
         </li>
+        <li>
+            <router-link :to="{ name: 'demos.nfts' }">NFTs / Collectibles</router-link>
+        </li>
     </ul>
 
     <router-view />

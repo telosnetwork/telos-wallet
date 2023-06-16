@@ -4,11 +4,9 @@ import AppPage from 'components/evm/AppPage.vue';
 import AddressQR from 'components/evm/AddressQR.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore } from 'src/antelope';
-import { useAppNavStore } from 'src/stores';
 
 const accountStore = useAccountStore();
 const ant = getAntelope();
-const global = useAppNavStore();
 
 export default defineComponent({
     name: 'ReceivePage',
@@ -16,9 +14,6 @@ export default defineComponent({
         AppPage,
         AddressQR,
         UserInfo,
-    },
-    async mounted() {
-        global.setShowBackBtn(true);
     },
     methods: {
         goBack() {

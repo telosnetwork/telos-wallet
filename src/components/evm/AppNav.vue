@@ -4,13 +4,10 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
-import { useAppNavStore } from 'src/stores';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
 const chainStore = useChainStore();
-
-const appnav = useAppNavStore();
 
 export default defineComponent({
     name: 'AppNav',
@@ -27,7 +24,7 @@ export default defineComponent({
             return this.$q.screen.lt.md && !this.showBackButton;
         },
         showBackButton() {
-            return appnav.showBackBtn;
+            return this.$route.meta.showBackButton;
         },
         showUserInfo() {
             return !this.showBackButton && this.loggedAccount;
@@ -74,11 +71,9 @@ export default defineComponent({
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
-            appnav.setShowBackBtn(false);
         },
         goBack() {
             this.$router.back();
-            appnav.setShowBackBtn(false);
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {
@@ -204,8 +199,8 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
-                @click="goTo('evm-nfts')"
-                @keypress.space.enter="goTo('evm-nfts')"
+                @click="goTo('evm-nft-inventory')"
+                @keypress.space.enter="goTo('evm-nft-inventory')"
             >
                 <InlineSvg
                     :src="require('src/assets/icon--nft.svg')"

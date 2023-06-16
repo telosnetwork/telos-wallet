@@ -24,7 +24,7 @@ const nftDetailsRoute = {
     name: 'evm-nft-details',
     query: {
         contract: props.nft.contractAddress,
-        tokenId: props.nft.id,
+        id: props.nft.id,
     },
 };
 
