@@ -38,6 +38,7 @@ export default {
         metamask: 'MetaMask',
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
+        wallet_introduction: 'What is a Web Wallet?',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
