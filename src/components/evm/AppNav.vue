@@ -65,7 +65,6 @@ export default defineComponent({
             if (!!newVal) {
                 this.showWalletOptions = false;
 
-
                 if (this.notifyOnSuccessfulLogin) {
                     const shortenedAddress = getShortenedHash(this.loggedAccount.account);
 
@@ -471,15 +470,6 @@ export default defineComponent({
         position: absolute;
         bottom: 24px;
         left: 48px;
-    }
-
-    &__connect-wallet-container {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        margin: auto;
     }
 }
 </style>
