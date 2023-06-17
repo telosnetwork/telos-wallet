@@ -4,21 +4,14 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
-import {
     Label, TokenClass,
 } from 'src/antelope/types';
-import { getAntelope, useAccountStore } from '..';
+import { getAntelope, useAccountStore, useFeedbackStore, useChainStore } from 'src/antelope';
 import { toRaw } from 'vue';
-import {
-    ChainModel,
-    useChainStore,
-} from 'src/antelope/stores/chain';
 import { errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { ChainModel } from 'src/antelope/stores/chain';
 
 export interface TokensState {
     __tokens:  { [label: Label]: TokenClass[] };

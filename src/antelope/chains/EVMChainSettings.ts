@@ -17,11 +17,17 @@ import {
     MarketSourceInfo,
     TokenMarketData,
     IndexerHealthResponse,
+    NFTClass,
+    IndexerNftResponse,
+    NFTContractClass,
+    IndexerNftItemResult,
+    NFTItemClass,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { getAntelope } from 'src/antelope';
+
 
 export default abstract class EVMChainSettings implements ChainSettings {
     // Short Name of the network
@@ -238,6 +244,83 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error(error);
             return [];
         });
+    }
+
+    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        if (!this.hasIndexerSupport()) {
+            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        const params = {
+            ... filter,
+            address: undefined,
+        };
+        return this.indexer.get(url, { params })
+            .then(response => response.data as IndexerNftResponse)
+            .then((response) => {
+                console.log('-------------------------------');
+                // iterate over the contracts and parse json the calldata using try catch
+                for (const contract of Object.values(response.contracts)) {
+                    try {
+                        contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${contract.calldata}"`, e);
+                    }
+                }
+                const nfts = [] as NFTClass[];
+                for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
+                    try {
+                        item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
+                    }
+                    if (!item_source.metadata || typeof item_source.metadata !== 'object') {
+                        // we create a new metadata object with the actual string atributes of the item
+                        const list = item_source as unknown as { [key: string]: unknown };
+                        item_source.metadata =
+                            Object.keys(item_source)
+                                .filter(k => typeof list[k] === 'string')
+                                .reduce((obj, key) => {
+                                    obj[key] = list[key] as string;
+                                    return obj;
+                                }, {} as { [key: string]: string });
+
+                    }
+                    const contract_source = response.contracts[item_source.contract];
+                    const contract = new NFTContractClass(contract_source);
+                    const item = new NFTItemClass(item_source, contract);
+                    const nft = new NFTClass(item);
+                    nfts.push(nft);
+
+                    //// watch this nft, if it chenges we remake the nfts list
+                    //nft.watch(() => {
+                    //    const index = nfts.findIndex(n => `${n.id}-${n.contractAddress}` === `${nft.id}-${nft.contractAddress}`);
+                    //    if (index > -1) {
+                    //        // nfts[index] = nft;
+                    //        // first we take out the nft from the list
+                    //        const nft = nfts.splice(index, 1)[0];
+                    //        // then we add it again
+                    //        nfts.push(nft);
+                    //    } else {
+                    //        console.error('NFT not found in list', nft, nfts);
+                    //    }
+                    //});
+                }
+                console.log('-------------------------------');
+                return nfts;
+            }).catch((error) => {
+                console.error(error);
+                return [];
+            });
+    }
+
+
+    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
+    }
+
+    async getNFTsInventory(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        return this.getNFTsFromIndexer(`v1/account/${contract}/nfts`, filter);
     }
 
     constructTokenId(token: TokenSourceInfo): string {

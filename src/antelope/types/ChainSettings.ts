@@ -1,6 +1,5 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
-import { PriceChartData } from 'src/antelope/types/PriceData';
-import { TokenClass } from 'src/antelope/types';
+import { IndexerTransactionsFilter, NFTClass, PriceChartData, TokenClass } from 'src/antelope/types';
 
 export interface ChainSettings {
     isNative(): boolean;
@@ -15,4 +14,6 @@ export interface ChainSettings {
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
     getImportantTokensIdList(): string[];
+    getNFTsInventory(address: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
+    getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>
 }

@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { ShapedNFT } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
@@ -31,8 +31,6 @@ const nftDetailsRoute = {
 // computed
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
-
-
 </script>
 
 <template>
@@ -49,7 +47,6 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
             :preview-mode="true"
         />
     </router-link>
-
     <div class="c-nft-tile__text-container">
         <h4>
             <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>

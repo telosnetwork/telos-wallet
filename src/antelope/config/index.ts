@@ -1,6 +1,6 @@
 import { Authenticator } from 'universal-authenticator-library';
 import { App } from 'vue';
-import { getAntelope } from '..';
+import { getAntelope } from 'src/antelope';
 import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
