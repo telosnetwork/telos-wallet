@@ -13,10 +13,9 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+} from 'src/antelope';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EvmContract, { Erc20Transfer } from 'src/antelope/stores/utils/contracts/EvmContract';
 import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import { useChainStore } from 'src/antelope';

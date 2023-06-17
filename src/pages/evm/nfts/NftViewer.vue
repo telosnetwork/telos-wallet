@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { computed, nextTick, ref } from 'vue';
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore } from 'src/antelope';
 
@@ -123,6 +123,19 @@ function toggleVideoPlay(playOnly?: boolean) {
                 :alt="imageAlt"
                 class="c-nft-viewer__image"
             >
+            <div
+                v-else-if="nftType === nftTypes.video"
+                class="c-nft-viewer__video-container"
+                tabindex="0"
+                role="preview"
+            ><video
+                ref="videoElement"
+                :controls="false"
+                :src="nft.videoSrc"
+                :poster="nft.imageSrcFull"
+                playsinline
+                class="c-nft-viewer__video"
+            ></video></div>
             <div v-else class="c-nft-viewer__placeholder-image"></div>
         </div>
 

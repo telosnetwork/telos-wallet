@@ -16,11 +16,10 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+} from 'src/antelope';
 import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 
 export interface PlatformState {
     __is_browser: boolean;

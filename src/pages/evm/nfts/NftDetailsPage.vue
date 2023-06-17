@@ -2,7 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { ShapedNFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';

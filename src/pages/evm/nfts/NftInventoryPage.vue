@@ -1,40 +1,22 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useAccountStore } from 'src/antelope';
+import { NFTClass } from 'src/antelope/types';
 
 const nftStore = useNftsStore();
-const accountStore = useAccountStore();
 
 // data
-const loading = ref(true);
-const nfts = ref<ShapedNFT[]>([]);
+const loading = computed(() => nftStore.loggedInventoryLoading);
+// const nfts = ref([] as NFTClass[]);
 const showNftsAsTiles = ref(true);
 
-// watchers
-watch(
-    accountStore,
-    (newValue) => {
-        const address = newValue?.loggedAccount?.account;
-        if (address) {
-            // remove fake loading time
-            setTimeout(() => {
-                nftStore.fetchNFtsForAccount('current', address).then(() => {
-                    nfts.value = nftStore.getAccountNfts('current', address);
-                    loading.value = false;
-                });
-            }, 2000);
-        }
-    },
-    {
-        immediate: true,
-        deep: true,
-    },
-);
+const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+
 </script>
 
 <template>
@@ -53,7 +35,7 @@ watch(
         <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
             <NftTile
                 v-for="nft in nfts"
-                :key="nft.id"
+                :key="nft.key"
                 :nft="nft"
             />
         </div>
