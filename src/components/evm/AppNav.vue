@@ -4,6 +4,8 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
+import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
+import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
@@ -12,19 +14,22 @@ const chainStore = useChainStore();
 export default defineComponent({
     name: 'AppNav',
     components: {
+        ConnectWalletOptions,
         UserInfo,
         InlineSvg,
     },
     data: () => ({
         menuIsOpen: false,
         showShadow: false,
+        showWalletOptions: false,
+        notifyOnSuccessfulLogin: false,
     }),
     computed: {
         showMenuIcon() {
             return this.$q.screen.lt.md && !this.showBackButton;
         },
         showBackButton() {
-            return this.$route.meta.showBackButton;
+            return !!this.$route.meta.parent;
         },
         showUserInfo() {
             return !this.showBackButton && this.loggedAccount;
@@ -42,11 +47,31 @@ export default defineComponent({
         isProduction() {
             return process.env.NODE_ENV === 'production';
         },
+        accountActionText() {
+            if (this.loggedAccount) {
+                return this.$t('nav.logout');
+            } else {
+                return this.$t('nav.login');
+            }
+        },
     },
     watch: {
         '$q.screen.lt.md'(newValue, oldValue) {
             if (newValue !== oldValue) {
                 this.menuIsOpen = false;
+            }
+        },
+        loggedAccount(newVal) {
+            if (!!newVal) {
+                this.showWalletOptions = false;
+
+                if (this.notifyOnSuccessfulLogin) {
+                    const shortenedAddress = getShortenedHash(this.loggedAccount.account);
+
+                    (this as any).$notifySuccessMessage(
+                        this.$t('home.logged_as', { account: shortenedAddress }),
+                    );
+                }
             }
         },
     },
@@ -64,16 +89,24 @@ export default defineComponent({
         scrollHandler(info: { position: { top: number }}) {
             this.showShadow = info.position.top !== 0;
         },
-        logout() {
+        handleUserAuthAction() {
             this.menuIsOpen = false;
-            accountStore.logout();
+
+            if (accountStore.loggedAccount) {
+                accountStore.logout();
+            } else {
+                this.showWalletOptions = true;
+                this.notifyOnSuccessfulLogin = true;
+            }
         },
         goTo(routeName: string) {
             this.$router.push({ name: routeName });
             this.menuIsOpen = false;
         },
         goBack() {
-            this.$router.back();
+            const parent = this.$route.meta.parent as string;
+
+            this.$router.push({ name: parent });
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {
@@ -206,7 +239,7 @@ export default defineComponent({
                     :src="require('src/assets/icon--nft.svg')"
                     :class="{
                         'c-app-nav__icon': true,
-                        'c-app-nav__icon--current-route': $route.name === 'evm-nfts',
+                        'c-app-nav__icon--current-route': $route.name === 'evm-nft-inventory',
                     }"
                     height="24"
                     width="24"
@@ -263,19 +296,19 @@ export default defineComponent({
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
-                @click="logout"
-                @keypress.space.enter="logout"
+                @click="handleUserAuthAction"
+                @keypress.space.enter="handleUserAuthAction"
                 @keyup.tab.stop.prevent="() => {}"
                 @keydown.tab.exact="cycleFocus($event, 'first')"
             >
                 <InlineSvg
-                    :src="require('src/assets/icon--logout.svg')"
+                    :src="require(`src/assets/icon--log${loggedAccount ? 'out' : 'in'}.svg`)"
                     class="c-app-nav__icon"
                     height="24"
                     width="24"
                     aria-hidden="true"
                 />
-                {{ $t('global.sign_out') }}
+                {{ accountActionText }}
             </li>
         </ul>
 
@@ -299,6 +332,14 @@ export default defineComponent({
         </div>
     </div>
 </nav>
+<q-dialog v-model="showWalletOptions">
+    <ConnectWalletOptions
+        :toggleWalletConnect="false"
+        @wallet-connect-button-clicked="showWalletOptions = false"
+        @close-wallet-options="showWalletOptions = false"
+    />
+</q-dialog>
+
 </template>
 
 <style lang="scss">

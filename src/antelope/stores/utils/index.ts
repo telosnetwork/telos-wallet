@@ -277,3 +277,19 @@ export function getGasInTlos(gasUsed: string, gasPrice: string) {
         5,
     );
 }
+
+/**
+ * Takes an ethereum hash ('0x...') and returns a shortened version, like '0x0000...0000'
+ * @param {string} hash - a string beginning with 0x and containing only 0-9, a-f, or A-F
+ *
+ * @return {string} shortened hash
+ */
+export function getShortenedHash(hash: string) {
+    const textIsAddress = /^0x[0-9a-fA-F]+$/.test(hash);
+
+    if (textIsAddress) {
+        return hash.slice(0, 6) + '...' + hash.slice(-4);
+    } else {
+        throw new Error('Invalid hash ' + hash);
+    }
+}

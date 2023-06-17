@@ -29,31 +29,44 @@ const routes = [
             {
                 path: 'wallet',
                 name: 'evm-wallet',
-                meta: { showBackButton: false },
+                meta: {
+                    requiresAuth: true,
+                },
                 component: () => import('pages/evm/wallet/WalletPage.vue'),
             },
             {
                 path: 'send',
                 name: 'evm-send',
-                meta: { showBackButton: true },
+                meta: {
+                    requiresAuth: true,
+                    parent: 'evm-wallet',
+                },
                 component: () => import('pages/evm/wallet/SendPage.vue'),
             },
             {
                 path: 'receive',
                 name: 'evm-receive',
-                meta: { showBackButton: true },
+                meta: {
+                    requiresAuth: true,
+                    parent: 'evm-wallet',
+                },
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
             },
             {
                 path: 'collectible-inventory',
                 name: 'evm-nft-inventory',
-                meta: { showBackButton: false },
+                meta: {
+                    requiresAuth: true,
+                },
                 component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
             },
             {
                 path: 'collectible-details',
                 name: 'evm-nft-details',
-                meta: { showBackButton: true },
+                meta: {
+                    requiresAuth: false,
+                    parent: 'evm-nft-inventory',
+                },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
             // {
@@ -72,7 +85,10 @@ const routes = [
     {
         path: '/demos',
         name: 'demos',
-        meta: { notInProduction: true },
+        meta: {
+            requiresAuth: false,
+            notInProduction: true,
+        },
         component: () => import('pages/demo/DemoLayout.vue'),
         children: [
             {
