@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const props = defineProps<{
     text: string,
@@ -11,8 +12,7 @@ const formattedText = computed(() => {
     const textIsAddress = /^0x[0-9a-fA-F]+$/.test(props.text);
 
     if (textIsAddress) {
-        const address = props.text;
-        return address.slice(0, 6) + '...' + address.slice(-4);
+        return getShortenedHash(props.text);
     }
 
     return props.text;

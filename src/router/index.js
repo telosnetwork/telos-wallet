@@ -25,10 +25,18 @@ export default function (/* { store, ssrContext } */) {
         history: createHistory(process.env.VUE_ROUTER_BASE),
     });
 
-    // this prevents the general public from accessing the demo pages
     Router.beforeEach((to, from) => {
+        // this prevents the general public from accessing the demo pages
         if (to.meta.notInProduction && process.env.NODE_ENV === 'production') {
             return { name: 'home' };
+        }
+
+        if (to.meta.requiresAuth) {
+            const isAuthenticated = !!localStorage.getItem('account');
+
+            if (!isAuthenticated) {
+                return { name: 'home' };
+            }
         }
     });
 
