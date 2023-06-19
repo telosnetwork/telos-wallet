@@ -75,10 +75,11 @@ export class NFTItemClass {
         let type = NFTSourceTypes.IMAGE;
         let preview = '';
         let source: string | undefined = undefined;
+
+        // We are going to test the imageCache URL to see if it is a valid URL
         if (this.indexer.imageCache) {
 
-            // We are going to test the imageCache URL to see if it is a valid URL
-            // first we create a regExp for the valid URL. "https://nfts.telos.net/40/0x552fd5743432eC2dAe222531e8b88bf7d2410FBc/344"
+            // first we create a regExp for the valid URL. e.g: "https://nfts.telos.net/40/0x552fd5743432eC2dAe222531e8b88bf7d2410FBc/344"
             const regExp = new RegExp('^(https?:\\/\\/)?' + // protocol
                 '(nfts.telos.net\\/)' + // domain name
                 '(\\d+\\/)' + // chain id
