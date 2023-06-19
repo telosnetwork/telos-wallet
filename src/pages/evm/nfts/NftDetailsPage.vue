@@ -29,11 +29,8 @@ const nftId = route.query.id as string;
 onBeforeMount(() => {
     if (contractAddress && nftId) {
         nftStore.getNftDetails('current', contractAddress, nftId).then((nftResponse) => {
-            // remove fake loading time
-            setTimeout(() => {
-                nft.value = nftResponse ?? null;
-                loading.value = false;
-            }, 1500);
+            nft.value = nftResponse ?? null;
+            loading.value = false;
         });
     }
 });
