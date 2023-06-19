@@ -222,9 +222,6 @@ export class NFTItemClass {
 
                 const canvas = document.createElement('canvas');
 
-                // inser the video in the DOM to be able see it
-                document.body.appendChild(canvas);
-
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
 
