@@ -178,7 +178,6 @@ export class NFTItemClass {
                     this.extractFirstFrameFromVideo(source as string).then((_preview) => {
                         this.preview = _preview;
                         this.ready = true;
-                        console.log('TENGO EL PREVIEW');
                         this.notifyWatchers();
                     });
                 }
@@ -209,29 +208,11 @@ export class NFTItemClass {
     }
 
     async extractFirstFrameFromVideo(source: string): Promise<string> {
-        return this.extractFrameFromVideo(source, 100);
-        /*return new Promise<string>((resolve, reject) => {
-            const video = document.createElement('video');
-
-            video.onloadedmetadata = function() {
-                const canvas = document.createElement('canvas');
-
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
-                console.log([canvas.toDataURL()]);
-                resolve(canvas.toDataURL());
-            };
-
-            video.onerror = function(e) {
-                reject({ error: e, source });
-            };
-
-            video.src = source;
-        });*/
+        return this.extractFrameFromVideo(source, 0);
     }
 
     async extractFrameFromVideo(source: string, time: number): Promise<string> {
+        // this function seams not to wer in most of the cases. It returns a transparent image
         return new Promise<string>((resolve, reject) => {
             const video = document.createElement('video');
 

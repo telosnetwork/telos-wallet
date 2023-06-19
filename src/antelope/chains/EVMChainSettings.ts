@@ -258,7 +258,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerNftResponse)
             .then((response) => {
-                console.log('-------------------------------');
                 // iterate over the contracts and parse json the calldata using try catch
                 for (const contract of Object.values(response.contracts)) {
                     try {
@@ -291,22 +290,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const item = new NFTItemClass(item_source, contract);
                     const nft = new NFTClass(item);
                     nfts.push(nft);
-
-                    //// watch this nft, if it chenges we remake the nfts list
-                    //nft.watch(() => {
-                    //    const index = nfts.findIndex(n => `${n.id}-${n.contractAddress}` === `${nft.id}-${nft.contractAddress}`);
-                    //    if (index > -1) {
-                    //        // nfts[index] = nft;
-                    //        // first we take out the nft from the list
-                    //        const nft = nfts.splice(index, 1)[0];
-                    //        // then we add it again
-                    //        nfts.push(nft);
-                    //    } else {
-                    //        console.error('NFT not found in list', nft, nfts);
-                    //    }
-                    //});
                 }
-                console.log('-------------------------------');
                 return nfts;
             }).catch((error) => {
                 console.error(error);
