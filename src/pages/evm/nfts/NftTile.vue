@@ -48,8 +48,10 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
         />
     </router-link>
     <div class="c-nft-tile__text-container">
-        <h4>
-            <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>
+        <h4 class="c-nft-tile__text">
+            <span v-if="nft.name" class="u-text--high-contrast q-pr-sm">
+                {{nft.name}}
+            </span>
             <span class="u-text--default-contrast">{{nft.id}}</span>
         </h4>
         <ExternalLink :text="creatorLinkText" :url="creatorLinkUrl" />
@@ -72,6 +74,11 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
 
     @include tiny-only {
         width: 288px;
+    }
+
+    &__text {
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     &__link {
