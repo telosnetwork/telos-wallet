@@ -6,9 +6,14 @@ import NftTile from 'pages/evm/nfts/NftTile.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { NFTClass } from 'src/antelope/types';
+import { useChainStore } from 'src/antelope';
+
+import { NFTClass, ShapedNFT } from 'src/antelope/types';
+import { truncateText } from 'src/antelope/stores/utils/text-utils';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 const nftStore = useNftsStore();
+const chainStore = useChainStore();
 
 // data
 const loading = computed(() => nftStore.loggedInventoryLoading);
@@ -16,8 +21,32 @@ const showNftsAsTiles = ref(true);
 const collectionFilter = ref('');
 const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
+// eztodo i18n
+const tableColumns = [
+    { name: 'image', field: 'image', label: '', align: 'left' as 'left' },
+    { name: 'name', field: 'name', label: 'Name', align: 'left' as 'left' },
+    { name: 'id', field: 'id', label: 'ID', align: 'left' as 'left' },
+    { name: 'collection', field: 'collection', label: 'Collection', align: 'left' as 'left' },
+];
 
+// eztodo add url param to save list/grid preference
+// computed
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+const tableRows = computed(() => nfts.value.map((nft: ShapedNFT) => ({
+    image: nft.imageSrcIcon || nft.imageSrcFull,
+    name: truncateText(nft.name, 35),
+    id: truncateText(nft.id),
+    collectionName: nft.contractPrettyName || nft.contractAddress,
+    collectionAddress: nft.contractAddress,
+})));
+
+
+// methods
+function getCollectionUrl(address: string) {
+    const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+
+    return `${explorer}/address/${address}`;
+}
 
 </script>
 
@@ -58,24 +87,23 @@ const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTCl
                     <q-icon name="search" />
                 </template>
             </q-input>
+
             <div class="c-nft-page__grid-toggles">
                 <!--eztodo aria a11y-->
                 <q-icon
                     size="sm"
-                    name="format_list_bulleted"
+                    name="o_format_list_bulleted"
                     :color="!showNftsAsTiles ? 'primary' : ''"
                     @click="showNftsAsTiles = false"
                 />
                 <q-icon
                     size="sm"
-                    name="grid_view"
+                    name="o_grid_view"
                     :color="showNftsAsTiles ? 'primary' : ''"
                     @click="showNftsAsTiles = true"
                 />
             </div>
         </div>
-
-
 
         <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
             <h2 class="c-nft-page__empty-title">You don't have any digital collectibles yet</h2>
@@ -90,9 +118,65 @@ const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTCl
             />
         </div>
 
-        <div v-else>
-            nft table view placeholder
-        </div>
+        <q-table
+            v-else
+            :columns="tableColumns"
+            :rows="tableRows"
+            :pagination="{ rowsPerPage: 0 }"
+            hide-pagination
+            flat
+        >
+            <template v-slot:header="props">
+                <q-tr :props="props">
+                    <q-th
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
+                        class="o-text--paragraph u-text--default-contrast"
+                    >
+                        {{ col.label }}
+                    </q-th>
+                </q-tr>
+            </template>
+
+            <template v-slot:body="props">
+                <q-tr :props="props">
+                    <q-td key="image" :props="props">
+                        <!--eztodo alt-->
+                        <div class="c-nft-page__table-image-container">
+                            <img
+                                v-if="props.row.image"
+                                :src="props.row.image"
+                                height="40"
+                                width="40"
+                            >
+                            <q-icon
+                                v-else
+                                name="o_image_not_supported"
+                                size="md"
+                                color="grey-7"
+                            />
+                        </div>
+                    </q-td>
+                    <q-td key="name" :props="props">
+                        <span class="o-text--paragraph-bold u-text--default-contrast">
+                            {{ props.row.name }}
+                        </span>
+                    </q-td>
+                    <q-td key="id" :props="props">
+                        <span class="o-text--paragraph">
+                            {{ props.row.id }}
+                        </span>
+                    </q-td>
+                    <q-td key="collection" :props="props">
+                        <ExternalLink
+                            :text="props.row.collectionName"
+                            :url="getCollectionUrl(props.row.collectionAddress)"
+                        />
+                    </q-td>
+                </q-tr>
+            </template>
+        </q-table>
     </div>
 </AppPage>
 </template>
@@ -130,9 +214,6 @@ const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTCl
     }
 
     &__input {
-        //min-width: 275px;
-        //max-width: 375px;
-        //width: 100%;
         width:  clamp(275px, 100%, 375px);
 
         @include md-and-up {
@@ -168,6 +249,16 @@ const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTCl
         @media only screen and (min-width: 1400px) {
             grid-template-columns: 1fr 1fr 1fr;
         }
+    }
+
+    &__image-col-header {
+        width: 42px;
+    }
+
+    &__table-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }
 </style>

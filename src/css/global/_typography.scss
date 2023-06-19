@@ -27,64 +27,64 @@
 /* Typography mixins */
 @mixin text--header-1 {
     @include bold;
-    font-size: 2.5rem;
+    font-size: 2.5rem !important;
     line-height: 100%;
 
     @include tiny-only {
-        font-size: 2rem;
+        font-size: 2rem !important;
     }
 }
 
 @mixin text--header-2 {
     @include bold;
-    font-size: 1.5rem;
+    font-size: 1.5rem !important;
     line-height: 130%;
 }
 
 @mixin text--header-3 {
     @include regular;
-    font-size: 1.5rem;
+    font-size: 1.5rem !important;
     line-height: 130%;
 }
 
 @mixin text--header-4 {
     @include bold;
-    font-size: 1.125rem;
+    font-size: 1.125rem !important;
     line-height: 130%;
 
     @media only screen and (min-width: $breakpoint-sm-min) {
-        font-size: 1.25rem;
+        font-size: 1.25rem !important;
     }
 }
 
 @mixin text--header-5 {
     @include bold;
-    font-size: 0.9rem;
+    font-size: 0.9rem !important;
     line-height: 150%;
     text-transform: uppercase;
 }
 
 @mixin text--paragraph {
     @include regular;
-    font-size: 1rem;
+    font-size: 1rem !important;
     line-height: 150%;
 }
 
 @mixin text--paragraph-bold {
     @include bold;
-    font-size: 1rem;
+    font-size: 1rem !important;
     line-height: 150%;
 }
 
 @mixin text--small {
     @include regular;
-    font-size: 0.8rem;
+    font-size: 0.8rem !important;
     line-height: 150%;
 }
 
 @mixin text--small-bold {
     @include bold;
-    font-size: 0.8rem;
+    font-size: 0.8rem !important;
     line-height: 150%;
 }
 
