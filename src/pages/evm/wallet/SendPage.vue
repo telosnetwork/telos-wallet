@@ -164,7 +164,6 @@ export default defineComponent({
         },
         configIsLoading() {
             let config;
-
             if (this.token?.isSystem) {
                 config = balanceStore.__wagmiSystemTokenTransferConfig['logged'];
             } else {
@@ -174,6 +173,9 @@ export default defineComponent({
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
+        },
+        loadingTransaction() {
+            return localStorage.getItem('wagmi.connected') ? this.isLoading || this.configIsLoading : this.isLoading;
         },
     },
     created() {
@@ -399,7 +401,7 @@ export default defineComponent({
                             color="primary"
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
-                            :loading="isLoading || configIsLoading"
+                            :loading="loadingTransaction"
                             :disable="!isFormValid || isLoading"
                             @click="startTransfer"
                         />
