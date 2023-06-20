@@ -337,7 +337,7 @@ export default defineComponent({
     }
 
     &__token_name {
-        width: calc(100vw - 200px);
+        max-width: calc(100vw - 200px);
         display: inline-block;
         overflow: hidden;
         text-overflow: ellipsis;
