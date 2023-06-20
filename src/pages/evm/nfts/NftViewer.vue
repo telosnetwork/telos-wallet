@@ -70,6 +70,10 @@ const iconOverlayName = computed(() => {
     }
 
     if (nftType.value === nftTypes.video) {
+        if (props.previewMode) {
+            return 'o_movie';
+        }
+
         if (videoIsAtEnd.value) {
             return 'o_replay';
         } else {

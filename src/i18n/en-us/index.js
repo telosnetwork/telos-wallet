@@ -121,6 +121,8 @@ export default {
         amount: 'Amount',
         id: 'ID',
         attributes: 'Attributes',
+        name: 'Name',
+        collection: 'Collection',
     },
     nft : {
         link_to_nft_details: 'Go to NFT details page for {name}',

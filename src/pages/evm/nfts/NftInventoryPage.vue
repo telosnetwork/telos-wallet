@@ -12,11 +12,13 @@ import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 
 const router = useRouter();
+const { t: $t } = useI18n();
 
 const tile = 'tile';
 const list = 'list';
@@ -24,10 +26,30 @@ const initialInventoryDisplayPreference = localStorage.getItem('nftInventoryDisp
 
 // eztodo i18n
 const tableColumns = [
-    { name: 'image', field: 'image', label: '', align: 'left' as 'left' },
-    { name: 'name', field: 'name', label: 'Name', align: 'left' as 'left' },
-    { name: 'id', field: 'id', label: 'ID', align: 'left' as 'left' },
-    { name: 'collection', field: 'collection', label: 'Collection', align: 'left' as 'left' },
+    {
+        name: 'image',
+        field: 'image',
+        label: '',
+        align: 'left' as 'left',
+    },
+    {
+        name: 'name',
+        field: 'name',
+        label: $t('global.name'),
+        align: 'left' as 'left',
+    },
+    {
+        name: 'id',
+        field: 'id',
+        label: $t('global.id'),
+        align: 'left' as 'left',
+    },
+    {
+        name: 'collection',
+        field: 'collection',
+        label: $t('global.collection'),
+        align: 'left' as 'left',
+    },
 ];
 
 // data
@@ -39,7 +61,6 @@ const searchFilter = ref('');
 
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading);
-// const loading = true;
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
 const tableRows = computed(() => nfts.value.map((nft: ShapedNFT) => ({
     image: nft.imageSrcIcon || nft.imageSrcFull,
@@ -96,8 +117,13 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
     </template>
 
     <div class="c-nft-page">
+        <div v-if="nfts.length === 0 && !loading" class="c-nft-page__empty-inventory" >
+            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
+            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
+        </div>
+
         <!--eztodo i18n-->
-        <div class="c-nft-page__controls-container">
+        <div v-else-if="nfts.length || loading" class="c-nft-page__controls-container">
             <q-select
                 v-model="collectionFilter"
                 :options="collectionList"
@@ -166,12 +192,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
             </template>
         </div>
 
-        <div v-else>
-            <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
-                <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
-                <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
-            </div>
-
+        <div v-if="nfts.length">
             <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
                 <NftTile
                     v-for="nft in nfts"
@@ -352,6 +373,14 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
     &__list-skeleton-row {
         flex-basis: 100%;
         flex-shrink: 1;
+    }
+
+    // quasar overrides
+    .q-td,
+    .q-th {
+        &:first-of-type {
+            width: 42px;
+        }
     }
 }
 </style>
