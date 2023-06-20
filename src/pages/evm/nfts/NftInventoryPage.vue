@@ -11,7 +11,7 @@ import { useChainStore } from 'src/antelope';
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TableControls from 'components/evm/TableControls.vue';
 
@@ -19,6 +19,7 @@ const nftStore = useNftsStore();
 const chainStore = useChainStore();
 
 const router = useRouter();
+const route = useRoute();
 const { t: $t } = useI18n();
 
 const tile = 'tile';
@@ -51,6 +52,8 @@ const tableColumns = [
         align: 'left' as 'left',
     },
 ];
+
+const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
@@ -102,8 +105,32 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
-watch(nfts, (list) => {
+watch(nfts, (list, oldList) => {
     pagination.value.rowsNumber = list.length;
+    const { rowsPerPage, page } = route.query;
+
+    // if this is initial load and there are pagination query params, validate and apply them
+    if (oldList.length === 0 && rowsPerPage && page && rowsPerPageOptions.includes(+rowsPerPage)) {
+        if ((+rowsPerPage * (+page - 1)) < list.length) {
+            pagination.value.page = +page;
+            pagination.value.rowsPerPage = +rowsPerPage;
+        } else {
+            router.push({
+                name: 'evm-nft-inventory',
+                query: { },
+            });
+        }
+    }
+});
+
+watch(pagination, ({ rowsPerPage, page }) => {
+    router.push({
+        name: 'evm-nft-inventory',
+        query: {
+            rowsPerPage,
+            page,
+        },
+    });
 });
 
 
@@ -318,7 +345,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
             <TableControls
                 class="q-mt-lg"
                 :pagination="pagination"
-                :rows-per-page-options="[6, 12, 24, 48, 96]"
+                :rows-per-page-options="rowsPerPageOptions"
                 @pagination-updated="pagination = $event"
             />
         </div>
