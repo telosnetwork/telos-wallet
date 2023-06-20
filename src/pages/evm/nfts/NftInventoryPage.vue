@@ -106,8 +106,8 @@ function getCollectionUrl(address: string) {
         </div>
 
         <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
-            <h2 class="c-nft-page__empty-title">You don't have any digital collectibles yet</h2>
-            <p class="c-nft-page__empty-text">Purchase your first collectible <ExternalLink :text="'here'" :url="'contractLink'" /></p>
+            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
+            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
         </div>
 
         <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
@@ -202,8 +202,7 @@ function getCollectionUrl(address: string) {
     &__empty-inventory {
         text-align: center;
         margin: auto;
-        margin-top: 100px;
-        margin-bottom: 100px;
+        margin-top: 50px;
     }
 
     &__empty-title {

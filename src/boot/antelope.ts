@@ -41,9 +41,11 @@ export default boot(({ app }) => {
     ant.config.setIndexerHealthThresholdSeconds(10);
     ant.config.setIndexerHealthCheckInterval(5000);
 
-    // Finally we check if the url has the network parameter and if so, we connect to that network
-    // Otherwise we connect to the default network 'telos-evm'
+    // Finally, we check if the url has the network parameter and if so, we connect to that network
+    // Otherwise we just let the store decide which network to connect to
     const network = new URLSearchParams(window.location.search).get('network');
-    ant.stores.chain.setCurrentChain(network || 'telos-evm');
+    if (network) {
+        ant.stores.chain.setCurrentChain(network);
+    }
 
 });
