@@ -236,7 +236,7 @@ export default defineComponent({
             :alt="$t('evm_wallet.token_logo_alt')"
         >
         <div>
-            {{ token.name }}
+            <span class="c-wallet-balance-row__token_name">{{ token.name }}</span>
             <br>
             <span class="o-text--small">{{ fiatRateText }}</span>
         </div>
@@ -334,6 +334,13 @@ export default defineComponent({
     &__left-container,
     &__right-container {
         width: max-content;
+    }
+
+    &__token_name {
+        width: calc(100vw - 200px);
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &__left-container {
