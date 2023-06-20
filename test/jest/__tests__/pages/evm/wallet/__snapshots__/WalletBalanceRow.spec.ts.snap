@@ -16,7 +16,11 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices (Staked
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -138,7 +142,11 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices (Staked 
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -265,7 +273,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -390,7 +402,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Telos 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Telos
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -517,7 +533,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Wrapped TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Wrapped TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -644,7 +664,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Shiba 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Shiba
+      </span>
       <br />
       <span
         class="o-text--small"
