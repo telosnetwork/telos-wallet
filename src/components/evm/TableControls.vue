@@ -15,10 +15,13 @@ const props = defineProps({
         }>,
         required: true,
     },
+    rowsPerPageOptions: {
+        type: Array as PropType<number[]>,
+        default: () => [5, 10, 20, 50, 100],
+    },
 });
 const emit = defineEmits(['pagination-updated']);
 
-const rowsPerPageOptions = [5, 10, 20, 50, 100];
 const showRowsPerPageDropdown = ref(false);
 const rowsPerPagePopup = ref<QPopupProxy>();
 

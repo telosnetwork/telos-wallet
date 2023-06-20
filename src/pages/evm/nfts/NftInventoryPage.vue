@@ -13,6 +13,7 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import TableControls from 'components/evm/TableControls.vue';
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
@@ -58,23 +59,51 @@ const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
 const searchbar = ref<HTMLElement | null>(null); // search input element
 
+// eztodo add to query params, handle invalid params
+const pagination = ref<{
+    page: number;
+    rowsPerPage: number;
+    rowsNumber: number;
+}>({
+    page: 1,
+    rowsPerPage: 12,
+    rowsNumber: 0,
+});
+
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading);
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
-const tableRows = computed(() => nfts.value.map((nft: ShapedNFT) => ({
-    image: nft.imageSrcIcon || nft.imageSrcFull,
-    name: truncateText(nft.name, 35),
-    isAudio: !!nft.audioSrc,
-    isVideo: !!nft.videoSrc,
-    id: truncateText(nft.id),
-    collectionName: nft.contractPrettyName || nft.contractAddress,
-    collectionAddress: nft.contractAddress,
-})));
+const nftsToShow = computed(() => {
+    const { page, rowsPerPage } = pagination.value;
+    const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return nfts.value.slice(start, end);
+});
+const tableRows = computed(() => {
+    if (showNftsAsTiles.value) {
+        return [];
+    }
+
+    return nftsToShow.value.map((nft: ShapedNFT) => ({
+        image: nft.imageSrcIcon || nft.imageSrcFull,
+        name: truncateText(nft.name, 35),
+        isAudio: !!nft.audioSrc,
+        isVideo: !!nft.videoSrc,
+        id: truncateText(nft.id),
+        collectionName: nft.contractPrettyName || nft.contractAddress,
+        collectionAddress: nft.contractAddress,
+    }));
+});
 
 
 // watchers
 watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
+});
+
+watch(nfts, (list) => {
+    pagination.value.rowsNumber = list.length;
 });
 
 
@@ -209,7 +238,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         <div v-if="nfts.length">
             <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
                 <NftTile
-                    v-for="nft in nfts"
+                    v-for="nft in nftsToShow"
                     :key="nft.key"
                     :nft="nft"
                 />
@@ -285,6 +314,13 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
                     </q-tr>
                 </template>
             </q-table>
+
+            <TableControls
+                class="q-mt-lg"
+                :pagination="pagination"
+                :rows-per-page-options="[6, 12, 24, 48, 96]"
+                @pagination-updated="pagination = $event"
+            />
         </div>
     </div>
 </AppPage>
