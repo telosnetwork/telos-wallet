@@ -123,8 +123,10 @@ export default {
         attributes: 'Attributes',
         name: 'Name',
         collection: 'Collection',
+        search: 'Search',
     },
     nft : {
+        collectible: 'Collectible',
         link_to_nft_details: 'Go to NFT details page for {name}',
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
@@ -145,6 +147,10 @@ export default {
         empty_collection_title: 'You don\'t have any digital collectibles yet',
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
+        show_as_tiles_label: 'Show collectibles as tiles',
+        show_as_list_label: 'Show collectibles in a list',
+        go_to_detail_page_label: 'Go to collectible detail page',
+        name_missing: '(No name)',
     },
     notification:{
         success_title_trx: 'Success',
@@ -225,6 +231,7 @@ export default {
         },
     },
     forms: {
+        clear_search_label: 'Clear search terms',
         errors: {
             accountFormat:
           'The account can contain lowercase characters only, numbers from 1 to 5 or a dot (.)',

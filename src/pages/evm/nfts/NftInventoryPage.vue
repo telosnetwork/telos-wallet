@@ -24,7 +24,6 @@ const tile = 'tile';
 const list = 'list';
 const initialInventoryDisplayPreference = localStorage.getItem('nftInventoryDisplayPreference') || tile;
 
-// eztodo i18n
 const tableColumns = [
     {
         name: 'image',
@@ -57,7 +56,7 @@ const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
 const collectionFilter = ref('');
 const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
-
+const searchbar = ref<HTMLElement | null>(null); // search input element
 
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading);
@@ -118,26 +117,31 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 
     <div class="c-nft-page">
         <div v-if="nfts.length === 0 && !loading" class="c-nft-page__empty-inventory" >
-            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
-            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
+            <h2 class="c-nft-page__empty-title">
+                {{ $t('nft.empty_collection_title') }}
+            </h2>
+            <p class="c-nft-page__empty-text">
+                {{ $t('nft.empty_collection_message') }}
+                <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" />
+            </p>
         </div>
 
-        <!--eztodo i18n-->
         <div v-else-if="nfts.length || loading" class="c-nft-page__controls-container">
             <q-select
                 v-model="collectionFilter"
                 :options="collectionList"
                 :disable="loading"
+                :label="$t('global.collection')"
                 outlined
-                label="Collection"
                 class="c-nft-page__input"
             />
 
             <q-input
+                ref="searchbar"
                 v-model="searchFilter"
                 :disable="loading"
+                :label="$t('global.search')"
                 outlined
-                label="Search"
                 class="c-nft-page__input"
             >
                 <template v-slot:append>
@@ -145,27 +149,37 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
                         v-if="searchFilter !== ''"
                         name="close"
                         class="cursor-pointer"
-                        @click="searchFilter = ''"
+                        tabindex="0"
+                        :aria-label="$t('forms.clear_search_label')"
+                        @click="searchFilter = ''; searchbar?.focus()"
+                        @keydown.space.enter.prevent="searchFilter = ''; searchbar?.focus()"
                     />
                     <q-icon name="search" />
                 </template>
             </q-input>
 
             <div class="c-nft-page__grid-toggles">
-                <!--eztodo aria, a11y-->
                 <q-icon
                     size="sm"
                     name="o_format_list_bulleted"
                     :color="!showNftsAsTiles ? 'primary' : ''"
                     class="cursor-pointer"
+                    tabindex="0"
+                    role="button"
+                    :aria-label="$t('nft.show_as_list_label')"
                     @click="showNftsAsTiles = false"
+                    @keydown.space.enter.prevent="showNftsAsTiles = false"
                 />
                 <q-icon
                     size="sm"
                     name="o_grid_view"
                     :color="showNftsAsTiles ? 'primary' : ''"
                     class="cursor-pointer"
+                    tabindex="0"
+                    role="button"
+                    :aria-label="$t('nft.show_as_tiles_label')"
                     @click="showNftsAsTiles = true"
+                    @keydown.space.enter.prevent="showNftsAsTiles = true"
                 />
             </div>
         </div>
@@ -225,12 +239,19 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
                 <template v-slot:body="props">
                     <q-tr :props="props">
                         <q-td key="image" :props="props">
-                            <!--eztodo alt-->
-                            <!--eztodo a11y-->
-                            <div class="c-nft-page__table-image-container" @click="goToDetailPage(props.row)">
+                            <div
+                                class="c-nft-page__table-image-container"
+                                role="link"
+                                tabindex="0"
+                                :aria-label="$t('nft.go_to_detail_page_label')"
+                                @click="goToDetailPage(props.row)"
+                                @keydown.space.enter.prevent="goToDetailPage(props.row)"
+                            >
                                 <img
                                     v-if="props.row.image"
                                     :src="props.row.image"
+                                    :alt="`${$t('nft.collectible')} ${props.row.id}`"
+                                    class="c-nft-page__list-image"
                                     height="40"
                                     width="40"
                                 >
@@ -247,8 +268,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
                                 {{ props.row.name }}
                             </span>
                             <template v-else>
-                                <!--eztodo i18n-->
-                                (No name)
+                                {{ $t('nft.name_missing') }}
                             </template>
                         </q-td>
                         <q-td key="id" :props="props">
@@ -267,8 +287,6 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
             </q-table>
         </div>
     </div>
-
-
 </AppPage>
 </template>
 
@@ -351,6 +369,12 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         justify-content: center;
         align-items: center;
         cursor: pointer;
+    }
+
+    &__list-image {
+        border-radius: 4px;
+        height: 40px;
+        width: 40px;
     }
 
     &__tile-skeleton {
