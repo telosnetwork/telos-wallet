@@ -22,12 +22,6 @@ const tile = 'tile';
 const list = 'list';
 const initialInventoryDisplayPreference = localStorage.getItem('nftInventoryDisplayPreference') || tile;
 
-// data
-const loading = computed(() => nftStore.loggedInventoryLoading);
-const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
-const collectionFilter = ref('');
-const collectionList = ref(['', 'Test', 'Test 2']);
-const searchFilter = ref('');
 // eztodo i18n
 const tableColumns = [
     { name: 'image', field: 'image', label: '', align: 'left' as 'left' },
@@ -36,12 +30,22 @@ const tableColumns = [
     { name: 'collection', field: 'collection', label: 'Collection', align: 'left' as 'left' },
 ];
 
-// eztodo add url param to save list/grid preference
+// data
+const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
+const collectionFilter = ref('');
+const collectionList = ref(['', 'Test', 'Test 2']);
+const searchFilter = ref('');
+
+
 // computed
+const loading = computed(() => nftStore.loggedInventoryLoading);
+// const loading = true;
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
 const tableRows = computed(() => nfts.value.map((nft: ShapedNFT) => ({
     image: nft.imageSrcIcon || nft.imageSrcFull,
     name: truncateText(nft.name, 35),
+    isAudio: !!nft.audioSrc,
+    isVideo: !!nft.videoSrc,
     id: truncateText(nft.id),
     collectionName: nft.contractPrettyName || nft.contractAddress,
     collectionAddress: nft.contractAddress,
@@ -59,6 +63,18 @@ function getCollectionUrl(address: string) {
     const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 
     return `${explorer}/address/${address}`;
+}
+
+function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
+    if (isAudio) {
+        return 'o_headphones';
+    }
+
+    if (isVideo) {
+        return 'o_movie';
+    }
+
+    return 'o_image_not_supported';
 }
 
 function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
@@ -79,16 +95,13 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         <h1>{{ $t('evm_wallet.inventory') }}</h1>
     </template>
 
-    <div v-if="loading" class="q-mt-xl flex flex-center">
-        <q-spinner size="lg" />
-    </div>
-
-    <div v-else class="c-nft-page">
+    <div class="c-nft-page">
         <!--eztodo i18n-->
         <div class="c-nft-page__controls-container">
             <q-select
                 v-model="collectionFilter"
                 :options="collectionList"
+                :disable="loading"
                 outlined
                 label="Collection"
                 class="c-nft-page__input"
@@ -96,6 +109,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 
             <q-input
                 v-model="searchFilter"
+                :disable="loading"
                 outlined
                 label="Search"
                 class="c-nft-page__input"
@@ -112,97 +126,128 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
             </q-input>
 
             <div class="c-nft-page__grid-toggles">
-                <!--eztodo aria a11y-->
+                <!--eztodo aria, a11y-->
                 <q-icon
                     size="sm"
                     name="o_format_list_bulleted"
                     :color="!showNftsAsTiles ? 'primary' : ''"
+                    class="cursor-pointer"
                     @click="showNftsAsTiles = false"
                 />
                 <q-icon
                     size="sm"
                     name="o_grid_view"
                     :color="showNftsAsTiles ? 'primary' : ''"
+                    class="cursor-pointer"
                     @click="showNftsAsTiles = true"
                 />
             </div>
         </div>
 
-        <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
-            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
-            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
-        </div>
+        <div v-if="loading">
+            <div v-if="showNftsAsTiles" class="c-nft-page__tiles-loading-container">
+                <q-skeleton
+                    v-for="index in 25"
+                    :key="`loading-tile-${index}`"
+                    type="rect"
+                    class="c-nft-page__tile-skeleton"
+                />
+            </div>
 
-        <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
-            <NftTile
-                v-for="nft in nfts"
-                :key="nft.key"
-                :nft="nft"
-            />
-        </div>
-
-        <q-table
-            v-else
-            :columns="tableColumns"
-            :rows="tableRows"
-            :pagination="{ rowsPerPage: 0 }"
-            hide-pagination
-            flat
-        >
-            <template v-slot:header="props">
-                <q-tr :props="props">
-                    <q-th
-                        v-for="col in props.cols"
-                        :key="col.name"
-                        :props="props"
-                        class="o-text--paragraph u-text--default-contrast"
-                    >
-                        {{ col.label }}
-                    </q-th>
-                </q-tr>
+            <template v-else>
+                <div
+                    v-for="index in 25"
+                    :key="`loading-row-${index}`"
+                    class="c-nft-page__list-loading-container"
+                >
+                    <q-skeleton type="rect" class="c-nft-page__list-skeleton-icon" />
+                    <q-skeleton type="rect" class="c-nft-page__list-skeleton-row" />
+                </div>
             </template>
+        </div>
 
-            <template v-slot:body="props">
-                <q-tr :props="props">
-                    <q-td key="image" :props="props">
-                        <!--eztodo alt-->
-                        <!--eztodo a11y-->
-                        <div class="c-nft-page__table-image-container" @click="goToDetailPage(props.row)">
-                            <img
-                                v-if="props.row.image"
-                                :src="props.row.image"
-                                height="40"
-                                width="40"
-                            >
-                            <q-icon
-                                v-else
-                                name="o_image_not_supported"
-                                size="md"
-                                color="grey-7"
+        <div v-else>
+            <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
+                <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
+                <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
+            </div>
+
+            <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
+                <NftTile
+                    v-for="nft in nfts"
+                    :key="nft.key"
+                    :nft="nft"
+                />
+            </div>
+
+            <q-table
+                v-else
+                :columns="tableColumns"
+                :rows="tableRows"
+                :pagination="{ rowsPerPage: 0 }"
+                hide-pagination
+                flat
+            >
+                <template v-slot:header="props">
+                    <q-tr :props="props">
+                        <q-th
+                            v-for="col in props.cols"
+                            :key="col.name"
+                            :props="props"
+                            class="o-text--paragraph u-text--default-contrast"
+                        >
+                            {{ col.label }}
+                        </q-th>
+                    </q-tr>
+                </template>
+
+                <template v-slot:body="props">
+                    <q-tr :props="props">
+                        <q-td key="image" :props="props">
+                            <!--eztodo alt-->
+                            <!--eztodo a11y-->
+                            <div class="c-nft-page__table-image-container" @click="goToDetailPage(props.row)">
+                                <img
+                                    v-if="props.row.image"
+                                    :src="props.row.image"
+                                    height="40"
+                                    width="40"
+                                >
+                                <q-icon
+                                    v-else
+                                    :name="getListIconName(props.row)"
+                                    size="md"
+                                    color="grey-7"
+                                />
+                            </div>
+                        </q-td>
+                        <q-td key="name" :props="props">
+                            <span v-if="props.row.name" class="o-text--paragraph-bold u-text--default-contrast">
+                                {{ props.row.name }}
+                            </span>
+                            <template v-else>
+                                <!--eztodo i18n-->
+                                (No name)
+                            </template>
+                        </q-td>
+                        <q-td key="id" :props="props">
+                            <span class="o-text--paragraph">
+                                {{ props.row.id }}
+                            </span>
+                        </q-td>
+                        <q-td key="collection" :props="props">
+                            <ExternalLink
+                                :text="props.row.collectionName"
+                                :url="getCollectionUrl(props.row.collectionAddress)"
                             />
-                        </div>
-                    </q-td>
-                    <q-td key="name" :props="props">
-                        <span class="o-text--paragraph-bold u-text--default-contrast">
-                            <!--eztodo i18n-->
-                            {{ props.row.name || '(No name)' }}
-                        </span>
-                    </q-td>
-                    <q-td key="id" :props="props">
-                        <span class="o-text--paragraph">
-                            {{ props.row.id }}
-                        </span>
-                    </q-td>
-                    <q-td key="collection" :props="props">
-                        <ExternalLink
-                            :text="props.row.collectionName"
-                            :url="getCollectionUrl(props.row.collectionAddress)"
-                        />
-                    </q-td>
-                </q-tr>
-            </template>
-        </q-table>
+                        </q-td>
+                    </q-tr>
+                </template>
+            </q-table>
+        </div>
     </div>
+
+
 </AppPage>
 </template>
 
@@ -259,7 +304,8 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         }
     }
 
-    &__tiles-container {
+    &__tiles-container,
+    &__tiles-loading-container {
         width: max-content;
         margin: auto;
         display: grid;
@@ -283,6 +329,29 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         display: flex;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
+    }
+
+    &__tile-skeleton {
+        margin: auto;
+        width: 280px;
+        height: 280px;
+    }
+
+    &__list-loading-container {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    &__list-skeleton-icon {
+        height: 40px;
+        width: 40px;
+    }
+
+    &__list-skeleton-row {
+        flex-basis: 100%;
+        flex-shrink: 1;
     }
 }
 </style>
