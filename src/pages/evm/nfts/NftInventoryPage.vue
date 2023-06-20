@@ -11,13 +11,20 @@ import { useChainStore } from 'src/antelope';
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { useRouter } from 'vue-router';
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 
+const router = useRouter();
+
+const tile = 'tile';
+const list = 'list';
+const initialInventoryDisplayPreference = localStorage.getItem('nftInventoryDisplayPreference') || tile;
+
 // data
 const loading = computed(() => nftStore.loggedInventoryLoading);
-const showNftsAsTiles = ref(true);
+const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
 const collectionFilter = ref('');
 const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
@@ -41,11 +48,27 @@ const tableRows = computed(() => nfts.value.map((nft: ShapedNFT) => ({
 })));
 
 
+// watchers
+watch(showNftsAsTiles, (showAsTile) => {
+    localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
+});
+
+
 // methods
 function getCollectionUrl(address: string) {
     const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 
     return `${explorer}/address/${address}`;
+}
+
+function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
+    router.push({
+        name: 'evm-nft-details',
+        query: {
+            contract: collectionAddress,
+            id: id,
+        },
+    });
 }
 
 </script>
@@ -143,7 +166,8 @@ function getCollectionUrl(address: string) {
                 <q-tr :props="props">
                     <q-td key="image" :props="props">
                         <!--eztodo alt-->
-                        <div class="c-nft-page__table-image-container">
+                        <!--eztodo a11y-->
+                        <div class="c-nft-page__table-image-container" @click="goToDetailPage(props.row)">
                             <img
                                 v-if="props.row.image"
                                 :src="props.row.image"
@@ -160,7 +184,8 @@ function getCollectionUrl(address: string) {
                     </q-td>
                     <q-td key="name" :props="props">
                         <span class="o-text--paragraph-bold u-text--default-contrast">
-                            {{ props.row.name }}
+                            <!--eztodo i18n-->
+                            {{ props.row.name || '(No name)' }}
                         </span>
                     </q-td>
                     <q-td key="id" :props="props">
