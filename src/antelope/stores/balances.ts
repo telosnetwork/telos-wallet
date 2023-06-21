@@ -130,7 +130,7 @@ export const useBalancesStore = defineStore(store_name, {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
 
-                            // fist we add system token
+                            // first, we add the system token
                             await this.updateSystemBalanceForAccount(label, account.account, chain_settings.getSystemToken());
 
                             // then we iterate over the tokens, fetch the balance for each and add them to the list
