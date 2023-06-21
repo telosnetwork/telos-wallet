@@ -184,6 +184,7 @@ export const useHistoryStore = defineStore(store_name, {
                                         tokenXfer.address,
                                         userStore.fiatCurrency,
                                         indexer,
+                                        chain_settings,
                                     );
 
                                     transferAmountInFiat = tokenFiatPrice ?

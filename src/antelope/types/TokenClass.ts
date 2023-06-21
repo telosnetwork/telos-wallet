@@ -250,6 +250,9 @@ export class TokenClass implements TokenSourceInfo {
         };
     }
 
+    toString(): string {
+        return this.symbol;
+    }
 }
 
 // A class to represent the balance of a token
@@ -328,5 +331,7 @@ export class TokenBalance {
         return this.token.isNative;
     }
 
-
+    toString(): string {
+        return this._balanceStr;
+    }
 }

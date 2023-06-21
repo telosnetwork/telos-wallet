@@ -24,6 +24,11 @@ import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { getAntelope } from 'src/antelope';
 
 export default abstract class EVMChainSettings implements ChainSettings {
+    // to avoid init() being called twice
+    protected ready = false;
+
+    protected initPromise: Promise<void>;
+
     // Short Name of the network
     protected network: string;
 
@@ -88,13 +93,41 @@ export default abstract class EVMChainSettings implements ChainSettings {
         this.indexer.interceptors.response.use(responseHandler, erorrHandler);
 
         // Check indexer health state periodically
-        this.updateIndexerHealthState();
+        this.initPromise = new Promise((resolve) => {
+            this.updateIndexerHealthState().then(() => {
+                // we resolve the promise that will be returned by init()
+                resolve();
+            });
+        });
+    }
+
+    async init(): Promise<void> {
+        // this is called only when this chain is needed to avoid initialization of all chains
+        if (this.ready) {
+            return this.initPromise;
+        }
+        this.ready = true;
+
         // this setTimeout is a work arround because we can't call getAntelope() function before it initializes
         setTimeout(() => {
             setInterval(() => {
                 this.updateIndexerHealthState();
             }, getAntelope().config.indexerHealthCheckInterval);
         }, 1000);
+
+        // Update system token price
+        this.getUsdPrice().then((value:number) => {
+            const sys_token = this.getSystemToken();
+            const price = value.toString();
+            const marketInfo = { price } as MarketSourceInfo;
+            const marketData = new TokenMarketData(marketInfo);
+            sys_token.market = marketData;
+
+            const wsys_token = this.getWrappedSystemToken();
+            wsys_token.market = marketData;
+        });
+
+        return this.initPromise;
     }
 
     get deathHealthResponse() {
@@ -177,7 +210,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getExplorerUrl(): string;
     abstract getEcosystemUrl(): string;
     abstract getTrustedContractsBucket(): string;
-    abstract getImportantTokensIdList(): string[];
+    abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
 

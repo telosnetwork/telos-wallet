@@ -66,7 +66,7 @@ jest.mock('src/antelope/stores/chain', () => ({
                 getTokenList: jest.fn().mockImplementation(() => tokenList),
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
                 getUsdPrice: jest.fn().mockImplementation(() => 1),
-                getImportantTokensIdList: jest.fn().mockImplementation(() => []),
+                getSystemTokens: jest.fn().mockImplementation(() => []),
                 hasIndexerSupport: jest.fn().mockImplementation(() => false),
                 isIndexerHealthy: jest.fn().mockImplementation(() => false),
                 getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
@@ -138,7 +138,7 @@ describe('Antelope Balance Store', () => {
         const tokenBalance = new TokenBalance(tokenList[0], TOKEN_BALANCE);
 
         const expected = {
-            label: [sysBalance, tokenBalance],
+            label: [tokenBalance, sysBalance],
         };
         expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
     });

@@ -35,6 +35,7 @@ const events = {
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
     onAccountChanged: new Subject<{label:string, account:AccountModel|null}>(),
+    onChainIndexer: new Subject<{label:string, isHealthy:boolean}>(),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };
 export const getEvents = () => events;

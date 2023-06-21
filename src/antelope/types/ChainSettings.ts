@@ -3,6 +3,7 @@ import { PriceChartData } from 'src/antelope/types/PriceData';
 import { TokenClass } from 'src/antelope/types';
 
 export interface ChainSettings {
+    init(): Promise<void>;
     isNative(): boolean;
     getNetwork(): string;
     getSystemToken(): TokenClass;
@@ -14,5 +15,5 @@ export interface ChainSettings {
     getRPCEndpoint(): RpcEndpoint;
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
-    getImportantTokensIdList(): string[];
+    getSystemTokens(): TokenClass[];
 }

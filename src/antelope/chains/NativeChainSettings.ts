@@ -47,6 +47,9 @@ export const DEFAULT_ICON = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjciIGhla
 const abortController = new AbortController();
 
 export default abstract class NativeChainSettings implements ChainSettings {
+    // to avoid init() being called twice
+    protected ready = false;
+
     // Short Name of the network
     protected network: string;
 
@@ -100,6 +103,14 @@ export default abstract class NativeChainSettings implements ChainSettings {
 
     }
 
+    async init(): Promise<void> {
+        // this is called only when this chain is needed to avoid initialization of all chains at once
+        if (this.ready) {
+            return;
+        }
+        this.ready = true;
+    }
+
     isNative() {
         return true;
     }
@@ -137,7 +148,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
      * @returns An array of strings representing the IDs of the important tokens.
      * Each ID follows the format: <symbol>-<contract>-<chainId>.
      */
-    abstract getImportantTokensIdList(): string[];
+    abstract getSystemTokens(): TokenClass[];
 
 
 
