@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
@@ -14,6 +14,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TableControls from 'components/evm/TableControls.vue';
+import { useAccountStore } from 'src/antelope';
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
@@ -162,6 +163,20 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
         },
     });
 }
+
+// we update the inventory while the user is on the page
+let timer: string | number | NodeJS.Timer | undefined;
+onMounted(async () => {
+    timer = setInterval(async () => {
+        if (useAccountStore().loggedAccount) {
+            await useNftsStore().updateNFTsForAccount('logged', useAccountStore().loggedAccount);
+        }
+    }, 13000);
+});
+
+onUnmounted(() => {
+    clearInterval(timer);
+});
 
 </script>
 

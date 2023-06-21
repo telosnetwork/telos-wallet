@@ -7,7 +7,7 @@ import { defineStore } from 'pinia';
 
 import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE } from 'src/antelope/types';
 
-import { useFeedbackStore, getAntelope, useAccountStore, useChainStore, useEVMStore } from 'src/antelope';
+import { useFeedbackStore, getAntelope, useChainStore, useEVMStore } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
 import { AccountModel } from 'src/antelope/stores/account';
@@ -57,14 +57,6 @@ export const useNftsStore = defineStore(store_name, {
                     await self.updateNFTsForAccount(label, toRaw(account));
                 },
             });
-
-            useAccountStore();
-            // update logged NFTs every 13 seconds only if the user is logged
-            setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await self.updateNFTsForAccount('logged', useAccountStore().loggedAccount);
-                }
-            }, 13000);
         },
         async updateNFTsForAccount(label: string, account: AccountModel | null) {
             this.trace('updateNFTsForAccount', label, account);
