@@ -40,6 +40,7 @@ export default defineComponent({
                 await login();
             }else {
                 await (web3Modal.value as Web3Modal).openModal();
+                emit('toggleWalletConnect');
             }
         };
 
