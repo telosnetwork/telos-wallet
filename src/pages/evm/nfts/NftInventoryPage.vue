@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, toRaw } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
@@ -7,17 +9,18 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useChainStore } from 'src/antelope';
+import { useAccountStore } from 'src/antelope';
 
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
+
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useRoute, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import TableControls from 'components/evm/TableControls.vue';
-import { useAccountStore } from 'src/antelope';
+
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
+const accountStore = useAccountStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -57,6 +60,7 @@ const tableColumns = [
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
+const initialLoadComplete = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
 const collectionFilter = ref('');
 const collectionList = ref(['', 'Test', 'Test 2']);
@@ -75,7 +79,7 @@ const pagination = ref<{
 });
 
 // computed
-const loading = computed(() => nftStore.loggedInventoryLoading);
+const loading = computed(() => nftStore.loggedInventoryLoading || !initialLoadComplete.value);
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
@@ -102,11 +106,25 @@ const tableRows = computed(() => {
 
 
 // watchers
+
+// fetch initial data
+watch(accountStore, (store) => {
+    if (store.loggedAccount) {
+        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
+            initialLoadComplete.value = true;
+        });
+    }
+});
+
 watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
 watch(nfts, (list, oldList) => {
+    if (list.length === pagination.value.rowsNumber) {
+        return;
+    }
+
     pagination.value.rowsNumber = list.length;
     const { rowsPerPage, page } = route.query;
 
@@ -168,8 +186,8 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
-        if (useAccountStore().loggedAccount) {
-            await useNftsStore().updateNFTsForAccount('logged', useAccountStore().loggedAccount);
+        if (accountStore.loggedAccount) {
+            await nftStore.updateNFTsForAccount('logged', accountStore.loggedAccount);
         }
     }, 13000);
 });
@@ -191,10 +209,6 @@ onUnmounted(() => {
             <h2 class="c-nft-page__empty-title">
                 {{ $t('nft.empty_collection_title') }}
             </h2>
-            <p class="c-nft-page__empty-text">
-                {{ $t('nft.empty_collection_message') }}
-                <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" />
-            </p>
         </div>
 
         <div v-else-if="nfts.length || loading" class="c-nft-page__controls-container">

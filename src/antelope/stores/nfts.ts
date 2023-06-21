@@ -54,7 +54,6 @@ export const useNftsStore = defineStore(store_name, {
                         list: [],
                         loading: true,
                     };
-                    await self.updateNFTsForAccount(label, toRaw(account));
                 },
             });
         },

@@ -101,7 +101,7 @@ export default {
         add_to_metamask: 'Add to MetaMask',
         rejected_metamask_prompt: 'The MetaMask prompt was rejected',
         error_adding_token_to_metamask: 'Error adding token to MetaMask',
-        inventory: 'Inventory',
+        inventory: 'Collectibles',
     },
     global: {
         native: 'Native',
@@ -145,8 +145,6 @@ export default {
         // 'part 2' is 'global.id'
         collectible_not_found_nft_id_part_3: 'correct? An incorrect ID may result in inaccurate information being displayed.',
         empty_collection_title: 'You don\'t have any digital collectibles yet',
-        empty_collection_message: 'Purchase your first collectible',
-        empty_collection_link_text: 'here',
         show_as_tiles_label: 'Show collectibles as tiles',
         show_as_list_label: 'Show collectibles in a list',
         go_to_detail_page_label: 'Go to collectible detail page',
