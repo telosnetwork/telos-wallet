@@ -7,7 +7,7 @@ import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, A
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { checkNetwork, isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 
@@ -171,7 +171,7 @@ export default defineComponent({
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
         loadingTransaction() {
-            return localStorage.getItem('wagmi.connected') ? this.isLoading || this.configIsLoading : this.isLoading;
+            return localStorage.getItem('wagmi.connected') && isCorrectNetwork() ? this.isLoading || this.configIsLoading : this.isLoading;
         },
     },
     created() {
@@ -243,11 +243,8 @@ export default defineComponent({
         async startTransfer() {
             // if WalletConnect on wrong network, notify user and prevent transaction
             if (localStorage.getItem('wagmi.connected')){
-                const chainSettings = useChainStore().currentChain.settings;
-                const appChainId = chainSettings.getChainId();
-                const networkName = chainSettings.getDisplay();
-                const walletConnectChainId = getNetwork().chain?.id.toString();
-                if (appChainId !== walletConnectChainId){
+                const networkName = useChainStore().currentChain.settings.getDisplay();
+                if (!isCorrectNetwork()){
                     const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
                     ant.config.notifyFailureMessage(errorMessage);
                     return;
