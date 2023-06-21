@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
@@ -7,6 +7,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { NFTClass } from 'src/antelope/types';
+import { useAccountStore } from 'src/antelope';
 
 const nftStore = useNftsStore();
 
@@ -16,6 +17,20 @@ const loading = computed(() => nftStore.loggedInventoryLoading);
 const showNftsAsTiles = ref(true);
 
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+
+// we update the inventory while the user is on the page
+let timer: string | number | NodeJS.Timer | undefined;
+onMounted(async () => {
+    timer = setInterval(async () => {
+        if (useAccountStore().loggedAccount) {
+            await useNftsStore().updateNFTsForAccount('logged', useAccountStore().loggedAccount);
+        }
+    }, 13000);
+});
+
+onUnmounted(() => {
+    clearInterval(timer);
+});
 
 </script>
 
