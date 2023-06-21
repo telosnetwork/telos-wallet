@@ -66,8 +66,6 @@ const collectionFilter = ref('');
 const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
 const searchbar = ref<HTMLElement | null>(null); // search input element
-
-// eztodo add to query params, handle invalid params
 const pagination = ref<{
     page: number;
     rowsPerPage: number;
