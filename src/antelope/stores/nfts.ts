@@ -57,14 +57,6 @@ export const useNftsStore = defineStore(store_name, {
                     await self.updateNFTsForAccount(label, toRaw(account));
                 },
             });
-
-            useAccountStore();
-            // update logged NFTs every 13 seconds only if the user is logged
-            setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await self.updateNFTsForAccount('logged', useAccountStore().loggedAccount);
-                }
-            }, 13000);
         },
         async updateNFTsForAccount(label: string, account: AccountModel | null) {
             this.trace('updateNFTsForAccount', label, account);
