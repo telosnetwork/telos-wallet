@@ -247,7 +247,7 @@ export default defineComponent({
         async startTransfer() {
             // if WalletConnect on wrong network, notify user and prevent transaction
             if (localStorage.getItem('wagmi.connected')){
-                const network = useChainStore().currentChain.settings.getDisplay();
+                const networkName = useChainStore().currentChain.settings.getDisplay();
                 if (!isCorrectNetwork()){
                     const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
                     (this as any).$errorNotification(errorMessage, true);
