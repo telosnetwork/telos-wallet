@@ -76,12 +76,13 @@ export default defineComponent({
     },
     mounted() {
         const projectId = process.env.PROJECT_ID || '';
-        const explorerAllowList = [
+        const explorerRecommendedWalletIds = [
             // MetaMask
             'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
         ];
+        const explorerExcludedWalletIds: 'ALL' = 'ALL'; // Web3Modal option excludes all but recomended
 
-        const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerAllowList };
+        const options = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
 
         this.web3Modal = new Web3Modal(options, this.wagmiClient);
 
