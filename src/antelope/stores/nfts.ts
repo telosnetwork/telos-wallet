@@ -7,7 +7,7 @@ import { defineStore } from 'pinia';
 
 import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE } from 'src/antelope/types';
 
-import { useFeedbackStore, getAntelope, useAccountStore, useChainStore, useEVMStore } from 'src/antelope';
+import { useFeedbackStore, getAntelope, useChainStore, useEVMStore } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
 import { AccountModel } from 'src/antelope/stores/account';
