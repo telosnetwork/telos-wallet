@@ -146,7 +146,13 @@ export default defineComponent({
             if (!this.selected.balance) {
                 return ethers.constants.Zero;
             }
-            return this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
+            // Let's ensure the returned value is not negative
+            const available = this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
+            if (available.gt(ethers.constants.Zero)) {
+                return available;
+            } else {
+                return ethers.constants.Zero;
+            }
         },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
