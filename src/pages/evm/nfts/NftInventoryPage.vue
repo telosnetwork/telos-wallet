@@ -96,11 +96,12 @@ const tableRows = computed(() => {
         name: truncateText(nft.name, 35),
         isAudio: !!nft.audioSrc,
         isVideo: !!nft.videoSrc,
-        id: truncateText(nft.id),
+        id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
     }));
 });
+const listImagesLoadingStates = ref<Record<string, boolean>>({});
 
 
 // watchers
@@ -112,14 +113,24 @@ watch(accountStore, (store) => {
             initialLoadComplete.value = true;
         });
     }
-});
+},
+{ immediate: true },
+);
 
 watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
 watch(nfts, (list, oldList) => {
-    if (list.length === pagination.value.rowsNumber) {
+    // if NFTs are loaded...
+    if (list.length && list.length === pagination.value.rowsNumber) {
+        list.forEach((nft) => {
+            // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
+            // the loading state will be ended when the @loaded event is fired by that image
+            if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
+                listImagesLoadingStates.value[nft.id] = true;
+            }
+        });
         return;
     }
 
@@ -330,14 +341,23 @@ onUnmounted(() => {
                                 @click="goToDetailPage(props.row)"
                                 @keydown.space.enter.prevent="goToDetailPage(props.row)"
                             >
-                                <img
-                                    v-if="props.row.image"
-                                    :src="props.row.image"
-                                    :alt="`${$t('nft.collectible')} ${props.row.id}`"
-                                    class="c-nft-page__list-image"
-                                    height="40"
-                                    width="40"
-                                >
+                                <template v-if="props.row.image">
+                                    <q-skeleton
+                                        v-if="listImagesLoadingStates[props.row.id]"
+                                        type="rect"
+                                        class="c-nft-page__list-image"
+                                    />
+                                    <img
+                                        v-show="!listImagesLoadingStates[props.row.id]"
+                                        :src="props.row.image"
+                                        :alt="`${$t('nft.collectible')} ${props.row.id}`"
+                                        class="c-nft-page__list-image"
+                                        height="40"
+                                        width="40"
+                                        @load="listImagesLoadingStates[props.row.id] = false"
+                                    >
+                                </template>
+
                                 <q-icon
                                     v-else
                                     :name="getListIconName(props.row)"
@@ -356,7 +376,7 @@ onUnmounted(() => {
                         </q-td>
                         <q-td key="id" :props="props">
                             <span class="o-text--paragraph">
-                                {{ props.row.id }}
+                                {{ truncateText(props.row.id) }}
                             </span>
                         </q-td>
                         <q-td key="collection" :props="props">
