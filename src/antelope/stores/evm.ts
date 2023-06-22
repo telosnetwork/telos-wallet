@@ -549,7 +549,7 @@ export const useEVMStore = defineStore(store_name, {
         async getNFT(address:string, tokenId: string, suspectedType:string): Promise<NFTClass | null> {
             this.trace('getNFT', address, suspectedType, tokenId);
             if (suspectedType.toUpperCase() === ERC721_TYPE) {
-                // TODO: here we try to get NFT data from the chain directly as a fallback for indexer
+                // TODO: here we try to get NFT data from the chain directly as a fallback for indexer, see https://github.com/telosnetwork/telos-wallet/issues/446
             }
             return null;
         },
