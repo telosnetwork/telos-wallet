@@ -149,6 +149,8 @@ export default {
         show_as_list_label: 'Show collectibles in a list',
         go_to_detail_page_label: 'Go to collectible detail page',
         name_missing: '(No name)',
+        empty_collection_message: 'Purchase your first collectible',
+        empty_collection_link_text: 'here',
     },
     notification:{
         success_title_trx: 'Success',

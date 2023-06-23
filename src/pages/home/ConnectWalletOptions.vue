@@ -6,6 +6,7 @@ import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
 import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
 import { getNetwork } from '@wagmi/core';
+import { isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -41,6 +42,7 @@ export default defineComponent({
                 await login();
             } else {
                 await (web3Modal.value as Web3Modal).openModal();
+                emit('toggleWalletConnect');
             }
         };
 
@@ -49,12 +51,9 @@ export default defineComponent({
 
             loginEvm();
 
-            const chainSettings = useChainStore().currentChain.settings;
-            const appChainId = chainSettings.getChainId();
-            const networkName = chainSettings.getDisplay();
-            const walletConnectChainId = getNetwork().chain?.id.toString();
+            const networkName = useChainStore().currentChain.settings.getDisplay();
 
-            if (appChainId !== walletConnectChainId) {
+            if (!isCorrectNetwork()){
                 const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
                 globalProps.$warningNotification(warningMessage);
             }
@@ -76,12 +75,13 @@ export default defineComponent({
     },
     mounted() {
         const projectId = process.env.PROJECT_ID || '';
-        const explorerAllowList = [
+        const explorerRecommendedWalletIds = [
             // MetaMask
             'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
         ];
+        const explorerExcludedWalletIds: 'ALL' = 'ALL'; // Web3Modal option excludes all but recomended
 
-        const options = usePlatformStore().isMobile ? { projectId } : { projectId, explorerAllowList };
+        const options = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
 
         this.web3Modal = new Web3Modal(options, this.wagmiClient);
 

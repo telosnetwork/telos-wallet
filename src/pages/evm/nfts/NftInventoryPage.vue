@@ -9,9 +9,9 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useChainStore } from 'src/antelope';
+import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
-import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -422,9 +422,6 @@ onUnmounted(() => {
         text-align: center;
         margin: auto;
         margin-top: 50px;
-    }
-
-    &__empty-title {
     }
 
     &__empty-text {
