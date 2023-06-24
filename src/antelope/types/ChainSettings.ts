@@ -15,7 +15,6 @@ export interface ChainSettings {
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
     getSystemTokens(): TokenClass[];
-    getImportantTokensIdList(): string[];
     getNFTsInventory(address: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
     getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>
 }

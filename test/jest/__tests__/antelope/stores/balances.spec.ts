@@ -75,7 +75,6 @@ const ChainStore = jest.fn().mockImplementation(() => ({
             getTokenList: jest.fn().mockImplementation(() => tokenList),
             getSystemToken: jest.fn().mockImplementation(() => tokenSys),
             getUsdPrice: jest.fn().mockImplementation(() => 1),
-            getImportantTokensIdList: jest.fn().mockImplementation(() => []),
             hasIndexerSupport: jest.fn().mockImplementation(() => false),
             isIndexerHealthy: jest.fn().mockImplementation(() => false),
             getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
