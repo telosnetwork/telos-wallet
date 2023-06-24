@@ -15,10 +15,13 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
+    getAntelope,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+    useChainStore,
+    useContractStore,
+    useUserStore,
+} from 'src/antelope';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import {
     Label,
     EvmTransaction,
@@ -29,10 +32,8 @@ import {
     EVMTransactionsPaginationData, TransactionValueData, EvmSwapFunctionNames,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { getAntelope, useContractStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
@@ -46,16 +47,16 @@ export interface HistoryState {
         [label: Label]: {
             transactions: EvmTransaction[],
         },
-    }
+    };
     __total_evm_transaction_count: {
         [label: Label]: number,
-    },
+    };
     __shaped_evm_transaction_rows: {
         [label: Label]: ShapedTransactionRow[],
     };
     __evm_transactions_pagination_data: {
         [label: Label]: EVMTransactionsPaginationData,
-    },
+    };
 }
 
 const store_name = 'history';

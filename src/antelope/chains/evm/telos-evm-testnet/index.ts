@@ -3,7 +3,7 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
 import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
-import { useUserStore } from 'src/antelope/stores/user';
+import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';

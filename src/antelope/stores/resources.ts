@@ -11,11 +11,7 @@
 
 
 import { defineStore } from 'pinia';
-import {
-    createInitFunction,
-    createTraceFunction,
-} from 'src/antelope/stores/feedback';
-
+import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 export interface ResourcesState {
     __: string;

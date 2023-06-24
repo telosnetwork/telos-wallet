@@ -140,6 +140,9 @@ export default {
         collectible_not_found_nft_id_part_1: 'Is the collectible\'s',
         // 'part 2' is 'global.id'
         collectible_not_found_nft_id_part_3: 'correct? An incorrect ID may result in inaccurate information being displayed.',
+        empty_collection_title: 'You don\'t have any digital collectibles yet',
+        empty_collection_message: 'Purchase your first collectible',
+        empty_collection_link_text: 'here',
     },
     notification:{
         success_title_trx: 'Success',

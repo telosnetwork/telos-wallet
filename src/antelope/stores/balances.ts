@@ -12,14 +12,7 @@
  */
 
 import { defineStore } from 'pinia';
-import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import {
-    createTraceFunction,
-    isTracingAll,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
 import { errorToString } from 'src/antelope/config';
-import { getAntelope } from '..';
 import {
     AntelopeError,
     EvmTransactionResponse,
@@ -29,10 +22,16 @@ import {
     TokenClass,
     TransactionResponse, EvmABI,
 } from 'src/antelope/types';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
-import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useEVMStore } from 'src/antelope/stores/evm';
+import {
+    getAntelope,
+    useAccountStore,
+    useFeedbackStore,
+    useChainStore,
+    useEVMStore,
+} from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
@@ -48,6 +47,7 @@ import {
     PrepareSendTransactionResult,
     PrepareWriteContractResult,
 } from '@wagmi/core';
+import { AccountModel } from 'src/antelope/stores/account';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };

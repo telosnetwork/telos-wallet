@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import { setActivePinia, createPinia } from 'pinia';
-import { useBalancesStore } from 'src/antelope/stores/balances';
 import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
 
@@ -24,37 +23,75 @@ const tokenSys = new TokenClass({
 const SYSTEM_TOKEN_BALANCE = ethers.BigNumber.from('123'.concat('1'.repeat(18)));
 const TOKEN_BALANCE = ethers.BigNumber.from('321'.concat('9'.repeat(18)));
 
-jest.mock('src/antelope/stores/evm', () => ({
-    useEVMStore: jest.fn().mockImplementation(() => ({
-        getContract: jest.fn().mockImplementation(() => ({
-            then: jest.fn().mockImplementation((cb1: any) => {
-                cb1({
-                    getContractInstance: jest.fn().mockImplementation(() => ({
-                        transfer: jest.fn(),
-                        balanceOf: jest.fn().mockImplementation(() => ({
-                            then: jest.fn().mockImplementation((cb: any) => {
-                                cb(TOKEN_BALANCE);
-                            }),
-                        })),
+
+const FeedbackStore = jest.fn().mockImplementation(() => ({
+    setDebug: jest.fn(),
+    setLoading: jest.fn(),
+    unsetLoading: jest.fn(),
+}));
+
+const EVMStore = jest.fn().mockImplementation(() => ({
+    getContract: jest.fn().mockImplementation(() => ({
+        then: jest.fn().mockImplementation((cb1: any) => {
+            cb1({
+                getContractInstance: jest.fn().mockImplementation(() => ({
+                    transfer: jest.fn(),
+                    balanceOf: jest.fn().mockImplementation(() => ({
+                        then: jest.fn().mockImplementation((cb: any) => {
+                            cb(TOKEN_BALANCE);
+                        }),
                     })),
-                });
-            }),
-        })),
-        toWei: jest.fn().mockImplementation((value: any) => value),
-        getERC20TokenBalance: jest.fn().mockImplementation(() => ({
+                })),
+            });
+        }),
+    })),
+    toWei: jest.fn().mockImplementation((value: any) => value),
+    getERC20TokenBalance: jest.fn().mockImplementation(() => ({
+        then: jest.fn().mockImplementation((cb: any) => {
+            cb(TOKEN_BALANCE);
+        }),
+    })),
+    sendSystemToken: jest.fn(),
+    rpcProvider: {
+        getBalance: jest.fn().mockImplementation(() => ({
             then: jest.fn().mockImplementation((cb: any) => {
-                cb(TOKEN_BALANCE);
+                cb(SYSTEM_TOKEN_BALANCE);
             }),
         })),
-        sendSystemToken: jest.fn(),
-        rpcProvider: {
-            getBalance: jest.fn().mockImplementation(() => ({
-                then: jest.fn().mockImplementation((cb: any) => {
-                    cb(SYSTEM_TOKEN_BALANCE);
-                }),
-            })),
+    },
+}));
+
+const AccountStore = jest.fn().mockImplementation(() => ({
+    loggedAccount: {},
+    currentIsLogged: true,
+    sendAction: jest.fn(),
+}));
+
+const ChainStore = jest.fn().mockImplementation(() => ({
+    getChain: jest.fn().mockImplementation(() => ({
+        settings: {
+            isNative: jest.fn(),
+            getTokens: jest.fn(),
+            getTokenList: jest.fn().mockImplementation(() => tokenList),
+            getSystemToken: jest.fn().mockImplementation(() => tokenSys),
+            getUsdPrice: jest.fn().mockImplementation(() => 1),
+            getImportantTokensIdList: jest.fn().mockImplementation(() => []),
+            hasIndexerSupport: jest.fn().mockImplementation(() => false),
+            isIndexerHealthy: jest.fn().mockImplementation(() => false),
+            getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
         },
     })),
+    loggedChain: {
+        settings: {
+            isNative: jest.fn(),
+            getTokens: jest.fn(),
+            getTokenList: jest.fn().mockImplementation(() => tokenList),
+        },
+    },
+}));
+
+jest.mock('src/antelope/stores/evm', () => ({
+    useEVMStore: EVMStore,
 }));
 
 jest.mock('src/antelope/stores/chain', () => ({
@@ -83,24 +120,21 @@ jest.mock('src/antelope/stores/chain', () => ({
 }));
 
 jest.mock('src/antelope/stores/account', () => ({
-    useAccountStore: jest.fn().mockImplementation(() => ({
-        loggedAccount: {},
-        currentIsLogged: true,
-        sendAction: jest.fn(),
-    })),
+    useAccountStore: AccountStore,
 }));
+
 
 jest.mock('src/antelope/stores/feedback', () => ({
     createTraceFunction: jest.fn().mockImplementation(() => jest.fn()),
-    useFeedbackStore: jest.fn().mockImplementation(() => ({
-        setDebug: jest.fn(),
-        setLoading: jest.fn(),
-        unsetLoading: jest.fn(),
-    })),
+    useFeedbackStore: FeedbackStore,
     isTracingAll: jest.fn().mockImplementation(() => false),
 }));
 
 jest.mock('src/antelope', () => ({
+    useChainStore: ChainStore,
+    useAccountStore: AccountStore,
+    useEVMStore: EVMStore,
+    useFeedbackStore: FeedbackStore,
     getAntelope: jest.fn().mockImplementation(() => ({
         events: {
             onAccountChanged: {
@@ -116,6 +150,9 @@ jest.mock('src/antelope', () => ({
 jest.mock('src/antelope/config', () => ({
     errorToString: jest.fn().mockImplementation(e => e),
 }));
+
+
+import { useBalancesStore } from 'src/antelope/stores/balances';
 
 describe('Antelope Balance Store', () => {
     let store: any;

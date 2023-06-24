@@ -1,40 +1,37 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import ExternalLink from 'components/ExternalLink.vue';
+
 import { useNftsStore } from 'src/antelope/stores/nfts';
+import { NFTClass } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
 const nftStore = useNftsStore();
-const accountStore = useAccountStore();
 
 // data
-const loading = ref(true);
-const nfts = ref<ShapedNFT[]>([]);
+const loading = computed(() => nftStore.loggedInventoryLoading);
+// const nfts = ref([] as NFTClass[]);
 const showNftsAsTiles = ref(true);
 
-// watchers
-watch(
-    accountStore,
-    (newValue) => {
-        const address = newValue?.loggedAccount?.account;
-        if (address) {
-            // remove fake loading time
-            setTimeout(() => {
-                nftStore.fetchNFtsForAccount('current', address).then(() => {
-                    nfts.value = nftStore.getAccountNfts('current', address);
-                    loading.value = false;
-                });
-            }, 2000);
+const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+
+// we update the inventory while the user is on the page
+let timer: string | number | NodeJS.Timer | undefined;
+onMounted(async () => {
+    timer = setInterval(async () => {
+        if (useAccountStore().loggedAccount) {
+            await useNftsStore().updateNFTsForAccount('logged', useAccountStore().loggedAccount);
         }
-    },
-    {
-        immediate: true,
-        deep: true,
-    },
-);
+    }, 13000);
+});
+
+onUnmounted(() => {
+    clearInterval(timer);
+});
+
 </script>
 
 <template>
@@ -48,12 +45,18 @@ watch(
     </div>
 
     <div v-else class="c-nft-page">
-        <q-checkbox v-model="showNftsAsTiles" class="q-mb-lg">Show as tile?</q-checkbox>
+
+        <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
+            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
+            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
+        </div>
+
+        <q-checkbox v-else v-model="showNftsAsTiles" class="q-mb-lg">Show as tile?</q-checkbox>
 
         <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
             <NftTile
                 v-for="nft in nfts"
-                :key="nft.id"
+                :key="nft.key"
                 :nft="nft"
             />
         </div>
@@ -69,6 +72,19 @@ watch(
 .c-nft-page {
     max-width: 1000px;
     margin: auto;
+
+    &__empty-inventory {
+        text-align: center;
+        margin: auto;
+        margin-top: 50px;
+    }
+
+    &__empty-title {
+    }
+
+    &__empty-text {
+        margin-top: 20px;
+    }
 
     &__tiles-container {
         width: max-content;

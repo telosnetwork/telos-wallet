@@ -17,10 +17,8 @@
 
 import { defineStore } from 'pinia';
 import {
-    createInitFunction,
-    createTraceFunction,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+} from 'src/antelope';
 
 // main native chains
 import EOS from 'src/antelope/chains/native/eos';
@@ -37,7 +35,7 @@ import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
 import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
-import { getAntelope } from '..';
+import { getAntelope } from 'src/antelope';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
@@ -47,7 +45,7 @@ import {
     TokenClass,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
-
+import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 
 
