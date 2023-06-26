@@ -126,6 +126,8 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
+// eztodo change rows per page, go to another page, select collection from dropdown, does not behave as expected
+
 watch(nfts, (list) => {
     // if NFTs are loaded...
     if (list.length && list.length === pagination.value.rowsNumber) {
