@@ -120,22 +120,6 @@ export const useHistoryStore = defineStore(store_name, {
 
                 await this.shapeTransactions(label, transactions);
 
-                // we try to re-shape transactions that were not shaped for any reason
-                // const timer = setInterval(() => {
-                //     const loaded = toRaw(this.__shaped_evm_transaction_rows[label]);
-                //     const not_loaded = [];
-                //     for (let i = 0; i < transactions.length; i++) {
-                //         // if is not loaded
-                //         if (!loaded[i]) {
-                //             not_loaded.push(toRaw(transactions[i]));
-                //         }
-                //     }
-                //     if (not_loaded.length !== 0) {
-                //         this.shapeTransactions(label, not_loaded);
-                //     }
-                //     clearInterval(timer);
-                // }, 2000);
-
                 // there's an instant between this point and the appearance of the first transaction to show
                 // so we add a small delay to avoid flickering
                 setTimeout(() => {
