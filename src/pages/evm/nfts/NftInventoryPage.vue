@@ -82,7 +82,7 @@ const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading || !initialLoadComplete.value);
-const nfts = computed(() => nftStore.getUserFilteredInventory('logged') || [] as NFTClass[]);
+const nfts = computed(() => initialLoadComplete.value ? (nftStore.getUserFilteredInventory('logged') || [] as NFTClass[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -126,7 +126,7 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
-watch(nfts, (list, oldList) => {
+watch(nfts, (list) => {
     // if NFTs are loaded...
     if (list.length && list.length === pagination.value.rowsNumber) {
         list.forEach((nft) => {
@@ -143,10 +143,11 @@ watch(nfts, (list, oldList) => {
     const { rowsPerPage, page } = route.query;
 
     // if this is initial load and there are pagination query params, validate and apply them
-    if (oldList.length === 0 && rowsPerPage && page && rowsPerPageOptions.includes(+rowsPerPage)) {
+    if (rowsPerPage && page && rowsPerPageOptions.includes(+rowsPerPage)) {
+        pagination.value.rowsPerPage = +rowsPerPage;
+
         if ((+rowsPerPage * (+page - 1)) < list.length) {
             pagination.value.page = +page;
-            pagination.value.rowsPerPage = +rowsPerPage;
         } else {
             router.push({
                 name: 'evm-nft-inventory',
