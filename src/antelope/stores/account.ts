@@ -31,6 +31,7 @@ import {
     NativeTransactionResponse,
 } from 'src/antelope/types';
 import { getAccount, disconnect } from '@wagmi/core';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -155,7 +156,7 @@ export const useAccountStore = defineStore(store_name, {
                 }
 
                 if (address) {
-                    const displayAddress = address.replace(/^..(.{4})(.*)(.{4})$/, '0x$1...$3');
+                    const displayAddress = truncateAddress(address);
 
                     const account = address;
 

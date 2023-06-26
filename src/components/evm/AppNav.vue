@@ -104,9 +104,17 @@ export default defineComponent({
             this.menuIsOpen = false;
         },
         goBack() {
-            const parent = this.$route.meta.parent as string;
+            // if the user has navigated from within the app, pressing back should preserve query params, thus we should go back in history
+            // if the user has come from an external source, pressing back should go to the parent route
+            const navigatedFromApp = sessionStorage.getItem('navigatedFromApp');
 
-            this.$router.push({ name: parent });
+            if (navigatedFromApp) {
+                this.$router.go(-1);
+            } else {
+                const parent = this.$route.meta.parent as string;
+
+                this.$router.push({ name: parent });
+            }
         },
         cycleFocus(event: Event, toFocus: 'first' | 'last') {
             if (this.$q.screen.lt.md) {

@@ -14,6 +14,7 @@ import { AccountModel } from 'src/antelope/stores/account';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 export interface NFTsInventory {
     owner: Address;
@@ -27,10 +28,21 @@ export interface NFTsCollection {
     loading: boolean;
 }
 
+export interface UserNftFilter {
+    searchTerm?: string;
+    collection?: string;
+}
+
 export interface NftsState {
-    __filter: IndexerTransactionsFilter;
+    __indexer_filter: IndexerTransactionsFilter;
+    __user_filter: UserNftFilter;
     __inventory: Record<Label, NFTsInventory>;
     __contracts: Record<Network, Record<Address, NFTsCollection>>;
+}
+
+export interface NftCollectionListItem {
+    contract: Address;
+    name: string;
 }
 
 const store_name = 'nfts';
@@ -41,6 +53,54 @@ export const useNftsStore = defineStore(store_name, {
         loggedInventory: state => state.__inventory['logged']?.list,
         loggedInventoryLoading: state => state.__inventory['logged']?.loading,
         getInventory: state => (label: string) => state.__inventory[label],
+        getUserFilter: state => state.__user_filter,
+        getCollectionList: state => (label: string): NftCollectionListItem[] => {
+            // used to populate the 'collections' dropdown in the NFT inventory page
+            const inventory = state.__inventory[label]?.list;
+            if (!inventory) {
+                return [];
+            }
+            const collection_list: NftCollectionListItem[] = [];
+            inventory.forEach((nft) => {
+                const collection = collection_list.find(c => c.contract === nft.contractAddress);
+                if (!collection) {
+                    collection_list.push({
+                        contract: nft.contractAddress,
+                        name: nft.contractPrettyName || truncateAddress(nft.contractAddress),
+                    });
+                }
+            });
+            // sort collection list such that items whose name begins with 0x are at the bottom, and those with names are at the top sorted alphabetically
+            collection_list.sort((a, b) => {
+                if (a.name.startsWith('0x') && !b.name.startsWith('0x')) {
+                    return 1;
+                } else if (!a.name.startsWith('0x') && b.name.startsWith('0x')) {
+                    return -1;
+                } else {
+                    return a.name.localeCompare(b.name);
+                }
+            });
+            return collection_list;
+        },
+        getUserFilteredInventory:  state => (label: string) => {
+            let inventory = state.__inventory[label]?.list ?? [];
+            const filter = state.__user_filter;
+
+            if (filter.collection) {
+                inventory = inventory.filter(nft => nft.contractAddress === filter.collection);
+            }
+
+            if (filter.searchTerm) {
+                const searchTermLower = filter.searchTerm.toLowerCase();
+                inventory = inventory.filter(nft =>
+                    nft.name.toLowerCase().includes(searchTermLower) ||
+                    nft.id.includes(searchTermLower) ||
+                    nft.attributes.some(attr => [attr.label?.toLowerCase(), attr.text?.toLowerCase()].includes(searchTermLower)),
+                );
+            }
+
+            return inventory;
+        },
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -76,7 +136,7 @@ export const useNftsStore = defineStore(store_name, {
                 const chain = useChainStore().getChain(label);
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
-                    chain_settings.getNFTsInventory(owner, toRaw(this.__filter)).then((nfts) => {
+                    chain_settings.getNFTsInventory(owner, toRaw(this.__indexer_filter)).then((nfts) => {
                         this.__inventory[label].list = nfts;
                         this.__inventory[label].loading = false;
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
@@ -86,7 +146,7 @@ export const useNftsStore = defineStore(store_name, {
                     const chain_settings = chain.settings as EVMChainSettings;
 
                     if (chain_settings.hasIndexerSupport()) {
-                        chain_settings.getNFTsInventory(owner, toRaw(this.__filter)).then((nfts) => {
+                        chain_settings.getNFTsInventory(owner, toRaw(this.__indexer_filter)).then((nfts) => {
                             this.__inventory[label].list = nfts;
                             this.__inventory[label].loading = false;
                             this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
@@ -111,8 +171,8 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async getNftDetails(label: Label, contract: string, tokenId: string): Promise<NFTClass | null> {
-            this.trace('getNftDetails', label, contract, tokenId);
+        async fetchNftDetails(label: Label, contract: string, tokenId: string): Promise<NFTClass | null> {
+            this.trace('fetchNftDetails', label, contract, tokenId);
             let promise = Promise.resolve(null) as Promise<NFTClass | null>;
             try {
                 const chain = useChainStore().getChain(label);
@@ -129,7 +189,7 @@ export const useNftsStore = defineStore(store_name, {
                 }
 
                 const new_filter = {
-                    ...toRaw(this.__filter),
+                    ...toRaw(this.__indexer_filter),
                     tokenId,
                 };
 
@@ -154,7 +214,7 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
                     promise = chain.settings.getNFTsCollection(contract, new_filter).then((nfts) => {
-                        this.trace('getNftDetails', 'indexer returned:', nfts);
+                        this.trace('fetchNftDetails', 'indexer returned:', nfts);
                         this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(nfts);
                         this.__contracts[network][contract].loading = false;
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
@@ -169,7 +229,7 @@ export const useNftsStore = defineStore(store_name, {
                             tokenId,
                             ERC721_TYPE,
                         ).then((nft) => {
-                            this.trace('getNftDetails', 'indexer fallback:', nft);
+                            this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {
                                 this.__contracts[network][contract].list.push(nft);
                                 this.__contracts[network][contract].loading = false;
@@ -187,10 +247,20 @@ export const useNftsStore = defineStore(store_name, {
             return promise;
         },
 
+        clearUserFilter() {
+            this.setUserFilter({
+                collection: '',
+                searchTerm: '',
+            });
+        },
+
 
         // commits ---
         setPaginationFilter(filter: IndexerTransactionsFilter) {
-            this.__filter = filter;
+            this.__indexer_filter = filter;
+        },
+        setUserFilter(filter: UserNftFilter) {
+            this.__user_filter = filter;
         },
     },
 });
@@ -198,8 +268,12 @@ export const useNftsStore = defineStore(store_name, {
 
 
 const nftsInitialState: NftsState = {
-    __filter: {
+    __indexer_filter: {
         address: '',
+    },
+    __user_filter: {
+        collection: '',
+        searchTerm: '',
     },
     __inventory: {},
     __contracts: {},
