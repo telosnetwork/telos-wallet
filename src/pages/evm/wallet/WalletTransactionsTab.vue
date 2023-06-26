@@ -32,7 +32,7 @@ export default defineComponent({
             return feedbackStore.getLoadings;
         },
         loading() {
-            return this.shapedTransactions.length === 0;
+            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -109,10 +109,6 @@ export default defineComponent({
         <h2>{{ $t('global.transactions') }}</h2>
         <span v-if="totalRowsText">{{ totalRowsText }}</span>
     </div>
-    <!--
-    <div><pre>{{ loadings }}</pre></div>
-    <div><pre>{{ hashes }}</pre></div>
-    -->
     <template v-if="loading">
         <q-skeleton
             v-for="i of pagination.rowsCurrentPage"
