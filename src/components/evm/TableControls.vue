@@ -15,10 +15,13 @@ const props = defineProps({
         }>,
         required: true,
     },
+    rowsPerPageOptions: {
+        type: Array as PropType<number[]>,
+        default: () => [5, 10, 20, 50, 100],
+    },
 });
 const emit = defineEmits(['pagination-updated']);
 
-const rowsPerPageOptions = [5, 10, 20, 50, 100];
 const showRowsPerPageDropdown = ref(false);
 const rowsPerPagePopup = ref<QPopupProxy>();
 
@@ -90,7 +93,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         <q-btn
             outline
             size="sm"
-            color="primary"
+            :color="pagination.page === 1 ? 'gray-4' : 'primary'"
             icon="first_page"
             class="q-mr-xs"
             :disable="pagination.page === 1"
@@ -99,7 +102,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         <q-btn
             outline
             size="sm"
-            color="primary"
+            :color="pagination.page === 1 ? 'gray-4' : 'primary'"
             icon="chevron_left"
             class="q-mr-sm"
             :disable="pagination.page === 1"
@@ -111,7 +114,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         <q-btn
             outline
             size="sm"
-            color="primary"
+            :color="pagination.page === totalPages ? 'gray-4' : 'primary'"
             icon="chevron_right"
             class="q-ml-sm"
             :disable="pagination.page === totalPages"
@@ -120,7 +123,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         <q-btn
             outline
             size="sm"
-            color="primary"
+            :color="pagination.page === totalPages ? 'gray-4' : 'primary'"
             icon="last_page"
             class="q-ml-xs"
             :disable="pagination.page === totalPages"

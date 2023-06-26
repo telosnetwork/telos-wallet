@@ -20,5 +20,6 @@ const props = defineProps<{
     border: 1px solid $header-item-border;
     background-color: var(--bg-color);
     padding: 16px;
+    word-break: break-word;
 }
 </style>

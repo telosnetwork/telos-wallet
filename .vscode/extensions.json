@@ -1,7 +1,11 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "octref.vetur"
+    "vue.volar",
+    "streetsidesoftware.code-spell-checker",
+    "abdelaziz18003.quasar-snippets",
+    "syler.sass-indented",
+    "mrmlnc.vscode-scss",
   ],
   "unwantedRecommendations": [
     "hookyqr.beautify",

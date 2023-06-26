@@ -31,6 +31,9 @@ const nftDetailsRoute = {
 // computed
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
+// hide ID text if the NFT name includes the ID, which is common
+const showId = computed(() => !props.nft.name.includes(props.nft.id));
+
 </script>
 
 <template>
@@ -48,9 +51,11 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
         />
     </router-link>
     <div class="c-nft-tile__text-container">
-        <h4>
-            <span class="u-text--high-contrast q-pr-sm">{{nft.name}}</span>
-            <span class="u-text--default-contrast">{{nft.id}}</span>
+        <h4 class="c-nft-tile__text">
+            <span v-if="nft.name" class="u-text--high-contrast q-pr-sm">
+                {{nft.name}}
+            </span>
+            <span v-if="showId" class="u-text--default-contrast">{{nft.id}}</span>
         </h4>
         <ExternalLink :text="creatorLinkText" :url="creatorLinkUrl" />
     </div>
@@ -72,6 +77,11 @@ const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address
 
     @include tiny-only {
         width: 288px;
+    }
+
+    &__text {
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     &__link {

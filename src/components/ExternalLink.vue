@@ -36,7 +36,8 @@ const formattedText = computed(() => {
 <style lang="scss">
 .c-external-link {
     &__link {
-        line-height: 24px;
+        @include text--paragraph;
+
         text-decoration: none;
         color: var(--link-color);
         display: inline-flex;

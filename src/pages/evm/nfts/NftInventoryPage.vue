@@ -1,29 +1,202 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, toRaw } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { NFTClass } from 'src/antelope/types';
+import { useChainStore } from 'src/antelope';
+import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
+import { truncateText } from 'src/antelope/stores/utils/text-utils';
+
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import TableControls from 'components/evm/TableControls.vue';
+
+
 const nftStore = useNftsStore();
+const chainStore = useChainStore();
+const accountStore = useAccountStore();
+
+const router = useRouter();
+const route = useRoute();
+const { t: $t } = useI18n();
+
+const tile = 'tile';
+const list = 'list';
+const initialInventoryDisplayPreference = localStorage.getItem('nftInventoryDisplayPreference') || tile;
+
+const tableColumns = [
+    {
+        name: 'image',
+        field: 'image',
+        label: '',
+        align: 'left' as 'left',
+    },
+    {
+        name: 'name',
+        field: 'name',
+        label: $t('global.name'),
+        align: 'left' as 'left',
+    },
+    {
+        name: 'id',
+        field: 'id',
+        label: $t('global.id'),
+        align: 'left' as 'left',
+    },
+    {
+        name: 'collection',
+        field: 'collection',
+        label: $t('global.collection'),
+        align: 'left' as 'left',
+    },
+];
+
+const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
-const loading = computed(() => nftStore.loggedInventoryLoading);
-// const nfts = ref([] as NFTClass[]);
-const showNftsAsTiles = ref(true);
+const initialLoadComplete = ref(false);
+const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
+const collectionFilter = ref('');
+const collectionList = ref(['', 'Test', 'Test 2']);
+const searchFilter = ref('');
+const searchbar = ref<HTMLElement | null>(null); // search input element
+const pagination = ref<{
+    page: number;
+    rowsPerPage: number;
+    rowsNumber: number;
+}>({
+    page: 1,
+    rowsPerPage: 12,
+    rowsNumber: 0,
+});
 
+// computed
+const loading = computed(() => nftStore.loggedInventoryLoading || !initialLoadComplete.value);
 const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+const nftsToShow = computed(() => {
+    const { page, rowsPerPage } = pagination.value;
+    const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return nfts.value.slice(start, end);
+});
+const tableRows = computed(() => {
+    if (showNftsAsTiles.value) {
+        return [];
+    }
+
+    return nftsToShow.value.map((nft: ShapedNFT) => ({
+        image: nft.imageSrcIcon || nft.imageSrcFull,
+        name: truncateText(nft.name, 35),
+        isAudio: !!nft.audioSrc,
+        isVideo: !!nft.videoSrc,
+        id: nft.id,
+        collectionName: nft.contractPrettyName || nft.contractAddress,
+        collectionAddress: nft.contractAddress,
+    }));
+});
+const listImagesLoadingStates = ref<Record<string, boolean>>({});
+
+
+// watchers
+
+// fetch initial data
+watch(accountStore, (store) => {
+    if (store.loggedAccount) {
+        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
+            initialLoadComplete.value = true;
+        });
+    }
+},
+{ immediate: true },
+);
+
+watch(showNftsAsTiles, (showAsTile) => {
+    localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
+});
+
+watch(nfts, (list, oldList) => {
+    // if NFTs are loaded...
+    if (list.length && list.length === pagination.value.rowsNumber) {
+        list.forEach((nft) => {
+            // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
+            // the loading state will be ended when the @loaded event is fired by that image
+            if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
+                listImagesLoadingStates.value[nft.id] = true;
+            }
+        });
+        return;
+    }
+
+    pagination.value.rowsNumber = list.length;
+    const { rowsPerPage, page } = route.query;
+
+    // if this is initial load and there are pagination query params, validate and apply them
+    if (oldList.length === 0 && rowsPerPage && page && rowsPerPageOptions.includes(+rowsPerPage)) {
+        if ((+rowsPerPage * (+page - 1)) < list.length) {
+            pagination.value.page = +page;
+            pagination.value.rowsPerPage = +rowsPerPage;
+        } else {
+            router.push({
+                name: 'evm-nft-inventory',
+                query: { },
+            });
+        }
+    }
+});
+
+watch(pagination, ({ rowsPerPage, page }) => {
+    router.push({
+        name: 'evm-nft-inventory',
+        query: {
+            rowsPerPage,
+            page,
+        },
+    });
+});
+
+
+// methods
+function getCollectionUrl(address: string) {
+    const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+
+    return `${explorer}/address/${address}`;
+}
+
+function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
+    if (isAudio) {
+        return 'o_headphones';
+    }
+
+    if (isVideo) {
+        return 'o_movie';
+    }
+
+    return 'o_image_not_supported';
+}
+
+function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
+    router.push({
+        name: 'evm-nft-details',
+        query: {
+            contract: collectionAddress,
+            id: id,
+        },
+    });
+}
 
 // we update the inventory while the user is on the page
 let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
-        if (useAccountStore().loggedAccount) {
-            await useNftsStore().updateNFTsForAccount('logged', useAccountStore().loggedAccount);
+        if (accountStore.loggedAccount) {
+            await nftStore.updateNFTsForAccount('logged', accountStore.loggedAccount);
         }
     }, 13000);
 });
@@ -40,29 +213,188 @@ onUnmounted(() => {
         <h1>{{ $t('evm_wallet.inventory') }}</h1>
     </template>
 
-    <div v-if="loading" class="q-mt-xl flex flex-center">
-        <q-spinner size="lg" />
-    </div>
-
-    <div v-else class="c-nft-page">
-
-        <div v-if="nfts.length === 0" class="c-nft-page__empty-inventory" >
-            <h2 class="c-nft-page__empty-title">{{ $t('nft.empty_collection_title') }}</h2>
-            <p class="c-nft-page__empty-text">{{ $t('nft.empty_collection_message') }} <ExternalLink :text="$t('nft.empty_collection_link_text')" :url="'contractLink'" /></p>
+    <div class="c-nft-page">
+        <div v-if="nfts.length === 0 && !loading" class="c-nft-page__empty-inventory" >
+            <h2 class="c-nft-page__empty-title">
+                {{ $t('nft.empty_collection_title') }}
+            </h2>
         </div>
 
-        <q-checkbox v-else v-model="showNftsAsTiles" class="q-mb-lg">Show as tile?</q-checkbox>
-
-        <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
-            <NftTile
-                v-for="nft in nfts"
-                :key="nft.key"
-                :nft="nft"
+        <div v-else-if="nfts.length || loading" class="c-nft-page__controls-container">
+            <q-select
+                v-model="collectionFilter"
+                :options="collectionList"
+                :disable="loading"
+                :label="$t('global.collection')"
+                outlined
+                class="c-nft-page__input"
             />
+
+            <q-input
+                ref="searchbar"
+                v-model="searchFilter"
+                :disable="loading"
+                :label="$t('global.search')"
+                outlined
+                class="c-nft-page__input"
+            >
+                <template v-slot:append>
+                    <q-icon
+                        v-if="searchFilter !== ''"
+                        name="close"
+                        class="cursor-pointer"
+                        tabindex="0"
+                        :aria-label="$t('forms.clear_search_label')"
+                        @click="searchFilter = ''; searchbar?.focus()"
+                        @keydown.space.enter.prevent="searchFilter = ''; searchbar?.focus()"
+                    />
+                    <q-icon name="search" />
+                </template>
+            </q-input>
+
+            <div class="c-nft-page__grid-toggles">
+                <q-icon
+                    size="sm"
+                    name="o_format_list_bulleted"
+                    :color="!showNftsAsTiles ? 'primary' : ''"
+                    class="cursor-pointer"
+                    tabindex="0"
+                    role="button"
+                    :aria-label="$t('nft.show_as_list_label')"
+                    @click="showNftsAsTiles = false"
+                    @keydown.space.enter.prevent="showNftsAsTiles = false"
+                />
+                <q-icon
+                    size="sm"
+                    name="o_grid_view"
+                    :color="showNftsAsTiles ? 'primary' : ''"
+                    class="cursor-pointer"
+                    tabindex="0"
+                    role="button"
+                    :aria-label="$t('nft.show_as_tiles_label')"
+                    @click="showNftsAsTiles = true"
+                    @keydown.space.enter.prevent="showNftsAsTiles = true"
+                />
+            </div>
         </div>
 
-        <div v-else>
-            nft table view placeholder
+        <div v-if="loading">
+            <div v-if="showNftsAsTiles" class="c-nft-page__tiles-loading-container">
+                <q-skeleton
+                    v-for="index in 25"
+                    :key="`loading-tile-${index}`"
+                    type="rect"
+                    class="c-nft-page__tile-skeleton"
+                />
+            </div>
+
+            <template v-else>
+                <div
+                    v-for="index in 25"
+                    :key="`loading-row-${index}`"
+                    class="c-nft-page__list-loading-container"
+                >
+                    <q-skeleton type="rect" class="c-nft-page__list-skeleton-icon" />
+                    <q-skeleton type="rect" class="c-nft-page__list-skeleton-row" />
+                </div>
+            </template>
+        </div>
+
+        <div v-if="nfts.length">
+            <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
+                <NftTile
+                    v-for="nft in nftsToShow"
+                    :key="nft.key"
+                    :nft="nft"
+                />
+            </div>
+
+            <q-table
+                v-else
+                :columns="tableColumns"
+                :rows="tableRows"
+                :pagination="{ rowsPerPage: 0 }"
+                hide-pagination
+                flat
+            >
+                <template v-slot:header="props">
+                    <q-tr :props="props">
+                        <q-th
+                            v-for="col in props.cols"
+                            :key="col.name"
+                            :props="props"
+                            class="o-text--paragraph u-text--default-contrast"
+                        >
+                            {{ col.label }}
+                        </q-th>
+                    </q-tr>
+                </template>
+
+                <template v-slot:body="props">
+                    <q-tr :props="props">
+                        <q-td key="image" :props="props">
+                            <div
+                                class="c-nft-page__table-image-container"
+                                role="link"
+                                tabindex="0"
+                                :aria-label="$t('nft.go_to_detail_page_label')"
+                                @click="goToDetailPage(props.row)"
+                                @keydown.space.enter.prevent="goToDetailPage(props.row)"
+                            >
+                                <template v-if="props.row.image">
+                                    <q-skeleton
+                                        v-if="listImagesLoadingStates[props.row.id]"
+                                        type="rect"
+                                        class="c-nft-page__list-image"
+                                    />
+                                    <img
+                                        v-show="!listImagesLoadingStates[props.row.id]"
+                                        :src="props.row.image"
+                                        :alt="`${$t('nft.collectible')} ${props.row.id}`"
+                                        class="c-nft-page__list-image"
+                                        height="40"
+                                        width="40"
+                                        @load="listImagesLoadingStates[props.row.id] = false"
+                                    >
+                                </template>
+
+                                <q-icon
+                                    v-else
+                                    :name="getListIconName(props.row)"
+                                    size="md"
+                                    color="grey-7"
+                                />
+                            </div>
+                        </q-td>
+                        <q-td key="name" :props="props">
+                            <span v-if="props.row.name" class="o-text--paragraph-bold u-text--default-contrast">
+                                {{ props.row.name }}
+                            </span>
+                            <template v-else>
+                                {{ $t('nft.name_missing') }}
+                            </template>
+                        </q-td>
+                        <q-td key="id" :props="props">
+                            <span class="o-text--paragraph">
+                                {{ truncateText(props.row.id) }}
+                            </span>
+                        </q-td>
+                        <q-td key="collection" :props="props">
+                            <ExternalLink
+                                :text="props.row.collectionName"
+                                :url="getCollectionUrl(props.row.collectionAddress)"
+                            />
+                        </q-td>
+                    </q-tr>
+                </template>
+            </q-table>
+
+            <TableControls
+                class="q-mt-lg"
+                :pagination="pagination"
+                :rows-per-page-options="rowsPerPageOptions"
+                @pagination-updated="pagination = $event"
+            />
         </div>
     </div>
 </AppPage>
@@ -73,20 +405,53 @@ onUnmounted(() => {
     max-width: 1000px;
     margin: auto;
 
+    &__controls-container {
+        margin: 24px 0;
+        display: flex;
+        gap: 8px;
+        flex-direction: column;
+        align-items: center;
+
+        @include md-and-up {
+            flex-direction: row;
+            margin: 16px 0 32px;
+        }
+    }
+
     &__empty-inventory {
         text-align: center;
         margin: auto;
         margin-top: 50px;
     }
 
-    &__empty-title {
-    }
-
     &__empty-text {
         margin-top: 20px;
     }
 
-    &__tiles-container {
+    &__input {
+        width:  clamp(275px, 100%, 375px);
+
+        @include md-and-up {
+            flex-basis: 100%;
+        }
+    }
+
+    &__grid-toggles {
+        width: 100%;
+        max-width: 375px;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 16px;
+
+        @include md-and-up {
+            margin-top: unset;
+            justify-content: flex-end;
+        }
+    }
+
+    &__tiles-container,
+    &__tiles-loading-container {
         width: max-content;
         margin: auto;
         display: grid;
@@ -99,6 +464,53 @@ onUnmounted(() => {
 
         @media only screen and (min-width: 1400px) {
             grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+
+    &__image-col-header {
+        width: 42px;
+    }
+
+    &__table-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    &__list-image {
+        border-radius: 4px;
+        height: 40px;
+        width: 40px;
+    }
+
+    &__tile-skeleton {
+        margin: auto;
+        width: 280px;
+        height: 280px;
+    }
+
+    &__list-loading-container {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    &__list-skeleton-icon {
+        height: 40px;
+        width: 40px;
+    }
+
+    &__list-skeleton-row {
+        flex-basis: 100%;
+        flex-shrink: 1;
+    }
+
+    // quasar overrides
+    .q-td,
+    .q-th {
+        &:first-of-type {
+            width: 42px;
         }
     }
 }

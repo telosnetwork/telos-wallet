@@ -101,7 +101,7 @@ export default {
         add_to_metamask: 'Add to MetaMask',
         rejected_metamask_prompt: 'The MetaMask prompt was rejected',
         error_adding_token_to_metamask: 'Error adding token to MetaMask',
-        inventory: 'Inventory',
+        inventory: 'Collectibles',
     },
     global: {
         native: 'Native',
@@ -121,8 +121,12 @@ export default {
         amount: 'Amount',
         id: 'ID',
         attributes: 'Attributes',
+        name: 'Name',
+        collection: 'Collection',
+        search: 'Search',
     },
     nft : {
+        collectible: 'Collectible',
         link_to_nft_details: 'Go to NFT details page for {name}',
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
@@ -141,6 +145,10 @@ export default {
         // 'part 2' is 'global.id'
         collectible_not_found_nft_id_part_3: 'correct? An incorrect ID may result in inaccurate information being displayed.',
         empty_collection_title: 'You don\'t have any digital collectibles yet',
+        show_as_tiles_label: 'Show collectibles as tiles',
+        show_as_list_label: 'Show collectibles in a list',
+        go_to_detail_page_label: 'Go to collectible detail page',
+        name_missing: '(No name)',
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
     },
@@ -223,6 +231,7 @@ export default {
         },
     },
     forms: {
+        clear_search_label: 'Clear search terms',
         errors: {
             accountFormat:
           'The account can contain lowercase characters only, numbers from 1 to 5 or a dot (.)',
