@@ -78,6 +78,7 @@ const ChainStore = jest.fn().mockImplementation(() => ({
             hasIndexerSupport: jest.fn().mockImplementation(() => false),
             isIndexerHealthy: jest.fn().mockImplementation(() => false),
             getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
+            getSystemTokens: jest.fn().mockImplementation(() => [tokenSys]),
         },
     })),
     loggedChain: {
@@ -102,7 +103,7 @@ jest.mock('src/antelope/stores/chain', () => ({
                 getTokenList: jest.fn().mockImplementation(() => tokenList),
                 getSystemToken: jest.fn().mockImplementation(() => tokenSys),
                 getUsdPrice: jest.fn().mockImplementation(() => 1),
-                getSystemTokens: jest.fn().mockImplementation(() => []),
+                getSystemTokens: jest.fn().mockImplementation(() => [tokenSys]),
                 hasIndexerSupport: jest.fn().mockImplementation(() => false),
                 isIndexerHealthy: jest.fn().mockImplementation(() => false),
                 getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
