@@ -125,6 +125,7 @@ export const useChainStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateChainData');
             try {
                 await Promise.all([
+                    this.updateSettings(label),
                     this.updateApy(label),
                     this.updateGasPrice(label),
                 ]);
@@ -134,6 +135,14 @@ export const useChainStore = defineStore(store_name, {
             } finally {
                 useFeedbackStore().unsetLoading('updateChainData');
             }
+        },
+        async updateSettings(label: string) {
+            this.getChain(label).settings.init().then(() => {
+                getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
+            }).catch((error) => {
+                console.error(error);
+                throw new Error('antelope.chain.error_settings');
+            });
         },
         async updateApy(label: string) {
             useFeedbackStore().setLoading('updateApy');

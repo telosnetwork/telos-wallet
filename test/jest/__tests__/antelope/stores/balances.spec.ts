@@ -75,10 +75,10 @@ const ChainStore = jest.fn().mockImplementation(() => ({
             getTokenList: jest.fn().mockImplementation(() => tokenList),
             getSystemToken: jest.fn().mockImplementation(() => tokenSys),
             getUsdPrice: jest.fn().mockImplementation(() => 1),
-            getImportantTokensIdList: jest.fn().mockImplementation(() => []),
             hasIndexerSupport: jest.fn().mockImplementation(() => false),
             isIndexerHealthy: jest.fn().mockImplementation(() => false),
             getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
+            getSystemTokens: jest.fn().mockImplementation(() => [tokenSys]),
         },
     })),
     loggedChain: {
@@ -95,7 +95,28 @@ jest.mock('src/antelope/stores/evm', () => ({
 }));
 
 jest.mock('src/antelope/stores/chain', () => ({
-    useChainStore: ChainStore,
+    useChainStore: jest.fn().mockImplementation(() => ({
+        getChain: jest.fn().mockImplementation(() => ({
+            settings: {
+                isNative: jest.fn(),
+                getTokens: jest.fn(),
+                getTokenList: jest.fn().mockImplementation(() => tokenList),
+                getSystemToken: jest.fn().mockImplementation(() => tokenSys),
+                getUsdPrice: jest.fn().mockImplementation(() => 1),
+                getSystemTokens: jest.fn().mockImplementation(() => [tokenSys]),
+                hasIndexerSupport: jest.fn().mockImplementation(() => false),
+                isIndexerHealthy: jest.fn().mockImplementation(() => false),
+                getNetwork: jest.fn().mockImplementation(() => TEST_NETWORK),
+            },
+        })),
+        loggedChain: {
+            settings: {
+                isNative: jest.fn(),
+                getTokens: jest.fn(),
+                getTokenList: jest.fn().mockImplementation(() => tokenList),
+            },
+        },
+    })),
 }));
 
 jest.mock('src/antelope/stores/account', () => ({
@@ -154,7 +175,7 @@ describe('Antelope Balance Store', () => {
         const tokenBalance = new TokenBalance(tokenList[0], TOKEN_BALANCE);
 
         const expected = {
-            label: [sysBalance, tokenBalance],
+            label: [tokenBalance, sysBalance],
         };
         expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
     });
