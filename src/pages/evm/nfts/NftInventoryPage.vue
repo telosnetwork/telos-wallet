@@ -126,8 +126,6 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
-// eztodo change rows per page, go to another page, select collection from dropdown, does not behave as expected
-
 watch(nfts, (nftList, oldList) => {
     // if NFTs just loaded...
     if (nftList.length && oldList.length === 0) {
@@ -175,9 +173,7 @@ watch(pagination, ({ rowsPerPage, page }) => {
 watch(collectionList, (list, oldList) => {
     // the watcher for collection filter requires collectionList to be loaded because it needs to get the address for the selected collection
     // as such, we need to defer handling query params until collectionList is loaded
-    if (list.length && !oldList.length) {
-        nftStore.clearUserFilter();
-
+    if (list !== oldList && list.length && initialLoadComplete.value) {
         const { collection, search } = route.query;
 
         if (search) {
@@ -185,39 +181,34 @@ watch(collectionList, (list, oldList) => {
         }
 
         if (collection) {
-            if (isAddress(collection as string)) {
-                collectionFilter.value = truncateAddress(collection as string);
+            const collectionPrettyName = list.find(item => item.contract === collection)?.name;
+
+            if (collectionPrettyName) {
+                collectionFilter.value = collectionPrettyName;
             } else {
-                collectionFilter.value = collectionList.value.find(item => item.name === collection)?.name || '';
+                collectionFilter.value = truncateAddress(collection as string);
             }
         }
 
-    }
-});
-
-watch(route, (newRoute) => {
-    if (newRoute.name !== 'evm-nft-inventory') {
-        return;
-    }
-
-    if (!newRoute.query.collection) {
-        collectionFilter.value = '';
-    }
-
-    if (!newRoute.query.search) {
-        searchFilter.value = '';
-    }
-
-    if (!newRoute.query.page) {
-        pagination.value.page = 1;
-    }
-
-    if (!newRoute.query.rowsPerPage) {
-        pagination.value.rowsPerPage = 12;
+        nftStore.setUserFilter({
+            collection: (collection ?? '') as string,
+            searchTerm: (search ?? '') as string,
+        });
     }
 });
 
 watch(userInventoryFilter, (filter) => {
+    // debugger;
+    // if (filter.searchTerm !== searchFilter.value) {
+    //     searchFilter.value = filter.searchTerm ?? '';
+    // }
+
+    // const collectionAddress = (collectionList.value.find(item => item.name === collectionFilter.value || item.contract === collectionFilter.value))?.contract || '';
+
+    // if (filter.collection !== collectionAddress) {
+    //     collectionFilter.value = (collectionList.value.find(item => item.contract === filter.collection))?.name || '';
+    // }
+
     const page = (filter.collection || filter.searchTerm) ? 1 : pagination.value.page;
     router.push({
         name: 'evm-nft-inventory',
@@ -241,19 +232,23 @@ watch(collectionFilter, (collection) => {
 
     const currentFilter = nftStore.getUserFilter;
 
-    nftStore.setUserFilter({
-        ...currentFilter,
-        collection: collectionAddress,
-    });
+    if (currentFilter.collection !== collectionAddress) {
+        nftStore.setUserFilter({
+            ...currentFilter,
+            collection: collectionAddress,
+        });
+    }
 });
 
 watch(searchFilter, (filter) => {
     const currentFilter = nftStore.getUserFilter;
 
-    nftStore.setUserFilter({
-        ...currentFilter,
-        searchTerm: filter,
-    });
+    if (currentFilter.searchTerm !== filter) {
+        nftStore.setUserFilter({
+            ...currentFilter,
+            searchTerm: filter,
+        });
+    }
 });
 
 
