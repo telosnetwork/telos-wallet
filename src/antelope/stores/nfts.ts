@@ -92,11 +92,22 @@ export const useNftsStore = defineStore(store_name, {
 
             if (filter.searchTerm) {
                 const searchTermLower = filter.searchTerm.toLowerCase();
-                inventory = inventory.filter(nft =>
-                    nft.name.toLowerCase().includes(searchTermLower) ||
-                    nft.id.includes(searchTermLower) ||
-                    nft.attributes.some(attr => [attr.label?.toLowerCase(), attr.text?.toLowerCase()].includes(searchTermLower)),
-                );
+                inventory = inventory.filter((nft) => {
+                    nft.attributes.forEach((attr) => {
+                        console.log(attr.label);
+                        console.log(attr.text);
+
+                    });
+
+                    return nft.name.toLowerCase().includes(searchTermLower) ||
+                        nft.id.toLowerCase().includes(searchTermLower) ||
+                        nft.description?.toLowerCase().includes(searchTermLower) ||
+                        nft.attributes.some(
+                            attr => [attr.label?.toLowerCase(), attr.text?.toLowerCase()].some(
+                                text => text?.includes(searchTermLower),
+                            ),
+                        );
+                });
             }
 
             return inventory;
