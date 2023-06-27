@@ -126,6 +126,8 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
+// eztodo change rows per page, go to another page, select collection from dropdown, does not behave as expected
+
 watch(nfts, (nftList, oldList) => {
     // if NFTs just loaded...
     if (nftList.length && oldList.length === 0) {
@@ -194,6 +196,28 @@ watch(collectionList, (list, oldList) => {
             collection: (collection ?? '') as string,
             searchTerm: (search ?? '') as string,
         });
+    }
+});
+
+watch(route, (newRoute) => {
+    if (newRoute.name !== 'evm-nft-inventory') {
+        return;
+    }
+
+    if (!newRoute.query.collection) {
+        collectionFilter.value = '';
+    }
+
+    if (!newRoute.query.search) {
+        searchFilter.value = '';
+    }
+
+    if (!newRoute.query.page) {
+        pagination.value.page = 1;
+    }
+
+    if (!newRoute.query.rowsPerPage) {
+        pagination.value.rowsPerPage = 12;
     }
 });
 
