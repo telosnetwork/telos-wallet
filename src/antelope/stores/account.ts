@@ -93,6 +93,7 @@ export const useAccountStore = defineStore(store_name, {
         currentIsLogged: state =>
             state.__accounts['logged']?.account === state.__accounts['current']?.account &&
             state.__accounts['logged']?.network === state.__accounts['current']?.network,
+        getAccount: state => (label: Label) => ({ ...state.__accounts[label] }),
     },
     actions: {
         trace: createTraceFunction(store_name),

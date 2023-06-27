@@ -120,7 +120,7 @@ export default class Telos extends NativeChainSettings {
         return true;
     }
 
-    getImportantTokensIdList(): string[] {
-        return [TOKEN.id];
+    getSystemTokens(): TokenClass[] {
+        return [TOKEN];
     }
 }
