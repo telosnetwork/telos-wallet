@@ -63,7 +63,7 @@ const tableColumns = [
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
-const initialLoadComplete = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
+const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
 const listImagesLoadingStates = ref<Record<string, boolean>>({});
 const collectionFilter = ref('');
@@ -81,8 +81,9 @@ const pagination = ref<{
 const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
-const loading = computed(() => nftStore.loggedInventoryLoading || !initialLoadComplete.value);
-const nfts = computed(() => initialLoadComplete.value ? (nftStore.getUserFilteredInventory('logged') as NFTClass[]) : []);
+const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || !collectionList.value.length);
+const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory('logged') as NFTClass[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -111,27 +112,9 @@ const showNoFilteredResultsState = computed(() => (collectionFilter.value || sea
 
 
 // watchers
-watch(accountStore, (store) => {
-    // fetch initial data
-    if (store.loggedAccount) {
-        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
-            initialLoadComplete.value = true;
-        });
-    }
-},
-{ immediate: true },
-);
-
-watch(showNftsAsTiles, (showAsTile) => {
-    localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
-});
-
-// eztodo change rows per page, go to another page, select collection from dropdown, does not behave as expected
-
-watch(nfts, (nftList, oldList) => {
-    // if NFTs just loaded...
-    if (nftList.length && oldList.length === 0) {
-        nftList.forEach((nft) => {
+watch(nftsAndCollectionListLoaded, (loaded) => {
+    if (loaded) {
+        nfts.value.forEach((nft) => {
             // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
             // the loading state will be ended when the @loaded event is fired by that image
             if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
@@ -140,7 +123,7 @@ watch(nfts, (nftList, oldList) => {
         });
 
         // if this is initial load and there are pagination query params, validate and apply them
-        const { rowsPerPage, page } = route.query;
+        const { rowsPerPage, page, collection, search } = route.query;
 
         let newRowsPerPage = 12;
         let newPage = 1;
@@ -149,41 +132,24 @@ watch(nfts, (nftList, oldList) => {
             newRowsPerPage = +(rowsPerPage ?? 12);
         }
 
-        if (page && (newRowsPerPage * (+(page ?? 1) - 1)) < nftList.length) {
+        // if there are no collection or search query params, and the page query param is valid (not greater than the total number of pages), apply it
+        if (!(collection || search) && page && (newRowsPerPage * (+(page ?? 1) - 1)) < nfts.value.length) {
             newPage = +(page ?? 1);
         }
 
         pagination.value = {
-            rowsNumber: nftList.length,
+            rowsNumber: nfts.value.length,
             page: newPage,
             rowsPerPage: newRowsPerPage,
         };
-    }
-});
 
-watch(pagination, ({ rowsPerPage, page }) => {
-    router.push({
-        name: 'evm-nft-inventory',
-        query: {
-            ...route.query,
-            rowsPerPage,
-            page,
-        },
-    });
-});
-
-watch(collectionList, (list, oldList) => {
-    // the watcher for collection filter requires collectionList to be loaded because it needs to get the address for the selected collection
-    // as such, we need to defer handling query params until collectionList is loaded
-    if (list !== oldList && list.length && initialLoadComplete.value) {
-        const { collection, search } = route.query;
-
+        // on initial load, if there are collection or search query params, apply them to the inputs
         if (search) {
             searchFilter.value = search as string;
         }
 
         if (collection) {
-            const collectionPrettyName = list.find(item => item.contract === collection)?.name;
+            const collectionPrettyName = collectionList.value.find(item => item.contract === collection)?.name;
 
             if (collectionPrettyName) {
                 collectionFilter.value = collectionPrettyName;
@@ -197,6 +163,33 @@ watch(collectionList, (list, oldList) => {
             searchTerm: (search ?? '') as string,
         });
     }
+
+});
+
+watch(accountStore, (store) => {
+    // fetch initial data
+    if (store.loggedAccount) {
+        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
+            nftsLoaded.value = true;
+        });
+    }
+},
+{ immediate: true },
+);
+
+watch(showNftsAsTiles, (showAsTile) => {
+    localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
+});
+
+watch(pagination, ({ rowsPerPage, page }) => {
+    router.push({
+        name: 'evm-nft-inventory',
+        query: {
+            ...route.query,
+            rowsPerPage,
+            page,
+        },
+    });
 });
 
 watch(route, (newRoute) => {
@@ -204,36 +197,29 @@ watch(route, (newRoute) => {
         return;
     }
 
-    if (!newRoute.query.collection) {
+    if (newRoute.query.collection) {
+        const collectionPrettyName = collectionList.value.find(item => item.contract === newRoute.query.collection)?.name;
+        if (collectionPrettyName) {
+            collectionFilter.value = collectionPrettyName;
+        } else {
+            collectionFilter.value = truncateAddress(newRoute.query.collection as string);
+        }
+    } else {
         collectionFilter.value = '';
     }
 
-    if (!newRoute.query.search) {
-        searchFilter.value = '';
-    }
+    searchFilter.value = (newRoute.query.search ?? '') as string;
 
-    if (!newRoute.query.page) {
-        pagination.value.page = 1;
-    }
-
-    if (!newRoute.query.rowsPerPage) {
-        pagination.value.rowsPerPage = 12;
-    }
+    pagination.value = {
+        ...pagination.value,
+        page: +(newRoute.query.page ?? 1),
+        rowsPerPage: +(newRoute.query.rowsPerPage ?? 12),
+    };
 });
 
 watch(userInventoryFilter, (filter) => {
-    // debugger;
-    // if (filter.searchTerm !== searchFilter.value) {
-    //     searchFilter.value = filter.searchTerm ?? '';
-    // }
-
-    // const collectionAddress = (collectionList.value.find(item => item.name === collectionFilter.value || item.contract === collectionFilter.value))?.contract || '';
-
-    // if (filter.collection !== collectionAddress) {
-    //     collectionFilter.value = (collectionList.value.find(item => item.contract === filter.collection))?.name || '';
-    // }
-
     const page = (filter.collection || filter.searchTerm) ? 1 : pagination.value.page;
+
     router.push({
         name: 'evm-nft-inventory',
         query: {
@@ -243,13 +229,11 @@ watch(userInventoryFilter, (filter) => {
             search: filter.searchTerm,
         },
     });
+
+    pagination.value.rowsNumber = nfts.value.length;
 });
 
 watch(collectionFilter, (collection) => {
-    if (!collectionList.value?.length) {
-        return;
-    }
-
     // collectionFilter is a list of contract names and, for those with no name, addresses
     // so we need to get the address for the selected collection
     const collectionAddress = (collectionList.value.find(item => item.name === collection || item.contract === collection))?.contract || '';
