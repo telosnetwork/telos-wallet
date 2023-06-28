@@ -99,7 +99,7 @@ export const useUserStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
-                useFeedbackStore().unsetLoading('account.loadUsers');
+                useFeedbackStore().unsetLoading('user.loadUsers');
             }
 
             this.loadCurrencyPreferences();
