@@ -81,7 +81,7 @@ const pagination = ref<{
 const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
-const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || (!collectionList.value.length && nfts.value.length));
+const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
 const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory('logged') as NFTClass[]) : []);
 const nftsToShow = computed(() => {
