@@ -64,6 +64,7 @@ const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
 const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
+const initialQueryParamsApplied = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
 const listImagesLoadingStates = ref<Record<string, boolean>>({});
 const collectionFilter = ref('');
@@ -132,8 +133,8 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
             newRowsPerPage = +(rowsPerPage ?? 12);
         }
 
-        // if there are no collection or search query params, and the page query param is valid (not greater than the total number of pages), apply it
-        if (!(collection || search) && page && (newRowsPerPage * (+(page ?? 1) - 1)) < nfts.value.length) {
+        // if the page query param is valid (not greater than the total number of pages), apply it
+        if (page && (newRowsPerPage * (+(page ?? 1) - 1)) < nfts.value.length) {
             newPage = +(page ?? 1);
         }
 
@@ -162,8 +163,9 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
             collection: (collection ?? '') as string,
             searchTerm: (search ?? '') as string,
         });
-    }
 
+        initialQueryParamsApplied.value = true;
+    }
 });
 
 watch(accountStore, (store) => {
@@ -211,14 +213,17 @@ watch(route, (newRoute) => {
     searchFilter.value = (newRoute.query.search ?? '') as string;
 
     pagination.value = {
-        ...pagination.value,
         page: +(newRoute.query.page ?? 1),
         rowsPerPage: +(newRoute.query.rowsPerPage ?? 12),
+        rowsNumber: nfts.value.length,
     };
 });
 
 watch(userInventoryFilter, (filter) => {
-    const page = (filter.collection || filter.searchTerm) ? 1 : pagination.value.page;
+    let page = pagination.value.page;
+    if (initialQueryParamsApplied.value && (filter.collection || filter.searchTerm)) {
+        page = 1;
+    }
 
     router.push({
         name: 'evm-nft-inventory',
@@ -229,8 +234,6 @@ watch(userInventoryFilter, (filter) => {
             search: filter.searchTerm,
         },
     });
-
-    pagination.value.rowsNumber = nfts.value.length;
 });
 
 watch(collectionFilter, (collection) => {
