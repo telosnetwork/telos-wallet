@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, toRaw } from 'vue';
+import { computed, ref, watch, onBeforeMount, onMounted, onUnmounted, toRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -16,6 +16,9 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
+import { isAddress } from 'ethers/lib/utils.js';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { storeToRefs } from 'pinia';
 
 
 const nftStore = useNftsStore();
@@ -60,10 +63,11 @@ const tableColumns = [
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
-const initialLoadComplete = ref(false);
+const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
+const initialQueryParamsApplied = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
+const listImagesLoadingStates = ref<Record<string, boolean>>({});
 const collectionFilter = ref('');
-const collectionList = ref(['', 'Test', 'Test 2']);
 const searchFilter = ref('');
 const searchbar = ref<HTMLElement | null>(null); // search input element
 const pagination = ref<{
@@ -75,10 +79,12 @@ const pagination = ref<{
     rowsPerPage: 12,
     rowsNumber: 0,
 });
+const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
-const loading = computed(() => nftStore.loggedInventoryLoading || !initialLoadComplete.value);
-const nfts = computed(() => nftStore.getInventory('logged')?.list || [] as NFTClass[]);
+const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
+const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory('logged') as NFTClass[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -86,6 +92,8 @@ const nftsToShow = computed(() => {
 
     return nfts.value.slice(start, end);
 });
+const collectionList = computed(() => nftStore.getCollectionList('logged') || []);
+const collectionSelectOptions = computed(() => collectionList.value.map(item => item.name));
 const tableRows = computed(() => {
     if (showNftsAsTiles.value) {
         return [];
@@ -101,16 +109,71 @@ const tableRows = computed(() => {
         collectionAddress: nft.contractAddress,
     }));
 });
-const listImagesLoadingStates = ref<Record<string, boolean>>({});
+const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
 
 
 // watchers
+watch(nftsAndCollectionListLoaded, (loaded) => {
+    if (loaded) {
+        nfts.value.forEach((nft) => {
+            // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
+            // the loading state will be ended when the @loaded event is fired by that image
+            if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
+                listImagesLoadingStates.value[nft.id] = true;
+            }
+        });
 
-// fetch initial data
+        // if this is initial load and there are pagination query params, validate and apply them
+        const { rowsPerPage, page, collection, search } = route.query;
+
+        let newRowsPerPage = 12;
+        let newPage = 1;
+
+        if (rowsPerPage && rowsPerPageOptions.includes(+(rowsPerPage ?? 12))) {
+            newRowsPerPage = +(rowsPerPage ?? 12);
+        }
+
+        // if the page query param is valid (not greater than the total number of pages), apply it
+        const newPageIsNotPastLastPage = page && (newRowsPerPage * (+page - 1)) < nfts.value.length;
+        if (newPageIsNotPastLastPage) {
+            newPage = +page;
+        }
+
+        pagination.value = {
+            rowsNumber: nfts.value.length,
+            page: newPage,
+            rowsPerPage: newRowsPerPage,
+        };
+
+        // on initial load, if there are collection or search query params, apply them to the inputs
+        if (search) {
+            searchFilter.value = search as string;
+        }
+
+        if (collection) {
+            const collectionPrettyName = collectionList.value.find(item => item.contract === collection)?.name;
+
+            if (collectionPrettyName) {
+                collectionFilter.value = collectionPrettyName;
+            } else {
+                collectionFilter.value = truncateAddress(collection as string);
+            }
+        }
+
+        nftStore.setUserFilter({
+            collection: (collection ?? '') as string,
+            searchTerm: (search ?? '') as string,
+        });
+
+        initialQueryParamsApplied.value = true;
+    }
+});
+
 watch(accountStore, (store) => {
+    // fetch initial data
     if (store.loggedAccount) {
         nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
-            initialLoadComplete.value = true;
+            nftsLoaded.value = true;
         });
     }
 },
@@ -121,44 +184,83 @@ watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
 });
 
-watch(nfts, (list, oldList) => {
-    // if NFTs are loaded...
-    if (list.length && list.length === pagination.value.rowsNumber) {
-        list.forEach((nft) => {
-            // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
-            // the loading state will be ended when the @loaded event is fired by that image
-            if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
-                listImagesLoadingStates.value[nft.id] = true;
-            }
-        });
-        return;
-    }
-
-    pagination.value.rowsNumber = list.length;
-    const { rowsPerPage, page } = route.query;
-
-    // if this is initial load and there are pagination query params, validate and apply them
-    if (oldList.length === 0 && rowsPerPage && page && rowsPerPageOptions.includes(+rowsPerPage)) {
-        if ((+rowsPerPage * (+page - 1)) < list.length) {
-            pagination.value.page = +page;
-            pagination.value.rowsPerPage = +rowsPerPage;
-        } else {
-            router.push({
-                name: 'evm-nft-inventory',
-                query: { },
-            });
-        }
-    }
-});
-
 watch(pagination, ({ rowsPerPage, page }) => {
-    router.push({
+    router.replace({
         name: 'evm-nft-inventory',
         query: {
+            ...route.query,
             rowsPerPage,
             page,
         },
     });
+});
+
+watch(route, (newRoute) => {
+    if (newRoute.name !== 'evm-nft-inventory') {
+        return;
+    }
+
+    if (newRoute.query.collection) {
+        const collectionPrettyName = collectionList.value.find(item => item.contract === newRoute.query.collection)?.name;
+        if (collectionPrettyName) {
+            collectionFilter.value = collectionPrettyName;
+        } else {
+            collectionFilter.value = truncateAddress(newRoute.query.collection as string);
+        }
+    } else {
+        collectionFilter.value = '';
+    }
+
+    searchFilter.value = (newRoute.query.search ?? '') as string;
+
+    pagination.value = {
+        page: +(newRoute.query.page ?? 1),
+        rowsPerPage: +(newRoute.query.rowsPerPage ?? 12),
+        rowsNumber: nfts.value.length,
+    };
+});
+
+watch(userInventoryFilter, (filter) => {
+    let page = pagination.value.page;
+    if (initialQueryParamsApplied.value && (filter.collection || filter.searchTerm)) {
+        page = 1;
+    }
+
+    router.replace({
+        name: 'evm-nft-inventory',
+        query: {
+            rowsPerPage: pagination.value.rowsPerPage,
+            page,
+            collection: filter.collection,
+            search: filter.searchTerm,
+        },
+    });
+});
+
+watch(collectionFilter, (collection) => {
+    // collectionFilter is a list of contract names and, for those with no name, addresses
+    // so we need to get the address for the selected collection
+    const collectionAddress = (collectionList.value.find(item => item.name === collection || item.contract === collection))?.contract || '';
+
+    const currentFilter = nftStore.getUserFilter;
+
+    if (currentFilter.collection !== collectionAddress) {
+        nftStore.setUserFilter({
+            ...currentFilter,
+            collection: collectionAddress,
+        });
+    }
+});
+
+watch(searchFilter, (filter) => {
+    const currentFilter = nftStore.getUserFilter;
+
+    if (currentFilter.searchTerm !== filter) {
+        nftStore.setUserFilter({
+            ...currentFilter,
+            searchTerm: filter,
+        });
+    }
 });
 
 
@@ -182,7 +284,7 @@ function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
 }
 
 function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
-    router.push({
+    router.replace({
         name: 'evm-nft-details',
         query: {
             contract: collectionAddress,
@@ -214,19 +316,23 @@ onUnmounted(() => {
     </template>
 
     <div class="c-nft-page">
-        <div v-if="nfts.length === 0 && !loading" class="c-nft-page__empty-inventory" >
+        <div v-if="nfts.length === 0 && !loading && !showNoFilteredResultsState" class="c-nft-page__empty-inventory" >
             <h2 class="c-nft-page__empty-title">
                 {{ $t('nft.empty_collection_title') }}
             </h2>
         </div>
 
-        <div v-else-if="nfts.length || loading" class="c-nft-page__controls-container">
+        <div
+            v-else-if="nfts.length || loading || showNoFilteredResultsState"
+            class="c-nft-page__controls-container"
+        >
             <q-select
                 v-model="collectionFilter"
-                :options="collectionList"
+                :options="collectionSelectOptions"
                 :disable="loading"
                 :label="$t('global.collection')"
                 outlined
+                clearable
                 class="c-nft-page__input"
             />
 
@@ -236,21 +342,9 @@ onUnmounted(() => {
                 :disable="loading"
                 :label="$t('global.search')"
                 outlined
+                clearable
                 class="c-nft-page__input"
-            >
-                <template v-slot:append>
-                    <q-icon
-                        v-if="searchFilter !== ''"
-                        name="close"
-                        class="cursor-pointer"
-                        tabindex="0"
-                        :aria-label="$t('forms.clear_search_label')"
-                        @click="searchFilter = ''; searchbar?.focus()"
-                        @keydown.space.enter.prevent="searchFilter = ''; searchbar?.focus()"
-                    />
-                    <q-icon name="search" />
-                </template>
-            </q-input>
+            />
 
             <div class="c-nft-page__grid-toggles">
                 <q-icon
@@ -300,7 +394,11 @@ onUnmounted(() => {
             </template>
         </div>
 
-        <div v-if="nfts.length">
+        <div v-else-if="showNoFilteredResultsState">
+            <h4 class="text-center">{{ $t('global.no_results') }}</h4>
+        </div>
+
+        <div v-else-if="nfts.length">
             <div v-if="showNftsAsTiles" class="c-nft-page__tiles-container">
                 <NftTile
                     v-for="nft in nftsToShow"

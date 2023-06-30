@@ -124,6 +124,7 @@ export default {
         name: 'Name',
         collection: 'Collection',
         search: 'Search',
+        no_results: 'No results found',
     },
     nft : {
         collectible: 'Collectible',

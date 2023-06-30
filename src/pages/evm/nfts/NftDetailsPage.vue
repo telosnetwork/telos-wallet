@@ -28,7 +28,7 @@ const nftId = route.query.id as string;
 
 onBeforeMount(() => {
     if (contractAddress && nftId) {
-        nftStore.getNftDetails('current', contractAddress, nftId).then((nftResponse) => {
+        nftStore.fetchNftDetails('current', contractAddress, nftId).then((nftResponse) => {
             nft.value = nftResponse ?? null;
             loading.value = false;
         });
