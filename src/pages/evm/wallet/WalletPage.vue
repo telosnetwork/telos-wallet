@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { TokenBalance } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { useBalancesStore, useFeedbackStore } from 'src/antelope';
+import { useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 
+const route = useRoute();
+
+const historyStore = useHistoryStore();
+const accountStore = useAccountStore();
 const feedback = useFeedbackStore();
+
 const tabs = ['balance', 'transactions'];
+
+// data
 const totalFiatAmount = ref(0);
 
+// computed
 const allBalances = computed(() => useBalancesStore().loggedBalances);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
+// watchers
 watch(allBalances, (newBalances: TokenBalance[]) => {
     let newFiatBalance = 0;
     for (let balance of newBalances){
@@ -23,6 +33,19 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
     }
     totalFiatAmount.value = newFiatBalance;
 }, { deep: true, immediate: true });
+
+watch(accountStore, () => {
+    // if user is on the balances screen, prefetch transactions
+    if (accountStore.loggedEvmAccount?.address && route.query.tab === 'balance') {
+        historyStore.setEVMTransactionsFilter({
+            address: accountStore.loggedEvmAccount?.address,
+            offset: 0,
+            limit: 5,
+            includeAbi: true,
+        });
+        historyStore.fetchEVMTransactionsForAccount('current');
+    }
+});
 </script>
 
 <template>
