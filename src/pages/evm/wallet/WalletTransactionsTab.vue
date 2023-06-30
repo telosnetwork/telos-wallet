@@ -23,16 +23,15 @@ export default defineComponent({
             rowsCurrentPage: 5,
             rowsNumber: 0,
         },
+        hideLoadingState: false,
+        fetchTransactionsInterval: null as null | NodeJS.Timer,
     }),
     computed: {
         hashes() {
             return this.shapedTransactions.map(tx => tx.id);
         },
-        loadings() {
-            return feedbackStore.getLoadings;
-        },
         loading() {
-            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
+            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount') && !this.hideLoadingState;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -68,9 +67,35 @@ export default defineComponent({
         },
     },
     created() {
-        this.getTransactions();
+        if (this.shapedTransactions.length > 0) {
+            this.hideLoadingState = true;
+        }
+
+        this.fetchTransactionsInterval = setInterval(() => {
+            if (this.address && this.pagination.page === 1) {
+                this.hideLoadingState = true;
+                this.getTransactions().finally(() => {
+                    this.enableLoadingState();
+                });
+            }
+        }, 13000);
+
+        this.getTransactions().finally(() => {
+            this.enableLoadingState();
+        });
+    },
+    unmounted() {
+        if (this.fetchTransactionsInterval) {
+            clearInterval(this.fetchTransactionsInterval);
+        }
     },
     methods: {
+        enableLoadingState() {
+            // a timeout of 500ms is used in the history store to prevent the loading state from flashing; account for that here
+            setTimeout(() => {
+                this.hideLoadingState = false;
+            }, 550);
+        },
         isLoadingTransaction(i: number) {
             const loadingFlag = `history.shapeTransactions-${i}`;
             return feedbackStore.isLoading(loadingFlag);

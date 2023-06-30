@@ -94,7 +94,6 @@ export const useHistoryStore = defineStore(store_name, {
             feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
-                this.setShapedTransactionRows(label, []);
                 const response = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
                 const contracts = response.contracts;
                 const transactions = response.results;
@@ -306,6 +305,8 @@ const historyInitialState: HistoryState = {
     __evm_filter: {
         address: '',
     },
-    __shaped_evm_transaction_rows: {},
+    __shaped_evm_transaction_rows: {
+        current: [],
+    },
     __evm_transactions_pagination_data: {},
 };
