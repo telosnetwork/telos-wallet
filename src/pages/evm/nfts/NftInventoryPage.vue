@@ -134,8 +134,9 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
         }
 
         // if the page query param is valid (not greater than the total number of pages), apply it
-        if (page && (newRowsPerPage * (+(page ?? 1) - 1)) < nfts.value.length) {
-            newPage = +(page ?? 1);
+        const newPageIsNotPastLastPage = page && (newRowsPerPage * (+page - 1)) < nfts.value.length;
+        if (newPageIsNotPastLastPage) {
+            newPage = +page;
         }
 
         pagination.value = {
