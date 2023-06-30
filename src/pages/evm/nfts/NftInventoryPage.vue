@@ -185,7 +185,7 @@ watch(showNftsAsTiles, (showAsTile) => {
 });
 
 watch(pagination, ({ rowsPerPage, page }) => {
-    router.push({
+    router.replace({
         name: 'evm-nft-inventory',
         query: {
             ...route.query,
@@ -226,7 +226,7 @@ watch(userInventoryFilter, (filter) => {
         page = 1;
     }
 
-    router.push({
+    router.replace({
         name: 'evm-nft-inventory',
         query: {
             rowsPerPage: pagination.value.rowsPerPage,
@@ -284,7 +284,7 @@ function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
 }
 
 function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
-    router.push({
+    router.replace({
         name: 'evm-nft-details',
         query: {
             contract: collectionAddress,
