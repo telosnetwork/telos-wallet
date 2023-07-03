@@ -45,7 +45,8 @@ watch(accountStore, () => {
         });
         historyStore.fetchEVMTransactionsForAccount('current');
     }
-});
+},
+{ immediate: true });
 </script>
 
 <template>
