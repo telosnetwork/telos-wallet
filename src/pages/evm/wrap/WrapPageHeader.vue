@@ -21,6 +21,7 @@ const totalFiatValueText = computed(() => {
     const wrappedTokenFiatValueBn = chainSettings.getWrappedSystemToken().price.value;
     const added = systemTokenFiatValueBn.add(wrappedTokenFiatValueBn);
 
+    // eztodo this is 0.0 when value is 0, should be 0.00
     return `${fiatSymbol.value} ${formatWei(added, WEI_PRECISION)}`;
 });
 
@@ -47,6 +48,7 @@ const totalBalanceUnitsText = computed(() => {
 
 <template>
 <div class="c-wrap-header">
+    <!-- eztodo i18n -->
     <h5>Total of Wrapped Telos and Telos</h5>
     <h1>{{ totalFiatValueText }}</h1>
     <p class="o-text--small-bold u-text--low-contrast">
