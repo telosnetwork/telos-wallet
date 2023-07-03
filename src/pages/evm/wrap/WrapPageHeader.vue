@@ -20,7 +20,6 @@ const totalFiatValueText = computed(() => {
     const systemTokenFiatValueBn = chainSettings.getSystemToken().price.value;
     const wrappedTokenFiatValueBn = chainSettings.getWrappedSystemToken().price.value;
     const added = systemTokenFiatValueBn.add(wrappedTokenFiatValueBn);
-    console.log('added', added.toBigInt());
 
     return `${fiatSymbol.value} ${formatWei(added, WEI_PRECISION)}`;
 });
