@@ -74,6 +74,8 @@ export default defineComponent({
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.address && this.pagination.page === 1) {
                 this.hideLoadingState = true;
+                console.log('getting txs');
+
                 this.getTransactions().finally(() => {
                     this.enableLoadingState();
                 });
