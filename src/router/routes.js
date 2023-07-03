@@ -74,11 +74,11 @@ const routes = [
             //     name: 'evm-staking',
             //     component: () => import('pages/evm/staking/StakingPage.vue'),
             // },
-            // {
-            //     path: 'wrap',
-            //     name: 'evm-wrap',
-            //     component: () => import('pages/evm/wrap/WrapPage.vue'),
-            // },
+            {
+                path: 'wrap',
+                name: 'evm-wrap',
+                component: () => import('pages/evm/wrap/WrapPage.vue'),
+            },
         ],
     },
 
