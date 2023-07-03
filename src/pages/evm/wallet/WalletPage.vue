@@ -36,7 +36,7 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
 
 watch(accountStore, () => {
     // if user is on the balances screen, prefetch transactions
-    if (accountStore.loggedEvmAccount?.address && route.query.tab === 'balance') {
+    if (accountStore.loggedEvmAccount?.address && route.query.tab !== 'transactions') {
         historyStore.setEVMTransactionsFilter({
             address: accountStore.loggedEvmAccount?.address,
             offset: 0,
