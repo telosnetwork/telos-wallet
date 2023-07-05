@@ -59,6 +59,12 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
 
+    // set evm authenticators --
+    const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;
+    const wagmiClient = app.config.globalProperties.$wagmi as EthereumClient;
+    ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
+    ant.wallets.addEVMAuthenticator(new MetamaskAuth());
+
     // autologin --
     ant.stores.account.autoLogin();
 

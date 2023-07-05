@@ -28,11 +28,21 @@ export default defineComponent({
     },
 
     methods: {
+<<<<<<< HEAD
         onShowWalletConnect() {
             this.showWalletConnect = true;
         },
         onShowWalletOptions(show: boolean) {
             this.showWalletOptions = show;
+=======
+        onToggleWalletConnect() {
+            console.log('onToggleWalletConnect');
+            this.toggleWalletConnect = false;
+        },
+        onCloseWalletOptions() {
+            console.log('onCloseWalletOptions');
+            this.showWalletOptions = false;
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
         },
     },
 });
@@ -89,9 +99,15 @@ export default defineComponent({
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
+<<<<<<< HEAD
                         :showWalletConnect="showWalletConnect"
                         @show-wallet-connect="onShowWalletConnect()"
                         @close-wallet-options="onShowWalletOptions(false)"
+=======
+                        :toggleWalletConnect="toggleWalletConnect"
+                        @toggle-wallet-connect="onToggleWalletConnect()"
+                        @close-wallet-options="onCloseWalletOptions()"
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">

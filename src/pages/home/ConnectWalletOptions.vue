@@ -1,8 +1,15 @@
 
 
 <script lang="ts">
+<<<<<<< HEAD
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
 import { useEVMStore, useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
+=======
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref } from 'vue';
+import { Web3Modal } from '@web3modal/html';
+import { EthereumClient } from '@web3modal/ethereum';
+import { useEVMStore, useAccountStore, useChainStore, getAntelope } from 'src/antelope';
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -14,18 +21,27 @@ export default defineComponent({
     },
     setup(props, { emit }){
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
+<<<<<<< HEAD
+=======
+        const wagmiClient = inject('$wagmi') as EthereumClient;
+        // console.log('ConnectWalletOptions -> wagmiClient:', wagmiClient);
+        const web3Modal = ref<Web3Modal>();
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
 
+<<<<<<< HEAD
         watch(() => props.showWalletConnect, async (newVal) => {
             if (newVal) {
                 await setWalletConnectAuthenticator();
             }
         });
 
+=======
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
         // new refactor --------------
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
@@ -56,12 +72,20 @@ export default defineComponent({
         };
         // --------------
 
+<<<<<<< HEAD
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
 
         return {
             isLoading,
             supportsMetamask,
             redirectToMetamaskDownload,
+=======
+        return {
+            web3Modal,
+            supportsMetamask,
+            redirectToMetamaskDownload,
+            wagmiClient,
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
             setMetamaskAuthenticator,
             setWalletConnectAuthenticator,
         };
@@ -83,6 +107,7 @@ export default defineComponent({
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
+<<<<<<< HEAD
 
         <!-- Metamask Authenticator button -->
         <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
@@ -114,6 +139,26 @@ export default defineComponent({
                 >
                 {{ $t('home.walletconnect') }}
             </template>
+=======
+        <!--div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()"-->
+        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
+            <img
+                width="24"
+                class="flex q-ml-auto q-mt-auto wallet-logo"
+                alt="MetaMask"
+                src="~assets/evm/metamask_fox.svg"
+            >
+            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+        </div>
+        <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
+            <img
+                width="24"
+                class="flex q-ml-auto q-mt-auto wallet-logo"
+                alt="WalletConnect"
+                src="~assets/evm/wallet_connect.svg"
+            >
+            {{ $t('home.walletconnect') }}
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
         </div>
     </div>
 

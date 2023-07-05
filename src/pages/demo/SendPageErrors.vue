@@ -177,6 +177,24 @@ export default defineComponent({
             }
         },
         async startTransfer() {
+<<<<<<< HEAD
+=======
+            // // if WalletConnect on wrong network, notify user and prevent transaction
+            // if (localStorage.getItem('wagmi.connected')){
+            //     const chainSettings = useChainStore().currentChain.settings;
+            //     const appChainId = chainSettings.getChainId();
+            //     const networkName = chainSettings.getDisplay();
+            //     const walletConnectChainId = getNetwork().chain?.id.toString();
+            //     if (appChainId !== walletConnectChainId){
+            //         const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
+            //         (this as any).$errorNotification(errorMessage, true);
+            //         return;
+            //     }
+            // } else {
+            //     //if injected provider (Desktop) prompt to switch chains
+            //     await checkNetwork();
+            // }
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
 
             const token = this.token as TokenClass;
             const amount = this.amount;

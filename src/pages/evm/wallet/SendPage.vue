@@ -180,6 +180,10 @@ export default defineComponent({
         isCorrectNetwork() {
             return true;
         },
+        //loadingTransaction() {
+        //    // TODO: fixme
+        //    return localStorage.getItem('wagmi.connected') && this.isCorrectNetwork ? this.isLoading || this.configIsLoading : this.isLoading;
+        //},
     },
     created() {
         this.clearTokenTransferConfigs();
@@ -234,6 +238,7 @@ export default defineComponent({
             // before sending the transaction, we check if the user is connected to the correct network
             const label = 'logged';
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+<<<<<<< HEAD
                 const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                 const networkName = useChainStore().loggedChain.settings.getDisplay();
                 const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
@@ -245,6 +250,11 @@ export default defineComponent({
                         await authenticator.ensureCorrectChain();
                     },
                 });
+=======
+                const networkName = useChainStore().currentChain.settings.getDisplay();
+                const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
+                ant.config.notifyFailureMessage(errorMessage);
+>>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
                 return;
             }
 
