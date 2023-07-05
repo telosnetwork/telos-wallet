@@ -10,7 +10,7 @@ const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
 
 const wagmi = createClient({
     autoConnect: true,
-    connectors: w3mConnectors({ projectId, version: 1, chains }),
+    connectors: w3mConnectors({ projectId, version: 2, chains }),
     provider,
 });
 
