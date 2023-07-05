@@ -54,6 +54,7 @@ import {
     useFeedbackStore,
     usePlatformStore,
 } from 'src/antelope';
+import { EVMAuthenticator } from 'src/antelope/wallets';
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
 export const evmEvents = {
@@ -175,12 +176,13 @@ export const useEVMStore = defineStore(store_name, {
             return response;
         },
 
-        async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
-            this.trace('ensureCorrectChain', checkProvider);
+        async ensureCorrectChain(authenticator: EVMAuthenticator): Promise<ethers.providers.Web3Provider> {
+            this.trace('ensureCorrectChain', [authenticator]);
+            const checkProvider = await authenticator.web3Provider();
             let response = checkProvider;
             const correctChainId = useChainStore().currentChain.settings.getChainId();
             if (!await this.isProviderOnTheCorrectChain(checkProvider, correctChainId)) {
-                await this.switchChainInjected();
+                await this.switchChainInjected(await authenticator.externalProvider());
                 const provider = await this.ensureProvider();
                 response = new ethers.providers.Web3Provider(provider);
             }
@@ -188,10 +190,10 @@ export const useEVMStore = defineStore(store_name, {
             return response;
         },
 
-        async switchChainInjected(): Promise<boolean> {
-            this.trace('switchChainInjected');
+        async switchChainInjected(externalProvider: ethers.providers.ExternalProvider): Promise<boolean> {
+            this.trace('switchChainInjected', [externalProvider]);
             useFeedbackStore().setLoading('evm.switchChainInjected');
-            const provider = this.__external_provider;
+            const provider = externalProvider;
             if (provider) {
                 const chainSettings = useChainStore().loggedChain.settings as unknown as EVMChainSettings;
                 const chainId = parseInt(chainSettings.getChainId(), 10);

@@ -29,12 +29,12 @@ export default defineComponent({
 
     methods: {
         onToggleWalletConnect() {
-            console.log('onToggleWalletConnect');
-            this.toggleWalletConnect = false;
+            console.log('onToggleWalletConnect', this.toggleWalletConnect, ' -> ', !this.toggleWalletConnect);
+            this.toggleWalletConnect =  !this.toggleWalletConnect;
         },
-        onCloseWalletOptions() {
-            console.log('onCloseWalletOptions');
-            this.showWalletOptions = false;
+        onShowWalletOptions(show: boolean) {
+            console.log('onShowWalletOptions', show);
+            this.showWalletOptions = show;
         },
     },
 });
@@ -84,8 +84,8 @@ export default defineComponent({
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @toggle-wallet-connect="toggleWalletConnect = true"
-                        @show-wallet-options="showWalletOptions = true"
+                        @toggle-wallet-connect="onToggleWalletConnect()"
+                        @show-wallet-options="onShowWalletOptions(true)"
                     />
                 </div>
                 <div class="c-home__connect-wallet">
@@ -93,7 +93,7 @@ export default defineComponent({
                         v-show="showWalletOptions"
                         :toggleWalletConnect="toggleWalletConnect"
                         @toggle-wallet-connect="onToggleWalletConnect()"
-                        @close-wallet-options="onCloseWalletOptions()"
+                        @close-wallet-options="onShowWalletOptions(false)"
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
