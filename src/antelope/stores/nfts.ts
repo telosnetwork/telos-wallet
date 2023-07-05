@@ -130,7 +130,8 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
-            const owner = account.account;
+            // TODO: remove this hardcoded owner
+            const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {

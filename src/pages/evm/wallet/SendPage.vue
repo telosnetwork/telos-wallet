@@ -180,6 +180,10 @@ export default defineComponent({
         isCorrectNetwork() {
             return true;
         },
+        //loadingTransaction() {
+        //    // TODO: fixme
+        //    return localStorage.getItem('wagmi.connected') && this.isCorrectNetwork ? this.isLoading || this.configIsLoading : this.isLoading;
+        //},
     },
     created() {
         this.clearTokenTransferConfigs();
