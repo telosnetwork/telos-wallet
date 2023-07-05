@@ -5,7 +5,7 @@ import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, A
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { getNetwork } from '@wagmi/core';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+// import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 
@@ -177,21 +177,21 @@ export default defineComponent({
             }
         },
         async startTransfer() {
-            // if WalletConnect on wrong network, notify user and prevent transaction
-            if (localStorage.getItem('wagmi.connected')){
-                const chainSettings = useChainStore().currentChain.settings;
-                const appChainId = chainSettings.getChainId();
-                const networkName = chainSettings.getDisplay();
-                const walletConnectChainId = getNetwork().chain?.id.toString();
-                if (appChainId !== walletConnectChainId){
-                    const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                    (this as any).$errorNotification(errorMessage, true);
-                    return;
-                }
-            } else {
-                //if injected provider (Desktop) prompt to switch chains
-                await checkNetwork();
-            }
+            // // if WalletConnect on wrong network, notify user and prevent transaction
+            // if (localStorage.getItem('wagmi.connected')){
+            //     const chainSettings = useChainStore().currentChain.settings;
+            //     const appChainId = chainSettings.getChainId();
+            //     const networkName = chainSettings.getDisplay();
+            //     const walletConnectChainId = getNetwork().chain?.id.toString();
+            //     if (appChainId !== walletConnectChainId){
+            //         const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
+            //         (this as any).$errorNotification(errorMessage, true);
+            //         return;
+            //     }
+            // } else {
+            //     //if injected provider (Desktop) prompt to switch chains
+            //     await checkNetwork();
+            // }
 
             const token = this.token as TokenClass;
             const amount = this.amount;

@@ -14,7 +14,6 @@ const setPreferredService = (service) => {
 
 export default function (/* { store, ssrContext } */) {
     const createHistory =  createWebHistory;
-
     const Router = createRouter({
         scrollBehavior: () => ({ left: 0, top: 0 }),
         routes,

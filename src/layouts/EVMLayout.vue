@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
-
-onMounted(() => {
-    window.addEventListener('focus', checkNetwork);
-});
+// TODO: fixme - let's think about alternatives to this.
+// This is related to switchChainInjected() in evm.ts:260 -> window.removeEventListener('focus', checkNetwork);
+// ------------------------
+// import { onMounted } from 'vue';
+// import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+// onMounted(() => {
+//     window.addEventListener('focus', checkNetwork);
+// });
+// ------------------------
 </script>
 
 <template>

@@ -176,10 +176,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     isIndexerHealthy(): boolean {
-        return (
-            this._indexerHealthState.state.success &&
-            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
-        );
+        console.error('isIndexerHealthy() return (harcoded) false');
+        return false;
+        // return (
+        //     this._indexerHealthState.state.success &&
+        //     this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+        // );
     }
 
     get indexerHealthState(): IndexerHealthResponse {
@@ -330,7 +332,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 return [];
             });
     }
-
 
     async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
         return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);

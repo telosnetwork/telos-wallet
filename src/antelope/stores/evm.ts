@@ -45,10 +45,10 @@ import {
     NFTClass,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
-import { getAccount } from '@wagmi/core';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
+// import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import {
+    getAntelope,
     useAccountStore,
     useChainStore,
     useFeedbackStore,
@@ -101,7 +101,7 @@ export const useEVMStore = defineStore(store_name, {
             const evm = useEVMStore();
 
             // detect provider
-            detectEthereumProvider({ mustBeMetaMask: true }).then((provider) => {
+            detectEthereumProvider().then((provider) => {
                 evm.setSupportsMetaMask(provider?.isMetaMask ?? false);
                 if (provider) {
                     evm.setExternalProvider(provider);
@@ -109,59 +109,27 @@ export const useEVMStore = defineStore(store_name, {
                     provider.on('chainChanged', (newNetwork) => {
                         evm.trace('provider.chainChanged', newNetwork);
                     });
+
                     provider.on('accountsChanged', async (accounts) => {
                         const network = useChainStore().currentChain.settings.getNetwork();
                         evm.trace('provider.accountsChanged', accounts);
-                        useAccountStore().loginEVM({ network });
+                        if (evm.isMetamaskSupported) {
+                            const authenticator = getAntelope().wallets.getAutenticator('Metamask');
+                            if (!authenticator) {
+                                console.error('Inconsistency: MetamaskAuth not found but the proviuder says it is supported');
+                            } else {
+                                useAccountStore().loginEVM({ authenticator,  network });
+                            }
+                        } else {
+                            console.error('TODO: handle accountsChanged for non metamask providers');
+                        }
                     });
                 }
                 onEvmReady.next(true);
             });
         },
         // actions ---
-        async login (network: string): Promise<string | null> {
-            this.trace('login', network);
-            const chain = useChainStore();
-            try {
-                useFeedbackStore().setLoading('evm.login');
-                chain.setLoggedChain(network);
-                chain.setCurrentChain(network);
-
-                if (localStorage.getItem('wagmi.connected')){
-                    return getAccount().address as string;
-                }
-
-                const checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
-
-                const accounts = await checkProvider.listAccounts();
-                if (accounts.length > 0) {
-                    return accounts[0];
-                } else {
-                    if (!checkProvider.provider.request) {
-                        throw new AntelopeError('antelope.evm.error_support_provider_request');
-                    }
-                    const accessGranted = await checkProvider.provider.request({ method: 'eth_requestAccounts' });
-                    if (accessGranted.length < 1) {
-                        return null;
-                    }
-                    return accessGranted[0];
-                }
-            } catch (error) {
-                if ((error as unknown as ExceptionError).code === 4001) {
-                    throw new AntelopeError('antelope.evm.error_connect_rejected');
-                } else {
-                    console.error('Error:', error);
-                    throw new AntelopeError('antelope.evm.error_login');
-                }
-            } finally {
-                useFeedbackStore().unsetLoading('evm.login');
-                const provider = await this.ensureProvider();
-                const checkProvider = new ethers.providers.Web3Provider(provider);
-                const signer = await checkProvider.getSigner();
-                this.setExternalSigner(signer);
-
-            }
-        },
+        // this action is used by MetamaskAuth.transferTokens()
         async sendSystemToken (to: string, value: BigNumber): Promise<EvmTransactionResponse> {
             this.trace('sendSystemToken', to, value);
 
@@ -200,12 +168,18 @@ export const useEVMStore = defineStore(store_name, {
             });
         },
 
+        async isProviderOnTheCorrectChain(provider: ethers.providers.Web3Provider, correctChainId: string): Promise<boolean> {
+            const { chainId } = await provider.getNetwork();
+            const response = Number(chainId).toString() === correctChainId;
+            this.trace('isProviderOnTheCorrectChain', provider, ' -> ', response);
+            return response;
+        },
+
         async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
             this.trace('ensureCorrectChain', checkProvider);
             let response = checkProvider;
-            const { chainId } = await checkProvider.getNetwork();
-            const currentChain = useChainStore().currentChain.settings as unknown as EVMChainSettings;
-            if (Number(chainId).toString() !== currentChain.getChainId()) {
+            const correctChainId = useChainStore().currentChain.settings.getChainId();
+            if (!await this.isProviderOnTheCorrectChain(checkProvider, correctChainId)) {
                 await this.switchChainInjected();
                 const provider = await this.ensureProvider();
                 response = new ethers.providers.Web3Provider(provider);
@@ -239,9 +213,9 @@ export const useEVMStore = defineStore(store_name, {
                     ];
 
                     // if user rejects request to switch chains, disable repeated prompts
-                    if ((error as unknown as ExceptionError).code === 4001){ // 4001 - 'user rejected request'
-                        window.removeEventListener('focus', checkNetwork);
-                    }
+                    // if ((error as unknown as ExceptionError).code === 4001){ // 4001 - 'user rejected request'
+                    //     window.removeEventListener('focus', checkNetwork);
+                    // }
 
                     if (chainNotAddedCodes.includes((error as unknown as ExceptionError).code)) {  // 'Chain <hex chain id> hasn't been added'
                         const p:RpcEndpoint = chainSettings.getRPCEndpoint();
