@@ -20,7 +20,6 @@ import { createInitFunction, createTraceFunction } from 'src/antelope/stores/fee
 import { FuelUserWrapper } from 'src/api/fuel';
 import {
     useFeedbackStore,
-    useEVMStore,
 } from 'src/antelope';
 import { getAntelope, useChainStore } from 'src/antelope';
 import { errorToString } from 'src/antelope/config';
@@ -29,9 +28,9 @@ import {
     Action,
     Label,
     NativeTransactionResponse,
+    addressString,
 } from 'src/antelope/types';
-import { getAccount, disconnect } from '@wagmi/core';
-import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { EVMAuthenticator } from 'src/antelope/wallets';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -39,6 +38,7 @@ export interface LoginNativeActionData {
 }
 
 export interface LoginEVMActionData {
+    authenticator: EVMAuthenticator
     network: string,
 }
 
@@ -52,9 +52,10 @@ export interface SendActionData {
 
 export interface AccountModel {
     network: string;
-    account: string;
+    account: string | addressString;
     isNative: boolean;
     data: API.v1.AccountObject | null;
+    authenticator: Authenticator | EVMAuthenticator;
 }
 
 export interface NativeAccountModel extends AccountModel {
@@ -66,10 +67,11 @@ export interface NativeAccountModel extends AccountModel {
 }
 
 export interface EvmAccountModel extends AccountModel {
-    address: string;
+    address: addressString;
     displayAddress: string;
     isNative: false;
     associatedNative: string;
+    authenticator: EVMAuthenticator;
 }
 
 
@@ -95,6 +97,9 @@ export const useAccountStore = defineStore(store_name, {
             state.__accounts['logged']?.account === state.__accounts['current']?.account &&
             state.__accounts['logged']?.network === state.__accounts['current']?.network,
         getAccount: state => (label: Label) => ({ ...state.__accounts[label] }),
+        getAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator,
+        getEVMAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator as EVMAuthenticator,
+        getNativeAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator as Authenticator,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -143,18 +148,13 @@ export const useAccountStore = defineStore(store_name, {
             return success;
         },
 
-        async loginEVM({ network }: LoginEVMActionData): Promise<boolean> {
+        async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             let success = false;
-            let address = null;
             try {
                 useFeedbackStore().setLoading('account.login');
 
-                if (localStorage.getItem('wagmi.connected')){
-                    address = getAccount().address;
-                }else{
-                    address = await useEVMStore().login(network);
-                }
+                const address = await authenticator.login(network);
 
                 if (address) {
                     const displayAddress = truncateAddress(address);
@@ -169,13 +169,15 @@ export const useAccountStore = defineStore(store_name, {
                         associatedNative: '',
                         data: null,
                         displayAddress,
+                        authenticator,
                     };
+                    this.setCurrentAccount(evmAccount);
                     this.setLoggedAccount(evmAccount);
 
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
                     localStorage.setItem('isNative', 'false');
-                    localStorage.setItem('autoLogin', 'evm');
+                    localStorage.setItem('autoLogin', authenticator.getName());
                     success = true;
                     this.fetchAccountDataFor('logged', evmAccount);
                     getAntelope().events.onLoggedIn.next(evmAccount);
@@ -184,7 +186,7 @@ export const useAccountStore = defineStore(store_name, {
                     throw new Error('antelope.account.error_login_evm');
                 }
             } catch (error) {
-                console.error('Error: ', errorToString(error));
+                console.error('Error: ', error);
             } finally {
                 useFeedbackStore().unsetLoading('account.login');
             }
@@ -199,19 +201,14 @@ export const useAccountStore = defineStore(store_name, {
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                if (localStorage.getItem('wagmi.connected')){
-                    disconnect();
+                const logged = this.__accounts['logged'];
+                const { authenticator } = logged;
+                try {
+                    authenticator && (await authenticator.logout());
+                } catch (error) {
+                    console.error('Authenticator logout error', error);
                 }
 
-                if (this.__accounts['logged']?.isNative) {
-                    const logged = this.__accounts['logged'] as NativeAccountModel;
-                    const { authenticator } = logged;
-                    try {
-                        authenticator && (await authenticator.logout());
-                    } catch (error) {
-                        console.error('Authenticator logout error', error);
-                    }
-                }
                 this.setLoggedAccount(null);
                 getAntelope().events.onLoggedOut.next();
             } catch (error) {
@@ -223,6 +220,7 @@ export const useAccountStore = defineStore(store_name, {
 
         async autoLogin(): Promise<boolean> {
             this.trace('autoLogin');
+            const label = 'logged';
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
                 const network = localStorage.getItem('network');
@@ -230,7 +228,7 @@ export const useAccountStore = defineStore(store_name, {
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
                 this.trace('autoLogin', account, isNative, autoLogin);
-                if (account && network && autoLogin && !this.__accounts['logged']) {
+                if (account && network && autoLogin && !this.__accounts[label]) {
                     if (isNative) {
                         const authenticators = getAntelope().config.authenticatorsGetter();
                         const authenticator = authenticators.find(
@@ -245,7 +243,15 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     } else {
-                        return this.loginEVM({ network });
+                        const authenticator = getAntelope().wallets.getAutenticator(autoLogin)?.newInstance(label);
+                        if (!authenticator) {
+                            console.error(getAntelope().wallets);
+                            throw new Error('antelope.account.error_auto_login');
+                        }
+                        return this.loginEVM({
+                            authenticator,
+                            network,
+                        });
                     }
                 }
             } catch (error) {
@@ -255,6 +261,22 @@ export const useAccountStore = defineStore(store_name, {
             }
             return Promise.resolve(false);
         },
+
+        async isConnectedToCorrectNetwork(label: string): Promise<boolean> {
+            this.trace('isConnectedToCorrectNetwork', label);
+            try {
+                useFeedbackStore().setLoading('account.isConnectedToCorrectNetwork');
+                const correctChainId = useChainStore().getChain(label).settings.getChainId();
+                const authenticator = useAccountStore().getAccount(label)?.authenticator as EVMAuthenticator;
+                return authenticator.isConnectedTo(correctChainId);
+            } catch (error) {
+                console.error('Error: ', errorToString(error));
+                return Promise.resolve(false);
+            } finally {
+                useFeedbackStore().unsetLoading('account.isConnectedToCorrectNetwork');
+            }
+        },
+
         async sendAction({ account, data, name, actor, permission }: SendActionData): Promise<NativeTransactionResponse> {
             this.trace('sendAction', account, data, name, actor, permission);
             try {

@@ -6,6 +6,7 @@ export * from 'src/antelope/stores/utils/abi/supportsInterface';
 export * from 'src/antelope/stores/utils/abi/signature/transfer_signatures';
 
 export type StateMutabilityType = 'pure' | 'view' | 'nonpayable' | 'payable';
+export type addressString = `0x${string}`; // required wagmi type
 
 export type EvmABI = EvmABIEntry[];
 

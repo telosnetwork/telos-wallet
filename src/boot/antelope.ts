@@ -1,5 +1,21 @@
+import { EthereumClient } from '@web3modal/ethereum';
+import { Web3ModalConfig } from '@web3modal/html';
 import { boot } from 'quasar/wrappers';
 import { installAntelope } from 'src/antelope';
+import { MetamaskAuth, WalletConnectAuth } from 'src/antelope/wallets';
+import { App } from 'vue';
+import { Router } from 'vue-router';
+
+
+const getRouter = async (app: App) => new Promise<Router>((resolve) => {
+    const intervalId = setInterval(() => {
+        if (app.config.globalProperties?.$router) {
+            clearInterval(intervalId);
+            resolve(app.config.globalProperties.$router as Router);
+        }
+    }, 100); // Interval time in milliseconds (adjust as needed)
+});
+
 
 export default boot(({ app }) => {
     const ant = installAntelope(app);
@@ -13,17 +29,19 @@ export default boot(({ app }) => {
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
 
     // setting log in and out callbacks --
+
+    // we need to wait 1000 milisec to ensure app.config.globalProperties?.$router is not null
     ant.events.onLoggedIn.subscribe({
-        next: () => {
+        next: async () => {
             if (window.location.pathname === '/') {
-                app.config.globalProperties?.$router?.push({ path: '/evm/wallet?tab=balance' });
+                (await getRouter(app)).push({ path: '/evm/wallet?tab=balance' });
             }
         },
     });
     ant.events.onLoggedOut.subscribe({
-        next: () => {
+        next: async () => {
             if (window.location.pathname !== '/') {
-                app.config.globalProperties?.$router?.push({ path: '/' });
+                (await getRouter(app)).push({ path: '/' });
             }
         },
     });
@@ -33,6 +51,12 @@ export default boot(({ app }) => {
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));
+
+    // set evm authenticators --
+    const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;
+    const wagmiClient = app.config.globalProperties.$wagmi as EthereumClient;
+    ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
+    ant.wallets.addEVMAuthenticator(new MetamaskAuth());
 
     // autologin --
     ant.stores.account.autoLogin();

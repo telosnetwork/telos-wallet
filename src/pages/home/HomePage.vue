@@ -26,6 +26,17 @@ export default defineComponent({
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
     },
+
+    methods: {
+        onToggleWalletConnect() {
+            console.log('onToggleWalletConnect');
+            this.toggleWalletConnect = false;
+        },
+        onCloseWalletOptions() {
+            console.log('onCloseWalletOptions');
+            this.showWalletOptions = false;
+        },
+    },
 });
 </script>
 
@@ -81,8 +92,8 @@ export default defineComponent({
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
                         :toggleWalletConnect="toggleWalletConnect"
-                        @toggle-wallet-connect="toggleWalletConnect = false"
-                        @close-wallet-options="showWalletOptions = false"
+                        @toggle-wallet-connect="onToggleWalletConnect()"
+                        @close-wallet-options="onCloseWalletOptions()"
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
