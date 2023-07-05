@@ -1,12 +1,10 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
-import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
-import { getNetwork } from '@wagmi/core';
-import { isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { useEVMStore, useAccountStore, useChainStore, getAntelope } from 'src/antelope';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -19,77 +17,52 @@ export default defineComponent({
     setup(props, { emit }){
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const wagmiClient = inject('$wagmi') as EthereumClient;
+        // console.log('ConnectWalletOptions -> wagmiClient:', wagmiClient);
         const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
-
-        watch(() => props.toggleWalletConnect, async (newVal) => {
-            if (newVal) {
-                await toggleWalletConnectModal();
-            }
-        });
-
-        const loginEvm = () => {
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            const network = chainStore.currentChain.settings.getNetwork();
-            accountStore.loginEVM({ network });
-        };
-
-        const toggleWalletConnectModal = async () => {
-            emit('walletConnectButtonClicked');
-            // if already connected, trigger autologin
-            if (localStorage.getItem('wagmi.connected')){
-                await login();
-            } else {
-                await (web3Modal.value as Web3Modal).openModal();
-                emit('toggleWalletConnect');
-            }
-        };
-
-        const login = async () => {
-            emit('toggleWalletConnect');
-
-            loginEvm();
-
-            const networkName = useChainStore().currentChain.settings.getDisplay();
-
-            if (!isCorrectNetwork()){
-                const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
-                globalProps.$warningNotification(warningMessage);
-            }
-        };
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
 
+        // new refactor --------------
+        const setMetamaskAuthenticator = async () => {
+            setAuthenticator('Metamask', 'logged');
+        };
+        const setWalletConnectAuthenticator = async () => {
+            setAuthenticator('WalletConnect', 'logged');
+        };
+
+        const setAuthenticator = async(name: string, label: string) => {
+            const auth = getAntelope().wallets.getAutenticator(name);
+            if (!auth) {
+                console.error(`${name} authenticator not found`);
+                return;
+            }
+            const authenticator = auth.newInstance(label);
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            const correctChainId = useChainStore().currentChain.settings.getChainId();
+            accountStore.loginEVM({ authenticator, network }).then(async () => {
+                // we verify that the authenticator is connected to the correct network
+                if (!await authenticator.isConnectedTo(correctChainId)) {
+                    const networkName = useChainStore().getChain(label).settings.getDisplay();
+                    const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
+                    globalProps.$warningNotification(warningMessage);
+                }
+            });
+        };
+        // --------------
+
         return {
             web3Modal,
             supportsMetamask,
-            loginEvm,
-            toggleWalletConnectModal,
-            login,
             redirectToMetamaskDownload,
             wagmiClient,
+            setMetamaskAuthenticator,
+            setWalletConnectAuthenticator,
         };
-    },
-    mounted() {
-        const projectId = process.env.PROJECT_ID || '';
-        const explorerRecommendedWalletIds = [
-            // MetaMask
-            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-        ];
-        const explorerExcludedWalletIds: 'ALL' = 'ALL'; // Web3Modal option excludes all but recomended
-
-        const options = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
-
-        this.web3Modal = new Web3Modal(options, this.wagmiClient);
-
-        this.web3Modal.subscribeModal(async (newState) => {
-            if (newState.open === false && localStorage.getItem('wagmi.connected')) {
-                await this.login();
-            }
-        });
     },
 });
 </script>
@@ -108,7 +81,8 @@ export default defineComponent({
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
-        <div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()">
+        <!--div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()"-->
+        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"
@@ -117,7 +91,7 @@ export default defineComponent({
             >
             {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
         </div>
-        <div class="wallet-options__option" @click="toggleWalletConnectModal">
+        <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
             <img
                 width="24"
                 class="flex q-ml-auto q-mt-auto wallet-logo"

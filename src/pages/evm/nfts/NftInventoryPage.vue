@@ -8,7 +8,7 @@ import NftTile from 'pages/evm/nfts/NftTile.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { useChainStore } from 'src/antelope';
+import { getAntelope, useChainStore } from 'src/antelope';
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
@@ -104,18 +104,20 @@ const tableRows = computed(() => {
 const listImagesLoadingStates = ref<Record<string, boolean>>({});
 
 
-// watchers
-
-// fetch initial data
-watch(accountStore, (store) => {
-    if (store.loggedAccount) {
-        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
+function updateNFTsForAccount() {
+    if (accountStore.loggedAccount) {
+        nftStore.updateNFTsForAccount('logged', toRaw(accountStore.loggedAccount)).finally(() => {
             initialLoadComplete.value = true;
         });
     }
-},
-{ immediate: true },
-);
+}
+// watchers
+
+// fetch initial data
+updateNFTsForAccount();
+getAntelope().events.onAccountChanged.subscribe(() => {
+    updateNFTsForAccount();
+});
 
 watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
@@ -195,9 +197,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
-        if (accountStore.loggedAccount) {
-            await nftStore.updateNFTsForAccount('logged', accountStore.loggedAccount);
-        }
+        updateNFTsForAccount();
     }, 13000);
 });
 
