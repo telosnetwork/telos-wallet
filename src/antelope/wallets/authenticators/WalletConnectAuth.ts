@@ -53,6 +53,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         this.trace('login', network);
         if (localStorage.getItem('wagmi.connected')) {
             const address = getAccount().address as addressString;
+            await super.login(network);
             return address;
         } else {
             return new Promise(async (resolve) => {
@@ -60,6 +61,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 web3Modal.subscribeModal(async (newState) => {
                     if (newState.open === false && localStorage.getItem('wagmi.connected')) {
                         const address = getAccount().address as addressString;
+                        await super.login(network);
                         resolve(address);
                     }
                 });
@@ -145,6 +147,13 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         this.trace('web3Provider');
+        const web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+        await web3Provider.ready;
+        return web3Provider;
+    }
+
+    async externalProvider(): Promise<ethers.providers.ExternalProvider> {
+        this.trace('externalProvider');
         return new Promise(async (resolve) => {
             const injected = new InjectedConnector();
             const provider = toRaw(await injected.getProvider());
@@ -152,11 +161,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 // TODO: fix the i18n
                 throw new AntelopeError('evm.no-provider');
             }
-            const web3Provider = new ethers.providers.Web3Provider(provider as unknown as ethers.providers.ExternalProvider);
-            await web3Provider.ready;
-            resolve(web3Provider);
+            resolve(provider as unknown as ethers.providers.ExternalProvider);
         });
     }
+
     // ----------------------------------------------------------
 
 }

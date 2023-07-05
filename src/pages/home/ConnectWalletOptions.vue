@@ -1,7 +1,7 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
 import { Web3Modal } from '@web3modal/html';
 import { EthereumClient } from '@web3modal/ethereum';
 import { useEVMStore, useAccountStore, useChainStore, getAntelope } from 'src/antelope';
@@ -24,6 +24,12 @@ export default defineComponent({
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
+
+        watch(() => props.toggleWalletConnect, async (newVal) => {
+            if (newVal) {
+                await setWalletConnectAuthenticator();
+            }
+        });
 
         // new refactor --------------
         const setMetamaskAuthenticator = async () => {
