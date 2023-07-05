@@ -205,7 +205,11 @@ export function prettyPrintCurrency(
             finalFormattedValue = finalFormattedValue.replace(trailingZeroesRegex, '');
         }
 
-        if (currency) {
+        if (precision === 2 && tokenDecimals === 2 && currency) {
+            // value is a fiat currency with 2 decimals, so add the currency symbol
+            const symbol = getCurrencySymbol(locale, currency);
+            finalFormattedValue = `${symbol}${finalFormattedValue}`;
+        } else if (currency) {
             finalFormattedValue += ` ${currency}`;
         }
 

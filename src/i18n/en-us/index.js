@@ -153,6 +153,9 @@ export default {
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
     },
+    evm_wrap: {
+        total_of_wrapped_and_unwrapped: 'Total of wrapped {token} and {token}',
+    },
     notification:{
         success_title_trx: 'Success',
         success_title_copied: 'Copied',

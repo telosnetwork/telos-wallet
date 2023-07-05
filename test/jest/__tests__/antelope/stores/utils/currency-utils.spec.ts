@@ -184,6 +184,10 @@ describe('prettyPrintCurrency', () => {
             prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, 'TLOS', undefined, 18),
         ).toBe('1.5K TLOS');
 
+        // ensure that fiat currency expressed as a BigNumber is formatted correctly
+        expect(
+            prettyPrintCurrency(BigNumber.from(100), 2, 'en-US', false, 'USD', false, 2, false),
+        ).toBe('$1.00');
     });
 });
 
