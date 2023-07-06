@@ -48,7 +48,6 @@ export abstract class EVMAuthenticator {
                 return accounts[0] as addressString;
             } else {
                 if (!checkProvider.provider.request) {
-                    // TODO: fixme. change variable name
                     throw new AntelopeError('antelope.evm.error_support_provider_request');
                 }
                 const accessGranted = await checkProvider.provider.request({ method: 'eth_requestAccounts' });
@@ -59,11 +58,9 @@ export abstract class EVMAuthenticator {
             }
         } catch (error) {
             if ((error as unknown as ExceptionError).code === 4001) {
-                // TODO: fixme. change variable name
                 throw new AntelopeError('antelope.evm.error_connect_rejected');
             } else {
                 console.error('Error:', error);
-                // TODO: fixme. change variable name
                 throw new AntelopeError('antelope.evm.error_login');
             }
         } finally {

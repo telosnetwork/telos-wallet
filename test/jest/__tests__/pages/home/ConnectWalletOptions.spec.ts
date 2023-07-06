@@ -53,7 +53,7 @@ jest.mock('@web3modal/html', () => web3ModalMock);
 
 const mountComponent = () => shallowMount(ConnectWalletOptions, {
     props: {
-        toggleWalletConnect: false,
+        showWalletConnect: false,
     },
     mocks: {
         $t :  () => WARNING_MESSAGE,
@@ -109,11 +109,11 @@ describe('ConnectWalletOptions.vue', () => {
             });
         });
 
-        describe('toggleWalletConnectModal', () => {
+        describe('showWalletConnectModal', () => {
             it('calls openModal if not currently connected', async () => {
                 const methodSpy = jest.spyOn(wrapper.vm.web3Modal, 'openModal');
 
-                wrapper.vm.toggleWalletConnectModal();
+                wrapper.vm.showWalletConnectModal();
 
                 expect(methodSpy).toHaveBeenCalled();
             });
@@ -123,7 +123,7 @@ describe('ConnectWalletOptions.vue', () => {
 
                 const methodSpy = jest.spyOn(wrapper.vm, 'login');
 
-                await wrapper.vm.toggleWalletConnectModal();
+                await wrapper.vm.showWalletConnectModal();
 
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalled();
@@ -132,11 +132,11 @@ describe('ConnectWalletOptions.vue', () => {
         });
 
         describe('login', () => {
-            it('emits "toggleWalletConnect"', async () => {
+            it('emits "showWalletConnect"', async () => {
                 await wrapper.vm.login();
 
                 wrapper.vm.$nextTick(() => {
-                    expect(wrapper.vm.emitted).toBe('toggleWalletConnect');
+                    expect(wrapper.vm.emitted).toBe('showWalletConnect');
                 });
             });
 

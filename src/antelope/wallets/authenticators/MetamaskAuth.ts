@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
-import { useEVMStore } from 'src/antelope';
+import { useEVMStore, useFeedbackStore } from 'src/antelope';
 import { AntelopeError, EvmTransactionResponse, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { toRaw } from 'vue';
@@ -26,18 +26,19 @@ export class MetamaskAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        useFeedbackStore().setLoading(`${this.getName()}.login`);
         const response = await super.login(network);
         // store the signer for later use
         const provider = await useEVMStore().ensureProvider();
         const checkProvider = new ethers.providers.Web3Provider(provider);
         const signer = await checkProvider.getSigner();
         this.setExternalSigner(signer);
+        useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return response;
     }
 
     async logout(): Promise<void> {
         this.trace('logout');
-        // TODO: is there anythig to do here?
     }
 
     async getSystemTokenBalance(label:string, address: addressString | string): Promise<BigNumber> {
@@ -74,7 +75,6 @@ export class MetamaskAuth extends EVMAuthenticator {
     }
 
     prepareTokenForTransfer(label: string, token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
-        console.log('prepareTokenForTransfer', label, [token], amount, to);
         this.trace('prepareTokenForTransfer', label, [token], amount, to);
         return new Promise((resolve) => {
             resolve();

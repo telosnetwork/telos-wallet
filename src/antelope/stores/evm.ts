@@ -52,7 +52,6 @@ import {
     useAccountStore,
     useChainStore,
     useFeedbackStore,
-    usePlatformStore,
 } from 'src/antelope';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 const onEvmReady = new BehaviorSubject<boolean>(false);
@@ -93,13 +92,9 @@ export const useEVMStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
 
-            // bypass provider detection on mobile
-            if (usePlatformStore().isMobile){
-                return;
-            }
-
             useFeedbackStore().setDebug(store_name, isTracingAll());
             const evm = useEVMStore();
+            const ant = getAntelope();
 
             // detect provider
             detectEthereumProvider().then((provider) => {
@@ -107,20 +102,57 @@ export const useEVMStore = defineStore(store_name, {
                 if (provider) {
                     evm.setExternalProvider(provider);
 
+                    // this handler activates only when the user comes back from switching to the wrong network on the wallet
+                    // It checks if the user is on the correct network and if not, it shows a notification with a button to switch
+                    const checkNetworkHandler = async () => {
+                        const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                        const chainId = useChainStore().currentChain.settings.getChainId();
+                        window.removeEventListener('focus', checkNetworkHandler);
+                        if (await authenticator.isConnectedTo(chainId)) {
+                            evm.trace('checkNetworkHandler', 'correct network');
+                        } else {
+                            const networkName = useChainStore().loggedChain.settings.getDisplay();
+                            const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                            ant.config.notifyFailureWithAction(errorMessage, {
+                                label: ant.config.localizationHandler('evm_wallet.switch'),
+                                handler: () => {
+                                    authenticator.ensureCorrectChain();
+                                },
+                            });
+                        }
+                    };
+
                     provider.on('chainChanged', (newNetwork) => {
                         evm.trace('provider.chainChanged', newNetwork);
+                        window.removeEventListener('focus', checkNetworkHandler);
+                        if (useAccountStore().loggedAccount) {
+                            window.addEventListener('focus', checkNetworkHandler);
+                        }
                     });
 
                     provider.on('accountsChanged', async (accounts) => {
                         const network = useChainStore().currentChain.settings.getNetwork();
-                        evm.trace('provider.accountsChanged', accounts);
+                        evm.trace('provider.accountsChanged', ...accounts);
+
                         if (evm.isMetamaskSupported) {
-                            const authenticator = getAntelope().wallets.getAutenticator('Metamask');
-                            if (!authenticator) {
-                                console.error('Inconsistency: MetamaskAuth not found but the proviuder says it is supported');
+                            // accounts.length > 0 means has just logged in or is switching account in wallet
+                            if (accounts.length > 0) {
+                                if (useAccountStore().loggedAccount) {
+                                    // if the user is already authenticated we try to re login the account using the same authenticator
+                                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                                    if (!authenticator) {
+                                        console.error('Inconsistency: logged account authwenticator is null', authenticator);
+                                    } else {
+                                        useAccountStore().loginEVM({ authenticator,  network });
+                                    }
+                                } else {
+                                    // if not, we do nothing because this is part of the happy ligin path
+                                }
                             } else {
-                                useAccountStore().loginEVM({ authenticator,  network });
+                                // the user has disconnected the all the accounts from the wallet so we logout
+                                useAccountStore().logout();
                             }
+
                         } else {
                             console.error('TODO: handle accountsChanged for non metamask providers');
                         }

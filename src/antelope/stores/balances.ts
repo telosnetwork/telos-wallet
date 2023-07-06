@@ -134,32 +134,6 @@ export const useBalancesStore = defineStore(store_name, {
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
-                            /*
-                            const evm = useEVMStore();
-                            let promises: Promise<void>[] = [];
-
-                            if (localStorage.getItem('wagmi.connected')) {
-
-                                promises = tokens.map(async (token) => {
-                                    fetchBalance({
-                                        address: getAccount().address as addressString,
-                                        chainId: +chain_settings.getChainId(),
-                                        token: token.address as addressString,
-                                    }).then((balanceBn: FetchBalanceResult) => {
-                                        this.processBalanceForToken(label, token, balanceBn.value);
-                                    });
-                                });
-
-                            } else {
-                                promises = tokens
-                                    .map(token => evm.getERC20TokenBalance(account.account, token.address)
-                                        .then((balanceBn: BigNumber) => {
-                                            this.processBalanceForToken(label, token, balanceBn);
-                                        }),
-                                    );
-
-                            }
-                            */
 
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
@@ -359,43 +333,6 @@ export const useBalancesStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
         },
-        /*
-        async transferWalletConnect(label: Label, token: TokenClass): Promise<SendTransactionResult> {
-            if (token.isSystem) {
-                const config = this.__wagmiSystemTokenTransferConfig[label];
-
-                if (!config) {
-                    throw new AntelopeError('antelope.balances.error_system_token_transfer_config');
-                }
-
-                return await sendTransaction(config);
-            } else {
-                const config = this.__wagmiTokenTransferConfig[label];
-
-                if (!config) {
-                    throw new AntelopeError('antelope.balances.error_token_transfer_config');
-                }
-
-                return await writeContract(config);
-            }
-        },
-
-        async transferMetaMask(token: TokenClass, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
-            const evm = useEVMStore();
-
-            if (token.isSystem) {
-                return evm.sendSystemToken(to, amount);
-            } else {
-                const contract = await evm.getContract(token.address, token.type);
-                if (contract) {
-                    const contractInstance = contract.getContractInstance();
-                    const amountInWei = amount.toString();
-                    return contractInstance.transfer(to, amountInWei);
-                } else {
-                    throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
-                }
-            }
-        },*/
         // sorting ----------
         splitTokensBasedOnHasFiatValue(tokens: TokenBalance[]): [TokenBalance[], TokenBalance[]] {
             const tokenHasFiatValue = (balance: TokenBalance) => balance.token.price.isAvailable;

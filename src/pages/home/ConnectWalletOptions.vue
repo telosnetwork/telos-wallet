@@ -1,31 +1,26 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
-import { Web3Modal } from '@web3modal/html';
-import { EthereumClient } from '@web3modal/ethereum';
-import { useEVMStore, useAccountStore, useChainStore, getAntelope } from 'src/antelope';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
+import { useEVMStore, useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
     props: {
-        toggleWalletConnect: {
+        showWalletConnect: {
             required: true,
             type: Boolean,
         },
     },
     setup(props, { emit }){
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
-        const wagmiClient = inject('$wagmi') as EthereumClient;
-        // console.log('ConnectWalletOptions -> wagmiClient:', wagmiClient);
-        const web3Modal = ref<Web3Modal>();
         const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
 
-        watch(() => props.toggleWalletConnect, async (newVal) => {
+        watch(() => props.showWalletConnect, async (newVal) => {
             if (newVal) {
                 await setWalletConnectAuthenticator();
             }
@@ -61,11 +56,12 @@ export default defineComponent({
         };
         // --------------
 
+        const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+
         return {
-            web3Modal,
+            isLoading,
             supportsMetamask,
             redirectToMetamaskDownload,
-            wagmiClient,
             setMetamaskAuthenticator,
             setWalletConnectAuthenticator,
         };
@@ -87,26 +83,40 @@ export default defineComponent({
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
-        <!--div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()"-->
+
+        <!-- Metamask Authenticator button -->
         <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
-            <img
-                width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="MetaMask"
-                src="~assets/evm/metamask_fox.svg"
-            >
-            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+            <template v-if="isLoading('Metamask.login')">
+                <div class="wallet-options__loading"><q-spinner-facebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Metamask"
+                    src="~assets/evm/metamask_fox.svg"
+                >
+                {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+            </template>
         </div>
+
+        <!-- WalletConnect Authenticator button -->
         <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
-            <img
-                width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="WalletConnect"
-                src="~assets/evm/wallet_connect.svg"
-            >
-            {{ $t('home.walletconnect') }}
+            <template v-if="isLoading('WalletConnect.login')">
+                <div class="wallet-options__loading"><q-spinner-facebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="WalletConnect"
+                    src="~assets/evm/wallet_connect.svg"
+                >
+                {{ $t('home.walletconnect') }}
+            </template>
         </div>
     </div>
+
 </div>
 
 </template>
@@ -125,6 +135,11 @@ export default defineComponent({
     flex-direction: column;
     align-items: flex-start;
     padding-left: 42px;
+
+    &__loading{
+        width: 100%;
+        text-align: center;
+    }
 
     &__close{
         margin-left: 265px;
@@ -147,6 +162,7 @@ export default defineComponent({
         font-weight: 600;
         padding-top: 14px;
         padding-left: 14px;
+        padding-right: 14px;
         cursor: pointer;
 
         img {

@@ -25,6 +25,7 @@ export default boot(({ app }) => {
     ant.config.setNotifySuccessMessageHandler(app.config.globalProperties.$notifySuccessMessage);
     ant.config.setNotifySuccessCopyHandler(app.config.globalProperties.$notifySuccessCopy);
     ant.config.setnotifyFailureMessage(app.config.globalProperties.$notifyFailure);
+    ant.config.setnotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
     ant.config.setNotifyDisconnectedHandler(app.config.globalProperties.$notifyDisconnected);
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
 
@@ -50,7 +51,7 @@ export default boot(({ app }) => {
     ant.config.setAuthenticatorsGetter(() => app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators);
 
     // setting translation handler --
-    ant.config.setLocalizationHandler((key:string) => app.config.globalProperties.$t(key));
+    ant.config.setLocalizationHandler((key:string, payload?: Record<string, unknown>) => app.config.globalProperties.$t(key, payload ? payload : {}));
 
     // set evm authenticators --
     const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;

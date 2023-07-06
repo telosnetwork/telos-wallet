@@ -66,6 +66,7 @@ export default defineComponent({
                 this.showWalletOptions = false;
 
                 if (this.notifyOnSuccessfulLogin) {
+                    this.notifyOnSuccessfulLogin = false;
                     const shortenedAddress = getShortenedHash(this.loggedAccount.account);
 
                     (this as any).$notifySuccessMessage(
@@ -342,7 +343,7 @@ export default defineComponent({
 </nav>
 <q-dialog v-model="showWalletOptions">
     <ConnectWalletOptions
-        :toggleWalletConnect="false"
+        :showWalletConnect="false"
         @wallet-connect-button-clicked="showWalletOptions = false"
         @close-wallet-options="showWalletOptions = false"
     />

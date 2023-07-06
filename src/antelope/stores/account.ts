@@ -155,6 +155,7 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('account.login');
 
                 const address = await authenticator.login(network);
+                this.trace('loginEVM', 'authenticator finished with address', address);
 
                 if (address) {
                     const displayAddress = truncateAddress(address);

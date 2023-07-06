@@ -16,11 +16,11 @@ export default defineComponent({
     data: (): {
         tab: 'left' | 'right'
         showWalletOptions: boolean,
-        toggleWalletConnect: boolean,
+        showWalletConnect: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
-        toggleWalletConnect: false,
+        showWalletConnect: false,
     }),
 
     computed: {
@@ -28,12 +28,10 @@ export default defineComponent({
     },
 
     methods: {
-        onToggleWalletConnect() {
-            console.log('onToggleWalletConnect', this.toggleWalletConnect, ' -> ', !this.toggleWalletConnect);
-            this.toggleWalletConnect =  !this.toggleWalletConnect;
+        onShowWalletConnect() {
+            this.showWalletConnect = true;
         },
         onShowWalletOptions(show: boolean) {
-            console.log('onShowWalletOptions', show);
             this.showWalletOptions = show;
         },
     },
@@ -84,15 +82,15 @@ export default defineComponent({
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @toggle-wallet-connect="onToggleWalletConnect()"
+                        @show-wallet-connect="onShowWalletConnect()"
                         @show-wallet-options="onShowWalletOptions(true)"
                     />
                 </div>
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
-                        :toggleWalletConnect="toggleWalletConnect"
-                        @toggle-wallet-connect="onToggleWalletConnect()"
+                        :showWalletConnect="showWalletConnect"
+                        @show-wallet-connect="onShowWalletConnect()"
                         @close-wallet-options="onShowWalletOptions(false)"
                     />
                 </div>
