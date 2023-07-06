@@ -439,7 +439,7 @@ export default {
             error_transaction_canceled: 'You canceled the action',
         },
         history: {
-            error_fetching_transactions: 'Error in fetching transactions',
+            error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
         },
         chain: {
             error_update_data: 'Error in updating data',
