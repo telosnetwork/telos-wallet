@@ -6,8 +6,6 @@ import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserS
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
-//import { getNetwork } from '@wagmi/core';
-// import { checkNetwork, isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 import { EVMAuthenticator } from 'src/antelope/wallets';

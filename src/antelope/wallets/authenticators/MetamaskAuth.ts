@@ -96,9 +96,9 @@ export class MetamaskAuth extends EVMAuthenticator {
         await web3Provider.ready;
         return web3Provider;
     }
+
     // ----------------------------------------------------------
 
-    // functions that can be migrated from evm store
     setExternalSigner(signer: ethers.Signer): void {
         this.trace('setExternalSigner', signer);
         useEVMStore().setExternalSigner(signer);
