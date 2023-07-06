@@ -31,6 +31,7 @@ import {
     addressString,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
