@@ -3,7 +3,8 @@ import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
-import { useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { AntelopeError } from 'src/antelope/types';
 
 
 const historyStore = useHistoryStore();
@@ -23,10 +24,14 @@ export default defineComponent({
             rowsCurrentPage: 5,
             rowsNumber: 0,
         },
+        errorsFound: false,
         hideLoadingState: false,
         fetchTransactionsInterval: null as null | NodeJS.Timer,
     }),
     computed: {
+        doLiveUpdate() {
+            return this.address && this.pagination.page === 1 && !this.errorsFound;
+        },
         hashes() {
             return this.shapedTransactions.map(tx => tx.id);
         },
@@ -72,7 +77,7 @@ export default defineComponent({
         }
 
         this.fetchTransactionsInterval = setInterval(() => {
-            if (this.address && this.pagination.page === 1) {
+            if (this.doLiveUpdate) {
                 this.hideLoadingState = true;
 
                 this.getTransactions().finally(() => {
@@ -121,8 +126,15 @@ export default defineComponent({
                     limit,
                     includeAbi: true,
                 });
-                await historyStore.fetchEVMTransactionsForAccount('current');
-                this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                try {
+                    await historyStore.fetchEVMTransactionsForAccount('current');
+                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                } catch (e) {
+                    if (e instanceof AntelopeError) {
+                        getAntelope().config.notifyFailureMessage(e.message, e.payload);
+                        this.errorsFound = true;
+                    }
+                }
             }
         },
     },
