@@ -17,6 +17,8 @@ import {
     AntelopeError,
     EvmTransactionResponse,
     Label,
+    TokenMarketData,
+    MarketSourceInfo,
     NativeTransactionResponse,
     TokenBalance,
     TokenClass,
@@ -67,22 +69,9 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
-            const self = useBalancesStore();
             getAntelope().events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
-                    await self.updateBalancesForAccount(label, toRaw(account));
-                },
-            });
-
-            getAntelope().events.onChainIndexer.subscribe({
-                next: async ({ label, isHealthy }) => {
-                    if (isHealthy) {
-                        self.trace('init', 'onChainIndexer:', label, isHealthy);
-                        const account = useAccountStore().getAccount(label);
-                        if (account?.account) {
-                            await self.updateBalancesForAccount(label, account);
-                        }
-                    }
+                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
             });
 
@@ -110,27 +99,21 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
-                        this.__balances[label] = this.__balances[label] ?? [];
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
                             if (account?.account) {
-                                const balances = await chain_settings.getBalances(account.account);
+                                this.__balances[label] = await chain_settings.getBalances(account.account);
                                 // if new account with no index records display default zero TLOS balance
                                 if (this.__balances[label].length === 0){
                                     await this.updateSystemBalanceForAccount(label, account.account as addressString);
                                 }
-                                await this.updateSystemBalancesForAccount(label, account.account);
                                 this.sortBalances(label);
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
-
-                            // first, we add the system token
-                            await this.updateSystemBalanceForAccount(label, account.account, chain_settings.getSystemToken());
-
-                            // then we iterate over the tokens, fetch the balance for each and add them to the list
+                            this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
@@ -146,7 +129,7 @@ export const useBalancesStore = defineStore(store_name, {
 
                             Promise.allSettled(promises).then(() => {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]).map(t => t.toString()));
+                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
                             });
                         }
                     }
@@ -168,29 +151,10 @@ export const useBalancesStore = defineStore(store_name, {
             const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(label, address);
             this.processBalanceForToken(label, token, balanceBn);
         },
-        async updateERC20BalanceForAccount(label: string, address: string, token: TokenClass): Promise<void> {
-            const chain_settings = useChainStore().getChain(label).settings;
-            const evm = useEVMStore();
-            if (localStorage.getItem('wagmi.connected')) {
-                console.assert(getAccount().address === address, `${getAccount().address} is different from ${address}`);
-                fetchBalance({
-                    address: address as addressString,
-                    chainId: +chain_settings.getChainId(),
-                    token: token.address as addressString,
-                }).then((balanceBn: FetchBalanceResult) => {
-                    this.processBalanceForToken(label, token, balanceBn.value);
-                });
-            } else {
-                return evm.getERC20TokenBalance(address, token.address)
-                    .then((balanceBn: BigNumber) => {
-                        this.processBalanceForToken(label, token, balanceBn);
-                    });
-            }
-        },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
-            const importantTokens = useChainStore().getChain(label).settings.getSystemTokens().map(t => t.id);
+            const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();
             let result = false;
-            if (importantTokens.includes(token.id)) {
+            if (importantTokens.map(t => t.id).includes(token.id)) {
                 // if the token is important, we always add it. Even with 0 balance.
                 result = true;
             } else {
