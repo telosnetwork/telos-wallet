@@ -53,6 +53,16 @@ const successNotification = function(message) {
 
 // ---------- new notification layouts ---------------
 
+class NotificationAction {
+    constructor(payload) {
+        this.label     = payload.label;
+        this.class     = payload.class;
+        this.handler   = payload.handler;
+        this.iconRight = payload.iconRight;
+        this.color     = payload.color;
+    }
+}
+
 const crossIcon = require('src/assets/icon--cross.svg');
 const checkIcon = require('src/assets/icon--check.svg');
 const discoIcon = require('src/assets/icon--disconnected.svg');
@@ -115,6 +125,13 @@ const notifyMessage = function(type, icon, title, message, payload) {
             });
         },
     };
+    const action_btn = {
+        label: this.$t(payload?.label ?? '') ?? this.$t('notification.error_see_details_label'),
+        color: payload?.color ?? type === 'error' ? 'negative' : 'positive',
+        iconRight: payload?.iconRight,
+        class: 'c-notify__action-btn ' + payload?.class ? payload?.class : '',
+        handler: payload?.handler,
+    };
     const hidden_btn = {
         label: 'hidden',
         class: 'c-notify__action-btn c-notify__action-btn--hide',
@@ -123,6 +140,8 @@ const notifyMessage = function(type, icon, title, message, payload) {
     // adding buttons
     if (typeof payload === 'string' && type === 'success') {
         actions.push(link_btn);
+    } else if (typeof payload === 'object' && payload instanceof NotificationAction) {
+        actions.push(action_btn);
     } else if (typeof payload === 'object' && type === 'error') {
         actions.push(details_btn);
     } else {
@@ -134,7 +153,7 @@ const notifyMessage = function(type, icon, title, message, payload) {
         actions.splice(0, actions.length);
     }
 
-    let final_message = message;
+    let final_message = this.$t(message);
     if (Array.isArray(message)) {
         final_message = message.map(m => ` <${m.tag ?? 'span'} class="${m.class}">${m.text}</${m.tag ?? 'span'}> `).join('');
     }
@@ -205,6 +224,16 @@ const notifyFailure = function(message, payload) {
     );
 };
 
+const notifyFailureWithAction = function(message, payload) {
+    return notifyMessage.bind(this)(
+        'error',
+        crossIcon,
+        this.$t('notification.error_title').toUpperCase(),
+        message,
+        new NotificationAction(payload),
+    );
+};
+
 const notifyDisconnected = function() {
     return notifyMessage.bind(this)(
         'error',
@@ -238,12 +267,14 @@ export default boot(({ app, store }) => {
     app.config.globalProperties.$notifySuccessMessage     = notifySuccessMessage.bind(store);
     app.config.globalProperties.$notifySuccessCopy        = notifySuccessCopy.bind(store);
     app.config.globalProperties.$notifyFailure            = notifyFailure.bind(store);
+    app.config.globalProperties.$notifyFailureWithAction  = notifyFailureWithAction.bind(store);
     app.config.globalProperties.$notifyDisconnected       = notifyDisconnected.bind(store);
     app.config.globalProperties.$notifyNeutralMessage     = notifyNeutralMessage.bind(store);
     store['$notifySuccessTransaction']                    = app.config.globalProperties.$notifySuccessTransaction;
     store['$notifySuccessMessage']                        = app.config.globalProperties.$notifySuccessMessage;
     store['$notifySuccessCopy']                           = app.config.globalProperties.$notifySuccessCopy;
     store['$notifyFailure']                               = app.config.globalProperties.$notifyFailure;
+    store['$notifyFailureWithAction']                     = app.config.globalProperties.$notifyFailureWithAction;
     store['$notifyDisconnected']                          = app.config.globalProperties.$notifyDisconnected;
     store['$notifyNeutralMessage']                        = app.config.globalProperties.$notifyNeutralMessage;
 

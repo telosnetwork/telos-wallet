@@ -88,6 +88,7 @@ export default {
         sent: 'Sent',
         received: 'Received',
         swapped: 'Swapped',
+        switch: 'Switch',
         failed_contract_interaction: 'Failed contract interaction',
         contract_interaction: 'Contract interaction',
         contract_creation: 'Contract creation',
@@ -459,6 +460,8 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+        },
+        wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
         },

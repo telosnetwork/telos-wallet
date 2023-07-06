@@ -19,6 +19,7 @@ import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
+import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { toRaw } from 'vue';
@@ -51,9 +52,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        useFeedbackStore().setLoading(`${this.getName()}.login`);
         if (localStorage.getItem('wagmi.connected')) {
             const address = getAccount().address as addressString;
-            await super.login(network);
+            try {
+                await super.login(network);
+            } catch (e) {
+                // we are already logged in. So we just ignore the error
+            }
+            useFeedbackStore().unsetLoading(`${this.getName()}.login`);
             return address;
         } else {
             return new Promise(async (resolve) => {
@@ -61,8 +68,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 web3Modal.subscribeModal(async (newState) => {
                     if (newState.open === false && localStorage.getItem('wagmi.connected')) {
                         const address = getAccount().address as addressString;
-                        await super.login(network);
+                        try {
+                            await super.login(network);
+                        } catch (e) {
+                            // we are already logged in. So we just ignore the error
+                        }
                         resolve(address);
+                    }
+                    if (newState.open === false) {
+                        useFeedbackStore().unsetLoading(`${this.getName()}.login`);
                     }
                 });
                 web3Modal.openModal();
@@ -93,10 +107,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async transferTokens(label:string, token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult> {
         this.trace('transferTokens', label, token, amount, to);
         if (!this.sendConfig) {
-            // TODO: fixme. change variable name
             throw new AntelopeError(token.isSystem ?
-                'antelope.balances.error_system_token_transfer_config' :
-                'antelope.balances.error_token_transfer_config',
+                'antelope.wallets.error_system_token_transfer_config' :
+                'antelope.wallets.error_token_transfer_config',
             );
         } else {
             if (token.isSystem) {
@@ -109,7 +122,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     sendConfig: PrepareSendTransactionResult | null = null;
     async prepareTokenForTransfer(label: string, token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
-        console.log('prepareTokenForTransfer', label, [token], amount, to);
         this.trace('prepareTokenForTransfer', label, [token], amount, to);
         if (token) {
             if (token.isSystem) {
@@ -134,7 +146,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
 
-    // TODO: implement
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
         return new Promise(async (resolve) => {
@@ -158,8 +169,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
             const injected = new InjectedConnector();
             const provider = toRaw(await injected.getProvider());
             if (!provider) {
-                // TODO: fix the i18n
-                throw new AntelopeError('evm.no-provider');
+                throw new AntelopeError('antelope.evm.error_no_provider');
             }
             resolve(provider as unknown as ethers.providers.ExternalProvider);
         });

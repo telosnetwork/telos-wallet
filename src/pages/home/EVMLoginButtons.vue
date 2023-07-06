@@ -1,7 +1,6 @@
 <script lang="ts">
-import { usePlatformStore } from 'src/antelope';
-import { useChainStore } from 'src/antelope';
-import { defineComponent } from 'vue';
+import { useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { computed, defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -9,10 +8,13 @@ export default defineComponent({
         const viewAnyAccount = () => {};
 
         const toggleWalletOptions = () => {
-            usePlatformStore().isMobile ? emit('toggleWalletConnect') : emit('showWalletOptions');
+            usePlatformStore().isMobile ? emit('showWalletConnect') : emit('showWalletOptions');
         };
 
+        const loading = computed(() => useFeedbackStore().isLoading('account.login'));
+
         return {
+            loading,
             viewAnyAccount,
             toggleWalletOptions,
         };
@@ -22,8 +24,11 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
+    <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
+        <template v-slot:loading>
+            <q-spinner-facebook />
+        </template>
     </q-btn>
 
     <!-- <q-btn

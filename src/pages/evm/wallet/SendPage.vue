@@ -10,6 +10,7 @@ import { BigNumber, ethers } from 'ethers';
 // import { checkNetwork, isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import { EVMAuthenticator } from 'src/antelope/wallets';
 
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
@@ -179,10 +180,6 @@ export default defineComponent({
         isCorrectNetwork() {
             return true;
         },
-        //loadingTransaction() {
-        //    // TODO: fixme
-        //    return localStorage.getItem('wagmi.connected') && this.isCorrectNetwork ? this.isLoading || this.configIsLoading : this.isLoading;
-        //},
     },
     created() {
         this.clearTokenTransferConfigs();
@@ -237,9 +234,17 @@ export default defineComponent({
             // before sending the transaction, we check if the user is connected to the correct network
             const label = 'logged';
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
-                const networkName = useChainStore().currentChain.settings.getDisplay();
-                const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                ant.config.notifyFailureMessage(errorMessage);
+                const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                const networkName = useChainStore().loggedChain.settings.getDisplay();
+                const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                ant.config.notifyFailureWithAction(errorMessage, {
+                    label: ant.config.localizationHandler('evm_wallet.switch'),
+                    handler: async () => {
+                        // we force the useer to manually re enter the amount which triggers updateTokenTransferConfig
+                        this.amount = ethers.constants.Zero;
+                        await authenticator.ensureCorrectChain();
+                    },
+                });
                 return;
             }
 
@@ -248,6 +253,8 @@ export default defineComponent({
             const to = this.address;
 
             if (this.isFormValid) {
+                this.updateTokenTransferConfig(this.isFormValid, this.token, this.address, this.amount);
+
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
