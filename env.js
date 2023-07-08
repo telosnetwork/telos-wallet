@@ -26,7 +26,7 @@ const TESTNET = {
 
 const MAINNET = {
     ...sharedEnv,
-    FUEL_RPC: 'telos.greymass.com',
+    FUEL_RPC: 'https://telos.greymass.com',
     APP_NAME: 'Telos Web Wallet',
     NETWORK_HOST: 'mainnet.telos.net',
     NETWORK_CHAIN_ID:

@@ -17,7 +17,7 @@ import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
-import { FuelUserWrapper } from 'src/api/fuel';
+import { initFuelUserWrapper } from 'src/api/fuel';
 import {
     useFeedbackStore,
     useEVMStore,
@@ -107,7 +107,7 @@ export const useAccountStore = defineStore(store_name, {
                 await authenticator.init();
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
-                    const ualUser = new FuelUserWrapper(ualUsers[0]);
+                    const ualUser = await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
                     const account = await ualUser.getAccountName();
