@@ -3,6 +3,7 @@
 <script lang="ts">
 import { useEVMStore, useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
+import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',

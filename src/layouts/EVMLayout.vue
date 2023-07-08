@@ -1,17 +1,5 @@
 <script setup lang="ts">
 import AppNav from 'components/evm/AppNav.vue';
-<<<<<<< HEAD
-=======
-// TODO: fixme - let's think about alternatives to this.
-// This is related to switchChainInjected() in evm.ts:260 -> window.removeEventListener('focus', checkNetwork);
-// ------------------------
-// import { onMounted } from 'vue';
-// import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
-// onMounted(() => {
-//     window.addEventListener('focus', checkNetwork);
-// });
-// ------------------------
->>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
 </script>
 
 <template>

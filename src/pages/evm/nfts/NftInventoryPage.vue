@@ -8,7 +8,7 @@ import NftTile from 'pages/evm/nfts/NftTile.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { getAntelope, useChainStore } from 'src/antelope';
+import { useChainStore } from 'src/antelope';
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
@@ -112,7 +112,6 @@ const tableRows = computed(() => {
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
 
 
-<<<<<<< HEAD
 // watchers
 watch(nftsAndCollectionListLoaded, (loaded) => {
     if (loaded) {
@@ -175,22 +174,11 @@ watch(accountStore, (store) => {
     if (store.loggedAccount) {
         nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
             nftsLoaded.value = true;
-=======
-function updateNFTsForAccount() {
-    if (accountStore.loggedAccount) {
-        nftStore.updateNFTsForAccount('logged', toRaw(accountStore.loggedAccount)).finally(() => {
-            initialLoadComplete.value = true;
->>>>>>> 373e176 (Refactoring EVM Authentication (WalletConnect / Metamask))
         });
     }
-}
-// watchers
-
-// fetch initial data
-updateNFTsForAccount();
-getAntelope().events.onAccountChanged.subscribe(() => {
-    updateNFTsForAccount();
-});
+},
+{ immediate: true },
+);
 
 watch(showNftsAsTiles, (showAsTile) => {
     localStorage.setItem('nftInventoryDisplayPreference', showAsTile ? tile : list);
@@ -309,7 +297,9 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
-        updateNFTsForAccount();
+        if (accountStore.loggedAccount) {
+            await nftStore.updateNFTsForAccount('logged', accountStore.loggedAccount);
+        }
     }, 13000);
 });
 
