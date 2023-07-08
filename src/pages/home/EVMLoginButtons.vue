@@ -1,9 +1,13 @@
 <script lang="ts">
 import { useFeedbackStore, usePlatformStore } from 'src/antelope';
 import { computed, defineComponent } from 'vue';
+import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
+    components: {
+        QSpinnerFacebook,
+    },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
 
@@ -27,7 +31,7 @@ export default defineComponent({
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
-            <q-spinner-facebook />
+            <QSpinnerFacebook />
         </template>
     </q-btn>
 

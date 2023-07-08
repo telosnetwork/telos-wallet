@@ -61,9 +61,19 @@ const EVMStore = jest.fn().mockImplementation(() => ({
     },
 }));
 
+const evmAuthenticatorMock = {
+    getSystemTokenBalance: () => SYSTEM_TOKEN_BALANCE,
+    getERC20TokenBalance: () => ({
+        then: jest.fn().mockImplementation((cb: any) => {
+            cb(TOKEN_BALANCE);
+        }),
+    }),
+};
+
 const AccountStore = jest.fn().mockImplementation(() => ({
     loggedAccount: {},
     currentIsLogged: true,
+    getEVMAuthenticator: jest.fn().mockImplementation(() => evmAuthenticatorMock),
     sendAction: jest.fn(),
 }));
 
@@ -168,14 +178,14 @@ describe('Antelope Balance Store', () => {
 
     test('updateBalancesForAccount should update __balances', async () => {
         const label = 'label';
-        const account = { account: 'address' };
+        const account = { account: 'address', authenticator: evmAuthenticatorMock };
         await store.updateBalancesForAccount(label, account);
 
         const sysBalance = new TokenBalance(tokenSys, SYSTEM_TOKEN_BALANCE);
         const tokenBalance = new TokenBalance(tokenList[0], TOKEN_BALANCE);
 
         const expected = {
-            label: [tokenBalance, sysBalance],
+            label: [sysBalance, tokenBalance],
         };
         expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
     });

@@ -18,7 +18,6 @@ export abstract class EVMAuthenticator {
         useFeedbackStore().setDebug(name, isTracingAll());
     }
     abstract getName(): string;
-    // abstract login(network: string): Promise<addressString | null>;
     abstract logout(): Promise<void>;
     abstract getSystemTokenBalance(label:string, address: addressString | string): Promise<BigNumber>;
     abstract getERC20TokenBalance(label:string, address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;

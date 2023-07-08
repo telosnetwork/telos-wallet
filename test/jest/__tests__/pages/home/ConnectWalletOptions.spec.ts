@@ -1,11 +1,34 @@
 import { shallowMount } from '@vue/test-utils';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
 
 const NETWORK = 'test-network';
 const WARNING_MESSAGE = 'warning-message';
 
 const storeMock = {
+    //useAccountStore().loginEVM({ authenticator, network }).then(async () => {
+    //    // we verify that the authenticator is connected to the correct network
+    //    if (!await authenticator.isConnectedTo(correctChainId)) {
+    //        const networkName = useChainStore().getChain(label).settings.getDisplay();
+    //        const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
+    //        globalProps.$warningNotification(warningMessage);
+    //    }
+    //});
     useAccountStore: () => ({
-        loginEVM: () => jest.fn(),
+        loginEVM: () => ({
+            then: (cb: () => void) => cb(),
+        }),
+    }),
+    useFeedbackStore: () => ({
+        isLoading: () => false,
+    }),
+    getAntelope: () => ({
+        wallets: {
+            getAutenticator: () => ({
+                newInstance: (label: string) => ({
+                    isConnectedTo: () => Promise.resolve(label === 'logged'),
+                }),
+            }),
+        },
     }),
     useChainStore: () => ({
         currentChain: {
@@ -15,6 +38,11 @@ const storeMock = {
                 getDisplay: () => NETWORK,
             },
         },
+        getChain: () => ({
+            settings: {
+                getDisplay: () => NETWORK,
+            },
+        }),
     }),
     useEVMStore: () => ({
         isMetamaskSupported: true,
@@ -23,6 +51,30 @@ const storeMock = {
         isMobile: true,
     }),
 };
+
+jest.mock('vue', () => {
+    const originalVue = jest.requireActual('vue');
+
+    const globalProps = {
+        $t: jest.fn(() => 'Mocked translation'),
+        $warningNotification: jest.fn(),
+    };
+
+    return {
+        ...originalVue,
+        getCurrentInstance: jest.fn(() => ({
+            appContext: {
+                config: {
+                    globalProperties: globalProps,
+                },
+            },
+        })),
+        ComponentInternalInstance: originalVue.ComponentInternalInstance,
+        computed: originalVue.computed,
+        defineComponent: originalVue.defineComponent,
+        watch: originalVue.watch,
+    };
+});
 
 const wagmiMock = {
     getAccount: () => 'wagmiAccount',
@@ -76,21 +128,22 @@ describe('ConnectWalletOptions.vue', () => {
             wrapper = mountComponent();
         });
 
-        describe('loginEvm', () => {
+        describe('setMetamaskAuthenticator', () => {
             it('should call accountStore loginEVM method', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
+                wrapper.vm.setMetamaskAuthenticator();
 
-                wrapper.vm.loginEvm();
-
+                const authenticator = storeMock.getAntelope().wallets.getAutenticator().newInstance('correct');
+                const network = NETWORK;
                 wrapper.vm.$nextTick(() => {
-                    expect(methodSpy).toHaveBeenCalledWith(NETWORK);
+                    expect(methodSpy).toHaveBeenCalledWith({ authenticator, network });
                 });
             });
 
             it('should call chain store getNetwork method', () => {
                 const methodSpy = jest.spyOn(storeMock.useChainStore().currentChain.settings, 'getNetwork');
 
-                wrapper.vm.loginEvm();
+                wrapper.vm.setMetamaskAuthenticator();
 
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalled();
@@ -109,41 +162,20 @@ describe('ConnectWalletOptions.vue', () => {
             });
         });
 
-        describe('showWalletConnectModal', () => {
-            it('calls openModal if not currently connected', async () => {
-                const methodSpy = jest.spyOn(wrapper.vm.web3Modal, 'openModal');
-
-                wrapper.vm.showWalletConnectModal();
-
-                expect(methodSpy).toHaveBeenCalled();
-            });
-
-            it('calls login if already connected', async () => {
-                localStorage.setItem('wagmi.connected', 'true');
-
-                const methodSpy = jest.spyOn(wrapper.vm, 'login');
-
-                await wrapper.vm.showWalletConnectModal();
+        describe('setWalletConnectAuthenticator', () => {
+            it('should call accountStore loginEVM method', () => {
+                const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
+                wrapper.vm.setWalletConnectAuthenticator();
 
                 wrapper.vm.$nextTick(() => {
-                    expect(methodSpy).toHaveBeenCalled();
-                });
-            });
-        });
-
-        describe('login', () => {
-            it('emits "showWalletConnect"', async () => {
-                await wrapper.vm.login();
-
-                wrapper.vm.$nextTick(() => {
-                    expect(wrapper.vm.emitted).toBe('showWalletConnect');
+                    expect(methodSpy).toHaveBeenCalledWith(NETWORK);
                 });
             });
 
-            it('calls loginEVM', async () => {
-                const methodSpy = jest.spyOn(wrapper.vm, 'loginEvm');
+            it('should call chain store getNetwork method', () => {
+                const methodSpy = jest.spyOn(storeMock.useChainStore().currentChain.settings, 'getNetwork');
 
-                await wrapper.vm.login();
+                wrapper.vm.setWalletConnectAuthenticator();
 
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalled();
@@ -154,7 +186,7 @@ describe('ConnectWalletOptions.vue', () => {
                 jest.mock('@wagmi/core', () => wagmiMockWrongNetwork);
                 wrapper = mountComponent();
 
-                await wrapper.vm.login();
+                await wrapper.vm.setWalletConnectAuthenticator();
 
                 wrapper.vm.$nextTick(() => {
                     expect(wrapper.vm.mocks.$t).toHaveBeenCalledWith('evm_wallet.incorrect_network', { network: NETWORK });

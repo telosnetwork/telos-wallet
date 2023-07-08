@@ -12,8 +12,6 @@ export class MetamaskAuth extends EVMAuthenticator {
         super(label);
     }
 
-    // EVMAuthenticator API ----------------------------------------------------------
-
     getName(): string {
         return name;
     }

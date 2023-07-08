@@ -2,10 +2,13 @@
 
 <script lang="ts">
 import { useEVMStore, useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
+    components: {
+        QSpinnerFacebook,
+    },
     props: {
         showWalletConnect: {
             required: true,
@@ -48,7 +51,7 @@ export default defineComponent({
                 // we verify that the authenticator is connected to the correct network
                 if (!await authenticator.isConnectedTo(correctChainId)) {
                     const networkName = useChainStore().getChain(label).settings.getDisplay();
-                    const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
+                    const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });
                     globalProps.$warningNotification(warningMessage);
                 }
             });
@@ -86,7 +89,7 @@ export default defineComponent({
         <!-- Metamask Authenticator button -->
         <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
             <template v-if="isLoading('Metamask.login')">
-                <div class="wallet-options__loading"><q-spinner-facebook /></div>
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <img
@@ -102,7 +105,7 @@ export default defineComponent({
         <!-- WalletConnect Authenticator button -->
         <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
             <template v-if="isLoading('WalletConnect.login')">
-                <div class="wallet-options__loading"><q-spinner-facebook /></div>
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <img
