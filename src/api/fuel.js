@@ -49,6 +49,7 @@ class FuelUserWrapper extends User {
       this.user = user;
   }
 
+  // called immediately after class instantiation in initFuelUserWrapper()
   async setAvailability() {
       if (!fuelrpc){
           return;
