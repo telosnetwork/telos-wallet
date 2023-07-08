@@ -176,12 +176,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     isIndexerHealthy(): boolean {
-        console.error('isIndexerHealthy() return (harcoded) false');
-        return false;
-        // return (
-        //     this._indexerHealthState.state.success &&
-        //     this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
-        // );
+        return (
+            this._indexerHealthState.state.success &&
+            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+        );
     }
 
     get indexerHealthState(): IndexerHealthResponse {
