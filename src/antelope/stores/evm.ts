@@ -246,11 +246,6 @@ export const useEVMStore = defineStore(store_name, {
                         -32603, // https://github.com/MetaMask/metamask-mobile/issues/2944
                     ];
 
-                    // if user rejects request to switch chains, disable repeated prompts
-                    // if ((error as unknown as ExceptionError).code === 4001){ // 4001 - 'user rejected request'
-                    //     window.removeEventListener('focus', checkNetwork);
-                    // }
-
                     if (chainNotAddedCodes.includes((error as unknown as ExceptionError).code)) {  // 'Chain <hex chain id> hasn't been added'
                         const p:RpcEndpoint = chainSettings.getRPCEndpoint();
                         const rpcUrl = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;

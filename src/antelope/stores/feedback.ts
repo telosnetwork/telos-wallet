@@ -26,21 +26,6 @@ import { defineStore } from 'pinia';
 import { getAntelope } from 'src/antelope';
 import { toRaw } from 'vue';
 
-export interface FeedbackProggress {
-    percent: number;
-    message: string;
-}
-
-export interface FeedbackState {
-    // a list of loading names used inside async functions
-    __loading: string[];
-    // error messages is a map of error name and error message
-    __errors: Map<string, string>;
-    // progress is a map of processes name and progress value
-    __processes: Map<string, FeedbackProggress>;
-    // debug flags for each store
-    __debug: Map<string, boolean>;
-}
 
 // auxiliary tracing functions
 export const createTraceFunction = (store_name: string) => function(action: string, ...args: unknown[]) {
@@ -65,8 +50,24 @@ export const createInitFunction = (store_name: string, debug?: boolean) => funct
     useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
 };
 
+// -------------------------------------------
 
 
+export interface FeedbackProggress {
+    percent: number;
+    message: string;
+}
+
+export interface FeedbackState {
+    // a list of loading names used inside async functions
+    __loading: string[];
+    // error messages is a map of error name and error message
+    __errors: Map<string, string>;
+    // progress is a map of processes name and progress value
+    __processes: Map<string, FeedbackProggress>;
+    // debug flags for each store
+    __debug: Map<string, boolean>;
+}
 
 const store_name = 'feedback';
 
