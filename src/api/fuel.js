@@ -54,7 +54,7 @@ class FuelUserWrapper extends User {
           return;
       };
       try {
-          this.available = (await fetch('https://25432542354.com/')).status === 200;
+          this.available = (await fetch(fuelrpc)).status === 200;
       } catch(e) {
           console.error(e);
       }
