@@ -277,6 +277,7 @@ export const useNftsStore = defineStore(store_name, {
 const nftsInitialState: NftsState = {
     __indexer_filter: {
         address: '',
+        limit: 10000, // override api limit default value of 50
     },
     __user_filter: {
         collection: '',
