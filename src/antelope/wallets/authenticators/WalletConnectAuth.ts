@@ -10,7 +10,6 @@ import {
     prepareWriteContract,
     sendTransaction,
     writeContract,
-    // getProvider,
 } from '@wagmi/core';
 import {
     EthereumClient,
@@ -174,7 +173,5 @@ export class WalletConnectAuth extends EVMAuthenticator {
             resolve(provider as unknown as ethers.providers.ExternalProvider);
         });
     }
-
-    // ----------------------------------------------------------
 
 }
