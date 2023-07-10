@@ -3,6 +3,7 @@ import { Web3ModalConfig } from '@web3modal/html';
 import { boot } from 'quasar/wrappers';
 import { installAntelope } from 'src/antelope';
 import { MetamaskAuth, WalletConnectAuth } from 'src/antelope/wallets';
+import { SafePalAuth } from 'src/antelope/wallets/authenticators/SafePalAuth';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 
@@ -58,6 +59,7 @@ export default boot(({ app }) => {
     const wagmiClient = app.config.globalProperties.$wagmi as EthereumClient;
     ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
+    ant.wallets.addEVMAuthenticator(new SafePalAuth());
 
     // set evm authenticators --
     const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;

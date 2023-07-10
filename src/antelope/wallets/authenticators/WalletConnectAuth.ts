@@ -91,21 +91,21 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
 
-    async getSystemTokenBalance(label:string, address: addressString): Promise<BigNumber> {
+    async getSystemTokenBalance(address: addressString): Promise<BigNumber> {
         this.trace('getSystemTokenBalance', address);
-        const chainId = +useChainStore().getChain(label).settings.getChainId();
+        const chainId = +useChainStore().getChain(this.label).settings.getChainId();
         const balanceBn = await fetchBalance({ address, chainId });
         return balanceBn.value;
     }
 
-    getERC20TokenBalance(label:string, address: addressString, token: addressString): Promise<BigNumber> {
-        this.trace('getERC20TokenBalance', label, [address, token]);
-        const chainId = +useChainStore().getChain(label).settings.getChainId();
+    getERC20TokenBalance(address: addressString, token: addressString): Promise<BigNumber> {
+        this.trace('getERC20TokenBalance', [address, token]);
+        const chainId = +useChainStore().getChain(this.label).settings.getChainId();
         return fetchBalance({ address, chainId, token }).then(balanceBn => balanceBn.value);
     }
 
-    async transferTokens(label:string, token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult> {
-        this.trace('transferTokens', label, token, amount, to);
+    async transferTokens(token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult> {
+        this.trace('transferTokens', token, amount, to);
         if (!this.sendConfig) {
             throw new AntelopeError(token.isSystem ?
                 'antelope.wallets.error_system_token_transfer_config' :
@@ -121,8 +121,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     sendConfig: PrepareSendTransactionResult | null = null;
-    async prepareTokenForTransfer(label: string, token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
-        this.trace('prepareTokenForTransfer', label, [token], amount, to);
+    async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
+        this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
             if (token.isSystem) {
                 this.sendConfig = await prepareSendTransaction({

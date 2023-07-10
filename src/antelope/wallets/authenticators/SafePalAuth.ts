@@ -1,0 +1,30 @@
+import { EthereumProvider } from 'src/antelope/types';
+import { EVMAuthenticator, ExternalProviderAuth } from 'src/antelope/wallets';
+
+const name = 'SafePal';
+export class SafePalAuth extends ExternalProviderAuth {
+
+    // this is just a dummy label to identify the authenticator base class
+    constructor(label = name) {
+        super(label);
+    }
+
+    // ExternalProviderAuth API ------------------------------------------------------
+
+    getProvider(): EthereumProvider | null {
+        return (window as unknown as {safepalProvider:unknown}).safepalProvider as EthereumProvider ?? null;
+    }
+
+    // EVMAuthenticator API ----------------------------------------------------------
+
+
+    getName(): string {
+        return name;
+    }
+
+    // this is the important instance creation where we define a label to asign to this instance of the authenticator
+    newInstance(label: string): EVMAuthenticator {
+        this.trace('newInstance', label);
+        return new SafePalAuth(label);
+    }
+}

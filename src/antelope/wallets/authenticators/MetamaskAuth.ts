@@ -1,16 +1,21 @@
-import { BigNumber, ethers } from 'ethers';
-import { useEVMStore, useFeedbackStore } from 'src/antelope';
-import { AntelopeError, EvmTransactionResponse, TokenClass, addressString } from 'src/antelope/types';
-import { EVMAuthenticator } from 'src/antelope/wallets';
-import { toRaw } from 'vue';
+import { EthereumProvider } from 'src/antelope/types';
+import { EVMAuthenticator, ExternalProviderAuth } from 'src/antelope/wallets';
 
 const name = 'Metamask';
-export class MetamaskAuth extends EVMAuthenticator {
+export class MetamaskAuth extends ExternalProviderAuth {
 
     // this is just a dummy label to identify the authenticator base class
     constructor(label = name) {
         super(label);
     }
+
+    // ExternalProviderAuth API ------------------------------------------------------
+
+    getProvider(): EthereumProvider | null {
+        return window.ethereum as unknown as EthereumProvider ?? null;
+    }
+
+    // EVMAuthenticator API ----------------------------------------------------------
 
     getName(): string {
         return name;

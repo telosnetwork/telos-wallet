@@ -1,5 +1,5 @@
 import { App } from 'vue';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
 import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
@@ -37,7 +37,7 @@ const events = {
     onLoggedIn: new Subject<AccountModel>(),
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
-    onAccountChanged: new Subject<{label:string, account:AccountModel|null}>(),
+    onAccountChanged: new BehaviorSubject<{label:string, account:AccountModel|null}>({ label: '', account: null }),
     onChainIndexer: new Subject<{label:string, isHealthy:boolean}>(),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };

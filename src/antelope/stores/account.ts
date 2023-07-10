@@ -32,6 +32,7 @@ import {
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { toRaw } from 'vue';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -94,6 +95,8 @@ export const useAccountStore = defineStore(store_name, {
         loggedNativeAccount: state => (state.__accounts['logged']?.isNative ?
             state.__accounts['logged'] : null) as NativeAccountModel,
         currentAccount: state => ({ ...state.__accounts['current'] }),
+        currentEvmAccount: state => (state.__accounts['current']?.isNative ?
+            null : state.__accounts['current']) as EvmAccountModel,
         currentIsLogged: state =>
             state.__accounts['logged']?.account === state.__accounts['current']?.account &&
             state.__accounts['logged']?.network === state.__accounts['current']?.network,
@@ -268,9 +271,8 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('isConnectedToCorrectNetwork', label);
             try {
                 useFeedbackStore().setLoading('account.isConnectedToCorrectNetwork');
-                const correctChainId = useChainStore().getChain(label).settings.getChainId();
                 const authenticator = useAccountStore().getAccount(label)?.authenticator as EVMAuthenticator;
-                return authenticator.isConnectedTo(correctChainId);
+                return authenticator.isConnectedToCorrectChain();
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 return Promise.resolve(false);
@@ -329,23 +331,13 @@ export const useAccountStore = defineStore(store_name, {
         },
 
         // commits
-        setCurrentAccount(account: AccountModel | null | string) {
+        setCurrentAccount(account: AccountModel | null) {
             this.trace('setCurrentAccount', account);
             const label = 'current';
             const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
             try {
                 if (account) {
-                    if (typeof account === 'string') {
-                        const _account = {
-                            account: account,
-                            network: useChainStore().currentChain.settings.getNetwork(),
-                            isNative: true,
-                            data: null,
-                        };
-                        this.__accounts[label] = { ...this.__accounts[label], ..._account };
-                    } else {
-                        this.__accounts[label] = { ...this.__accounts[label], ...account };
-                    }
+                    this.__accounts[label] = { ...this.__accounts[label], ...account };
                 } else {
                     delete this.__accounts[label];
                 }
@@ -355,7 +347,7 @@ export const useAccountStore = defineStore(store_name, {
                 const after = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
                 if (before !== after) {
                     getAntelope().events.onAccountChanged.next({
-                        label, account: this.__accounts[label] as AccountModel,
+                        label, account: toRaw(this.__accounts[label]) as AccountModel,
                     });
                 }
             }
@@ -378,7 +370,7 @@ export const useAccountStore = defineStore(store_name, {
                 const after = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
                 if (before !== after) {
                     getAntelope().events.onAccountChanged.next({
-                        label, account: this.__accounts[label] as AccountModel,
+                        label, account: toRaw(this.__accounts[label]) as AccountModel,
                     });
                 }
             }

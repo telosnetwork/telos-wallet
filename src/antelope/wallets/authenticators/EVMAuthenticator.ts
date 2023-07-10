@@ -19,10 +19,10 @@ export abstract class EVMAuthenticator {
     }
     abstract getName(): string;
     abstract logout(): Promise<void>;
-    abstract getSystemTokenBalance(label:string, address: addressString | string): Promise<BigNumber>;
-    abstract getERC20TokenBalance(label:string, address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
-    abstract transferTokens(label:string, token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult>;
-    abstract prepareTokenForTransfer(label: string, token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
+    abstract getSystemTokenBalance(address: addressString | string): Promise<BigNumber>;
+    abstract getERC20TokenBalance(address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
+    abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult>;
+    abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
@@ -74,4 +74,8 @@ export abstract class EVMAuthenticator {
         return web3Provider;
     }
 
+    isConnectedToCorrectChain(): Promise<boolean> {
+        const correctChainId = useChainStore().getChain(this.label).settings.getChainId();
+        return this.isConnectedTo(correctChainId);
+    }
 }

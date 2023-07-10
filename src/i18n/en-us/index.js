@@ -36,6 +36,8 @@ export default {
         logout: 'Log Out',
         install_metamask: 'Install MetaMask',
         metamask: 'MetaMask',
+        install_safepal: 'Install SafePal',
+        safepal: 'SafePal',
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
         wallet_introduction: 'What is a Web Wallet?',

@@ -229,9 +229,7 @@ export default defineComponent({
             // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
             // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
             // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
-
-            const label = 'logged';
-            this.loggedAccount?.authenticator.prepareTokenForTransfer(label, formIsValid ? token : null, amount, address);
+            this.loggedAccount?.authenticator.prepareTokenForTransfer(formIsValid ? token : null, amount, address);
         },
         async startTransfer() {
 

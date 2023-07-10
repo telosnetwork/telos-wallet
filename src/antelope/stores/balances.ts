@@ -12,7 +12,6 @@
  */
 
 import { defineStore } from 'pinia';
-import { errorToString } from 'src/antelope/config';
 import {
     AntelopeError,
     EvmTransactionResponse,
@@ -49,6 +48,7 @@ import {
 } from '@wagmi/core';
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { filter } from 'rxjs';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -69,7 +69,9 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
-            getAntelope().events.onAccountChanged.subscribe({
+            getAntelope().events.onAccountChanged.pipe(
+                filter(({ label, account }) => !!label && !!account),
+            ).subscribe({
                 next: async ({ label, account }) => {
                     await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
@@ -86,7 +88,6 @@ export const useBalancesStore = defineStore(store_name, {
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
             this.trace('updateBalancesForAccount', label, account);
-
             try {
                 useFeedbackStore().setLoading('updateBalancesForAccount');
                 const chain = useChainStore().getChain(label);
@@ -120,7 +121,7 @@ export const useBalancesStore = defineStore(store_name, {
 
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
-                                .map(token => authenticator.getERC20TokenBalance(label, account.account, token.address)
+                                .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
                                     .then((balanceBn: BigNumber) => {
                                         this.processBalanceForToken(label, token, balanceBn);
                                     }),
@@ -136,7 +137,7 @@ export const useBalancesStore = defineStore(store_name, {
                 }
             } catch (error) {
                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                console.error('Error: ', errorToString(error));
+                console.error('Error: ', error);
             }
         },
 
@@ -148,7 +149,7 @@ export const useBalancesStore = defineStore(store_name, {
             const marketData = new TokenMarketData(marketInfo);
             token.market = marketData;
 
-            const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(label, address);
+            const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
             this.processBalanceForToken(label, token, balanceBn);
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
@@ -289,7 +290,7 @@ export const useBalancesStore = defineStore(store_name, {
 
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-                return await account.authenticator.transferTokens(label, token, amount, to);
+                return await account.authenticator.transferTokens(token, amount, to);
             } catch (error) {
                 console.error(error);
                 throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);

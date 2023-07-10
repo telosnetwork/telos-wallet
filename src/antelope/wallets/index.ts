@@ -18,7 +18,7 @@ export class AntelopeWallets {
     }
 
     addEVMAuthenticator(authenticator: EVMAuthenticator) {
-        this.trace('addEVMAuthenticator', authenticator);
+        this.trace('addEVMAuthenticator', authenticator.getName(), authenticator);
         this.authenticators.set(authenticator.getName(), authenticator);
     }
 
@@ -29,5 +29,6 @@ export class AntelopeWallets {
 }
 
 export * from 'src/antelope/wallets/authenticators/EVMAuthenticator';
+export * from 'src/antelope/wallets/authenticators/ExternalProviderAuth';
 export * from 'src/antelope/wallets/authenticators/MetamaskAuth';
 export * from 'src/antelope/wallets/authenticators/WalletConnectAuth';
