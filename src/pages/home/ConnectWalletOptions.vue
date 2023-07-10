@@ -2,7 +2,7 @@
 
 <script lang="ts">
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
-import { useEVMStore, useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
+import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
