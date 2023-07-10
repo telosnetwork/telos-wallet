@@ -33,6 +33,9 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
     }
     totalFiatAmount.value = newFiatBalance;
 
+}, { deep: true, immediate: true });
+
+watch(accountStore.currentEvmAccount, (newAccount) => {
     // if user is on the balances screen, prefetch transactions
     if (accountStore.currentEvmAccount?.address && route.query.tab !== 'transactions') {
         historyStore.setEVMTransactionsFilter({
@@ -43,8 +46,7 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
         });
         historyStore.fetchEVMTransactionsForAccount('current');
     }
-
-}, { deep: true, immediate: true });
+}, { immediate: true });
 
 
 </script>

@@ -7,11 +7,9 @@ import { AntelopeError, ERC20_TYPE, EthereumProvider, EvmTransactionResponse, To
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
-import { toRaw } from 'vue';
 
 export abstract class ExternalProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
-    signer: ethers.Signer | null = null;
 
     // this is just a dummy label to identify the authenticator base class
     constructor(label: string) {
@@ -20,19 +18,11 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
     }
     abstract getProvider(): EthereumProvider | null;
 
-    getSigner(): ethers.Signer {
-        if (this.signer) {
-            return toRaw(this.signer);
-        } else {
-            // TODO:: anotar la variable error_no_signer
-            throw new AntelopeError('antelope.evm.error_no_signer');
-        }
+    async getSigner(): Promise<ethers.Signer> {
+        const web3Provider = await this.web3Provider();
+        return web3Provider.getSigner();
     }
 
-    setExternalSigner(signer: ethers.Signer): void {
-        this.trace('setExternalSigner', signer);
-        this.signer = signer;
-    }
     async ensureInitializedProvider(): Promise<ethers.providers.ExternalProvider> {
         return new Promise((resolve, reject) => {
             this.onReady.asObservable().pipe(
@@ -53,7 +43,7 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
         this.trace('sendSystemToken', to, value);
 
         // Send the transaction
-        return this.getSigner().sendTransaction({
+        return (await this.getSigner()).sendTransaction({
             to,
             value,
         }).then(
@@ -75,10 +65,6 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
         this.trace('login', network);
         useFeedbackStore().setLoading(`${this.getName()}.login`);
         const response = await super.login(network);
-        // store the signer for later use
-        const web3Provider = await this.web3Provider();
-        const signer = await web3Provider.getSigner();
-        this.setExternalSigner(signer);
         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return response;
     }
@@ -115,7 +101,7 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
             const evm = useEVMStore();
             const contract = await evm.getContract(this, token.address, token.type);
             if (contract) {
-                const contractInstance = contract.getContractInstance();
+                const contractInstance = await contract.getContractInstance();
                 const amountInWei = amount.toString();
                 return contractInstance.transfer(to, amountInWei);
             } else {
