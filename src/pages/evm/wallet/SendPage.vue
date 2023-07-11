@@ -175,9 +175,6 @@ export default defineComponent({
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
         },
-        isCorrectNetwork() {
-            return true;
-        },
     },
     created() {
         this.clearTokenTransferConfigs();

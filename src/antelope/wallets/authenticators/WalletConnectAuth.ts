@@ -42,7 +42,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return name;
     }
 
-    // this is the important instance creation where we define a label to asign to this instance of the authenticator
+    // this is the important instance creation where we define a label to assign to this instance of the authenticator
     newInstance(label: string): EVMAuthenticator {
         this.trace('newInstance', label);
         return new WalletConnectAuth(this.options, this.wagmiClient, label);

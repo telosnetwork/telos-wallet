@@ -24,7 +24,7 @@ export default defineComponent({
             return e && e.isMetaMask && !e.isSafePal;
         });
 
-        const supporttsSafePal = computed(() => {
+        const supportsSafePal = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
             return e && e.isSafePal;
         });
@@ -81,7 +81,7 @@ export default defineComponent({
         return {
             isLoading,
             supportsMetamask,
-            supporttsSafePal,
+            supportsSafePal,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
             setMetamaskAuthenticator,
@@ -124,7 +124,7 @@ export default defineComponent({
         </div>
 
         <!-- Safepal Authenticator button -->
-        <div class="wallet-options__option" @click="supporttsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
             <template v-if="isLoading('SafePal.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -135,7 +135,7 @@ export default defineComponent({
                     alt="SafePal"
                     src="~assets/evm/safepal.svg"
                 >
-                {{ supporttsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
             </template>
         </div>
 
