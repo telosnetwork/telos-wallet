@@ -1,18 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
 
 const NETWORK = 'test-network';
 const WARNING_MESSAGE = 'warning-message';
 
 const storeMock = {
-    //useAccountStore().loginEVM({ authenticator, network }).then(async () => {
-    //    // we verify that the authenticator is connected to the correct network
-    //    if (!await authenticator.isConnectedTo(correctChainId)) {
-    //        const networkName = useChainStore().getChain(label).settings.getDisplay();
-    //        const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
-    //        globalProps.$warningNotification(warningMessage);
-    //    }
-    //});
     useAccountStore: () => ({
         loginEVM: () => ({
             then: (cb: () => void) => cb(),

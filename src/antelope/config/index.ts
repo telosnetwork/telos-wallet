@@ -205,7 +205,7 @@ export class AntelopeConfig {
         this.__notify_failure_message_handler = handler;
     }
 
-    public setnotifyFailureWithAction(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+    public setNotifyFailureWithAction(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
         this.__notify_failure_action_handler = handler;
     }
 

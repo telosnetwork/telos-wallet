@@ -27,10 +27,9 @@ export abstract class EVMAuthenticator {
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
 
-    // to easely clone the authenticator
+    // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;
 
-    // la función login debería ser posible reimplementar por subclases de esta clase abtracta
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chain = useChainStore();
@@ -69,9 +68,7 @@ export abstract class EVMAuthenticator {
 
     async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
         this.trace('ensureCorrectChain');
-        let web3Provider = await this.web3Provider();
-        web3Provider = await useEVMStore().ensureCorrectChain(this);
-        return web3Provider;
+        return useEVMStore().ensureCorrectChain(this);
     }
 
     isConnectedToCorrectChain(): Promise<boolean> {

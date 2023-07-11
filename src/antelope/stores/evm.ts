@@ -88,7 +88,6 @@ export const useEVMStore = defineStore(store_name, {
                 this.trace('initExternalProvider', authenticator.getName(), 'initializing provider');
                 // ensure this provider actually has the correct methods
                 // Check consistency of the provider
-                // const methods = ['send', 'sendAsync', 'request', 'once', 'on', 'addListener', 'removeListener', 'removeAllListeners'];
                 const methods = ['request', 'on'];
                 const candidate = provider as unknown as Record<string, unknown>;
                 for (const method of methods) {
@@ -131,18 +130,24 @@ export const useEVMStore = defineStore(store_name, {
                     const network = useChainStore().currentChain.settings.getNetwork();
                     evm.trace('provider.accountsChanged', ...accounts);
 
-                    // accounts.length > 0 means has just logged in or is switching account in wallet
                     if (accounts.length > 0) {
+                        // If we are here one of two possible things had happened:
+                        // 1. The user has just logged in to the wallet
+                        // 2. The user has switched the account in the wallet
+
+                        // if we are in case 1, then we are in the middle of the login process and we don't need to do anything
+                        // We can tell because the account store has no logged account
+
+                        // But if we are in case 2 and have a logged account, we need to re-login the account using the same authenticator
+                        // overwriting the previous logged account, which in turn will trigger all account data to be reloaded
                         if (useAccountStore().loggedAccount) {
                             // if the user is already authenticated we try to re login the account using the same authenticator
                             const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                             if (!authenticator) {
-                                console.error('Inconsistency: logged account authwenticator is null', authenticator);
+                                console.error('Inconsistency: logged account authenticator is null', authenticator);
                             } else {
                                 useAccountStore().loginEVM({ authenticator,  network });
                             }
-                        } else {
-                            // if not, we do nothing because this is part of the happy ligin path
                         }
                     } else {
                         // the user has disconnected the all the accounts from the wallet so we logout

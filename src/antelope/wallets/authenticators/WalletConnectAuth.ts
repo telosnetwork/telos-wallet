@@ -28,7 +28,6 @@ const name = 'WalletConnect';
 export class WalletConnectAuth extends EVMAuthenticator {
 
     options: Web3ModalConfig;
-    // web3Modal: Web3Modal | null = null;
     wagmiClient: EthereumClient;
     // this is just a dummy label to identify the authenticator base class
     constructor(options: Web3ModalConfig, wagmiClient: EthereumClient, label = name) {

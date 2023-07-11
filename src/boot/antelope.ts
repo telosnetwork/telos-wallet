@@ -26,7 +26,7 @@ export default boot(({ app }) => {
     ant.config.setNotifySuccessMessageHandler(app.config.globalProperties.$notifySuccessMessage);
     ant.config.setNotifySuccessCopyHandler(app.config.globalProperties.$notifySuccessCopy);
     ant.config.setnotifyFailureMessage(app.config.globalProperties.$notifyFailure);
-    ant.config.setnotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
+    ant.config.setNotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
     ant.config.setNotifyDisconnectedHandler(app.config.globalProperties.$notifyDisconnected);
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
 
