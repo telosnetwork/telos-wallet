@@ -15,7 +15,8 @@ export default defineComponent({
             usePlatformStore().isMobile ? emit('showWalletConnect') : emit('showWalletOptions');
         };
 
-        const loading = computed(() => useFeedbackStore().isLoading('account.login'));
+        // loading state for generic connect button is only required for mobile (WalletConnect)
+        const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
         return {
             loading,
