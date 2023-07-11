@@ -15,7 +15,7 @@ export default defineComponent({
             usePlatformStore().isMobile ? emit('showWalletConnect') : emit('showWalletOptions');
         };
 
-        const loading = computed(() => useFeedbackStore().isLoading('account.login'));
+        const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
         return {
             loading,

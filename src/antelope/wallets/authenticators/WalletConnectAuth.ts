@@ -50,7 +50,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
-        useFeedbackStore().setLoading(`${this.getName()}.login`);
+        useFeedbackStore().setLoading('WalletConnect.login');
         if (localStorage.getItem('wagmi.connected')) {
             const address = getAccount().address as addressString;
             try {
@@ -58,7 +58,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
             } catch (e) {
                 // we are already logged in. So we just ignore the error
             }
-            useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+            useFeedbackStore().unsetLoading('WalletConnect.login');
             return address;
         } else {
             return new Promise(async (resolve) => {
@@ -74,7 +74,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                         resolve(address);
                     }
                     if (newState.open === false) {
-                        useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+                        useFeedbackStore().unsetLoading('WalletConnect.login');
                     }
                 });
                 web3Modal.openModal();
