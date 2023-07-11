@@ -155,6 +155,9 @@ export default {
     },
     evm_wrap: {
         total_of_wrapped_and_unwrapped: 'Total of wrapped {token} and {token}',
+        wrapped_card_label: 'Wrapped {symbol}',
+        wrapped_card_tooltip: '{wrappedSymbol} can be used to buy NFTs and trade on decentralized exchanges, among other things. Wrapping {systemSymbol} is done via a decentralized smart contract.',
+        unwrapped_card_tooltip: 'An equal amount of {systemSymbol} will be received as the amount of {wrappedSymbol} that was unwrapped. Unwrapping {wrappedSymbol} is done via a decentralized smart contract.',
     },
     notification:{
         success_title_trx: 'Success',

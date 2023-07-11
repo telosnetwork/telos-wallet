@@ -111,6 +111,11 @@ const routes = [
                 name: 'demos.nfts',
                 component: () => import('pages/demo/NftDemos.vue'),
             },
+            {
+                path: 'scrollable-cards',
+                name: 'demos.scrollable-cards',
+                component: () => import('pages/demo/ScrollableInfoCardDemos.vue'),
+            },
         ],
     },
 
