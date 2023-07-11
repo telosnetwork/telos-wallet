@@ -77,16 +77,16 @@ const wrappedFiatValueText = computed(() => prettyPrintCurrency(
 ));
 
 const cardData = computed(() => [{
-    label: $t('evm_wrap.wrapped_card_label', { symbol: systemTokenSymbol.value }), // eztodo i18n
+    label: $t('evm_wrap.wrapped_card_label', { symbol: systemTokenSymbol.value }),
     tooltip: $t('evm_wrap.wrapped_card_tooltip', { wrappedSymbol: wrappedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
     primaryText: wrappedFiatValueText.value,
-    secondaryText: prettyPrintToken(wrappedTokenBalanceBn.value),
+    secondaryText: prettyPrintToken(wrappedTokenBalanceBn.value, true),
     lowContrastSecondaryText: true,
 }, {
     label: systemTokenSymbol.value,
     tooltip: $t('evm_wrap.unwrapped_card_tooltip', { wrappedSymbol: wrappedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
     primaryText: unwrappedFiatValueText.value,
-    secondaryText: prettyPrintToken(systemTokenBalanceBn.value),
+    secondaryText: prettyPrintToken(systemTokenBalanceBn.value, false),
     lowContrastSecondaryText: true,
 }]);
 
@@ -100,13 +100,13 @@ onBeforeMount(() => {
     });
 });
 
-function prettyPrintToken(amount: BigNumber | undefined) {
+function prettyPrintToken(amount: BigNumber | undefined, isWrapped: boolean) {
     return prettyPrintCurrency(
         amount ?? BigNumber.from(0),
-        2,
+        4,
         fiatLocale.value,
         false,
-        systemTokenSymbol.value,
+        isWrapped ? wrappedTokenSymbol.value : systemTokenSymbol.value,
         false,
         WEI_PRECISION,
     );
