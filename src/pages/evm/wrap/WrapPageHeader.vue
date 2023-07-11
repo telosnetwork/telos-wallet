@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { BigNumber } from 'ethers';
+
 import { useUserStore, useBalancesStore, useChainStore } from 'src/antelope';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { NativeCurrencyAddress } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
-import { useI18n } from 'vue-i18n';
+
+import ScrollableInfoCards from 'components/evm/ScrollableInfoCards.vue';
+
 
 const { t: $t } = useI18n();
 const userStore = useUserStore();
@@ -16,6 +21,7 @@ const chainSettings = (chainStore.loggedChain.settings as EVMChainSettings);
 // data
 const systemTokenPrice = ref(0); // always equal to wrapped token price
 const loading = ref(true);
+
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -32,6 +38,8 @@ const totalFiatValueText = computed(() => {
 });
 
 const systemTokenName = computed(() => chainSettings.getSystemToken().name);
+const systemTokenSymbol = computed(() => chainSettings.getSystemToken().symbol);
+const wrappedTokenSymbol = computed(() => chainSettings.getWrappedSystemToken().symbol);
 const allBalances = computed(() => balancesStore.loggedBalances);
 const systemTokenBalanceBn =  computed(() => allBalances.value.find(b => b.token.contract === NativeCurrencyAddress)?.balance);
 const wrappedTokenBalanceBn = computed(() =>
@@ -51,6 +59,36 @@ const totalBalanceUnitsText = computed(() => {
 
     return `${systemSymbol} + ${wrappedSymbol}`;
 });
+const unwrappedFiatValueText = computed(() => prettyPrintCurrency(
+    +formatWei(systemTokenBalanceBn.value ?? BigNumber.from(0), WEI_PRECISION) * systemTokenPrice.value,
+    2,
+    fiatLocale.value,
+    false,
+    fiatCurrency.value,
+    false,
+));
+const wrappedFiatValueText = computed(() => prettyPrintCurrency(
+    +formatWei(wrappedTokenBalanceBn.value ?? BigNumber.from(0), WEI_PRECISION) * systemTokenPrice.value,
+    2,
+    fiatLocale.value,
+    false,
+    fiatCurrency.value,
+    false,
+));
+
+const cardData = computed(() => [{
+    label: $t('evm_wrap.wrapped_card_label', { symbol: systemTokenSymbol.value }), // eztodo i18n
+    tooltip: $t('evm_wrap.wrapped_card_tooltip', { wrappedSymbol: wrappedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
+    primaryText: wrappedFiatValueText.value,
+    secondaryText: prettyPrintToken(wrappedTokenBalanceBn.value),
+    lowContrastSecondaryText: true,
+}, {
+    label: systemTokenSymbol.value,
+    tooltip: $t('evm_wrap.unwrapped_card_tooltip', { wrappedSymbol: wrappedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
+    primaryText: unwrappedFiatValueText.value,
+    secondaryText: prettyPrintToken(systemTokenBalanceBn.value),
+    lowContrastSecondaryText: true,
+}]);
 
 
 // methods
@@ -61,17 +99,36 @@ onBeforeMount(() => {
         loading.value = false;
     });
 });
+
+function prettyPrintToken(amount: BigNumber | undefined) {
+    return prettyPrintCurrency(
+        amount ?? BigNumber.from(0),
+        2,
+        fiatLocale.value,
+        false,
+        systemTokenSymbol.value,
+        false,
+        WEI_PRECISION,
+    );
+}
 </script>
 
 <template>
-<div class="text-center">
-    <h5>{{ $t('evm_wrap.total_of_wrapped_and_unwrapped', { token: systemTokenName }) }}</h5>
-    <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
-    <p v-if="!loading" class="o-text--small-bold u-text--low-contrast">
-        {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
-    </p>
+<div class="c-wrap-header">
+    <div class="text-center">
+        <h5>{{ $t('evm_wrap.total_of_wrapped_and_unwrapped', { token: systemTokenName }) }}</h5>
+        <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
+        <p v-if="!loading" class="o-text--small-bold u-text--low-contrast q-mb-xl">
+            {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
+        </p>
+    </div>
+
+    <ScrollableInfoCards :cards="cardData" />
 </div>
 </template>
 
 <style lang="scss">
+.c-wrap-header {
+    width: 100%;
+}
 </style>

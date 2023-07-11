@@ -100,9 +100,12 @@ export default defineComponent({
                 this.randomizeExchangeRates = false;
             }
         },
-        updateCurrencyInputLocale(event: InputEvent): void {
+        updateCurrencyInputLocale(event: Event): void {
             const eventTarget = event.target as HTMLInputElement;
             this.currencyInputLocale = eventTarget.value;
+        },
+        showError() {
+            (this.$refs.currencyTlosUsdInput as typeof CurrencyInput).showEmptyError();
         },
     },
     watch: {
@@ -217,7 +220,7 @@ export default defineComponent({
         <br>
         <br>
 
-        <button @click="$refs.currencyTlosUsdInput.showEmptyError()">
+        <button @click="showError">
             Set empty error
         </button>
         <label>(Required must be true, affects 3rd input only)</label>
