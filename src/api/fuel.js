@@ -36,14 +36,29 @@ const client = new APIClient({
 });
 
 const fuelrpc = chain.getFuelRPCEndpoint();
-const resourceProviderEndpoint = `https://${fuelrpc}/v1/resource_provider/request_transaction`;
+const resourceProviderEndpoint = `${fuelrpc}/v1/resource_provider/request_transaction`;
 
 // Wrapper for the user to intersect the signTransaction call
-export class FuelUserWrapper extends User {
+// Use initFuelUserWrapper() method to initialize an instance of the class
+class FuelUserWrapper extends User {
   user = null;
+  available = false;
+
   constructor(user/*: User*/) {
       super();
       this.user = user;
+  }
+
+  // called immediately after class instantiation in initFuelUserWrapper()
+  async setAvailability() {
+      if (!fuelrpc){
+          return;
+      };
+      try {
+          this.available = (await fetch(fuelrpc)).status === 200;
+      } catch(e) {
+          console.error(e);
+      }
   }
 
   async signTransaction(
@@ -52,7 +67,7 @@ export class FuelUserWrapper extends User {
   )/*: Promise<SignTransactionResponse>*/ {
       try {
       // if fuel is not supported, just let the normal implementation to perform
-          if (!fuelrpc) {
+          if (!this.available) {
               return this.user.signTransaction(originalTransaction, originalconfig);
           }
 
@@ -209,6 +224,13 @@ export class FuelUserWrapper extends User {
   getAccountName = async ()/*: Promise<string>*/ => this.user.getAccountName();
   getChainId = async ()/*: Promise<string>*/ => this.user.getChainId();
   getKeys = async ()/*: Promise<string[]>*/ => this.user.getKeys();
+}
+
+// create an instance of FuelUserWrapper class and check fuel service availability
+export async function initFuelUserWrapper(user) {
+    const fuelUserWrapper = new FuelUserWrapper(user);
+    await fuelUserWrapper.setAvailability();
+    return fuelUserWrapper;
 }
 
 // Auxiliar functions to validate with the user the use of the service

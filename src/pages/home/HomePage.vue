@@ -96,7 +96,7 @@ export default defineComponent({
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
                     <a
-                        href="https://docs.telos.net/overview/getting-started/wallet-introduction"
+                        href="https://docs.telos.net/evm/about/setup-a-wallet"
                         target="_blank"
                         class="c-home__external-link-text"
                     >
