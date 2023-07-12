@@ -58,6 +58,8 @@ const NETWORK_EVM_ENDPOINT = 'https://mainnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts.s3.amazonaws.com';
 
+declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
+
 export default class TelosEVMTestnet extends EVMChainSettings {
     getNetwork(): string {
         return NETWORK;
@@ -147,5 +149,15 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     hasIndexerSupport(): boolean {
         return true;
+    }
+
+    trackAnalyticsEvent(params: Record<string, unknown>): void {
+        if (!fathom) {
+            console.log('Failed to track event: Fathom Analytics not loaded');
+            return;
+        }
+
+        const id = params.id as string;
+        fathom.trackGoal(id, 0);
     }
 }

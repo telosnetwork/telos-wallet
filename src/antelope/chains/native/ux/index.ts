@@ -97,4 +97,8 @@ export default class UX extends NativeChainSettings {
     getSystemTokens(): TokenClass[] {
         return [TOKEN];
     }
+
+    trackAnalyticsEvent(): void {
+        console.warn(`trackAnalyticsEvent not implemented for ${NETWORK}`);
+    }
 }
