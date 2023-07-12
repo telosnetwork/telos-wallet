@@ -219,6 +219,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
+    abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
 
     async getBalances(account: string): Promise<TokenBalance[]> {
         if (!this.hasIndexerSupport()) {
