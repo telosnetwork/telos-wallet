@@ -16,6 +16,7 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
+import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -55,8 +56,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
             try {
-                await super.login(network);
-            } catch (e) {
+                const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                await useAccountStore().loginEVM({ authenticator,  network });
+            }catch(e){
                 // we are already logged in. So we just ignore the error
             }
             useFeedbackStore().unsetLoading(`${this.getName()}.login`);
@@ -72,7 +74,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
                         this.clearAuthenticator();
                         const address = getAccount().address as addressString;
                         try {
-                            await super.login(network);
+                            const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                            await useAccountStore().loginEVM({ authenticator,  network });
                         } catch (e) {
                             // we are already logged in. So we just ignore the error
                         }
