@@ -142,17 +142,6 @@ describe('ConnectWalletOptions.vue', () => {
             });
         });
 
-        describe('redirectToMetamaskDownload', () => {
-            it('should open a a new tab to metamask download page', () => {
-                window.open = () => null;
-                const methodSpy = jest.spyOn(window, 'open');
-
-                wrapper.vm.redirectToMetamaskDownload();
-
-                expect(methodSpy).toHaveBeenCalledWith('https://metamask.io/download/', '_blank');
-            });
-        });
-
         describe('setWalletConnectAuthenticator', () => {
             it('should call accountStore loginEVM method', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
