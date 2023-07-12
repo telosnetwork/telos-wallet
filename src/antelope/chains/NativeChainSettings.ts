@@ -142,6 +142,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
     abstract getMapDisplay(): boolean;
     abstract getTheme(): Theme;
     abstract getFiltersSupported(prop: string): boolean;
+    abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
 
     /**
      * Retrieves the list of IDs for the important tokens.
