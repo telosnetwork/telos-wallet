@@ -30,6 +30,10 @@ export default defineComponent({
     methods: {
         onShowWalletConnect() {
             this.showWalletConnect = true;
+            // put this variable back to false for an eventual re-open
+            setTimeout(() => {
+                this.showWalletConnect = false;
+            }, 200);
         },
         onShowWalletOptions(show: boolean) {
             this.showWalletOptions = show;

@@ -17,6 +17,7 @@ export default defineComponent({
         },
     },
     setup(props, { emit }){
+        const ant = getAntelope();
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
 
         const supportsMetamask = computed(() => {
@@ -37,13 +38,12 @@ export default defineComponent({
             window.open('https://www.safepal.com/en/download', '_blank');
         };
 
-
         watch(() => props.showWalletConnect, async (newVal) => {
             if (newVal) {
                 await setWalletConnectAuthenticator();
             }
         });
-        // new refactor --------------
+
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
@@ -55,7 +55,7 @@ export default defineComponent({
         };
 
         const setAuthenticator = async(name: string, label: string) => {
-            const auth = getAntelope().wallets.getAutenticator(name);
+            const auth = ant.wallets.getAutenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -72,10 +72,26 @@ export default defineComponent({
                     const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });
                     globalProps.$warningNotification(warningMessage);
                 }
-                useFeedbackStore().unsetLoading(`${authenticator.getName()}.login`);
             });
         };
-        // --------------
+
+        const notifyNoProvider = (provider:string) => {
+            const message = globalProps.$t('home.no_provider_notification_message');
+            ant.config.notifyFailureWithAction(message, {
+                label: ant.config.localizationHandler('home.no_provider_action_label', { provider }),
+                handler: () => {
+                    redirectToInstall(provider);
+                },
+            });
+        };
+
+        const redirectToInstall = (name:string) => {
+            if (name === 'Metamask') {
+                redirectToMetamaskDownload();
+            } else if (name === 'SafePal') {
+                redirectToSafepalDownload();
+            }
+        };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
 
@@ -83,11 +99,10 @@ export default defineComponent({
             isLoading,
             supportsMetamask,
             supportsSafePal,
-            redirectToMetamaskDownload,
-            redirectToSafepalDownload,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
+            notifyNoProvider,
         };
     },
 });
@@ -109,7 +124,7 @@ export default defineComponent({
         </div>
 
         <!-- Metamask Authenticator button -->
-        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : redirectToMetamaskDownload()">
+        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : notifyNoProvider('Metamask')">
             <template v-if="isLoading('Metamask.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -125,7 +140,7 @@ export default defineComponent({
         </div>
 
         <!-- Safepal Authenticator button -->
-        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
             <template v-if="isLoading('SafePal.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>

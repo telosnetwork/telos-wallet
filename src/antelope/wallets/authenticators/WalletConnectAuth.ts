@@ -50,21 +50,26 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
-        useFeedbackStore().setLoading('WalletConnect.login');
+        useFeedbackStore().setLoading(`${this.getName()}.login`);
         if (localStorage.getItem('wagmi.connected')) {
+            this.clearAuthenticator();
             const address = getAccount().address as addressString;
             try {
                 await super.login(network);
             } catch (e) {
                 // we are already logged in. So we just ignore the error
             }
-            useFeedbackStore().unsetLoading('WalletConnect.login');
+            useFeedbackStore().unsetLoading(`${this.getName()}.login`);
             return address;
         } else {
             return new Promise(async (resolve) => {
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
+                    if (newState.open === false) {
+                        useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+                    }
                     if (newState.open === false && localStorage.getItem('wagmi.connected')) {
+                        this.clearAuthenticator();
                         const address = getAccount().address as addressString;
                         try {
                             await super.login(network);
@@ -73,13 +78,17 @@ export class WalletConnectAuth extends EVMAuthenticator {
                         }
                         resolve(address);
                     }
-                    if (newState.open === false) {
-                        useFeedbackStore().unsetLoading('WalletConnect.login');
-                    }
                 });
                 web3Modal.openModal();
             });
         }
+    }
+
+    // having this two properties attached to the authenticator instance may bring some problems
+    // so after we use them we nned to clear them to avoid that problems
+    clearAuthenticator(): void {
+        this.options = null as unknown as Web3ModalConfig;
+        this.wagmiClient = null as unknown as EthereumClient;
     }
 
     async logout(): Promise<void> {

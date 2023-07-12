@@ -41,6 +41,8 @@ export default {
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
         wallet_introduction: 'What is a Web Wallet?',
+        no_provider_notification_message: 'No wallet provider was detected. Make sure you have the wallet installed and enabled. If you have multiple wallets installed, you can disable the others to avoid possible conflicts.',
+        no_provider_action_label: 'Install {provider}',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
