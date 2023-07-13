@@ -58,7 +58,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {
-                console.error('desabling this for now', network, [useAccountStore()]);
+                console.error('disabling this for now', network, [useAccountStore()]);
                 // await super.login(network);
             } catch (e) {
                 // we are already logged in. So we just ignore the error
