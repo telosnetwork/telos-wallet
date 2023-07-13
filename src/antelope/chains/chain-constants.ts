@@ -1,9 +1,11 @@
 export const TELOS_CHAIN_IDS = ['40', '41'];
 export const TELOS_ANALYTICS_EVENT_IDS = {
-    loginStarted: '',
-    loginSuccessfulMetamask: '',
-    loginFailedMetamask: '',
-    loginSuccessfulSafepal: '',
-    loginFailedSafepal: '',
-    loginSuccessful: '',
+    loginStarted: 'JXIYBP1S',
+    loginSuccessful: 'HIP11SFR',
+    loginSuccessfulMetamask: 'ABGMND23',
+    loginFailedMetamask: 'ZFGE6TFS',
+    loginSuccessfulSafepal: 'LKCBKDU2',
+    loginFailedSafepal: '6PSIWGNV',
+    loginSuccessfulOreid: 'MSXMDDNK',
+    loginFailedOreid: 'UFX3JYRJ',
 };
