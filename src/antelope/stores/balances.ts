@@ -206,15 +206,10 @@ export const useBalancesStore = defineStore(store_name, {
             }
             return response;
         },
-        async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: BigNumber): Promise<void> {
-            const config = await prepareSendTransaction({
-                request: {
-                    to,
-                    value: amount,
-                },
-            });
+        async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {
+            const request = await prepareSendTransaction({ to, value: amount });
 
-            this.setWagmiSystemTokenTransferConfig(config, label);
+            this.setWagmiSystemTokenTransferConfig(request, label);
             this.setWagmiTokenTransferConfig(null, label);
         },
         async prepareWagmiTokenTransferConfig(label: Label, token: TokenClass, to: string, amount: BigNumber): Promise<void> {
@@ -222,7 +217,7 @@ export const useBalancesStore = defineStore(store_name, {
                 address: token.address as addressString,
                 abi: useEVMStore().getTokenABI(token.type),
                 functionName: 'transfer',
-                args: [to, amount],
+                args: [to, amount] as any[],
             })) as PrepareWriteContractResult<EvmABI, 'transfer', number>;
 
             this.setWagmiTokenTransferConfig(config, label);
@@ -243,7 +238,7 @@ export const useBalancesStore = defineStore(store_name, {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount as EvmAccountModel;
                     return await this.transferEVMTokens(label, chain_settings, account, token, to, amount)
-                        .then(r => this.subscribeForTransactionReceipt(account, r));
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
                 console.error(error);
