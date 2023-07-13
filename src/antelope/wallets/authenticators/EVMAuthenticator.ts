@@ -33,9 +33,7 @@ export abstract class EVMAuthenticator {
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chain = useChainStore();
-        const feedback = useFeedbackStore();
         try {
-            feedback.setLoading('Authenticator.login');
             chain.setLoggedChain(network);
             chain.setCurrentChain(network);
 
@@ -61,8 +59,6 @@ export abstract class EVMAuthenticator {
                 console.error('Error:', error);
                 throw new AntelopeError('antelope.evm.error_login');
             }
-        } finally {
-            feedback.unsetLoading('Authenticator.login');
         }
     }
 

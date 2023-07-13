@@ -112,7 +112,6 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('loginNative', authenticator, network);
             let success = false;
             try {
-                useFeedbackStore().setLoading('account.login');
                 await authenticator.init();
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
@@ -146,8 +145,6 @@ export const useAccountStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw new Error('antelope.account.error_login_native');
-            } finally {
-                useFeedbackStore().unsetLoading('account.login');
             }
             return success;
         },
@@ -156,8 +153,6 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('loginEVM', network);
             let success = false;
             try {
-                useFeedbackStore().setLoading('account.login');
-
                 const address = await authenticator.login(network);
                 this.trace('loginEVM', 'authenticator finished with address', address);
 
@@ -193,7 +188,7 @@ export const useAccountStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', error);
             } finally {
-                useFeedbackStore().unsetLoading('account.login');
+                useFeedbackStore().unsetLoading(`${authenticator.getName()}.login`);
             }
             return success;
         },

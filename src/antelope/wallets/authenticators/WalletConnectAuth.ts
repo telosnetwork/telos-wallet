@@ -48,35 +48,37 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return new WalletConnectAuth(this.options, this.wagmiClient, label);
     }
 
-    async login(network: string): Promise<addressString | null> {
-        this.trace('login', network);
-        useFeedbackStore().setLoading(`${this.getName()}.login`);
-        if (localStorage.getItem('wagmi.connected')) {
+    async walletConnectLogin(network: string): Promise<addressString | null> {
+        this.trace('walletConnectLogin');
+        try {
+            useFeedbackStore().setLoading(`${this.getName()}.login`);
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
-            try {
-                await super.login(network);
-            } catch (e) {
-                // we are already logged in. So we just ignore the error
-            }
-            useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+            await super.login(network);
             return address;
+        } catch (e) {
+            // we are already logged in. So we just ignore the error
+            return null;
+        } finally {
+            useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+        }
+    }
+
+    async login(network: string): Promise<addressString | null> {
+        this.trace('login', network);
+        if (localStorage.getItem('wagmi.connected')) {
+            return this.walletConnectLogin(network);
         } else {
             return new Promise(async (resolve) => {
+                this.trace('login', 'web3Modal.openModal()');
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
+                    this.trace('login', 'web3Modal.subscribeModal ', newState, localStorage.getItem('wagmi.connected'));
                     if (newState.open === false) {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
                     }
-                    if (newState.open === false && localStorage.getItem('wagmi.connected')) {
-                        this.clearAuthenticator();
-                        const address = getAccount().address as addressString;
-                        try {
-                            await super.login(network);
-                        } catch (e) {
-                            // we are already logged in. So we just ignore the error
-                        }
-                        resolve(address);
+                    if (localStorage.getItem('wagmi.connected')) {
+                        resolve(this.walletConnectLogin(network));
                     }
                 });
                 web3Modal.openModal();
