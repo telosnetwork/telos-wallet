@@ -5,6 +5,10 @@ import { ComponentInternalInstance, computed, defineComponent, getCurrentInstanc
 import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { QSpinnerFacebook } from 'quasar';
 
+import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject } from 'oreid-js';
+import { WebPopup } from 'oreid-webpopup';
+import { erc20Abi } from 'src/antelope/types';
+
 export default defineComponent({
     name: 'ConnectWalletOptions',
     components: {
@@ -43,7 +47,76 @@ export default defineComponent({
                 await setWalletConnectAuthenticator();
             }
         });
+        // new refactor --------------
+        const setOreIdkAuthenticator = async () => {
+            // ---------------------------------------------------------------------------------
+            // ---------------------------------------------------------------------------------
+            const ABI = erc20Abi;
+            const REACT_APP_OREID_APP_ID = 't_23991cde82994c88bb582c019a9c45e1';
+            // const REACT_APP_OREID_APP_ID = 't_75a4d9233ec441d18c4221e92b379197';
+            const oreIdOptions: OreIdOptions = {
+                appName: 'Telos Wallet App',
+                appId: REACT_APP_OREID_APP_ID,
+                plugins: { popup: WebPopup() },
+            };
 
+            const oreId = new OreId(oreIdOptions);
+            await oreId.init();
+
+            // launch the login flow
+            await oreId.popup.auth({ provider: 'google' as AuthProvider });
+            const userData = await oreId.auth.user.getData();
+            console.log('-----------------------------------------');
+            console.log(`Hello ${userData.name}`);
+            console.log(`Your blockchain accounts are: ${userData.chainAccounts}`);
+            console.log(userData);
+
+            const chain = userData.chainAccounts.find((account: any) => account.chainNetwork !== ChainNetwork.OreTest);
+
+            if (chain) {
+
+                const contractAddress = '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD';
+                const targetAddress = '0xa30b5e3c8Fee56C135Aecb733cd708cC31A5657a';
+
+                const systemTransfer = {
+                    'from':chain.chainAccount,
+                    'to': targetAddress,
+                    'value':'0x01',
+                };
+
+                const erc20Transfer = {
+                    'from':chain.chainAccount,
+                    'to':contractAddress,
+                    'contract': {
+                        'abi': ABI,
+                        'parameters': [targetAddress, '0x02'],
+                        'method': 'transfer',
+                    },
+                } as unknown as JSONObject;
+
+                // sign a blockchain transaction
+                console.log('createTransaction()...');
+                const transaction = await oreId.createTransaction({
+                    transaction: erc20Transfer,
+                    chainAccount: chain.chainAccount,
+                    chainNetwork: ChainNetwork.TelosEvmTest,
+                    signOptions: {
+                        broadcast: true,
+                        returnSignedTransaction: true,
+                    },
+                });
+
+                // have the user approve signature
+                console.log('Signing a transaction...', transaction);
+                const { transactionId } = await oreId.popup.sign({ transaction });
+                console.log('transactionId: ', transactionId);
+
+            }
+
+
+            // ---------------------------------------------------------------------------------
+            // ---------------------------------------------------------------------------------
+        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
@@ -99,6 +172,7 @@ export default defineComponent({
             isLoading,
             supportsMetamask,
             supportsSafePal,
+            setOreIdkAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
@@ -121,6 +195,23 @@ export default defineComponent({
     <div class="wallet-options">
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
+        </div>
+
+
+        <!-- ORE-ID Authenticator button -->
+        <div class="wallet-options__option" @click="setOreIdkAuthenticator()">
+            <template v-if="isLoading('OreId.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Metamask"
+                    src="~assets/evm/ore-id.svg"
+                >
+                ORE-ID
+            </template>
         </div>
 
         <!-- Metamask Authenticator button -->
@@ -180,7 +271,7 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 370px;
     margin:auto;
     color: $white;
 }
