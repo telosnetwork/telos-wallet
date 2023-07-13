@@ -16,6 +16,7 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
+import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -54,11 +55,21 @@ export class WalletConnectAuth extends EVMAuthenticator {
             useFeedbackStore().setLoading(`${this.getName()}.login`);
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
-            await super.login(network);
+
+            // We are already logged in. Now let's try to force the wallet to connect to the correct network
+            try {
+                console.error('desabling this for now', network, [useAccountStore()]);
+                // await super.login(network);
+            } catch (e) {
+                // we are already logged in. So we just ignore the error
+                console.error(e);
+            }
+
             return address;
         } catch (e) {
-            // we are already logged in. So we just ignore the error
-            return null;
+            // This is a non-expected error
+            console.error(e);
+            throw new AntelopeError('antelope.evm.error_login');
         } finally {
             useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         }

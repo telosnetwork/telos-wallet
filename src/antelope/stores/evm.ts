@@ -101,18 +101,20 @@ export const useEVMStore = defineStore(store_name, {
                 // It checks if the user is on the correct network and if not, it shows a notification with a button to switch
                 const checkNetworkHandler = async () => {
                     window.removeEventListener('focus', checkNetworkHandler);
-                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
-                    if (await authenticator.isConnectedToCorrectChain()) {
-                        evm.trace('checkNetworkHandler', 'correct network');
-                    } else {
-                        const networkName = useChainStore().loggedChain.settings.getDisplay();
-                        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-                        ant.config.notifyFailureWithAction(errorMessage, {
-                            label: ant.config.localizationHandler('evm_wallet.switch'),
-                            handler: () => {
-                                authenticator.ensureCorrectChain();
-                            },
-                        });
+                    if (useAccountStore().loggedAccount) {
+                        const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                        if (await authenticator.isConnectedToCorrectChain()) {
+                            evm.trace('checkNetworkHandler', 'correct network');
+                        } else {
+                            const networkName = useChainStore().loggedChain.settings.getDisplay();
+                            const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                            ant.config.notifyFailureWithAction(errorMessage, {
+                                label: ant.config.localizationHandler('evm_wallet.switch'),
+                                handler: () => {
+                                    authenticator.ensureCorrectChain();
+                                },
+                            });
+                        }
                     }
                 };
 
