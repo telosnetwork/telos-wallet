@@ -16,7 +16,6 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
-import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -53,7 +52,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async walletConnectLogin(network: string): Promise<addressString | null> {
         this.trace('walletConnectLogin');
         try {
-            useFeedbackStore().setLoading(`${this.getName()}.login`);
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
 
@@ -80,6 +78,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        useFeedbackStore().setLoading(`${this.getName()}.login`);
         if (localStorage.getItem('wagmi.connected')) {
             return this.walletConnectLogin(network);
         } else {

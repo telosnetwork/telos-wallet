@@ -13,7 +13,6 @@
 
 import { defineStore } from 'pinia';
 import {
-    AntelopeError,
     EvmTransactionResponse,
     Label,
     TokenMarketData,
@@ -24,6 +23,7 @@ import {
     TransactionResponse,
     EvmABI,
     addressString,
+    AntelopeError,
 
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
@@ -35,6 +35,7 @@ import {
     useFeedbackStore,
     useChainStore,
     useEVMStore,
+    usePlatformStore,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -195,7 +196,12 @@ export const useBalancesStore = defineStore(store_name, {
                     // so that the caller can subscribe to the confirmation event
                     response.wait = async () => whenConfirmed;
                 } else {
-                    throw new AntelopeError('antelope.evm.error_no_provider');
+                    // TODO: mobile fix
+                    if (usePlatformStore().isMobile) {
+                        response.wait = async () => Promise.resolve({} as ethers.providers.TransactionReceipt);
+                    } else {
+                        throw new AntelopeError('antelope.evm.error_no_provider');
+                    }
                 }
             }
             return response;
