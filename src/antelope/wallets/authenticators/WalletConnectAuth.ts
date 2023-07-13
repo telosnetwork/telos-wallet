@@ -20,6 +20,7 @@ import { useAccountStore } from 'src/antelope/stores/account';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { toRaw } from 'vue';
@@ -58,8 +59,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {
-                console.error('disabling this for now', network, [useAccountStore()]);
-                // await super.login(network);
+                // TODO: mobile fix
+                if (!usePlatformStore().isMobile) {
+                    await super.login(network);
+                }
             } catch (e) {
                 // we are already logged in. So we just ignore the error
                 console.error(e);
@@ -168,6 +171,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
+        // TODO: mobile fix
+        if (usePlatformStore().isMobile) {
+            this.trace('isConnectedTo', 'on mobile hardcodded true');
+            return true;
+        }
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
             const correct = +web3Provider.network.chainId === +chainId;
