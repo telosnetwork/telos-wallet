@@ -8,6 +8,7 @@ import { QSpinnerFacebook } from 'quasar';
 import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject } from 'oreid-js';
 import { WebPopup } from 'oreid-webpopup';
 import { erc20Abi } from 'src/antelope/types';
+import { ethers } from 'ethers';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -48,7 +49,7 @@ export default defineComponent({
             }
         });
         // new refactor --------------
-        const setOreIdkAuthenticator = async () => {
+        /*const setOreIdkAuthenticator_antes = async () => {
             // ---------------------------------------------------------------------------------
             // ---------------------------------------------------------------------------------
             const ABI = erc20Abi;
@@ -116,6 +117,47 @@ export default defineComponent({
 
             // ---------------------------------------------------------------------------------
             // ---------------------------------------------------------------------------------
+        };*/
+        const setOreIdkAuthenticator = async () => {
+            setAuthenticator('OreId', 'logged');
+
+            /*const CHAIN_ID = '40';
+            const RPC_ENDPOINT = {
+                protocol: 'https',
+                host: 'mainnet.telos.net',
+                port: 443,
+                path: '/evm',
+            };
+            const SYMBOL = 'TLOS';
+            const WEI_PRECISION = 18;
+
+            // Dirección de la cuenta para la cual deseas obtener el saldo
+            const accountAddress = '0x80586a9583a4872c16628e21d44eeea15dd97be3'; // Inserta aquí la dirección de la cuenta deseada
+
+            async function getAccountBalance(): Promise<string> {
+                console.log('getAccountBalance -------------------------');
+                // Crear una instancia del proveedor de la red Telos EVM
+                const provider = new ethers.providers.JsonRpcProvider('https://testnet.telos.net/evm');
+
+                // Obtener el saldo de la cuenta
+                const balance = await provider.getBalance(accountAddress);
+
+                // Convertir el saldo a la unidad deseada (TLOS en este caso)
+                const balanceInTlos = ethers.utils.formatUnits(balance, WEI_PRECISION);
+
+                return balanceInTlos;
+            }
+
+            // Llamar a la función para obtener el saldo y mostrarlo en la consola
+            getAccountBalance()
+                .then((balance) => {
+                    console.log(`Saldo de la cuenta ${accountAddress}: ${balance} ${SYMBOL}`);
+                })
+                .catch((error) => {
+                    console.error('Error al obtener el saldo:', error);
+                });*/
+
+
         };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');

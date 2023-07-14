@@ -84,13 +84,15 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
     }
 
     async getERC20TokenBalance(account: addressString | string, tokenAddress: addressString | string): Promise<ethers.BigNumber> {
-        this.trace('getERC20TokenBalance', [account, tokenAddress]);
+        this.trace('getERC20TokenBalance', [account], tokenAddress);
         const erc20ABI = useEVMStore().getTokenABI(ERC20_TYPE) as AbiItem[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const web3 = new Web3(this.getProvider() as any);
         const contract = new web3.eth.Contract(erc20ABI, tokenAddress);
-        return contract.methods.balanceOf(account).call()
+        const result:ethers.BigNumber = contract.methods.balanceOf(account).call()
             .then((balance: never) => ethers.BigNumber.from(balance));
+        this.trace('getERC20TokenBalance', [account], tokenAddress, '->', result);
+        return result;
     }
 
     async transferTokens(token: TokenClass, amount: ethers.BigNumber, to: addressString): Promise<EvmTransactionResponse> {

@@ -74,15 +74,15 @@ export const useBalancesStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    if (label === 'current') {
+                        await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    }
                 },
             });
 
-            // update logged balances every 10 seconds only if the user is logged
+            // update logged balances every 10 seconds
             setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
-                }
+                await useBalancesStore().updateBalancesForAccount('current', useAccountStore().loggedAccount);
             }, 10000);
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
@@ -120,9 +120,12 @@ export const useBalancesStore = defineStore(store_name, {
 
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
+                                .filter(token => token.address !== chain_settings.getSystemToken().address)
                                 .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
                                     .then((balanceBn: BigNumber) => {
                                         this.processBalanceForToken(label, token, balanceBn);
+                                    }).catch((error) => {
+                                        console.error(error);
                                     }),
                                 );
 

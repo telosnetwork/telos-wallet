@@ -9,7 +9,6 @@ const sharedEnv = {
     IMGUR_CLIENT_ID: 'b6f46df9d1da9d9',
     EVM_CONTRACT: 'eosio.evm',
     PROJECT_ID: '14ec76c44bae7d461fa0f5fd5f8a9da1',
-    APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 };
 
 const TESTNET = {
@@ -23,6 +22,7 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
+    APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 };
 
 const MAINNET = {
@@ -36,12 +36,9 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
+    APP_OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;
-
-if (process.env.NODE_ENV === 'production') {
-    process.env.APP_OREID_APP_ID = 'p_e5b81fcc20a04339993b0cc80df7e3fd';
-}
 
 module.exports = env;
