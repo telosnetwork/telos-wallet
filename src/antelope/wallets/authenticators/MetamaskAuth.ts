@@ -2,6 +2,7 @@ import { EthereumProvider } from 'src/antelope/types';
 import { EVMAuthenticator, ExternalProviderAuth } from 'src/antelope/wallets';
 
 const name = 'Metamask';
+export const MetamaskAuthName = name;
 export class MetamaskAuth extends ExternalProviderAuth {
 
     // this is just a dummy label to identify the authenticator base class
