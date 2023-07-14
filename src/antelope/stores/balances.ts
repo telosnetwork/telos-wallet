@@ -217,6 +217,7 @@ export const useBalancesStore = defineStore(store_name, {
                 address: token.address as addressString,
                 abi: useEVMStore().getTokenABI(token.type),
                 functionName: 'transfer',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 args: [to, amount] as any[],
             })) as PrepareWriteContractResult<EvmABI, 'transfer', number>;
 
