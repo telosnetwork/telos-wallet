@@ -1,6 +1,6 @@
 // EVMAuthenticator class
 
-import { SendTransactionResult } from '@wagmi/core';
+import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
@@ -21,7 +21,7 @@ export abstract class EVMAuthenticator {
     abstract logout(): Promise<void>;
     abstract getSystemTokenBalance(address: addressString | string): Promise<BigNumber>;
     abstract getERC20TokenBalance(address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
-    abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult>;
+    abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult | WriteContractResult>;
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;

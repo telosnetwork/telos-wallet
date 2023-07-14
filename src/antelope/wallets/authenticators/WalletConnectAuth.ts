@@ -10,6 +10,7 @@ import {
     prepareWriteContract,
     sendTransaction,
     writeContract,
+    WriteContractResult,
 } from '@wagmi/core';
 import {
     EthereumClient,
@@ -117,16 +118,17 @@ export class WalletConnectAuth extends EVMAuthenticator {
         this.trace('getSystemTokenBalance', address);
         const chainId = +useChainStore().getChain(this.label).settings.getChainId();
         const balanceBn = await fetchBalance({ address, chainId });
-        return balanceBn.value;
+        return BigNumber.from(balanceBn.value);
     }
 
-    getERC20TokenBalance(address: addressString, token: addressString): Promise<BigNumber> {
+    async getERC20TokenBalance(address: addressString, token: addressString): Promise<BigNumber> {
         this.trace('getERC20TokenBalance', [address, token]);
         const chainId = +useChainStore().getChain(this.label).settings.getChainId();
-        return fetchBalance({ address, chainId, token }).then(balanceBn => balanceBn.value);
+        const balance = await fetchBalance({ address, chainId, token }).then(balanceBn => balanceBn.value);
+        return BigNumber.from(balance);
     }
 
-    async transferTokens(token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult> {
+    async transferTokens(token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult | WriteContractResult> {
         this.trace('transferTokens', token, amount, to);
         if (!this.sendConfig) {
             throw new AntelopeError(token.isSystem ?
@@ -135,33 +137,32 @@ export class WalletConnectAuth extends EVMAuthenticator {
             );
         } else {
             if (token.isSystem) {
-                return await sendTransaction(this.sendConfig);
+                return await sendTransaction(this.sendConfig as PrepareSendTransactionResult);
             } else {
                 return await writeContract(this.sendConfig as PrepareWriteContractResult<EvmABI, 'transfer', number>);
             }
         }
     }
 
-    sendConfig: PrepareSendTransactionResult | null = null;
+    sendConfig: PrepareSendTransactionResult | PrepareWriteContractResult<EvmABI, string, number> | null = null;
     async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
         this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
             if (token.isSystem) {
                 this.sendConfig = await prepareSendTransaction({
-                    request: {
-                        to,
-                        value: amount,
-                    },
+                    to,
+                    value: amount.toBigInt(),
                 });
             } else {
                 const abi = useEVMStore().getTokenABI(token.type);
                 const functionName = 'transfer';
-                this.sendConfig = (await prepareWriteContract({
+                this.sendConfig = await prepareWriteContract({
                     address: token.address as addressString,
                     abi,
                     functionName,
-                    args: [to, amount],
-                })) as PrepareWriteContractResult<EvmABI, 'transfer', number>;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    args: [to, amount] as any[],
+                });
             }
         } else {
             this.sendConfig = null;
