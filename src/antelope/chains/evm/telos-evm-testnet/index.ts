@@ -153,7 +153,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     trackAnalyticsEvent(params: Record<string, unknown>): void {
         if (typeof fathom === 'undefined') {
-            console.log('Failed to track event: Fathom Analytics not loaded');
+            console.warn(`Failed to track event with ID ${params.id}: Fathom Analytics not loaded`);
             return;
         }
 
