@@ -16,12 +16,14 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
 
 const name = 'WalletConnect';
@@ -184,10 +186,18 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
-        this.trace('web3Provider');
-        const web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+        let web3Provider = null;
+        if (usePlatformStore().isMobile) {
+            const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+            const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+            web3Provider = new ethers.providers.JsonRpcProvider(url);
+            this.trace('web3Provider', 'JsonRpcProvider ->', web3Provider);
+        } else {
+            web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+            this.trace('web3Provider', 'Web3Provider ->', web3Provider);
+        }
         await web3Provider.ready;
-        return web3Provider;
+        return web3Provider as ethers.providers.Web3Provider;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {

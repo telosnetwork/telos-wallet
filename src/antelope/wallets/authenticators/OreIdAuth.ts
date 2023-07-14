@@ -9,7 +9,10 @@ import {
     addressString,
     EvmTransactionResponse,
 } from 'src/antelope/types';
-
+import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { useChainStore } from 'src/antelope/stores/chain';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { RpcEndpoint } from 'universal-authenticator-library';
 
 
 const name = 'OreId';
@@ -21,7 +24,6 @@ export class OreIdAuth extends EVMAuthenticator {
 
     options: OreIdOptions;
     userChainAccount: UserChainAccount | null = null;
-
     // this is just a dummy label to identify the authenticator base class
     constructor(options: OreIdOptions, label = name) {
         super(label);
@@ -40,9 +42,34 @@ export class OreIdAuth extends EVMAuthenticator {
         return new OreIdAuth(this.options, label);
     }
 
+    getNetworkNameFromChainNet(chainNetwork: ChainNetwork): string {
+        this.trace('getNetworkNameFromChainNet', chainNetwork);
+        switch (chainNetwork) {
+        case ChainNetwork.TelosEvmTest:
+            return 'telos-evm-testnet';
+        case ChainNetwork.TelosEvmMain:
+            return 'telos-evm';
+        default:
+            throw new AntelopeError('antelope.evm.error_invalid_chain_network');
+        }
+    }
+
+    getChainNetwork(network: string): ChainNetwork {
+        this.trace('getChainNetwork', network);
+        switch (network) {
+        case 'telos-evm-testnet':
+            return ChainNetwork.TelosEvmTest;
+        case 'telos-evm':
+            return ChainNetwork.TelosEvmMain;
+        default:
+            throw new AntelopeError('antelope.evm.error_invalid_chain_network');
+        }
+    }
+
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
 
+        useFeedbackStore().setLoading(`${this.getName()}.login`);
         const oreIdOptions: OreIdOptions = {
             plugins: { popup: WebPopup() },
             ... this.options,
@@ -51,11 +78,36 @@ export class OreIdAuth extends EVMAuthenticator {
         oreId = new OreId(oreIdOptions);
         await oreId.init();
 
+        if (
+            localStorage.getItem('autoLogin') === this.getName() &&
+            typeof localStorage.getItem('account') === 'string'
+        ) {
+            // auto login without the popup
+            const chainAccount = localStorage.getItem('account') as addressString;
+            this.userChainAccount = { chainAccount } as UserChainAccount;
+            this.trace('login', 'userChainAccount', this.userChainAccount);
+            return chainAccount;
+        }
+
         // launch the login flow
         await oreId.popup.auth({ provider: 'google' as AuthProvider });
         const userData = await oreId.auth.user.getData();
-        this.userChainAccount = userData.chainAccounts.find((account: UserChainAccount) => account.chainNetwork !== ChainNetwork.OreTest) ?? null;
+        this.trace('login', 'userData', userData);
+        this.userChainAccount = userData.chainAccounts.find(
+            (account: UserChainAccount) => this.getChainNetwork(network) === account.chainNetwork) ?? null;
+
+        if (!this.userChainAccount) {
+            const appName = this.options.appName;
+            const networkName = useChainStore().getNetworkSettings(network).getDisplay();
+            throw new AntelopeError('antelope.wallets.error_oreid_no_chain_account', {
+                networkName,
+                appName,
+            });
+        }
+
         const address = (this.userChainAccount?.chainAccount as addressString) ?? null;
+        this.trace('login', 'userChainAccount', this.userChainAccount);
+        useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return address;
     }
 
@@ -64,14 +116,26 @@ export class OreIdAuth extends EVMAuthenticator {
         this.trace('logout');
     }
 
-    async getSystemTokenBalance(address: addressString): Promise<ethers.BigNumber> {
+    async getSystemTokenBalance(address: addressString | string): Promise<ethers.BigNumber> {
         this.trace('getSystemTokenBalance', address);
-        return ethers.BigNumber.from(0);
+        const provider = await this.web3Provider();
+        if (provider) {
+            return provider.getBalance(address);
+        } else {
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
     }
 
     async getERC20TokenBalance(address: addressString, token: addressString): Promise<ethers.BigNumber> {
         this.trace('getERC20TokenBalance', [address, token]);
-        return ethers.BigNumber.from(0);
+        const provider = await this.web3Provider();
+        if (provider) {
+            const erc20Contract = new ethers.Contract(token, erc20Abi, provider);
+            const balance = await erc20Contract.balanceOf(address);
+            return balance;
+        } else {
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
     }
 
     async transferTokens(token: TokenClass, amount: ethers.BigNumber, to: addressString): Promise<EvmTransactionResponse> {
@@ -133,6 +197,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
         return {
             hash: transactionId,
+            wait: async () => Promise.resolve({} as ethers.providers.TransactionReceipt),
         } as EvmTransactionResponse;
     }
 
@@ -142,20 +207,22 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
-        return false;
+        return true;
     }
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         this.trace('web3Provider');
-        const web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+        const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+        const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+        const web3Provider = new ethers.providers.JsonRpcProvider(url);
         await web3Provider.ready;
-        return web3Provider;
+        return web3Provider as ethers.providers.Web3Provider;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {
         this.trace('externalProvider');
         return new Promise(async (resolve) => {
-            resolve({} as unknown as ethers.providers.ExternalProvider);
+            resolve(null as unknown as ethers.providers.ExternalProvider);
         });
     }
 

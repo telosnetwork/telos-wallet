@@ -68,6 +68,9 @@ const evmAuthenticatorMock = {
     getERC20TokenBalance: () => ({
         then: jest.fn().mockImplementation((cb: any) => {
             cb(TOKEN_BALANCE);
+            return {
+                catch: jest.fn(),
+            };
         }),
     }),
 };
