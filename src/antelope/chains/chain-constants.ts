@@ -1,4 +1,8 @@
+import { NETWORK as telosEvmNetwork } from 'src/antelope/chains/evm/telos-evm';
+import { NETWORK as telosTestnetEvmNetwork } from 'src/antelope/chains/evm/telos-evm-testnet';
+
 export const TELOS_CHAIN_IDS = ['40', '41'];
+export const TELOS_NETWORK_NAMES = [telosEvmNetwork, telosTestnetEvmNetwork];
 export const TELOS_ANALYTICS_EVENT_IDS = {
     loginStarted: 'JXIYBP1S',
     loginSuccessful: 'HIP11SFR',

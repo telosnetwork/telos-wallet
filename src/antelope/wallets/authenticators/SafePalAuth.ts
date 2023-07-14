@@ -2,6 +2,7 @@ import { EthereumProvider } from 'src/antelope/types';
 import { EVMAuthenticator, ExternalProviderAuth } from 'src/antelope/wallets';
 
 const name = 'SafePal';
+export const SafePalAuthName = name;
 export class SafePalAuth extends ExternalProviderAuth {
 
     // this is just a dummy label to identify the authenticator base class

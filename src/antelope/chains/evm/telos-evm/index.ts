@@ -8,7 +8,7 @@ import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '40';
-const NETWORK = 'telos-evm';
+export const NETWORK = 'telos-evm';
 const DISPLAY = 'Telos EVM Mainnet';
 const TOKEN = new TokenClass({
     name: 'Telos',
