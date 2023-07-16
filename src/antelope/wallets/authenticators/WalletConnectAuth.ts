@@ -2,13 +2,13 @@ import {
     PrepareSendTransactionResult,
     PrepareWriteContractResult,
     SendTransactionResult,
+    sendTransaction,
     disconnect,
     InjectedConnector,
     fetchBalance,
     getAccount,
     prepareSendTransaction,
     prepareWriteContract,
-    sendTransaction,
     writeContract,
     WriteContractResult,
 } from '@wagmi/core';
@@ -17,12 +17,14 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
 
 const name = 'WalletConnect';
@@ -152,11 +154,13 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.sendConfig = await prepareSendTransaction({
                     to: to,
                     value: BigInt(amount.toString()),
+                    chainId: +useChainStore().getChain(this.label).settings.getChainId(),
                 });
             } else {
                 const abi = useEVMStore().getTokenABI(token.type);
                 const functionName = 'transfer';
                 this.sendConfig = await prepareWriteContract({
+                    chainId: +useChainStore().getChain(this.label).settings.getChainId(),
                     address: token.address as addressString,
                     abi,
                     functionName,
@@ -172,12 +176,13 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
         // TODO: mobile fix
-        if (usePlatformStore().isMobile) {
-            this.trace('isConnectedTo', 'on mobile hardcodded true');
-            return true;
-        }
+        // if (usePlatformStore().isMobile) {
+        //     this.trace('isConnectedTo', 'on mobile hardcodded true');
+        //     return true;
+        // }
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
+            console.log('----- web3Provider', web3Provider.network.chainId, web3Provider);
             const correct = +web3Provider.network.chainId === +chainId;
             this.trace('isConnectedTo', chainId, correct ? 'OK!' : 'not connected');
             resolve(correct);
@@ -185,10 +190,18 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
-        this.trace('web3Provider');
-        const web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+        let web3Provider = null;
+        if (usePlatformStore().isMobile) {
+            const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+            const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+            web3Provider = new ethers.providers.JsonRpcProvider(url);
+            this.trace('web3Provider', 'JsonRpcProvider ->', web3Provider);
+        } else {
+            web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
+            this.trace('web3Provider', 'Web3Provider ->', web3Provider);
+        }
         await web3Provider.ready;
-        return web3Provider;
+        return web3Provider as ethers.providers.Web3Provider;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {

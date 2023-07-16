@@ -171,7 +171,7 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async ensureCorrectChain(authenticator: EVMAuthenticator): Promise<ethers.providers.Web3Provider> {
-            this.trace('ensureCorrectChain', [authenticator]);
+            this.trace('ensureCorrectChain', authenticator);
             const checkProvider = await authenticator.web3Provider();
             let response = checkProvider;
             const correctChainId = useChainStore().currentChain.settings.getChainId();
