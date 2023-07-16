@@ -149,7 +149,7 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 250px;
     margin:auto;
     color: $white;
 }
