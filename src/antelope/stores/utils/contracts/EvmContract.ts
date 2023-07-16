@@ -134,11 +134,11 @@ export default class EvmContract {
         );
     }
 
-    getContractInstance() {
+    async getContractInstance() {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
-        const signer = this._manager?.getSigner();
+        const signer = await this._manager?.getSigner();
 
         if (!this._contract || signer) {
             this._contract = new ethers.Contract(this.address, this.abi, signer);

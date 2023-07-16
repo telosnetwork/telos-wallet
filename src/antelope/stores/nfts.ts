@@ -116,11 +116,13 @@ export const useNftsStore = defineStore(store_name, {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
-                    self.__inventory[label] = {
-                        owner: account?.account || '',
-                        list: [],
-                        loading: true,
-                    };
+                    if (label) {
+                        self.__inventory[label] = {
+                            owner: account?.account || '',
+                            list: [],
+                            loading: true,
+                        };
+                    }
                 },
             });
         },

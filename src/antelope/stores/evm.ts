@@ -9,17 +9,12 @@
  *
  */
 
-import detectEthereumProvider from '@metamask/detect-provider';
-import { ExternalProvider } from '@ethersproject/providers';
-import { BigNumber, ethers } from 'ethers';
-import Web3 from 'web3';
-import { AbiItem } from 'web3-utils';
+import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
-import { errorToString } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
@@ -34,26 +29,23 @@ import {
     EvmLog,
     ExceptionError,
     supportsInterfaceAbi,
-    EvmTransactionResponse,
     EvmContractCreationInfo,
     EvmContractMetadata,
-    TokenSourceInfo,
     TokenClass,
     ERC20_TYPE,
     ERC721_TYPE,
     ERC1155_TYPE,
     NFTClass,
+    EthereumProvider,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
-import { getAccount } from '@wagmi/core';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
-import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import {
+    getAntelope,
     useAccountStore,
     useChainStore,
     useFeedbackStore,
-    usePlatformStore,
 } from 'src/antelope';
+import { EVMAuthenticator, ExternalProviderAuth } from 'src/antelope/wallets';
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
 export const evmEvents = {
@@ -63,17 +55,14 @@ export const evmEvents = {
 };
 
 export interface EVMState {
-    __external_signer: ethers.Signer | null;
-    __external_provider: ExternalProvider | null;
-    __ethers_rpc_provider: ethers.providers.JsonRpcProvider | null;
-    __supports_meta_mask: boolean;
+    __:boolean;
 }
 
 const store_name = 'evm';
 
-const createManager = ():EvmContractManagerI => ({
-    getSigner: () => toRaw(useEVMStore().signer) as ethers.Signer,
-    getRpcProvider: () => toRaw(useEVMStore().rpcProvider) as ethers.providers.JsonRpcProvider,
+const createManager = (authenticator: ExternalProviderAuth):EvmContractManagerI => ({
+    getSigner: () => toRaw(authenticator.getSigner()),
+    getWeb3Provider: () => authenticator.web3Provider(),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
 });
@@ -81,143 +70,123 @@ const createManager = ():EvmContractManagerI => ({
 export const useEVMStore = defineStore(store_name, {
     state: (): EVMState => (evmInitialState),
     getters: {
-        provider: state => state.__external_provider,
-        rpcProvider: state => state.__ethers_rpc_provider,
-        signer: state => toRaw(state.__external_signer),
-        isMetamaskSupported: state => state.__supports_meta_mask,
         functionInterfaces: () => functions_overrides,
         eventInterfaces: () => events_signatures,
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: () => {
+        init: createInitFunction(store_name),
 
-            // bypass provider detection on mobile
-            if (usePlatformStore().isMobile){
-                return;
-            }
-
-            useFeedbackStore().setDebug(store_name, isTracingAll());
-            const evm = useEVMStore();
-
-            // detect provider
-            detectEthereumProvider({ mustBeMetaMask: true }).then((provider) => {
-                evm.setSupportsMetaMask(provider?.isMetaMask ?? false);
-                if (provider) {
-                    evm.setExternalProvider(provider);
-
-                    provider.on('chainChanged', (newNetwork) => {
-                        evm.trace('provider.chainChanged', newNetwork);
-                    });
-                    provider.on('accountsChanged', async (accounts) => {
-                        const network = useChainStore().currentChain.settings.getNetwork();
-                        evm.trace('provider.accountsChanged', accounts);
-                        useAccountStore().loginEVM({ network });
-                    });
-                }
-                onEvmReady.next(true);
-            });
-        },
         // actions ---
-        async login (network: string): Promise<string | null> {
-            this.trace('login', network);
-            const chain = useChainStore();
-            try {
-                useFeedbackStore().setLoading('evm.login');
-                chain.setLoggedChain(network);
-                chain.setCurrentChain(network);
+        async initExternalProvider(authenticator: ExternalProviderAuth): Promise<void> {
+            this.trace('initExternalProvider', authenticator.getName(), [authenticator.getProvider()]);
+            const provider: EthereumProvider | null = authenticator.getProvider();
+            const evm = useEVMStore();
+            const ant = getAntelope();
 
-                if (localStorage.getItem('wagmi.connected')){
-                    return getAccount().address as string;
-                }
-
-                const checkProvider = await checkNetwork() as ethers.providers.Web3Provider;
-
-                const accounts = await checkProvider.listAccounts();
-                if (accounts.length > 0) {
-                    return accounts[0];
-                } else {
-                    if (!checkProvider.provider.request) {
-                        throw new AntelopeError('antelope.evm.error_support_provider_request');
+            if (provider && !provider.__initialized) {
+                this.trace('initExternalProvider', authenticator.getName(), 'initializing provider');
+                // ensure this provider actually has the correct methods
+                // Check consistency of the provider
+                const methods = ['request', 'on'];
+                const candidate = provider as unknown as Record<string, unknown>;
+                for (const method of methods) {
+                    if (typeof candidate[method] !== 'function') {
+                        console.warn(`MetamaskAuth.getProvider: method ${method} not found`);
+                        throw new AntelopeError('antelope.evm.error_invalid_provider');
                     }
-                    const accessGranted = await checkProvider.provider.request({ method: 'eth_requestAccounts' });
-                    if (accessGranted.length < 1) {
-                        return null;
+                }
+
+                // this handler activates only when the user comes back from switching to the wrong network on the wallet
+                // It checks if the user is on the correct network and if not, it shows a notification with a button to switch
+                const checkNetworkHandler = async () => {
+                    window.removeEventListener('focus', checkNetworkHandler);
+                    if (useAccountStore().loggedAccount) {
+                        const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                        if (await authenticator.isConnectedToCorrectChain()) {
+                            evm.trace('checkNetworkHandler', 'correct network');
+                        } else {
+                            const networkName = useChainStore().loggedChain.settings.getDisplay();
+                            const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                            ant.config.notifyFailureWithAction(errorMessage, {
+                                label: ant.config.localizationHandler('evm_wallet.switch'),
+                                handler: () => {
+                                    authenticator.ensureCorrectChain();
+                                },
+                            });
+                        }
                     }
-                    return accessGranted[0];
-                }
-            } catch (error) {
-                if ((error as unknown as ExceptionError).code === 4001) {
-                    throw new AntelopeError('antelope.evm.error_connect_rejected');
-                } else {
-                    console.error('Error:', error);
-                    throw new AntelopeError('antelope.evm.error_login');
-                }
-            } finally {
-                useFeedbackStore().unsetLoading('evm.login');
-                const provider = await this.ensureProvider();
-                const checkProvider = new ethers.providers.Web3Provider(provider);
-                const signer = await checkProvider.getSigner();
-                this.setExternalSigner(signer);
+                };
 
-            }
-        },
-        async sendSystemToken (to: string, value: BigNumber): Promise<EvmTransactionResponse> {
-            this.trace('sendSystemToken', to, value);
-
-            // Send the transaction
-            if (this.signer) {
-                return this.signer.sendTransaction({
-                    to,
-                    value,
-                }).then(
-                    (transaction: ethers.providers.TransactionResponse) => transaction,
-                ).catch((error) => {
-                    if ('ACTION_REJECTED' === ((error as {code:string}).code)) {
-                        throw new AntelopeError('antelope.evm.error_transaction_canceled');
-                    } else {
-                        // unknown error we print on console
-                        console.error(error);
-                        throw new AntelopeError('antelope.evm.error_send_transaction', { error });
+                provider.on('chainChanged', (value) => {
+                    const newNetwork = value as string;
+                    evm.trace('provider.chainChanged', newNetwork);
+                    window.removeEventListener('focus', checkNetworkHandler);
+                    if (useAccountStore().loggedAccount) {
+                        window.addEventListener('focus', checkNetworkHandler);
                     }
                 });
-            } else {
-                console.error('Error sending transaction: No signer');
-                throw new AntelopeError('antelope.evm.error_no_signer');
-            }
-        },
-        // auxiliar
-        async ensureProvider(): Promise<ExternalProvider> {
-            return new Promise((resolve, reject) => {
-                evmEvents.whenReady.subscribe(async () => {
-                    const provider = this.__external_provider as ExternalProvider;
-                    if (provider) {
-                        resolve(provider);
+
+                provider.on('accountsChanged', async (value) => {
+                    const accounts = value as string[];
+                    const network = useChainStore().currentChain.settings.getNetwork();
+                    evm.trace('provider.accountsChanged', ...accounts);
+
+                    if (accounts.length > 0) {
+                        // If we are here one of two possible things had happened:
+                        // 1. The user has just logged in to the wallet
+                        // 2. The user has switched the account in the wallet
+
+                        // if we are in case 1, then we are in the middle of the login process and we don't need to do anything
+                        // We can tell because the account store has no logged account
+
+                        // But if we are in case 2 and have a logged account, we need to re-login the account using the same authenticator
+                        // overwriting the previous logged account, which in turn will trigger all account data to be reloaded
+                        if (useAccountStore().loggedAccount) {
+                            // if the user is already authenticated we try to re login the account using the same authenticator
+                            const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                            if (!authenticator) {
+                                console.error('Inconsistency: logged account authenticator is null', authenticator);
+                            } else {
+                                useAccountStore().loginEVM({ authenticator,  network });
+                            }
+                        }
                     } else {
-                        reject(new AntelopeError('antelope.evm.error_no_provider'));
+                        // the user has disconnected the all the accounts from the wallet so we logout
+                        useAccountStore().logout();
                     }
                 });
-            });
+
+                // This initialized property is not part of the standard provider, it's just a flag to know if we already initialized the provider
+                provider.__initialized = true;
+            }
+            authenticator.onReady.next(true);
         },
 
-        async ensureCorrectChain(checkProvider: ethers.providers.Web3Provider): Promise<ethers.providers.Web3Provider> {
-            this.trace('ensureCorrectChain', checkProvider);
-            let response = checkProvider;
-            const { chainId } = await checkProvider.getNetwork();
-            const currentChain = useChainStore().currentChain.settings as unknown as EVMChainSettings;
-            if (Number(chainId).toString() !== currentChain.getChainId()) {
-                await this.switchChainInjected();
-                const provider = await this.ensureProvider();
-                response = new ethers.providers.Web3Provider(provider);
-            }
-            this.setRpcProvider(response);
+        async isProviderOnTheCorrectChain(provider: ethers.providers.Web3Provider, correctChainId: string): Promise<boolean> {
+            const { chainId } = await provider.getNetwork();
+            const response = Number(chainId).toString() === correctChainId;
+            this.trace('isProviderOnTheCorrectChain', provider, ' -> ', response);
             return response;
         },
 
-        async switchChainInjected(): Promise<boolean> {
-            this.trace('switchChainInjected');
+        async ensureCorrectChain(authenticator: EVMAuthenticator): Promise<ethers.providers.Web3Provider> {
+            this.trace('ensureCorrectChain', authenticator);
+            const checkProvider = await authenticator.web3Provider();
+            let response = checkProvider;
+            const correctChainId = useChainStore().currentChain.settings.getChainId();
+            if (!await this.isProviderOnTheCorrectChain(checkProvider, correctChainId)) {
+                const provider = await authenticator.externalProvider();
+                await this.switchChainInjected(provider);
+                response = new ethers.providers.Web3Provider(provider);
+            }
+            return response;
+        },
+
+        async switchChainInjected(externalProvider: ethers.providers.ExternalProvider): Promise<boolean> {
+            this.trace('switchChainInjected', [externalProvider]);
             useFeedbackStore().setLoading('evm.switchChainInjected');
-            const provider = this.__external_provider;
+            const provider = externalProvider;
             if (provider) {
                 const chainSettings = useChainStore().loggedChain.settings as unknown as EVMChainSettings;
                 const chainId = parseInt(chainSettings.getChainId(), 10);
@@ -237,11 +206,6 @@ export const useEVMStore = defineStore(store_name, {
                         4902,
                         -32603, // https://github.com/MetaMask/metamask-mobile/issues/2944
                     ];
-
-                    // if user rejects request to switch chains, disable repeated prompts
-                    if ((error as unknown as ExceptionError).code === 4001){ // 4001 - 'user rejected request'
-                        window.removeEventListener('focus', checkNetwork);
-                    }
 
                     if (chainNotAddedCodes.includes((error as unknown as ExceptionError).code)) {  // 'Chain <hex chain id> hasn't been added'
                         const p:RpcEndpoint = chainSettings.getRPCEndpoint();
@@ -289,17 +253,6 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
         },
-        // utils ---
-        toWei(value: string | number, decimals = 18): string {
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(decimals));
-            const amountInWei = bigAmount.toString();
-            return amountInWei;
-        },
-        toBigNumber(value: string | number, decimals?: number): ethers.BigNumber {
-            const dec = decimals ? decimals : value.toString().split('.')[1]?.length ?? 0;
-            const bigAmount: ethers.BigNumber = ethers.utils.parseUnits(value === 'string' ? value : toStringNumber(value), toStringNumber(dec));
-            return bigAmount;
-        },
         // Evm Contract Managment
         async getFunctionIface(hash:string): Promise<ethers.utils.Interface | null> {
             const prefix = hash.toLowerCase().slice(0, 10);
@@ -345,13 +298,14 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async getContractCreation(address:string): Promise<EvmContractCreationInfo | null> {
+        async getContractCreation(authenticator: ExternalProviderAuth, address:string): Promise<EvmContractCreationInfo | null> {
+            this.trace('getContractCreation', address);
             if (!address) {
                 console.error('address is null', address);
                 throw new AntelopeError('antelope.evm.error_invalid_address', { address });
             }
             try {
-                const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
+                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
                 return await chain_settings.getContractCreation(address);
             } catch (e) {
                 console.error(new AntelopeError('antelope.evm.error_getting_contract_creation', { address }));
@@ -363,7 +317,7 @@ export const useEVMStore = defineStore(store_name, {
         // this is coming from the token transfer, transactions table & transaction (general + logs tabs) pages where we're
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
-        async getContract(address:string, suspectedToken = ''): Promise<EvmContract | null> {
+        async getContract(authenticator: ExternalProviderAuth, address:string, suspectedToken = ''): Promise<EvmContract | null> {
             if (!address) {
                 this.trace('getContract', 'address is null', address);
                 return null;
@@ -372,7 +326,7 @@ export const useEVMStore = defineStore(store_name, {
 
             // Get from already queried contracts, add token data if needed & not present
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
-            const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
+            const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
             // If cached is null, it means this is the first time this address is queried
             if (cached !== null) {
@@ -393,32 +347,31 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.setContractAsNotExisting(addressLower);
 
             // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
-            const creationInfo = await this.getContractCreation(addressLower);
+            const creationInfo = await this.getContractCreation(authenticator, addressLower);
             // The the contract passes the creation info check,
             // we overwrite the previous call to set contract as not existing with the actual EvmContract
 
-            const metadata = await this.checkBucket(address);
+            const metadata = await this.checkBucket(authenticator, address);
             if (metadata && creationInfo) {
                 this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
-                return await this.getVerifiedContract(addressLower, metadata, creationInfo, suspectedToken);
+                return await this.getVerifiedContract(authenticator, addressLower, metadata, creationInfo, suspectedToken);
             }
 
-            const contract = await this.getContractFromTokenList(address, suspectedToken, creationInfo);
+            const contract = await this.getContractFromTokenList(authenticator, address, suspectedToken, creationInfo);
             if (contract) {
                 this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
             }
 
             this.trace('getContract', 'returning empty contract', address, creationInfo);
-            return await this.getEmptyContract(addressLower, creationInfo);
+            return await this.getEmptyContract(authenticator, addressLower, creationInfo);
         },
 
-        async checkBucket(address:string): Promise<EvmContractMetadata | null> {
+        async checkBucket(authenticator: ExternalProviderAuth, address:string): Promise<EvmContractMetadata | null> {
             const checksumAddress = toChecksumAddress(address);
             try {
-                const currentChain = useChainStore().currentChain.settings as unknown as EVMChainSettings;
-                // let responseData = (await contractsBucket.get(`${checksumAddress}/metadata.json`)).data;
-                const metadataStr = await currentChain.getContractMetadata(checksumAddress);
+                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
+                const metadataStr = await chain_settings.getContractMetadata(checksumAddress);
                 return JSON.parse(metadataStr);
             } catch (e) {
                 return null;
@@ -426,17 +379,18 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getVerifiedContract(
+            authenticator: ExternalProviderAuth,
             address:string,
             metadata: EvmContractMetadata,
             creationInfo: EvmContractCreationInfo,
             suspectedType:string,
         ): Promise<EvmContract> {
-            const token = await this.getToken(address, suspectedType) ?? undefined;
+            const token = await this.getToken(authenticator, address, suspectedType) ?? undefined;
             const contract = new EvmContract({
                 name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
                 address,
                 abi: metadata.output?.abi,
-                manager: createManager(),
+                manager: createManager(authenticator),
                 token: token,
                 creationInfo,
                 verified: true,
@@ -447,30 +401,16 @@ export const useEVMStore = defineStore(store_name, {
             return contract;
         },
 
-        async getTokenContract(address:string, tokenData: TokenSourceInfo, creationInfo:EvmContractCreationInfo): Promise<EvmContract> {
-            const contract = new EvmContract({
-                name: tokenData.symbol ? `${tokenData.name} (${tokenData.symbol})` : tokenData.name ?? 'Unknown',
-                address,
-                abi: this.getTokenABI(tokenData.type ?? ''),
-                manager: createManager(),
-                creationInfo,
-                token: Object.assign({
-                    address,
-                }, tokenData) as TokenSourceInfo,
-                supportedInterfaces: [tokenData.type ?? 'none'],
-            });
-
-            const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-            chain_settings.addContract(address, contract);
-            return contract;
-        },
-
-        async getEmptyContract(address:string, creationInfo: EvmContractCreationInfo | null): Promise<EvmContract> {
+        async getEmptyContract(
+            authenticator: ExternalProviderAuth,
+            address:string,
+            creationInfo: EvmContractCreationInfo | null,
+        ): Promise<EvmContract> {
             const contract = new EvmContract({
                 name: `0x${address.slice(0, 16)}...`,
                 address,
                 creationInfo,
-                manager: createManager(),
+                manager: createManager(authenticator),
                 supportedInterfaces: [],
             });
             const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
@@ -478,8 +418,8 @@ export const useEVMStore = defineStore(store_name, {
             return contract;
         },
 
-        async supportsInterface(address:string, iface:string): Promise<boolean> {
-            const provider = this.__ethers_rpc_provider;
+        async supportsInterface(authenticator: ExternalProviderAuth, address:string, iface:string): Promise<boolean> {
+            const provider = await authenticator.web3Provider();
             if (!provider) {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
@@ -492,15 +432,15 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async isTokenType(address:string, type:string): Promise<string> {
+        async isTokenType(authenticator: ExternalProviderAuth, address:string, type:string): Promise<string> {
             if(typeof type === 'undefined'){
                 return '';
             } else if(type === 'erc721'){
-                if(!await this.supportsInterface(address, '0x80ac58cd')){
+                if(!await this.supportsInterface(authenticator, address, '0x80ac58cd')){
                     return '';
                 }
             } else if(type === 'erc1155') {
-                if(!await this.supportsInterface(address, '0xd9b67a26')){
+                if(!await this.supportsInterface(authenticator, address, '0xd9b67a26')){
                     return '';
                 }
             }
@@ -516,27 +456,18 @@ export const useEVMStore = defineStore(store_name, {
             return erc20Abi;
         },
 
-        async getContractFromAbi(address:string, abi:EvmABI): Promise<ethers.Contract> {
-            const provider = this.__ethers_rpc_provider;
+        async getContractFromAbi(authenticator: ExternalProviderAuth, address:string, abi:EvmABI): Promise<ethers.Contract> {
+            this.trace('getContractFromAbi', address, abi);
+            const provider = await authenticator.web3Provider();
             if (!provider) {
                 throw new AntelopeError('antelope.evm.error_no_provider');
             }
             return  new ethers.Contract(address, abi, provider);
         },
 
-        async getERC20TokenBalance(account: string, address:string): Promise<ethers.BigNumber> {
-            const erc20ABI = this.getTokenABI(ERC20_TYPE) as AbiItem[];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const web3 = new Web3((window as any).ethereum);
-
-            const contract = new web3.eth.Contract(erc20ABI, address);
-            return contract.methods.balanceOf(account).call()
-                .then((balance: never) => ethers.BigNumber.from(balance));
-        },
-
-        async getToken(address:string, suspectedType:string): Promise<TokenClass | null> {
+        async getToken(authenticator: ExternalProviderAuth, address:string, suspectedType:string): Promise<TokenClass | null> {
             if (suspectedType.toUpperCase() === ERC20_TYPE) {
-                const chain = useChainStore().currentChain;
+                const chain = useChainStore().getChain(authenticator.label);
                 const list = await chain.settings.getTokenList();
                 const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
                 if (token) {
@@ -554,8 +485,13 @@ export const useEVMStore = defineStore(store_name, {
             return null;
         },
 
-        async getContractFromTokenList(address:string, suspectedType:string, creationInfo:EvmContractCreationInfo | null): Promise<EvmContract | null> {
-            const token = await this.getToken(address, suspectedType);
+        async getContractFromTokenList(
+            authenticator: ExternalProviderAuth,
+            address:string,
+            suspectedType:string,
+            creationInfo:EvmContractCreationInfo | null,
+        ): Promise<EvmContract | null> {
+            const token = await this.getToken(authenticator, address, suspectedType);
             if (token) {
                 const abi = this.getTokenABI(ERC20_TYPE);
                 const token_contract = new EvmContract({
@@ -563,7 +499,7 @@ export const useEVMStore = defineStore(store_name, {
                     address,
                     creationInfo,
                     abi,
-                    manager: createManager(),
+                    manager: createManager(authenticator),
                     token,
                     supportedInterfaces: [token.type],
                 });
@@ -574,48 +510,9 @@ export const useEVMStore = defineStore(store_name, {
                 return null;
             }
         },
-
-        // Commits ----
-        setSupportsMetaMask(value: boolean) {
-            this.trace('setSupportsMetaMask', value);
-            try {
-                this.__supports_meta_mask = value;
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
-
-        setExternalProvider(value: ExternalProvider | null) {
-            this.trace('setExternalProvider', value);
-            try {
-                this.__external_provider = value;
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
-
-        setRpcProvider(value: ethers.providers.JsonRpcProvider | null) {
-            this.trace('setRpcProvider', value);
-            try {
-                this.__ethers_rpc_provider = value;
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
-        setExternalSigner(value: ethers.Signer | null) {
-            this.trace('setExternalSigner', value);
-            try {
-                this.__external_signer = value;
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            }
-        },
     },
 });
 
 const evmInitialState: EVMState = {
-    __external_signer: null,
-    __external_provider: null,
-    __ethers_rpc_provider: null,
-    __supports_meta_mask: false,
+    __: false,
 };

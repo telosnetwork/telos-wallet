@@ -165,7 +165,7 @@ export default defineComponent({
                 },
             });
 
-            if (this.token.address !== NativeCurrencyAddress && evmStore.isMetamaskSupported) {
+            if (this.token.address !== NativeCurrencyAddress) {
                 items.push({
                     label: this.$t('evm_wallet.add_to_metamask'),
                     icon: require('assets/logo--metamask.svg'),

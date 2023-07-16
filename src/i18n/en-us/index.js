@@ -39,6 +39,8 @@ export default {
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
         wallet_introduction: 'What is a Web Wallet?',
+        no_provider_notification_message: 'No wallet provider was detected. Make sure you have the wallet installed and enabled. If you have multiple wallets installed, you can disable the others to avoid possible conflicts.',
+        no_provider_action_label: 'Install {provider}',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -88,6 +90,7 @@ export default {
         sent: 'Sent',
         received: 'Received',
         swapped: 'Swapped',
+        switch: 'Switch',
         failed_contract_interaction: 'Failed contract interaction',
         contract_interaction: 'Contract interaction',
         contract_creation: 'Contract creation',
@@ -459,6 +462,8 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+        },
+        wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
         },

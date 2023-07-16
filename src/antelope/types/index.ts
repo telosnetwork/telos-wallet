@@ -19,6 +19,7 @@ export * from 'src/antelope/types/OpenSeaTypes';
 export * from 'src/antelope/types/PriceData';
 export * from 'src/antelope/types/Proposals';
 export * from 'src/antelope/types/Producers';
+export * from 'src/antelope/types/Providers';
 export * from 'src/antelope/types/Theme';
 export * from 'src/antelope/types/TokenClass';
 export * from 'src/antelope/types/TransactionV1';

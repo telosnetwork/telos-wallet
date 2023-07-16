@@ -12,15 +12,19 @@
  */
 
 import { defineStore } from 'pinia';
-import { errorToString } from 'src/antelope/config';
 import {
-    AntelopeError,
     EvmTransactionResponse,
     Label,
+    TokenMarketData,
+    MarketSourceInfo,
     NativeTransactionResponse,
     TokenBalance,
     TokenClass,
-    TransactionResponse, EvmABI,
+    TransactionResponse,
+    EvmABI,
+    addressString,
+    AntelopeError,
+
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
@@ -31,31 +35,27 @@ import {
     useFeedbackStore,
     useChainStore,
     useEVMStore,
+    usePlatformStore,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
 import {
-    FetchBalanceResult,
     SendTransactionResult,
-    fetchBalance,
-    getAccount,
     prepareSendTransaction,
     prepareWriteContract,
-    sendTransaction,
-    writeContract,
     PrepareSendTransactionResult,
     PrepareWriteContractResult,
 } from '@wagmi/core';
-import { AccountModel } from 'src/antelope/stores/account';
+import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
+import { EVMAuthenticator } from 'src/antelope/wallets';
+import { filter } from 'rxjs';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
     __wagmiSystemTokenTransferConfig: { [label: Label]: PrepareSendTransactionResult | null };
     __wagmiTokenTransferConfig: { [label: Label]: PrepareWriteContractResult<EvmABI, 'transfer', number> | null };
 }
-
-type addressString = `0x${string}`; // required wagmi type
 
 const store_name = 'balances';
 
@@ -70,36 +70,23 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
-            const self = useBalancesStore();
-            getAntelope().events.onAccountChanged.subscribe({
+            getAntelope().events.onAccountChanged.pipe(
+                filter(({ label, account }) => !!label && !!account),
+            ).subscribe({
                 next: async ({ label, account }) => {
-                    await self.updateBalancesForAccount(label, toRaw(account));
-                },
-            });
-
-            getAntelope().events.onChainIndexer.subscribe({
-                next: async ({ label, isHealthy }) => {
-                    if (isHealthy) {
-                        self.trace('init', 'onChainIndexer:', label, isHealthy);
-                        const account = useAccountStore().getAccount(label);
-                        if (account?.account) {
-                            await self.updateBalancesForAccount(label, account);
-                        }
-                    }
+                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                 },
             });
 
             // update logged balances every 10 seconds only if the user is logged
             setInterval(async () => {
                 if (useAccountStore().loggedAccount) {
-                    await self.updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
                 }
             }, 10000);
-
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
             this.trace('updateBalancesForAccount', label, account);
-
             try {
                 useFeedbackStore().setLoading('updateBalancesForAccount');
                 const chain = useChainStore().getChain(label);
@@ -112,95 +99,62 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
-                        this.__balances[label] = this.__balances[label] ?? [];
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
                             if (account?.account) {
-                                const balances = await chain_settings.getBalances(account.account);
+                                this.__balances[label] = await chain_settings.getBalances(account.account);
                                 // if new account with no index records display default zero TLOS balance
-                                if (balances.length > 0){
-                                    this.__balances[label] = balances;
+                                if (this.__balances[label].length === 0){
+                                    await this.updateSystemBalanceForAccount(label, account.account as addressString);
                                 }
-                                await this.updateSystemBalancesForAccount(label, account.account);
                                 this.sortBalances(label);
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                             }
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
-
-                            // first, we add the system token
-                            await this.updateSystemBalanceForAccount(label, account.account, chain_settings.getSystemToken());
-
-                            // then we iterate over the tokens, fetch the balance for each and add them to the list
+                            this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();
-                            const promises = tokens.map(
-                                async token => this.updateERC20BalanceForAccount(label, account.account, token),
-                            );
+                            await this.updateSystemBalanceForAccount(label, account.account as addressString);
+                            this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
+
+                            const authenticator = account.authenticator as EVMAuthenticator;
+                            const promises = tokens
+                                .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
+                                    .then((balanceBn: BigNumber) => {
+                                        this.processBalanceForToken(label, token, balanceBn);
+                                    }),
+                                );
+
 
                             Promise.allSettled(promises).then(() => {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]).map(t => t.toString()));
+                                this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
                             });
                         }
                     }
                 }
             } catch (error) {
                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
-                console.error('Error: ', errorToString(error));
+                console.error('Error: ', error);
             }
         },
-        async updateSystemBalancesForAccount(label: string, address: string): Promise<void> {
-            const chain_settings = useChainStore().getChain(label).settings;
-            chain_settings.getSystemTokens().forEach(async (token) => {
-                if (token.isSystem) {
-                    this.updateSystemBalanceForAccount(label, address, token);
-                } else {
-                    this.updateERC20BalanceForAccount(label, address, token);
-                }
-            });
-        },
-        async updateSystemBalanceForAccount(label: string, address: string, token: TokenClass): Promise<void> {
-            const evm = useEVMStore();
-            const provider = toRaw(evm.rpcProvider);
-            const chain_settings = useChainStore().getChain(label).settings;
 
-            if (provider) {
-                const balanceBn = await provider.getBalance(address);
-                this.processBalanceForToken(label, token, balanceBn);
-            } else if (localStorage.getItem('wagmi.connected')) {
-                const balanceBn = await fetchBalance({
-                    address: getAccount().address as addressString,
-                    chainId: +chain_settings.getChainId(),
-                });
-                this.processBalanceForToken(label, token, balanceBn.value);
-            } else {
-                throw new AntelopeError('antelope.evm.error_no_provider');
-            }
-        },
-        async updateERC20BalanceForAccount(label: string, address: string, token: TokenClass): Promise<void> {
-            const chain_settings = useChainStore().getChain(label).settings;
-            const evm = useEVMStore();
-            if (localStorage.getItem('wagmi.connected')) {
-                console.assert(getAccount().address === address, `${getAccount().address} is different from ${address}`);
-                fetchBalance({
-                    address: address as addressString,
-                    chainId: +chain_settings.getChainId(),
-                    token: token.address as addressString,
-                }).then((balanceBn: FetchBalanceResult) => {
-                    this.processBalanceForToken(label, token, balanceBn.value);
-                });
-            } else {
-                return evm.getERC20TokenBalance(address, token.address)
-                    .then((balanceBn: BigNumber) => {
-                        this.processBalanceForToken(label, token, balanceBn);
-                    });
-            }
+        async updateSystemBalanceForAccount(label: string, address: addressString): Promise<void> {
+            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+            const token = chain_settings.getSystemToken();
+            const price = (await chain_settings.getUsdPrice()).toString();
+            const marketInfo = { price } as MarketSourceInfo;
+            const marketData = new TokenMarketData(marketInfo);
+            token.market = marketData;
+
+            const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
+            this.processBalanceForToken(label, token, balanceBn);
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
-            const importantTokens = useChainStore().getChain(label).settings.getSystemTokens().map(t => t.id);
+            const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();
             let result = false;
-            if (importantTokens.includes(token.id)) {
+            if (importantTokens.map(t => t.id).includes(token.id)) {
                 // if the token is important, we always add it. Even with 0 balance.
                 result = true;
             } else {
@@ -217,40 +171,43 @@ export const useBalancesStore = defineStore(store_name, {
                 this.removeBalance(label, tokenBalance);
             }
         },
-        async subscribeForTransactionReceipt(response: TransactionResponse): Promise<TransactionResponse> {
+        async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', response.hash);
-            const provider = toRaw(useEVMStore().rpcProvider);
-            if (provider) {
-                // instead of await, we use then() to return the response immediately
-                // and perform the balance update in the background
-                const whenConfirmed = provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
-                    this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
-                    if (receipt.status === 1) {
-                        const account = useAccountStore().loggedAccount;
-                        if (account?.account) {
-                            this.updateBalancesForAccount('logged', account);
-                        }
-                    }
-                    return receipt;
-                });
-
-                // we add the wait method to the response,
-                // so that the caller can subscribe to the confirmation event
-                response.wait = async () => whenConfirmed;
+            if (account.isNative) {
+                throw new AntelopeError('Not implemented yet for native');
             } else {
-                throw new AntelopeError('antelope.evm.error_no_provider');
+                const authenticator = account.authenticator as EVMAuthenticator;
+                const provider = await authenticator.web3Provider();
+                if (provider) {
+                    // instead of await, we use then() to return the response immediately
+                    // and perform the balance update in the background
+                    const whenConfirmed = provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
+                        this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+                        if (receipt.status === 1) {
+                            const account = useAccountStore().loggedAccount;
+                            if (account?.account) {
+                                this.updateBalancesForAccount('logged', account);
+                            }
+                        }
+                        return receipt;
+                    });
+                    // we add the wait method to the response,
+                    // so that the caller can subscribe to the confirmation event
+                    response.wait = async () => whenConfirmed;
+                } else {
+                    if (usePlatformStore().isMobile) {
+                        response.wait = async () => Promise.resolve({} as ethers.providers.TransactionReceipt);
+                    } else {
+                        throw new AntelopeError('antelope.evm.error_no_provider');
+                    }
+                }
             }
             return response;
         },
-        async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: BigNumber): Promise<void> {
-            const config = await prepareSendTransaction({
-                request: {
-                    to,
-                    value: amount,
-                },
-            });
+        async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {
+            const request = await prepareSendTransaction({ to, value: amount });
 
-            this.setWagmiSystemTokenTransferConfig(config, label);
+            this.setWagmiSystemTokenTransferConfig(request, label);
             this.setWagmiTokenTransferConfig(null, label);
         },
         async prepareWagmiTokenTransferConfig(label: Label, token: TokenClass, to: string, amount: BigNumber): Promise<void> {
@@ -258,7 +215,8 @@ export const useBalancesStore = defineStore(store_name, {
                 address: token.address as addressString,
                 abi: useEVMStore().getTokenABI(token.type),
                 functionName: 'transfer',
-                args: [to, amount],
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                args: [to, amount] as any[],
             })) as PrepareWriteContractResult<EvmABI, 'transfer', number>;
 
             this.setWagmiTokenTransferConfig(config, label);
@@ -274,12 +232,12 @@ export const useBalancesStore = defineStore(store_name, {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
                     return await this.transferNativeTokens(chain_settings, account, token, to, amount, memo ?? '')
-                        .then(this.subscribeForTransactionReceipt);
+                        .then(r => this.subscribeForTransactionReceipt(account, r));
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
-                    const account = useAccountStore().loggedAccount;
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
                     return await this.transferEVMTokens(label, chain_settings, account, token, to, amount)
-                        .then(this.subscribeForTransactionReceipt);
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
                 console.error(error);
@@ -322,7 +280,7 @@ export const useBalancesStore = defineStore(store_name, {
         async transferEVMTokens(
             label: Label,
             settings: EVMChainSettings,
-            account: AccountModel,
+            account: EvmAccountModel,
             token: TokenClass,
             to: string,
             amount: BigNumber,
@@ -331,54 +289,12 @@ export const useBalancesStore = defineStore(store_name, {
 
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-
-                if (localStorage.getItem('wagmi.connected')) {
-                    return await this.transferWalletConnect(label, token);
-                } else {
-                    return await this.transferMetaMask(token, to, amount);
-                }
+                return await account.authenticator.transferTokens(token, amount, to);
             } catch (error) {
                 console.error(error);
                 throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
-            }
-        },
-
-        async transferWalletConnect(label: Label, token: TokenClass): Promise<SendTransactionResult> {
-            if (token.isSystem) {
-                const config = this.__wagmiSystemTokenTransferConfig[label];
-
-                if (!config) {
-                    throw new AntelopeError('antelope.balances.error_system_token_transfer_config');
-                }
-
-                return await sendTransaction(config);
-            } else {
-                const config = this.__wagmiTokenTransferConfig[label];
-
-                if (!config) {
-                    throw new AntelopeError('antelope.balances.error_token_transfer_config');
-                }
-
-                return await writeContract(config);
-            }
-        },
-
-        async transferMetaMask(token: TokenClass, to: string, amount: BigNumber): Promise<EvmTransactionResponse> {
-            const evm = useEVMStore();
-
-            if (token.isSystem) {
-                return evm.sendSystemToken(to, amount);
-            } else {
-                const contract = await evm.getContract(token.address, token.type);
-                if (contract) {
-                    const contractInstance = contract.getContractInstance();
-                    const amountInWei = amount.toString();
-                    return contractInstance.transfer(to, amountInWei);
-                } else {
-                    throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
-                }
             }
         },
         // sorting ----------
