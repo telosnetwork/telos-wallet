@@ -47,9 +47,9 @@ export default defineComponent({
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
-        const setSafepalAuthenticator = async () => {
-            setAuthenticator('SafePal', 'logged');
-        };
+        // const setSafepalAuthenticator = async () => {
+        //     setAuthenticator('SafePal', 'logged');
+        // };
         const setWalletConnectAuthenticator = async () => {
             setAuthenticator('WalletConnect', 'logged');
         };
@@ -100,7 +100,7 @@ export default defineComponent({
             supportsMetamask,
             supportsSafePal,
             setMetamaskAuthenticator,
-            setSafepalAuthenticator,
+            // setSafepalAuthenticator,
             setWalletConnectAuthenticator,
             notifyNoProvider,
         };
@@ -140,7 +140,7 @@ export default defineComponent({
         </div>
 
         <!-- Safepal Authenticator button -->
-        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
+        <!--div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
             <template v-if="isLoading('SafePal.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -153,7 +153,7 @@ export default defineComponent({
                 >
                 {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
             </template>
-        </div>
+        </div-->
 
         <!-- WalletConnect Authenticator button -->
         <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">

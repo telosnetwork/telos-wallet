@@ -79,11 +79,12 @@ export const useBalancesStore = defineStore(store_name, {
             });
 
             // update logged balances every 10 seconds only if the user is logged
-            setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
-                }
-            }, 10000);
+            // setInterval(async () => {
+            //     if (useAccountStore().loggedAccount) {
+            //         await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
+            //     }
+            // }, 10000);
+            console.error('TODO: remember restore the comented code');
 
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {

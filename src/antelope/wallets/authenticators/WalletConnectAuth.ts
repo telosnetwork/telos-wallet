@@ -150,8 +150,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
         if (token) {
             if (token.isSystem) {
                 this.sendConfig = await prepareSendTransaction({
-                    to,
-                    value: amount.toBigInt(),
+                    to: to,
+                    value: BigInt(amount.toString()),
                 });
             } else {
                 const abi = useEVMStore().getTokenABI(token.type);
