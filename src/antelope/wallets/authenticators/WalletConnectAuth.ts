@@ -111,7 +111,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async logout(): Promise<void> {
         this.trace('logout');
         if (localStorage.getItem('wagmi.connected')){
-            disconnect();
+            await disconnect();
         }
     }
 
