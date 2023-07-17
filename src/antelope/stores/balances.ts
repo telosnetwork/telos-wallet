@@ -198,7 +198,6 @@ export const useBalancesStore = defineStore(store_name, {
                     // so that the caller can subscribe to the confirmation event
                     response.wait = async () => whenConfirmed;
                 } else {
-                    // TODO: mobile fix
                     if (usePlatformStore().isMobile) {
                         response.wait = async () => Promise.resolve({} as ethers.providers.TransactionReceipt);
                     } else {

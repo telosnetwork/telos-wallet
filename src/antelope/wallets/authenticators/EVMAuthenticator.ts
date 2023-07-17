@@ -43,7 +43,6 @@ export abstract class EVMAuthenticator {
             if (accounts.length > 0) {
                 return accounts[0] as addressString;
             } else {
-                console.log('----------', checkProvider.provider, checkProvider);
                 if (!checkProvider.provider.request) {
                     throw new AntelopeError('antelope.evm.error_support_provider_request');
                 }

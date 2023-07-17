@@ -86,6 +86,3 @@ export default boot(({ app }) => {
     }
 
 });
-
-
-console.error('TODO: remove https');

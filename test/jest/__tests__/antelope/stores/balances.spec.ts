@@ -167,6 +167,12 @@ jest.mock('src/antelope/config', () => ({
 }));
 
 
+jest.mock('@wagmi/core', () => ({
+    prepareSendTransaction: jest.fn(),
+    prepareWriteContract: jest.fn(),
+}));
+
+
 import { useBalancesStore } from 'src/antelope/stores/balances';
 
 describe('Antelope Balance Store', () => {

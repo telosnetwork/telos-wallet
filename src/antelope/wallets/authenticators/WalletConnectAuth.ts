@@ -60,7 +60,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {
-                // TODO: mobile fix
                 if (!usePlatformStore().isMobile) {
                     await super.login(network);
                 }
@@ -175,14 +174,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
-        // TODO: mobile fix
-        // if (usePlatformStore().isMobile) {
-        //     this.trace('isConnectedTo', 'on mobile hardcodded true');
-        //     return true;
-        // }
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
-            console.log('----- web3Provider', web3Provider.network.chainId, web3Provider);
             const correct = +web3Provider.network.chainId === +chainId;
             this.trace('isConnectedTo', chainId, correct ? 'OK!' : 'not connected');
             resolve(correct);
