@@ -205,7 +205,11 @@ export const useBalancesStore = defineStore(store_name, {
             return response;
         },
         async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {
-            const request = await prepareSendTransaction({ to, value: amount });
+            const request = await prepareSendTransaction({
+                to,
+                value: amount,
+                chainId: +useChainStore().getChain(label).settings.getChainId(),
+            });
 
             this.setWagmiSystemTokenTransferConfig(request, label);
             this.setWagmiTokenTransferConfig(null, label);

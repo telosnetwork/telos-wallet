@@ -31,7 +31,7 @@ import {
     addressString,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
-import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { getChecksumAddress, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 
 export interface LoginNativeActionData {
@@ -153,10 +153,12 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('loginEVM', network);
             let success = false;
             try {
-                const address = await authenticator.login(network);
-                this.trace('loginEVM', 'authenticator finished with address', address);
+                const rawAddress = await authenticator.login(network);
+                this.trace('loginEVM', 'authenticator finished with address', rawAddress);
 
-                if (address) {
+                if (rawAddress) {
+                    const address = getChecksumAddress(rawAddress);
+
                     const displayAddress = truncateAddress(address);
 
                     const account = address;
