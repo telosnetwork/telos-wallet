@@ -17,6 +17,7 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
+import { debounce } from 'quasar';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
@@ -30,6 +31,7 @@ import { toRaw } from 'vue';
 const name = 'WalletConnect';
 
 export class WalletConnectAuth extends EVMAuthenticator {
+    private _debouncedPrepareTokenConfig: (...args: [TokenClass | null, BigNumber, string]) => Promise<void>;
 
     options: Web3ModalConfig;
     wagmiClient: EthereumClient;
@@ -38,6 +40,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         super(label);
         this.options = options;
         this.wagmiClient = wagmiClient;
+        this._debouncedPrepareTokenConfig = debounce(this._prepareTokenForTransfer.bind(this), 500);
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
@@ -146,7 +149,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     sendConfig: PrepareSendTransactionResult | PrepareWriteContractResult<EvmABI, string, number> | null = null;
-    async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
+    async _prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string) {
         this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
             if (token.isSystem) {
@@ -171,12 +174,16 @@ export class WalletConnectAuth extends EVMAuthenticator {
             this.sendConfig = null;
         }
     }
+    async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
+        this._debouncedPrepareTokenConfig(token, amount, to);
+    }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
             const correct = +web3Provider.network.chainId === +chainId;
+            debugger;
             this.trace('isConnectedTo', chainId, correct ? 'OK!' : 'not connected');
             resolve(correct);
         });
