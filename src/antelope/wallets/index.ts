@@ -31,4 +31,5 @@ export class AntelopeWallets {
 export * from 'src/antelope/wallets/authenticators/EVMAuthenticator';
 export * from 'src/antelope/wallets/authenticators/ExternalProviderAuth';
 export * from 'src/antelope/wallets/authenticators/MetamaskAuth';
+export * from 'src/antelope/wallets/authenticators/SafePalAuth';
 export * from 'src/antelope/wallets/authenticators/WalletConnectAuth';

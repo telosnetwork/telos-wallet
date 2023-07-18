@@ -246,8 +246,6 @@ export default defineComponent({
             const to = this.address;
 
             if (this.isFormValid) {
-                await this.updateTokenTransferConfig(true, token, to, amount);
-
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {

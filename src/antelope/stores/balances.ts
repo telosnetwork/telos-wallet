@@ -74,15 +74,15 @@ export const useBalancesStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    if (label === 'current') {
+                        await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    }
                 },
             });
 
-            // update logged balances every 10 seconds only if the user is logged
+            // update logged balances every 10 seconds
             setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
-                }
+                await useBalancesStore().updateBalancesForAccount('current', useAccountStore().loggedAccount);
             }, 10000);
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
@@ -120,9 +120,12 @@ export const useBalancesStore = defineStore(store_name, {
 
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
+                                .filter(token => token.address !== chain_settings.getSystemToken().address)
                                 .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
                                     .then((balanceBn: BigNumber) => {
                                         this.processBalanceForToken(label, token, balanceBn);
+                                    }).catch((error) => {
+                                        console.error(error);
                                     }),
                                 );
 
@@ -290,14 +293,27 @@ export const useBalancesStore = defineStore(store_name, {
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
-
+            let timer: NodeJS.Timeout | null = null;
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-                return await account.authenticator.transferTokens(token, amount, to);
+                const timeoutPromise = new Promise((_resolve, reject) => {
+                    timer = setTimeout(() => {
+                        reject(new AntelopeError('antelope.balances.error_transfer_timeout'));
+
+                    }, getAntelope().config.transactionSecTimeout * 1000);
+                });
+                const transferPromise = account.authenticator.transferTokens(token, amount, to);
+                const result = await Promise.race([timeoutPromise, transferPromise]);
+                console.log('result: ', result);
+                clearTimeout(timer ?? undefined);
+                return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
                 console.error(error);
                 throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
+                if (timer) {
+                    clearTimeout(timer);
+                }
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
         },
