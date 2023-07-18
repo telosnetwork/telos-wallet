@@ -183,7 +183,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
             const correct = +web3Provider.network.chainId === +chainId;
-            debugger;
             this.trace('isConnectedTo', chainId, correct ? 'OK!' : 'not connected');
             resolve(correct);
         });
