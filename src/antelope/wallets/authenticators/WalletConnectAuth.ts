@@ -182,7 +182,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         if (token) {
             if (token.isSystem) {
                 this.sendConfig = await prepareSendTransaction({
-                    to: to,
+                    to,
                     value: BigInt(amount.toString()),
                     chainId: +useChainStore().getChain(this.label).settings.getChainId(),
                 });
