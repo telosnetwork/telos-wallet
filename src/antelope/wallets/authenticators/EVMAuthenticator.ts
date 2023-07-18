@@ -2,9 +2,11 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
+import { getAntelope } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
+import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
@@ -64,7 +66,22 @@ export abstract class EVMAuthenticator {
 
     async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
         this.trace('ensureCorrectChain');
-        return useEVMStore().ensureCorrectChain(this);
+        if (usePlatformStore().isMobile) {
+            // we don't have tools to check the chain on mobile
+            return useEVMStore().ensureCorrectChain(this);
+        } else {
+            const showSwitchNotification = !(await this.isConnectedToCorrectChain());
+            return useEVMStore().ensureCorrectChain(this).then((result) => {
+                if (showSwitchNotification) {
+                    const ant = getAntelope();
+                    const networkName = useChainStore().getChain(this.label).settings.getDisplay();
+                    ant.config.notifyNeutralMessageHandler(
+                        ant.config.localizationHandler('antelope.wallets.network_switch_success', { networkName }),
+                    );
+                }
+                return result;
+            });
+        }
     }
 
     isConnectedToCorrectChain(): Promise<boolean> {

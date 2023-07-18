@@ -36,6 +36,8 @@ export default {
         logout: 'Log Out',
         install_metamask: 'Install MetaMask',
         metamask: 'MetaMask',
+        install_safepal: 'Install SafePal',
+        safepal: 'SafePal',
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
         wallet_introduction: 'What is a Web Wallet?',
@@ -462,10 +464,13 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+            error_transfer_timeout: 'Timeout while waiting for transfer to complete',
         },
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
+            error_oreid_no_chain_account: 'The app <b>{appName}</b> does not have a chain account for the chain <b>{networkName}</b>',
+            network_switch_success: 'Switched to <b>{networkName}</b> network',
         },
     },
 };

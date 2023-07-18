@@ -22,11 +22,20 @@ export default defineComponent({
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask;
+            return e && e.isMetaMask && !e.isSafePal;
+        });
+
+        const supportsSafePal = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isSafePal;
         });
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
+        };
+
+        const redirectToSafepalDownload = () => {
+            window.open('https://www.safepal.com/en/download', '_blank');
         };
 
         watch(() => props.showWalletConnect, async (newVal) => {
@@ -38,7 +47,9 @@ export default defineComponent({
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
-
+        const setSafepalAuthenticator = async () => {
+            setAuthenticator('SafePal', 'logged');
+        };
         const setWalletConnectAuthenticator = async () => {
             setAuthenticator('WalletConnect', 'logged');
         };
@@ -77,6 +88,8 @@ export default defineComponent({
         const redirectToInstall = (name:string) => {
             if (name === 'Metamask') {
                 redirectToMetamaskDownload();
+            } else if (name === 'SafePal') {
+                redirectToSafepalDownload();
             }
         };
 
@@ -85,7 +98,9 @@ export default defineComponent({
         return {
             isLoading,
             supportsMetamask,
+            supportsSafePal,
             setMetamaskAuthenticator,
+            setSafepalAuthenticator,
             setWalletConnectAuthenticator,
             notifyNoProvider,
         };
@@ -124,6 +139,22 @@ export default defineComponent({
             </template>
         </div>
 
+        <!-- Safepal Authenticator button -->
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
+            <template v-if="isLoading('SafePal.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="SafePal"
+                    src="~assets/evm/safepal.svg"
+                >
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+            </template>
+        </div>
+
         <!-- WalletConnect Authenticator button -->
         <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
             <template v-if="isLoading('WalletConnect.login')">
@@ -149,7 +180,7 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 250px;
+    height: 300px;
     margin:auto;
     color: $white;
 }
