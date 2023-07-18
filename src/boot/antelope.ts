@@ -1,8 +1,12 @@
 import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { boot } from 'quasar/wrappers';
-import { installAntelope } from 'src/antelope';
-import { MetamaskAuth, WalletConnectAuth } from 'src/antelope/wallets';
+import { installAntelope, usePlatformStore } from 'src/antelope';
+import {
+    MetamaskAuth,
+    WalletConnectAuth,
+    SafePalAuth,
+} from 'src/antelope/wallets';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 
@@ -58,6 +62,7 @@ export default boot(({ app }) => {
     const wagmiClient = app.config.globalProperties.$wagmi as EthereumClient;
     ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
+    ant.wallets.addEVMAuthenticator(new SafePalAuth());
 
     // autologin --
     ant.stores.account.autoLogin();
@@ -65,6 +70,7 @@ export default boot(({ app }) => {
     // constants --
     ant.config.setIndexerHealthThresholdSeconds(10);
     ant.config.setIndexerHealthCheckInterval(5000);
+    ant.config.setTransactionSecTimeout(usePlatformStore().isMobile ? 30 : 10);
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to

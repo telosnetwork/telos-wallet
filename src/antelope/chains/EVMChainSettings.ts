@@ -331,7 +331,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
             });
     }
 
-
     async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
         return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
     }
