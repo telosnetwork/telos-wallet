@@ -17,7 +17,6 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
-import { debounce } from 'quasar';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
@@ -31,7 +30,10 @@ import { toRaw } from 'vue';
 const name = 'WalletConnect';
 
 export class WalletConnectAuth extends EVMAuthenticator {
-    private _debouncedPrepareTokenConfig: (...args: [TokenClass | null, BigNumber, string]) => Promise<void>;
+    // debounce methods do not allow for async functions to be awaited; they return a promise which resolves immediately
+    // thus, we need to implement out own debounce so that we can await the async function (in this case, _prepareTokenForTransfer)
+    private _debounceTimer: number | NodeJS.Timer | null;
+    private _debouncedPrepareTokenConfigResolver: ((value: unknown) => void) | null;
 
     options: Web3ModalConfig;
     wagmiClient: EthereumClient;
@@ -40,7 +42,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
         super(label);
         this.options = options;
         this.wagmiClient = wagmiClient;
-        this._debouncedPrepareTokenConfig = debounce(this._prepareTokenForTransfer.bind(this), 500);
+        this._debounceTimer = null;
+        this._debouncedPrepareTokenConfigResolver = null;
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
@@ -149,15 +152,49 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     sendConfig: PrepareSendTransactionResult | PrepareWriteContractResult<EvmABI, string, number> | null = null;
+    private _debouncedPrepareTokenConfig(token: TokenClass | null, amount: BigNumber, to: string) {
+        // If there is already a pending call, clear it
+        if (this._debounceTimer !== null && this._debouncedPrepareTokenConfigResolver) {
+            clearTimeout(this._debounceTimer);
+            this._debouncedPrepareTokenConfigResolver(null); // Resolve with null when debounced
+        }
+
+        // Create a new promise for this call
+        const promise = new Promise((resolve) => {
+            this._debouncedPrepareTokenConfigResolver = resolve;
+        });
+
+        // Set a timer to call the function after the delay
+        this._debounceTimer = setTimeout(async () => {
+            this._debounceTimer = null; // Clear the timer
+            const result = await this._prepareTokenForTransfer(token, amount, to); // Call the function
+
+            if (this._debouncedPrepareTokenConfigResolver) {
+                this._debouncedPrepareTokenConfigResolver(result); // Resolve the promise with the result
+            }
+        }, 500);
+
+        // Return the promise
+        return promise;
+    }
     async _prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string) {
         this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
             if (token.isSystem) {
-                this.sendConfig = await prepareSendTransaction({
-                    to: to,
-                    value: BigInt(amount.toString()),
-                    chainId: +useChainStore().getChain(this.label).settings.getChainId(),
-                });
+                try {
+                    const test = await prepareSendTransaction({
+                        to: to,
+                        value: BigInt(amount.toString()),
+                        chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+                    });
+                    debugger;
+                    this.sendConfig = test;
+                } catch (e) {
+                    debugger;
+                } finally {
+                    debugger;
+                }
+
             } else {
                 const abi = useEVMStore().getTokenABI(token.type);
                 const functionName = 'transfer';
@@ -175,7 +212,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
     async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
-        this._debouncedPrepareTokenConfig(token, amount, to);
+        await this._debouncedPrepareTokenConfig(token, amount, to);
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
