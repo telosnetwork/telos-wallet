@@ -181,20 +181,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
         this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
             if (token.isSystem) {
-                try {
-                    const test = await prepareSendTransaction({
-                        to: to,
-                        value: BigInt(amount.toString()),
-                        chainId: +useChainStore().getChain(this.label).settings.getChainId(),
-                    });
-                    debugger;
-                    this.sendConfig = test;
-                } catch (e) {
-                    debugger;
-                } finally {
-                    debugger;
-                }
-
+                this.sendConfig = await prepareSendTransaction({
+                    to: to,
+                    value: BigInt(amount.toString()),
+                    chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+                });
             } else {
                 const abi = useEVMStore().getTokenABI(token.type);
                 const functionName = 'transfer';
