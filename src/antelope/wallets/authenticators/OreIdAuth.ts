@@ -20,21 +20,6 @@ const name = 'OreId';
 // This instance needs to be placed outside to avoid watch function to crash
 let oreId: OreId | null = null;
 
-
-/*
-// if we define options like this
-options: OreIdOptions;
-
-// we can not use the options to place to provider like this
-this.options.provider = 'google';
-
-// because the options are not defined as a class
-// so we need to define our own type extending the OreIdOptions interface to add the provider property
-
-
-
-*/
-
 export interface AuthOreIdOptions extends OreIdOptions {
     provider?: string;
 }
