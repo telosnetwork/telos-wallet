@@ -216,11 +216,11 @@ export default defineComponent({
         clearTokenTransferConfigs() {
             this.updateTokenTransferConfig(false, null, this.address, this.amount);
         },
-        updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null, address: string, amount: BigNumber) {
+        async updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null, address: string, amount: BigNumber) {
             // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
             // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
             // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
-            this.loggedAccount?.authenticator.prepareTokenForTransfer(formIsValid ? token : null, amount, address);
+            await this.loggedAccount?.authenticator.prepareTokenForTransfer(formIsValid ? token : null, amount, address);
         },
         async startTransfer() {
 
@@ -246,6 +246,8 @@ export default defineComponent({
             const to = this.address;
 
             if (this.isFormValid) {
+                await this.updateTokenTransferConfig(true, token, to, amount);
+
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
