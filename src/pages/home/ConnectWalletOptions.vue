@@ -91,6 +91,7 @@ export default defineComponent({
                 return;
             }
             const authenticator = auth.newInstance(label);
+            console.log('authenticator', authenticator);
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();

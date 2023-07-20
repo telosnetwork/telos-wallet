@@ -124,10 +124,10 @@ export class OreIdAuth extends EVMAuthenticator {
         return address;
     }
 
-    logout(): Promise<void> {
+    async logout(): Promise<void> {
         this.trace('logout');
         if (oreId) {
-            oreId.logout();
+            await oreId.logout();
         }
         return Promise.resolve();
     }

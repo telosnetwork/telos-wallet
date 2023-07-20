@@ -30,6 +30,10 @@ export default defineComponent({
             emit('showOauthOptions');
         };
 
+        const toggleOAuthOptions = () => {
+            emit('showOauthOptions');
+        };
+
         // loading state for generic connect button is only required for mobile (WalletConnect)
         const loadingConnect = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
