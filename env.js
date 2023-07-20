@@ -22,6 +22,9 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
+    APP_OREID_APP_ID: 't_23991cde82994c88bb582c019a9c45e1',
+    // TODO: uncomment this line when the testnet app is ready
+    // APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 };
 
 const MAINNET = {
@@ -35,6 +38,7 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
+    APP_OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;

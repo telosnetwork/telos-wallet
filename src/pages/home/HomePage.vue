@@ -16,10 +16,12 @@ export default defineComponent({
     data: (): {
         tab: 'left' | 'right'
         showWalletOptions: boolean,
+        showOAuthOptions: boolean,
         showWalletConnect: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
+        showOAuthOptions: false,
         showWalletConnect: false,
     }),
 
@@ -36,6 +38,13 @@ export default defineComponent({
             }, 200);
         },
         onShowWalletOptions(show: boolean) {
+            this.showWalletOptions = show;
+            if (!show) {
+                this.showOAuthOptions = false;
+            }
+        },
+        onShowOAuthOptions(show: boolean) {
+            this.showOAuthOptions = show;
             this.showWalletOptions = show;
         },
     },
@@ -88,12 +97,14 @@ export default defineComponent({
                         v-else-if="tab === 'left'"
                         @show-wallet-connect="onShowWalletConnect()"
                         @show-wallet-options="onShowWalletOptions(true)"
+                        @show-oauth-options="onShowOAuthOptions(true)"
                     />
                 </div>
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
                         :showWalletConnect="showWalletConnect"
+                        :showOAuthOptions="showOAuthOptions"
                         @show-wallet-connect="onShowWalletConnect()"
                         @close-wallet-options="onShowWalletOptions(false)"
                     />

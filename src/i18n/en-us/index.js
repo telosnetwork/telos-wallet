@@ -30,6 +30,7 @@ export default {
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
+        login_with_social_media: 'Login with Social Media',
         create_new_account: 'Create a New Account',
         logged_as: 'Logged in as {account}',
         view_wallet: 'View Wallet',
@@ -43,6 +44,12 @@ export default {
         wallet_introduction: 'What is a Web Wallet?',
         no_provider_notification_message: 'No wallet provider was detected. Make sure you have the wallet installed and enabled. If you have multiple wallets installed, you can disable the others to avoid possible conflicts.',
         no_provider_action_label: 'Install {provider}',
+        sign_in_with: 'Sign in with',
+        oauth_google: 'Google',
+        oauth_github: 'GitHub',
+        oauth_facebook: 'Facebook',
+        oauth_twitter: 'Twitter',
+        oauth_email: 'Email',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -464,13 +471,11 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
-            error_transfer_timeout: 'Timeout while waiting for transfer to complete',
         },
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
-            error_oreid_no_chain_account: 'The app <b>{appName}</b> does not have a chain account for the chain <b>{networkName}</b>',
-            network_switch_success: 'Switched to <b>{networkName}</b> network',
+            error_oreid_no_chain_account: 'The app {appName} does not have a chain account for the chain {networkName}',
         },
     },
 };
