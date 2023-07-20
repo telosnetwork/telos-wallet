@@ -1,9 +1,10 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { QSpinnerFacebook } from 'quasar';
+import { OreIdAuth } from 'src/antelope/wallets';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -12,6 +13,10 @@ export default defineComponent({
     },
     props: {
         showWalletConnect: {
+            required: true,
+            type: Boolean,
+        },
+        showOAuthOptions: {
             required: true,
             type: Boolean,
         },
@@ -30,6 +35,8 @@ export default defineComponent({
             return e && e.isSafePal;
         });
 
+        const selectedOAuthProvider = ref('');
+
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
@@ -43,7 +50,16 @@ export default defineComponent({
                 await setWalletConnectAuthenticator();
             }
         });
-
+        const setOreIdkAuthenticator = async (provider: string) => {
+            const name = 'OreId';
+            const auth = ant.wallets.getAutenticator(name);
+            if (auth) {
+                (auth as OreIdAuth).setProvider(provider);
+                selectedOAuthProvider.value = provider;
+            }
+            console.log('auth', provider, (auth as OreIdAuth).provider, auth);
+            setAuthenticator(name, 'logged');
+        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
@@ -61,6 +77,7 @@ export default defineComponent({
                 return;
             }
             const authenticator = auth.newInstance(label);
+            console.log('authenticator', authenticator);
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
             const network = chainStore.currentChain.settings.getNetwork();
@@ -94,11 +111,16 @@ export default defineComponent({
         };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+        const isLoadingOreId = (provider: string) =>
+            selectedOAuthProvider.value === provider &&
+            useFeedbackStore().isLoading('OreId.login');
 
         return {
             isLoading,
+            isLoadingOreId,
             supportsMetamask,
             supportsSafePal,
+            setOreIdkAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
@@ -109,7 +131,12 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="wallet-options-container">
+<div
+    :class="{
+        'wallet-options-container': true,
+        'wallet-options-container--oauth': showOAuthOptions,
+    }"
+>
     <q-btn
         class="wallet-options__close"
         icon="close"
@@ -118,7 +145,79 @@ export default defineComponent({
         dense
         @click="$emit('closeWalletOptions')"
     />
-    <div class="wallet-options">
+    <div v-if="showOAuthOptions" class="wallet-options">
+
+        <div class="wallet-options__header">
+            {{ $t('home.sign_in_with') }}
+        </div>
+
+        <!-- Google OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdkAuthenticator('google')">
+            <template v-if="isLoadingOreId('google')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Google"
+                    src="~assets/evm/icon-oauth-google.svg"
+                >
+                {{ $t('home.oauth_google') }}
+            </template>
+        </div>
+
+        <!-- Facebook OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdkAuthenticator('facebook')">
+            <template v-if="isLoadingOreId('facebook')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Facebook"
+                    src="~assets/evm/icon-oauth-facebook.svg"
+                >
+                {{ $t('home.oauth_facebook') }}
+            </template>
+        </div>
+
+        <!-- Github OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdkAuthenticator('github')">
+            <template v-if="isLoadingOreId('github')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Github"
+                    src="~assets/evm/icon-oauth-github.svg"
+                >
+                {{ $t('home.oauth_github') }}
+            </template>
+        </div>
+
+        <!-- Twitter OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdkAuthenticator('twitter')">
+            <template v-if="isLoadingOreId('twitter')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Twitter"
+                    src="~assets/evm/icon-oauth-twitter.svg"
+                >
+                {{ $t('home.oauth_twitter') }}
+            </template>
+        </div>
+
+    </div>
+
+    <div v-else class="wallet-options">
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
@@ -183,6 +282,10 @@ export default defineComponent({
     height: 300px;
     margin:auto;
     color: $white;
+
+    &--oauth{
+        height: 370px;
+    }
 }
 
 .wallet-options{

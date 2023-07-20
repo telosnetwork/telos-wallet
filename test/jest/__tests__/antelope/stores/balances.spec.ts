@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { setActivePinia, createPinia } from 'pinia';
 import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
+
 const TEST_NETWORK = 'testnet';
 
 const tokenList = [new TokenClass({
