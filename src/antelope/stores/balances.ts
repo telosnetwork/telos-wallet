@@ -304,7 +304,7 @@ export const useBalancesStore = defineStore(store_name, {
                 });
                 const transferPromise = account.authenticator.transferTokens(token, amount, to);
                 const result = await Promise.race([timeoutPromise, transferPromise]);
-                console.log('result: ', result);
+
                 clearTimeout(timer ?? undefined);
                 return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
