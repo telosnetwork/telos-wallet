@@ -208,6 +208,12 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
+
+        if (usePlatformStore().isMobile) {
+            this.trace('isConnectedTo', 'mobile -> true');
+            return true;
+        }
+
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
             const correct = +web3Provider.network.chainId === +chainId;

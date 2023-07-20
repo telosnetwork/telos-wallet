@@ -1,10 +1,12 @@
 import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
+import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
 import { installAntelope } from 'src/antelope';
 import {
     MetamaskAuth,
     WalletConnectAuth,
+    OreIdAuth,
     SafePalAuth,
 } from 'src/antelope/wallets';
 import { App } from 'vue';
@@ -63,6 +65,11 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
+    const oreIdOptions: OreIdOptions = {
+        appName: process.env.APP_NAME,
+        appId: process.env.APP_OREID_APP_ID as string,
+    };
+    ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
 
     // autologin --
     ant.stores.account.autoLogin();
