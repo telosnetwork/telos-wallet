@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
 import { useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import { AntelopeError, ERC20_TYPE, EthereumProvider, EvmTransactionResponse, TokenClass, addressString } from 'src/antelope/types';
-import { EVMAuthenticator, OreIdAuthName } from 'src/antelope/wallets';
+import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -71,6 +71,7 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
         this.trace('login', network);
         useFeedbackStore().setLoading(`${this.getName()}.login`);
 
+        this.trace('login', 'trackAnalyticsEvent -> login started');
         chainSettings.trackAnalyticsEvent(
             { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
         );
@@ -83,16 +84,16 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
                     successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulMetamask;
                 } else if (authName === SafePalAuthName) {
                     successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulSafepal;
-                } else if (authName === OreIdAuthName) {
-                    successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId;
                 }
 
                 if (successfulLoginEventId) {
+                    this.trace('login', 'trackAnalyticsEvent -> login succeeded', authName, successfulLoginEventId);
                     chainSettings.trackAnalyticsEvent(
                         { id: successfulLoginEventId },
                     );
                 }
 
+                this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
                 chainSettings.trackAnalyticsEvent(
                     { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
                 );
@@ -111,11 +112,10 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
                     failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedMetamask;
                 } else if (authName === SafePalAuthName) {
                     failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedSafepal;
-                } else if (authName === OreIdAuthName) {
-                    failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedOreId;
                 }
 
                 if (failedLoginEventId) {
+                    this.trace('login', 'trackAnalyticsEvent -> login failed', authName, failedLoginEventId);
                     chainSettings.trackAnalyticsEvent(
                         { id: failedLoginEventId },
                     );
