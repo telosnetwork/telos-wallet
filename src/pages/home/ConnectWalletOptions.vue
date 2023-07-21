@@ -50,14 +50,14 @@ export default defineComponent({
                 await setWalletConnectAuthenticator();
             }
         });
-        const setOreIdkAuthenticator = async (provider: string) => {
+        const setOreIdAuthenticator = async (provider: string) => {
             const name = 'OreId';
             const auth = ant.wallets.getAutenticator(name);
             if (auth) {
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            console.log('auth', provider, (auth as OreIdAuth).provider, auth);
+            console.info('auth', provider, (auth as OreIdAuth).provider, auth);
             setAuthenticator(name, 'logged');
         };
         const setMetamaskAuthenticator = async () => {
@@ -119,7 +119,7 @@ export default defineComponent({
             isLoadingOreId,
             supportsMetamask,
             supportsSafePal,
-            setOreIdkAuthenticator,
+            setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
@@ -151,7 +151,7 @@ export default defineComponent({
         </div>
 
         <!-- Google OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdkAuthenticator('google')">
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('google')">
             <template v-if="isLoadingOreId('google')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -167,7 +167,7 @@ export default defineComponent({
         </div>
 
         <!-- Facebook OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdkAuthenticator('facebook')">
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('facebook')">
             <template v-if="isLoadingOreId('facebook')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -183,7 +183,7 @@ export default defineComponent({
         </div>
 
         <!-- Github OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdkAuthenticator('github')">
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('github')">
             <template v-if="isLoadingOreId('github')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -199,7 +199,7 @@ export default defineComponent({
         </div>
 
         <!-- Twitter OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdkAuthenticator('twitter')">
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('twitter')">
             <template v-if="isLoadingOreId('twitter')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
