@@ -16,6 +16,7 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 
 
 const name = 'OreId';
+export const OreIdAuthName = name;
 
 // This instance needs to be placed outside to avoid watch function to crash
 let oreId: OreId | null = null;
