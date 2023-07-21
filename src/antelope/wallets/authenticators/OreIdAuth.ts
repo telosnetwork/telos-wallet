@@ -124,9 +124,12 @@ export class OreIdAuth extends EVMAuthenticator {
         return address;
     }
 
-
-    async logout(): Promise<void> {
+    logout(): Promise<void> {
         this.trace('logout');
+        if (oreId) {
+            oreId.logout();
+        }
+        return Promise.resolve();
     }
 
     async getSystemTokenBalance(address: addressString | string): Promise<ethers.BigNumber> {
