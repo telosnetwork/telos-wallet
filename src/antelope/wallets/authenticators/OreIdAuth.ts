@@ -13,6 +13,7 @@ import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { useChainStore } from 'src/antelope/stores/chain';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
+import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 
 
 const name = 'OreId';
@@ -82,6 +83,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
         const oreIdOptions: OreIdOptions = {
@@ -107,12 +109,23 @@ export class OreIdAuth extends EVMAuthenticator {
         await oreId.popup.auth({ provider: this.provider as AuthProvider });
         const userData = await oreId.auth.user.getData();
         this.trace('login', 'userData', userData);
+        this.trace('login', 'trackAnalyticsEvent -> login started');
+        chainSettings.trackAnalyticsEvent(
+            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+        );
+
         this.userChainAccount = userData.chainAccounts.find(
             (account: UserChainAccount) => this.getChainNetwork(network) === account.chainNetwork) ?? null;
 
         if (!this.userChainAccount) {
             const appName = this.options.appName;
             const networkName = useChainStore().getNetworkSettings(network).getDisplay();
+
+            this.trace('login', 'trackAnalyticsEvent -> login failed', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginFailedOreId);
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedOreId },
+            );
+
             throw new AntelopeError('antelope.wallets.error_oreid_no_chain_account', {
                 networkName,
                 appName,
@@ -121,6 +134,15 @@ export class OreIdAuth extends EVMAuthenticator {
 
         const address = (this.userChainAccount?.chainAccount as addressString) ?? null;
         this.trace('login', 'userChainAccount', this.userChainAccount);
+        this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
+        chainSettings.trackAnalyticsEvent(
+            { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
+        );
+        this.trace('login', 'trackAnalyticsEvent -> login succeeded', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId);
+        chainSettings.trackAnalyticsEvent(
+            { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId },
+        );
+
         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return address;
     }
