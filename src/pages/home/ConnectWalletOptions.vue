@@ -72,7 +72,6 @@ export default defineComponent({
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            console.info('auth', provider, (auth as OreIdAuth).provider, auth);
             setAuthenticator(name, 'logged');
         };
         const setMetamaskAuthenticator = async () => {
