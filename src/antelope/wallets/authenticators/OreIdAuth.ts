@@ -192,7 +192,7 @@ export class OreIdAuth extends EVMAuthenticator {
         }
 
         // sign a blockchain transaction
-        console.log('createTransaction()...');
+        this.trace('createTransaction()');
         const transaction = await oreId.createTransaction({
             transaction: transactionBody,
             chainAccount: from,
@@ -204,9 +204,10 @@ export class OreIdAuth extends EVMAuthenticator {
         });
 
         // have the user approve signature
-        console.log('Signing a transaction...', transaction);
+        this.trace('Signing a transaction...', transaction);
+
         const { transactionId } = await oreId.popup.sign({ transaction });
-        console.log('transactionId: ', transactionId);
+        this.trace('transactionId:', transactionId);
 
         return {
             hash: transactionId,
