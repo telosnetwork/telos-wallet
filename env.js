@@ -26,7 +26,7 @@ const TESTNET = {
     APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 =======
     APP_OREID_APP_ID: 't_23991cde82994c88bb582c019a9c45e1',
-    // TODO: uncomment this line when the testnet app is ready
+    // TODO: uncomment this line when the testnet app is ready - https://github.com/telosnetwork/telos-wallet/issues/492
     // APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 >>>>>>> e801689 (adding OreId authenticator (2))
 };
