@@ -116,10 +116,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
 
                         if (wagmiConnected) {
-                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login successful');
+                            this.trace('walletConnectLogin', 'WalletConnect', 'trackAnalyticsEvent -> login successful');
                             chainSettings.trackAnalyticsEvent(
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
                             );
+                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> generic login successful');
                             chainSettings.trackAnalyticsEvent(
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
                             );
