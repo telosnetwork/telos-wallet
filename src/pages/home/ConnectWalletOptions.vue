@@ -165,53 +165,8 @@ export default defineComponent({
             </template>
         </div>
 
-        <!-- Facebook OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('facebook')">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Facebook"
-                    src="~assets/evm/icon-oauth-facebook.svg"
-                >
-                {{ $t('home.oauth_facebook') }}
-            </template>
-        </div>
-
-        <!-- Github OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('github')">
-            <template v-if="isLoadingOreId('github')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Github"
-                    src="~assets/evm/icon-oauth-github.svg"
-                >
-                {{ $t('home.oauth_github') }}
-            </template>
-        </div>
-
-        <!-- Twitter OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('twitter')">
-            <template v-if="isLoadingOreId('twitter')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Twitter"
-                    src="~assets/evm/icon-oauth-twitter.svg"
-                >
-                {{ $t('home.oauth_twitter') }}
-            </template>
-        </div>
+        <!-- Facebook, Twitter or GitHub OAuth Provider Buttons can be foud in this link -->
+        <!-- https://github.com/telosnetwork/telos-wallet/blob/40196ac0e9cc0cef78ec20d7876f0c97ef02cc1c/src/pages/home/ConnectWalletOptions.vue#L168-L214 -->
 
     </div>
 
@@ -282,7 +237,7 @@ export default defineComponent({
     color: $white;
 
     &--oauth{
-        height: 370px;
+        height: 180px;
     }
 }
 
