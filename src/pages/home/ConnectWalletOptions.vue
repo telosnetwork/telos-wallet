@@ -49,10 +49,6 @@ export default defineComponent({
             window.open('https://metamask.io/download/', '_blank');
         };
 
-        const redirectToSafepalDownload = () => {
-            window.open('https://www.safepal.com/en/download', '_blank');
-        };
-
         watch(() => props.showWalletConnect, async (newVal) => {
             if (newVal) {
                 await setWalletConnectAuthenticator();
@@ -113,8 +109,6 @@ export default defineComponent({
         const redirectToInstall = (name:string) => {
             if (name === 'Metamask') {
                 redirectToMetamaskDownload();
-            } else if (name === 'SafePal') {
-                redirectToSafepalDownload();
             }
         };
 
@@ -127,7 +121,6 @@ export default defineComponent({
             isLoading,
             isLoadingOreId,
             supportsMetamask,
-            supportsSafePal,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
@@ -244,7 +237,7 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 240px;
     margin:auto;
     color: $white;
 
