@@ -79,7 +79,12 @@ export class WalletConnectAuth extends EVMAuthenticator {
         } catch (e) {
             // This is a non-expected error
             console.error(e);
-            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login failed');
+            this.trace(
+                'walletConnectLogin',
+                'trackAnalyticsEvent -> login failed',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+            );
             const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
             chainSettings.trackAnalyticsEvent(
                 { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
@@ -106,7 +111,12 @@ export class WalletConnectAuth extends EVMAuthenticator {
                     this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
 
                     if (newState.open === true) {
-                        this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login started');
+                        this.trace(
+                            'login',
+                            'trackAnalyticsEvent -> login started',
+                            'WalletConnect',
+                            TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+                        );
                         chainSettings.trackAnalyticsEvent(
                             { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
                         );
@@ -116,16 +126,30 @@ export class WalletConnectAuth extends EVMAuthenticator {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
 
                         if (wagmiConnected) {
-                            this.trace('walletConnectLogin', 'WalletConnect', 'trackAnalyticsEvent -> login successful');
+                            this.trace(
+                                'login',
+                                'trackAnalyticsEvent -> login successful',
+                                'WalletConnect',
+                                TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect,
+                            );
                             chainSettings.trackAnalyticsEvent(
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
                             );
-                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> generic login successful');
+                            this.trace(
+                                'login',
+                                'trackAnalyticsEvent -> generic login successful',
+                                TELOS_ANALYTICS_EVENT_IDS.loginSuccessful,
+                            );
                             chainSettings.trackAnalyticsEvent(
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
                             );
                         } else {
-                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login failed');
+                            this.trace(
+                                'login',
+                                'trackAnalyticsEvent -> login failed',
+                                'WalletConnect',
+                                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+                            );
                             chainSettings.trackAnalyticsEvent(
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
                             );
