@@ -22,8 +22,6 @@ const wagmiClient = new EthereumClient(wagmiConfig, chains);
 const explorerRecommendedWalletIds = [
     // MetaMask
     'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-    // SafePal
-    '0b415a746fb9ee99cce155c2ceca0c6f6061b1dbca2d722b3ba16381d0562150',
 ];
 const explorerExcludedWalletIds = 'ALL' as const; // Web3Modal option excludes all but recomended
 const wagmiOptions: Web3ModalConfig = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
