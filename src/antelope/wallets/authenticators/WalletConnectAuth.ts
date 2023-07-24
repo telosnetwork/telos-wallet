@@ -18,6 +18,7 @@ import {
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -78,6 +79,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
         } catch (e) {
             // This is a non-expected error
             console.error(e);
+            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login failed');
+            const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
+            );
             throw new AntelopeError('antelope.evm.error_login');
         } finally {
             useFeedbackStore().unsetLoading(`${this.getName()}.login`);
@@ -94,9 +100,35 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.trace('login', 'web3Modal.openModal()');
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
-                    this.trace('login', 'web3Modal.subscribeModal ', newState, localStorage.getItem('wagmi.connected'));
+                    const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+                    const wagmiConnected = localStorage.getItem('wagmi.connected');
+
+                    this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
+
+                    if (newState.open === true) {
+                        this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login started');
+                        chainSettings.trackAnalyticsEvent(
+                            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+                        );
+                    }
+
                     if (newState.open === false) {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+
+                        if (wagmiConnected) {
+                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login successful');
+                            chainSettings.trackAnalyticsEvent(
+                                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
+                            );
+                            chainSettings.trackAnalyticsEvent(
+                                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
+                            );
+                        } else {
+                            this.trace('walletConnectLogin', 'trackAnalyticsEvent -> login failed');
+                            chainSettings.trackAnalyticsEvent(
+                                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
+                            );
+                        }
                     }
                     if (localStorage.getItem('wagmi.connected')) {
                         resolve(this.walletConnectLogin(network));
