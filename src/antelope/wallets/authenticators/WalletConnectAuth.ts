@@ -155,7 +155,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                             );
                         }
                     }
-                    if (localStorage.getItem('wagmi.connected')) {
+                    if (wagmiConnected) {
                         resolve(this.walletConnectLogin(network));
                     }
                 });
