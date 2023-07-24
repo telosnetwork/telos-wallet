@@ -20,7 +20,7 @@ const tabs = ['balance', 'transactions'];
 const totalFiatAmount = ref(0);
 
 // computed
-const allBalances = computed(() => useBalancesStore().loggedBalances);
+const allBalances = computed(() => useBalancesStore().currentBalances);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
 // watchers
@@ -32,21 +32,23 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
         }
     }
     totalFiatAmount.value = newFiatBalance;
+
 }, { deep: true, immediate: true });
 
-watch(accountStore, () => {
+watch(accountStore.currentEvmAccount, (newAccount) => {
     // if user is on the balances screen, prefetch transactions
-    if (accountStore.loggedEvmAccount?.address && route.query.tab !== 'transactions') {
+    if (accountStore.currentEvmAccount?.address && route.query.tab !== 'transactions') {
         historyStore.setEVMTransactionsFilter({
-            address: accountStore.loggedEvmAccount?.address,
+            address: accountStore.currentEvmAccount?.address,
             offset: 0,
             limit: 5,
             includeAbi: true,
         });
         historyStore.fetchEVMTransactionsForAccount('current');
     }
-},
-{ immediate: true });
+}, { immediate: true });
+
+
 </script>
 
 <template>

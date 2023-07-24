@@ -105,9 +105,6 @@ export interface IndexerAccountTransactionsResponse {
     more: boolean;
 }
 
-
-
-// TODO: refactoring needed
 export type EvmTransactionResponse = ethers.providers.TransactionResponse;
 export interface TransactionResponse {
     hash: string;

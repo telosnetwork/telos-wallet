@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import { setActivePinia, createPinia } from 'pinia';
 import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
 
-
 const TEST_NETWORK = 'testnet';
 
 const tokenList = [new TokenClass({
@@ -34,14 +33,16 @@ const EVMStore = jest.fn().mockImplementation(() => ({
     getContract: jest.fn().mockImplementation(() => ({
         then: jest.fn().mockImplementation((cb1: any) => {
             cb1({
-                getContractInstance: jest.fn().mockImplementation(() => ({
-                    transfer: jest.fn(),
-                    balanceOf: jest.fn().mockImplementation(() => ({
-                        then: jest.fn().mockImplementation((cb: any) => {
-                            cb(TOKEN_BALANCE);
-                        }),
-                    })),
-                })),
+                getContractInstance: jest.fn().mockImplementation((cb2: any) => {
+                    cb2({
+                        transfer: jest.fn(),
+                        balanceOf: jest.fn().mockImplementation(() => ({
+                            then: jest.fn().mockImplementation((cb: any) => {
+                                cb(TOKEN_BALANCE);
+                            }),
+                        })),
+                    });
+                }),
             });
         }),
     })),
@@ -61,9 +62,19 @@ const EVMStore = jest.fn().mockImplementation(() => ({
     },
 }));
 
+const evmAuthenticatorMock = {
+    getSystemTokenBalance: () => SYSTEM_TOKEN_BALANCE,
+    getERC20TokenBalance: () => ({
+        then: jest.fn().mockImplementation((cb: any) => {
+            cb(TOKEN_BALANCE);
+        }),
+    }),
+};
+
 const AccountStore = jest.fn().mockImplementation(() => ({
     loggedAccount: {},
     currentIsLogged: true,
+    getEVMAuthenticator: jest.fn().mockImplementation(() => evmAuthenticatorMock),
     sendAction: jest.fn(),
 }));
 
@@ -152,6 +163,12 @@ jest.mock('src/antelope/config', () => ({
 }));
 
 
+jest.mock('@wagmi/core', () => ({
+    prepareSendTransaction: jest.fn(),
+    prepareWriteContract: jest.fn(),
+}));
+
+
 import { useBalancesStore } from 'src/antelope/stores/balances';
 
 describe('Antelope Balance Store', () => {
@@ -168,14 +185,14 @@ describe('Antelope Balance Store', () => {
 
     test('updateBalancesForAccount should update __balances', async () => {
         const label = 'label';
-        const account = { account: 'address' };
+        const account = { account: 'address', authenticator: evmAuthenticatorMock };
         await store.updateBalancesForAccount(label, account);
 
         const sysBalance = new TokenBalance(tokenSys, SYSTEM_TOKEN_BALANCE);
         const tokenBalance = new TokenBalance(tokenList[0], TOKEN_BALANCE);
 
         const expected = {
-            label: [tokenBalance, sysBalance],
+            label: [sysBalance, tokenBalance],
         };
         expect(JSON.stringify(store.__balances)).toBe(JSON.stringify(expected));
     });
