@@ -20,7 +20,9 @@ import { createInitFunction, createTraceFunction } from 'src/antelope/stores/fee
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
     useBalancesStore,
-    useFeedbackStore, useHistoryStore, useNftsStore,
+    useFeedbackStore,
+    useHistoryStore,
+    useNftsStore,
 } from 'src/antelope';
 import { getAntelope, useChainStore } from 'src/antelope';
 import { errorToString } from 'src/antelope/config';
