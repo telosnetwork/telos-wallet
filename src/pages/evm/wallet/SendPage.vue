@@ -6,10 +6,9 @@ import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserS
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
-import { getNetwork } from '@wagmi/core';
-import { checkNetwork, isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import { EVMAuthenticator } from 'src/antelope/wallets';
 
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
@@ -93,8 +92,8 @@ export default defineComponent({
         },
     },
     computed: {
-        token(): TokenClass | undefined {
-            return this.selected?.token as TokenClass ?? undefined;
+        token(): TokenClass | null {
+            return this.selected?.token as TokenClass ?? null;
         },
         loggedAccount() {
             return accountStore.loggedEvmAccount;
@@ -162,7 +161,7 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferTokens');
+            return ant.stores.feedback.isLoading('transferEVMTokens');
         },
         configIsLoading() {
             let config;
@@ -175,9 +174,6 @@ export default defineComponent({
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
-        },
-        loadingTransaction() {
-            return localStorage.getItem('wagmi.connected') && isCorrectNetwork() ? this.isLoading || this.configIsLoading : this.isLoading;
         },
     },
     created() {
@@ -218,46 +214,31 @@ export default defineComponent({
             }
         },
         clearTokenTransferConfigs() {
-            balanceStore.clearAllWagmiTokenTransferConfigs('logged');
+            this.updateTokenTransferConfig(false, null, this.address, this.amount);
         },
-        updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null | undefined, address: string, amount: BigNumber) {
+        async updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null, address: string, amount: BigNumber) {
             // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
             // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
             // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
-
-            if (!formIsValid || !token?.address || !localStorage.getItem('wagmi.connected')) {
-                this.clearTokenTransferConfigs();
-                return;
-            }
-
-
-            if (this.token?.isSystem) {
-                balanceStore.prepareWagmiSystemTokenTransferConfig(
-                    'logged',
-                    address,
-                    amount,
-                );
-            } else {
-                balanceStore.prepareWagmiTokenTransferConfig(
-                    'logged',
-                    token,
-                    address,
-                    amount,
-                );
-            }
+            await this.loggedAccount?.authenticator.prepareTokenForTransfer(formIsValid ? token : null, amount, address);
         },
         async startTransfer() {
-            // if WalletConnect on wrong network, notify user and prevent transaction
-            if (localStorage.getItem('wagmi.connected')){
-                const networkName = useChainStore().currentChain.settings.getDisplay();
-                if (!isCorrectNetwork()){
-                    const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                    ant.config.notifyFailureMessage(errorMessage);
-                    return;
-                }
-            } else {
-                //if injected provider (Desktop) prompt to switch chains
-                await checkNetwork();
+
+            // before sending the transaction, we check if the user is connected to the correct network
+            const label = 'logged';
+            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                const networkName = useChainStore().loggedChain.settings.getDisplay();
+                const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                ant.config.notifyFailureWithAction(errorMessage, {
+                    label: ant.config.localizationHandler('evm_wallet.switch'),
+                    handler: async () => {
+                        // we force the useer to manually re enter the amount which triggers updateTokenTransferConfig
+                        this.amount = ethers.constants.Zero;
+                        await authenticator.ensureCorrectChain();
+                    },
+                });
+                return;
             }
 
             const token = this.token as TokenClass;
@@ -265,6 +246,8 @@ export default defineComponent({
             const to = this.address;
 
             if (this.isFormValid) {
+                await this.updateTokenTransferConfig(true, token, to, amount);
+
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
@@ -418,7 +401,7 @@ export default defineComponent({
                             color="primary"
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
-                            :loading="loadingTransaction"
+                            :loading="isLoading"
                             :disable="!isFormValid || isLoading"
                             @click="startTransfer"
                         />

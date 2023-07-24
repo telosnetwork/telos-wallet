@@ -116,11 +116,13 @@ export const useNftsStore = defineStore(store_name, {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
-                    self.__inventory[label] = {
-                        owner: account?.account || '',
-                        list: [],
-                        loading: true,
-                    };
+                    if (label) {
+                        self.__inventory[label] = {
+                            owner: account?.account || '',
+                            list: [],
+                            loading: true,
+                        };
+                    }
                 },
             });
         },
@@ -277,6 +279,7 @@ export const useNftsStore = defineStore(store_name, {
 const nftsInitialState: NftsState = {
     __indexer_filter: {
         address: '',
+        limit: 10000, // override api limit default value of 50
     },
     __user_filter: {
         collection: '',

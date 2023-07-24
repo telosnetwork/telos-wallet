@@ -55,6 +55,7 @@ export const usePlatformStore = defineStore(store_name, {
             // detect mobile
             const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i;
             platform.setIsMobile(mobileRegex.test(navigator.userAgent));
+
             //  used for temp exclusion from Brave Browser wallet.
             //  See https://github.com/telosnetwork/teloscan/issues/335
             platform.setIsIOSMobile((/iPhone|iPad|iPod/i).test(navigator.userAgent));

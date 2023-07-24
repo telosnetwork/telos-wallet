@@ -139,7 +139,7 @@ export const useUserStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
-                useFeedbackStore().unsetLoading('account.saveUsers');
+                useFeedbackStore().unsetLoading('user.saveUsers');
             }
         },
         // Logged Handlers ----------------

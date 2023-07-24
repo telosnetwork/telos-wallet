@@ -24,6 +24,33 @@
 
 import { defineStore } from 'pinia';
 import { getAntelope } from 'src/antelope';
+import { toRaw } from 'vue';
+
+
+// auxiliary tracing functions
+export const createTraceFunction = (store_name: string) => function(action: string, ...args: unknown[]) {
+    if (useFeedbackStore().isDebugging(store_name)) {
+        const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+        const eventName = `${titlecase(store_name)}.${action}()`;
+        console.debug(eventName, [...args]);
+    }
+};
+
+
+// only if we are NOT in production mode search in the url for the trace flag
+// to turn on the Antelope trace mode
+let trace = false;
+if (process.env.NODE_ENV !== 'production') {
+    const urlParams = new URLSearchParams(window.location.search);
+    trace = urlParams.get('trace') === 'true';
+}
+export const isTracingAll = () => trace;
+export const createInitFunction = (store_name: string, debug?: boolean) => function() {
+    useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
+};
+
+// -------------------------------------------
+
 
 export interface FeedbackProggress {
     percent: number;
@@ -41,7 +68,9 @@ export interface FeedbackState {
     __debug: Map<string, boolean>;
 }
 
-export const useFeedbackStore = defineStore('feedback', {
+const store_name = 'feedback';
+
+export const useFeedbackStore = defineStore(store_name, {
     state: (): FeedbackState => (feedbackiInitialState),
     getters: {
         getLoadings: state => state.__loading,
@@ -52,17 +81,21 @@ export const useFeedbackStore = defineStore('feedback', {
         getProgress: state => (name: string) => state.__processes.get(name),
     },
     actions: {
+        trace: createTraceFunction(store_name),
+        init: createInitFunction(store_name),
         // Loading ----
         setLoading(name: string) {
             if (!this.__loading.includes(name)) {
                 this.__loading.push(name);
             }
+            this.trace('setLoading', name, 'list:', [...toRaw(this.__loading)]);
         },
         unsetLoading(name: string) {
             const index = this.__loading.indexOf(name);
             if (index > -1) {
                 this.__loading.splice(index, 1);
             }
+            this.trace('unsetLoading', name, 'list:', [...toRaw(this.__loading)]);
         },
         // Error ----
         setError(name: string, message: string) {
@@ -94,28 +127,6 @@ const feedbackiInitialState: FeedbackState = {
     __errors: new Map(),
     __processes: new Map(),
     __debug: new Map(),
-};
-
-export const createTraceFunction = (store_name: string) => function(action: string, ...args: unknown[]) {
-    if (useFeedbackStore().isDebugging(store_name)) {
-        const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-        const eventName = `${titlecase(store_name)}.${action}()`;
-        console.debug(eventName, [...args]);
-    }
-};
-
-
-// only if we are NOT in production mode search in the url for the trace flag
-// to turn on the Antelope trace mode
-let trace = false;
-if (process.env.NODE_ENV !== 'production') {
-    const urlParams = new URLSearchParams(window.location.search);
-    trace = urlParams.get('trace') === 'true';
-}
-
-export const isTracingAll = () => trace;
-export const createInitFunction = (store_name: string, debug?: boolean) => function() {
-    useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
 };
 
 

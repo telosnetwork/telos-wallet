@@ -1,18 +1,25 @@
 <script lang="ts">
-import { usePlatformStore } from 'src/antelope';
-import { useChainStore } from 'src/antelope';
-import { defineComponent } from 'vue';
+import { useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { computed, defineComponent } from 'vue';
+import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
+    components: {
+        QSpinnerFacebook,
+    },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
 
         const toggleWalletOptions = () => {
-            usePlatformStore().isMobile ? emit('toggleWalletConnect') : emit('showWalletOptions');
+            usePlatformStore().isMobile ? emit('showWalletConnect') : emit('showWalletOptions');
         };
 
+        // loading state for generic connect button is only required for mobile (WalletConnect)
+        const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
+
         return {
+            loading,
             viewAnyAccount,
             toggleWalletOptions,
         };
@@ -22,8 +29,11 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
+    <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
+        <template v-slot:loading>
+            <QSpinnerFacebook />
+        </template>
     </q-btn>
 
     <!-- <q-btn

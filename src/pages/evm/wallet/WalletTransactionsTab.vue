@@ -3,7 +3,8 @@ import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
-import { useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { AntelopeError } from 'src/antelope/types';
 
 
 const historyStore = useHistoryStore();
@@ -23,16 +24,19 @@ export default defineComponent({
             rowsCurrentPage: 5,
             rowsNumber: 0,
         },
+        errorsFound: false,
+        hideLoadingState: false,
+        fetchTransactionsInterval: null as null | NodeJS.Timer,
     }),
     computed: {
+        doLiveUpdate() {
+            return this.address && this.pagination.page === 1 && !this.errorsFound;
+        },
         hashes() {
             return this.shapedTransactions.map(tx => tx.id);
         },
-        loadings() {
-            return feedbackStore.getLoadings;
-        },
         loading() {
-            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
+            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount') && !this.hideLoadingState;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -68,9 +72,36 @@ export default defineComponent({
         },
     },
     created() {
-        this.getTransactions();
+        if (this.shapedTransactions.length > 0) {
+            this.hideLoadingState = true;
+        }
+
+        this.fetchTransactionsInterval = setInterval(() => {
+            if (this.doLiveUpdate) {
+                this.hideLoadingState = true;
+
+                this.getTransactions().finally(() => {
+                    this.enableLoadingState();
+                });
+            }
+        }, 13000);
+
+        this.getTransactions().finally(() => {
+            this.enableLoadingState();
+        });
+    },
+    unmounted() {
+        if (this.fetchTransactionsInterval) {
+            clearInterval(this.fetchTransactionsInterval);
+        }
     },
     methods: {
+        enableLoadingState() {
+            // a timeout of 500ms is used in the history store to prevent the loading state from flashing; account for that here
+            setTimeout(() => {
+                this.hideLoadingState = false;
+            }, 550);
+        },
         isLoadingTransaction(i: number) {
             const loadingFlag = `history.shapeTransactions-${i}`;
             return feedbackStore.isLoading(loadingFlag);
@@ -95,8 +126,15 @@ export default defineComponent({
                     limit,
                     includeAbi: true,
                 });
-                await historyStore.fetchEVMTransactionsForAccount('current');
-                this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                try {
+                    await historyStore.fetchEVMTransactionsForAccount('current');
+                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                } catch (e) {
+                    if (e instanceof AntelopeError) {
+                        getAntelope().config.notifyFailureMessage(e.message, e.payload);
+                        this.errorsFound = true;
+                    }
+                }
             }
         },
     },

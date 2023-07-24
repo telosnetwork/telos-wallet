@@ -16,15 +16,28 @@ export default defineComponent({
     data: (): {
         tab: 'left' | 'right'
         showWalletOptions: boolean,
-        toggleWalletConnect: boolean,
+        showWalletConnect: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
-        toggleWalletConnect: false,
+        showWalletConnect: false,
     }),
 
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
+    },
+
+    methods: {
+        onShowWalletConnect() {
+            this.showWalletConnect = true;
+            // put this variable back to false for an eventual re-open
+            setTimeout(() => {
+                this.showWalletConnect = false;
+            }, 200);
+        },
+        onShowWalletOptions(show: boolean) {
+            this.showWalletOptions = show;
+        },
     },
 });
 </script>
@@ -73,21 +86,21 @@ export default defineComponent({
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @toggle-wallet-connect="toggleWalletConnect = true"
-                        @show-wallet-options="showWalletOptions = true"
+                        @show-wallet-connect="onShowWalletConnect()"
+                        @show-wallet-options="onShowWalletOptions(true)"
                     />
                 </div>
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
-                        :toggleWalletConnect="toggleWalletConnect"
-                        @toggle-wallet-connect="toggleWalletConnect = false"
-                        @close-wallet-options="showWalletOptions = false"
+                        :showWalletConnect="showWalletConnect"
+                        @show-wallet-connect="onShowWalletConnect()"
+                        @close-wallet-options="onShowWalletOptions(false)"
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
                     <a
-                        href="https://docs.telos.net/overview/getting-started/wallet-introduction"
+                        href="https://docs.telos.net/evm/about/setup-a-wallet"
                         target="_blank"
                         class="c-home__external-link-text"
                     >

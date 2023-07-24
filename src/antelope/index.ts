@@ -1,5 +1,5 @@
 import { App } from 'vue';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
 import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
@@ -24,6 +24,7 @@ import {
     useTokensStore,
     useUserStore,
 } from 'src/antelope';
+import { AntelopeWallets } from 'src/antelope/wallets';
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
@@ -36,7 +37,7 @@ const events = {
     onLoggedIn: new Subject<AccountModel>(),
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
-    onAccountChanged: new Subject<{label:string, account:AccountModel|null}>(),
+    onAccountChanged: new BehaviorSubject<{label:string, account:AccountModel|null}>({ label: '', account: null }),
     onChainIndexer: new Subject<{label:string, isHealthy:boolean}>(),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };
@@ -45,6 +46,7 @@ export const getEvents = () => events;
 export class Antelope {
     constructor(
         public config: AntelopeConfig,
+        public wallets: AntelopeWallets,
     ) {
         //
     }
@@ -53,10 +55,12 @@ export class Antelope {
         if (this.config.app) {
             throw new Error('Antelope has already been initialized.');
         }
-        this.config.init(app);
-
         // do not access pinia stores before this line
         installPinia(app);
+
+        // inintialize config and wallets
+        this.config.init(app);
+        this.wallets.init();
 
         // call for the first time useXStore for all X stores in Antelope library
         const stores = this.stores;
@@ -110,7 +114,7 @@ export class Antelope {
     }
 }
 
-const antelope = new Antelope(new AntelopeConfig());
+const antelope = new Antelope(new AntelopeConfig(), new AntelopeWallets());
 export const getAntelope = () => antelope;
 export const installAntelope = (app: App) => {
     if (app.config.globalProperties.$antelope) {

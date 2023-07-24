@@ -6,3 +6,8 @@ $z-index--connect-wallet-popup: 3;
 
 $z-index--video-wrapper: -1;
 $z-index--video-overlay: -1;
+
+// WalletConnect popup on top of fullscreen modal (z-index:6000) containing ConnectWalletOptions
+body {
+    --w3m-z-index: 6001;
+}

@@ -32,6 +32,7 @@ export class AntelopeConfig {
     private __notify_success_message_handler: (message: string, payload?: never) => void = alert;
     private __notify_success_copy_handler: () => void = alert;
     private __notify_failure_message_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_failure_action_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
     private __notify_disconnected_handler: () => void = alert;
     private __notify_neutral_message_handler: (message: string) => (() => void) = () => (() => void 0);
 
@@ -39,7 +40,7 @@ export class AntelopeConfig {
     private __authenticators_getter: () => Authenticator[] = () => [];
 
     // localization handler --
-    private __localization_handler: (key: string) => string = (key: string) => key;
+    private __localization_handler: (key: string, payload?: Record<string, unknown>) => string = (key: string) => key;
 
     // error to string handler --
     private __error_to_string_handler: (error: unknown) => string = (error: unknown) => {
@@ -142,6 +143,10 @@ export class AntelopeConfig {
         return this.__notify_failure_message_handler;
     }
 
+    get notifyFailureWithAction() {
+        return this.__notify_failure_action_handler;
+    }
+
     get notifyDisconnectedHandler() {
         return this.__notify_disconnected_handler;
     }
@@ -200,6 +205,10 @@ export class AntelopeConfig {
         this.__notify_failure_message_handler = handler;
     }
 
+    public setNotifyFailureWithAction(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+        this.__notify_failure_action_handler = handler;
+    }
+
     public setNotifyDisconnectedHandler(handler: () => void) {
         this.__notify_disconnected_handler = handler;
     }
@@ -214,7 +223,7 @@ export class AntelopeConfig {
     }
 
     // setting translation handler --
-    public setLocalizationHandler(handler: (key: string) => string) {
+    public setLocalizationHandler(handler: (key: string, payload?: Record<string, unknown>) => string) {
         this.__localization_handler = handler;
     }
 

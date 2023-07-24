@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import AppNav from 'components/evm/AppNav.vue';
-import { checkNetwork } from 'src/antelope/stores/utils/checkNetwork';
-
-onMounted(() => {
-    window.addEventListener('focus', checkNetwork);
-});
 </script>
 
 <template>
