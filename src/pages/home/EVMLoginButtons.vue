@@ -35,6 +35,11 @@ export default defineComponent({
 <template>
 <div class="c-evm-login-buttons">
     <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleOAuthOptions">
+        <img
+            width="24"
+            class="q-mr-sm"
+            src="~assets/logo--tlos.svg"
+        >
         {{ $t('home.login_with_social_media') }}
     </q-btn>
 
