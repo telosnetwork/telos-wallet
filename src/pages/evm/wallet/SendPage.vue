@@ -282,7 +282,6 @@ export default defineComponent({
             }
         },
     },
-
 });
 </script>
 

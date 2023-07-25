@@ -1,5 +1,5 @@
 <script lang="ts">
-import { useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
 import { computed, defineComponent } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 
@@ -12,7 +12,16 @@ export default defineComponent({
         const viewAnyAccount = () => {};
 
         const toggleWalletOptions = () => {
-            usePlatformStore().isMobile ? emit('showWalletConnect') : emit('showWalletOptions');
+            if (usePlatformStore().isMobile) {
+                if (useEVMStore().injectedProviderNames.length > 0) {
+                    console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+                    emit('useInjectedProvider');
+                } else {
+                    emit('showWalletConnect');
+                }
+            } else {
+                emit('showWalletOptions');
+            }
         };
 
         // loading state for generic connect button is only required for mobile (WalletConnect)

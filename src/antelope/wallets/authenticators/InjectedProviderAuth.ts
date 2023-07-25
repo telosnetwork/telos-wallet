@@ -8,13 +8,13 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
 
-export abstract class ExternalProviderAuth extends EVMAuthenticator {
+export abstract class InjectedProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
 
     // this is just a dummy label to identify the authenticator base class
     constructor(label: string) {
         super(label);
-        useEVMStore().initExternalProvider(this);
+        useEVMStore().initInjectedProvider(this);
     }
     abstract getProvider(): EthereumProvider | null;
 

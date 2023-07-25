@@ -15,6 +15,10 @@ export default defineComponent({
             required: true,
             type: Boolean,
         },
+        useInjectedProvider: {
+            required: true,
+            type: String,
+        },
     },
     setup(props, { emit }){
         const ant = getAntelope();
@@ -41,6 +45,12 @@ export default defineComponent({
         watch(() => props.showWalletConnect, async (newVal) => {
             if (newVal) {
                 await setWalletConnectAuthenticator();
+            }
+        });
+
+        watch(() => props.useInjectedProvider, async (providerName) => {
+            if (providerName) {
+                setAuthenticator(providerName, 'logged');
             }
         });
 
