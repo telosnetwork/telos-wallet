@@ -27,22 +27,13 @@ export default defineComponent({
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask && !e.isSafePal;
-        });
-
-        const supportsSafePal = computed(() => {
-            const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isSafePal;
+            return e && e.isMetaMask;
         });
 
         const selectedOAuthProvider = ref('');
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
-        };
-
-        const redirectToSafepalDownload = () => {
-            window.open('https://www.safepal.com/en/download', '_blank');
         };
 
         watch(() => props.showWalletConnect, async (newVal) => {
@@ -103,8 +94,6 @@ export default defineComponent({
         const redirectToInstall = (name:string) => {
             if (name === 'Metamask') {
                 redirectToMetamaskDownload();
-            } else if (name === 'SafePal') {
-                redirectToSafepalDownload();
             }
         };
 
@@ -117,7 +106,6 @@ export default defineComponent({
             isLoading,
             isLoadingOreId,
             supportsMetamask,
-            supportsSafePal,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
@@ -165,53 +153,8 @@ export default defineComponent({
             </template>
         </div>
 
-        <!-- Facebook OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('facebook')">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Facebook"
-                    src="~assets/evm/icon-oauth-facebook.svg"
-                >
-                {{ $t('home.oauth_facebook') }}
-            </template>
-        </div>
-
-        <!-- Github OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('github')">
-            <template v-if="isLoadingOreId('github')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Github"
-                    src="~assets/evm/icon-oauth-github.svg"
-                >
-                {{ $t('home.oauth_github') }}
-            </template>
-        </div>
-
-        <!-- Twitter OAuth Provider -->
-        <div class="wallet-options__option" @click="setOreIdAuthenticator('twitter')">
-            <template v-if="isLoadingOreId('twitter')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="Twitter"
-                    src="~assets/evm/icon-oauth-twitter.svg"
-                >
-                {{ $t('home.oauth_twitter') }}
-            </template>
-        </div>
+        <!-- Facebook, Twitter or GitHub OAuth Provider Buttons can be foud in this link -->
+        <!-- https://github.com/telosnetwork/telos-wallet/blob/40196ac0e9cc0cef78ec20d7876f0c97ef02cc1c/src/pages/home/ConnectWalletOptions.vue#L168-L214 -->
 
     </div>
 
@@ -233,22 +176,6 @@ export default defineComponent({
                     src="~assets/evm/metamask_fox.svg"
                 >
                 {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
-            </template>
-        </div>
-
-        <!-- Safepal Authenticator button -->
-        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
-            <template v-if="isLoading('SafePal.login')">
-                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="flex q-ml-auto q-mt-auto wallet-logo"
-                    alt="SafePal"
-                    src="~assets/evm/safepal.svg"
-                >
-                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
             </template>
         </div>
 
@@ -277,12 +204,12 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 240px;
     margin:auto;
     color: $white;
 
     &--oauth{
-        height: 370px;
+        height: 180px;
     }
 }
 
