@@ -61,6 +61,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async walletConnectLogin(network: string): Promise<addressString | null> {
         this.trace('walletConnectLogin');
+        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
         try {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
@@ -74,6 +76,24 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 // we are already logged in. So we just ignore the error
                 console.error(e);
             }
+
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> login successful',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
+            );
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> generic login successful',
+                TELOS_ANALYTICS_EVENT_IDS.loginSuccessful,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
+            );
 
             return address;
         } catch (e) {
@@ -98,6 +118,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const wagmiConnected = localStorage.getItem('wagmi.connected');
+        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
         if (wagmiConnected) {
@@ -107,8 +128,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.trace('login', 'web3Modal.openModal()');
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
-                    const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
-
                     this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
 
                     if (newState.open === true) {
