@@ -10,7 +10,7 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
-        const coso = ref(0);
+        const coso = ref(useEVMStore().injectedProviderNames.length);
 
         const toggleWalletOptions = () => {
             coso.value = useEVMStore().injectedProviderNames.length;
@@ -41,7 +41,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <div class="coso-1"><pre>coso: {{ coso }}</pre></div>
+    <div class="coso"><pre>coso: {{ coso }}</pre></div>
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
@@ -59,7 +59,7 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.coso-1 {
+.coso {
     color: white;
 }
 .c-evm-login-buttons {
