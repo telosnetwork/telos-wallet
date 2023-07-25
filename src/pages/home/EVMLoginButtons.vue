@@ -41,7 +41,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <div class="coso"><pre>coso: {{ coso }}</pre></div>
+    <div class="coso-1"><pre>coso: {{ coso }}</pre></div>
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
@@ -59,7 +59,7 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.coso {
+.coso-1 {
     color: white;
 }
 .c-evm-login-buttons {
