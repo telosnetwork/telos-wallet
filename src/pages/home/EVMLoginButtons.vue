@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
@@ -10,24 +10,27 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
+        const coso = ref(0);
 
         const toggleWalletOptions = () => {
-            if (usePlatformStore().isMobile) {
-                if (useEVMStore().injectedProviderNames.length > 0) {
-                    console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-                    emit('useInjectedProvider');
-                } else {
-                    emit('showWalletConnect');
-                }
-            } else {
-                emit('showWalletOptions');
-            }
+            coso.value = useEVMStore().injectedProviderNames.length;
+            // if (usePlatformStore().isMobile) {
+            //     if (useEVMStore().injectedProviderNames.length > 0) {
+            //         console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+            //         emit('useInjectedProvider');
+            //     } else {
+            //         emit('showWalletConnect');
+            //     }
+            // } else {
+            //     emit('showWalletOptions');
+            // }
         };
 
         // loading state for generic connect button is only required for mobile (WalletConnect)
         const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
         return {
+            coso,
             loading,
             viewAnyAccount,
             toggleWalletOptions,
@@ -38,6 +41,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
+    <div class="coso"><pre>coso: {{ coso }}</pre></div>
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
@@ -55,6 +59,9 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+.coso {
+    color: white;
+}
 .c-evm-login-buttons {
     display: flex;
     flex-direction: column;
