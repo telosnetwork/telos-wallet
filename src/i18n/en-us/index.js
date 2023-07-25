@@ -30,7 +30,7 @@ export default {
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
-        login_with_social_media: 'Login with Social Media',
+        login_with_social_media: 'Telos Cloud Wallet',
         create_new_account: 'Create a New Account',
         logged_as: 'Logged in as {account}',
         view_wallet: 'View Wallet',
