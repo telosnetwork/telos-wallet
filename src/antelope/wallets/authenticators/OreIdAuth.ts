@@ -105,14 +105,15 @@ export class OreIdAuth extends EVMAuthenticator {
             return chainAccount;
         }
 
-        // launch the login flow
-        await oreId.popup.auth({ provider: this.provider as AuthProvider });
-        const userData = await oreId.auth.user.getData();
-        this.trace('login', 'userData', userData);
         this.trace('login', 'trackAnalyticsEvent -> login started');
         chainSettings.trackAnalyticsEvent(
             { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
         );
+
+        // launch the login flow
+        await oreId.popup.auth({ provider: this.provider as AuthProvider });
+        const userData = await oreId.auth.user.getData();
+        this.trace('login', 'userData', userData);
 
         this.userChainAccount = userData.chainAccounts.find(
             (account: UserChainAccount) => this.getChainNetwork(network) === account.chainNetwork) ?? null;

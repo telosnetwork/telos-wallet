@@ -97,8 +97,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        const wagmiConnected = localStorage.getItem('wagmi.connected');
+
         useFeedbackStore().setLoading(`${this.getName()}.login`);
-        if (localStorage.getItem('wagmi.connected')) {
+        if (wagmiConnected) {
             return this.walletConnectLogin(network);
         } else {
             return new Promise(async (resolve) => {
@@ -106,7 +108,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
                     const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
-                    const wagmiConnected = localStorage.getItem('wagmi.connected');
 
                     this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
 
