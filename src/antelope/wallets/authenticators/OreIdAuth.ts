@@ -84,6 +84,16 @@ export class OreIdAuth extends EVMAuthenticator {
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+        const trackSuccessfulLogin = () => {
+            this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
+            );
+            this.trace('login', 'trackAnalyticsEvent -> login succeeded', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId);
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId },
+            );
+        };
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
         const oreIdOptions: OreIdOptions = {
@@ -102,17 +112,19 @@ export class OreIdAuth extends EVMAuthenticator {
             const chainAccount = localStorage.getItem('account') as addressString;
             this.userChainAccount = { chainAccount } as UserChainAccount;
             this.trace('login', 'userChainAccount', this.userChainAccount);
+            trackSuccessfulLogin();
             return chainAccount;
         }
+
+        this.trace('login', 'trackAnalyticsEvent -> login started');
+        chainSettings.trackAnalyticsEvent(
+            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+        );
 
         // launch the login flow
         await oreId.popup.auth({ provider: this.provider as AuthProvider });
         const userData = await oreId.auth.user.getData();
         this.trace('login', 'userData', userData);
-        this.trace('login', 'trackAnalyticsEvent -> login started');
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-        );
 
         this.userChainAccount = userData.chainAccounts.find(
             (account: UserChainAccount) => this.getChainNetwork(network) === account.chainNetwork) ?? null;
@@ -134,14 +146,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
         const address = (this.userChainAccount?.chainAccount as addressString) ?? null;
         this.trace('login', 'userChainAccount', this.userChainAccount);
-        this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-        );
-        this.trace('login', 'trackAnalyticsEvent -> login succeeded', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId);
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId },
-        );
+        trackSuccessfulLogin();
 
         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return address;
