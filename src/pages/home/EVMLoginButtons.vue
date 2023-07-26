@@ -14,18 +14,14 @@ export default defineComponent({
         const isMobile = ref(usePlatformStore().isMobile);
 
         const toggleWalletOptions = () => {
-            injected.value = useEVMStore().injectedProviderNames.length;
-            if (usePlatformStore().isMobile) {
-                if (useEVMStore().injectedProviderNames.length > 0) {
+            if (isMobile.value) {
+                if (injected.value === 1) {
                     console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-                    alert('useInjectedProvider');
                     emit('useInjectedProvider');
                 } else {
-                    alert('showWalletConnect');
                     emit('showWalletConnect');
                 }
             } else {
-                alert('showWalletOptions');
                 emit('showWalletOptions');
             }
         };
@@ -34,8 +30,6 @@ export default defineComponent({
         const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
         return {
-            injected,
-            isMobile,
             loading,
             viewAnyAccount,
             toggleWalletOptions,
@@ -46,8 +40,6 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <div class="coso"><pre>injected: {{ injected }}</pre></div>
-    <div class="coso"><pre>isMobile: {{ isMobile }}</pre></div>
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
