@@ -577,6 +577,7 @@ onUnmounted(() => {
     }
 
     &__list-image {
+        object-fit: cover;
         border-radius: 4px;
         height: 40px;
         width: 40px;

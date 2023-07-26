@@ -1,16 +1,18 @@
 <script setup lang="ts">
 
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
-import { usePlatformStore } from 'src/antelope';
+import { usePlatformStore, useUserStore } from 'src/antelope';
 
 const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
+const { fiatLocale } = useUserStore();
 
 const props = defineProps<{
     nft: ShapedNFT,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
+    quantity?: number, // for ERC1155 tokens, represents the quantity of the token in the user's inventory
 }>();
 
 // data
@@ -88,6 +90,14 @@ const iconOverlayName = computed(() => {
     return 'o_image_not_supported';
 });
 
+const quantityBadgeText = computed(() => {
+    if (!props.quantity || props.quantity <= 1) {
+        return '';
+    }
+
+    // eztodo enhance this
+    return Intl.NumberFormat(fiatLocale).format(props.quantity);
+});
 
 // methods
 function playVideo() {
@@ -125,7 +135,10 @@ function toggleVideoPlay(playOnly?: boolean) {
                 v-if="!showPlaceholderCoverImage"
                 :src="nft.imageSrcFull"
                 :alt="imageAlt"
-                class="c-nft-viewer__image"
+                :class="{
+                    'c-nft-viewer__image': true,
+                    'c-nft-viewer__image--preview': previewMode,
+                }"
             >
             <div
                 v-else-if="nftType === nftTypes.video"
@@ -138,7 +151,10 @@ function toggleVideoPlay(playOnly?: boolean) {
                 :src="nft.videoSrc"
                 :poster="nft.imageSrcFull"
                 playsinline
-                class="c-nft-viewer__video"
+                :class="{
+                    'c-nft-viewer__video': true,
+                    'c-nft-viewer__video--preview': previewMode,
+                }"
             ></video></div>
             <div v-else class="c-nft-viewer__placeholder-image"></div>
         </div>
@@ -184,6 +200,10 @@ function toggleVideoPlay(playOnly?: boolean) {
         :src="nft.audioSrc"
         class="c-nft-viewer__audio"
     ></audio>
+
+    <div class="c-nft-viewer__quantity-badge">
+        x3
+    </div>
 </div>
 </template>
 
@@ -216,8 +236,7 @@ function toggleVideoPlay(playOnly?: boolean) {
     }
 
     &__image-container,
-    &__video-container,
-    &__blank-container {
+    &__video-container {
         width: 100%;
     }
 
@@ -236,6 +255,12 @@ function toggleVideoPlay(playOnly?: boolean) {
         width: auto;
         max-width: 100%;
         max-height: 100%;
+
+        &--preview {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
     }
 
     &__overlay-icon-bg,
@@ -286,10 +311,10 @@ function toggleVideoPlay(playOnly?: boolean) {
     &__video {
         width: 100%;
         cursor: pointer;
-    }
 
-    &__audio-container {
-
+        &--preview {
+            border-radius: 4px;
+        }
     }
 
     &__audio {
@@ -300,8 +325,21 @@ function toggleVideoPlay(playOnly?: boolean) {
         flex-shrink: 0;
     }
 
-    &__blank-container {
+    &__quantity-badge {
+        @include text--small-bold;
 
+        position: absolute;
+        right: -0.5px; // 0.5px to prevent clipping issue
+        bottom: -0.5px;
+        width: 56px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        color: var(--accent-color-2);
+        border-radius: 4px 0 4px 0;
+        background-color: var(--bg-color);
     }
 }
 </style>
