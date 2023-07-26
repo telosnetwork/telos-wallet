@@ -113,6 +113,7 @@ export default defineComponent({
                         @use-injected-provider="onUseInjectedProvider()"
                     />
                 </div>
+
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"

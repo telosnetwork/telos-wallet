@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 
 export default defineComponent({
@@ -10,16 +10,21 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
+        const injected = ref(useEVMStore().injectedProviderNames.length);
+        const isMobile = ref(usePlatformStore().isMobile);
 
         const toggleWalletOptions = () => {
-            if (usePlatformStore().isMobile) {
-                if (useEVMStore().injectedProviderNames.length > 0) {
+            if (isMobile.value) {
+                if (injected.value === 1) {
                     console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+                    alert('useInjectedProvider');
                     emit('useInjectedProvider');
                 } else {
+                    alert('showWalletConnect');
                     emit('showWalletConnect');
                 }
             } else {
+                alert('showWalletOptions');
                 emit('showWalletOptions');
             }
         };
