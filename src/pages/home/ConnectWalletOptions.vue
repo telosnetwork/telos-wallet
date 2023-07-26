@@ -26,12 +26,17 @@ export default defineComponent({
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask && !e.isSafePal;
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
         });
 
         const supportsSafePal = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
             return e && e.isSafePal;
+        });
+
+        const unsupportedExtensions = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a generalize regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
         });
 
         const redirectToMetamaskDownload = () => {
