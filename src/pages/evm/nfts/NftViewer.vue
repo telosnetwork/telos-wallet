@@ -96,7 +96,9 @@ const quantityBadgeText = computed(() => {
     }
 
     // eztodo enhance this
-    return Intl.NumberFormat(fiatLocale).format(props.quantity);
+    const number = Intl.NumberFormat(fiatLocale).format(props.quantity);
+
+    return `x${number}`;
 });
 
 // methods

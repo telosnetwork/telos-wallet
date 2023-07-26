@@ -155,18 +155,24 @@ export const useNftsStore = defineStore(store_name, {
                     const chain_settings = chain.settings as EVMChainSettings;
 
                     if (chain_settings.hasIndexerSupport()) {
-                        chain_settings.getNFTsInventory(owner, toRaw(this.__indexer_filter)).then((nfts) => {
-                            this.__inventory[label].list = nfts;
-                            this.__inventory[label].loading = false;
-                            this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
-                            useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                            nfts.forEach((nft) => {
-                                nft.watch(() => {
-                                    // this forces an update for watchers to be called
-                                    this.__inventory[label].list = [...nfts];
-                                });
+                        const filter = toRaw(this.__indexer_filter);
+                        const erc1155Nfts = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc1155' });
+                        const erc721Nfts  = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc721'  });
+                        const nfts = erc1155Nfts.concat(erc721Nfts);
+                        // eztodo sort on block number when available
+
+                        this.__inventory[label].list = nfts;
+                        this.__inventory[label].loading = false;
+                        this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
+                        useFeedbackStore().unsetLoading('updateNFTsForAccount');
+                        nfts.forEach((nft) => {
+                            nft.watch(() => {
+                                // this forces an update for watchers to be called
+                                this.__inventory[label].list = [...nfts];
                             });
                         });
+
+                        // eztodo should nfts be sorted somehow?
                     } else {
                         // In case the chain does not support index, we don't have any solution yet
                         this.trace('updateNFTsForAccount', 'No alternative for indexer, returning []');
