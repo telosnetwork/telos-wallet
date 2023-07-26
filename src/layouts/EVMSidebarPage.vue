@@ -14,14 +14,12 @@ const props = defineProps<{
     sidebarContent: SidebarProps;
 }>();
 
-//data
+// data
 const expansionItemModel = ref(false);
 
 // computed
 const isMobile = computed(() => $q.screen.lt.md);
 const isLarge = computed(() => $q.screen.gt.md);
-
-// eztodo get color updates from 1155 branch
 
 // methods
 function handleExpansionItemUpdate() {
