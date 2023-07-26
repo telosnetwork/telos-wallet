@@ -171,6 +171,10 @@ export default {
         wrapped_card_label: 'Wrapped {symbol}',
         wrapped_card_tooltip: '{wrappedSymbol} can be used to buy NFTs and trade on decentralized exchanges, among other things. Wrapping {systemSymbol} is done via a decentralized smart contract.',
         unwrapped_card_tooltip: 'An equal amount of {systemSymbol} will be received as the amount of {wrappedSymbol} that was unwrapped. Unwrapping {wrappedSymbol} is done via a decentralized smart contract.',
+        wrap_sidebar_title: 'Why wrap {symbol}?',
+        wrap_sidebar_content_fragment_1: 'Wrap your {systemSymbol} to {wrappedSymbol} for ',
+        wrap_sidebar_content_fragment_bold: 'seamless integration with DeFi platforms',
+        wrap_sidebar_content_fragment_3: ', improved compatibility with ERC-20 tokens, and cross-chain interoperability. Unlock new opportunities and financial services by converting your native {systemSymbol} into the versatile {wrappedSymbol} token.',
     },
     notification:{
         success_title_trx: 'Success',

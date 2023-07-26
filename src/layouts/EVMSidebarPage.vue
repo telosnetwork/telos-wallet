@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { is, useQuasar } from 'quasar';
+import { useQuasar } from 'quasar';
 
 
 interface SidebarProps {
     header: string;
-    content: { text: string; bold: boolean; }[];
+    content: { text: string; bold?: boolean; }[];
 }
 
 const $q = useQuasar();
@@ -15,10 +15,13 @@ const props = defineProps<{
 }>();
 
 //data
-const expansionItemModel = ref(true);
+const expansionItemModel = ref(false);
 
 // computed
-const isMobile = computed(() => $q.screen.lt.sm);
+const isMobile = computed(() => $q.screen.lt.md);
+const isLarge = computed(() => $q.screen.gt.md);
+
+// eztodo get color updates from 1155 branch
 
 // methods
 function handleExpansionItemUpdate() {
@@ -34,7 +37,7 @@ function handleExpansionItemUpdate() {
 <div class="c-sidebar-page">
     <div class="c-sidebar-page__sidebar-container">
         <q-expansion-item
-            :model-value="expansionItemModel"
+            :model-value="expansionItemModel || isLarge"
             :label="sidebarContent.header"
             :expand-icon="isMobile ? 'expand_more' : 'none'"
             class="c-sidebar-page__expansion-item"
@@ -43,11 +46,11 @@ function handleExpansionItemUpdate() {
             <q-card>
                 <q-card-section>
                     <span
-                        v-for="(text, index) in sidebarContent.content"
+                        v-for="(content, index) in sidebarContent.content"
                         :key="`text-fragment-${index}`"
-                        :class="{ 'o-text--paragraph-bold': text.bold }"
+                        :class="{ 'o-text--paragraph-bold': content.bold }"
                     >
-                        {{ text.text }}&nbsp;
+                        {{ content.text }}
                     </span>
                 </q-card-section>
             </q-card>
@@ -66,12 +69,21 @@ function handleExpansionItemUpdate() {
     grid-template: 'a'
                    'b';
 
-    @include sm-and-up {
+    @include lg-and-up {
         grid-template: 'a b .';
+        grid-template-columns: 1fr 1fr 1fr;
     }
 
     &__sidebar-container {
         grid-area: a;
+
+        @include sm-and-up {
+            margin: auto;
+        }
+
+        @include lg-and-up {
+            margin: unset;
+        }
     }
 
     &__body-container {
@@ -80,8 +92,13 @@ function handleExpansionItemUpdate() {
 
     &__expansion-item {
         border-radius: 4px;
-        border: 1px solid var(--header-item-outline-color);
+        border: 2px solid var(--header-bg-color);
         margin-bottom: 8px;
+
+        @include sm-and-up {
+            width: 350px;
+            max-width: 100%;
+        }
 
         // quasiar overrides
         .q-item__label {
@@ -90,6 +107,10 @@ function handleExpansionItemUpdate() {
 
         .q-item.q-item-type {
             position: relative;
+
+            @include lg-and-up {
+                pointer-events: none;
+            }
 
             &::after {
                 content: ' ';
@@ -100,7 +121,7 @@ function handleExpansionItemUpdate() {
                 left: 0;
                 width: calc(100% - 30px);
                 height: 1px;
-                background-color: var(--link-color);
+                background-color: var(--accent-color-2);
             }
         }
     }

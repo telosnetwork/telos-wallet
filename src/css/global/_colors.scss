@@ -19,6 +19,8 @@ $saveBtn: #2e1f4f;
 
 // Light Mode
 .body--light {
+    $accent-1: #571AFF;
+    $accent-2: #505DCD;
     $page-header: #F7F5FF;
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
     $high-contrast-text-color: #282828;
@@ -26,17 +28,17 @@ $saveBtn: #2e1f4f;
     $low-contrast-text-color: #939393;
     $native-contrast-text-color: #F7F5FF;
     $menu-text: #fff;
-    $link-color: #646FD3;
     $canvas: #fff;
 
     --text-high-contrast: #{$high-contrast-text-color};
     --text-default-contrast: #{$default-contrast-text-color};
     --text-low-contrast: #{$low-contrast-text-color};
     --native-contrast-text-color: #{$native-contrast-text-color};
-    --link-color: #{$link-color};
+    --link-color: #{$accent-2};
     --menu-text: #{$menu-text};
 
-    --accent-color: #{$primary};
+    --accent-color: #{$accent-1};
+    --accent-color-2: #{$accent-2};
     --negative-color: #{$negative};
     --positive-color: #{$positive};
     --warning-color-ui: #{$warning};
@@ -49,7 +51,6 @@ $saveBtn: #2e1f4f;
     --bg-color-hover: #{$page-header};
 
     --header-bg-color: #{$page-header};
-    --header-item-outline-color: #{rgba($primary, 10%)};
 }
 
 // Dark Mode
