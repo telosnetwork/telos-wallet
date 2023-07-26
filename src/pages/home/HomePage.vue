@@ -32,6 +32,7 @@ export default defineComponent({
 
     methods: {
         onUseInjectedProvider() {
+            // first check the integrity of the injected provider
             const evm = useEVMStore();
             const platform = usePlatformStore();
             console.assert(platform.isMobile, 'onUseInjectedProvider should only be called on mobile');
@@ -48,6 +49,7 @@ export default defineComponent({
                 );
                 return;
             }
+            // Everything is fine, let's use the injected provider
             this.useInjectedProvider = providerName;
         },
         onShowWalletConnect() {

@@ -1,7 +1,7 @@
 import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { boot } from 'quasar/wrappers';
-import { installAntelope, usePlatformStore } from 'src/antelope';
+import { installAntelope } from 'src/antelope';
 import {
     MetamaskAuth,
     WalletConnectAuth,
@@ -70,7 +70,6 @@ export default boot(({ app }) => {
     // constants --
     ant.config.setIndexerHealthThresholdSeconds(10);
     ant.config.setIndexerHealthCheckInterval(5000);
-    ant.config.setTransactionSecTimeout(usePlatformStore().isMobile ? 30 : 10);
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to

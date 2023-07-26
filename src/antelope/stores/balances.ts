@@ -293,27 +293,14 @@ export const useBalancesStore = defineStore(store_name, {
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
-            let timer: NodeJS.Timeout | null = null;
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-                const timeoutPromise = new Promise((_resolve, reject) => {
-                    timer = setTimeout(() => {
-                        reject(new AntelopeError('antelope.balances.error_transfer_timeout'));
-
-                    }, getAntelope().config.transactionSecTimeout * 1000);
-                });
-                const transferPromise = account.authenticator.transferTokens(token, amount, to);
-                const result = await Promise.race([timeoutPromise, transferPromise]);
-
-                clearTimeout(timer ?? undefined);
+                const result = await account.authenticator.transferTokens(token, amount, to);
                 return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
                 console.error(error);
                 throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
             } finally {
-                if (timer) {
-                    clearTimeout(timer);
-                }
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }
         },

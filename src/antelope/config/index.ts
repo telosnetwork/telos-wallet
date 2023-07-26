@@ -16,8 +16,6 @@ export class AntelopeConfig {
             return new AntelopeError(description, { error: str });
         }
     }
-    // transaction time out in seconds --
-    private __transaction_sec_timeout = 10; // 10 seconds
 
     // indexer health threshold --
     private __indexer_health_threshold = 10; // 10 seconds
@@ -110,10 +108,6 @@ export class AntelopeConfig {
         return this.__app;
     }
 
-    get transactionSecTimeout() {
-        return this.__transaction_sec_timeout;
-    }
-
     get indexerHealthThresholdSeconds() {
         return this.__indexer_health_threshold;
     }
@@ -172,11 +166,6 @@ export class AntelopeConfig {
 
     get errorToStringHandler() {
         return this.__error_to_string_handler;
-    }
-
-    // setting transaction timeout --
-    public setTransactionSecTimeout(timeout: number) {
-        this.__transaction_sec_timeout = timeout;
     }
 
     // setting indexer constants --
