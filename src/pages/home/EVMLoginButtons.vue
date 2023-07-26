@@ -13,18 +13,20 @@ export default defineComponent({
         const injected = ref(useEVMStore().injectedProviderNames.length);
         const isMobile = ref(usePlatformStore().isMobile);
 
+        alert('Hello from EVMLoginButtons.vue');
+
         const toggleWalletOptions = () => {
             if (isMobile.value) {
                 if (injected.value === 1) {
                     console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-                    alert('useInjectedProvider');
+                    alert(`useInjectedProvider injected:${injected.value} isMobile:${isMobile.value}`);
                     emit('useInjectedProvider');
                 } else {
-                    alert('showWalletConnect');
+                    alert(`showWalletConnect injected:${injected.value} isMobile:${isMobile.value}`);
                     emit('showWalletConnect');
                 }
             } else {
-                alert('showWalletOptions');
+                alert(`showWalletOptions injected:${injected.value} isMobile:${isMobile.value}`);
                 emit('showWalletOptions');
             }
         };
