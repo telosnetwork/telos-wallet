@@ -86,7 +86,7 @@ export default defineComponent({
         };
 
         const notifyNoProvider = (provider:string) => {
-            const message = globalProps.$t('home.no_provider_notification_message');
+            const message = globalProps.$t('home.multiple_providers_notification_message');
             ant.config.notifyFailureWithAction(message, {
                 label: ant.config.localizationHandler('home.no_provider_action_label', { provider }),
                 handler: () => {
@@ -113,6 +113,8 @@ export default defineComponent({
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
             notifyNoProvider,
+            redirectToMetamaskDownload,
+            redirectToSafepalDownload,
         };
     },
 });
@@ -134,7 +136,7 @@ export default defineComponent({
         </div>
 
         <!-- Metamask Authenticator button -->
-        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : notifyNoProvider('Metamask')">
+        <div class="wallet-options__option" @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()">
             <template v-if="isLoading('Metamask.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -150,7 +152,7 @@ export default defineComponent({
         </div>
 
         <!-- Safepal Authenticator button -->
-        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : notifyNoProvider('SafePal')">
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
             <template v-if="isLoading('SafePal.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
