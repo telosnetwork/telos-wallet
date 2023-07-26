@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { PropType, defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'AppPage',
@@ -122,9 +122,12 @@ export default defineComponent({
     }
 
     &__tabs {
-        margin-top: 48px;
         flex-grow: 1;
         color: var(--header-text-color);
+
+        @include sm-and-up {
+            margin-top: 36px;
+        }
 
         // quasar override
         .q-tab__indicator {
