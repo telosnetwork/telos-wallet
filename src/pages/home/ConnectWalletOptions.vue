@@ -87,12 +87,7 @@ export default defineComponent({
 
         const notifyNoProvider = (provider:string) => {
             const message = globalProps.$t('home.multiple_providers_notification_message');
-            ant.config.notifyFailureWithAction(message, {
-                label: ant.config.localizationHandler('home.no_provider_action_label', { provider }),
-                handler: () => {
-                    redirectToInstall(provider);
-                },
-            });
+            ant.config.notifyFailureMessage(message);
         };
 
         const redirectToInstall = (name:string) => {
