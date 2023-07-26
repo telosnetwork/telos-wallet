@@ -112,6 +112,12 @@ export class OreIdAuth extends EVMAuthenticator {
             const chainAccount = localStorage.getItem('account') as addressString;
             this.userChainAccount = { chainAccount } as UserChainAccount;
             this.trace('login', 'userChainAccount', this.userChainAccount);
+            // track the login start for auto-login procceess
+            this.trace('login', 'trackAnalyticsEvent -> login started');
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+            );
+            // then track the successful login
             trackSuccessfulLogin();
             return chainAccount;
         }

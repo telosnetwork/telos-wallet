@@ -117,11 +117,21 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
-        const wagmiConnected = localStorage.getItem('wagmi.connected');
+        const wagmiConnected = () => localStorage.getItem('wagmi.connected');
         const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
-        if (wagmiConnected) {
+        if (wagmiConnected()) {
+            // We are in auto-login process. So log loginStarted before calling the walletConnectLogin method
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> login started',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+            );
             return this.walletConnectLogin(network);
         } else {
             return new Promise(async (resolve) => {
@@ -145,25 +155,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                     if (newState.open === false) {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
 
-                        if (wagmiConnected) {
-                            this.trace(
-                                'login',
-                                'trackAnalyticsEvent -> login successful',
-                                'WalletConnect',
-                                TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect,
-                            );
-                            chainSettings.trackAnalyticsEvent(
-                                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
-                            );
-                            this.trace(
-                                'login',
-                                'trackAnalyticsEvent -> generic login successful',
-                                TELOS_ANALYTICS_EVENT_IDS.loginSuccessful,
-                            );
-                            chainSettings.trackAnalyticsEvent(
-                                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-                            );
-                        } else {
+                        if (!wagmiConnected()) {
                             this.trace(
                                 'login',
                                 'trackAnalyticsEvent -> login failed',
@@ -175,7 +167,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                             );
                         }
                     }
-                    if (wagmiConnected) {
+                    if (wagmiConnected()) {
                         resolve(this.walletConnectLogin(network));
                     }
                 });
