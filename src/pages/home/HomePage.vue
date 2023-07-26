@@ -74,6 +74,9 @@ export default defineComponent({
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
+                <div class="coso">useInjectedProvider: {{ useInjectedProvider }}</div>
+                <div class="coso">showWalletConnect: {{ showWalletConnect }}</div>
+                <div class="coso">showWalletOptions: {{ showWalletOptions }}</div>
                 <div v-if="!showWalletOptions" class="c-home__button-container">
                     <div class="c-home__network-toggle-container" role="tablist">
                         <button
@@ -113,6 +116,7 @@ export default defineComponent({
                         @use-injected-provider="onUseInjectedProvider()"
                     />
                 </div>
+
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"

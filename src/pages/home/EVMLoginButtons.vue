@@ -10,27 +10,32 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const viewAnyAccount = () => {};
-        const coso = ref(useEVMStore().injectedProviderNames.length);
+        const injected = ref(useEVMStore().injectedProviderNames.length);
+        const isMobile = ref(usePlatformStore().isMobile);
 
         const toggleWalletOptions = () => {
-            coso.value = useEVMStore().injectedProviderNames.length;
-            // if (usePlatformStore().isMobile) {
-            //     if (useEVMStore().injectedProviderNames.length > 0) {
-            //         console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-            //         emit('useInjectedProvider');
-            //     } else {
-            //         emit('showWalletConnect');
-            //     }
-            // } else {
-            //     emit('showWalletOptions');
-            // }
+            injected.value = useEVMStore().injectedProviderNames.length;
+            if (usePlatformStore().isMobile) {
+                if (useEVMStore().injectedProviderNames.length > 0) {
+                    console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+                    alert('useInjectedProvider');
+                    emit('useInjectedProvider');
+                } else {
+                    alert('showWalletConnect');
+                    emit('showWalletConnect');
+                }
+            } else {
+                alert('showWalletOptions');
+                emit('showWalletOptions');
+            }
         };
 
         // loading state for generic connect button is only required for mobile (WalletConnect)
         const loading = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
 
         return {
-            coso,
+            injected,
+            isMobile,
             loading,
             viewAnyAccount,
             toggleWalletOptions,
@@ -41,7 +46,8 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <div class="coso"><pre>coso: {{ coso }}</pre></div>
+    <div class="coso"><pre>injected: {{ injected }}</pre></div>
+    <div class="coso"><pre>isMobile: {{ isMobile }}</pre></div>
     <q-btn :loading="loading" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
         {{ $t('home.connect_with_wallet') }}
         <template v-slot:loading>
