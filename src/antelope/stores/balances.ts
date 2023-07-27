@@ -386,6 +386,10 @@ export const useBalancesStore = defineStore(store_name, {
 
             this.__wagmiTokenTransferConfig[label] = config;
         },
+        clearBalances() {
+            this.trace('clearBalances');
+            this.__balances = {};
+        },
     },
 });
 
