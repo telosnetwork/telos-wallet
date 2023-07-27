@@ -36,7 +36,7 @@ export default defineComponent({
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a generalize regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
+            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
         });
 
         const redirectToMetamaskDownload = () => {

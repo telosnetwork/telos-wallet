@@ -14,8 +14,9 @@ export default defineComponent({
         const isMobile = ref(usePlatformStore().isMobile);
 
         const toggleWalletOptions = () => {
+            debugger;
             if (isMobile.value) {
-                if (injected.value === 1) {
+                if (injected.value === 1 && !(navigator as any).brave) { // temp workaround for mobile Brave browser, see https://github.com/telosnetwork/telos-wallet/issues/501
                     console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
                     emit('useInjectedProvider');
                 } else {
