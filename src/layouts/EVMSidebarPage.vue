@@ -32,7 +32,7 @@ function handleExpansionItemUpdate() {
 </script>
 
 <template>
-<div class="c-sidebar-page">
+<div class="c-sidebar-page q-mb-xl">
     <aside class="c-sidebar-page__sidebar-container">
         <q-expansion-item
             :model-value="expansionItemModel || isLarge"
@@ -92,6 +92,7 @@ function handleExpansionItemUpdate() {
         grid-area: b;
         word-break: break-all;
         max-width: 1000px;
+        width: 100%;
         margin: auto;
 
         @include lg-and-up {

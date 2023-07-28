@@ -139,6 +139,7 @@ export default {
         search: 'Search',
         no_results: 'No results found',
         toggle: 'Toggle "{text}"',
+        arrow_icon_alt: 'Arrow icon',
     },
     nft : {
         collectible: 'Collectible',
@@ -168,6 +169,8 @@ export default {
         empty_collection_link_text: 'here',
     },
     evm_wrap: {
+        wrap: 'Wrap',
+        wrap_button_label: 'Wrap {systemSymbol} to {wrappedSymbol}',
         total_of_wrapped_and_unwrapped: 'Total of wrapped {token} and {token}',
         wrapped_card_label: 'Wrapped {symbol}',
         wrapped_card_tooltip: '{wrappedSymbol} can be used to buy NFTs and trade on decentralized exchanges, among other things. Wrapping {systemSymbol} is done via a decentralized smart contract.',
@@ -178,6 +181,7 @@ export default {
         wrap_sidebar_content_fragment_3: ', improved compatibility with ERC-20 tokens, and cross-chain interoperability. Unlock new opportunities and financial services by converting your native {systemSymbol} into the versatile {wrappedSymbol} token.',
         unwrap_sidebar_title: 'Unwrapping {symbol}',
         unwrap_sidebar: 'Unwrap your {wrappedSymbol} to get your {systemSymbol} back instantly.',
+        wrap_input_label: 'Wrapping Amount',
     },
     notification:{
         success_title_trx: 'Success',
