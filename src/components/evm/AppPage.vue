@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PropType, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: 'AppPage',
