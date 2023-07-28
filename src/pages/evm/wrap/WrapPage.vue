@@ -2,6 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import WrapPageHeader from 'pages/evm/wrap/WrapPageHeader.vue';
 import WrapTab from 'pages/evm/wrap/WrapTab.vue';
+import UnwrapTab from 'pages/evm/wrap/UnwrapTab.vue';
 
 const tabs = ['wrap', 'unwrap'];
 </script>
@@ -17,7 +18,7 @@ const tabs = ['wrap', 'unwrap'];
     </template>
 
     <template v-slot:unwrap>
-        <p>unwrap tab</p>
+        <UnwrapTab />
     </template>
 </AppPage>
 </template>

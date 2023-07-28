@@ -15,19 +15,11 @@ const wrappedTokenSymbol = chainSettings.getWrappedSystemToken().symbol;
 
 // computed
 const sidebarContent = computed(() => {
-    const header = $t('evm_wrap.wrap_sidebar_title', { symbol: systemTokenSymbol });
+    const header = $t('evm_wrap.unwrap_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
         text: $t(
-            'evm_wrap.wrap_sidebar_content_fragment_1',
-            { systemSymbol: systemTokenSymbol, wrappedSymbol: wrappedTokenSymbol },
-        ),
-    }, {
-        text: $t('evm_wrap.wrap_sidebar_content_fragment_bold'),
-        bold: true,
-    }, {
-        text: $t(
-            'evm_wrap.wrap_sidebar_content_fragment_3',
-            { systemSymbol: systemTokenSymbol, wrappedSymbol: wrappedTokenSymbol },
+            'evm_wrap.unwrap_sidebar',
+            { wrappedSymbol: wrappedTokenSymbol, systemSymbol: systemTokenSymbol },
         ),
     }];
 

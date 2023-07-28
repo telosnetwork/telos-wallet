@@ -21,6 +21,7 @@ $saveBtn: #2e1f4f;
 .body--light {
     $accent-1: #571AFF;
     $accent-2: #505DCD;
+    $accent-4: #A5A6F6;
     $page-header: #F7F5FF;
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
     $high-contrast-text-color: #282828;
@@ -39,6 +40,7 @@ $saveBtn: #2e1f4f;
 
     --accent-color: #{$accent-1};
     --accent-color-2: #{$accent-2};
+    --accent-color-4: #{$accent-4};
     --negative-color: #{$negative};
     --positive-color: #{$positive};
     --warning-color-ui: #{$warning};

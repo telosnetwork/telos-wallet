@@ -138,6 +138,7 @@ export default {
         collection: 'Collection',
         search: 'Search',
         no_results: 'No results found',
+        toggle: 'Toggle "{text}"',
     },
     nft : {
         collectible: 'Collectible',
@@ -175,6 +176,8 @@ export default {
         wrap_sidebar_content_fragment_1: 'Wrap your {systemSymbol} to {wrappedSymbol} for ',
         wrap_sidebar_content_fragment_bold: 'seamless integration with DeFi platforms',
         wrap_sidebar_content_fragment_3: ', improved compatibility with ERC-20 tokens, and cross-chain interoperability. Unlock new opportunities and financial services by converting your native {systemSymbol} into the versatile {wrappedSymbol} token.',
+        unwrap_sidebar_title: 'Unwrapping {symbol}',
+        unwrap_sidebar: 'Unwrap your {wrappedSymbol} to get your {systemSymbol} back instantly.',
     },
     notification:{
         success_title_trx: 'Success',

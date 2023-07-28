@@ -18,12 +18,12 @@ const props = defineProps<{
 const expansionItemModel = ref(false);
 
 // computed
-const isMobile = computed(() => $q.screen.lt.md);
+const isStacked = computed(() => $q.screen.lt.lg);
 const isLarge = computed(() => $q.screen.gt.md);
 
 // methods
 function handleExpansionItemUpdate() {
-    if (!isMobile.value) {
+    if (!isStacked.value) {
         expansionItemModel.value = true;
     } else {
         expansionItemModel.value = !expansionItemModel.value;
@@ -33,11 +33,12 @@ function handleExpansionItemUpdate() {
 
 <template>
 <div class="c-sidebar-page">
-    <div class="c-sidebar-page__sidebar-container">
+    <aside class="c-sidebar-page__sidebar-container">
         <q-expansion-item
             :model-value="expansionItemModel || isLarge"
             :label="sidebarContent.header"
-            :expand-icon="isMobile ? 'expand_more' : 'none'"
+            :toggle-aria-label="$t('global.toggle', { text: sidebarContent.header })"
+            :expand-icon="isStacked ? 'expand_more' : 'none'"
             class="c-sidebar-page__expansion-item"
             @update:model-value="handleExpansionItemUpdate"
         >
@@ -53,7 +54,7 @@ function handleExpansionItemUpdate() {
                 </q-card-section>
             </q-card>
         </q-expansion-item>
-    </div>
+    </aside>
     <div class="c-sidebar-page__body-container">
         <slot></slot>
     </div>
@@ -63,6 +64,7 @@ function handleExpansionItemUpdate() {
 <style lang="scss">
 .c-sidebar-page {
     display: grid;
+    gap: 24px;
 
     grid-template: 'a'
                    'b';
@@ -81,17 +83,27 @@ function handleExpansionItemUpdate() {
 
         @include lg-and-up {
             margin: unset;
+            display: flex;
+            justify-content: center;
         }
     }
 
     &__body-container {
         grid-area: b;
+        word-break: break-all;
+        max-width: 1000px;
+        margin: auto;
+
+        @include lg-and-up {
+            margin: unset;
+        }
     }
 
     &__expansion-item {
         border-radius: 4px;
         border: 2px solid var(--header-bg-color);
         margin-bottom: 8px;
+        height: fit-content;
 
         @include sm-and-up {
             width: 350px;
@@ -119,7 +131,7 @@ function handleExpansionItemUpdate() {
                 left: 0;
                 width: calc(100% - 30px);
                 height: 1px;
-                background-color: var(--accent-color-2);
+                background-color: var(--accent-color-4);
             }
         }
     }
