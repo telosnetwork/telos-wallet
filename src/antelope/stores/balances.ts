@@ -325,8 +325,12 @@ export const useBalancesStore = defineStore(store_name, {
         sortBalances(label: string): void {
             this.trace('sortBalances', label);
             const allTokens = this.__balances[label] as TokenBalance[];
-            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(allTokens);
+            const systemTokenBalance = allTokens.filter(b => b.token.isSystem);
+            const erc20TokenBalances = allTokens.filter(b => !b.token.isSystem);
+
+            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(erc20TokenBalances);
             this.__balances[label] = [
+                ...systemTokenBalance,
                 ...tokensWithFiatValue,
                 ...tokensWithoutFiatValue,
             ];
