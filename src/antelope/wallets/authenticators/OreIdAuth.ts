@@ -233,7 +233,7 @@ export class OreIdAuth extends EVMAuthenticator {
         const transaction = await oreId.createTransaction({
             transaction: transactionBody,
             chainAccount: from,
-            chainNetwork: ChainNetwork.TelosEvmTest,
+            chainNetwork: this.getChainNetwork(useChainStore().getChain(this.label).settings.getNetwork()),
             signOptions: {
                 broadcast: true,
                 returnSignedTransaction: true,
