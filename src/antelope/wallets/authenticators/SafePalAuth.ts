@@ -2,6 +2,7 @@ import { EthereumProvider } from 'src/antelope/types';
 import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
 
 const name = 'SafePal';
+export const SafePalAuthName = name;
 export class SafePalAuth extends InjectedProviderAuth {
 
     // this is just a dummy label to identify the authenticator base class
@@ -16,7 +17,6 @@ export class SafePalAuth extends InjectedProviderAuth {
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
-
 
     getName(): string {
         return name;

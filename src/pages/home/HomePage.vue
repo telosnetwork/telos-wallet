@@ -17,11 +17,13 @@ export default defineComponent({
     data: (): {
         tab: 'left' | 'right'
         showWalletOptions: boolean,
+        showOAuthOptions: boolean,
         showWalletConnect: boolean,
         useInjectedProvider: string,
     } => ({
         tab: 'left',
         showWalletOptions: false,
+        showOAuthOptions: false,
         showWalletConnect: false,
         useInjectedProvider: '',
     }),
@@ -60,6 +62,13 @@ export default defineComponent({
             }, 200);
         },
         onShowWalletOptions(show: boolean) {
+            this.showWalletOptions = show;
+            if (!show) {
+                this.showOAuthOptions = false;
+            }
+        },
+        onShowOAuthOptions(show: boolean) {
+            this.showOAuthOptions = show;
             this.showWalletOptions = show;
         },
     },
@@ -113,6 +122,7 @@ export default defineComponent({
                         @show-wallet-connect="onShowWalletConnect()"
                         @show-wallet-options="onShowWalletOptions(true)"
                         @use-injected-provider="onUseInjectedProvider()"
+                        @show-oauth-options="onShowOAuthOptions(true)"
                     />
                 </div>
 
@@ -121,6 +131,7 @@ export default defineComponent({
                         v-show="showWalletOptions"
                         :showWalletConnect="showWalletConnect"
                         :useInjectedProvider="useInjectedProvider"
+                        :showOAuthOptions="showOAuthOptions"
                         @show-wallet-connect="onShowWalletConnect()"
                         @close-wallet-options="onShowWalletOptions(false)"
                     />

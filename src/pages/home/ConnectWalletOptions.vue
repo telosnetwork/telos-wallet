@@ -1,9 +1,10 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { QSpinnerFacebook } from 'quasar';
+import { OreIdAuth } from 'src/antelope/wallets';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -18,6 +19,10 @@ export default defineComponent({
         useInjectedProvider: {
             required: true,
             type: String,
+        },
+        showOAuthOptions: {
+            required: true,
+            type: Boolean,
         },
     },
     setup(props, { emit }){
@@ -39,6 +44,8 @@ export default defineComponent({
             return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
         });
 
+        const selectedOAuthProvider = ref('');
+
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
@@ -59,6 +66,15 @@ export default defineComponent({
             }
         });
 
+        const setOreIdAuthenticator = async (provider: string) => {
+            const name = 'OreId';
+            const auth = ant.wallets.getAutenticator(name);
+            if (auth) {
+                (auth as OreIdAuth).setProvider(provider);
+                selectedOAuthProvider.value = provider;
+            }
+            setAuthenticator(name, 'logged');
+        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
@@ -95,20 +111,17 @@ export default defineComponent({
             ant.config.notifyFailureMessage(message);
         };
 
-        const redirectToInstall = (name:string) => {
-            if (name === 'Metamask') {
-                redirectToMetamaskDownload();
-            } else if (name === 'SafePal') {
-                redirectToSafepalDownload();
-            }
-        };
-
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+        const isLoadingOreId = (provider: string) =>
+            selectedOAuthProvider.value === provider &&
+            useFeedbackStore().isLoading('OreId.login');
 
         return {
             isLoading,
+            isLoadingOreId,
             supportsMetamask,
             supportsSafePal,
+            setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
             setWalletConnectAuthenticator,
@@ -121,7 +134,12 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="wallet-options-container">
+<div
+    :class="{
+        'wallet-options-container': true,
+        'wallet-options-container--oauth': showOAuthOptions,
+    }"
+>
     <q-btn
         class="wallet-options__close"
         icon="close"
@@ -130,7 +148,34 @@ export default defineComponent({
         dense
         @click="$emit('closeWalletOptions')"
     />
-    <div class="wallet-options">
+    <div v-if="showOAuthOptions" class="wallet-options">
+
+        <div class="wallet-options__header">
+            {{ $t('home.sign_in_with') }}
+        </div>
+
+        <!-- Google OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('google')">
+            <template v-if="isLoadingOreId('google')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Google"
+                    src="~assets/evm/icon-oauth-google.svg"
+                >
+                {{ $t('home.oauth_google') }}
+            </template>
+        </div>
+
+        <!-- Facebook, Twitter or GitHub OAuth Provider Buttons can be foud in this link -->
+        <!-- https://github.com/telosnetwork/telos-wallet/blob/40196ac0e9cc0cef78ec20d7876f0c97ef02cc1c/src/pages/home/ConnectWalletOptions.vue#L168-L214 -->
+
+    </div>
+
+    <div v-else class="wallet-options">
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
@@ -192,9 +237,13 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 240px;
     margin:auto;
     color: $white;
+
+    &--oauth{
+        height: 180px;
+    }
 }
 
 .wallet-options{

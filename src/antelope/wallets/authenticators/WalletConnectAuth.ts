@@ -18,6 +18,7 @@ import {
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -60,6 +61,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async walletConnectLogin(network: string): Promise<addressString | null> {
         this.trace('walletConnectLogin');
+        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
         try {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
@@ -74,10 +77,38 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 console.error(e);
             }
 
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> login successful',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
+            );
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> generic login successful',
+                TELOS_ANALYTICS_EVENT_IDS.loginSuccessful,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
+            );
+
             return address;
         } catch (e) {
             // This is a non-expected error
             console.error(e);
+            this.trace(
+                'walletConnectLogin',
+                'trackAnalyticsEvent -> login failed',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+            );
+            const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
+            );
             throw new AntelopeError('antelope.evm.error_login');
         } finally {
             useFeedbackStore().unsetLoading(`${this.getName()}.login`);
@@ -86,19 +117,57 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
+        const wagmiConnected = () => localStorage.getItem('wagmi.connected');
+        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
         useFeedbackStore().setLoading(`${this.getName()}.login`);
-        if (localStorage.getItem('wagmi.connected')) {
+        if (wagmiConnected()) {
+            // We are in auto-login process. So log loginStarted before calling the walletConnectLogin method
+            this.trace(
+                'login',
+                'trackAnalyticsEvent -> login started',
+                'WalletConnect',
+                TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+            );
+            chainSettings.trackAnalyticsEvent(
+                { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+            );
             return this.walletConnectLogin(network);
         } else {
             return new Promise(async (resolve) => {
                 this.trace('login', 'web3Modal.openModal()');
                 const web3Modal = new Web3Modal(this.options, this.wagmiClient);
                 web3Modal.subscribeModal(async (newState) => {
-                    this.trace('login', 'web3Modal.subscribeModal ', newState, localStorage.getItem('wagmi.connected'));
+                    this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
+
+                    if (newState.open === true) {
+                        this.trace(
+                            'login',
+                            'trackAnalyticsEvent -> login started',
+                            'WalletConnect',
+                            TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+                        );
+                        chainSettings.trackAnalyticsEvent(
+                            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
+                        );
+                    }
+
                     if (newState.open === false) {
                         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
+
+                        if (!wagmiConnected()) {
+                            this.trace(
+                                'login',
+                                'trackAnalyticsEvent -> login failed',
+                                'WalletConnect',
+                                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+                            );
+                            chainSettings.trackAnalyticsEvent(
+                                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
+                            );
+                        }
                     }
-                    if (localStorage.getItem('wagmi.connected')) {
+                    if (wagmiConnected()) {
                         resolve(this.walletConnectLogin(network));
                     }
                 });
@@ -208,6 +277,12 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
+
+        if (usePlatformStore().isMobile) {
+            this.trace('isConnectedTo', 'mobile -> true');
+            return true;
+        }
+
         return new Promise(async (resolve) => {
             const web3Provider = await this.web3Provider();
             const correct = +web3Provider.network.chainId === +chainId;
