@@ -491,6 +491,7 @@ onUnmounted(() => {
                 class="q-mt-lg"
                 :pagination="pagination"
                 :rows-per-page-options="rowsPerPageOptions"
+                :row-label="'nft.collectibles_per_page'"
                 @pagination-updated="pagination = $event"
             />
         </div>

@@ -165,6 +165,7 @@ export default {
         name_missing: '(No name)',
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
+        collectibles_per_page: 'Collectibles per page',
     },
     notification:{
         success_title_trx: 'Success',
