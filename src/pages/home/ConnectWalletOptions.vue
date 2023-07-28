@@ -111,12 +111,6 @@ export default defineComponent({
             ant.config.notifyFailureMessage(message);
         };
 
-        const redirectToInstall = (name:string) => {
-            if (name === 'Metamask') {
-                redirectToMetamaskDownload();
-            }
-        };
-
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
         const isLoadingOreId = (provider: string) =>
             selectedOAuthProvider.value === provider &&
@@ -243,7 +237,7 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 300px;
+    height: 240px;
     margin:auto;
     color: $white;
 
