@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
+import { useAccountStore, useBalancesStore, useChainStore, useEVMStore, useUserStore } from 'src/antelope';
 
 import { BigNumber } from 'ethers';
 
@@ -10,6 +10,7 @@ import EVMSidebarPage from 'src/layouts/EVMSidebarPage.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
+import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
 
 const { t: $t } = useI18n();
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
@@ -24,8 +25,6 @@ const wrappedTokenSymbol = chainSettings.getWrappedSystemToken().symbol;
 // data
 const oneEth = BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(BigNumber.from(0));
-
-// eztodo available doe snot match currency input available
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -57,11 +56,11 @@ const sidebarContent = computed(() => {
         content,
     };
 });
-const disableCta = computed(() => true);
+const disableCta = computed(() => false); //eztodo
 
 
 // methods
-function handleCtaClick() {
+async function handleCtaClick() {
     console.log('wrap');
 }
 </script>
