@@ -5,6 +5,7 @@ import { mapGetters } from 'vuex';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
+import { getAntelope, useAccountStore, useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'HomePage',
@@ -17,10 +18,12 @@ export default defineComponent({
         tab: 'left' | 'right'
         showWalletOptions: boolean,
         showWalletConnect: boolean,
+        useInjectedProvider: string,
     } => ({
         tab: 'left',
         showWalletOptions: false,
         showWalletConnect: false,
+        useInjectedProvider: '',
     }),
 
     computed: {
@@ -28,6 +31,27 @@ export default defineComponent({
     },
 
     methods: {
+        onUseInjectedProvider() {
+            // first check the integrity of the injected provider
+            const evm = useEVMStore();
+            const platform = usePlatformStore();
+            console.assert(platform.isMobile, 'onUseInjectedProvider should only be called on mobile');
+            console.assert(evm.injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+            const providerName = evm.injectedProviderNames[0];
+            const authenticator = evm.injectedProvider(providerName);
+            if (!authenticator) {
+                console.error(`${providerName} authenticator not found`);
+                getAntelope().config.notifyFailureMessage(
+                    this.$t(
+                        'home.no_injected_provider_found',
+                        { providerName },
+                    ),
+                );
+                return;
+            }
+            // Everything is fine, let's use the injected provider
+            this.useInjectedProvider = providerName;
+        },
         onShowWalletConnect() {
             this.showWalletConnect = true;
             // put this variable back to false for an eventual re-open
@@ -88,12 +112,15 @@ export default defineComponent({
                         v-else-if="tab === 'left'"
                         @show-wallet-connect="onShowWalletConnect()"
                         @show-wallet-options="onShowWalletOptions(true)"
+                        @use-injected-provider="onUseInjectedProvider()"
                     />
                 </div>
+
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
                         :showWalletConnect="showWalletConnect"
+                        :useInjectedProvider="useInjectedProvider"
                         @show-wallet-connect="onShowWalletConnect()"
                         @close-wallet-options="onShowWalletOptions(false)"
                     />

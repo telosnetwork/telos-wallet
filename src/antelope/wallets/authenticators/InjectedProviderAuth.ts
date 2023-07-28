@@ -8,13 +8,13 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
 
-export abstract class ExternalProviderAuth extends EVMAuthenticator {
+export abstract class InjectedProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
 
     // this is just a dummy label to identify the authenticator base class
     constructor(label: string) {
         super(label);
-        useEVMStore().initExternalProvider(this);
+        useEVMStore().initInjectedProvider(this);
     }
     abstract getProvider(): EthereumProvider | null;
 
@@ -84,13 +84,15 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
     }
 
     async getERC20TokenBalance(account: addressString | string, tokenAddress: addressString | string): Promise<ethers.BigNumber> {
-        this.trace('getERC20TokenBalance', [account, tokenAddress]);
+        this.trace('getERC20TokenBalance', [account], tokenAddress);
         const erc20ABI = useEVMStore().getTokenABI(ERC20_TYPE) as AbiItem[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const web3 = new Web3(this.getProvider() as any);
         const contract = new web3.eth.Contract(erc20ABI, tokenAddress);
-        return contract.methods.balanceOf(account).call()
+        const result:ethers.BigNumber = contract.methods.balanceOf(account).call()
             .then((balance: never) => ethers.BigNumber.from(balance));
+        this.trace('getERC20TokenBalance', [account], tokenAddress, '->', result);
+        return result;
     }
 
     async transferTokens(token: TokenClass, amount: ethers.BigNumber, to: addressString): Promise<EvmTransactionResponse> {
@@ -133,6 +135,9 @@ export abstract class ExternalProviderAuth extends EVMAuthenticator {
         return web3Provider;
     }
 
-
+    async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
+        this.trace('ensureCorrectChain');
+        return super.ensureCorrectChain();
+    }
 
 }
