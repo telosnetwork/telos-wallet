@@ -97,6 +97,8 @@ jest.mock('@web3modal/html', () => web3ModalMock);
 const mountComponent = () => shallowMount(ConnectWalletOptions, {
     props: {
         showWalletConnect: false,
+        useInjectedProvider: '',
+        showOAuthOptions: false,
     },
     mocks: {
         $t :  () => WARNING_MESSAGE,

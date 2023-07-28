@@ -1,9 +1,10 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, watch } from 'vue';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
 import { QSpinnerFacebook } from 'quasar';
+import { OreIdAuth } from 'src/antelope/wallets';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
@@ -15,6 +16,14 @@ export default defineComponent({
             required: true,
             type: Boolean,
         },
+        useInjectedProvider: {
+            required: true,
+            type: String,
+        },
+        showOAuthOptions: {
+            required: true,
+            type: Boolean,
+        },
     },
     setup(props, { emit }){
         const ant = getAntelope();
@@ -22,11 +31,27 @@ export default defineComponent({
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask;
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
         });
+
+        const supportsSafePal = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isSafePal;
+        });
+
+        const unsupportedExtensions = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
+        });
+
+        const selectedOAuthProvider = ref('');
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
+        };
+
+        const redirectToSafepalDownload = () => {
+            window.open('https://www.safepal.com/en/download', '_blank');
         };
 
         watch(() => props.showWalletConnect, async (newVal) => {
@@ -35,10 +60,27 @@ export default defineComponent({
             }
         });
 
+        watch(() => props.useInjectedProvider, async (providerName) => {
+            if (providerName) {
+                setAuthenticator(providerName, 'logged');
+            }
+        });
+
+        const setOreIdAuthenticator = async (provider: string) => {
+            const name = 'OreId';
+            const auth = ant.wallets.getAutenticator(name);
+            if (auth) {
+                (auth as OreIdAuth).setProvider(provider);
+                selectedOAuthProvider.value = provider;
+            }
+            setAuthenticator(name, 'logged');
+        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', 'logged');
         };
-
+        const setSafepalAuthenticator = async () => {
+            setAuthenticator('SafePal', 'logged');
+        };
         const setWalletConnectAuthenticator = async () => {
             setAuthenticator('WalletConnect', 'logged');
         };
@@ -65,36 +107,39 @@ export default defineComponent({
         };
 
         const notifyNoProvider = (provider:string) => {
-            const message = globalProps.$t('home.no_provider_notification_message');
-            ant.config.notifyFailureWithAction(message, {
-                label: ant.config.localizationHandler('home.no_provider_action_label', { provider }),
-                handler: () => {
-                    redirectToInstall(provider);
-                },
-            });
-        };
-
-        const redirectToInstall = (name:string) => {
-            if (name === 'Metamask') {
-                redirectToMetamaskDownload();
-            }
+            const message = globalProps.$t('home.multiple_providers_notification_message');
+            ant.config.notifyFailureMessage(message);
         };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+        const isLoadingOreId = (provider: string) =>
+            selectedOAuthProvider.value === provider &&
+            useFeedbackStore().isLoading('OreId.login');
 
         return {
             isLoading,
+            isLoadingOreId,
             supportsMetamask,
+            supportsSafePal,
+            setOreIdAuthenticator,
             setMetamaskAuthenticator,
+            setSafepalAuthenticator,
             setWalletConnectAuthenticator,
             notifyNoProvider,
+            redirectToMetamaskDownload,
+            redirectToSafepalDownload,
         };
     },
 });
 </script>
 
 <template>
-<div class="wallet-options-container">
+<div
+    :class="{
+        'wallet-options-container': true,
+        'wallet-options-container--oauth': showOAuthOptions,
+    }"
+>
     <q-btn
         class="wallet-options__close"
         icon="close"
@@ -103,13 +148,40 @@ export default defineComponent({
         dense
         @click="$emit('closeWalletOptions')"
     />
-    <div class="wallet-options">
+    <div v-if="showOAuthOptions" class="wallet-options">
+
+        <div class="wallet-options__header">
+            {{ $t('home.sign_in_with') }}
+        </div>
+
+        <!-- Google OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('google')">
+            <template v-if="isLoadingOreId('google')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Google"
+                    src="~assets/evm/icon-oauth-google.svg"
+                >
+                {{ $t('home.oauth_google') }}
+            </template>
+        </div>
+
+        <!-- Facebook, Twitter or GitHub OAuth Provider Buttons can be foud in this link -->
+        <!-- https://github.com/telosnetwork/telos-wallet/blob/40196ac0e9cc0cef78ec20d7876f0c97ef02cc1c/src/pages/home/ConnectWalletOptions.vue#L168-L214 -->
+
+    </div>
+
+    <div v-else class="wallet-options">
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
 
         <!-- Metamask Authenticator button -->
-        <div class="wallet-options__option" @click="supportsMetamask ? setMetamaskAuthenticator() : notifyNoProvider('Metamask')">
+        <div class="wallet-options__option" @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()">
             <template v-if="isLoading('Metamask.login')">
                 <div class="wallet-options__loading"><QSpinnerFacebook /></div>
             </template>
@@ -121,6 +193,22 @@ export default defineComponent({
                     src="~assets/evm/metamask_fox.svg"
                 >
                 {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+            </template>
+        </div>
+
+        <!-- Safepal Authenticator button -->
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
+            <template v-if="isLoading('SafePal.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="SafePal"
+                    src="~assets/evm/safepal.svg"
+                >
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
             </template>
         </div>
 
@@ -149,9 +237,13 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 250px;
+    height: 240px;
     margin:auto;
     color: $white;
+
+    &--oauth{
+        height: 180px;
+    }
 }
 
 .wallet-options{

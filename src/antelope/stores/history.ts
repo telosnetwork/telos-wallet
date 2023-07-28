@@ -290,6 +290,13 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('setEvmTransactionsRowCount', count);
             this.__total_evm_transaction_count[label] = count;
         },
+        clearEvmTransactions() {
+            this.trace('clearEvmTransactions');
+            this.setEVMTransactionsFilter({ address: '' });
+            this.setEVMTransactions('current', []);
+            this.setShapedTransactionRows('current', []);
+            this.setEvmTransactionsRowCount('current', 0);
+        },
     },
 });
 

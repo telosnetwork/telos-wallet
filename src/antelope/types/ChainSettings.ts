@@ -16,5 +16,6 @@ export interface ChainSettings {
     getUsdPrice(): Promise<number>;
     getSystemTokens(): TokenClass[];
     getNFTsInventory(address: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
-    getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>
+    getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
+    trackAnalyticsEvent(params: Record<string, unknown>): void;
 }

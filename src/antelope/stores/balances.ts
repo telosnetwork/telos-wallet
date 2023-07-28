@@ -74,15 +74,15 @@ export const useBalancesStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    if (label === 'current') {
+                        await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                    }
                 },
             });
 
-            // update logged balances every 10 seconds only if the user is logged
+            // update logged balances every 10 seconds
             setInterval(async () => {
-                if (useAccountStore().loggedAccount) {
-                    await useBalancesStore().updateBalancesForAccount('logged', useAccountStore().loggedAccount);
-                }
+                await useBalancesStore().updateBalancesForAccount('current', useAccountStore().loggedAccount);
             }, 10000);
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
@@ -120,9 +120,12 @@ export const useBalancesStore = defineStore(store_name, {
 
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
+                                .filter(token => token.address !== chain_settings.getSystemToken().address)
                                 .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
                                     .then((balanceBn: BigNumber) => {
                                         this.processBalanceForToken(label, token, balanceBn);
+                                    }).catch((error) => {
+                                        console.error(error);
                                     }),
                                 );
 
@@ -290,10 +293,10 @@ export const useBalancesStore = defineStore(store_name, {
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
-
             try {
                 useFeedbackStore().setLoading('transferEVMTokens');
-                return await account.authenticator.transferTokens(token, amount, to);
+                const result = await account.authenticator.transferTokens(token, amount, to);
+                return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
                 console.error(error);
                 throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
@@ -322,8 +325,12 @@ export const useBalancesStore = defineStore(store_name, {
         sortBalances(label: string): void {
             this.trace('sortBalances', label);
             const allTokens = this.__balances[label] as TokenBalance[];
-            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(allTokens);
+            const systemTokenBalance = allTokens.filter(b => b.token.isSystem);
+            const erc20TokenBalances = allTokens.filter(b => !b.token.isSystem);
+
+            const [tokensWithFiatValue, tokensWithoutFiatValue] = this.splitTokensBasedOnHasFiatValue(erc20TokenBalances);
             this.__balances[label] = [
+                ...systemTokenBalance,
                 ...tokensWithFiatValue,
                 ...tokensWithoutFiatValue,
             ];
@@ -382,6 +389,10 @@ export const useBalancesStore = defineStore(store_name, {
             this.trace('setWagmiTokenTransferConfig', config, label);
 
             this.__wagmiTokenTransferConfig[label] = config;
+        },
+        clearBalances() {
+            this.trace('clearBalances');
+            this.__balances = {};
         },
     },
 });

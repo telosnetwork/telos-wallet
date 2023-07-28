@@ -19,7 +19,10 @@ import { API } from '@greymass/eosio';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
+    useBalancesStore,
     useFeedbackStore,
+    useHistoryStore,
+    useNftsStore,
 } from 'src/antelope';
 import { getAntelope, useChainStore } from 'src/antelope';
 import { errorToString } from 'src/antelope/config';
@@ -151,6 +154,10 @@ export const useAccountStore = defineStore(store_name, {
 
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
+            useHistoryStore().clearEvmTransactions();
+            useBalancesStore().clearBalances();
+            useNftsStore().clearNFTs();
+
             let success = false;
             try {
                 const rawAddress = await authenticator.login(network);
@@ -197,6 +204,10 @@ export const useAccountStore = defineStore(store_name, {
 
         async logout() {
             this.trace('logout');
+            useHistoryStore().clearEvmTransactions();
+            useBalancesStore().clearBalances();
+            useNftsStore().clearNFTs();
+
             try {
                 localStorage.removeItem('network');
                 localStorage.removeItem('account');

@@ -16,6 +16,7 @@ export class AntelopeConfig {
             return new AntelopeError(description, { error: str });
         }
     }
+
     // indexer health threshold --
     private __indexer_health_threshold = 10; // 10 seconds
 

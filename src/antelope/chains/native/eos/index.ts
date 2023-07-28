@@ -102,4 +102,8 @@ export default class EOS extends NativeChainSettings {
     getSystemTokens(): TokenClass[] {
         return [TOKEN];
     }
+
+    trackAnalyticsEvent(): void {
+        console.warn(`trackAnalyticsEvent not implemented for ${NETWORK}`);
+    }
 }
