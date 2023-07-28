@@ -57,6 +57,7 @@ const sidebarContent = computed(() => {
         content,
     };
 });
+const disableCta = computed(() => true);
 
 
 // methods
@@ -123,16 +124,19 @@ function handleCtaClick() {
     </div>
 
     <div class="row">
-        <div class="col-12 text-right">
-            <q-btn
-                color="primary"
-                :label="$t('evm_wrap.wrap')"
-                :aria-label="$t(
-                    'evm_wrap.wrap_button_label',
-                    { systemSymbol: systemTokenSymbol, wrappedSymbol: wrappedTokenSymbol },
-                )"
-                @click="handleCtaClick"
-            />
+        <div class="col-12">
+            <div class="c-wrap-tab__cta-container">
+                <q-btn
+                    color="primary"
+                    :disable="disableCta"
+                    :label="$t('evm_wrap.wrap')"
+                    :aria-label="$t(
+                        'evm_wrap.wrap_button_label',
+                        { systemSymbol: systemTokenSymbol, wrappedSymbol: wrappedTokenSymbol },
+                    )"
+                    @click="handleCtaClick"
+                />
+            </div>
         </div>
     </div>
 </EVMSidebarPage>
@@ -140,16 +144,17 @@ function handleCtaClick() {
 
 <style lang="scss">
 .c-wrap-tab {
-    &__badge-container {
-        display: flex;
-        justify-content: flex-end;
+    &__badge-container,
+    &__cta-container,
+    &__input {
         max-width: 320px;
         margin: auto;
     }
 
-    &__input {
-        max-width: 320px;
-        margin: 0 auto;
+    &__badge-container,
+    &__cta-container {
+        display: flex;
+        justify-content: flex-end;
     }
 }
 </style>
