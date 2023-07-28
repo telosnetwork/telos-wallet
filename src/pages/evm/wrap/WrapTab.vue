@@ -61,6 +61,9 @@ const disableCta = computed(() => false); //eztodo
 
 // methods
 async function handleCtaClick() {
+    const evmStore = useEVMStore();
+    const authenticator = evmStore.injectedProvider(evmStore.injectedProviderNames[0]);
+    authenticator.wrapSystemToken(inputModelValue.value);
     console.log('wrap');
 }
 </script>

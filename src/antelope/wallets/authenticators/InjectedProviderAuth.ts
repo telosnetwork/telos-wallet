@@ -1,6 +1,6 @@
 
 
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
 import { useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import { AntelopeError, ERC20_TYPE, EthereumProvider, EvmTransactionResponse, TokenClass, addressString } from 'src/antelope/types';
@@ -61,6 +61,20 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
             }
         });
     }
+
+    async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        const wrappedSystemTokenContractAddress = (useChainStore().currentChain.settings as EVMChainSettings).getWrappedSystemToken().address;
+        const wrappedSystemTokenContractInstance = await (await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE))?.getContractInstance();
+        if (wrappedSystemTokenContractInstance) {
+            const test = wrappedSystemTokenContractInstance.functions;
+            debugger;
+            const transaction = (await wrappedSystemTokenContractInstance.functions.deposit()) as EvmTransactionResponse;
+            return transaction;
+        } else {
+            throw 'eztodo this error';
+        }
+    }
+
 
     // EVMAuthenticator API ----------------------------------------------------------
 

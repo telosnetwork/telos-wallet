@@ -320,7 +320,7 @@ export const useEVMStore = defineStore(store_name, {
         // this is coming from the token transfer, transactions table & transaction (general + logs tabs) pages where we're
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
-        async getContract(authenticator: InjectedProviderAuth, address:string, suspectedToken = ''): Promise<EvmContract | null> {
+        async getContract(authenticator: InjectedProviderAuth, address: string, label: string, suspectedToken = ''): Promise<EvmContract | null> {
             if (!address) {
                 this.trace('getContract', 'address is null', address);
                 return null;
@@ -329,7 +329,7 @@ export const useEVMStore = defineStore(store_name, {
 
             // Get from already queried contracts, add token data if needed & not present
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
-            const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
+            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const cached = chain_settings.getContract(addressLower);
             // If cached is null, it means this is the first time this address is queried
             if (cached !== null) {
@@ -357,11 +357,12 @@ export const useEVMStore = defineStore(store_name, {
             const metadata = await this.checkBucket(authenticator, address);
             if (metadata && creationInfo) {
                 this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
-                return await this.getVerifiedContract(authenticator, addressLower, metadata, creationInfo, suspectedToken);
+                return await this.getVerifiedContract(authenticator, addressLower, label, metadata, creationInfo, suspectedToken);
             }
 
-            const contract = await this.getContractFromTokenList(authenticator, address, suspectedToken, creationInfo);
+            const contract = await this.getContractFromTokenList(authenticator, address, label, suspectedToken, creationInfo);
             if (contract) {
+                debugger;
                 this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
             }
@@ -383,12 +384,13 @@ export const useEVMStore = defineStore(store_name, {
 
         async getVerifiedContract(
             authenticator: InjectedProviderAuth,
-            address:string,
+            address: string,
+            label: string,
             metadata: EvmContractMetadata,
             creationInfo: EvmContractCreationInfo,
-            suspectedType:string,
+            suspectedType: string,
         ): Promise<EvmContract> {
-            const token = await this.getToken(authenticator, address, suspectedType) ?? undefined;
+            const token = await this.getToken(authenticator, address, label, suspectedType) ?? undefined;
             const contract = new EvmContract({
                 name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
                 address,
@@ -468,9 +470,9 @@ export const useEVMStore = defineStore(store_name, {
             return  new ethers.Contract(address, abi, provider);
         },
 
-        async getToken(authenticator: InjectedProviderAuth, address:string, suspectedType:string): Promise<TokenClass | null> {
+        async getToken(authenticator: InjectedProviderAuth, address:string, label: string, suspectedType:string): Promise<TokenClass | null> {
             if (suspectedType.toUpperCase() === ERC20_TYPE) {
-                const chain = useChainStore().getChain(authenticator.label);
+                const chain = useChainStore().getChain('logged');
                 const list = await chain.settings.getTokenList();
                 const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
                 if (token) {
@@ -491,10 +493,11 @@ export const useEVMStore = defineStore(store_name, {
         async getContractFromTokenList(
             authenticator: InjectedProviderAuth,
             address:string,
+            label: string,
             suspectedType:string,
             creationInfo:EvmContractCreationInfo | null,
         ): Promise<EvmContract | null> {
-            const token = await this.getToken(authenticator, address, suspectedType);
+            const token = await this.getToken(authenticator, address, label, suspectedType);
             if (token) {
                 const abi = this.getTokenABI(ERC20_TYPE);
                 const token_contract = new EvmContract({

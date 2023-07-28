@@ -275,6 +275,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
         await this._debouncedPrepareTokenConfig(token, amount, to);
     }
 
+    async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        throw 'eztodo this';
+    }
+
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
 

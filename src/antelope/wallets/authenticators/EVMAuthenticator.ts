@@ -25,6 +25,7 @@ export abstract class EVMAuthenticator {
     abstract getERC20TokenBalance(address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
     abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult | WriteContractResult>;
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
+    abstract wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;

@@ -1,5 +1,5 @@
 import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject, UserChainAccount } from 'oreid-js';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { WebPopup } from 'oreid-webpopup';
 import { erc20Abi } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
@@ -254,6 +254,10 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async prepareTokenForTransfer(token: TokenClass | null, amount: ethers.BigNumber, to: string): Promise<void> {
         this.trace('prepareTokenForTransfer', [token], amount, to);
+    }
+
+    async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        throw 'eztodo this';
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
