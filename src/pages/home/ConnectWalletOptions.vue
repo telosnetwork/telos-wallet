@@ -237,7 +237,8 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 240px;
+    height: fit-content;
+    padding-bottom: 2rem;
     margin:auto;
     color: $white;
 
