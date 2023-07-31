@@ -63,15 +63,33 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     }
 
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        useFeedbackStore().setLoading('wrapSystemToken');
         const wrappedSystemTokenContractAddress = (useChainStore().currentChain.settings as EVMChainSettings).getWrappedSystemToken().address;
-        const wrappedSystemTokenContractInstance = await (await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE))?.getContractInstance();
-        if (wrappedSystemTokenContractInstance) {
-            const test = wrappedSystemTokenContractInstance.functions;
-            debugger;
-            const transaction = (await wrappedSystemTokenContractInstance.functions.deposit()) as EvmTransactionResponse;
+        let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
+        try {
+            const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);
+            wrappedSystemTokenContractInstance = await wrappedSystemTokenContract?.getContractInstance();
+
+            if (!wrappedSystemTokenContractInstance) {
+                throw 'Unable to get wrapped system contract instance';
+            }
+        } catch (error) {
+            useFeedbackStore().unsetLoading('wrapSystemToken');
+            throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
+        }
+
+        try {
+            const transaction = (await wrappedSystemTokenContractInstance.functions['deposit()']({ value: amount })) as EvmTransactionResponse;
             return transaction;
-        } else {
-            throw 'eztodo this error';
+        } catch (error) {
+            if ('ACTION_REJECTED' === ((error as { code: string }).code)) {
+                throw new AntelopeError('antelope.evm.error_transaction_canceled');
+            } else {
+                console.error(error);
+                throw new AntelopeError('antelope.wrap.error_wrap', { error });
+            }
+        } finally {
+            useFeedbackStore().unsetLoading('wrapSystemToken');
         }
     }
 

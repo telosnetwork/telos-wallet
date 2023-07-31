@@ -16,7 +16,7 @@ import { BehaviorSubject, filter } from 'rxjs';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
+import { events_signatures, functions_overrides } from 'src/antelope/stores/utils';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import {
     AntelopeError,
@@ -46,6 +46,8 @@ import {
     useFeedbackStore,
 } from 'src/antelope';
 import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
+import { getAddress } from 'ethers/lib/utils';
+
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
 export const evmEvents = {
@@ -301,14 +303,14 @@ export const useEVMStore = defineStore(store_name, {
             }
         },
 
-        async getContractCreation(authenticator: InjectedProviderAuth, address:string): Promise<EvmContractCreationInfo | null> {
+        async getContractCreation(label: string, address:string): Promise<EvmContractCreationInfo | null> {
             this.trace('getContractCreation', address);
             if (!address) {
                 console.error('address is null', address);
                 throw new AntelopeError('antelope.evm.error_invalid_address', { address });
             }
             try {
-                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
                 return await chain_settings.getContractCreation(address);
             } catch (e) {
                 console.error(new AntelopeError('antelope.evm.error_getting_contract_creation', { address }));
@@ -350,11 +352,12 @@ export const useEVMStore = defineStore(store_name, {
             chain_settings.setContractAsNotExisting(addressLower);
 
             // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
-            const creationInfo = await this.getContractCreation(authenticator, addressLower);
+            const creationInfo = await this.getContractCreation(label, addressLower);
             // The the contract passes the creation info check,
             // we overwrite the previous call to set contract as not existing with the actual EvmContract
 
-            const metadata = await this.checkBucket(authenticator, address);
+            const metadata = await this.checkBucket(label, address);
+
             if (metadata && creationInfo) {
                 this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
                 return await this.getVerifiedContract(authenticator, addressLower, label, metadata, creationInfo, suspectedToken);
@@ -362,7 +365,6 @@ export const useEVMStore = defineStore(store_name, {
 
             const contract = await this.getContractFromTokenList(authenticator, address, label, suspectedToken, creationInfo);
             if (contract) {
-                debugger;
                 this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
             }
@@ -371,10 +373,10 @@ export const useEVMStore = defineStore(store_name, {
             return await this.getEmptyContract(authenticator, addressLower, creationInfo);
         },
 
-        async checkBucket(authenticator: InjectedProviderAuth, address:string): Promise<EvmContractMetadata | null> {
-            const checksumAddress = toChecksumAddress(address);
+        async checkBucket(label: string, address:string): Promise<EvmContractMetadata | null> {
+            const checksumAddress = getAddress(address);
             try {
-                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
                 const metadataStr = await chain_settings.getContractMetadata(checksumAddress);
                 return JSON.parse(metadataStr);
             } catch (e) {

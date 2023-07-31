@@ -200,6 +200,7 @@ export default {
         neutral_message_staking: 'Staking <b>{quantity}</b>',
         neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
+        neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
     },
     resources: {
         title: 'Network Resources',
@@ -494,6 +495,10 @@ export default {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
             error_oreid_no_chain_account: 'The app {appName} does not have a chain account for the chain {networkName}',
+        },
+        wrap: {
+            error_getting_wrapped_contract: 'An error occurred while getting the wrapped system token contract',
+            error_wrap: 'An unknown error occurred while wrapping system token',
         },
     },
 };

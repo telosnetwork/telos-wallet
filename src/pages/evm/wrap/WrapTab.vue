@@ -1,21 +1,30 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { useAccountStore, useBalancesStore, useChainStore, useEVMStore, useUserStore } from 'src/antelope';
-
 import { BigNumber } from 'ethers';
+
+import {
+    getAntelope,
+    useAccountStore,
+    useBalancesStore,
+    useChainStore,
+    useEVMStore,
+    useUserStore,
+} from 'src/antelope';
 
 import EVMSidebarPage from 'src/layouts/EVMSidebarPage.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
-import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
+import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
+import { AntelopeError } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
+const ant = getAntelope();
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 const userStore = useUserStore();
 const balanceStore = useBalancesStore();
+const evmStore = useEVMStore();
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -25,15 +34,16 @@ const wrappedTokenSymbol = chainSettings.getWrappedSystemToken().symbol;
 // data
 const oneEth = BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(BigNumber.from(0));
+const estimatedGas = ref(BigNumber.from(0));
+const systemTokenFiatPrice = ref('1');
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
 const fiatCurrency = computed(() => userStore.fiatCurrency);
 const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
-    balance => balance.token.address === systemToken.address)[0],
+    balance => balance.token.contract === systemToken.address)[0],
 );
 const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? BigNumber.from(0));
-const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1));
 const sidebarContent = computed(() => {
     const header = $t('evm_wrap.wrap_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
@@ -56,15 +66,79 @@ const sidebarContent = computed(() => {
         content,
     };
 });
-const disableCta = computed(() => false); //eztodo
+const availableToWrap = computed(() => {
+    const available = systemTokenBalance.value.sub(estimatedGas.value);
+
+    if (available.lt(0)) {
+        return BigNumber.from(0);
+    }
+    return available;
+});
+const formIsValid = computed(() =>
+    !inputModelValue.value.isZero() &&
+    inputModelValue.value.lt(availableToWrap.value),
+);
+const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('wrapSystemToken'));
+
+
+// watchers
+watch(systemTokenBalanceInfo, (info) => {
+    systemTokenFiatPrice.value = info.token.price.getAmountInFiatStr(1);
+});
 
 
 // methods
+onBeforeMount(() => {
+    // https://github.com/telosnetwork/telos-wallet/issues/274
+    const GAS_FOR_WRAPPING_TOKEN = 55500;
+    chainSettings.getEstimatedGas(GAS_FOR_WRAPPING_TOKEN).then((gas) => {
+        estimatedGas.value = gas.system;
+    });
+});
+
 async function handleCtaClick() {
-    const evmStore = useEVMStore();
-    const authenticator = evmStore.injectedProvider(evmStore.injectedProviderNames[0]);
-    authenticator.wrapSystemToken(inputModelValue.value);
-    console.log('wrap');
+    // eztodo move this to common function, replace in sendpage.vue
+    const label = 'logged';
+    if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+        const networkName = useChainStore().loggedChain.settings.getDisplay();
+        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+
+        ant.config.notifyFailureWithAction(errorMessage, {
+            label: ant.config.localizationHandler('evm_wallet.switch'),
+        });
+
+        return;
+    }
+
+    if (formIsValid.value) {
+        try {
+            const authenticator = evmStore.injectedProvider(evmStore.injectedProviderNames[0]);
+            const tx = await authenticator.wrapSystemToken(inputModelValue.value);
+            const formattedAmount = formatWei(inputModelValue.value, systemTokenDecimals, WEI_PRECISION);
+
+            const dismiss = ant.config.notifyNeutralMessageHandler(
+                $t('notification.neutral_message_wrapping', { quantity: formattedAmount, symbol: systemTokenSymbol }),
+            );
+
+            tx.wait().then(() => {
+                ant.config.notifySuccessfulTrxHandler(
+                    `${chainSettings.getExplorerUrl()}/tx/${tx.hash}`,
+                );
+            }).catch((err) => {
+                console.error(err);
+            }).finally(() => {
+                dismiss();
+            });
+        } catch (err) {
+            console.error(err);
+            if (err instanceof AntelopeError) {
+                const evmErr = err as AntelopeError;
+                ant.config.notifyFailureMessage($t(evmErr.message), evmErr.payload);
+            } else {
+                ant.config.notifyFailureMessage($t('evm_wallet.general_error'));
+            }
+        }
+    }
 }
 </script>
 
@@ -94,7 +168,7 @@ async function handleCtaClick() {
                 :secondary-currency-conversion-factor="systemTokenFiatPrice"
                 :locale="fiatLocale"
                 :label="$t('evm_wrap.wrap_input_label')"
-                :max-value="systemTokenBalance"
+                :max-value="availableToWrap"
                 class="c-wrap-tab__input"
             />
         </div>
@@ -130,7 +204,8 @@ async function handleCtaClick() {
             <div class="c-wrap-tab__cta-container">
                 <q-btn
                     color="primary"
-                    :disable="disableCta"
+                    :disable="!formIsValid"
+                    :loading="ctaIsLoading"
                     :label="$t('evm_wrap.wrap')"
                     :aria-label="$t(
                         'evm_wrap.wrap_button_label',

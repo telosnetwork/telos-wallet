@@ -1,11 +1,7 @@
 export * from 'src/antelope/stores/utils/abi/signature';
 import { BigNumber, ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
-import { keccak256 } from '@ethersproject/keccak256';
-import { toUtf8Bytes } from '@ethersproject/strings';
-import {
-    EvmABIEntry,
-} from 'src/antelope/types';
+import { EvmABIEntry } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
@@ -70,30 +66,6 @@ export function isValidAddressFormat(ethAddressString: string): boolean {
 
 export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
-}
-
-export function toChecksumAddress(address: string): string {
-    if (!address) {
-        return address;
-    }
-
-    let addy = address.toLowerCase().replace('0x', '');
-    if (addy.length !== 40) {
-        addy = addy.padStart(40, '0');
-    }
-
-    const hash = keccak256(toUtf8Bytes(addy));
-    let ret = '0x';
-
-    for (let i = 0; i < addy.length; i++) {
-        if (parseInt(hash[i], 16) >= 8) {
-            ret += addy[i].toUpperCase();
-        } else {
-            ret += addy[i];
-        }
-    }
-
-    return ret;
 }
 
 export function parseErrorMessage(output: string): string {
