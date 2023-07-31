@@ -284,7 +284,7 @@ function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
 }
 
 function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
-    router.replace({
+    router.push({
         name: 'evm-nft-details',
         query: {
             contract: collectionAddress,
