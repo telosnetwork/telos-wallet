@@ -3,11 +3,13 @@ import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackSt
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
+import InlineSvg from 'vue-inline-svg';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
     components: {
         QSpinnerFacebook,
+        InlineSvg,
     },
     setup(props, { emit }) {
         const ant = getAntelope();
@@ -115,18 +117,17 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <div class="c-evm-login-buttons__option" @click="setOreIdAuthenticator('google')">
+    <div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
             <img
                 width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="Google"
-                src="~assets/evm/icon-oauth-google.svg"
+                class="c-evm-login-buttons__icon"
+                src="~assets/logo--tlos.svg"
             >
-            {{ $t('home.oauth_google') }}
+            {{ $t('home.login_with_social_media') }}
         </template>
     </div>
 
@@ -140,12 +141,13 @@ export default defineComponent({
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
-            <img
+            <InlineSvg
+                :src="require('src/assets/evm/metamask_fox.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--metamask"
+                height="24"
                 width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="Metamask"
-                src="~assets/evm/metamask_fox.svg"
-            >
+                aria-hidden="true"
+            />
             {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
         </template>
     </div>
@@ -160,12 +162,13 @@ export default defineComponent({
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
-            <img
+            <InlineSvg
+                :src="require('src/assets/evm/safepal.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                height="24"
                 width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="SafePal"
-                src="~assets/evm/safepal.svg"
-            >
+                aria-hidden="true"
+            />
             {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
         </template>
     </div>
@@ -176,12 +179,13 @@ export default defineComponent({
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
-            <img
+            <InlineSvg
+                :src="require('src/assets/evm/wallet_connect.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--wallet-connect"
+                height="24"
                 width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="WalletConnect"
-                src="~assets/evm/wallet_connect.svg"
-            >
+                aria-hidden="true"
+            />
             {{ $t('home.walletconnect') }}
         </template>
     </div>
@@ -191,6 +195,7 @@ export default defineComponent({
 
 <style lang="scss">
 .c-evm-login-buttons {
+    $self: &;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -211,7 +216,7 @@ export default defineComponent({
     &__option{
         width: 224px;
         height: 54px;
-        color: $white;
+        color: $gray;
         border: solid $white;
         border-width: 1px;
         border-radius: 4px;
@@ -222,11 +227,44 @@ export default defineComponent({
         padding-right: 14px;
         cursor: pointer;
 
-        img {
+        #{$self}__icon, img {
             display: inline-block;
             vertical-align:top;
             margin-right: 8px;
         }
+
+        &:hover {
+            color: $white;
+            border-color: $white;
+        }
+
+        &:not(:hover) #{$self}__icon {
+            &--metamask {
+                .st3, .st8, .st9 {
+                    fill: $blackDark;
+                    stroke: $blackDark;
+                }
+                .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+            }
+            &--safepal {
+                path {
+                    fill: $white;
+                }
+            }
+            &--wallet-connect {
+                circle {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+                path {
+                    fill: $blackDark;
+                }
+            }
+        }
+
     }
 }
 </style>
