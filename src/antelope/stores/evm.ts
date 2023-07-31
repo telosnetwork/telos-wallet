@@ -62,8 +62,8 @@ export interface EVMState {
 
 const store_name = 'evm';
 
-const createManager = (authenticator: InjectedProviderAuth):EvmContractManagerI => ({
-    getSigner: () => toRaw(authenticator.getSigner()),
+const createManager = (authenticator: InjectedProviderAuth | EVMAuthenticator):EvmContractManagerI => ({
+    getSigner: () => toRaw(authenticator.web3Provider().then(provider => provider.getSigner())),
     getWeb3Provider: () => authenticator.web3Provider(),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
@@ -322,7 +322,7 @@ export const useEVMStore = defineStore(store_name, {
         // this is coming from the token transfer, transactions table & transaction (general + logs tabs) pages where we're
         // looking for a contract based on a token transfer event
         // handles erc721 & erc20 (w/ stubs for erc1155)
-        async getContract(authenticator: InjectedProviderAuth, address: string, label: string, suspectedToken = ''): Promise<EvmContract | null> {
+        async getContract(authenticator: EVMAuthenticator, address: string, label: string, suspectedToken = ''): Promise<EvmContract | null> {
             if (!address) {
                 this.trace('getContract', 'address is null', address);
                 return null;
@@ -385,7 +385,7 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getVerifiedContract(
-            authenticator: InjectedProviderAuth,
+            authenticator: EVMAuthenticator,
             address: string,
             label: string,
             metadata: EvmContractMetadata,
@@ -409,7 +409,7 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getEmptyContract(
-            authenticator: InjectedProviderAuth,
+            authenticator: EVMAuthenticator,
             address:string,
             creationInfo: EvmContractCreationInfo | null,
         ): Promise<EvmContract> {
@@ -472,7 +472,7 @@ export const useEVMStore = defineStore(store_name, {
             return  new ethers.Contract(address, abi, provider);
         },
 
-        async getToken(authenticator: InjectedProviderAuth, address:string, label: string, suspectedType:string): Promise<TokenClass | null> {
+        async getToken(authenticator: EVMAuthenticator, address:string, label: string, suspectedType:string): Promise<TokenClass | null> {
             if (suspectedType.toUpperCase() === ERC20_TYPE) {
                 const chain = useChainStore().getChain('logged');
                 const list = await chain.settings.getTokenList();
@@ -493,7 +493,7 @@ export const useEVMStore = defineStore(store_name, {
         },
 
         async getContractFromTokenList(
-            authenticator: InjectedProviderAuth,
+            authenticator: EVMAuthenticator,
             address:string,
             label: string,
             suspectedType:string,

@@ -11,6 +11,7 @@ import {
     prepareWriteContract,
     writeContract,
     WriteContractResult,
+    WriteContractPreparedArgs,
 } from '@wagmi/core';
 import {
     EthereumClient,
@@ -23,7 +24,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
+import { AntelopeError, ERC20_TYPE, EvmABI, TokenClass, addressString } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
@@ -276,7 +277,45 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
-        throw 'eztodo this';
+        useFeedbackStore().setLoading('wrapSystemToken');
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+        let abi: EvmABI | null | undefined;
+        try {
+            const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);
+            abi = wrappedSystemTokenContract?.abi;
+
+            if (!abi) {
+                throw 'Unable to get wrapped system contract ABI';
+            }
+        } catch (error) {
+            useFeedbackStore().unsetLoading('wrapSystemToken');
+            throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
+        }
+
+        let request;
+        try {
+            const prepareWriteContractResult = await prepareWriteContract({
+                address: wrappedSystemTokenContractAddress,
+                abi,
+                functionName: 'deposit',
+                args: [amount],
+            });
+
+            request = prepareWriteContractResult.request;
+        } catch(e) {
+            console.error(e);
+            useFeedbackStore().unsetLoading('wrapSystemToken');
+            // eztodo throw antelope error
+        }
+
+        try {
+            useFeedbackStore().unsetLoading('wrapSystemToken');
+            return await writeContract(request as unknown as WriteContractPreparedArgs<readonly unknown[], string>);
+        } catch {
+            useFeedbackStore().unsetLoading('wrapSystemToken');
+            throw new AntelopeError('antelope.wrap.error_wrap');
+        }
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
@@ -308,6 +347,14 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
         await web3Provider.ready;
         return web3Provider as ethers.providers.Web3Provider;
+    }
+
+    async getSigner(): Promise<ethers.Signer> {
+        this.trace('getSigner');
+        const web3Provider = await this.web3Provider();
+        const signer = web3Provider.getSigner();
+        this.trace('getSigner', 'signer ->', signer);
+        return signer;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {

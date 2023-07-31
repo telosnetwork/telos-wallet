@@ -64,7 +64,8 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
 
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
         useFeedbackStore().setLoading('wrapSystemToken');
-        const wrappedSystemTokenContractAddress = (useChainStore().currentChain.settings as EVMChainSettings).getWrappedSystemToken().address;
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
         let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
         try {
             const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);

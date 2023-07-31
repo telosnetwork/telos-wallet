@@ -29,6 +29,7 @@ export abstract class EVMAuthenticator {
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
+    abstract getSigner(): Promise<ethers.Signer>;
 
     // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;
