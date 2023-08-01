@@ -239,6 +239,12 @@ export default defineComponent({
         }
 
         &:not(:hover) #{$self}__icon {
+            &--oreid {
+                opacity: 1;
+            }
+            &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.3;
+            }
             &--metamask {
                 .st3, .st8, .st9 {
                     fill: $blackDark;
