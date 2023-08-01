@@ -117,7 +117,7 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+    <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
@@ -129,7 +129,7 @@ export default defineComponent({
             >
             {{ $t('home.login_with_social_media') }}
         </template>
-    </div>
+    </div-->
 
     <!-- Metamask Authenticator button -->
     <div
@@ -216,7 +216,7 @@ export default defineComponent({
     &__option{
         width: 224px;
         height: 54px;
-        color: $gray;
+        color: $white;
         border: solid $white;
         border-width: 1px;
         border-radius: 4px;
@@ -233,44 +233,43 @@ export default defineComponent({
             margin-right: 8px;
         }
 
-        &:hover {
-            color: $white;
-            border-color: $white;
-        }
+        // &:hover {
+        //     color: $white;
+        //     border-color: $white;
+        // }
 
-        &:not(:hover) #{$self}__icon {
-            &--oreid {
-                opacity: 1;
-            }
-            &--metamask, &--safepal, &--wallet-connect {
-                opacity: 0.3;
-            }
-            &--metamask {
-                .st3, .st8, .st9 {
-                    fill: $blackDark;
-                    stroke: $blackDark;
-                }
-                .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
-                    fill: $white;
-                    stroke: $blackDark;
-                }
-            }
-            &--safepal {
-                path {
-                    fill: $white;
-                }
-            }
-            &--wallet-connect {
-                circle {
-                    fill: $white;
-                    stroke: $blackDark;
-                }
-                path {
-                    fill: $blackDark;
-                }
-            }
-        }
-
+        // &:not(:hover) #{$self}__icon {
+        //     &--oreid {
+        //         opacity: 1;
+        //     }
+        //     &--metamask, &--safepal, &--wallet-connect {
+        //         opacity: 0.3;
+        //     }
+        //     &--metamask {
+        //         .st3, .st8, .st9 {
+        //             fill: $blackDark;
+        //             stroke: $blackDark;
+        //         }
+        //         .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
+        //             fill: $white;
+        //             stroke: $blackDark;
+        //         }
+        //     }
+        //     &--safepal {
+        //         path {
+        //             fill: $white;
+        //         }
+        //     }
+        //     &--wallet-connect {
+        //         circle {
+        //             fill: $white;
+        //             stroke: $blackDark;
+        //         }
+        //         path {
+        //             fill: $blackDark;
+        //         }
+        //     }
+        // }
     }
 }
 </style>
