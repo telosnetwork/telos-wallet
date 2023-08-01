@@ -1,5 +1,5 @@
 import { API } from '@greymass/eosio';
-import { TokenSourceInfo } from 'src/antelope/types/TokenClass';
+import { TokenSourceInfo } from 'src/antelope/types';
 
 export interface ActionData {
     actions: Action[];

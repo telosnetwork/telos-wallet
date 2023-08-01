@@ -27,5 +27,5 @@ export interface IndexerTransactionsFilter {
     includePagination?: boolean; // include the total count and more flag in response
     logTopic?: string; // match to the transaction logs' first topic
     full?: string; // Add internal transactions to the response
+    forceMetadata?: number; // 1 to force metadata to be returned
 }
-

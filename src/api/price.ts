@@ -5,7 +5,6 @@ import {
     PriceHistory,
     PriceStats,
 } from 'src/antelope/types';
-import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 interface CachedPrice {
@@ -53,8 +52,9 @@ export async function getFiatPriceFromIndexer(
     tokenAddress: string,
     fiatCode: string,
     indexerAxios: AxiosInstance,
+    chain_settings: EVMChainSettings,
 ): Promise<number> {
-    const wrappedSystemAddress = (useChainStore().loggedChain.settings as EVMChainSettings).getWrappedSystemToken().address;
+    const wrappedSystemAddress = chain_settings.getWrappedSystemToken().address;
     const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedSystemAddress : tokenAddress;
     const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data;
 
@@ -62,7 +62,7 @@ export async function getFiatPriceFromIndexer(
         (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-    if (!tokenMarketData.updated || !tokenMarketData.price) {
+    if (!tokenMarketData?.updated || !tokenMarketData.price) {
         return 0;
     }
 

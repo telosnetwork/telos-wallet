@@ -16,7 +16,11 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices (Staked
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -112,6 +116,29 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices (Staked
               evm_wallet.send
             </span>
           </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
+          >
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.add_to_metamask
+            </span>
+          </li>
           
         </ul>
         
@@ -138,7 +165,11 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices (Staked 
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -239,6 +270,29 @@ exports[`WalletBalanceRow.vue should render correctly on mobile devices (Staked 
               evm_wallet.send
             </span>
           </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
+          >
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.add_to_metamask
+            </span>
+          </li>
           
         </ul>
         
@@ -265,7 +319,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Staked TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Staked TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -364,6 +422,29 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               evm_wallet.send
             </span>
           </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
+          >
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.add_to_metamask
+            </span>
+          </li>
           
         </ul>
         
@@ -390,7 +471,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Telos 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Telos
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -517,7 +602,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Wrapped TLOS 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Wrapped TLOS
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -618,6 +707,29 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               evm_wallet.send
             </span>
           </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
+          >
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.add_to_metamask
+            </span>
+          </li>
           
         </ul>
         
@@ -644,7 +756,11 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       width="40"
     />
     <div>
-      Shiba 
+      <span
+        class="c-wallet-balance-row__token_name"
+      >
+        Shiba
+      </span>
       <br />
       <span
         class="o-text--small"
@@ -741,6 +857,29 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
               id="overflow-text-1"
             >
               evm_wallet.send
+            </span>
+          </li>
+          <li
+            aria-labelledby="overflow-text-2"
+            class="c-wallet-balance-row__overflow-li"
+            tabindex="0"
+          >
+            <div
+              class="c-wallet-balance-row__overflow-icon-wrapper"
+            >
+              <inline-svg-stub
+                aria-hidden="true"
+                class="c-wallet-balance-row__overflow-icon c-wallet-balance-row__overflow-icon--stroke"
+                keepduringloading="true"
+                src=""
+                transformsource="[Function]"
+              />
+            </div>
+            <span
+              class="c-wallet-balance-row__overflow-text"
+              id="overflow-text-2"
+            >
+              evm_wallet.add_to_metamask
             </span>
           </li>
           

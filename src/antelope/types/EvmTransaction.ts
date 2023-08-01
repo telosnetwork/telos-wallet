@@ -105,12 +105,10 @@ export interface IndexerAccountTransactionsResponse {
     more: boolean;
 }
 
-
-
-// TODO: refactoring needed
 export type EvmTransactionResponse = ethers.providers.TransactionResponse;
 export interface TransactionResponse {
     hash: string;
+    wait: () => Promise<ethers.providers.TransactionReceipt>;
 }
 export interface NativeTransactionResponse extends TransactionResponse {
     __?: string;

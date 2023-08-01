@@ -3,14 +3,13 @@ import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
-import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress } from 'src/antelope/types';
+import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
-import { useAppNavStore } from 'src/stores';
 import { BigNumber, ethers } from 'ethers';
-import { getNetwork } from '@wagmi/core';
-import { checkNetwork, isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import { EVMAuthenticator } from 'src/antelope/wallets';
+
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
 const GAS_LIMIT_FOR_ERC20_TOKEN_TRANSFER = 55500;
@@ -20,7 +19,6 @@ const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
 const balanceStore = useBalancesStore();
-const global = useAppNavStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -42,9 +40,6 @@ export default defineComponent({
         },
         prettyPrintBalance,
     }),
-    mounted() {
-        global.setShowBackBtn(true);
-    },
     watch: {
         balances: {
             handler() {
@@ -97,8 +92,8 @@ export default defineComponent({
         },
     },
     computed: {
-        token(): TokenClass | undefined {
-            return this.selected?.token as TokenClass ?? undefined;
+        token(): TokenClass | null {
+            return this.selected?.token as TokenClass ?? null;
         },
         loggedAccount() {
             return accountStore.loggedEvmAccount;
@@ -150,7 +145,13 @@ export default defineComponent({
             if (!this.selected.balance) {
                 return ethers.constants.Zero;
             }
-            return this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
+            // Let's ensure the returned value is not negative
+            const available = this.selected.balance.sub(this.selected.isSystem ? this.estimatedGas.system : ethers.constants.Zero);
+            if (available.gt(ethers.constants.Zero)) {
+                return available;
+            } else {
+                return ethers.constants.Zero;
+            }
         },
         isAddressValid(): boolean {
             const regex = /^0x[a-fA-F0-9]{40}$/;
@@ -160,7 +161,7 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferTokens');
+            return ant.stores.feedback.isLoading('transferEVMTokens');
         },
         configIsLoading() {
             let config;
@@ -173,9 +174,6 @@ export default defineComponent({
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
-        },
-        loadingTransaction() {
-            return localStorage.getItem('wagmi.connected') && isCorrectNetwork() ? this.isLoading || this.configIsLoading : this.isLoading;
         },
     },
     created() {
@@ -206,7 +204,7 @@ export default defineComponent({
                     window.open(explorerUrl + '/address/' + this.token.address, '_blank');
                     return;
                 } else {
-                    ant.config.notifyErrorHandler(
+                    ant.config.notifyFailureMessage(
                         this.$t(
                             'settings.no_explorer',
                             { network: ant.stores.chain.currentChain?.settings.getNetwork() },
@@ -216,46 +214,31 @@ export default defineComponent({
             }
         },
         clearTokenTransferConfigs() {
-            balanceStore.clearAllWagmiTokenTransferConfigs('logged');
+            this.updateTokenTransferConfig(false, null, this.address, this.amount);
         },
-        updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null | undefined, address: string, amount: BigNumber) {
+        async updateTokenTransferConfig(formIsValid: boolean, token: TokenClass | null, address: string, amount: BigNumber) {
             // due to an issue with metamask/walletconnect on iOS, we must get the wagmi transfer configuration
             // before the 'Send' button is pressed to reduce the amount of time the click handler takes to execute
             // see https://github.com/WalletConnect/walletconnect-monorepo/issues/444
-
-            if (!formIsValid || !token?.address || !localStorage.getItem('wagmi.connected')) {
-                this.clearTokenTransferConfigs();
-                return;
-            }
-
-
-            if (this.token?.isSystem) {
-                balanceStore.prepareWagmiSystemTokenTransferConfig(
-                    'logged',
-                    address,
-                    amount,
-                );
-            } else {
-                balanceStore.prepareWagmiTokenTransferConfig(
-                    'logged',
-                    token,
-                    address,
-                    amount,
-                );
-            }
+            await this.loggedAccount?.authenticator.prepareTokenForTransfer(formIsValid ? token : null, amount, address);
         },
         async startTransfer() {
-            // if WalletConnect on wrong network, notify user and prevent transaction
-            if (localStorage.getItem('wagmi.connected')){
-                const networkName = useChainStore().currentChain.settings.getDisplay();
-                if (!isCorrectNetwork()){
-                    const errorMessage = this.$t('evm_wallet.incorrect_network', { networkName });
-                    (this as any).$errorNotification(errorMessage, true);
-                    return;
-                }
-            } else {
-                //if injected provider (Desktop) prompt to switch chains
-                await checkNetwork();
+
+            // before sending the transaction, we check if the user is connected to the correct network
+            const label = 'logged';
+            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                const networkName = useChainStore().loggedChain.settings.getDisplay();
+                const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                ant.config.notifyFailureWithAction(errorMessage, {
+                    label: ant.config.localizationHandler('evm_wallet.switch'),
+                    handler: async () => {
+                        // we force the useer to manually re enter the amount which triggers updateTokenTransferConfig
+                        this.amount = ethers.constants.Zero;
+                        await authenticator.ensureCorrectChain();
+                    },
+                });
+                return;
             }
 
             const token = this.token as TokenClass;
@@ -266,22 +249,39 @@ export default defineComponent({
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
-                        ant.config.notifySuccessfulTrxHandler(
-                            `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                        // we send the notification before the transaction is mined
+                        const quantity = `${formatWei(amount, token.decimals, 18)} ${token.symbol}`;
+                        const address = to.substring(0, 6) + '...' + to.substring(to.length - 4, to.length);
+                        const dismiss = ant.config.notifyNeutralMessageHandler(
+                            this.$t('notification.neutral_message_sending', { quantity, address }),
                         );
+
+                        // we wait for the transaction to be mined and then we send the success notification
+                        trx.wait().then((receipt) => {
+                            ant.config.notifySuccessfulTrxHandler(
+                                `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+                            );
+                        }).catch((err) => {
+                            console.error(err);
+                        }).finally(() => {
+                            // we dismiss the first notification
+                            dismiss();
+                        });
                     }
                 }).catch((err) => {
                     console.error(err);
-                    ant.config.notifyErrorHandler(this.$t('evm_wallet.general_error'));
-                    // TODO: verify in depth all error messages to know how to handle the feedback
-                    // https://github.com/telosnetwork/telos-wallet/issues/273
+                    if (err instanceof AntelopeError) {
+                        const evmErr = err as AntelopeError;
+                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
+                    } else {
+                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
+                    }
                 });
             } else {
-                ant.config.notifyErrorHandler(this.$t('evm_wallet.invalid_form'));
+                ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));
             }
         },
     },
-
 });
 </script>
 
@@ -356,7 +356,7 @@ export default defineComponent({
                     >
                         <span class="c-send-page__view-contract-text">{{ $t('evm_wallet.view_contract') }}</span>
                         <q-space v-if="!isMobile"/>
-                        <q-icon size="xs" name="launch" class="c-send-page__view-contract-min-icon" />
+                        <q-icon size="xs" name="o_launch" class="c-send-page__view-contract-min-icon" />
                     </div>
                 </div>
                 <!-- Amount input -->
@@ -398,7 +398,7 @@ export default defineComponent({
                             color="primary"
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
-                            :loading="loadingTransaction"
+                            :loading="isLoading"
                             :disable="!isFormValid || isLoading"
                             @click="startTransfer"
                         />

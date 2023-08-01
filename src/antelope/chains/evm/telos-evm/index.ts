@@ -3,12 +3,12 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
 import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
-import { useUserStore } from 'src/antelope/stores/user';
+import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '40';
-const NETWORK = 'telos-evm';
+export const NETWORK = 'telos-evm';
 const DISPLAY = 'Telos EVM Mainnet';
 const TOKEN = new TokenClass({
     name: 'Telos',
@@ -28,6 +28,7 @@ const S_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
@@ -38,6 +39,7 @@ const W_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
@@ -55,6 +57,8 @@ const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const NETWORK_EVM_ENDPOINT = 'https://mainnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts.s3.amazonaws.com';
+
+declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
     getNetwork(): string {
@@ -94,10 +98,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     async getUsdPrice(): Promise<number> {
-        if (this.hasIndexSupport()) {
+        if (this.hasIndexerSupport()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
-            const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer);
+            const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer, this);
 
             if (fiatPrice !== 0) {
                 return fiatPrice;
@@ -135,15 +139,25 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return 'https://www.telos.net/#buy-tlos-simplex';
     }
 
-    getImportantTokensIdList(): string[] {
-        return [TOKEN.id, S_TOKEN.id, W_TOKEN.id];
+    getSystemTokens(): TokenClass[] {
+        return [TOKEN, S_TOKEN, W_TOKEN];
     }
 
     getIndexerApiEndpoint(): string {
         return INDEXER_ENDPOINT;
     }
 
-    hasIndexSupport(): boolean {
+    hasIndexerSupport(): boolean {
         return true;
+    }
+
+    trackAnalyticsEvent(params: Record<string, unknown>): void {
+        if (typeof fathom === 'undefined') {
+            console.warn(`Failed to track event with ID ${params.id}: Fathom Analytics not loaded`);
+            return;
+        }
+
+        const id = params.id as string;
+        fathom.trackGoal(id, 0);
     }
 }

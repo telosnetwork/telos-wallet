@@ -18,9 +18,8 @@ import { AccountModel } from 'src/antelope/stores/account';
 import {
     createTraceFunction,
     isTracingAll,
-    useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { getAntelope } from '..';
+import { getAntelope, useFeedbackStore } from 'src/antelope';
 
 export type AccountList = Array<AccountId>;
 
@@ -100,7 +99,7 @@ export const useUserStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
-                useFeedbackStore().unsetLoading('account.loadUsers');
+                useFeedbackStore().unsetLoading('user.loadUsers');
             }
 
             this.loadCurrencyPreferences();
@@ -140,7 +139,7 @@ export const useUserStore = defineStore(store_name, {
             } catch (error) {
                 console.error('Error: ', errorToString(error));
             } finally {
-                useFeedbackStore().unsetLoading('account.saveUsers');
+                useFeedbackStore().unsetLoading('user.saveUsers');
             }
         },
         // Logged Handlers ----------------
@@ -167,6 +166,7 @@ export const useUserStore = defineStore(store_name, {
         },
         handleAccountLoggedOut(){
             try {
+                this.removeUser(this.__user_id);
                 this.__user_name = '';
                 this.__user_id = '';
                 this.__user_accounts = [];

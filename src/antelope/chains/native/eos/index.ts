@@ -99,7 +99,11 @@ export default class EOS extends NativeChainSettings {
         return true;
     }
 
-    getImportantTokensIdList(): string[] {
-        return [TOKEN.id];
+    getSystemTokens(): TokenClass[] {
+        return [TOKEN];
+    }
+
+    trackAnalyticsEvent(): void {
+        console.warn(`trackAnalyticsEvent not implemented for ${NETWORK}`);
     }
 }

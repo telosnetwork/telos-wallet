@@ -5,6 +5,7 @@ import { mapGetters } from 'vuex';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
+import { getAntelope, useAccountStore, useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'HomePage',
@@ -16,15 +17,60 @@ export default defineComponent({
     data: (): {
         tab: 'left' | 'right'
         showWalletOptions: boolean,
-        toggleWalletConnect: boolean,
+        showOAuthOptions: boolean,
+        showWalletConnect: boolean,
+        useInjectedProvider: string,
     } => ({
         tab: 'left',
         showWalletOptions: false,
-        toggleWalletConnect: false,
+        showOAuthOptions: false,
+        showWalletConnect: false,
+        useInjectedProvider: '',
     }),
 
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
+    },
+
+    methods: {
+        onUseInjectedProvider() {
+            // first check the integrity of the injected provider
+            const evm = useEVMStore();
+            const platform = usePlatformStore();
+            console.assert(platform.isMobile, 'onUseInjectedProvider should only be called on mobile');
+            console.assert(evm.injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
+            const providerName = evm.injectedProviderNames[0];
+            const authenticator = evm.injectedProvider(providerName);
+            if (!authenticator) {
+                console.error(`${providerName} authenticator not found`);
+                getAntelope().config.notifyFailureMessage(
+                    this.$t(
+                        'home.no_injected_provider_found',
+                        { providerName },
+                    ),
+                );
+                return;
+            }
+            // Everything is fine, let's use the injected provider
+            this.useInjectedProvider = providerName;
+        },
+        onShowWalletConnect() {
+            this.showWalletConnect = true;
+            // put this variable back to false for an eventual re-open
+            setTimeout(() => {
+                this.showWalletConnect = false;
+            }, 200);
+        },
+        onShowWalletOptions(show: boolean) {
+            this.showWalletOptions = show;
+            if (!show) {
+                this.showOAuthOptions = false;
+            }
+        },
+        onShowOAuthOptions(show: boolean) {
+            this.showOAuthOptions = show;
+            this.showWalletOptions = show;
+        },
     },
 });
 </script>
@@ -73,17 +119,32 @@ export default defineComponent({
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @toggle-wallet-connect="toggleWalletConnect = true"
-                        @show-wallet-options="showWalletOptions = true"
+                        @show-wallet-connect="onShowWalletConnect()"
+                        @show-wallet-options="onShowWalletOptions(true)"
+                        @use-injected-provider="onUseInjectedProvider()"
+                        @show-oauth-options="onShowOAuthOptions(true)"
                     />
                 </div>
+
                 <div class="c-home__connect-wallet">
                     <ConnectWalletOptions
                         v-show="showWalletOptions"
-                        :toggleWalletConnect="toggleWalletConnect"
-                        @toggle-wallet-connect="toggleWalletConnect = false"
-                        @close-wallet-options="showWalletOptions = false"
+                        :showWalletConnect="showWalletConnect"
+                        :useInjectedProvider="useInjectedProvider"
+                        :showOAuthOptions="showOAuthOptions"
+                        @show-wallet-connect="onShowWalletConnect()"
+                        @close-wallet-options="onShowWalletOptions(false)"
                     />
+                </div>
+                <div v-if="tab === 'left'" class="c-home__external-link">
+                    <a
+                        href="https://docs.telos.net/evm/about/setup-a-wallet"
+                        target="_blank"
+                        class="c-home__external-link-text"
+                    >
+                        {{$t('home.wallet_introduction')}}
+                    </a>
+                    <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
                     <q-toolbar class="bg-dark flex-center">
@@ -182,6 +243,27 @@ export default defineComponent({
         &--activated {
             background-color: white;
             color: var(--link-color);
+        }
+    }
+
+    &__external-link {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        margin-top: 24px;
+        color: white
+    }
+
+    &__external-link-text {
+        @include text--small;
+        color: white;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 

@@ -14,6 +14,5 @@ import { StoreCallback } from '@quasar/app-webpack';
 import { store } from 'quasar/wrappers';
 import { createPinia, defineStore } from 'pinia';
 import { ethers } from 'ethers';
-import detectEthereumProvider from '@metamask/detect-provider';
 import { ExternalProvider } from '@ethersproject/providers';
 ```

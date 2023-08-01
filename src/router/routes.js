@@ -29,17 +29,45 @@ const routes = [
             {
                 path: 'wallet',
                 name: 'evm-wallet',
+                meta: {
+                    requiresAuth: true,
+                },
                 component: () => import('pages/evm/wallet/WalletPage.vue'),
             },
             {
                 path: 'send',
                 name: 'evm-send',
+                meta: {
+                    requiresAuth: true,
+                    parent: 'evm-wallet',
+                },
                 component: () => import('pages/evm/wallet/SendPage.vue'),
             },
             {
                 path: 'receive',
                 name: 'evm-receive',
+                meta: {
+                    requiresAuth: true,
+                    parent: 'evm-wallet',
+                },
                 component: () => import('pages/evm/wallet/ReceivePage.vue'),
+            },
+            {
+                path: 'collectible-inventory',
+                name: 'evm-nft-inventory',
+                meta: {
+                    requiresAuth: true,
+                },
+                component: () => import('pages/evm/nfts/NftInventoryPage.vue'),
+            },
+            {
+                path: 'collectible-details',
+                name: 'evm-nft-details',
+                meta: {
+                    requiresAuth: false,
+                    parent: 'evm-nft-inventory',
+                },
+                component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
             // {
             //     path: 'staking',
@@ -57,12 +85,31 @@ const routes = [
     {
         path: '/demos',
         name: 'demos',
+        meta: {
+            requiresAuth: false,
+            notInProduction: true,
+        },
         component: () => import('pages/demo/DemoLayout.vue'),
         children: [
             {
                 path: 'inputs',
                 name: 'demos.inputs',
                 component: () => import('pages/demo/InputDemos.vue'),
+            },
+            {
+                path: 'send-errors',
+                name: 'demos.send-errors',
+                component: () => import('pages/demo/SendPageErrors.vue'),
+            },
+            {
+                path: 'notif',
+                name: 'demos.notifications',
+                component: () => import('pages/demo/NotificationDemos.vue'),
+            },
+            {
+                path: 'nfts',
+                name: 'demos.nfts',
+                component: () => import('pages/demo/NftDemos.vue'),
             },
         ],
     },

@@ -1,100 +1,145 @@
 
 
 <script lang="ts">
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, inject, ref, watch } from 'vue';
-import { Web3Modal } from '@web3modal/html';
-import { EthereumClient } from '@web3modal/ethereum';
-import { useEVMStore, usePlatformStore, useAccountStore, useChainStore } from 'src/antelope';
-import { getNetwork } from '@wagmi/core';
-import { isCorrectNetwork } from 'src/antelope/stores/utils/checkNetwork';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
+import { useAccountStore, useChainStore, getAntelope, useFeedbackStore } from 'src/antelope';
+import { QSpinnerFacebook } from 'quasar';
+import { OreIdAuth } from 'src/antelope/wallets';
 
 export default defineComponent({
     name: 'ConnectWalletOptions',
+    components: {
+        QSpinnerFacebook,
+    },
     props: {
-        toggleWalletConnect: {
+        showWalletConnect: {
+            required: true,
+            type: Boolean,
+        },
+        useInjectedProvider: {
+            required: true,
+            type: String,
+        },
+        showOAuthOptions: {
             required: true,
             type: Boolean,
         },
     },
     setup(props, { emit }){
+        const ant = getAntelope();
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
-        const wagmiClient = inject('$wagmi') as EthereumClient;
-        const web3Modal = ref<Web3Modal>();
-        const supportsMetamask = computed(() => useEVMStore().isMetamaskSupported);
 
-        watch(() => props.toggleWalletConnect, async (newVal) => {
-            if (newVal) {
-                await toggleWalletConnectModal();
-            };
+        const supportsMetamask = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
         });
 
-        const loginEvm = () => {
-            const accountStore = useAccountStore();
-            const chainStore = useChainStore();
-            const network = chainStore.currentChain.settings.getNetwork();
-            accountStore.loginEVM({ network });
-        };
+        const supportsSafePal = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isSafePal;
+        });
 
-        const toggleWalletConnectModal = async () => {
-            // if already connected, trigger autologin
-            if (localStorage.getItem('wagmi.connected')){
-                await login();
-            }else {
-                await (web3Modal.value as Web3Modal).openModal();
-                emit('toggleWalletConnect');
-            }
-        };
+        const unsupportedExtensions = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
+        });
 
-        const login = async () => {
-            emit('toggleWalletConnect');
-
-            loginEvm();
-
-            const networkName = useChainStore().currentChain.settings.getDisplay();
-
-            if (!isCorrectNetwork()){
-                const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });;
-                globalProps.$warningNotification(warningMessage);
-            }
-        };
+        const selectedOAuthProvider = ref('');
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
 
-        return {
-            web3Modal,
-            supportsMetamask,
-            loginEvm,
-            toggleWalletConnectModal,
-            login,
-            redirectToMetamaskDownload,
-            wagmiClient,
+        const redirectToSafepalDownload = () => {
+            window.open('https://www.safepal.com/en/download', '_blank');
         };
-    },
-    mounted() {
-        const projectId = process.env.PROJECT_ID || '';
-        const explorerRecommendedWalletIds = [
-            // MetaMask
-            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
-        ];
-        const explorerExcludedWalletIds: 'ALL' = 'ALL'; // Web3Modal option excludes all but recomended
 
-        const options = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
-
-        this.web3Modal = new Web3Modal(options, this.wagmiClient);
-
-        this.web3Modal.subscribeModal(async (newState) => {
-            if (newState.open === false && localStorage.getItem('wagmi.connected')) {
-                await this.login();
+        watch(() => props.showWalletConnect, async (newVal) => {
+            if (newVal) {
+                await setWalletConnectAuthenticator();
             }
         });
+
+        watch(() => props.useInjectedProvider, async (providerName) => {
+            if (providerName) {
+                setAuthenticator(providerName, 'logged');
+            }
+        });
+
+        const setOreIdAuthenticator = async (provider: string) => {
+            const name = 'OreId';
+            const auth = ant.wallets.getAutenticator(name);
+            if (auth) {
+                (auth as OreIdAuth).setProvider(provider);
+                selectedOAuthProvider.value = provider;
+            }
+            setAuthenticator(name, 'logged');
+        };
+        const setMetamaskAuthenticator = async () => {
+            setAuthenticator('Metamask', 'logged');
+        };
+        const setSafepalAuthenticator = async () => {
+            setAuthenticator('SafePal', 'logged');
+        };
+        const setWalletConnectAuthenticator = async () => {
+            setAuthenticator('WalletConnect', 'logged');
+        };
+
+        const setAuthenticator = async(name: string, label: string) => {
+            const auth = ant.wallets.getAutenticator(name);
+            if (!auth) {
+                console.error(`${name} authenticator not found`);
+                return;
+            }
+            const authenticator = auth.newInstance(label);
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            const correctChainId = useChainStore().currentChain.settings.getChainId();
+            accountStore.loginEVM({ authenticator, network }).then(async () => {
+                // we verify that the authenticator is connected to the correct network
+                if (!await authenticator.isConnectedTo(correctChainId)) {
+                    const networkName = useChainStore().getChain(label).settings.getDisplay();
+                    const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });
+                    globalProps.$warningNotification(warningMessage);
+                }
+            });
+        };
+
+        const notifyNoProvider = (provider:string) => {
+            const message = globalProps.$t('home.multiple_providers_notification_message');
+            ant.config.notifyFailureMessage(message);
+        };
+
+        const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+        const isLoadingOreId = (provider: string) =>
+            selectedOAuthProvider.value === provider &&
+            useFeedbackStore().isLoading('OreId.login');
+
+        return {
+            isLoading,
+            isLoadingOreId,
+            supportsMetamask,
+            supportsSafePal,
+            setOreIdAuthenticator,
+            setMetamaskAuthenticator,
+            setSafepalAuthenticator,
+            setWalletConnectAuthenticator,
+            notifyNoProvider,
+            redirectToMetamaskDownload,
+            redirectToSafepalDownload,
+        };
     },
 });
 </script>
 
 <template>
-<div class="wallet-options-container">
+<div
+    :class="{
+        'wallet-options-container': true,
+        'wallet-options-container--oauth': showOAuthOptions,
+    }"
+>
     <q-btn
         class="wallet-options__close"
         icon="close"
@@ -103,29 +148,87 @@ export default defineComponent({
         dense
         @click="$emit('closeWalletOptions')"
     />
-    <div class="wallet-options">
+    <div v-if="showOAuthOptions" class="wallet-options">
+
+        <div class="wallet-options__header">
+            {{ $t('home.sign_in_with') }}
+        </div>
+
+        <!-- Google OAuth Provider -->
+        <div class="wallet-options__option" @click="setOreIdAuthenticator('google')">
+            <template v-if="isLoadingOreId('google')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Google"
+                    src="~assets/evm/icon-oauth-google.svg"
+                >
+                {{ $t('home.oauth_google') }}
+            </template>
+        </div>
+
+        <!-- Facebook, Twitter or GitHub OAuth Provider Buttons can be foud in this link -->
+        <!-- https://github.com/telosnetwork/telos-wallet/blob/40196ac0e9cc0cef78ec20d7876f0c97ef02cc1c/src/pages/home/ConnectWalletOptions.vue#L168-L214 -->
+
+    </div>
+
+    <div v-else class="wallet-options">
         <div class="wallet-options__header">
             {{ $t('home.connect_your_wallet') }}
         </div>
-        <div class="wallet-options__option" @click="supportsMetamask ? loginEvm() : redirectToMetamaskDownload()">
-            <img
-                width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="MetaMask"
-                src="~assets/evm/metamask_fox.svg"
-            >
-            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+
+        <!-- Metamask Authenticator button -->
+        <div class="wallet-options__option" @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()">
+            <template v-if="isLoading('Metamask.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="Metamask"
+                    src="~assets/evm/metamask_fox.svg"
+                >
+                {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+            </template>
         </div>
-        <div class="wallet-options__option" @click="toggleWalletConnectModal">
-            <img
-                width="24"
-                class="flex q-ml-auto q-mt-auto wallet-logo"
-                alt="WalletConnect"
-                src="~assets/evm/wallet_connect.svg"
-            >
-            {{ $t('home.walletconnect') }}
+
+        <!-- Safepal Authenticator button -->
+        <div class="wallet-options__option" @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()">
+            <template v-if="isLoading('SafePal.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="SafePal"
+                    src="~assets/evm/safepal.svg"
+                >
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+            </template>
+        </div>
+
+        <!-- WalletConnect Authenticator button -->
+        <div class="wallet-options__option" @click="setWalletConnectAuthenticator()">
+            <template v-if="isLoading('WalletConnect.login')">
+                <div class="wallet-options__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="flex q-ml-auto q-mt-auto wallet-logo"
+                    alt="WalletConnect"
+                    src="~assets/evm/wallet_connect.svg"
+                >
+                {{ $t('home.walletconnect') }}
+            </template>
         </div>
     </div>
+
 </div>
 
 </template>
@@ -134,9 +237,14 @@ export default defineComponent({
 .wallet-options-container{
     background: $dark;
     width: 300px;
-    height: 250px;
+    height: fit-content;
+    padding-bottom: 2rem;
     margin:auto;
     color: $white;
+
+    &--oauth{
+        height: 180px;
+    }
 }
 
 .wallet-options{
@@ -144,6 +252,11 @@ export default defineComponent({
     flex-direction: column;
     align-items: flex-start;
     padding-left: 42px;
+
+    &__loading{
+        width: 100%;
+        text-align: center;
+    }
 
     &__close{
         margin-left: 265px;
@@ -166,6 +279,7 @@ export default defineComponent({
         font-weight: 600;
         padding-top: 14px;
         padding-left: 14px;
+        padding-right: 14px;
         cursor: pointer;
 
         img {

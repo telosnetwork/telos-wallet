@@ -165,7 +165,7 @@ export default defineComponent({
                 },
             });
 
-            if (this.token.address !== NativeCurrencyAddress && evmStore.isMetamaskSupported) {
+            if (this.token.address !== NativeCurrencyAddress) {
                 items.push({
                     label: this.$t('evm_wallet.add_to_metamask'),
                     icon: require('assets/logo--metamask.svg'),
@@ -236,7 +236,7 @@ export default defineComponent({
             :alt="$t('evm_wallet.token_logo_alt')"
         >
         <div>
-            {{ token.name }}
+            <span class="c-wallet-balance-row__token_name">{{ token.name }}</span>
             <br>
             <span class="o-text--small">{{ fiatRateText }}</span>
         </div>
@@ -334,6 +334,13 @@ export default defineComponent({
     &__left-container,
     &__right-container {
         width: max-content;
+    }
+
+    &__token_name {
+        max-width: calc(100vw - 200px);
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &__left-container {

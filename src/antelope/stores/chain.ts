@@ -17,10 +17,8 @@
 
 import { defineStore } from 'pinia';
 import {
-    createInitFunction,
-    createTraceFunction,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+} from 'src/antelope';
 
 // main native chains
 import EOS from 'src/antelope/chains/native/eos';
@@ -37,7 +35,7 @@ import TelosEVM from 'src/antelope/chains/evm/telos-evm';
 
 // test evm chains
 import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
-import { getAntelope } from '..';
+import { getAntelope } from 'src/antelope';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
@@ -47,7 +45,7 @@ import {
     TokenClass,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
-
+import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 
 
@@ -117,6 +115,7 @@ export const useChainStore = defineStore(store_name, {
         // https://github.com/telosnetwork/telos-wallet/issues/246
         getExplorerUrl: () => (network: string) => (settings[network] as EVMChainSettings).getExplorerUrl(),
         getEcosystemUrl: () => (network: string) => (settings[network] as EVMChainSettings).getEcosystemUrl(),
+        getNetworkSettings: () => (network: string) => settings[network],
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -127,6 +126,7 @@ export const useChainStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateChainData');
             try {
                 await Promise.all([
+                    this.updateSettings(label),
                     this.updateApy(label),
                     this.updateGasPrice(label),
                 ]);
@@ -136,6 +136,14 @@ export const useChainStore = defineStore(store_name, {
             } finally {
                 useFeedbackStore().unsetLoading('updateChainData');
             }
+        },
+        async updateSettings(label: string) {
+            this.getChain(label).settings.init().then(() => {
+                getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
+            }).catch((error) => {
+                console.error(error);
+                throw new Error('antelope.chain.error_settings');
+            });
         },
         async updateApy(label: string) {
             useFeedbackStore().setLoading('updateApy');

@@ -61,7 +61,6 @@ export default defineComponent({
                 :name="tab"
                 :label="tab.charAt(0).toUpperCase() + tab.slice(1)"
                 :to="{ query: { tab: tab.toLowerCase() } }"
-                exact
                 replace
             />
         </q-tabs>
@@ -136,6 +135,10 @@ export default defineComponent({
 
     &__body {
         padding: 24px;
+
+        @include tiny-only {
+            padding: 16px;
+        }
 
         @include md-and-up {
             padding: 32px;

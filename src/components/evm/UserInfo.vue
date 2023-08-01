@@ -40,7 +40,7 @@ export default defineComponent({
             if (!this.account.isNative && accountStore.isAuthenticated) {
                 const address = this.account.address;
                 navigator.clipboard.writeText(address);
-                ant.config.notifySuccessHandler(this.$t('settings.copied_ok'));
+                ant.config.notifySuccessCopyHandler();
             }
         },
         logout() {
@@ -56,7 +56,7 @@ export default defineComponent({
                 window.open(explorerUrl + '/address/' + this.account?.account, '_blank');
                 return;
             } else {
-                ant.config.notifyErrorHandler(this.$t('settings.no_explorer', { network: this.account.network }));
+                ant.config.notifyFailureMessage(this.$t('settings.no_explorer', { network: this.account.network }));
             }
         },
     },
@@ -113,7 +113,7 @@ export default defineComponent({
                         aria-hidden="true"
                     /></div>
                     <h5>{{ $t('nav.teloscan') }}</h5>
-                    <q-icon size="xs" name="launch" class="c-user-info__menu-item-min-icon" />
+                    <q-icon size="xs" name="o_launch" class="c-user-info__menu-item-min-icon" />
                 </li>
                 <li
                     class="c-user-info__menu-item"

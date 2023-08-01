@@ -16,13 +16,25 @@ import {
     TokenBalance,
     MarketSourceInfo,
     TokenMarketData,
+    IndexerHealthResponse,
+    NFTClass,
+    IndexerNftResponse,
+    NFTContractClass,
+    IndexerNftItemResult,
+    NFTItemClass,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
+import { getAntelope } from 'src/antelope';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
+    // to avoid init() being called twice
+    protected ready = false;
+
+    protected initPromise: Promise<void>;
+
     // Short Name of the network
     protected network: string;
 
@@ -34,6 +46,15 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External indexer API support
     protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerApiEndpoint() });
+
+    // indexer health check promise
+    protected _indexerHealthState: {
+        promise: Promise<IndexerHealthResponse> | null;
+        state: IndexerHealthResponse
+    } = {
+        promise: null,
+        state: this.deathHealthResponse,
+    };
 
     // Token list promise
     tokenListPromise: Promise<TokenClass[]> | null = null;
@@ -77,6 +98,92 @@ export default abstract class EVMChainSettings implements ChainSettings {
         this.hyperion.interceptors.response.use(responseHandler, erorrHandler);
         this.indexer.interceptors.response.use(responseHandler, erorrHandler);
 
+        // Check indexer health state periodically
+        this.initPromise = new Promise((resolve) => {
+            this.updateIndexerHealthState().then(() => {
+                // we resolve the promise that will be returned by init()
+                resolve();
+            });
+        });
+    }
+
+    async init(): Promise<void> {
+        // this is called only when this chain is needed to avoid initialization of all chains
+        if (this.ready) {
+            return this.initPromise;
+        }
+        this.ready = true;
+
+        // this setTimeout is a work arround because we can't call getAntelope() function before it initializes
+        setTimeout(() => {
+            setInterval(() => {
+                this.updateIndexerHealthState();
+            }, getAntelope().config.indexerHealthCheckInterval);
+        }, 1000);
+
+        // Update system token price
+        this.getUsdPrice().then((value:number) => {
+            const sys_token = this.getSystemToken();
+            const price = value.toString();
+            const marketInfo = { price } as MarketSourceInfo;
+            const marketData = new TokenMarketData(marketInfo);
+            sys_token.market = marketData;
+
+            const wsys_token = this.getWrappedSystemToken();
+            wsys_token.market = marketData;
+        });
+
+        return this.initPromise;
+    }
+
+    get deathHealthResponse() {
+        return {
+            success: false,
+            blockNumber: 0,
+            blockTimestamp: '',
+            secondsBehind: Number.POSITIVE_INFINITY,
+        } as IndexerHealthResponse;
+    }
+
+    async updateIndexerHealthState() {
+        // resolve if this chain has indexer api support and is working fine
+
+        const promise =
+            Promise.resolve(this.hasIndexerSupport())
+                .then(hasIndexerSupport =>
+                    hasIndexerSupport ?
+                        this.indexer.get('/v1/health') :
+                        Promise.resolve({ data: this.deathHealthResponse } as AxiosResponse<IndexerHealthResponse>),
+                )
+                .then(response => response.data as unknown as IndexerHealthResponse)
+                .catch((error) => {
+                    console.error('Indexer API not working for this chain:', this.getNetwork(), error);
+                    return this.deathHealthResponse as IndexerHealthResponse;
+                });
+
+        // initial state
+        this._indexerHealthState = {
+            promise,
+            state: this.deathHealthResponse,
+        };
+
+        // update indexer health state
+        promise.then((state) => {
+            this._indexerHealthState.state = state;
+        });
+
+        return promise;
+    }
+
+    isIndexerHealthy(): boolean {
+        return (
+            this._indexerHealthState.state.success &&
+            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+        );
+    }
+
+    get indexerHealthState(): IndexerHealthResponse {
+        return this._indexerHealthState.state;
     }
 
     isNative() {
@@ -109,12 +216,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getExplorerUrl(): string;
     abstract getEcosystemUrl(): string;
     abstract getTrustedContractsBucket(): string;
-    abstract getImportantTokensIdList(): string[];
+    abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
-    abstract hasIndexSupport(): boolean;
+    abstract hasIndexerSupport(): boolean;
+    abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
 
     async getBalances(account: string): Promise<TokenBalance[]> {
-        if (!this.hasIndexSupport()) {
+        if (!this.hasIndexerSupport()) {
             console.error('Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
@@ -170,6 +278,66 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error(error);
             return [];
         });
+    }
+
+    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        if (!this.hasIndexerSupport()) {
+            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        const params = {
+            ... filter,
+            address: undefined,
+        };
+        return this.indexer.get(url, { params })
+            .then(response => response.data as IndexerNftResponse)
+            .then((response) => {
+                // iterate over the contracts and parse json the calldata using try catch
+                for (const contract of Object.values(response.contracts)) {
+                    try {
+                        contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${contract.calldata}"`, e);
+                    }
+                }
+                const nfts = [] as NFTClass[];
+                for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
+                    try {
+                        item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
+                    } catch (e) {
+                        console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
+                    }
+                    if (!item_source.metadata || typeof item_source.metadata !== 'object') {
+                        // we create a new metadata object with the actual string atributes of the item
+                        const list = item_source as unknown as { [key: string]: unknown };
+                        item_source.metadata =
+                            Object.keys(item_source)
+                                .filter(k => typeof list[k] === 'string')
+                                .reduce((obj, key) => {
+                                    obj[key] = list[key] as string;
+                                    return obj;
+                                }, {} as { [key: string]: string });
+
+                    }
+                    const contract_source = response.contracts[item_source.contract];
+                    const contract = new NFTContractClass(contract_source);
+                    const item = new NFTItemClass(item_source, contract);
+                    const nft = new NFTClass(item);
+                    nfts.push(nft);
+                }
+                return nfts;
+            }).catch((error) => {
+                console.error(error);
+                return [];
+            });
+    }
+
+    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
+    }
+
+    async getNFTsInventory(account: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+        return this.getNFTsFromIndexer(`v1/account/${account}/nfts`, filter);
     }
 
     constructTokenId(token: TokenSourceInfo): string {

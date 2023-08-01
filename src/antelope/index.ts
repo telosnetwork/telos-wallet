@@ -1,26 +1,30 @@
 import { App } from 'vue';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig } from 'src/antelope/config/';
+import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
 import installPinia from 'src/antelope/stores';
 
 import { AccountModel } from 'src/antelope/stores/account';
 import { ChainModel } from 'src/antelope/stores/chain';
 
-import { useAccountStore } from 'src/antelope/stores/account';
-import { useChainStore } from 'src/antelope/stores/chain';
-import { useUserStore } from 'src/antelope/stores/user';
-import { useProfileStore } from 'src/antelope/stores/profile';
-import { useResourcesStore } from 'src/antelope/stores/resources';
-import { useRexStore } from 'src/antelope/stores/rex';
-import { useTokensStore } from 'src/antelope/stores/tokens';
-import { useContractStore } from 'src/antelope/stores/contract';
-import { useBalancesStore } from 'src/antelope/stores/balances';
-import { useHistoryStore } from 'src/antelope/stores/history';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
-import { usePlatformStore } from 'src/antelope/stores/platform';
-import { useEVMStore } from 'src/antelope/stores/evm';
+import {
+    useAccountStore,
+    useBalancesStore,
+    useChainStore,
+    useContractStore,
+    useEVMStore,
+    useFeedbackStore,
+    useHistoryStore,
+    useNftsStore,
+    usePlatformStore,
+    useProfileStore,
+    useResourcesStore,
+    useRexStore,
+    useTokensStore,
+    useUserStore,
+} from 'src/antelope';
+import { AntelopeWallets } from 'src/antelope/wallets';
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
@@ -33,7 +37,8 @@ const events = {
     onLoggedIn: new Subject<AccountModel>(),
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
-    onAccountChanged: new Subject<{label:string, account:AccountModel|null}>(),
+    onAccountChanged: new BehaviorSubject<{label:string, account:AccountModel|null}>({ label: '', account: null }),
+    onChainIndexer: new Subject<{label:string, isHealthy:boolean}>(),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };
 export const getEvents = () => events;
@@ -41,6 +46,7 @@ export const getEvents = () => events;
 export class Antelope {
     constructor(
         public config: AntelopeConfig,
+        public wallets: AntelopeWallets,
     ) {
         //
     }
@@ -49,10 +55,12 @@ export class Antelope {
         if (this.config.app) {
             throw new Error('Antelope has already been initialized.');
         }
-        this.config.init(app);
-
         // do not access pinia stores before this line
         installPinia(app);
+
+        // inintialize config and wallets
+        this.config.init(app);
+        this.wallets.init();
 
         // call for the first time useXStore for all X stores in Antelope library
         const stores = this.stores;
@@ -64,6 +72,18 @@ export class Antelope {
                 store.init();
             }
         });
+
+        const chainStore = useChainStore();
+
+        if (!chainStore.currentChain) {
+            if (!process.env.CHAIN_NAME) {
+                console.error('No chain name specified in environment config; the application will not run correctly');
+            } else {
+                const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+
+                chainStore.setCurrentChain(network);
+            }
+        }
 
         // Initializing store
         stores.user.loadUsers();
@@ -84,6 +104,7 @@ export class Antelope {
             feedback: useFeedbackStore(),
             platform: usePlatformStore(),
             evm: useEVMStore(),
+            nfts: useNftsStore(),
         };
     }
 
@@ -93,7 +114,7 @@ export class Antelope {
     }
 }
 
-const antelope = new Antelope(new AntelopeConfig());
+const antelope = new Antelope(new AntelopeConfig(), new AntelopeWallets());
 export const getAntelope = () => antelope;
 export const installAntelope = (app: App) => {
     if (app.config.globalProperties.$antelope) {
@@ -120,4 +141,5 @@ export { useHistoryStore } from 'src/antelope/stores/history';
 export { useFeedbackStore } from 'src/antelope/stores/feedback';
 export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useEVMStore } from 'src/antelope/stores/evm';
+export { useNftsStore } from 'src/antelope/stores/nfts';
 

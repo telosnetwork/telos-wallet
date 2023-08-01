@@ -1,52 +1,94 @@
 import { Authenticator } from 'universal-authenticator-library';
 import { App } from 'vue';
-import { getAntelope } from '..';
+import { getAntelope } from 'src/antelope';
+import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
+    wrapError(description: string, error: unknown): AntelopeError {
+        if (error instanceof AntelopeError) {
+            return error as AntelopeError;
+        }
+        const str = this.errorToStringHandler(error);
+        // if it matches antelope.*.error_*
+        if (str.match(/^antelope\.[a-z0-9_]+\.error_/)) {
+            return new AntelopeError(str, { error });
+        } else {
+            return new AntelopeError(description, { error: str });
+        }
+    }
+
+    // indexer health threshold --
+    private __indexer_health_threshold = 10; // 10 seconds
+
+    // indexer health check interval --
+    private __indexer_health_check_interval = 1000 * 60 * 5; // 5 minutes expressed in milliseconds
+
     // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
     private __notify_success_handler: (message: string) => void = alert;
     private __notify_warning_handler: (message: string) => void = alert;
 
-    // transaction attempts handlers --
+    // notification handlers --
     private __notify_successful_trx_handler: (link: string) => void = alert;
-    private __notify_failed_trx_handler: (message: string) => void = alert;
+    private __notify_success_message_handler: (message: string, payload?: never) => void = alert;
+    private __notify_success_copy_handler: () => void = alert;
+    private __notify_failure_message_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_failure_action_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_disconnected_handler: () => void = alert;
+    private __notify_neutral_message_handler: (message: string) => (() => void) = () => (() => void 0);
 
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
 
     // localization handler --
-    private __localization_handler: (key: string) => string = (key: string) => key;
+    private __localization_handler: (key: string, payload?: Record<string, unknown>) => string = (key: string) => key;
 
     // error to string handler --
-    private __error_to_string_handler: (catched: unknown) => string = (catched: unknown) => {
+    private __error_to_string_handler: (error: unknown) => string = (error: unknown) => {
         try {
-            if (typeof catched === 'string') {
-                return catched;
+
+            type EVMError = {code:string};
+            const evmErr = error as EVMError;
+
+            switch (evmErr.code) {
+            case 'CALL_EXCEPTION':          return 'antelope.evm.error_call_exception';
+            case 'INSUFFICIENT_FUNDS':      return 'antelope.evm.error_insufficient_funds';
+            case 'MISSING_NEW':             return 'antelope.evm.error_missing_new';
+            case 'NONCE_EXPIRED':           return 'antelope.evm.error_nonce_expired';
+            case 'NUMERIC_FAULT':           return 'antelope.evm.error_numeric_fault';
+            case 'REPLACEMENT_UNDERPRICED': return 'antelope.evm.error_replacement_underpriced';
+            case 'TRANSACTION_REPLACED':    return 'antelope.evm.error_transaction_replaced';
+            case 'UNPREDICTABLE_GAS_LIMIT': return 'antelope.evm.error_unpredictable_gas_limit';
+            case 'USER_REJECTED':           return 'antelope.evm.error_user_rejected';
+            case 'ACTION_REJECTED':         return 'antelope.evm.error_transaction_canceled';
             }
-            if (typeof catched === 'number') {
-                return catched.toString();
+
+            if (typeof error === 'string') {
+                return error;
             }
-            if (typeof catched === 'boolean') {
-                return catched.toString();
+            if (typeof error === 'number') {
+                return error.toString();
             }
-            if (catched instanceof Error) {
-                return catched.message;
+            if (typeof error === 'boolean') {
+                return error.toString();
             }
-            if (typeof catched === 'undefined') {
+            if (error instanceof Error) {
+                return error.message;
+            }
+            if (typeof error === 'undefined') {
                 return 'undefined';
             }
-            if (typeof catched === 'object') {
-                if (catched === null) {
+            if (typeof error === 'object') {
+                if (error === null) {
                     return 'null';
                 }
-                if (Array.isArray(catched)) {
-                    return catched.map(a => this.__error_to_string_handler(a)).join(', ');
+                if (Array.isArray(error)) {
+                    return error.map(a => this.__error_to_string_handler(a)).join(', ');
                 }
-                return JSON.stringify(catched);
+                return JSON.stringify(error);
             }
             return 'unknown';
-        } catch (error) {
+        } catch (er) {
             return 'error';
         }
     }
@@ -66,6 +108,14 @@ export class AntelopeConfig {
         return this.__app;
     }
 
+    get indexerHealthThresholdSeconds() {
+        return this.__indexer_health_threshold;
+    }
+
+    get indexerHealthCheckInterval() {
+        return this.__indexer_health_check_interval;
+    }
+
     get notifyErrorHandler() {
         return this.__notify_error_handler;
     }
@@ -82,8 +132,28 @@ export class AntelopeConfig {
         return this.__notify_successful_trx_handler;
     }
 
-    get notifyFailedTrxHandler() {
-        return this.__notify_failed_trx_handler;
+    get notifySuccessMessageHandler() {
+        return this.__notify_success_message_handler;
+    }
+
+    get notifySuccessCopyHandler() {
+        return this.__notify_success_copy_handler;
+    }
+
+    get notifyFailureMessage() {
+        return this.__notify_failure_message_handler;
+    }
+
+    get notifyFailureWithAction() {
+        return this.__notify_failure_action_handler;
+    }
+
+    get notifyDisconnectedHandler() {
+        return this.__notify_disconnected_handler;
+    }
+
+    get notifyNeutralMessageHandler() {
+        return this.__notify_neutral_message_handler;
     }
 
     get authenticatorsGetter() {
@@ -98,7 +168,16 @@ export class AntelopeConfig {
         return this.__error_to_string_handler;
     }
 
-    // setting notifucation handlers --
+    // setting indexer constants --
+    public setIndexerHealthThresholdSeconds(threshold: number) {
+        this.__indexer_health_threshold = threshold;
+    }
+
+    public setIndexerHealthCheckInterval(interval: number) {
+        this.__indexer_health_check_interval = interval;
+    }
+
+    // setting notification handlers --
     public setNotifyErrorHandler(handler: (message: string) => void) {
         this.__notify_error_handler = handler;
     }
@@ -115,8 +194,28 @@ export class AntelopeConfig {
         this.__notify_successful_trx_handler = handler;
     }
 
-    public setNotifyFailedTrxHandler(handler: (message: string) => void) {
-        this.__notify_failed_trx_handler = handler;
+    public setNotifySuccessMessageHandler(handler: (message: string, payload?: never) => void) {
+        this.__notify_success_message_handler = handler;
+    }
+
+    public setNotifySuccessCopyHandler(handler: () => void) {
+        this.__notify_success_copy_handler = handler;
+    }
+
+    public setnotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+        this.__notify_failure_message_handler = handler;
+    }
+
+    public setNotifyFailureWithAction(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+        this.__notify_failure_action_handler = handler;
+    }
+
+    public setNotifyDisconnectedHandler(handler: () => void) {
+        this.__notify_disconnected_handler = handler;
+    }
+
+    public setNotifyNeutralMessageHandler(handler: (message: string) => (() => void)) {
+        this.__notify_neutral_message_handler = handler;
     }
 
     // setting authenticators getter --
@@ -125,7 +224,7 @@ export class AntelopeConfig {
     }
 
     // setting translation handler --
-    public setLocalizationHandler(handler: (key: string) => string) {
+    public setLocalizationHandler(handler: (key: string, payload?: Record<string, unknown>) => string) {
         this.__localization_handler = handler;
     }
 
@@ -138,3 +237,8 @@ export class AntelopeConfig {
 
 export const errorToString = (error: unknown) =>
     getAntelope().config.errorToStringHandler(error);
+
+export const chainNetworkNames: Record<string, string> = {
+    telos: 'telos-evm',
+    'telos-testnet': 'telos-evm-testnet',
+};

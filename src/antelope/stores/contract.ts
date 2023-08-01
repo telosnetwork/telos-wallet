@@ -13,10 +13,9 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
     useFeedbackStore,
-} from 'src/antelope/stores/feedback';
+} from 'src/antelope';
+import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EvmContract, { Erc20Transfer } from 'src/antelope/stores/utils/contracts/EvmContract';
 import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import { useChainStore } from 'src/antelope';
@@ -29,7 +28,7 @@ import { ethers } from 'ethers';
 export interface ContractStoreState {
     __factory: EvmContractFactory;
     __cachedContracts: Record<string, EvmContract>
-    __processing: string[];
+    __processing: Record<string, Promise<EvmContract | null>>
 }
 
 const store_name = 'contract';
@@ -47,33 +46,37 @@ export const useContractStore = defineStore(store_name, {
         async getContract(address: string): Promise<EvmContract | null> {
             const addressLower = address.toLowerCase();
 
+            // if we have it in cache, return it
             if (typeof this.__cachedContracts[addressLower] !== 'undefined') {
                 return this.__cachedContracts[addressLower];
             }
 
-            if (this.__processing.includes(addressLower)) {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                return this.getContract(address);
+            // maybe we already starting processing it, return the promise
+            if (typeof this.__processing[addressLower] !== 'undefined') {
+                return this.__processing[addressLower];
             }
-            this.__processing.push(addressLower);
 
-            const index = this.__processing.indexOf(addressLower);
-            let contract = { address: address };
-            try {
-                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                const response = await indexer.get(`/contract/${address}?full=true&includeAbi=true`);
+            // ok, we need to fetch it
+            this.__processing[addressLower] = new Promise(async (resolve) => {
 
-                if (response.data?.success && response.data.results.length > 0){
-                    contract = response.data.results[0];
+                let contract = { address: address };
+                try {
+                    const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                    const response = await indexer.get(`/contract/${address}?full=true&includeAbi=true`);
+                    if (response.data?.success && response.data.results.length > 0){
+                        contract = response.data.results[0];
+                    }
+                } catch (e) {
+                    console.warn(`Could not retrieve contract ${address}: ${e}`);
+                    resolve(null);
                 }
-            } catch (e) {
-                console.warn(`Could not retrieve contract ${address}: ${e}`);
-                this.__processing.splice(index, 1);
-                return null;
-            }
-            this.addContractToCache(address, contract);
-            this.__processing.splice(index, 1);
-            return this.$state.__factory.buildContract(contract);
+                this.addContractToCache(address, contract);
+
+                resolve(this.$state.__factory.buildContract(contract));
+            });
+
+            // return the promise
+            return this.__processing[addressLower];
         },
 
         async getTransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
@@ -154,6 +157,6 @@ export const useContractStore = defineStore(store_name, {
 
 const contractInitialState: ContractStoreState = {
     __cachedContracts: {},
-    __processing: [],
+    __processing: {},
     __factory: new EvmContractFactory(),
 };

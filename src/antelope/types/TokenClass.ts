@@ -68,7 +68,6 @@ export class TokenMarketData {
         try {
             this._price = ethers.utils.parseUnits(sourceInfo.price, TOKEN_PRICE_DECIMALS);
         } catch (e) {
-            console.error('TokenMarketData: error parsing price from MarketSourceInfo. price', sourceInfo.price, 'decimals', sourceInfo.decimals, '\nError:', e);
             this._price = ethers.constants.Zero;
         }
     }
@@ -251,6 +250,9 @@ export class TokenClass implements TokenSourceInfo {
         };
     }
 
+    toString(): string {
+        return this.symbol;
+    }
 }
 
 // A class to represent the balance of a token
@@ -329,5 +331,7 @@ export class TokenBalance {
         return this.token.isNative;
     }
 
-
+    toString(): string {
+        return this._balanceStr;
+    }
 }

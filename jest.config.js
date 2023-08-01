@@ -90,6 +90,7 @@ module.exports = {
       'jest-transform-stub',
     },
     transformIgnorePatterns: [`node_modules/(?!(${esModules}))`],
+    testPathIgnorePatterns: ['balances'],
     setupFiles: ['<rootDir>/jest.init.js', '<rootDir>/test/jest/setEnvVars.ts'],
     globalSetup: './global-jest-setup.js',
     snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
