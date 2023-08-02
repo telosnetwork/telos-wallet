@@ -277,45 +277,46 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
-        useFeedbackStore().setLoading('wrapSystemToken');
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
-        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
-        let abi: EvmABI | null | undefined;
-        try {
-            const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);
-            abi = wrappedSystemTokenContract?.abi;
+        throw 'eztodo';
+        // useFeedbackStore().setLoading('wrapSystemToken');
+        // const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        // const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+        // let abi: EvmABI | null | undefined;
+        // try {
+        //     const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);
+        //     abi = wrappedSystemTokenContract?.abi;
 
-            if (!abi) {
-                throw 'Unable to get wrapped system contract ABI';
-            }
-        } catch (error) {
-            useFeedbackStore().unsetLoading('wrapSystemToken');
-            throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
-        }
+        //     if (!abi) {
+        //         throw 'Unable to get wrapped system contract ABI';
+        //     }
+        // } catch (error) {
+        //     useFeedbackStore().unsetLoading('wrapSystemToken');
+        //     throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
+        // }
 
-        let request;
-        try {
-            const prepareWriteContractResult = await prepareWriteContract({
-                address: wrappedSystemTokenContractAddress,
-                abi,
-                functionName: 'deposit',
-                args: [amount],
-            });
+        // let request;
+        // try {
+        //     const prepareWriteContractResult = await prepareWriteContract({
+        //         address: wrappedSystemTokenContractAddress,
+        //         abi,
+        //         functionName: 'deposit',
+        //         args: [amount],
+        //     });
 
-            request = prepareWriteContractResult.request;
-        } catch(e) {
-            console.error(e);
-            useFeedbackStore().unsetLoading('wrapSystemToken');
-            // eztodo throw antelope error
-        }
+        //     request = prepareWriteContractResult.request;
+        // } catch(e) {
+        //     console.error(e);
+        //     useFeedbackStore().unsetLoading('wrapSystemToken');
+        //     // eztodo throw antelope error
+        // }
 
-        try {
-            useFeedbackStore().unsetLoading('wrapSystemToken');
-            return await writeContract(request as unknown as WriteContractPreparedArgs<readonly unknown[], string>);
-        } catch {
-            useFeedbackStore().unsetLoading('wrapSystemToken');
-            throw new AntelopeError('antelope.wrap.error_wrap');
-        }
+        // try {
+        //     useFeedbackStore().unsetLoading('wrapSystemToken');
+        //     return await writeContract(request as unknown as WriteContractPreparedArgs<readonly unknown[], string>);
+        // } catch {
+        //     useFeedbackStore().unsetLoading('wrapSystemToken');
+        //     throw new AntelopeError('antelope.wrap.error_wrap');
+        // }
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {

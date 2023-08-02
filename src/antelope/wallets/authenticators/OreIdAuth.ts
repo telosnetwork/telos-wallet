@@ -281,4 +281,10 @@ export class OreIdAuth extends EVMAuthenticator {
         });
     }
 
+    async getSigner(): Promise<ethers.Signer> {
+        this.trace('getSigner');
+        const provider = await this.web3Provider();
+        return provider.getSigner();
+    }
+
 }
