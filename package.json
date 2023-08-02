@@ -1,9 +1,8 @@
 {
   "name": "telos-web-wallet",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "A Web Wallet for Telos",
   "productName": "Telos Web Wallet",
-  "author": "Ryuhei Matsuda <ryuheimat3@gmail.com>",
   "private": true,
   "scripts": {
     "dev": "quasar dev",
@@ -38,6 +37,8 @@
     "mitt": "^3.0.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "numeral": "^2.0.6",
+    "oreid-js": "^4.7.1",
+    "oreid-webpopup": "^2.3.0",
     "pinia": "^2.0.33",
     "ptokens": "^0.14.0",
     "qrcanvas-vue": "^3.0.0",

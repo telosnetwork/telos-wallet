@@ -123,4 +123,8 @@ export default class Telos extends NativeChainSettings {
     getSystemTokens(): TokenClass[] {
         return [TOKEN];
     }
+
+    trackAnalyticsEvent(): void {
+        console.warn(`trackAnalyticsEvent not implemented for ${NETWORK}`);
+    }
 }

@@ -219,6 +219,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
+    abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
 
     async getBalances(account: string): Promise<TokenBalance[]> {
         if (!this.hasIndexerSupport()) {
@@ -330,7 +331,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 return [];
             });
     }
-
 
     async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
         return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);

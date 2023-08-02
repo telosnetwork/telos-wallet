@@ -8,7 +8,7 @@ import { getFiatPriceFromIndexer } from 'src/api/price';
 
 const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
 const CHAIN_ID = '41';
-const NETWORK = 'telos-evm-testnet';
+export const NETWORK = 'telos-evm-testnet';
 const DISPLAY = 'Telos EVM Testnet';
 const TOKEN = new TokenClass({
     name: 'Telos',
@@ -57,6 +57,8 @@ const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
+
+declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
     getNetwork(): string {
@@ -149,4 +151,13 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return true;
     }
 
+    trackAnalyticsEvent(params: Record<string, unknown>): void {
+        if (typeof fathom === 'undefined') {
+            console.warn(`Failed to track event with ID ${params.id}: Fathom Analytics not loaded`);
+            return;
+        }
+
+        const id = params.id as string;
+        fathom.trackGoal(id, 0);
+    }
 }

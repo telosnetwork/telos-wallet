@@ -277,6 +277,15 @@ export const useNftsStore = defineStore(store_name, {
         setUserFilter(filter: UserNftFilter) {
             this.__user_filter = filter;
         },
+        clearNFTs() {
+            this.trace('clearNFTs');
+            this.__inventory = {};
+            this.setUserFilter({});
+            this.setPaginationFilter({
+                address: '',
+                limit: 10000,
+            });
+        },
     },
 });
 
