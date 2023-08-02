@@ -37,6 +37,7 @@ export interface IndexerNftItemResult {
     blockMinted: number;
     updated: number; // epoch
     transaction: string; // tx hash
+    amount?: number; // integer; always 1 for ERC721, sometimes greater than 1 for ERC1155
 }
 
 export interface IndexerNftContract {

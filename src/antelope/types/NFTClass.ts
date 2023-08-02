@@ -15,6 +15,8 @@ export interface ShapedNFT {
     ownerAddress: string;
     contractAddress: string;
     contractPrettyName?: string;
+    blockMinted?: number; // the block number when this NFT was minted
+    quantity: number; // the number (integer) of this NFT owned by the owner; always 1 for ERC721, sometimes greater than 1 for ERC1155
     attributes: NftAttribute[];
     imageSrcFull?: string; // if this is empty, the UI will display a generic image icon
     imageSrcIcon?: string; // as a result of shaping, this will always have a value if imageSrcFull is defined
@@ -287,6 +289,15 @@ export class NFTItemClass {
         return this.preview;
     }
 
+    get blockMinted(): number | undefined {
+        return this.indexer.blockMinted;
+    }
+
+    // the number (integer) of this NFT owned by the owner; always 1 for ERC721, sometimes greater than 1 for ERC1155
+    get amount(): number {
+        return this.indexer.amount ?? 1;
+    }
+
     watchers: (() => void)[] = [];
     watch(cb: () => void): void {
         this.watchers.push(cb);
@@ -334,6 +345,14 @@ export class NFTClass implements ShapedNFT {
         return this.item.contract.name;
     }
 
+    get blockMinted(): number | undefined {
+        return this.item.blockMinted;
+    }
+
+    get quantity(): number {
+        return this.item.amount;
+    }
+
     get attributes(): NftAttribute[] {
         return this.item.attributes;
     }
@@ -362,6 +381,8 @@ export class NFTClass implements ShapedNFT {
             ownerAddress: this.ownerAddress,
             contractAddress: this.contractAddress,
             contractPrettyName: this.contractPrettyName,
+            blockMinted: this.blockMinted,
+            quantity: this.quantity,
             attributes: this.attributes,
             imageSrcFull: this.imageSrcFull,
             imageSrcIcon: this.imageSrcIcon,

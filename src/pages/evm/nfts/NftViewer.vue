@@ -12,7 +12,6 @@ const { fiatLocale } = useUserStore();
 const props = defineProps<{
     nft: ShapedNFT,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
-    quantity?: number, // for ERC1155 tokens, represents the quantity of the token in the user's inventory
 }>();
 
 // data
@@ -91,12 +90,12 @@ const iconOverlayName = computed(() => {
 });
 
 const quantityBadgeText = computed(() => {
-    if (!props.quantity || props.quantity <= 1) {
+    if (props.nft.quantity <= 1) {
         return '';
     }
 
     // eztodo enhance this
-    const number = Intl.NumberFormat(fiatLocale).format(props.quantity);
+    const number = Intl.NumberFormat(fiatLocale).format(props.nft.quantity);
 
     return `x${number}`;
 });
@@ -203,8 +202,8 @@ function toggleVideoPlay(playOnly?: boolean) {
         class="c-nft-viewer__audio"
     ></audio>
 
-    <div class="c-nft-viewer__quantity-badge">
-        x3
+    <div v-if="quantityBadgeText" class="c-nft-viewer__quantity-badge">
+        {{ quantityBadgeText }}
     </div>
 </div>
 </template>

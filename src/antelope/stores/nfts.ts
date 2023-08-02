@@ -132,7 +132,7 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
-            const owner = account.account;
+            const owner = '0xe7209d65c5BB05Ddf799b20fF0EC09E691FC3f11'; // eztodo revert this
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {
@@ -159,9 +159,9 @@ export const useNftsStore = defineStore(store_name, {
                         const erc1155Nfts = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc1155' });
                         const erc721Nfts  = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc721'  });
                         const nfts = erc1155Nfts.concat(erc721Nfts);
-                        // eztodo sort on block number when available
+                        const sortedNfts = nfts.sort((a, b) => (b.blockMinted ?? 0) - (a.blockMinted ?? 0));
 
-                        this.__inventory[label].list = nfts;
+                        this.__inventory[label].list = sortedNfts;
                         this.__inventory[label].loading = false;
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
@@ -171,8 +171,6 @@ export const useNftsStore = defineStore(store_name, {
                                 this.__inventory[label].list = [...nfts];
                             });
                         });
-
-                        // eztodo should nfts be sorted somehow?
                     } else {
                         // In case the chain does not support index, we don't have any solution yet
                         this.trace('updateNFTsForAccount', 'No alternative for indexer, returning []');
