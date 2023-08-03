@@ -5,6 +5,8 @@ import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore, useUserStore } from 'src/antelope';
 
+import ToolTip from 'src/components/ToolTip.vue';
+
 const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
 const { fiatLocale } = useUserStore();
@@ -94,11 +96,12 @@ const quantityBadgeText = computed(() => {
         return '';
     }
 
-    // eztodo enhance this
-    const number = Intl.NumberFormat(fiatLocale).format(props.nft.quantity);
+    const number = Intl.NumberFormat(fiatLocale, { notation: 'compact' }).format(props.nft.quantity);
 
     return `x${number}`;
 });
+
+const quantityTooltipText = computed(() => Intl.NumberFormat(fiatLocale).format(props.nft.quantity));
 
 // methods
 function playVideo() {
@@ -203,7 +206,9 @@ function toggleVideoPlay(playOnly?: boolean) {
     ></audio>
 
     <div v-if="quantityBadgeText" class="c-nft-viewer__quantity-badge">
-        {{ quantityBadgeText }}
+        <ToolTip :text="quantityTooltipText" :hideIcon="true">
+            {{ quantityBadgeText }}
+        </ToolTip>
     </div>
 </div>
 </template>

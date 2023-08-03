@@ -58,6 +58,12 @@ const tableColumns = [
         label: $t('global.collection'),
         align: 'left' as 'left',
     },
+    {
+        name: 'quantity',
+        field: 'quantity',
+        label: $t('global.quantity'),
+        align: 'left' as 'left',
+    },
 ];
 
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
@@ -107,6 +113,7 @@ const tableRows = computed(() => {
         id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
+        quantity: nft.quantity,
     }));
 });
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
@@ -482,6 +489,9 @@ onUnmounted(() => {
                                 :text="props.row.collectionName"
                                 :url="getCollectionUrl(props.row.collectionAddress)"
                             />
+                        </q-td>
+                        <q-td key="quantity" :props="props">
+                            {{ props.row.quantity }}
                         </q-td>
                     </q-tr>
                 </template>

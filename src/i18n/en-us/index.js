@@ -138,6 +138,7 @@ export default {
         collection: 'Collection',
         search: 'Search',
         no_results: 'No results found',
+        quantity: 'Quantity',
     },
     nft : {
         collectible: 'Collectible',

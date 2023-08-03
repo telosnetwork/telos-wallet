@@ -42,6 +42,7 @@ function setTooltipVisibility(enable: boolean) {
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
+        class="c-tooltip__tooltip"
         @update:model-value="() => {}"
     >
         <div class="c-tooltip__text-container">
@@ -113,6 +114,10 @@ function setTooltipVisibility(enable: boolean) {
     &__text {
         @include text--small-bold;
         white-space: pre-line;
+    }
+
+    &__tooltip {
+        background: var(--tooltip-gradient);
     }
 }
 </style>
