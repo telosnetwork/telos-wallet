@@ -59,6 +59,10 @@ const ownerLink = computed(() => {
     return `${explorerUrl}/address/${nft.value.contractAddress}`;
 });
 
+const filteredAttributes = computed(() =>
+    nft.value?.attributes.filter(attr => attr.label !== undefined && attr.text !== undefined),
+);
+
 </script>
 
 <template>
@@ -187,7 +191,7 @@ const ownerLink = computed(() => {
                 </p>
 
                 <NftDetailsCard
-                    v-for="(attribute, index) in nft.attributes"
+                    v-for="(attribute, index) in filteredAttributes"
                     :key="`nft-attr-${index}`"
                     :title="attribute.label"
                     class="q-mb-sm"
