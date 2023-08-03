@@ -90,7 +90,12 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else>
-                <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
+                <NftViewer
+                    :nft="nft"
+                    :previewMode="false"
+                    :tileMode="true"
+                    class="c-nft-details__viewer"
+                />
                 <NftDetailsCard title="Collection" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
                 </NftDetailsCard>

@@ -141,6 +141,7 @@ export default {
     },
     nft : {
         collectible: 'Collectible',
+        broken_image: 'Unable to load the image of collectible',
         link_to_nft_details: 'Go to NFT details page for {name}',
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
