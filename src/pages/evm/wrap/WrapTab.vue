@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 
 import {
     getAntelope,
@@ -24,7 +24,7 @@ const ant = getAntelope();
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 const userStore = useUserStore();
 const balanceStore = useBalancesStore();
-const evmStore = useEVMStore();
+const accountStore = useAccountStore();
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -32,10 +32,9 @@ const systemTokenDecimals = systemToken.decimals;
 const wrappedTokenSymbol = chainSettings.getWrappedSystemToken().symbol;
 
 // data
-const oneEth = BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
-const inputModelValue = ref(BigNumber.from(0));
-const estimatedGas = ref(BigNumber.from(0));
-const systemTokenFiatPrice = ref('1');
+const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
+const inputModelValue = ref(ethers.constants.Zero);
+const estimatedGas = ref(ethers.constants.Zero);
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -43,7 +42,8 @@ const fiatCurrency = computed(() => userStore.fiatCurrency);
 const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
     balance => balance.token.contract === systemToken.address)[0],
 );
-const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? BigNumber.from(0));
+const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
+const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 const sidebarContent = computed(() => {
     const header = $t('evm_wrap.wrap_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
@@ -70,7 +70,7 @@ const availableToWrap = computed(() => {
     const available = systemTokenBalance.value.sub(estimatedGas.value);
 
     if (available.lt(0)) {
-        return BigNumber.from(0);
+        return ethers.constants.Zero;
     }
     return available;
 });
@@ -78,13 +78,7 @@ const formIsValid = computed(() =>
     !inputModelValue.value.isZero() &&
     inputModelValue.value.lt(availableToWrap.value),
 );
-const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('wrapSystemToken'));
-
-
-// watchers
-watch(systemTokenBalanceInfo, (info) => {
-    systemTokenFiatPrice.value = info.token.price.getAmountInFiatStr(1);
-});
+const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('wrapSystemTokens'));
 
 
 // methods
@@ -97,9 +91,8 @@ onBeforeMount(() => {
 });
 
 async function handleCtaClick() {
-    // eztodo move this to common function, replace in sendpage.vue
     const label = 'logged';
-    if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+    if (!await accountStore.isConnectedToCorrectNetwork(label)) {
         const networkName = useChainStore().loggedChain.settings.getDisplay();
         const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
 
@@ -112,8 +105,7 @@ async function handleCtaClick() {
 
     if (formIsValid.value) {
         try {
-            const authenticator = evmStore.injectedProvider(evmStore.injectedProviderNames[0]);
-            const tx = await authenticator.wrapSystemToken(inputModelValue.value);
+            const tx = await useBalancesStore().wrapSystemTokens(inputModelValue.value);
             const formattedAmount = formatWei(inputModelValue.value, systemTokenDecimals, WEI_PRECISION);
 
             const dismiss = ant.config.notifyNeutralMessageHandler(
@@ -144,6 +136,8 @@ async function handleCtaClick() {
 
 <template>
 <EVMSidebarPage :sidebar-content="sidebarContent">
+
+    <!-- convert ratio 1:1 -->
     <div class="row q-mb-xl">
         <div class="col-12">
             <div class="c-wrap-tab__badge-container">
@@ -157,6 +151,7 @@ async function handleCtaClick() {
         </div>
     </div>
 
+    <!-- TLOS input -->
     <div class="row q-mb-lg">
         <div class="col-12">
             <CurrencyInput
@@ -174,6 +169,7 @@ async function handleCtaClick() {
         </div>
     </div>
 
+    <!-- arrow -->
     <div class="row q-mb-sm">
         <div class="col-12 text-center">
             <img
@@ -185,6 +181,7 @@ async function handleCtaClick() {
         </div>
     </div>
 
+    <!-- output field (readonly) -->
     <div class="row q-mb-lg">
         <div class="col-12">
             <CurrencyInput
@@ -199,6 +196,7 @@ async function handleCtaClick() {
         </div>
     </div>
 
+    <!-- Wrap button -->
     <div class="row">
         <div class="col-12">
             <div class="c-wrap-tab__cta-container">

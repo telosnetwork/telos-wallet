@@ -1,5 +1,5 @@
 import { ContractInterface, ethers } from 'ethers';
-import { markRaw, toRaw } from 'vue';
+import { markRaw } from 'vue';
 import {
     AntelopeError, EvmContractCalldata,
     EvmABI,

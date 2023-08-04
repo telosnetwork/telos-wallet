@@ -3,7 +3,16 @@
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
 import { useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
-import { AntelopeError, ERC20_TYPE, EthereumProvider, EvmTransactionResponse, TokenClass, addressString } from 'src/antelope/types';
+import {
+    AntelopeError,
+    ERC20_TYPE,
+    EthereumProvider,
+    EvmTransactionResponse,
+    TokenClass,
+    addressString,
+    wtlosAbiDeposit,
+    wtlosAbiWithdraw,
+} from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
@@ -62,25 +71,28 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         });
     }
 
+    // EVMAuthenticator API ----------------------------------------------------------
+
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
-        useFeedbackStore().setLoading('wrapSystemToken');
+        console.log('wrapSystemToken', amount.toString());
         const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
         let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
         try {
-            const wrappedSystemTokenContract = await useEVMStore().getContract(this, wrappedSystemTokenContractAddress, 'logged', ERC20_TYPE);
-            wrappedSystemTokenContractInstance = await wrappedSystemTokenContract?.getContractInstance();
+            const signer = await this.getSigner();
+            const wethContract = new ethers.Contract(wrappedSystemTokenContractAddress, wtlosAbiDeposit, signer);
 
-            if (!wrappedSystemTokenContractInstance) {
+            if (!wethContract) {
+                console.log('wrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
                 throw 'Unable to get wrapped system contract instance';
             }
+            wrappedSystemTokenContractInstance = wethContract;
         } catch (error) {
-            useFeedbackStore().unsetLoading('wrapSystemToken');
             throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
         }
 
         try {
-            const transaction = (await wrappedSystemTokenContractInstance.functions['deposit()']({ value: amount })) as EvmTransactionResponse;
+            const transaction = (await wrappedSystemTokenContractInstance.deposit({ value: amount })) as EvmTransactionResponse;
             return transaction;
         } catch (error) {
             if ('ACTION_REJECTED' === ((error as { code: string }).code)) {
@@ -89,13 +101,40 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
                 console.error(error);
                 throw new AntelopeError('antelope.wrap.error_wrap', { error });
             }
-        } finally {
-            useFeedbackStore().unsetLoading('wrapSystemToken');
         }
     }
 
+    async unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        console.log('unwrapSystemToken', amount.toString());
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
+        let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
 
-    // EVMAuthenticator API ----------------------------------------------------------
+        try {
+            const signer = await this.getSigner();
+            const wrappedSystemTokenContract = new ethers.Contract(wrappedSystemTokenContractAddress, wtlosAbiWithdraw, signer);
+
+            if (!wrappedSystemTokenContract) {
+                console.log('unwrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
+                throw 'Unable to get wrapped system contract instance';
+            }
+            wrappedSystemTokenContractInstance = wrappedSystemTokenContract;
+        } catch (error) {
+            throw new AntelopeError('antelope.wrap.error_getting_wrapped_contract', { error });
+        }
+
+        try {
+            const transaction = (await wrappedSystemTokenContractInstance.withdraw(amount)) as EvmTransactionResponse;
+            return transaction;
+        } catch (error) {
+            if ('ACTION_REJECTED' === ((error as { code: string }).code)) {
+                throw new AntelopeError('antelope.evm.error_transaction_canceled');
+            } else {
+                console.error(error);
+                throw new AntelopeError('antelope.wrap.error_unwrap', { error });
+            }
+        }
+    }
 
     async login(network: string): Promise<addressString | null> {
         const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;

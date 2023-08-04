@@ -170,7 +170,9 @@ export default {
     },
     evm_wrap: {
         wrap: 'Wrap',
+        unwrap: 'Unwrap',
         wrap_button_label: 'Wrap {systemSymbol} to {wrappedSymbol}',
+        unwrap_button_label: 'Unwrap {wrappedSymbol} to {systemSymbol}',
         total_of_wrapped_and_unwrapped: 'Total of wrapped {token} and {token}',
         wrapped_card_label: 'Wrapped {symbol}',
         wrapped_card_tooltip: '{wrappedSymbol} can be used to buy NFTs and trade on decentralized exchanges, among other things. Wrapping {systemSymbol} is done via a decentralized smart contract.',
@@ -182,6 +184,7 @@ export default {
         unwrap_sidebar_title: 'Unwrapping {symbol}',
         unwrap_sidebar: 'Unwrap your {wrappedSymbol} to get your {systemSymbol} back instantly.',
         wrap_input_label: 'Wrapping Amount',
+        unwrap_input_label: 'Unwrapping Amount',
     },
     notification:{
         success_title_trx: 'Success',
@@ -201,6 +204,7 @@ export default {
         neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
+        neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
     },
     resources: {
         title: 'Network Resources',
@@ -468,6 +472,10 @@ export default {
             error_unpredictable_gas_limit: 'The gas limit for this transaction couldn\'t be estimated',
             error_user_rejected: 'You rejected the transaction',
             error_transaction_canceled: 'You canceled the action',
+            error_wrap_not_supported_on_native: 'Wrap is not supported on native chain',
+            error_unwrap_not_supported_on_native: 'Unwrap is not supported on native chain',
+            error_wrap_failed: 'An unknown error occurred when wrapping tokens',
+            error_unwrap_failed: 'An unknown error occurred when unwrapping tokens',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
