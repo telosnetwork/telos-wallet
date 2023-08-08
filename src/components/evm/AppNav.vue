@@ -4,7 +4,7 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
-import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
+import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
@@ -14,7 +14,7 @@ const chainStore = useChainStore();
 export default defineComponent({
     name: 'AppNav',
     components: {
-        ConnectWalletOptions,
+        EVMLoginButtons,
         UserInfo,
         InlineSvg,
     },
@@ -83,6 +83,9 @@ export default defineComponent({
             this.$nextTick(() => {
                 (this.$refs['logo-image'] as HTMLElement)?.focus();
             });
+        },
+        closeLoginMenu() {
+            this.showWalletOptions = false;
         },
         closeMenu() {
             this.menuIsOpen = false;
@@ -342,11 +345,22 @@ export default defineComponent({
     </div>
 </nav>
 <q-dialog v-model="showWalletOptions">
-    <ConnectWalletOptions
-        :showWalletConnect="false"
-        @wallet-connect-button-clicked="showWalletOptions = false"
-        @close-wallet-options="showWalletOptions = false"
-    />
+    <div class="c-app-nav__login-bg">
+        <div class="c-app-nav__login-header">
+            <span class="c-app-nav__login-header-text">
+                {{ $t('home.sign_in_with') }}
+            </span>
+            <q-btn
+                class="c-app-nav__login-close"
+                icon="close"
+                flat
+                round
+                dense
+                @click="closeLoginMenu()"
+            />
+        </div>
+        <EVMLoginButtons/>
+    </div>
 </q-dialog>
 
 </template>
@@ -354,8 +368,35 @@ export default defineComponent({
 <style lang="scss">
 
 .c-app-nav {
-    color: white;
+    color: $white;
     $this: &;
+
+    &__login-bg {
+        background: $dark;
+        padding: 24px;
+    }
+
+    &__login-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    &__login-close {
+        color: $white;
+        padding: 0;
+        min-height: 2.4em;
+        min-width: 2.4em;
+        margin-top: -8px;
+        margin-right: -10px;
+    }
+
+    &__login-header-text {
+        @include text--header-5;
+        color: $white;
+    }
 
     &__back-button {
         @include text--header-5;
