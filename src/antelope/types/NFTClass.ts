@@ -353,6 +353,10 @@ export class NFTClass implements ShapedNFT {
         return this.item.amount;
     }
 
+    get updated() {
+        return this.item.indexer.updated;
+    }
+
     get attributes(): NftAttribute[] {
         return this.item.attributes;
     }

@@ -159,7 +159,7 @@ export const useNftsStore = defineStore(store_name, {
                         const erc1155Nfts = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc1155' });
                         const erc721Nfts  = await chain_settings.getNFTsInventory(owner, { ...filter, type: 'erc721'  });
                         const nfts = erc1155Nfts.concat(erc721Nfts);
-                        const sortedNfts = nfts.sort((a, b) => a.name.localeCompare(b.name));
+                        const sortedNfts = nfts.sort((a, b) => b.updated - a.updated);
 
                         this.__inventory[label].list = sortedNfts;
                         this.__inventory[label].loading = false;
