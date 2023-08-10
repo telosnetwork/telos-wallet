@@ -137,10 +137,11 @@ export default defineComponent({
             const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
             const getExplorerUrl = (address: string) => `${chainSettings.getExplorerUrl()}/address/${address}`;
 
-            const tokenIsTlos  = this.token.address === NativeCurrencyAddress;
+            const tokenIsSystemToken  = this.token.address === NativeCurrencyAddress;
+            const tokenIsWrappedSystemToken = this.token.address === chainSettings.getWrappedSystemToken().address;
             const buyMoreLink  = chainSettings.getBuyMoreOfTokenLink();
 
-            if (tokenIsTlos) {
+            if (tokenIsSystemToken) {
                 items.push({
                     label: this.$t('evm_wallet.buy'),
                     icon: require('src/assets/icon--plus.svg'),
@@ -148,7 +149,7 @@ export default defineComponent({
                 });
             }
 
-            if (!tokenIsTlos) {
+            if (!tokenIsSystemToken) {
                 items.push({
                     label: this.$t('global.contract'),
                     icon: require('src/assets/icon--code.svg'),
@@ -164,6 +165,22 @@ export default defineComponent({
                     query: { ...(this.token.address !== NativeCurrencyAddress ? { token: this.token.address ?? '' } : {}) },
                 },
             });
+
+            if (tokenIsSystemToken) {
+                items.push({
+                    label: this.$t('evm_wallet.wrap'),
+                    icon: require('src/assets/icon--wrap-tlos.svg'),
+                    url: { name: 'evm-wrap' },
+                });
+            }
+
+            if (tokenIsWrappedSystemToken) {
+                items.push({
+                    label: this.$t('evm_wallet.unwrap'),
+                    icon: require('src/assets/icon--wrap-tlos.svg'),
+                    url: { name: 'evm-wrap', query: { tab: 'unwrap' } },
+                });
+            }
 
             if (this.token.address !== NativeCurrencyAddress) {
                 items.push({
