@@ -45,7 +45,7 @@ describe('Antelope Balance Store', () => {
     });
 
     describe('updateBalancesForAccount should update __balances', () => {
-        test('with the minimun system tokens when has zero balances for all tokens', async () => {
+        test('with the minimum system tokens when has zero balances for all tokens', async () => {
             const label = 'label';
 
             const authenticator = {
