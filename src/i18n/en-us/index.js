@@ -477,6 +477,7 @@ export default {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
             error_oreid_no_chain_account: 'The app {appName} does not have a chain account for the chain {networkName}',
+            network_switch_success: 'Network switched successfully',
         },
     },
 };
