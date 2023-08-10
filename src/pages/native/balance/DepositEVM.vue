@@ -87,7 +87,6 @@ export default {
             }
         },
         async generateAddress(){
-            debugger;
             const accountInfo = await this.$store.$api.getAccount(this.accountName);
 
             if (accountInfo.ram_quota - accountInfo.ram_usage <= 1000){ // If account (often newly created account) does not have sufficient RAM, notify user
