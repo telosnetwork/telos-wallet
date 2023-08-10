@@ -32,7 +32,7 @@ describe('Antelope Balance Store', () => {
         });
     });
 
-    describe('Initializin the store', () => {
+    describe('Initializing the store', () => {
         test('should initialize the store', () => {
             expect(useFeedbackStore).not.toHaveBeenCalled();
             expect(FeedbackActions.setDebug).not.toHaveBeenCalled();
