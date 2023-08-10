@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import { usePlatformStore } from 'src/antelope';
 import InlineSvg from 'vue-inline-svg';
@@ -45,6 +45,13 @@ export default defineComponent({
             // the number of decimals used for the token. Use 2 for fiat values
             type: Number,
             required: true,
+            validator: (value: number) => value >= 0 && Number.isInteger(value),
+        },
+        decimalsToDisplay: {
+            // the number of decimals to display in the input.
+            type: Number,
+            required: false,
+            default: 4,
             validator: (value: number) => value >= 0 && Number.isInteger(value),
         },
         secondaryCurrencyConversionFactor: {
@@ -764,7 +771,7 @@ export default defineComponent({
                 if (this.currenciesAreSwapped) {
                     maxDecimals = this.secondaryCurrencyDecimals;
                 } else {
-                    maxDecimals = this.decimals;
+                    maxDecimals = this.decimalsToDisplay;
                 }
 
                 const keypressIsDigit = numKeys.includes(event.key);
@@ -861,7 +868,8 @@ export default defineComponent({
                     this.secondaryCurrencyDecimals,
                     this.secondaryCurrencyConversionFactor,
                 );
-                const maxValueDecimals = formatUnits(maxValueInSecondaryCurrency, this.secondaryCurrencyDecimals).split('.')[1].length;
+                const currentDecimals = formatUnits(maxValueInSecondaryCurrency, this.secondaryCurrencyDecimals).split('.')[1].length;
+                const maxValueDecimals = Math.min(currentDecimals, this.decimalsToDisplay);
 
                 formattedMaxValue = prettyPrintCurrency(
                     maxValueInSecondaryCurrency,
@@ -874,7 +882,8 @@ export default defineComponent({
                     true,
                 );
             } else {
-                const maxValueDecimals = formatUnits(this.maxValue, this.decimals).split('.')[1].length;
+                const currentDecimals = formatUnits(this.maxValue, this.decimals).split('.')[1].length;
+                const maxValueDecimals = Math.min(currentDecimals, this.decimalsToDisplay);
 
                 formattedMaxValue = prettyPrintCurrency(
                     this.maxValue,
@@ -1107,7 +1116,7 @@ export default defineComponent({
         top: 25px;
         left: var(--symbol-left);
         color: var(--text-low-contrast);
-
+        pointer-events: none;
     }
 
     &__amount-available {
