@@ -215,6 +215,7 @@ export default {
         add: 'Add',
         buying_resources: 'Buying Resources',
         resources_bought: 'Resources bought',
+        insufficient_ram: 'You have insufficient RAM to complete this transaction, please select "Resource Management" from the menu to view available resources',
     },
     login: {
         connect_wallet: 'Connect Wallet',
