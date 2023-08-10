@@ -17,6 +17,10 @@ export default {
             console.info('Client version: ', clientVersion);
         }
 
+        // when localstorage is cleared, we need to reload the page for it to take effect.
+        // however if we immediately reload the page here we cannot show a notification to the user.
+        // so the const appVersionUpdated lets us know after the reload that we just cleared the old localStorage
+        // and need to notify the user that they need to log in again
         if (clientVersion === appVersionJustUpdated) {
             console.info('App version mismatch, local storage cleared');
             // App version was updated, localStorage was cleared, and the page reloaded
@@ -25,12 +29,10 @@ export default {
             (this as any).$notifySuccessMessage(
                 (this as any).$t('global.new_app_version'),
             );
-        } else if (clientVersion && clientVersion !== currentVersion) {
+        } else if (clientVersion !== currentVersion) {
             localStorage.clear();
             localStorage.setItem('appVersion', appVersionJustUpdated);
             window.location.reload();
-        } else if (!clientVersion) {
-            localStorage.setItem('appVersion', currentVersion);
         }
     },
     mounted() {
