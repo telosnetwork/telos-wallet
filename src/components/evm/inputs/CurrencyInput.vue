@@ -938,7 +938,7 @@ export default defineComponent({
         class="c-currency-input__amount-available"
         @click="fillMaxValue"
     >
-        <ToolTip v-if="!isDisabled && !isReadonly" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
+        <ToolTip v-if="!isDisabled && !isReadonly && !$q.screen.lt.md" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
             {{ prettyMaxValue }}
         </ToolTip>
         <template v-else>
