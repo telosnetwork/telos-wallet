@@ -121,7 +121,7 @@ export const useChainStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: createInitFunction(store_name),
         // Updates ----
-        async updateChainData(label: string) {
+        async updateChainData(label: string): Promise<void> {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
@@ -137,7 +137,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateChainData');
             }
         },
-        async updateSettings(label: string) {
+        async updateSettings(label: string): Promise<void> {
             this.getChain(label).settings.init().then(() => {
                 getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
             }).catch((error) => {
@@ -145,7 +145,7 @@ export const useChainStore = defineStore(store_name, {
                 throw new Error('antelope.chain.error_settings');
             });
         },
-        async updateApy(label: string) {
+        async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
             this.trace('updateApy');
             const chain = this.getChain(label);
@@ -162,7 +162,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
-        async updateGasPrice(label: string) {
+        async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
             this.trace('updateGasPrice');
             const chain = this.getChain(label);
@@ -177,7 +177,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateGasPrice');
             }
         },
-        async updateTokenList(label: string) {
+        async updateTokenList(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
             const chain = this.getChain(label);
