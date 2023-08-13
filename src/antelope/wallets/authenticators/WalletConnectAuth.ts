@@ -220,6 +220,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
 
+    readyForTransfer(): boolean {
+        return !!this.sendConfig;
+    }
+
     sendConfig: PrepareSendTransactionResult | PrepareWriteContractResult<EvmABI, string, number> | null = null;
     private _debouncedPrepareTokenConfig(token: TokenClass | null, amount: BigNumber, to: string) {
         // If there is already a pending call, clear it
@@ -272,6 +276,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
     async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
+        this.sendConfig = null;
         await this._debouncedPrepareTokenConfig(token, amount, to);
     }
 
