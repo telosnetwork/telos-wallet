@@ -1,19 +1,10 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import AppPage from 'components/evm/AppPage.vue';
 import WrapPageHeader from 'pages/evm/wrap/WrapPageHeader.vue';
+import WrapTab from 'pages/evm/wrap/WrapTab.vue';
+import UnwrapTab from 'pages/evm/wrap/UnwrapTab.vue';
 
-export default defineComponent({
-    name: 'WrapPage',
-    components: {
-        AppPage,
-        WrapPageHeader,
-    },
-    data: () => ({
-        tabs: ['wrap', 'unwrap'],
-    }),
-
-});
+const tabs = ['wrap', 'unwrap'];
 </script>
 
 <template>
@@ -23,11 +14,11 @@ export default defineComponent({
     </template>
 
     <template v-slot:wrap>
-        <p>wrap tab</p>
+        <WrapTab />
     </template>
 
     <template v-slot:unwrap>
-        <p>unwrap tab</p>
+        <UnwrapTab />
     </template>
 </AppPage>
 </template>

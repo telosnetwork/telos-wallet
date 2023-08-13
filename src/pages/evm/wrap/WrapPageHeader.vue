@@ -40,7 +40,7 @@ const totalFiatValueText = computed(() => {
 const systemTokenName = computed(() => chainSettings.getSystemToken().name);
 const systemTokenSymbol = computed(() => chainSettings.getSystemToken().symbol);
 const wrappedTokenSymbol = computed(() => chainSettings.getWrappedSystemToken().symbol);
-const allBalances = computed(() => balancesStore.loggedBalances);
+const allBalances = computed(() => balancesStore.currentBalances);
 const systemTokenBalanceBn =  computed(() => allBalances.value.find(b => b.token.contract === NativeCurrencyAddress)?.balance);
 const wrappedTokenBalanceBn = computed(() =>
     allBalances.value.find(b => b.token.contract === chainSettings.getWrappedSystemToken().address)?.balance,
