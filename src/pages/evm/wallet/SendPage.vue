@@ -163,6 +163,9 @@ export default defineComponent({
         isLoading(): boolean {
             return ant.stores.feedback.isLoading('transferEVMTokens');
         },
+        authIsReadyForTransfer(): boolean {
+            return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
+        },
         configIsLoading() {
             let config;
             if (this.token?.isSystem) {
@@ -399,7 +402,7 @@ export default defineComponent({
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
                             :loading="isLoading"
-                            :disable="!isFormValid || isLoading"
+                            :disable="!isFormValid || isLoading || !authIsReadyForTransfer"
                             @click="startTransfer"
                         />
                     </div>
