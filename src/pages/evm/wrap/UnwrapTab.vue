@@ -38,7 +38,7 @@ const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filte
 );
 const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
 const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
-// computed
+
 const sidebarContent = computed(() => {
     const header = $t('evm_wrap.unwrap_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
