@@ -35,6 +35,11 @@ export abstract class EVMAuthenticator {
     // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;
 
+    // indicates the authenticator is ready to transfer tokens
+    readyForTransfer(): boolean {
+        return true;
+    }
+
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chain = useChainStore();
