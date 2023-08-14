@@ -123,7 +123,7 @@ function prettyPrintToken(amount: BigNumber | undefined, isWrapped: boolean) {
             <span class="o-text--small-bold">
                 {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
             </span>&nbsp;<span class="o-text--small">
-                {{ prettySystemTokenFiatPrice  }}
+                @ {{ prettySystemTokenFiatPrice  }}
             </span>
         </p>
     </div>
