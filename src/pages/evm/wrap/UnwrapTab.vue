@@ -61,6 +61,11 @@ const availableToWrap = computed(() => {
     }
     return available;
 });
+const wrappedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
+    balance => balance.token.contract === chainSettings.getWrappedSystemToken().address,
+)[0]);
+const wrappedTokenBalance = computed(() => wrappedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
+const availableToUnwrap = computed(() => wrappedTokenBalance.value);
 const formIsValid = computed(() =>
     !inputModelValue.value.isZero() &&
     inputModelValue.value.lt(availableToWrap.value),
@@ -76,15 +81,7 @@ onBeforeMount(() => {
         estimatedGas.value = gas.system;
     });
 });
-// -----------------------------------------------
-// New computed properties and data
-const wrappedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
-    balance => balance.token.contract === chainSettings.getWrappedSystemToken().address,
-)[0]);
-const wrappedTokenBalance = computed(() => wrappedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
-const availableToUnwrap = computed(() => wrappedTokenBalance.value);
 
-// New methods
 async function handleUnwrapClick() {
     const label = 'logged';
     if (!await accountStore.isConnectedToCorrectNetwork(label)) {
@@ -127,8 +124,6 @@ async function handleUnwrapClick() {
         }
     }
 }
-
-
 </script>
 
 <template>
