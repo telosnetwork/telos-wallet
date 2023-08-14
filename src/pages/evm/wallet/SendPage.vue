@@ -167,7 +167,7 @@ export default defineComponent({
             return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
-            return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
+            return !(this.token?.decimals && this.token?.symbol);
         },
     },
     created() {
