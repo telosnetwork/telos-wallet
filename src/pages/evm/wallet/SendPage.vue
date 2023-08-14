@@ -161,19 +161,10 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferEVMTokens');
+            return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
         authIsReadyForTransfer(): boolean {
             return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
-        },
-        configIsLoading() {
-            let config;
-            if (this.token?.isSystem) {
-                config = balanceStore.__wagmiSystemTokenTransferConfig['logged'];
-            } else {
-                config = balanceStore.__wagmiTokenTransferConfig['logged'];
-            }
-            return this.isFormValid && !config;
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
@@ -402,7 +393,7 @@ export default defineComponent({
                             class="wallet-btn"
                             :label="$t('evm_wallet.send')"
                             :loading="isLoading"
-                            :disable="!isFormValid || isLoading || !authIsReadyForTransfer"
+                            :disable="!isFormValid || isLoading"
                             @click="startTransfer"
                         />
                     </div>
