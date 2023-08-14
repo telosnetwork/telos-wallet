@@ -75,6 +75,7 @@ const wrappedFiatValueText = computed(() => prettyPrintCurrency(
     fiatCurrency.value,
     false,
 ));
+const prettySystemTokenFiatPrice = computed(() => prettyPrintCurrency(systemTokenPrice.value, 2, fiatLocale.value, false, fiatCurrency.value, false));
 
 const cardData = computed(() => [{
     label: $t('evm_wrap.wrapped_card_label', { symbol: systemTokenSymbol.value }),
@@ -118,8 +119,12 @@ function prettyPrintToken(amount: BigNumber | undefined, isWrapped: boolean) {
     <div class="text-center">
         <h5>{{ $t('evm_wrap.total_of_wrapped_and_unwrapped', { token: systemTokenName }) }}</h5>
         <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
-        <p v-if="!loading" class="o-text--small-bold u-text--low-contrast q-mb-xl">
-            {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
+        <p v-if="!loading" class="u-text--low-contrast q-mb-xl">
+            <span class="o-text--small-bold">
+                {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
+            </span>&nbsp;<span class="o-text--small">
+                {{ prettySystemTokenFiatPrice  }}
+            </span>
         </p>
     </div>
 
