@@ -122,7 +122,8 @@ function prettyPrintToken(amount: BigNumber | undefined, isWrapped: boolean) {
         <p v-if="!loading" class="u-text--low-contrast q-mb-xl">
             <span class="o-text--small-bold">
                 {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
-            </span>&nbsp;<span class="o-text--small">
+            </span>
+            <span class="o-text--small">
                 @ {{ prettySystemTokenFiatPrice  }}
             </span>
         </p>
