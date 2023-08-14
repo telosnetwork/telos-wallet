@@ -140,6 +140,7 @@ export default {
         no_results: 'No results found',
         toggle: 'Toggle "{text}"',
         arrow_icon_alt: 'Arrow icon',
+        new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
     },
     nft : {
         collectible: 'Collectible',
@@ -503,6 +504,7 @@ export default {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
             error_oreid_no_chain_account: 'The app {appName} does not have a chain account for the chain {networkName}',
+            network_switch_success: 'Network switched successfully',
         },
         wrap: {
             error_getting_wrapped_contract: 'An error occurred while getting the wrapped system token contract',

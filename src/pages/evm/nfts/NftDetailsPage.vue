@@ -56,7 +56,7 @@ const ownerLink = computed(() => {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.contractAddress}`;
+    return `${explorerUrl}/address/${nft.value.ownerAddress}`;
 });
 
 </script>
