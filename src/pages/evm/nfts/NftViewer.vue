@@ -176,6 +176,7 @@ function toggleVideoPlay(playOnly?: boolean) {
                 :controls="videoIsPlaying || isIos"
                 :poster="nft.imageSrcFull"
                 playsinline
+                class="c-nft-viewer__video"
                 @loadeddata="isMediaLoading = false"
                 @play="
                     videoIsPlaying = true;
