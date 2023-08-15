@@ -60,7 +60,7 @@ const ownerLink = computed(() => {
 });
 
 const filteredAttributes = computed(() =>
-    nft.value?.attributes.filter(attr => attr.label !== undefined && attr.text !== undefined),
+    nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
 
 </script>

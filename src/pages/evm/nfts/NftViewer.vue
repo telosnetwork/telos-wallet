@@ -135,7 +135,7 @@ function toggleVideoPlay(playOnly?: boolean) {
                 @load="isMediaLoading = false"
             >
             <div
-                v-if="nftType === nftTypes.video"
+                v-show="nftType === nftTypes.video && !isMediaLoading"
                 class="c-nft-viewer__video-container"
                 tabindex="0"
                 role="preview"
@@ -147,11 +147,11 @@ function toggleVideoPlay(playOnly?: boolean) {
                     :poster="nft.imageSrcFull"
                     playsinline
                     class="c-nft-viewer__video"
-                    @load="isMediaLoading = false"
+                    @loadeddata="isMediaLoading = false"
                 ></video>
             </div>
             <q-icon
-                v-else-if="passedMaxLoadingTime && isMediaLoading"
+                v-if="passedMaxLoadingTime && isMediaLoading"
                 :alt="`${$t('nft.broken_image')} ${imageAlt}`"
                 name="o_broken_image"
                 size="md"
@@ -170,12 +170,13 @@ function toggleVideoPlay(playOnly?: boolean) {
             @keypress.space.enter.prevent="toggleVideoPlay(false)"
         >
             <video
+                v-show="!isMediaLoading"
                 ref="videoElement"
                 :src="nft.videoSrc"
                 :controls="videoIsPlaying || isIos"
                 :poster="nft.imageSrcFull"
                 playsinline
-                class="c-nft-viewer__video"
+                @loadeddata="isMediaLoading = false"
                 @play="
                     videoIsPlaying = true;
                     videoIsAtEnd = false;
@@ -191,7 +192,7 @@ function toggleVideoPlay(playOnly?: boolean) {
             ></video>
         </div>
 
-        <template v-if="iconOverlayName">
+        <template v-if="!isMediaLoading && iconOverlayName">
             <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
 
             <q-icon
@@ -215,6 +216,7 @@ function toggleVideoPlay(playOnly?: boolean) {
     <q-icon
         v-else-if="isMediaLoading && passedMaxLoadingTime"
         name="o_broken_image"
+        :alt="`${$t('nft.broken_image')} ${imageAlt}`"
         size="md"
         color="grey-7"
         class="c-nft-viewer__list-image"
@@ -222,7 +224,7 @@ function toggleVideoPlay(playOnly?: boolean) {
     <img
         v-show="!isMediaLoading"
         :src="nft.imageSrcFull"
-        :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+        :alt="`${$t('nft.collectible')} ${imageAlt}`"
         class="c-nft-viewer__list-image"
         height="40"
         width="40"
@@ -286,9 +288,6 @@ function toggleVideoPlay(playOnly?: boolean) {
         width: 100%;
     }
 
-    &__broken-image {
-    }
-
     &__list-image {
         border-radius: 4px;
         height: 40px;
@@ -345,18 +344,12 @@ function toggleVideoPlay(playOnly?: boolean) {
         cursor: pointer;
     }
 
-    &__audio-container {
-    }
-
     &__audio {
         width: 100%;
         margin: auto;
         max-width: 432px;
         display: block;
         flex-shrink: 0;
-    }
-
-    &__blank-container {
     }
 }
 </style>
