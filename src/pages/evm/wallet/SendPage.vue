@@ -161,19 +161,13 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferEVMTokens');
+            return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
-        configIsLoading() {
-            let config;
-            if (this.token?.isSystem) {
-                config = balanceStore.__wagmiSystemTokenTransferConfig['logged'];
-            } else {
-                config = balanceStore.__wagmiTokenTransferConfig['logged'];
-            }
-            return this.isFormValid && !config;
+        authIsReadyForTransfer(): boolean {
+            return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
-            return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
+            return !(this.token?.decimals && this.token?.symbol);
         },
     },
     created() {

@@ -138,6 +138,7 @@ export default {
         collection: 'Collection',
         search: 'Search',
         no_results: 'No results found',
+        new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
     },
     nft : {
         collectible: 'Collectible',

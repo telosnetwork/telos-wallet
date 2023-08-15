@@ -4,15 +4,13 @@ import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import ConnectWalletOptions from 'pages/home/ConnectWalletOptions.vue';
-import { getAntelope, useAccountStore, useEVMStore, usePlatformStore } from 'src/antelope';
+import { getAntelope, useEVMStore, usePlatformStore } from 'src/antelope';
 
 export default defineComponent({
     name: 'HomePage',
     components: {
         EVMLoginButtons,
         NativeLoginButton,
-        ConnectWalletOptions,
     },
     data: (): {
         tab: 'left' | 'right'
@@ -123,17 +121,6 @@ export default defineComponent({
                         @show-wallet-options="onShowWalletOptions(true)"
                         @use-injected-provider="onUseInjectedProvider()"
                         @show-oauth-options="onShowOAuthOptions(true)"
-                    />
-                </div>
-
-                <div class="c-home__connect-wallet">
-                    <ConnectWalletOptions
-                        v-show="showWalletOptions"
-                        :showWalletConnect="showWalletConnect"
-                        :useInjectedProvider="useInjectedProvider"
-                        :showOAuthOptions="showOAuthOptions"
-                        @show-wallet-connect="onShowWalletConnect()"
-                        @close-wallet-options="onShowWalletOptions(false)"
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
