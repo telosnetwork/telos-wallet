@@ -94,7 +94,12 @@ export default defineComponent({
             selectedOAuthProvider.value === provider &&
             useFeedbackStore().isLoading('OreId.login');
 
+        const ethereum = window.ethereum as unknown as { [key:string]: boolean };
+
         return {
+            isMobile,
+            ethereum,
+            // -----------
             isLoading,
             isLoadingOreId,
             supportsMetamask,
@@ -130,6 +135,14 @@ export default defineComponent({
             {{ $t('home.login_with_social_media') }}
         </template>
     </div-->
+
+    <div class="borrame" >
+        <h5>-- Variables --</h5>
+        <div>showSafePalButton: {{ showSafePalButton }}</div>
+        <div>isMobile: {{ isMobile }}</div>
+        <div>ethereum._isSafePal: {{ ethereum._isSafePal }}</div>
+        <div>ethereum.isSafePal: {{ ethereum.isSafePal }}</div>
+    </div>
 
     <!-- Metamask Authenticator button -->
     <div
@@ -194,6 +207,10 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+.borrame {
+    color: white;
+}
+
 .c-evm-login-buttons {
     $self: &;
     display: flex;
