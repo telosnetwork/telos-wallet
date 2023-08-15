@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useEVMStore, useUserStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
 
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
@@ -37,7 +37,6 @@ const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filte
     balance => balance.token.contract === systemToken.address)[0],
 );
 const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
-const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 
 const sidebarContent = computed(() => {
     const header = $t('evm_wrap.unwrap_sidebar_title', { symbol: systemTokenSymbol });
@@ -53,14 +52,7 @@ const sidebarContent = computed(() => {
         content,
     };
 });
-const availableToWrap = computed(() => {
-    const available = systemTokenBalance.value.sub(estimatedGas.value);
 
-    if (available.lt(0)) {
-        return ethers.constants.Zero;
-    }
-    return available;
-});
 const wrappedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
     balance => balance.token.contract === chainSettings.getWrappedSystemToken().address,
 )[0]);
@@ -68,10 +60,10 @@ const wrappedTokenBalance = computed(() => wrappedTokenBalanceInfo.value?.amount
 const availableToUnwrap = computed(() => wrappedTokenBalance.value);
 const formIsValid = computed(() =>
     !inputModelValue.value.isZero() &&
-    inputModelValue.value.lt(availableToWrap.value),
+    inputModelValue.value.lt(availableToUnwrap.value),
 );
-const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unwrapSystemTokens'));
 
+const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unwrapSystemTokens'));
 
 // methods
 onBeforeMount(() => {
