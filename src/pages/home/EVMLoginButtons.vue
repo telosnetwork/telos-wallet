@@ -194,10 +194,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.borrame {
-    color: white;
-}
-
 .c-evm-login-buttons {
     $self: &;
     display: flex;
