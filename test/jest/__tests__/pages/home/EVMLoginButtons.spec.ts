@@ -28,7 +28,7 @@ describe('EVMLoginButtons.vue', () => {
             wrapper = mountComponent();
         });
 
-        describe.skip('setMetamaskAuthenticator', () => {
+        describe('setMetamaskAuthenticator', () => {
 
             it('should call accountStore loginEVM method 2', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
