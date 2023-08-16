@@ -189,7 +189,7 @@ export const useBalancesStore = defineStore(store_name, {
                 const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
                 const ratio:BigNumber = await contractInstance.previewDeposit(oneSys);
 
-                // STK price is 1 SYS divided by the ratio
+                // Now we calculate the price of 1 STK = (price of 1 SYS) / ratio
                 const stkPrice = sysToken.price.value.mul(oneSys).div(ratio);
                 const stkPriceNumber = ethers.utils.formatUnits(stkPrice, sysToken.decimals);
 
