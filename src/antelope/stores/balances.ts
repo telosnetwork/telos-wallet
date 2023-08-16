@@ -197,7 +197,11 @@ export const useBalancesStore = defineStore(store_name, {
 
                 // Finally we update the STK token price
                 const stkMarketInfo = { price:stkPriceNumber } as MarketSourceInfo;
-                stkToken.market = new TokenMarketData(stkMarketInfo);
+                // TODO: this is removed until we decide what to do whith the STK token price
+                // https://github.com/telosnetwork/telos-wallet/issues/544
+                // stkToken.market = new TokenMarketData(stkMarketInfo);
+                this.trace('updateSystemTokensPrices', `STLOS price: ${toRaw(stkMarketInfo)}`);
+
             } catch (error) {
                 console.error(error);
                 // we won't thorw an error here, as it is not critical
