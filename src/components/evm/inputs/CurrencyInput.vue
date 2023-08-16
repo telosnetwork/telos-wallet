@@ -349,6 +349,9 @@ export default defineComponent({
         isIOS() {
             return platformStore.isIOSMobile;
         },
+        enableMaxValTooltip() {
+            return !this.isDisabled && !this.isReadonly && !this.$q.screen.lt.md;
+        },
     },
     watch: {
         // as a refresher on modelValue, note that components implementing v-model do not update their own
@@ -938,7 +941,7 @@ export default defineComponent({
         class="c-currency-input__amount-available"
         @click="fillMaxValue"
     >
-        <ToolTip v-if="!isDisabled && !isReadonly" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
+        <ToolTip v-if="enableMaxValTooltip" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
             {{ prettyMaxValue }}
         </ToolTip>
         <template v-else>

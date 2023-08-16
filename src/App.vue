@@ -8,6 +8,7 @@ export default {
     name: 'App',
     created() {
         const appVersionJustUpdated = 'UPDATED_NOTIFY_USER';
+        const userIsNew = !localStorage.getItem('account');
         const currentVersion = packageInfo.version;
         const clientVersion = localStorage.getItem('appVersion');
 
@@ -29,6 +30,9 @@ export default {
             (this as any).$notifySuccessMessage(
                 (this as any).$t('global.new_app_version'),
             );
+        } else if (userIsNew) {
+            localStorage.clear();
+            localStorage.setItem('appVersion', currentVersion);
         } else if (clientVersion !== currentVersion) {
             localStorage.clear();
             localStorage.setItem('appVersion', appVersionJustUpdated);
