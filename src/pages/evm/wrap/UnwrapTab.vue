@@ -60,7 +60,7 @@ const wrappedTokenBalance = computed(() => wrappedTokenBalanceInfo.value?.amount
 const availableToUnwrap = computed(() => wrappedTokenBalance.value);
 const formIsValid = computed(() =>
     !inputModelValue.value.isZero() &&
-    inputModelValue.value.lt(availableToUnwrap.value),
+    inputModelValue.value.lte(availableToUnwrap.value),
 );
 
 const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unwrapSystemTokens'));
