@@ -42,6 +42,7 @@ jest.mock('src/antelope/config', () => ({
     errorToString: jest.fn().mockImplementation(e => e),
 }));
 
+export * from 'test/jest/utils/antelope/ethers';
 export * from 'test/jest/utils/antelope/mockData';
 export * from 'test/jest/utils/antelope/store-account';
 export * from 'test/jest/utils/antelope/store-chain';
@@ -50,3 +51,4 @@ export * from 'test/jest/utils/antelope/store-feedback';
 export * from 'test/jest/utils/antelope/store-platform';
 export * from 'test/jest/utils/antelope/wagmi-web3';
 export * from 'test/jest/utils/antelope/globalProps';
+

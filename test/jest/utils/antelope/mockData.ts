@@ -21,8 +21,10 @@ const ADDRESS_USER_2         = '0x5e331A5657aAecc8Fee56C13708cCb733cdA30b5';
 
 const CHAIN_ID = '999';
 const TEST_NETWORK = 'test-network';
+const TEST_NETWORK_NAME = 'Test Network';
 const EXPLORER_URL = 'https://explorer.testnet.telos.net';
 const ECOSYSTEM_URL = 'https://ecosystem.telos.net';
+const ENDPOINT_URL = 'https://test-network.telos.net';
 
 const commonToken = {
     decimals: 18,
@@ -32,6 +34,7 @@ const commonToken = {
 const SYSTEM_TOKEN = new TokenClass({
     address: ADDRESS_SYSTEM_TOKEN,
     symbol: 'SYSTEM',
+    isSystem: true,
     ...commonToken,
 } as TokenSourceInfo);
 
@@ -91,6 +94,8 @@ const Account = {
 const MockData = {
     Chain: {
         id: CHAIN_ID,
+        display: TEST_NETWORK_NAME,
+        hyperionEndpoint: ENDPOINT_URL,
     },
     Network: TEST_NETWORK,
     ExplorerUrl: EXPLORER_URL,

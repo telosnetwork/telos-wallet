@@ -38,19 +38,12 @@ const getContractCreation = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => cb()),
 }));
 
-const getContract = jest.fn().mockImplementation((auth, address:string) => ({
+const getContract = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb1: any) => {
         cb1({
-            getContractInstance: jest.fn().mockImplementation((cb2: any) => {
-                cb2({
-                    transfer: jest.fn(),
-                    balanceOf: jest.fn().mockImplementation(() => ({
-                        then: jest.fn().mockImplementation((cb: any) => {
-                            cb(MockData.BalancesMapping[address]);
-                        }),
-                    })),
-                });
-            }),
+            getContractInstance: jest.fn().mockImplementation(() => ({
+                previewDeposit: jest.fn(),
+            })),
         });
     }),
 }));
