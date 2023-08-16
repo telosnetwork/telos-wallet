@@ -28,6 +28,8 @@ export default defineComponent({
 
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
+        const injectedProviderDetected = computed(() => !!window.ethereum);
+        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value);
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -101,6 +103,7 @@ export default defineComponent({
             supportsSafePal,
             showMetamaskButton,
             showSafePalButton,
+            showWalletConnectButton,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
@@ -174,7 +177,11 @@ export default defineComponent({
     </div>
 
     <!-- WalletConnect Authenticator button -->
-    <div class="c-evm-login-buttons__option" @click="setWalletConnectAuthenticator()">
+    <div
+        v-if="showWalletConnectButton"
+        class="c-evm-login-buttons__option"
+        @click="setWalletConnectAuthenticator()"
+    >
         <template v-if="isLoading('WalletConnect.login')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
