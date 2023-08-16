@@ -107,6 +107,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
+    async initialized() {
+        return this.initPromise;
+    }
+
     async init(): Promise<void> {
         // this is called only when this chain is needed to avoid initialization of all chains
         if (this.ready) {

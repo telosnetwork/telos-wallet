@@ -99,21 +99,40 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
+
+                        // first we assert that the balances array exists and is he same until the user changes
+                        this.__balances[label] = this.__balances[label] ?? [];
+
+                        // then we wait for the chain indexer to be consulted at least once
+                        this.trace('updateBalancesForAccount', 'await chain_settings.initialized()');
+                        await chain_settings.initialized();
+
+                        // if the chain index is healthy, we use it to fetch the all the balances at once
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
-                            if (account?.account) {
-                                this.__balances[label] = await chain_settings.getBalances(account.account);
-                                // if new account with no index records display default zero TLOS balance
-                                if (this.__balances[label].length === 0){
-                                    await this.updateSystemBalanceForAccount(label, account.account as addressString);
-                                }
-                                this.sortBalances(label);
-                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
+                            const newBalances = await chain_settings.getBalances(account.account);
+
+                            if (this.__balances[label].length === 0) {
+                                // we add all system tokens with balance zero to the balances array to make sure they all always appear
+                                const systemTokens = chain_settings.getSystemTokens();
+                                systemTokens.forEach((token) => {
+                                    const balance = newBalances.find(b => b.token.id === token.id);
+                                    if (!balance) {
+                                        this.addNewBalance(label, new TokenBalance(token, BigNumber.from(0)));
+                                    }
+                                });
                             }
+
+                            // we update the existing balances array with the new balances
+                            newBalances.forEach((balance) => {
+                                this.processBalanceForToken(label, balance.token, balance.amount);
+                            });
+                            this.sortBalances(label);
+
+                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
-                            this.__balances[label] = this.__balances[label] ?? [];
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
