@@ -50,6 +50,7 @@ import {
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
+import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -188,9 +189,10 @@ export const useBalancesStore = defineStore(store_name, {
                 // Now we preview a deposit of 1 SYS to get the ratio
                 const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
                 const ratio:BigNumber = await contractInstance.previewDeposit(oneSys);
+                const ratioNumber = ethers.utils.formatUnits(ratio, stkToken.decimals);
 
                 // Now we calculate the price of 1 STK = (price of 1 SYS) / ratio
-                const stkPrice = sysToken.price.value.mul(oneSys).div(ratio);
+                const stkPrice = convertCurrency(oneSys, sysToken.decimals, stkToken.decimals, ratioNumber);
                 const stkPriceNumber = ethers.utils.formatUnits(stkPrice, sysToken.decimals);
 
                 // Finally we update the STK token price

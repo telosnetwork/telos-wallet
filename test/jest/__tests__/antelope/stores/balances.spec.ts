@@ -79,14 +79,21 @@ describe('Antelope Balance Store', () => {
         test('with system token first despite not having the higher balance', async () => {
             const label = 'label';
             const account = MockData.Account;
+
+            // we need to spy on store.sortBalances and see if it is called with the right label argument
+            const sortBalancesSpy = jest.spyOn(store, 'sortBalances');
+
             await store.updateBalancesForAccount(label, account);
 
-            const expected = [
+            // now we check if the spy was called with the right label argument
+            expect(sortBalancesSpy).toHaveBeenCalledWith('label');
+
+            const expected: string[] = [
                 MockData.Token.SYSTEM_TOKEN.symbol,
+                MockData.Token.WRAPPED_TOKEN.symbol,
                 MockData.Token.B_TOKEN.symbol,
                 MockData.Token.A_TOKEN.symbol,
                 MockData.Token.STAKED_TOKEN.symbol,
-                MockData.Token.WRAPPED_TOKEN.symbol,
             ];
 
             expect((store.__balances[label] as TokenClass[]).map((x: TokenClass) => x.symbol)).toStrictEqual(expected);
