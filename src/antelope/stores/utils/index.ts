@@ -82,7 +82,7 @@ export function toChecksumAddress(address: string): string {
         addy = addy.padStart(40, '0');
     }
 
-    const hash = keccak256(toUtf8Bytes(addy));
+    const hash = keccak256(toUtf8Bytes(addy)).replace('0x', '');
     let ret = '0x';
 
     for (let i = 0; i < addy.length; i++) {
