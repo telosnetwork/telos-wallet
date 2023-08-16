@@ -48,6 +48,7 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
         <NftViewer
             :nft="nft"
             :preview-mode="true"
+            :tile-mode="true"
         />
     </router-link>
     <div class="c-nft-tile__text-container">
@@ -86,6 +87,7 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
 
     &__link {
         height: 100%;
+        text-decoration: none;
     }
 }
 </style>

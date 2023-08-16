@@ -142,6 +142,7 @@ export default {
     },
     nft : {
         collectible: 'Collectible',
+        broken_image: 'Unable to load the image of collectible',
         link_to_nft_details: 'Go to NFT details page for {name}',
         img_alt: 'NFT - {nftInfo}',
         img_alt_video_nft: 'Video NFT cover - {nftInfo}',
@@ -166,6 +167,7 @@ export default {
         name_missing: '(No name)',
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
+        collectibles_per_page: 'Collectibles per page',
     },
     notification:{
         success_title_trx: 'Success',
