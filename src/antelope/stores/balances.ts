@@ -100,7 +100,7 @@ export const useBalancesStore = defineStore(store_name, {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
 
-                        // first we assert that the balances array exists and is he same until the user changes
+                        // first we assert that the balances array exists and is the same until the user changes
                         this.__balances[label] = this.__balances[label] ?? [];
 
                         // then we wait for the chain indexer to be consulted at least once
