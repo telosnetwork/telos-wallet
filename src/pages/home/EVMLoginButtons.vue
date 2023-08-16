@@ -1,43 +1,116 @@
 <script lang="ts">
-import { useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
-import { computed, defineComponent, ref } from 'vue';
+import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
+import { OreIdAuth } from 'src/antelope/wallets';
+import InlineSvg from 'vue-inline-svg';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
     components: {
         QSpinnerFacebook,
+        InlineSvg,
     },
     setup(props, { emit }) {
-        const viewAnyAccount = () => {};
-        const injected = ref(useEVMStore().injectedProviderNames.length);
+        const ant = getAntelope();
+        const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
 
-        const toggleWalletOptions = () => {
-            if (isMobile.value) {
-                if (injected.value === 1 && !(navigator as any).brave) { // temp workaround for mobile Brave browser, see https://github.com/telosnetwork/telos-wallet/issues/501
-                    console.assert(useEVMStore().injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-                    emit('useInjectedProvider');
-                } else {
-                    emit('showWalletConnect');
-                }
-            } else {
-                emit('showWalletOptions');
+        const supportsMetamask = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
+        });
+
+        const supportsSafePal = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && (isMobile.value ? e.isSafePal : e._isSafePal);
+        });
+
+        const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
+        const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
+        const injectedProviderDetected = computed(() => !!window.ethereum);
+        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value);
+
+        const unsupportedExtensions = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
+        });
+
+        const selectedOAuthProvider = ref('');
+
+        const redirectToMetamaskDownload = () => {
+            window.open('https://metamask.io/download/', '_blank');
+        };
+
+        const redirectToSafepalDownload = () => {
+            window.open('https://www.safepal.com/en/download', '_blank');
+        };
+
+        const setOreIdAuthenticator = async (provider: string) => {
+            const name = 'OreId';
+            const auth = ant.wallets.getAutenticator(name);
+            if (auth) {
+                (auth as OreIdAuth).setProvider(provider);
+                selectedOAuthProvider.value = provider;
             }
+            setAuthenticator(name, 'logged');
+        };
+        const setMetamaskAuthenticator = async () => {
+            setAuthenticator('Metamask', 'logged');
+        };
+        const setSafepalAuthenticator = async () => {
+            setAuthenticator('SafePal', 'logged');
+        };
+        const setWalletConnectAuthenticator = async () => {
+            setAuthenticator('WalletConnect', 'logged');
         };
 
-        const toggleOAuthOptions = () => {
-            emit('showOauthOptions');
+        const setAuthenticator = async(name: string, label: string) => {
+            const auth = ant.wallets.getAutenticator(name);
+            if (!auth) {
+                console.error(`${name} authenticator not found`);
+                return;
+            }
+            const authenticator = auth.newInstance(label);
+            const accountStore = useAccountStore();
+            const chainStore = useChainStore();
+            const network = chainStore.currentChain.settings.getNetwork();
+            const correctChainId = useChainStore().currentChain.settings.getChainId();
+            accountStore.loginEVM({ authenticator, network }).then(async () => {
+                // we verify that the authenticator is connected to the correct network
+                if (!await authenticator.isConnectedTo(correctChainId)) {
+                    const networkName = useChainStore().getChain(label).settings.getDisplay();
+                    const warningMessage = globalProps.$t('evm_wallet.incorrect_network', { networkName });
+                    globalProps.$warningNotification(warningMessage);
+                }
+            });
         };
 
-        // loading state for generic connect button is only required for mobile (WalletConnect)
-        const loadingConnect = computed(() => useFeedbackStore().isLoading('WalletConnect.login'));
+        const notifyNoProvider = (provider:string) => {
+            const message = globalProps.$t('home.multiple_providers_notification_message');
+            ant.config.notifyFailureMessage(message);
+        };
+
+        const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
+        const isLoadingOreId = (provider: string) =>
+            selectedOAuthProvider.value === provider &&
+            useFeedbackStore().isLoading('OreId.login');
 
         return {
-            loadingConnect,
-            viewAnyAccount,
-            toggleWalletOptions,
-            toggleOAuthOptions,
+            isLoading,
+            isLoadingOreId,
+            supportsMetamask,
+            supportsSafePal,
+            showMetamaskButton,
+            showSafePalButton,
+            showWalletConnectButton,
+            setOreIdAuthenticator,
+            setMetamaskAuthenticator,
+            setSafepalAuthenticator,
+            setWalletConnectAuthenticator,
+            notifyNoProvider,
+            redirectToMetamaskDownload,
+            redirectToSafepalDownload,
         };
     },
 });
@@ -45,42 +118,165 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
-    <q-btn class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleOAuthOptions">
-        <img
-            width="24"
-            class="q-mr-sm"
-            src="~assets/logo--tlos.svg"
-        >
-        {{ $t('home.login_with_social_media') }}
-    </q-btn>
 
-    <q-btn :loading="loadingConnect" class="c-evm-login-buttons__metamask-button purpleGradient" @click="toggleWalletOptions">
-        {{ $t('home.connect_with_wallet') }}
-        <template v-slot:loading>
-            <QSpinnerFacebook />
+    <!-- Google OAuth Provider -->
+    <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+        <template v-if="isLoadingOreId('google')">
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
-    </q-btn>
+        <template v-else>
+            <img
+                width="24"
+                class="c-evm-login-buttons__icon"
+                src="~assets/logo--tlos.svg"
+            >
+            {{ $t('home.login_with_social_media') }}
+        </template>
+    </div-->
 
-    <!-- <q-btn
-        text-color="white"
-        outline
-        :label="$t('home.view_any_account')"
-        @click="viewAnyAccount"
-    /> -->
+    <!-- Metamask Authenticator button -->
+    <div
+        v-if="showMetamaskButton"
+        class="c-evm-login-buttons__option"
+        @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()"
+    >
+        <template v-if="isLoading('Metamask.login')">
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+        </template>
+        <template v-else>
+            <InlineSvg
+                :src="require('src/assets/evm/metamask_fox.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--metamask"
+                height="24"
+                width="24"
+                aria-hidden="true"
+            />
+            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+        </template>
+    </div>
+
+    <!-- Safepal Authenticator button -->
+    <div
+        v-if="showSafePalButton"
+        class="c-evm-login-buttons__option"
+        @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()"
+    >
+        <template v-if="isLoading('SafePal.login')">
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+        </template>
+        <template v-else>
+            <InlineSvg
+                :src="require('src/assets/evm/safepal.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                height="24"
+                width="24"
+                aria-hidden="true"
+            />
+            {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+        </template>
+    </div>
+
+    <!-- WalletConnect Authenticator button -->
+    <div
+        v-if="showWalletConnectButton"
+        class="c-evm-login-buttons__option"
+        @click="setWalletConnectAuthenticator()"
+    >
+        <template v-if="isLoading('WalletConnect.login')">
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+        </template>
+        <template v-else>
+            <InlineSvg
+                :src="require('src/assets/evm/wallet_connect.svg')"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--wallet-connect"
+                height="24"
+                width="24"
+                aria-hidden="true"
+            />
+            {{ $t('home.walletconnect') }}
+        </template>
+    </div>
+
 </div>
 </template>
 
 <style lang="scss">
 .c-evm-login-buttons {
+    $self: &;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 24px;
+    gap: 14px;
 
-    &__metamask-button {
-        padding: 0 16px;
-        height: 42px;
+    &__loading{
+        width: 100%;
+        text-align: center;
+    }
+
+    &__header{
+        display: inline-block;
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    &__option{
+        width: 224px;
+        height: 54px;
+        color: $white;
+        border: solid $white;
+        border-width: 1px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        padding-top: 14px;
+        padding-left: 14px;
+        padding-right: 14px;
+        cursor: pointer;
+
+        #{$self}__icon, img {
+            display: inline-block;
+            vertical-align:top;
+            margin-right: 8px;
+        }
+
+        // &:hover {
+        //     color: $white;
+        //     border-color: $white;
+        // }
+
+        // &:not(:hover) #{$self}__icon {
+        //     &--oreid {
+        //         opacity: 1;
+        //     }
+        //     &--metamask, &--safepal, &--wallet-connect {
+        //         opacity: 0.3;
+        //     }
+        //     &--metamask {
+        //         .st3, .st8, .st9 {
+        //             fill: $blackDark;
+        //             stroke: $blackDark;
+        //         }
+        //         .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
+        //             fill: $white;
+        //             stroke: $blackDark;
+        //         }
+        //     }
+        //     &--safepal {
+        //         path {
+        //             fill: $white;
+        //         }
+        //     }
+        //     &--wallet-connect {
+        //         circle {
+        //             fill: $white;
+        //             stroke: $blackDark;
+        //         }
+        //         path {
+        //             fill: $blackDark;
+        //         }
+        //     }
+        // }
     }
 }
 </style>
