@@ -40,7 +40,7 @@ const totalFiatValueText = computed(() => {
 const systemTokenName = computed(() => chainSettings.getSystemToken().name);
 const systemTokenSymbol = computed(() => chainSettings.getSystemToken().symbol);
 const wrappedTokenSymbol = computed(() => chainSettings.getWrappedSystemToken().symbol);
-const allBalances = computed(() => balancesStore.currentBalances);
+const allBalances = computed(() => balancesStore.loggedBalances);
 const systemTokenBalanceBn =  computed(() => allBalances.value.find(b => b.token.contract === NativeCurrencyAddress)?.balance);
 const wrappedTokenBalanceBn = computed(() =>
     allBalances.value.find(b => b.token.contract === chainSettings.getWrappedSystemToken().address)?.balance,
@@ -75,7 +75,7 @@ const wrappedFiatValueText = computed(() => prettyPrintCurrency(
     fiatCurrency.value,
     false,
 ));
-const prettySystemTokenFiatPrice = computed(() => prettyPrintCurrency(systemTokenPrice.value, 2, fiatLocale.value, false, fiatCurrency.value, false));
+const prettySystemTokenFiatPrice = computed(() => prettyPrintCurrency(+systemTokenPrice.value, 2, fiatLocale.value, false, fiatCurrency.value, false));
 
 const cardData = computed(() => [{
     label: $t('evm_wrap.wrapped_card_label', { symbol: systemTokenSymbol.value }),
@@ -119,7 +119,7 @@ function prettyPrintToken(amount: BigNumber | undefined, isWrapped: boolean) {
     <div class="text-center">
         <h5>{{ $t('evm_wrap.total_of_wrapped_and_unwrapped', { token: systemTokenName }) }}</h5>
         <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
-        <p v-if="!loading" class="u-text--low-contrast q-mb-xl">
+        <p class="u-text--low-contrast q-mb-xl">
             <span class="o-text--small-bold">
                 {{ totalSystemAndWrappedBalance }} {{ totalBalanceUnitsText }}
             </span>
