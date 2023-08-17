@@ -189,6 +189,13 @@ export default {
         wrap_input_label: 'Wrapping Amount',
         unwrap_input_label: 'Unwrapping Amount',
     },
+    evm_stake: {
+        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdraw-able {token}',
+        staked_card_label: 'Staked {symbol}',
+        staked_card_tooltip: 'Staked\n\n' +
+        'This reflects the amount of staked {systemSymbol} tokens associated with the current account. This includes your {wrappedSymbol} token balance multiplied by the current exchange rate.',
+        unstaking_card_tooltip: 'Unstaking',
+    },
     notification:{
         success_title_trx: 'Success',
         success_title_copied: 'Copied',
