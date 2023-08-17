@@ -138,8 +138,11 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         async updateSettings(label: string): Promise<void> {
-            this.getChain(label).settings.init().then(() => {
-                getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
+            this.trace('updateSettings', label);
+            const settings = this.getChain(label).settings as EVMChainSettings;
+            settings.init().then(() => {
+                this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
+                getAntelope().events.onChainIndexerReady.next({ label, ready: true });
             }).catch((error) => {
                 console.error(error);
                 throw new Error('antelope.chain.error_settings');
@@ -147,7 +150,7 @@ export const useChainStore = defineStore(store_name, {
         },
         async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
-            this.trace('updateApy');
+            this.trace('updateApy', label);
             const chain = this.getChain(label);
             try {
                 if (chain.settings.isNative()) {
