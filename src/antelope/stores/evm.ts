@@ -16,7 +16,7 @@ import { BehaviorSubject, filter } from 'rxjs';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { events_signatures, functions_overrides } from 'src/antelope/stores/utils';
+import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import {
     AntelopeError,
@@ -46,7 +46,6 @@ import {
     useFeedbackStore,
 } from 'src/antelope';
 import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
-import { getAddress } from 'ethers/lib/utils';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -361,10 +360,10 @@ export const useEVMStore = defineStore(store_name, {
 
             if (metadata && creationInfo) {
                 this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
-                return await this.getVerifiedContract(authenticator, addressLower, authenticator.label, metadata, creationInfo, suspectedToken);
+                return await this.getVerifiedContract(authenticator, addressLower, metadata, creationInfo, suspectedToken);
             }
 
-            const contract = await this.getContractFromTokenList(authenticator, address, authenticator.label, suspectedToken, creationInfo);
+            const contract = await this.getContractFromTokenList(authenticator, address, suspectedToken, creationInfo);
             if (contract) {
                 this.trace('getContract', 'returning contract from token list', address, contract);
                 return contract;
@@ -496,7 +495,6 @@ export const useEVMStore = defineStore(store_name, {
         async getContractFromTokenList(
             authenticator: EVMAuthenticator,
             address:string,
-            label: string,
             suspectedType:string,
             creationInfo:EvmContractCreationInfo | null,
         ): Promise<EvmContract | null> {
