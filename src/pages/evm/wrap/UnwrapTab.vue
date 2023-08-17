@@ -187,7 +187,7 @@ async function handleUnwrapClick() {
             <div class="c-unwrap-tab__cta-container">
                 <q-btn
                     color="primary"
-                    :disable="availableToUnwrap.isZero()"
+                    :disable="availableToUnwrap.isZero() || !formIsValid"
                     :loading="ctaIsLoading"
                     :label="$t('evm_wrap.unwrap')"
                     :aria-label="$t(
