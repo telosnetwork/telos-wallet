@@ -5,6 +5,7 @@ import { MockData } from 'test/jest/utils/antelope/mockData';
 // -------- Chain Store --------
 
 const ChainSettings = {
+    initialized: jest.fn(),
     getChainId: jest.fn().mockImplementation(() => MockData.Chain.id),
     isNative: jest.fn(),
     getTokens: jest.fn(),
