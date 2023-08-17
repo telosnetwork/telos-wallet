@@ -189,46 +189,6 @@ export default {
         wrap_input_label: 'Wrapping Amount',
         unwrap_input_label: 'Unwrapping Amount',
     },
-    evm_stake: {
-        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdrawable {token}',
-        staked_card_label: 'Staked {symbol}',
-        staked_card_tooltip: 'Staked tokens:\n\n' +
-        'This reflects the total amount of staked {systemSymbol} tokens associated with the current account.\n' +
-        'This includes your {stakedSymbol} token balance multiplied by the current exchange rate.',
-        unstaking_card_label: 'Unstaking',
-        unstaking_card_tooltip: 'Unstaking tokens:\n\n' +
-        'This reflects the total value of locked {systemSymbol} in the process of unstaking.\n' +
-        'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
-        'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
-        'During this time you cannot interact with this {systemSymbol}.',
-        withdrawable_card_label: 'withdrawable',
-        withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
-        'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
-        'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
-        'you can withdraw your {systemSymbol} from escrow.',
-        apy_card_label: 'APY',
-        apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
-        'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
-        'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
-        'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
-        unstaking_period_card_label: 'Unstaking Period',
-        unstaking_period_card_tooltip: 'Unstaking Period:\n\n' +
-        'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
-        'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
-        tvl_card_label: 'TVL',
-        tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
-        'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
-        unstaking_period: '10 days',
-        stake_input_label: 'Staking Amount',
-        stake: 'Stake',
-        stake_button_label: 'Stake {systemSymbol} to {stakedSymbol}',
-        stake_sidebar_title: 'Why stake {symbol}?',
-        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS grants you access to',
-        stake_sidebar_content_fragment_2_bold: ' continuous rewards ',
-        stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
-        stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
-        stake_sidebar_content_fragment_5: 'No further action is required.',
-    },
     notification:{
         success_title_trx: 'Success',
         success_title_copied: 'Copied',
