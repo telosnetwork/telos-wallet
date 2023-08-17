@@ -261,7 +261,6 @@ export default defineComponent({
             </li>
 
             <li
-                v-if="false"
                 class="c-app-nav__menu-item"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
