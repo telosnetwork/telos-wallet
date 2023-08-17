@@ -333,7 +333,7 @@ function toggleVideoPlay(playOnly?: boolean) {
         max-width: 432px;
         border-radius: 4px;
         background-color: var(--header-bg-color);
-        border: 1px solid darken($page-header, 5%);
+        border: 1px solid var(--header-item-outline-color);
     }
 
     &__video-container {

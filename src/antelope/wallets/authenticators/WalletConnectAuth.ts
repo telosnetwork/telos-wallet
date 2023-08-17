@@ -23,7 +23,14 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
+import {
+    AntelopeError,
+    EvmABI,
+    TokenClass,
+    addressString,
+    wtlosAbiDeposit,
+    wtlosAbiWithdraw,
+} from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
@@ -287,9 +294,46 @@ export class WalletConnectAuth extends EVMAuthenticator {
             this.sendConfig = null;
         }
     }
+
     async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
         this.sendConfig = null;
         await this._debouncedPrepareTokenConfig(token, amount, to);
+    }
+
+    async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        this.trace('wrapSystemToken', amount.toString());
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+
+        const config = {
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: wrappedSystemTokenContractAddress,
+            abi: wtlosAbiDeposit,
+            functionName: 'deposit',
+            args: [],
+            value: BigInt(amount.toString()),
+        };
+        this.trace('wrapSystemToken', 'prepareWriteContract ->', config);
+        const sendConfig = await prepareWriteContract(config);
+
+        this.trace('wrapSystemToken', 'writeContract ->', sendConfig);
+        return await writeContract(sendConfig);
+    }
+
+    async unwrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+
+        const sendConfig = await prepareWriteContract({
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: wrappedSystemTokenContractAddress,
+            abi: wtlosAbiWithdraw,
+            functionName: 'withdraw',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            args: [amount] as any[],
+        });
+
+        return await writeContract(sendConfig);
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
@@ -321,6 +365,14 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
         await web3Provider.ready;
         return web3Provider as ethers.providers.Web3Provider;
+    }
+
+    async getSigner(): Promise<ethers.Signer> {
+        this.trace('getSigner');
+        const web3Provider = await this.web3Provider();
+        const signer = web3Provider.getSigner();
+        this.trace('getSigner', 'signer ->', signer);
+        return signer;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {

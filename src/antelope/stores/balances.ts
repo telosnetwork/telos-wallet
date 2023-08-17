@@ -273,6 +273,50 @@ export const useBalancesStore = defineStore(store_name, {
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
             }
         },
+        async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            this.trace('wrapSystemTokens', amount.toString());
+            const label = 'logged';
+            try {
+                useFeedbackStore().setLoading('wrapSystemTokens');
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: wrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_wrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.wrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+            } finally {
+                useFeedbackStore().unsetLoading('wrapSystemTokens');
+            }
+        },
+        async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            this.trace('unwrapSystemTokens', amount.toString());
+            const label = 'logged';
+            try {
+                useFeedbackStore().setLoading('unwrapSystemTokens');
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: unwrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_unwrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.unwrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+            } finally {
+                useFeedbackStore().unsetLoading('unwrapSystemTokens');
+            }
+        },
         async transferNativeTokens(
             settings: NativeChainSettings,
             account: AccountModel,

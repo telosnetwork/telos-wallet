@@ -104,6 +104,10 @@ describe('prettyPrintCurrency', () => {
                 expect(prettyPrintCurrency(1234, 4, locale, false, currency)).toBe('$1,234.0000');
                 expect(prettyPrintCurrency(-1234, 4, locale, false, currency)).toBe('-$1,234.0000');
 
+                // check BigNumber fiat values
+                expect(prettyPrintCurrency(BigNumber.from(12), 2, locale, false, currency, false, 2)).toBe('$0.12');
+                expect(prettyPrintCurrency(BigNumber.from(12), 2, locale, false, currency, true, 2)).toBe('0.12\u00A0USD');
+
                 // abbreviate: true, with currency, displayCurrencyAsCode: false
                 expect(prettyPrintCurrency(0.123, 0, locale, true, currency)).toBe('$0');
                 expect(prettyPrintCurrency(0.123, 2, locale, true, currency)).toBe('$0.12');
@@ -184,6 +188,10 @@ describe('prettyPrintCurrency', () => {
             prettyPrintCurrency(BigNumber.from(oneThousandFiveHundredEthInWei), 4, 'en-US', true, 'TLOS', undefined, 18),
         ).toBe('1.5K TLOS');
 
+        // ensure that fiat currency expressed as a BigNumber is formatted correctly
+        expect(
+            prettyPrintCurrency(BigNumber.from(100), 2, 'en-US', false, 'USD', false, 2, false),
+        ).toBe('$1.00');
     });
 });
 
