@@ -201,23 +201,13 @@ export default {
         'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
-<<<<<<< HEAD
         withdrawable_card_label: 'withdrawable',
         withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
-=======
-        withdrawable_card_label: 'Withdraw-able',
-        withdrawable_card_tooltip: 'Withdraw-able tokens:\n\n' +
->>>>>>> c6dbb950 (adding page header component for Staking Section)
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
         apy_card_label: 'APY',
-<<<<<<< HEAD
         apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
-=======
-        apy_card_tooltip: 'APY: Annual Percentage Yield\n\n' +
-        'The annual rate of return after taking compound interest into account.\n' +
->>>>>>> c6dbb950 (adding page header component for Staking Section)
         'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
         'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
         'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
@@ -226,15 +216,18 @@ export default {
         'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
         'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
         tvl_card_label: 'TVL',
-<<<<<<< HEAD
         tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
         unstaking_period: '10 days',
-=======
-        tvl_card_tooltip: 'TVL: Total Value Locked\n\n' +
-        'The current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
-        'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
->>>>>>> c6dbb950 (adding page header component for Staking Section)
+        stake_input_label: 'Staking Amount',
+        stake: 'Stake',
+        stake_button_label: 'Stake {systemSymbol} to {stakedSymbol}',
+        stake_sidebar_title: 'Why stake {symbol}?',
+        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS grants you access to',
+        stake_sidebar_content_fragment_2_bold: ' continuous rewards ',
+        stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
+        stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
+        stake_sidebar_content_fragment_5: 'No further action is required.',
     },
     notification:{
         success_title_trx: 'Success',
@@ -250,7 +243,7 @@ export default {
         error_see_details_label: 'See Details',
         error_details_title: 'Error Details',
         neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
-        neutral_message_staking: 'Staking <b>{quantity}</b>',
+        neutral_message_staking: 'Staking <b>{quantity} {symbol}</b>',
         neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
@@ -536,6 +529,7 @@ export default {
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
             error_no_default_authenticator: 'No default authenticator found',
+            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
@@ -550,6 +544,9 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+        },
+        rex: {
+            error_contract_not_found: 'Contract not found for address {address}',
         },
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
