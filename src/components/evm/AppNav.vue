@@ -279,6 +279,7 @@ export default defineComponent({
                     aria-hidden="true"
                 />
                 {{ $t('nav.staking') }}
+                <span class="c-app-nav__apy-box"> APY <b>8.23%</b> </span>
             </li>
 
             <li
@@ -479,6 +480,15 @@ export default defineComponent({
                 stroke: var(--link-color);
             }
         }
+    }
+
+    &__apy-box {
+        @include text--small;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--bg-color);
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
     }
 
     &__icon {
