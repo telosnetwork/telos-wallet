@@ -29,83 +29,63 @@ const systemTokenName = computed(() => chainSettings.getSystemToken().name);
 const systemTokenSymbol = computed(() => chainSettings.getSystemToken().symbol);
 const stakedTokenSymbol = computed(() => chainSettings.getStakedSystemToken().symbol);
 
-const totalFiatValueText = ref('--');
+const totalFiatValueText = ref('$ 4,324.35');
 
-/*
-const totalFiatValueText = computed(() => {
-    if (loading.value) {
-        return '--';
-    }
+const stakedFiatValueText = ref('$ 4,000.23');
+const stakedTokenBalanceBn = ref(ethers.utils.parseUnits('34021.230', WEI_PRECISION));
+const unstakingFiatValueText = ref('$ 200.72');
+const unstakingBalanceBn = ref(ethers.utils.parseUnits('1242.0312', WEI_PRECISION));
+const withdrawableFiatValueText = ref('$ 123.02');
+const withdrawableBalanceBn = ref(ethers.utils.parseUnits('245.0225', WEI_PRECISION));
 
-    const totalBalance = +totalSystemAndWrappedBalance.value;
-    const totalFiatValue = totalBalance * systemTokenPrice.value;
+const apyPrittyPrint = ref('8.23%');
+const unlockPeriod = ref('10 days');
 
-    return prettyPrintCurrency(totalFiatValue, 2, fiatLocale.value, false, fiatCurrency.value, false);
-});
+// tvlAmountBn is a BigNumber representing 10 ETH (or 10 TLOS) with WEI_PRECISION decimals
+const tvlAmountBn = ref(ethers.utils.parseUnits('102400.0', WEI_PRECISION));
+const evmNetworkName = ref('Telos EVM');
 
-
-const wrappedTokenSymbol = computed(() => chainSettings.getWrappedSystemToken().symbol);
-const allBalances = computed(() => balancesStore.loggedBalances);
-const systemTokenBalanceBn =  computed(() => allBalances.value.find(b => b.token.contract === NativeCurrencyAddress)?.balance);
-const wrappedTokenBalanceBn = computed(() =>
-    allBalances.value.find(b => b.token.contract === chainSettings.getWrappedSystemToken().address)?.balance,
-);
-const totalSystemAndWrappedBalance = computed(() => {
-    if (!systemTokenBalanceBn.value || !wrappedTokenBalanceBn.value) {
-        return '0';
-    }
-    const addedBn = systemTokenBalanceBn.value.add(wrappedTokenBalanceBn.value);
-
-    return formatWei(addedBn, WEI_PRECISION);
-});
-const totalBalanceUnitsText = computed(() => {
-    const systemSymbol = chainSettings.getSystemToken().symbol;
-    const wrappedSymbol = chainSettings.getWrappedSystemToken().symbol;
-
-    return `${systemSymbol} + ${wrappedSymbol}`;
-});
-const unwrappedFiatValueText = computed(() => prettyPrintCurrency(
-    +formatWei(systemTokenBalanceBn.value ?? BigNumber.from(0), WEI_PRECISION) * systemTokenPrice.value,
-    2,
-    fiatLocale.value,
-    false,
-    fiatCurrency.value,
-    false,
-));
-const wrappedFiatValueText = computed(() => prettyPrintCurrency(
-    +formatWei(wrappedTokenBalanceBn.value ?? BigNumber.from(0), WEI_PRECISION) * systemTokenPrice.value,
-    2,
-    fiatLocale.value,
-    false,
-    fiatCurrency.value,
-    false,
-));
-const prettySystemTokenFiatPrice = computed(() => prettyPrintCurrency(+systemTokenPrice.value, 2, fiatLocale.value, false, fiatCurrency.value, false));
-*/
-
-const stakedFiatValueText = ref('--');
-const stakedTokenBalanceBn = ref(ethers.BigNumber.from(0));
-const unstakingFiatValueText = ref('--');
-const unstakingBalanceBn = ref(ethers.BigNumber.from(0));
-
-const cardData = computed(() => [{
+const firstLineData = computed(() => [{
     label: $t('evm_stake.staked_card_label', { symbol: systemTokenSymbol.value }),
     tooltip: $t('evm_stake.staked_card_tooltip', { stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
     primaryText: stakedFiatValueText.value,
     secondaryText: prettyPrintToken(stakedTokenBalanceBn.value, systemTokenSymbol.value),
     lowContrastSecondaryText: true,
+    useSmallBox: true,
 }, {
-    label: systemTokenSymbol.value,
-    tooltip: $t('evm_wrap.unstaking_card_tooltip'),
+    label: $t('evm_stake.unstaking_card_label'),
+    tooltip: $t('evm_stake.unstaking_card_tooltip', { stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value, unlockPeriod: unlockPeriod.value }),
     primaryText: unstakingFiatValueText.value,
     secondaryText: prettyPrintToken(unstakingBalanceBn.value, systemTokenSymbol.value),
     lowContrastSecondaryText: true,
+    useSmallBox: true,
 }, {
-    label: systemTokenSymbol.value,
-    tooltip: $t('evm_wrap.unstaking_card_tooltip'),
-    primaryText: unstakingFiatValueText.value,
-    secondaryText: prettyPrintToken(unstakingBalanceBn.value, systemTokenSymbol.value),
+    label: $t('evm_stake.withdrawable_card_label'),
+    tooltip: $t('evm_stake.withdrawable_card_tooltip', { stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value, unlockPeriod: unlockPeriod.value }),
+    primaryText: withdrawableFiatValueText.value,
+    secondaryText: prettyPrintToken(withdrawableBalanceBn.value, systemTokenSymbol.value),
     lowContrastSecondaryText: true,
+    useSmallBox: true,
+}]);
+
+const secondLineData = computed(() => [{
+    label: $t('evm_stake.apy_card_label', { symbol: systemTokenSymbol.value }),
+    tooltip: $t('evm_stake.apy_card_tooltip', { stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
+    secondaryText: apyPrittyPrint.value,
+    lowContrastSecondaryText: false,
+    useSmallBox: true,
+}, {
+    label: $t('evm_stake.unstaking_period_card_label'),
+    tooltip: $t('evm_stake.unstaking_period_card_tooltip', { stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
+    secondaryText: unlockPeriod.value,
+    lowContrastSecondaryText: false,
+    useSmallBox: true,
+}, {
+    label: $t('evm_stake.tvl_card_label'),
+    tooltip: $t('evm_stake.tvl_card_tooltip', { evmNetworkName: evmNetworkName.value, stakedSymbol: stakedTokenSymbol.value, systemSymbol: systemTokenSymbol.value }),
+    secondaryText: prettyPrintToken(tvlAmountBn.value, systemTokenSymbol.value),
+    lowContrastSecondaryText: false,
+    useSmallBox: true,
 }]);
 
 
@@ -138,12 +118,17 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
         <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
     </div>
 
-    <ScrollableInfoCards :cards="cardData" />
+    <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
+    <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
 </div>
 </template>
 
 <style lang="scss">
 .c-staking-header {
     width: 100%;
+
+    &__cards-second-line {
+        margin-top: 24px;
+    }
 }
 </style>
