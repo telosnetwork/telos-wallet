@@ -222,12 +222,13 @@ export default defineComponent({
 
     &__icon {
         margin-top: -1px;
+        transition: all 0.3s;
     }
 
     &__option{
         width: 224px;
         height: 54px;
-        color: #FFFFFF77;
+        color: $white;
         border: solid $white;
         border-width: 1px;
         border-radius: 4px;
