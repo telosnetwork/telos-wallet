@@ -120,7 +120,7 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+    <div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
@@ -132,7 +132,7 @@ export default defineComponent({
             >
             {{ $t('home.login_with_social_media') }}
         </template>
-    </div-->
+    </div>
 
     <!-- Metamask Authenticator button -->
     <div
@@ -244,7 +244,6 @@ export default defineComponent({
         //     color: $white;
         //     border-color: $white;
         // }
-
         // &:not(:hover) #{$self}__icon {
         //     &--oreid {
         //         opacity: 1;
