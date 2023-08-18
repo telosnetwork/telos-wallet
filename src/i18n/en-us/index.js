@@ -201,13 +201,23 @@ export default {
         'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
+<<<<<<< HEAD
         withdrawable_card_label: 'withdrawable',
         withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
+=======
+        withdrawable_card_label: 'Withdraw-able',
+        withdrawable_card_tooltip: 'Withdraw-able tokens:\n\n' +
+>>>>>>> c6dbb950 (adding page header component for Staking Section)
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
         apy_card_label: 'APY',
+<<<<<<< HEAD
         apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
+=======
+        apy_card_tooltip: 'APY: Annual Percentage Yield\n\n' +
+        'The annual rate of return after taking compound interest into account.\n' +
+>>>>>>> c6dbb950 (adding page header component for Staking Section)
         'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
         'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
         'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
@@ -216,9 +226,15 @@ export default {
         'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
         'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
         tvl_card_label: 'TVL',
+<<<<<<< HEAD
         tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
         unstaking_period: '10 days',
+=======
+        tvl_card_tooltip: 'TVL: Total Value Locked\n\n' +
+        'The current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
+        'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
+>>>>>>> c6dbb950 (adding page header component for Staking Section)
     },
     notification:{
         success_title_trx: 'Success',
