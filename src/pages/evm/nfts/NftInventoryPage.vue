@@ -285,6 +285,11 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
     });
 }
 
+function getNftForViewer(row: { id: string }) {
+    // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
+    return nftsToShow.value.find(nft => nft.id === row.id) as NFTClass;
+}
+
 // we update the inventory while the user is on the page
 let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
@@ -433,7 +438,7 @@ onUnmounted(() => {
                             >
                                 <template v-if="props.row.image">
                                     <NftViewer
-                                        :nft="(nftsToShow.find((nft) => nft.id === props.row.id) as ShapedNFT)"
+                                        :nft="getNftForViewer(props.row)"
                                         :previewMode="false"
                                         :tileMode="false"
                                     />
