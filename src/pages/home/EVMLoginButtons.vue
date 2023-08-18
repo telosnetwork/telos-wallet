@@ -220,10 +220,14 @@ export default defineComponent({
         margin-bottom: 16px;
     }
 
+    &__icon {
+        margin-top: -1px;
+    }
+
     &__option{
         width: 224px;
         height: 54px;
-        color: $white;
+        color: #FFFFFF77;
         border: solid $white;
         border-width: 1px;
         border-radius: 4px;
@@ -234,48 +238,52 @@ export default defineComponent({
         padding-right: 14px;
         cursor: pointer;
 
+        &--oreid {
+            color: $white;
+        }
+
         #{$self}__icon, img {
             display: inline-block;
             vertical-align:top;
             margin-right: 8px;
         }
 
-        // &:hover {
-        //     color: $white;
-        //     border-color: $white;
-        // }
-        // &:not(:hover) #{$self}__icon {
-        //     &--oreid {
-        //         opacity: 1;
-        //     }
-        //     &--metamask, &--safepal, &--wallet-connect {
-        //         opacity: 0.3;
-        //     }
-        //     &--metamask {
-        //         .st3, .st8, .st9 {
-        //             fill: $blackDark;
-        //             stroke: $blackDark;
-        //         }
-        //         .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //     }
-        //     &--safepal {
-        //         path {
-        //             fill: $white;
-        //         }
-        //     }
-        //     &--wallet-connect {
-        //         circle {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //         path {
-        //             fill: $blackDark;
-        //         }
-        //     }
-        // }
+        &:hover {
+            color: $white;
+            border-color: $white;
+        }
+        &:not(:hover) #{$self}__icon {
+            &--oreid {
+                opacity: 1;
+            }
+            &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.3;
+            }
+            &--metamask {
+                .st3, .st8, .st9 {
+                    fill: $blackDark;
+                    stroke: $blackDark;
+                }
+                .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+            }
+            &--safepal {
+                path {
+                    fill: $white;
+                }
+            }
+            &--wallet-connect {
+                circle {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+                path {
+                    fill: $blackDark;
+                }
+            }
+        }
     }
 }
 </style>
