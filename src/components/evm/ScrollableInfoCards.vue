@@ -8,13 +8,21 @@ const props = defineProps<{
         primaryText?: string;
         secondaryText?: string;
         lowContrastSecondaryText?: boolean;
+        useSmallBox?: boolean;
     }[];
 }>();
 </script>
 
 <template>
 <div class="c-scrollable-info-cards">
-    <div v-for="(card, index) in cards" :key="`card-${index}`" class="c-scrollable-info-cards__card">
+    <div
+        v-for="(card, index) in cards"
+        :key="`card-${index}`"
+        :class="{
+            'c-scrollable-info-cards__card': true,
+            'c-scrollable-info-cards__card--small': !!card.useSmallBox,
+        }"
+    >
         <div class="c-scrollable-info-cards__card-header">
             <h5 class="u-text--low-contrast">
                 {{ card.label }}
@@ -66,9 +74,11 @@ const props = defineProps<{
         border: 2px solid var(--header-item-outline-color);
         width: 220px;
         flex-shrink: 0;
-
         @include sm-and-up {
             width: 300px;
+            &--small {
+                width: 220px;
+            }
         }
     }
 
