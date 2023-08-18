@@ -207,8 +207,7 @@ export default {
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
         apy_card_label: 'APY',
-        apy_card_tooltip: 'APY: Annual Percentage Yield\n\n' +
-        'The annual rate of return after taking compound interest into account.\n' +
+        apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
         'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
         'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
         'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
@@ -217,8 +216,7 @@ export default {
         'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
         'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
         tvl_card_label: 'TVL',
-        tvl_card_tooltip: 'TVL: Total Value Locked\n\n' +
-        'The current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
+        tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
     },
     notification:{
