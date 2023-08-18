@@ -279,7 +279,7 @@ export default defineComponent({
                     aria-hidden="true"
                 />
                 {{ $t('nav.staking') }}
-                <span class="c-app-nav__apy-box"> APY <b>8.23%</b> </span>
+                <span class="c-app-nav__apy-box">  {{ $t('evm_stake.apy_card_label') }} <b>8.23%</b> </span>
             </li>
 
             <li
