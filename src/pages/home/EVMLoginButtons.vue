@@ -253,7 +253,7 @@ export default defineComponent({
         }
         &:not(:hover) #{$self}__icon {
             &--oreid, &--metamask, &--safepal, &--wallet-connect {
-                opacity: 0.5;
+                opacity: 0.8;
 
                 @include mobile-only {
                     opacity: 1;
