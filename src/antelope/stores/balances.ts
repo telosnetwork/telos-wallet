@@ -50,6 +50,7 @@ import {
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
+import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -133,6 +134,7 @@ export const useBalancesStore = defineStore(store_name, {
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
+                            await this.updateSystemTokensPrices(label);
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
@@ -148,7 +150,6 @@ export const useBalancesStore = defineStore(store_name, {
                                     }),
                                 );
 
-
                             Promise.allSettled(promises).then(() => {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                                 this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
@@ -161,17 +162,60 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', error);
             }
         },
+        async updateSystemTokensPrices(label: string): Promise<void> {
+            this.trace('updateSystemTokensPrices', label);
+            try {
+                // take the three system tokens
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+                const sysToken = chain_settings.getSystemToken();
+                const wrpToken = chain_settings.getWrappedSystemToken();
+                const stkToken = chain_settings.getStakedSystemToken();
 
+                // get the price for both system and wrapped tokens
+                const price = (await chain_settings.getUsdPrice()).toString();
+                const marketInfo = { price } as MarketSourceInfo;
+                sysToken.market = new TokenMarketData(marketInfo);
+                wrpToken.market = new TokenMarketData(marketInfo);
+
+                // first we need the contract instance to be able to execute queries
+                const evm = useEVMStore();
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                const contract = await evm.getContract(authenticator, stkToken.address, stkToken.type);
+                if (!contract) {
+                    throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: stkToken.address });
+                }
+                const contractInstance = await contract.getContractInstance();
+
+                // Now we preview a deposit of 1 SYS to get the ratio
+                const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
+                const ratio:BigNumber = await contractInstance.previewDeposit(oneSys);
+                const ratioNumber = ethers.utils.formatUnits(ratio, stkToken.decimals);
+
+                // Now we calculate the price of 1 STK = (price of 1 SYS) / ratio
+                const stkPrice = convertCurrency(oneSys, sysToken.decimals, stkToken.decimals, ratioNumber);
+                const stkPriceNumber = ethers.utils.formatUnits(stkPrice, sysToken.decimals);
+
+                // Finally we update the STK token price
+                const stkMarketInfo = { price:stkPriceNumber } as MarketSourceInfo;
+                // TODO: this is removed until we decide what to do whith the STK token price
+                // https://github.com/telosnetwork/telos-wallet/issues/544
+                // stkToken.market = new TokenMarketData(stkMarketInfo);
+                this.trace('updateSystemTokensPrices', `STLOS price: ${toRaw(stkMarketInfo)}`);
+
+            } catch (error) {
+                console.error(error);
+                // we won't thorw an error here, as it is not critical
+            }
+        },
         async updateSystemBalanceForAccount(label: string, address: addressString): Promise<void> {
+            this.trace('updateSystemBalanceForAccount', label, address);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const token = chain_settings.getSystemToken();
+            const sys_token = chain_settings.getSystemToken();
             const price = (await chain_settings.getUsdPrice()).toString();
             const marketInfo = { price } as MarketSourceInfo;
-            const marketData = new TokenMarketData(marketInfo);
-            token.market = marketData;
-
+            sys_token.market = new TokenMarketData(marketInfo);
             const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
-            this.processBalanceForToken(label, token, balanceBn);
+            this.processBalanceForToken(label, sys_token, balanceBn);
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();

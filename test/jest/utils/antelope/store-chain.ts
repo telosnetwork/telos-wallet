@@ -2,20 +2,21 @@
 
 import { MockData } from 'test/jest/utils/antelope/mockData';
 
-// -------- Chain Store --------
-
 const ChainSettings = {
     initialized: jest.fn(),
+    getSystemToken: jest.fn().mockImplementation(() => MockData.Token.SYSTEM_TOKEN),
+    getStakedSystemToken: jest.fn().mockImplementation(() => MockData.Token.STAKED_TOKEN),
+    getWrappedSystemToken: jest.fn().mockImplementation(() => MockData.Token.WRAPPED_TOKEN),
     getChainId: jest.fn().mockImplementation(() => MockData.Chain.id),
+    getDisplay: jest.fn().mockImplementation(() => MockData.Chain.display),
+    getHyperionEndpoint: jest.fn().mockImplementation(() => MockData.Chain.hyperionEndpoint),
     isNative: jest.fn(),
     getTokens: jest.fn(),
     getTokenList: jest.fn().mockImplementation(() => MockData.TokenList),
-    getSystemToken: jest.fn().mockImplementation(() => MockData.Token.SYSTEM_TOKEN),
     getUsdPrice: jest.fn().mockImplementation(() => 1),
     hasIndexerSupport: jest.fn().mockImplementation(() => false),
     isIndexerHealthy: jest.fn().mockImplementation(() => false),
     getNetwork: jest.fn().mockImplementation(() => MockData.Network),
-    getDisplay: jest.fn().mockImplementation(() => MockData.Network),
     getSystemTokens: jest.fn().mockImplementation(() => [MockData.Token.SYSTEM_TOKEN, MockData.Token.WRAPPED_TOKEN, MockData.Token.STAKED_TOKEN]),
     getExplorerUrl: jest.fn().mockImplementation(() => MockData.ExplorerUrl),
 };

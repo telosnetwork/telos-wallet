@@ -5,6 +5,7 @@ import { EvmABIEntry } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { keccak256, toUtf8Bytes } from 'ethers/lib/utils';
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
@@ -66,6 +67,30 @@ export function isValidAddressFormat(ethAddressString: string): boolean {
 
 export function getTopicHash(topic: string): string {
     return `0x${topic.substring(topic.length - 40)}`;
+}
+
+export function toChecksumAddress(address: string): string {
+    if (!address) {
+        return address;
+    }
+
+    let addy = address.toLowerCase().replace('0x', '');
+    if (addy.length !== 40) {
+        addy = addy.padStart(40, '0');
+    }
+
+    const hash = keccak256(toUtf8Bytes(addy)).replace('0x', '');
+    let ret = '0x';
+
+    for (let i = 0; i < addy.length; i++) {
+        if (parseInt(hash[i], 16) >= 8) {
+            ret += addy[i].toUpperCase();
+        } else {
+            ret += addy[i];
+        }
+    }
+
+    return ret;
 }
 
 export function parseErrorMessage(output: string): string {

@@ -248,7 +248,6 @@ export default defineComponent({
             vertical-align:top;
             margin-right: 8px;
         }
-
         &:hover {
             color: $white;
             border-color: $white;
