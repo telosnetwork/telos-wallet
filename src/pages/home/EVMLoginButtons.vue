@@ -121,14 +121,14 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+    <div class="c-evm-login-buttons__option" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
             <img
                 width="24"
-                class="c-evm-login-buttons__icon"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--oreid"
                 src="~assets/logo--tlos.svg"
             >
             {{ $t('home.login_with_social_media') }}
@@ -234,15 +234,11 @@ export default defineComponent({
         border-width: 1px;
         border-radius: 4px;
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 500;
         padding-top: 14px;
         padding-left: 14px;
         padding-right: 14px;
         cursor: pointer;
-
-        &--oreid {
-            color: $white;
-        }
 
         #{$self}__icon, img {
             display: inline-block;
@@ -252,37 +248,13 @@ export default defineComponent({
         &:hover {
             color: $white;
             border-color: $white;
+            font-weight: 600;
+            border-width: 1.5px;
         }
         &:not(:hover) #{$self}__icon {
-            &--oreid {
-                opacity: 1;
-            }
-            &--metamask, &--safepal, &--wallet-connect {
-                opacity: 0.3;
-            }
-            &--metamask {
-                .st3, .st8, .st9 {
-                    fill: $blackDark;
-                    stroke: $blackDark;
-                }
-                .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
-                    fill: $white;
-                    stroke: $blackDark;
-                }
-            }
-            &--safepal {
-                path {
-                    fill: $white;
-                }
-            }
-            &--wallet-connect {
-                circle {
-                    fill: $white;
-                    stroke: $blackDark;
-                }
-                path {
-                    fill: $blackDark;
-                }
+            color: blue;
+            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.5;
             }
         }
     }
