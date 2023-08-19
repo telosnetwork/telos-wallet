@@ -251,9 +251,12 @@ export default defineComponent({
             border-width: 1.5px;
         }
         &:not(:hover) #{$self}__icon {
-            color: blue;
             &--oreid, &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.5;
+
+                @include mobile-only {
+                    opacity: 1;
+                }
             }
         }
     }
