@@ -15,6 +15,7 @@ export default defineComponent({
         const ant = getAntelope();
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
+        const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -29,7 +30,7 @@ export default defineComponent({
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
         const injectedProviderDetected = computed(() => !!window.ethereum);
-        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value);
+        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value || (isMobile.value && isBraveBrowser.value)); // temp solution until Brave support is added https://github.com/telosnetwork/telos-wallet/issues/501
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
