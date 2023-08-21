@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { MockData } from 'test/jest/utils/antelope/mockData';
-
 // -------- Evm Store --------
 
 const initInjectedProvider = jest.fn().mockImplementation(() => ({
