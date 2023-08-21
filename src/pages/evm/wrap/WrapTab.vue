@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
@@ -8,7 +8,6 @@ import {
     useAccountStore,
     useBalancesStore,
     useChainStore,
-    useEVMStore,
     useUserStore,
 } from 'src/antelope';
 
@@ -29,6 +28,7 @@ const accountStore = useAccountStore();
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
 const systemTokenDecimals = systemToken.decimals;
+const uiDecimals = 2;
 const wrappedTokenSymbol = chainSettings.getWrappedSystemToken().symbol;
 
 // data
@@ -158,6 +158,7 @@ async function handleCtaClick() {
                 v-model="inputModelValue"
                 :symbol="systemTokenSymbol"
                 :decimals="systemTokenDecimals"
+                :decimals-to-display="uiDecimals"
                 :secondary-currency-code="fiatCurrency"
                 :secondary-currency-decimals="2"
                 :secondary-currency-conversion-factor="systemTokenFiatPrice"

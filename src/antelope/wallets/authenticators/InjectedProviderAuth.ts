@@ -74,7 +74,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     // EVMAuthenticator API ----------------------------------------------------------
 
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
-        console.log('wrapSystemToken', amount.toString());
+        this.trace('wrapSystemToken', amount.toString());
         const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
         let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
@@ -220,9 +220,9 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const web3 = new Web3(this.getProvider() as any);
         const contract = new web3.eth.Contract(erc20ABI, tokenAddress);
-        const result:ethers.BigNumber = contract.methods.balanceOf(account).call()
+        const result:ethers.BigNumber = await contract.methods.balanceOf(account).call()
             .then((balance: never) => ethers.BigNumber.from(balance));
-        this.trace('getERC20TokenBalance', [account], tokenAddress, '->', result);
+        this.trace('getERC20TokenBalance', [account], tokenAddress, '->', result.toString());
         return result;
     }
 

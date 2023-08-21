@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
@@ -66,7 +67,6 @@ const rowsPerPageOptions = [6, 12, 24, 48, 96];
 const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
 const initialQueryParamsApplied = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
-const listImagesLoadingStates = ref<Record<string, boolean>>({});
 const collectionFilter = ref('');
 const searchFilter = ref('');
 const searchbar = ref<HTMLElement | null>(null); // search input element
@@ -115,14 +115,6 @@ const showNoFilteredResultsState = computed(() => (collectionFilter.value || sea
 // watchers
 watch(nftsAndCollectionListLoaded, (loaded) => {
     if (loaded) {
-        nfts.value.forEach((nft) => {
-            // if an NFT icon in list view hasn't yet been loaded, enable the loading state for that image
-            // the loading state will be ended when the @loaded event is fired by that image
-            if (!showNftsAsTiles.value && listImagesLoadingStates.value?.[nft.id] !== false) {
-                listImagesLoadingStates.value[nft.id] = true;
-            }
-        });
-
         // if this is initial load and there are pagination query params, validate and apply them
         const { rowsPerPage, page, collection, search } = route.query;
 
@@ -284,13 +276,18 @@ function getListIconName({ isAudio, isVideo }: Record<string, boolean>) {
 }
 
 function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
-    router.replace({
+    router.push({
         name: 'evm-nft-details',
         query: {
             contract: collectionAddress,
             id: id,
         },
     });
+}
+
+function getNftForViewer(row: { id: string }) {
+    // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
+    return nftsToShow.value.find(nft => nft.id === row.id) as NFTClass;
 }
 
 // we update the inventory while the user is on the page
@@ -440,20 +437,11 @@ onUnmounted(() => {
                                 @keydown.space.enter.prevent="goToDetailPage(props.row)"
                             >
                                 <template v-if="props.row.image">
-                                    <q-skeleton
-                                        v-if="listImagesLoadingStates[props.row.id]"
-                                        type="rect"
-                                        class="c-nft-page__list-image"
+                                    <NftViewer
+                                        :nft="getNftForViewer(props.row)"
+                                        :previewMode="false"
+                                        :tileMode="false"
                                     />
-                                    <img
-                                        v-show="!listImagesLoadingStates[props.row.id]"
-                                        :src="props.row.image"
-                                        :alt="`${$t('nft.collectible')} ${props.row.id}`"
-                                        class="c-nft-page__list-image"
-                                        height="40"
-                                        width="40"
-                                        @load="listImagesLoadingStates[props.row.id] = false"
-                                    >
                                 </template>
 
                                 <q-icon
@@ -491,6 +479,7 @@ onUnmounted(() => {
                 class="q-mt-lg"
                 :pagination="pagination"
                 :rows-per-page-options="rowsPerPageOptions"
+                :row-label="'nft.collectibles_per_page'"
                 @pagination-updated="pagination = $event"
             />
         </div>
@@ -574,12 +563,6 @@ onUnmounted(() => {
         justify-content: center;
         align-items: center;
         cursor: pointer;
-    }
-
-    &__list-image {
-        border-radius: 4px;
-        height: 40px;
-        width: 40px;
     }
 
     &__tile-skeleton {

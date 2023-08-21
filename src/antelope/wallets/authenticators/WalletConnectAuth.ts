@@ -23,7 +23,14 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmABI, TokenClass, addressString, wtlosAbiDeposit, wtlosAbiWithdraw } from 'src/antelope/types';
+import {
+    AntelopeError,
+    EvmABI,
+    TokenClass,
+    addressString,
+    wtlosAbiDeposit,
+    wtlosAbiWithdraw,
+} from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
@@ -35,6 +42,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // thus, we need to implement out own debounce so that we can await the async function (in this case, _prepareTokenForTransfer)
     private _debounceTimer: number | NodeJS.Timer | null;
     private _debouncedPrepareTokenConfigResolver: ((value: unknown) => void) | null;
+    private web3Modal: Web3Modal;
+    private unsubscribeWeb3Modal: null | (() => void) = null;
 
     options: Web3ModalConfig;
     wagmiClient: EthereumClient;
@@ -45,6 +54,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
         this.wagmiClient = wagmiClient;
         this._debounceTimer = null;
         this._debouncedPrepareTokenConfigResolver = null;
+
+        this.web3Modal = new Web3Modal(this.options, this.wagmiClient);
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
@@ -136,8 +147,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
         } else {
             return new Promise(async (resolve) => {
                 this.trace('login', 'web3Modal.openModal()');
-                const web3Modal = new Web3Modal(this.options, this.wagmiClient);
-                web3Modal.subscribeModal(async (newState) => {
+
+                this.unsubscribeWeb3Modal = this.web3Modal.subscribeModal(async (newState) => {
                     this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
 
                     if (newState.open === true) {
@@ -166,12 +177,20 @@ export class WalletConnectAuth extends EVMAuthenticator {
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
                             );
                         }
+
+                        // this prevents multiple subscribers from being attached to the web3Modal
+                        // without this, every time the user logs out and back in again, this subscribeModal handler
+                        // runs one more time than the last time
+                        if (this.unsubscribeWeb3Modal) {
+                            this.unsubscribeWeb3Modal();
+                        }
                     }
+
                     if (wagmiConnected()) {
                         resolve(this.walletConnectLogin(network));
                     }
                 });
-                web3Modal.openModal();
+                this.web3Modal.openModal();
             });
         }
     }

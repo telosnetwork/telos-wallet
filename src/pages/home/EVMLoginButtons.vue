@@ -23,11 +23,13 @@ export default defineComponent({
 
         const supportsSafePal = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e._isSafePal;
+            return e && (isMobile.value ? e.isSafePal : e._isSafePal);
         });
 
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
+        const injectedProviderDetected = computed(() => !!window.ethereum);
+        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value);
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -101,6 +103,7 @@ export default defineComponent({
             supportsSafePal,
             showMetamaskButton,
             showSafePalButton,
+            showWalletConnectButton,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
@@ -117,7 +120,7 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+    <div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
@@ -129,7 +132,7 @@ export default defineComponent({
             >
             {{ $t('home.login_with_social_media') }}
         </template>
-    </div-->
+    </div>
 
     <!-- Metamask Authenticator button -->
     <div
@@ -174,7 +177,11 @@ export default defineComponent({
     </div>
 
     <!-- WalletConnect Authenticator button -->
-    <div class="c-evm-login-buttons__option" @click="setWalletConnectAuthenticator()">
+    <div
+        v-if="showWalletConnectButton"
+        class="c-evm-login-buttons__option"
+        @click="setWalletConnectAuthenticator()"
+    >
         <template v-if="isLoading('WalletConnect.login')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
@@ -213,6 +220,11 @@ export default defineComponent({
         margin-bottom: 16px;
     }
 
+    &__icon {
+        margin-top: -1px;
+        transition: all 0.3s;
+    }
+
     &__option{
         width: 224px;
         height: 54px;
@@ -227,49 +239,51 @@ export default defineComponent({
         padding-right: 14px;
         cursor: pointer;
 
+        &--oreid {
+            color: $white;
+        }
+
         #{$self}__icon, img {
             display: inline-block;
             vertical-align:top;
             margin-right: 8px;
         }
-
-        // &:hover {
-        //     color: $white;
-        //     border-color: $white;
-        // }
-
-        // &:not(:hover) #{$self}__icon {
-        //     &--oreid {
-        //         opacity: 1;
-        //     }
-        //     &--metamask, &--safepal, &--wallet-connect {
-        //         opacity: 0.3;
-        //     }
-        //     &--metamask {
-        //         .st3, .st8, .st9 {
-        //             fill: $blackDark;
-        //             stroke: $blackDark;
-        //         }
-        //         .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //     }
-        //     &--safepal {
-        //         path {
-        //             fill: $white;
-        //         }
-        //     }
-        //     &--wallet-connect {
-        //         circle {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //         path {
-        //             fill: $blackDark;
-        //         }
-        //     }
-        // }
+        &:hover {
+            color: $white;
+            border-color: $white;
+        }
+        &:not(:hover) #{$self}__icon {
+            &--oreid {
+                opacity: 1;
+            }
+            &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.3;
+            }
+            &--metamask {
+                .st3, .st8, .st9 {
+                    fill: $blackDark;
+                    stroke: $blackDark;
+                }
+                .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+            }
+            &--safepal {
+                path {
+                    fill: $white;
+                }
+            }
+            &--wallet-connect {
+                circle {
+                    fill: $white;
+                    stroke: $blackDark;
+                }
+                path {
+                    fill: $blackDark;
+                }
+            }
+        }
     }
 }
 </style>

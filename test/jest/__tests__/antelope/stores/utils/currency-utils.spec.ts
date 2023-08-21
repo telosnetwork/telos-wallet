@@ -104,6 +104,10 @@ describe('prettyPrintCurrency', () => {
                 expect(prettyPrintCurrency(1234, 4, locale, false, currency)).toBe('$1,234.0000');
                 expect(prettyPrintCurrency(-1234, 4, locale, false, currency)).toBe('-$1,234.0000');
 
+                // check BigNumber fiat values
+                expect(prettyPrintCurrency(BigNumber.from(12), 2, locale, false, currency, false, 2)).toBe('$0.12');
+                expect(prettyPrintCurrency(BigNumber.from(12), 2, locale, false, currency, true, 2)).toBe('0.12\u00A0USD');
+
                 // abbreviate: true, with currency, displayCurrencyAsCode: false
                 expect(prettyPrintCurrency(0.123, 0, locale, true, currency)).toBe('$0');
                 expect(prettyPrintCurrency(0.123, 2, locale, true, currency)).toBe('$0.12');

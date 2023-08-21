@@ -99,7 +99,7 @@ export const useNftsStore = defineStore(store_name, {
                     nft.contractPrettyName?.toLowerCase().includes(searchTermLower) ||
                     nft.contractAddress.toLowerCase().includes(searchTermLower) ||
                     nft.attributes.some(
-                        attr => [attr.label?.toLowerCase(), attr.text?.toLowerCase()].some(
+                        attr => [attr.label?.toString().toLowerCase(), attr.text?.toString().toLowerCase()].some(
                             text => text?.includes(searchTermLower),
                         ),
                     ),
