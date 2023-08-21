@@ -226,31 +226,28 @@ export default defineComponent({
         transition: all 0.3s;
     }
 
-    &__option{
+    &__option {
+        display: flex;
+        gap: 8px;
+
         width: 224px;
         height: 54px;
         color: $white;
-        border: solid $white;
-        border-width: 1px;
+        outline-color: $white;
+        outline-width: 1px;
+        outline-style: solid;
         border-radius: 4px;
         font-size: 16px;
         font-weight: 500;
-        padding-top: 14px;
-        padding-left: 14px;
-        padding-right: 14px;
+        padding: 14px;
         cursor: pointer;
 
-        #{$self}__icon, img {
-            display: inline-block;
-            vertical-align:top;
-            margin-right: 8px;
-        }
         &:hover {
             color: $white;
-            border-color: $white;
-            font-weight: 600;
-            border-width: 1.5px;
+            outline-color: $white;
+            outline-width: 2px;
         }
+
         &:not(:hover) #{$self}__icon {
             &--oreid, &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.8;
