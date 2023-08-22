@@ -178,7 +178,8 @@ export const useBalancesStore = defineStore(store_name, {
             this.trace('updateSystemTokensPrices', label);
             try {
                 // take the three system tokens
-                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+                const chain = useChainStore();
+                const chain_settings = chain.getChain(label).settings as EVMChainSettings;
                 const sysToken = chain_settings.getSystemToken();
                 const wrpToken = chain_settings.getWrappedSystemToken();
 

@@ -51,6 +51,7 @@ const RPC_ENDPOINT = {
     path: '/evm',
 };
 
+const API_ENDPOINT = 'https://api-dev.telos.net/v1';
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
 const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
@@ -79,6 +80,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getRPCEndpoint(): RpcEndpoint {
         return RPC_ENDPOINT;
+    }
+
+    getApiEndpoint(): string {
+        return API_ENDPOINT;
     }
 
     getPriceData(): Promise<PriceChartData> {

@@ -42,6 +42,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
     // External query API support
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
 
+    // External query API support
+    protected api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
+
     // External trusted metadata bucket for EVM contracts
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getTrustedContractsBucket() });
 
@@ -61,7 +64,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     tokenListPromise: Promise<TokenClass[]> | null = null;
 
     // EvmContracts cache mapped by address
-    protected contracts: Record<string, EvmContract | false> = {};
+    protected contracts: Record<string, {
+        promise: Promise<EvmContract | false>;
+        resolve?: (value: EvmContract | false) => void;
+    }> = {};
 
     constructor(network: string) {
         this.network = network;
@@ -214,6 +220,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
     abstract getRPCEndpoint(): RpcEndpoint;
+    abstract getApiEndpoint(): string;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
     abstract getBuyMoreOfTokenLink(): string;
@@ -225,6 +232,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
     abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
+
+    async getApy(): Promise<string> {
+        const response = await this.api.get('apy/evm');
+        return response.data as string;
+    }
 
     async getBalances(account: string): Promise<TokenBalance[]> {
         if (!this.hasIndexerSupport()) {
@@ -351,22 +363,47 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return `${token.symbol}-${token.address}-${this.getNetwork()}`;
     }
 
-    getContract(address: string): EvmContract | false | null {
+    async getContract(address: string): Promise<EvmContract | false | null> {
         const key = address.toLowerCase();
-        return this.contracts[key] ?? null;
+        const returnValue = this.contracts[key]?.promise ?? null;
+        if (!this.contracts[key]) {
+            this.contracts[key] = {
+                promise: Promise.resolve(false),
+            };
+            this.contracts[key].promise = new Promise((resolve) => {
+                this.contracts[key].resolve = resolve;
+            });
+        }
+        return returnValue;
     }
 
     addContract(address: string, contract: EvmContract) {
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
-            this.contracts[key] = contract;
+            this.contracts[key] = {
+                promise: Promise.resolve(contract),
+            };
+        } else {
+            if (this.contracts[key].resolve) {
+                this.contracts[key].resolve?.(contract);
+            } else {
+                console.error('Error: Contract already exists', address);
+            }
         }
     }
 
     setContractAsNotExisting(address: string) {
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
-            this.contracts[key] = false;
+            this.contracts[key] = {
+                promise: Promise.resolve(false),
+            };
+        } else {
+            if (this.contracts[key].resolve) {
+                this.contracts[key].resolve?.(false);
+            } else {
+                console.error('Error: Contract already exists', address);
+            }
         }
     }
 
