@@ -11,11 +11,14 @@ export interface ChainSettings {
     getSmallLogoPath(): string;
     getLargeLogoPath(): string;
     getChainId(): string;
+    getHyperionEndpoint(): string;
     getRPCEndpoint(): RpcEndpoint;
+    getApiEndpoint(): string;
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
     getSystemTokens(): TokenClass[];
     getNFTsInventory(address: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
     getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
     trackAnalyticsEvent(params: Record<string, unknown>): void;
+    getApy(): Promise<string>;
 }
