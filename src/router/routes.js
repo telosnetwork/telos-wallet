@@ -79,6 +79,14 @@ const routes = [
                 name: 'evm-wrap',
                 component: () => import('pages/evm/wrap/WrapPage.vue'),
             },
+            {
+                path: 'buy',
+                name: 'buy',
+                meta: {
+                    requiresAuth: true,
+                },
+                component: () => import('pages/evm/buy/BuyPage.vue'),
+            },
         ],
     },
 
