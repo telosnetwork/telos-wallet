@@ -21,10 +21,6 @@ const goToRoute = (name: string) => {
     router.push({ name });
 };
 
-const goToBuy = () => {
-    window.open(buyMoreLink.value, '_blank')?.focus();
-};
-
 </script>
 
 <template>

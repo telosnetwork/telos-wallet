@@ -69,19 +69,4 @@ describe('WalletPageHeader.vue', () => {
         });
     });
 
-    describe('goToBuy', () => {
-
-        it('should call window.open', () => {
-            const originalWindowOpen = window.open;
-            window.open = jest.fn();
-
-            wrapper.vm.goToBuy();
-
-            expect(window.open).toHaveBeenCalledTimes(1);
-            expect(window.open).toHaveBeenCalledWith(fakeBuyMoreLink, '_blank');
-
-            window.open = originalWindowOpen;
-        });
-    });
-
 });
