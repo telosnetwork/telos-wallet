@@ -5,11 +5,6 @@ import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
 import BuyPageOptionWidget from 'pages/evm/buy/BuyPageOptionWidget.vue';
 import { inject, ref } from 'vue';
 
-const topperButtonLabel = 'topper button';
-const topperDescription = 'topper description';
-const simplexButtonLabel = 'simplex button';
-const simplexDescription = 'simplex description';
-
 const widgetLink = ref('');
 const displayWidget = ref<boolean>(false);
 const telosApi = inject('$telosApi') as AxiosInstance;
@@ -33,11 +28,26 @@ async function fetchLink(name: string) {
 
 <template>
 <AppPage>
+    <template v-slot:header>
+        <h1>{{ $t('evm_buy.buy_telos') }}</h1>
+    </template>
     <BuyPageOptionWidget v-if="displayWidget" :link="widgetLink"/>
 
     <div v-else>
-        <BuyPageOption :button-label="topperButtonLabel" :description="topperDescription" @click="fetchLink('topper')"/>
-        <BuyPageOption :button-label="simplexButtonLabel" :description="simplexDescription" @click="fetchLink('simplex')"/>
+        <BuyPageOption
+            :button-label="$t('evm_buy.simplex.button_label')"
+            :powered-by="$t('evm_buy.simplex.powered_by')"
+            :header="$t('evm_buy.simplex.header')"
+            :subheader="$t('evm_buy.simplex.subheader')"
+            @click="fetchLink('simplex')"
+        />
+        <BuyPageOption
+            :button-label="$t('evm_buy.topper.button_label')"
+            :powered-by="$t('evm_buy.topper.powered_by')"
+            :header="$t('evm_buy.topper.header')"
+            :subheader="$t('evm_buy.topper.subheader')"
+            @click="fetchLink('topper')"
+        />
     </div>
 </AppPage>
 </template>

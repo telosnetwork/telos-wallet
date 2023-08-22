@@ -1,16 +1,21 @@
 <script lang="ts" setup>
+import { QBtn } from 'quasar';
+
 
 const props = defineProps<{
     buttonLabel: string;
-    description: string;
+    poweredBy: string;
+    header: string;
+    subheader: string;
 }>();
 
 </script>
 
 <template>
 <div>
-    <q-button>{{ buttonLabel }}</q-button>
-    <p>{{ description }}</p>
+    <QBtn>{{ buttonLabel }} powered by{{ poweredBy }}</QBtn>
+    <p>{{ header }}</p>
+    <p>{{ subheader }}</p>
 </div>
 </template>
 

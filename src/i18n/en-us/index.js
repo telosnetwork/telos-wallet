@@ -67,6 +67,21 @@ export default {
         ecosystem: 'Ecosystem',
         nfts: 'Digital Collectibles',
     },
+    evm_buy: {
+        buy_telos: 'Buy Telos',
+        simplex: {
+            button_label: 'EVM Token',
+            powered_by: 'Simplex',
+            header: 'Receive TLOS directly on Telos EVM network.',
+            subheader: 'Not available for all U.S. based customers',
+        },
+        topper: {
+            button_label: 'ERC20 on Ethereum',
+            powered_by: 'Topper',
+            header: 'Receive ERC20 TLOS ptoken on the Ethereum mainnet.',
+            subheader: 'The Telos ERC20 token on Ethereum can be bridged to Telos Native or Telos EVM on https://dapp.ptokens.io',
+        },
+    },
     evm_wallet: {
         send_icon_alt: 'Send icon',
         receive_icon_alt: 'Receive icon',
