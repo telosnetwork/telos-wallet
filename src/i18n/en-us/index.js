@@ -517,6 +517,7 @@ export default {
             error_update_data: 'Error in updating data',
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
+            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',

@@ -9,6 +9,8 @@ const props = defineProps<{
         secondaryText?: string;
         lowContrastSecondaryText?: boolean;
         useSmallBox?: boolean;
+        isPrimaryLoading?: boolean;
+        isSecondaryLoading?: boolean;
     }[];
 }>();
 </script>
@@ -35,14 +37,23 @@ const props = defineProps<{
             />
         </div>
 
-        <h3>{{ card.primaryText }}</h3>
+        <h3 v-if="card.isPrimaryLoading" >
+            <q-spinner-dots class="c-scrollable-info-cards__primary-loading"  color="primary" />
+        </h3>
+        <h3 v-else class="c-scrollable-info-cards__primary-text">
+            {{ card.primaryText }}
+        </h3>
+
         <span
             v-if="card.secondaryText"
             :class="{
-                'u-text--low-contrast': card.lowContrastSecondaryText
+                'c-scrollable-info-cards__low-contrast': card.lowContrastSecondaryText
             }"
         >
-            {{ card.secondaryText }}
+            <q-spinner-dots v-if="card.isSecondaryLoading" class="c-scrollable-info-cards__secondary-loading" color="primary" />
+            <span v-else class="c-scrollable-info-cards__secondary-text">
+                {{ card.secondaryText }}
+            </span>
         </span>
     </div>
 </div>
@@ -66,6 +77,17 @@ const props = defineProps<{
         width: max-content;
         margin: auto;
     }
+
+    &__primary-loading {
+        margin-left: 4px;
+    }
+
+    &__secondary-loading {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+    }
+
 
     &__card {
         background-color: var(--bg-color);
