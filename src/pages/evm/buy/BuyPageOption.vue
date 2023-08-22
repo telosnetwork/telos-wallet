@@ -14,7 +14,16 @@ const props = defineProps<{
 <template>
 <div class="c-buy-page-option">
     <QBtn class="c-buy-page-option__button" @click="$emit('fetch-link')" >
-        <div class="c-buy-page-option__label"> {{ buttonLabel }}</div>
+        <div class="c-buy-page-option__label">
+            <img
+                src="https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg"
+                class="c-wallet-balance-row__logo"
+                height="24"
+                width="24"
+                aria-hidden="true"
+                alt="Token logo"
+            >
+            {{ buttonLabel }}</div>
         <div class="c-buy-page-option__powered">powered by {{ poweredBy }} </div>
     </QBtn>
     <div class="c-buy-page-option__header">{{ header }}</div>
@@ -30,7 +39,6 @@ const props = defineProps<{
     justify-content: center;
     align-items: flex-end;
     gap: 16px;
-    text-transform: none;
 
     &__button{
         display: flex;
@@ -59,14 +67,17 @@ const props = defineProps<{
         font-size: 24px;
         font-weight: 600;
         line-height: 130%;
+        text-transform: none;
     }
 
     &__powered{
+        margin-left: auto;
         color: #4D4D4D;
         text-align: center;
         font-size: 12px;
         font-weight: 400;
         line-height: 150%;
+        text-transform: none;
     }
 
     &__header{
