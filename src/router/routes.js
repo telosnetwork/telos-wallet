@@ -25,6 +25,9 @@ const routes = [
     {
         path: '/evm',
         component: () => import('layouts/EVMLayout.vue'),
+        meta: {
+            requiresAuth: true,
+        },
         children: [
             {
                 path: 'wallet',
