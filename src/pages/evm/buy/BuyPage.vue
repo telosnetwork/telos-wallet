@@ -2,7 +2,6 @@
 import { AxiosInstance } from 'axios';
 import AppPage from 'components/evm/AppPage.vue';
 import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
-import BuyPageOptionWidget from 'pages/evm/buy/BuyPageOptionWidget.vue';
 import { useAccountStore } from 'src/antelope';
 import { inject, ref } from 'vue';
 
@@ -39,8 +38,15 @@ async function fetchLink(name: string) {
     <template v-slot:header>
         <h1>{{ $t('evm_buy.buy_telos') }}</h1>
     </template>
-    <div >
-        <BuyPageOptionWidget v-if="displayWidget" :link="widgetLink"/>
+
+    <div>
+        <iframe
+            v-if="displayWidget"
+            :src="widgetLink"
+            height="500px"
+            width="100%"
+            allowfullscreen="true"
+        ></iframe>
 
         <div v-else class="c-buy-page">
             <BuyPageOption
