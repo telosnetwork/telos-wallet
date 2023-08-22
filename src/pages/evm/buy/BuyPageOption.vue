@@ -13,7 +13,7 @@ const props = defineProps<{
 
 <template>
 <div>
-    <QBtn>{{ buttonLabel }} powered by{{ poweredBy }}</QBtn>
+    <QBtn @click="$emit('fetch-link')" >{{ buttonLabel }} powered by{{ poweredBy }}</QBtn>
     <p>{{ header }}</p>
     <p>{{ subheader }}</p>
 </div>
