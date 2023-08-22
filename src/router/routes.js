@@ -77,6 +77,9 @@ const routes = [
             {
                 path: 'wrap',
                 name: 'evm-wrap',
+                meta: {
+                    requiresAuth: true,
+                },
                 component: () => import('pages/evm/wrap/WrapPage.vue'),
             },
         ],
