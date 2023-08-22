@@ -522,7 +522,6 @@ export default {
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
             error_no_default_authenticator: 'No default authenticator found',
-            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
