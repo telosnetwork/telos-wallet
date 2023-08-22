@@ -74,14 +74,8 @@ async function fetchLink(name: string) {
 .c-buy-page {
     display: flex;
     flex-wrap: wrap;
-    flex-direction: row;
-    max-width: 1000px;
-    margin: auto;
-
-    &__option {
-        @include md-and-up {
-            flex-basis: 50%;
-        }
-    }
+    justify-content: center;
+    align-items: flex-start;
+    gap: 160px;
 }
 </style>
