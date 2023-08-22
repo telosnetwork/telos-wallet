@@ -74,12 +74,14 @@ export default {
             powered_by: 'Simplex',
             header: 'Receive TLOS directly on Telos EVM network.',
             subheader: 'Not available for all U.S. based customers',
+            link: '',
         },
         topper: {
             button_label: 'ERC20 on Ethereum',
             powered_by: 'Topper',
             header: 'Receive ERC20 TLOS ptoken on the Ethereum mainnet.',
-            subheader: 'The Telos ERC20 token on Ethereum can be bridged to Telos Native or Telos EVM on https://dapp.ptokens.io',
+            subheader: 'The Telos ERC20 token on Ethereum can be bridged to Telos Native or Telos EVM on ',
+            subheader_link: 'https://dapp.ptokens.io',
         },
     },
     evm_wallet: {

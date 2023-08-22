@@ -54,6 +54,7 @@ async function fetchLink(name: string) {
                 :powered-by="$t('evm_buy.simplex.powered_by')"
                 :header="$t('evm_buy.simplex.header')"
                 :subheader="$t('evm_buy.simplex.subheader')"
+                subheaderLink=""
                 class="c-buy-page__option"
                 @fetchLink="fetchLink('simplex')"
             />
@@ -62,6 +63,7 @@ async function fetchLink(name: string) {
                 :powered-by="$t('evm_buy.topper.powered_by')"
                 :header="$t('evm_buy.topper.header')"
                 :subheader="$t('evm_buy.topper.subheader')"
+                :subheaderLink="$t('evm_buy.topper.subheader_link')"
                 class="c-buy-page__option"
                 @fetchLink="fetchLink('topper')"
             />

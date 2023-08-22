@@ -7,6 +7,7 @@ const props = defineProps<{
     poweredBy: string;
     header: string;
     subheader: string;
+    subheaderLink: string;
 }>();
 
 </script>
@@ -18,8 +19,8 @@ const props = defineProps<{
             <img
                 src="https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg"
                 class="c-wallet-balance-row__logo"
-                height="24"
-                width="24"
+                height="22"
+                width="22"
                 aria-hidden="true"
                 alt="Token logo"
             >
@@ -27,7 +28,9 @@ const props = defineProps<{
         <div class="c-buy-page-option__powered">powered by {{ poweredBy }} </div>
     </QBtn>
     <div class="c-buy-page-option__header">{{ header }}</div>
-    <div class="c-buy-page-option__subheader">{{ subheader }}</div>
+    <div class="c-buy-page-option__subheader">{{ subheader }}
+        <a v-if="subheaderLink" :href='subheaderLink' target="_blank">{{ subheaderLink }}</a>
+    </div>
 </div>
 </template>
 
