@@ -24,7 +24,9 @@ const props = defineProps<{
                 aria-hidden="true"
                 alt="Token logo"
             >
-            {{ buttonLabel }}</div>
+            {{ buttonLabel }}
+            <q-icon size="16px" name="launch" />
+        </div>
         <div class="c-buy-page-option__powered">powered by {{ poweredBy }} </div>
     </QBtn>
     <div class="c-buy-page-option__header">{{ header }}</div>
@@ -67,7 +69,7 @@ const props = defineProps<{
         gap: 4px;
         align-self: stretch;
         color:#4D4D4D;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 600;
         line-height: 130%;
         text-transform: none;

@@ -22,7 +22,7 @@ async function fetchLink(name: string) {
         }
         // TODO: display widget link in iframe
         // toggleWidget.value = true;
-        //temp solution just redirects to new tab
+        //temp solution just redirects to new tab, remove when iframe is enabled for all options
         window.open(widgetLink.value, '_blank')?.focus();
     }catch(e){
         errorNotification('There was an error redirecting, please try again later');
