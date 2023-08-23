@@ -1,6 +1,5 @@
 <script setup lang="ts">
-
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore } from 'src/antelope';
@@ -11,6 +10,7 @@ const { t: $t } = useI18n();
 const props = defineProps<{
     nft: ShapedNFT,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
+    tileMode: boolean,
 }>();
 
 // data
@@ -24,7 +24,8 @@ const nftTypes = {
 const videoIsPlaying = ref(false);
 const videoIsAtEnd = ref(false);
 const videoElement = ref<HTMLVideoElement | null>(null);
-
+let isMediaLoading = ref(true);
+let passedMaxLoadingTime = ref(false);
 
 // computed
 const isIos = computed(() => platformStore.isIOSMobile);
@@ -41,9 +42,8 @@ const nftType = computed(() => {
     }
 });
 
-const showCoverImage = computed(() =>
-    [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) ||
-    props.previewMode,
+const showCoverImage = computed(
+    () => [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode,
 );
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
@@ -88,6 +88,11 @@ const iconOverlayName = computed(() => {
     return 'o_image_not_supported';
 });
 
+onMounted(() => {
+    setTimeout(() => {
+        passedMaxLoadingTime.value = true;
+    }, 5000);
+});
 
 // methods
 function playVideo() {
@@ -108,11 +113,11 @@ function toggleVideoPlay(playOnly?: boolean) {
         videoElement.value.pause();
     }
 }
-
 </script>
 
 <template>
 <div
+    v-if="props.tileMode"
     :class="{
         'c-nft-viewer': true,
         'c-nft-viewer--preview': previewMode,
@@ -121,26 +126,38 @@ function toggleVideoPlay(playOnly?: boolean) {
 >
     <div class="c-nft-viewer__media-container">
         <div v-if="showCoverImage" class="c-nft-viewer__image-container">
+            <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
             <img
-                v-if="!showPlaceholderCoverImage"
+                v-show="!showPlaceholderCoverImage && !isMediaLoading"
                 :src="nft.imageSrcFull"
                 :alt="imageAlt"
                 class="c-nft-viewer__image"
+                @load="isMediaLoading = false"
             >
             <div
-                v-else-if="nftType === nftTypes.video"
+                v-show="nftType === nftTypes.video && !isMediaLoading"
                 class="c-nft-viewer__video-container"
                 tabindex="0"
                 role="preview"
-            ><video
-                ref="videoElement"
-                :controls="false"
-                :src="nft.videoSrc"
-                :poster="nft.imageSrcFull"
-                playsinline
-                class="c-nft-viewer__video"
-            ></video></div>
-            <div v-else class="c-nft-viewer__placeholder-image"></div>
+            >
+                <video
+                    ref="videoElement"
+                    :controls="false"
+                    :src="nft.videoSrc"
+                    :poster="nft.imageSrcFull"
+                    playsinline
+                    class="c-nft-viewer__video"
+                    @loadeddata="isMediaLoading = false"
+                ></video>
+            </div>
+            <q-icon
+                v-if="passedMaxLoadingTime && isMediaLoading"
+                :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+                name="o_broken_image"
+                size="md"
+                color="grey-7"
+                class="c-nft-viewer__image"
+            />
         </div>
 
         <div
@@ -153,19 +170,30 @@ function toggleVideoPlay(playOnly?: boolean) {
             @keypress.space.enter.prevent="toggleVideoPlay(false)"
         >
             <video
+                v-show="!isMediaLoading"
                 ref="videoElement"
                 :src="nft.videoSrc"
                 :controls="videoIsPlaying || isIos"
                 :poster="nft.imageSrcFull"
                 playsinline
                 class="c-nft-viewer__video"
-                @play="videoIsPlaying = true; videoIsAtEnd = false"
-                @pause="videoIsPlaying = false; videoIsAtEnd = false"
-                @ended="videoIsPlaying = false; videoIsAtEnd = true"
+                @loadeddata="isMediaLoading = false"
+                @play="
+                    videoIsPlaying = true;
+                    videoIsAtEnd = false;
+                "
+                @pause="
+                    videoIsPlaying = false;
+                    videoIsAtEnd = false;
+                "
+                @ended="
+                    videoIsPlaying = false;
+                    videoIsAtEnd = true;
+                "
             ></video>
         </div>
 
-        <template v-if="iconOverlayName">
+        <template v-if="!isMediaLoading && iconOverlayName">
             <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
 
             <q-icon
@@ -177,7 +205,6 @@ function toggleVideoPlay(playOnly?: boolean) {
         </template>
     </div>
 
-
     <audio
         v-if="nftType === nftTypes.audio && !previewMode"
         controls
@@ -185,8 +212,27 @@ function toggleVideoPlay(playOnly?: boolean) {
         class="c-nft-viewer__audio"
     ></audio>
 </div>
+<template v-else>
+    <q-skeleton v-if="isMediaLoading && !passedMaxLoadingTime" type="rect" class="c-nft-viewer__list-image" />
+    <q-icon
+        v-else-if="isMediaLoading && passedMaxLoadingTime"
+        name="o_broken_image"
+        :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+        size="md"
+        color="grey-7"
+        class="c-nft-viewer__list-image"
+    />
+    <img
+        v-show="!isMediaLoading"
+        :src="nft.imageSrcFull"
+        :alt="`${$t('nft.collectible')} ${imageAlt}`"
+        class="c-nft-viewer__list-image"
+        height="40"
+        width="40"
+        @load="isMediaLoading = false"
+    >
 </template>
-
+</template>
 <style lang="scss">
 .c-nft-viewer {
     $this: &;
@@ -238,6 +284,17 @@ function toggleVideoPlay(playOnly?: boolean) {
         max-height: 100%;
     }
 
+    &__image-loading {
+        height: 100%;
+        width: 100%;
+    }
+
+    &__list-image {
+        border-radius: 4px;
+        height: 40px;
+        width: 40px;
+    }
+
     &__overlay-icon-bg,
     &__overlay-icon {
         transition: transform 0.2s ease;
@@ -256,7 +313,7 @@ function toggleVideoPlay(playOnly?: boolean) {
         pointer-events: none;
 
         border-radius: 50%;
-        background: #FFFFFFA0;
+        background: #ffffffa0;
     }
 
     &__overlay-icon {
@@ -276,7 +333,7 @@ function toggleVideoPlay(playOnly?: boolean) {
         max-width: 432px;
         border-radius: 4px;
         background-color: var(--header-bg-color);
-        border: 1px solid darken($page-header, 5%);
+        border: 1px solid var(--header-item-outline-color);
     }
 
     &__video-container {
@@ -288,20 +345,12 @@ function toggleVideoPlay(playOnly?: boolean) {
         cursor: pointer;
     }
 
-    &__audio-container {
-
-    }
-
     &__audio {
         width: 100%;
         margin: auto;
         max-width: 432px;
         display: block;
         flex-shrink: 0;
-    }
-
-    &__blank-container {
-
     }
 }
 </style>

@@ -56,8 +56,12 @@ const ownerLink = computed(() => {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.contractAddress}`;
+    return `${explorerUrl}/address/${nft.value.ownerAddress}`;
 });
+
+const filteredAttributes = computed(() =>
+    nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
+);
 
 </script>
 
@@ -90,7 +94,12 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else>
-                <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
+                <NftViewer
+                    :nft="nft"
+                    :previewMode="false"
+                    :tileMode="true"
+                    class="c-nft-details__viewer"
+                />
                 <NftDetailsCard title="Collection" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
                 </NftDetailsCard>
@@ -182,7 +191,7 @@ const ownerLink = computed(() => {
                 </p>
 
                 <NftDetailsCard
-                    v-for="(attribute, index) in nft.attributes"
+                    v-for="(attribute, index) in filteredAttributes"
                     :key="`nft-attr-${index}`"
                     :title="attribute.label"
                     class="q-mb-sm"

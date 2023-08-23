@@ -107,6 +107,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
+    async initialized() {
+        return this.initPromise;
+    }
+
     async init(): Promise<void> {
         // this is called only when this chain is needed to avoid initialization of all chains
         if (this.ready) {
@@ -422,7 +426,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
             }) as unknown as TokenSourceInfo))
             .then(tokens => tokens.map(t => new TokenClass(t)))
-            .then(tokens => [this.getSystemToken(), ...tokens]);
+            .then(tokens => [this.getSystemToken(), this.getWrappedSystemToken(), this.getStakedSystemToken(), ...tokens]);
 
         return this.tokenListPromise;
     }

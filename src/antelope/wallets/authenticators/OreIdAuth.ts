@@ -1,7 +1,7 @@
 import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject, UserChainAccount } from 'oreid-js';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { WebPopup } from 'oreid-webpopup';
-import { erc20Abi } from 'src/antelope/types';
+import { erc20Abi, wtlosAbiDeposit, wtlosAbiWithdraw } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import {
     AntelopeError,
@@ -256,6 +256,115 @@ export class OreIdAuth extends EVMAuthenticator {
         this.trace('prepareTokenForTransfer', [token], amount, to);
     }
 
+    async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        this.trace('wrapSystemToken', amount);
+
+        if (!this.userChainAccount) {
+            console.error('Inconsistency error: userChainAccount is null');
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
+
+        if (!oreId) {
+            console.error('Inconsistency error: oreId is null');
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
+
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+        const from = this.userChainAccount.chainAccount as addressString;
+        const value = amount.toHexString();
+        const abi = wtlosAbiDeposit;
+
+
+        const wrapTransaction = {
+            from,
+            to: wrappedSystemTokenContractAddress,
+            value,
+            'contract': {
+                abi,
+                'parameters': [],
+                'method': 'deposit',
+            },
+        } as unknown as JSONObject;
+
+        // sign a blockchain transaction
+        this.trace('createTransaction()');
+        const transaction = await oreId.createTransaction({
+            transaction: wrapTransaction,
+            chainAccount: from,
+            chainNetwork: this.getChainNetwork(useChainStore().getChain(this.label).settings.getNetwork()),
+            signOptions: {
+                broadcast: true,
+                returnSignedTransaction: true,
+            },
+        });
+
+        // have the user approve signature
+        this.trace('Signing a transaction...', transaction);
+
+        const { transactionId } = await oreId.popup.sign({ transaction });
+        this.trace('transactionId:', transactionId);
+
+        return {
+            hash: transactionId,
+            wait: async () => Promise.resolve({} as ethers.providers.TransactionReceipt),
+        } as EvmTransactionResponse;
+
+    }
+
+    async unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
+        this.trace('unwrapSystemToken', amount.toString());
+
+        if (!this.userChainAccount) {
+            console.error('Inconsistency error: userChainAccount is null');
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
+
+        if (!oreId) {
+            console.error('Inconsistency error: oreId is null');
+            throw new AntelopeError('antelope.evm.error_no_provider');
+        }
+
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+        const from = this.userChainAccount.chainAccount as addressString;
+        const value = amount.toHexString();
+        const abi = wtlosAbiWithdraw;
+
+        const unwrapTransaction = {
+            from,
+            to: wrappedSystemTokenContractAddress,
+            'contract': {
+                abi,
+                'parameters': [value],
+                'method': 'withdraw',
+            },
+        } as unknown as JSONObject;
+
+        // sign a blockchain transaction
+        this.trace('createTransaction()');
+        const transaction = await oreId.createTransaction({
+            transaction: unwrapTransaction,
+            chainAccount: from,
+            chainNetwork: this.getChainNetwork(useChainStore().getChain(this.label).settings.getNetwork()),
+            signOptions: {
+                broadcast: true,
+                returnSignedTransaction: true,
+            },
+        });
+
+        // have the user approve signature
+        this.trace('Signing a transaction...', transaction);
+
+        const { transactionId } = await oreId.popup.sign({ transaction });
+        this.trace('transactionId:', transactionId);
+
+        return {
+            hash: transactionId,
+            wait: async () => Promise.resolve({} as ethers.providers.TransactionReceipt),
+        } as EvmTransactionResponse;
+    }
+
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
         return true;
@@ -275,6 +384,12 @@ export class OreIdAuth extends EVMAuthenticator {
         return new Promise(async (resolve) => {
             resolve(null as unknown as ethers.providers.ExternalProvider);
         });
+    }
+
+    async getSigner(): Promise<ethers.Signer> {
+        this.trace('getSigner');
+        const provider = await this.web3Provider();
+        return provider.getSigner();
     }
 
 }

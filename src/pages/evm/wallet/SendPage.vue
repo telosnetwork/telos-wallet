@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -18,7 +18,6 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
-const balanceStore = useBalancesStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -80,6 +79,10 @@ export default defineComponent({
             },
             immediate: true,
             deep: true,
+        },
+        selected() {
+            this.amount = BigNumber.from(0);
+            (this.$refs.currencyInput as InstanceType<typeof CurrencyInput>)?.resetEmptyError();
         },
         isFormValid(isValid: boolean) {
             this.updateTokenTransferConfig(isValid, this.token, this.address, this.amount);
@@ -356,6 +359,7 @@ export default defineComponent({
                 <!-- Amount input -->
                 <div class="col">
                     <CurrencyInput
+                        ref="currencyInput"
                         v-model="amount"
                         v-bind="currencyInputSecondaryCurrencyBindings"
                         :loading="currencyInputIsLoading"

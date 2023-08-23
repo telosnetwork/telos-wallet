@@ -26,7 +26,6 @@ export default class EvmContract {
     private readonly _manager?: EvmContractManagerI;
     private readonly _token?: TokenSourceInfo | null;
 
-    private _contract?: ethers.Contract | null;
     private _verified?: boolean;
 
     constructor({
@@ -140,10 +139,7 @@ export default class EvmContract {
         }
         const signer = await this._manager?.getSigner();
 
-        if (!this._contract || signer) {
-            this._contract = new ethers.Contract(this.address, this.abi, signer);
-        }
-        return this._contract;
+        return new ethers.Contract(this.address, this.abi, signer);
     }
 
     async parseTransaction(data:string) {

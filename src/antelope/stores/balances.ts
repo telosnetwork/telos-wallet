@@ -99,21 +99,53 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
+
+                        // first we assert that the balances array exists and is the same until the user changes
+                        this.__balances[label] = this.__balances[label] ?? [];
+
+                        // then we wait for the chain indexer to be consulted at least once
+                        this.trace('updateBalancesForAccount', 'await chain_settings.initialized()');
+                        await chain_settings.initialized();
+
+                        // if the chain index is healthy, we use it to fetch the all the balances at once
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
-                            if (account?.account) {
-                                this.__balances[label] = await chain_settings.getBalances(account.account);
-                                // if new account with no index records display default zero TLOS balance
-                                if (this.__balances[label].length === 0){
-                                    await this.updateSystemBalanceForAccount(label, account.account as addressString);
-                                }
-                                this.sortBalances(label);
-                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
+
+                            // Workaround-WTLOS: to fix the WTLOS balance while the indexer is not doing it after a successful withdraw (unwrap)
+                            // We need to get the value ready to overwrite immediately and therefore avoid the blink
+                            const wrapTokens = chain_settings.getWrappedSystemToken();
+                            const authenticator = account.authenticator as EVMAuthenticator;
+                            const wrapBalance = await authenticator.getERC20TokenBalance(account.account, wrapTokens.address);
+
+                            // now we call the indexer
+                            const newBalances = await chain_settings.getBalances(account.account);
+
+                            if (this.__balances[label].length === 0) {
+                                // we add all system tokens with balance zero to the balances array to make sure they all always appear
+                                const systemTokens = chain_settings.getSystemTokens();
+                                systemTokens.forEach((token) => {
+                                    const balance = newBalances.find(b => b.token.id === token.id);
+                                    if (!balance) {
+                                        this.addNewBalance(label, new TokenBalance(token, BigNumber.from(0)));
+                                    }
+                                });
                             }
+
+                            // we update the existing balances array with the new balances
+                            newBalances.forEach((balance) => {
+                                this.processBalanceForToken(label, balance.token, balance.amount);
+                            });
+
+                            // Workaround-WTLOS: now we overwrite the value with the one taken from the contract
+                            this.processBalanceForToken(label, wrapTokens, wrapBalance);
+
+                            this.sortBalances(label);
+
+                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
-                            this.__balances[label] = this.__balances[label] ?? [];
+                            await this.updateSystemTokensPrices(label);
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
@@ -129,7 +161,6 @@ export const useBalancesStore = defineStore(store_name, {
                                     }),
                                 );
 
-
                             Promise.allSettled(promises).then(() => {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                                 this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
@@ -142,17 +173,34 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', error);
             }
         },
+        async updateSystemTokensPrices(label: string): Promise<void> {
+            this.trace('updateSystemTokensPrices', label);
+            try {
+                // take the three system tokens
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+                const sysToken = chain_settings.getSystemToken();
+                const wrpToken = chain_settings.getWrappedSystemToken();
 
+                // get the price for both system and wrapped tokens
+                const price = (await chain_settings.getUsdPrice()).toString();
+                const marketInfo = { price } as MarketSourceInfo;
+                sysToken.market = new TokenMarketData(marketInfo);
+                wrpToken.market = new TokenMarketData(marketInfo);
+
+            } catch (error) {
+                console.error(error);
+                // we won't thorw an error here, as it is not critical
+            }
+        },
         async updateSystemBalanceForAccount(label: string, address: addressString): Promise<void> {
+            this.trace('updateSystemBalanceForAccount', label, address);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const token = chain_settings.getSystemToken();
+            const sys_token = chain_settings.getSystemToken();
             const price = (await chain_settings.getUsdPrice()).toString();
             const marketInfo = { price } as MarketSourceInfo;
-            const marketData = new TokenMarketData(marketInfo);
-            token.market = marketData;
-
+            sys_token.market = new TokenMarketData(marketInfo);
             const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
-            this.processBalanceForToken(label, token, balanceBn);
+            this.processBalanceForToken(label, sys_token, balanceBn);
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();
@@ -252,6 +300,50 @@ export const useBalancesStore = defineStore(store_name, {
             } finally {
                 useFeedbackStore().unsetLoading('transferTokens');
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
+            }
+        },
+        async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            this.trace('wrapSystemTokens', amount.toString());
+            const label = 'logged';
+            try {
+                useFeedbackStore().setLoading('wrapSystemTokens');
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: wrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_wrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.wrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+            } finally {
+                useFeedbackStore().unsetLoading('wrapSystemTokens');
+            }
+        },
+        async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            this.trace('unwrapSystemTokens', amount.toString());
+            const label = 'logged';
+            try {
+                useFeedbackStore().setLoading('unwrapSystemTokens');
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: unwrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_unwrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.unwrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+            } finally {
+                useFeedbackStore().unsetLoading('unwrapSystemTokens');
             }
         },
         async transferNativeTokens(

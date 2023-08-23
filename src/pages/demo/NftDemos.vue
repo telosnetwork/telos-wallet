@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShapedNFT } from 'src/antelope/types/NFTs';
+import { ShapedNFT } from 'src/antelope/types';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import { ref } from 'vue';

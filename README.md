@@ -4,7 +4,9 @@ Main Net: [wallet.telos.net](https://wallet.telos.net) [![Netlify Status](https:
 
 Test Net: [wallet-dev.telos.net](https://wallet-dev.telos.net) [![Netlify Status](https://api.netlify.com/api/v1/badges/626e6746-848f-4b60-ba52-134e8f71fa39/deploy-status)](https://app.netlify.com/sites/wallet-testnet/deploys)
 
-Development : [wallet-staging.netlify.app](https://wallet-staging.netlify.app/) [![Netlify Status](https://api.netlify.com/api/v1/badges/b568365c-3e5e-4ebf-8c9b-5bc64c15de6e/deploy-status)](https://app.netlify.com/sites/wallet-staging/deploys)
+Development (testnet): [wallet-staging.netlify.app](https://wallet-staging.netlify.app/) [![Netlify Status](https://api.netlify.com/api/v1/badges/b568365c-3e5e-4ebf-8c9b-5bc64c15de6e/deploy-status)](https://app.netlify.com/sites/wallet-staging/deploys)
+
+Development (mainnet): [wallet-develop-mainnet.netlify.app](https://wallet-develop-mainnet.netlify.app/) [![Netlify Status](https://api.netlify.com/api/v1/badges/16ea23bd-58d7-498c-b93d-6d7b11e47853/deploy-status)](https://app.netlify.com/sites/wallet-develop-mainnet/deploys)
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/telosnetwork/telos-wallet?url=https://github.com/telosnetwork/telos-wallet/releases/latest&style=for-the-badge)](https://github.com/telosnetwork/telos-wallet/releases/latest)
 

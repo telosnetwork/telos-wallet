@@ -121,7 +121,7 @@ export const useChainStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: createInitFunction(store_name),
         // Updates ----
-        async updateChainData(label: string) {
+        async updateChainData(label: string): Promise<void> {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
@@ -137,17 +137,20 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateChainData');
             }
         },
-        async updateSettings(label: string) {
-            this.getChain(label).settings.init().then(() => {
-                getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
+        async updateSettings(label: string): Promise<void> {
+            this.trace('updateSettings', label);
+            const settings = this.getChain(label).settings as EVMChainSettings;
+            settings.init().then(() => {
+                this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
+                getAntelope().events.onChainIndexerReady.next({ label, ready: true });
             }).catch((error) => {
                 console.error(error);
                 throw new Error('antelope.chain.error_settings');
             });
         },
-        async updateApy(label: string) {
+        async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
-            this.trace('updateApy');
+            this.trace('updateApy', label);
             const chain = this.getChain(label);
             try {
                 if (chain.settings.isNative()) {
@@ -162,7 +165,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
-        async updateGasPrice(label: string) {
+        async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
             this.trace('updateGasPrice');
             const chain = this.getChain(label);
@@ -177,7 +180,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateGasPrice');
             }
         },
-        async updateTokenList(label: string) {
+        async updateTokenList(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
             const chain = this.getChain(label);
