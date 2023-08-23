@@ -79,12 +79,19 @@ export class WalletConnectAuth extends EVMAuthenticator {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
 
-            // We are successfully logged in. If we don't have a injected provider, we are using QR
+            // We are successfully logged in. Let's find out if we are using QR
+            this.usingQR = false;
             const injected = new InjectedConnector();
             const provider = toRaw(await injected.getProvider());
-            this.usingQR = typeof provider === 'undefined';
-            this.trace('login', 'using QR:', this.usingQR);
-
+            if (typeof provider === 'undefined') {
+                this.usingQR = true;
+            } else {
+                const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
+                const sameAddress = providerAddress === address;
+                this.usingQR = !sameAddress;
+                this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
+            }
+            this.trace('walletConnectLogin', 'using QR:', this.usingQR);
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {

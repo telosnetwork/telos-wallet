@@ -50,7 +50,6 @@ import {
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
-import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -169,38 +168,12 @@ export const useBalancesStore = defineStore(store_name, {
                 const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
                 const sysToken = chain_settings.getSystemToken();
                 const wrpToken = chain_settings.getWrappedSystemToken();
-                const stkToken = chain_settings.getStakedSystemToken();
 
                 // get the price for both system and wrapped tokens
                 const price = (await chain_settings.getUsdPrice()).toString();
                 const marketInfo = { price } as MarketSourceInfo;
                 sysToken.market = new TokenMarketData(marketInfo);
                 wrpToken.market = new TokenMarketData(marketInfo);
-
-                // first we need the contract instance to be able to execute queries
-                const evm = useEVMStore();
-                const authenticator = useAccountStore().getEVMAuthenticator(label);
-                const contract = await evm.getContract(authenticator, stkToken.address, stkToken.type);
-                if (!contract) {
-                    throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: stkToken.address });
-                }
-                const contractInstance = await contract.getContractInstance();
-
-                // Now we preview a deposit of 1 SYS to get the ratio
-                const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
-                const ratio:BigNumber = await contractInstance.previewDeposit(oneSys);
-                const ratioNumber = ethers.utils.formatUnits(ratio, stkToken.decimals);
-
-                // Now we calculate the price of 1 STK = (price of 1 SYS) / ratio
-                const stkPrice = convertCurrency(oneSys, sysToken.decimals, stkToken.decimals, ratioNumber);
-                const stkPriceNumber = ethers.utils.formatUnits(stkPrice, sysToken.decimals);
-
-                // Finally we update the STK token price
-                const stkMarketInfo = { price:stkPriceNumber } as MarketSourceInfo;
-                // TODO: this is removed until we decide what to do whith the STK token price
-                // https://github.com/telosnetwork/telos-wallet/issues/544
-                // stkToken.market = new TokenMarketData(stkMarketInfo);
-                this.trace('updateSystemTokensPrices', `STLOS price: ${toRaw(stkMarketInfo)}`);
 
             } catch (error) {
                 console.error(error);
