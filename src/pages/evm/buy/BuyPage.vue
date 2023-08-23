@@ -35,8 +35,8 @@ async function fetchLink(name: string) {
 
 <template>
 <AppPage>
-    <template v-slot:header>
-        <h1>{{ $t('evm_buy.buy_telos') }}</h1>
+    <template v-slot:header >
+        <h1 class="c-buy-page__header">{{ $t('evm_buy.buy_telos') }}</h1>
     </template>
 
     <div>
@@ -79,5 +79,10 @@ async function fetchLink(name: string) {
     justify-content: center;
     align-items: flex-start;
     gap: 160px;
+    margin-top: 20px;
+
+    &__header{
+        padding: 88px 0px 104px;
+    }
 }
 </style>
