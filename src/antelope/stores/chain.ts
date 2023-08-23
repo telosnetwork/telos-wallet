@@ -74,6 +74,7 @@ export interface ChainModel {
 export interface EvmChainModel {
     apy: string;
     stakeRatio: ethers.BigNumber;
+    unstakeRatio: ethers.BigNumber;
     gasPrice: ethers.BigNumber;
     settings: EVMChainSettings;
     tokens: TokenClass[];
@@ -89,6 +90,7 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
     const model = {
         apy: '',
         stakeRatio: ethers.constants.Zero,
+        unstakeRatio: ethers.constants.Zero,
         settings: settings[network],
         tokens: [],
     } as ChainModel;
@@ -122,6 +124,7 @@ export const useChainStore = defineStore(store_name, {
         getEcosystemUrl: () => (network: string) => (settings[network] as EVMChainSettings).getEcosystemUrl(),
         getNetworkSettings: () => (network: string) => settings[network],
         getStakedRatio: state => (label: string) => (state.__chains[label] as EvmChainModel).stakeRatio ?? ethers.constants.Zero,
+        getUnstakedRatio: state => (label: string) => (state.__chains[label] as EvmChainModel).unstakeRatio ?? ethers.constants.Zero,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -168,7 +171,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
-        async actualUpdateStakedRatio(label: string): Promise<ethers.BigNumber> {
+        async actualUpdateStakedRatio(label: string): Promise<void> {
             // first we need the contract instance to be able to execute queries
             this.trace('actualUpdateStakedRatio', label);
             useFeedbackStore().setLoading('actualUpdateStakedRatio');
@@ -186,19 +189,20 @@ export const useChainStore = defineStore(store_name, {
             if (!contract) {
                 useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
                 this.trace('actualUpdateStakedRatio', label, '-> no contract');
-                return ethers.constants.Zero;
+                return;
             }
             const contractInstance = await contract.getContractInstance();
             // Now we preview a deposit of 1 SYS to get the ratio
             const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
-            const ratio:ethers.BigNumber = await contractInstance.previewDeposit(oneSys);
+            const stakedRatio:ethers.BigNumber = await contractInstance.previewDeposit(oneSys);
+            const unstakedRatio:ethers.BigNumber = await contractInstance.previewWithdraw(oneSys);
 
             // Finally we update the store
-            this.setStakedRatio(label, ratio);
+            this.setStakedRatio(label, stakedRatio);
+            this.setUnstakedRatio(label, unstakedRatio);
             useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
-            return ratio;
         },
-        async updateStakedRatio(label: string): Promise<ethers.BigNumber> {
+        async updateStakedRatio(label: string): Promise<void> {
             const accountModel = useAccountStore().getAccount(label);
             if (accountModel && accountModel.account) {
                 // if the account is already logged, we can update the staked ratio
@@ -272,6 +276,11 @@ export const useChainStore = defineStore(store_name, {
             const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, 18));
             this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
             (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
+        },
+        setUnstakedRatio(label: string, ratio: ethers.BigNumber) {
+            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, 18));
+            this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
+            (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
         },
     },
 });
