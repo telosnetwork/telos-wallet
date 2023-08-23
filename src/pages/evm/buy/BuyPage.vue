@@ -27,8 +27,10 @@ async function fetchLink(name: string) {
     }catch(e){
         errorNotification('There was an error redirecting, please try again later');
     }
+}
 
-
+function returnToOptions(){
+    widgetLink.value = '';
 }
 
 </script>
@@ -40,15 +42,19 @@ async function fetchLink(name: string) {
     </template>
 
     <div>
-        <iframe
+        <div
             v-if="displayWidget"
-            :src="widgetLink"
-            height="500px"
-            width="100%"
-            allowfullscreen="true"
-        ></iframe>
-
-        <div v-else class="c-buy-page">
+            class="c-buy-page__iframe"
+        >
+            <div class="c-buy-page__return" @click="returnToOptions"> &lt; Back to selection </div>
+            <iframe
+                :src="widgetLink"
+                height="500px"
+                width="100%"
+                allowfullscreen="true"
+            ></iframe>
+        </div>
+        <div v-else class="c-buy-page__options">
             <BuyPageOption
                 :button-label="$t('evm_buy.simplex.button_label')"
                 :powered-by="$t('evm_buy.simplex.powered_by')"
@@ -74,12 +80,14 @@ async function fetchLink(name: string) {
 
 <style lang="scss">
 .c-buy-page {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 160px;
-    margin-top: 20px;
+    &__options{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 160px;
+        margin-top: 20px;
+    }
 
     &__header{
         padding: 88px 0px 104px;
