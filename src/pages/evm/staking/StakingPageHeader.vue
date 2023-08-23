@@ -26,12 +26,25 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
+<<<<<<< HEAD
 const stakedTokenBalanceBn = ref(undefined as BigNumber | undefined);
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
     if (stakedTokenBalanceBn.value && !unstakedRatio.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(unstakedRatio.value, stakedToken.decimals);
+=======
+const stakedTokenBalanceBn = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === stakedToken.symbol)?.amount);
+const stakedRatio = computed(() => chainStore.getStakedRatio(label));
+const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || stakedRatio.value.isZero());
+const stakedExpressedInSystemBalanceBn = computed(() => {
+    if (stakedTokenBalanceBn.value && !stakedRatio.value.isZero()) {
+        console.log('stakedRatio', stakedRatio.value.toString());
+        const inverseRatio = ethers.constants.One.mul(ethers.constants.One).div(stakedRatio.value);
+        console.log('inverseRatio', inverseRatio.toString());
+        const ratioNumber = ethers.utils.formatUnits(inverseRatio, stakedToken.decimals);
+        console.log('ratioNumber', ratioNumber);
+>>>>>>> 8c4d4930 (saving WIP)
         return convertCurrency(stakedTokenBalanceBn.value, stakedToken.decimals, stakedToken.decimals, ratioNumber);
     } else {
         return undefined;
@@ -196,6 +209,9 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
         <h5>{{ $t('evm_stake.total_of_staked_unstaking_and_withdrawable', { token: systemToken.name }) }}</h5>
         <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
     </div>
+
+    <div>{{ stakedTokenBalanceBn?.toString() }}</div>
+    <div>{{ stakedRatio?.toString() }}</div>
 
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
     <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
