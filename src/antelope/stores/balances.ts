@@ -110,6 +110,14 @@ export const useBalancesStore = defineStore(store_name, {
                         // if the chain index is healthy, we use it to fetch the all the balances at once
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
+
+                            // Workaround-WTLOS: to fix the WTLOS balance while the indexer is not doing it after a successful withdraw (unwrap)
+                            // We need to get the value ready to overwrite immediately and therefore avoid the blink
+                            const wrapTokens = chain_settings.getWrappedSystemToken();
+                            const authenticator = account.authenticator as EVMAuthenticator;
+                            const wrapBalance = await authenticator.getERC20TokenBalance(account.account, wrapTokens.address);
+
+                            // now we call the indexer
                             const newBalances = await chain_settings.getBalances(account.account);
 
                             if (this.__balances[label].length === 0) {
@@ -127,6 +135,10 @@ export const useBalancesStore = defineStore(store_name, {
                             newBalances.forEach((balance) => {
                                 this.processBalanceForToken(label, balance.token, balance.amount);
                             });
+
+                            // Workaround-WTLOS: now we overwrite the value with the one taken from the contract
+                            this.processBalanceForToken(label, wrapTokens, wrapBalance);
+
                             this.sortBalances(label);
 
                             useFeedbackStore().unsetLoading('updateBalancesForAccount');
