@@ -31,6 +31,7 @@ async function fetchLink(name: string) {
 
 function returnToOptions(){
     displayWidget.value = false;
+    widgetLink.value = '';
 }
 
 </script>
