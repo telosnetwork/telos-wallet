@@ -70,6 +70,7 @@ function returnToOptions(){
                 :header="$t('evm_buy.topper.header')"
                 :subheader="$t('evm_buy.topper.subheader')"
                 :subheaderLink="$t('evm_buy.topper.subheader_link')"
+                :subheaderLinkText="$t('evm_buy.topper.subheader_link_text')"
                 class="c-buy-page__option"
                 @fetchLink="fetchLink('topper')"
             />

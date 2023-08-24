@@ -8,6 +8,7 @@ const props = defineProps<{
     header: string;
     subheader: string;
     subheaderLink: string;
+    subheaderLinkText: string;
 }>();
 
 </script>
@@ -31,7 +32,7 @@ const props = defineProps<{
     </QBtn>
     <div class="c-buy-page-option__header">{{ header }}</div>
     <div class="c-buy-page-option__subheader">{{ subheader }}
-        <a v-if="subheaderLink" :href='subheaderLink' target="_blank">{{ subheaderLink }}</a>
+        <a v-if="subheaderLink" :href='subheaderLink' target="_blank">{{ subheaderLinkText }}</a>
     </div>
 </div>
 </template>
