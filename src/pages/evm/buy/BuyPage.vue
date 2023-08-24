@@ -99,8 +99,13 @@ function returnToOptions(){
         flex-wrap: wrap;
         justify-content: center;
         align-items: flex-start;
-        gap: 160px;
+        gap: 88px;
         margin-top: 20px;
+        margin-bottom: 48px;
+
+        @include md-and-up {
+            gap: 160px;
+        }
     }
 
     &__header{
