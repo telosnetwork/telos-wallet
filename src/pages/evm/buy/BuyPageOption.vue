@@ -7,8 +7,9 @@ const props = defineProps<{
     poweredBy: string;
     header: string;
     subheader: string;
-    subheaderLink: string;
-    subheaderLinkText: string;
+    widget: boolean;
+    subheaderLink?: string;
+    subheaderLinkText?: string;
 }>();
 
 </script>
@@ -26,7 +27,7 @@ const props = defineProps<{
                 alt="Token logo"
             >
             {{ buttonLabel }}
-            <q-icon size="16px" name="launch" />
+            <q-icon v-if="!widget" size="16px" name="launch" />
         </div>
         <div class="c-buy-page-option__powered">powered by {{ poweredBy }} </div>
     </QBtn>
@@ -70,7 +71,7 @@ const props = defineProps<{
         gap: 4px;
         align-self: stretch;
         color:#4D4D4D;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 600;
         line-height: 130%;
         text-transform: none;

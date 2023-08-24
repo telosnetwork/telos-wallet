@@ -46,7 +46,7 @@ function returnToOptions(){
             v-if="displayWidget"
             class="c-buy-page__iframe"
         >
-            <div class="c-buy-page__return" @click="returnToOptions"> &lt; Back to selection </div>
+            <a class="c-buy-page__return" @click="returnToOptions"> &lt; Back to selection </a>
             <iframe
                 :src="widgetLink"
                 height="1000px"
@@ -60,7 +60,7 @@ function returnToOptions(){
                 :powered-by="$t('evm_buy.simplex.powered_by')"
                 :header="$t('evm_buy.simplex.header')"
                 :subheader="$t('evm_buy.simplex.subheader')"
-                subheaderLink=""
+                :widget="false"
                 class="c-buy-page__option"
                 @fetchLink="fetchLink('simplex')"
             />
@@ -69,6 +69,7 @@ function returnToOptions(){
                 :powered-by="$t('evm_buy.topper.powered_by')"
                 :header="$t('evm_buy.topper.header')"
                 :subheader="$t('evm_buy.topper.subheader')"
+                :widget="true"
                 :subheaderLink="$t('evm_buy.topper.subheader_link')"
                 :subheaderLinkText="$t('evm_buy.topper.subheader_link_text')"
                 class="c-buy-page__option"
