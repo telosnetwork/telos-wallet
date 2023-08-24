@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { QBtn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     buttonLabel: string;
@@ -10,6 +11,8 @@ const props = defineProps<{
     subheaderLink?: string;
     subheaderLinkText?: string;
 }>();
+
+const { t: $t } = useI18n();
 
 </script>
 
@@ -28,7 +31,7 @@ const props = defineProps<{
             {{ buttonLabel }}
             <q-icon v-if="!widget" size="16px" name="launch" />
         </div>
-        <div class="c-buy-page-option__powered">powered by {{ poweredBy }} </div>
+        <div class="c-buy-page-option__powered">{{ $t('evm_buy.powered_by', { provider: poweredBy }) }}</div>
     </QBtn>
     <div class="c-buy-page-option__header">{{ header }}</div>
     <div class="c-buy-page-option__subheader">{{ subheader }}
@@ -38,7 +41,7 @@ const props = defineProps<{
 </template>
 
 <style lang="scss">
-.c-buy-page-option{
+.c-buy-page-option {
     display: flex;
     width: 320px;
     flex-direction: column;
@@ -46,7 +49,7 @@ const props = defineProps<{
     align-items: flex-end;
     gap: 16px;
 
-    &__button{
+    &__button {
         display: flex;
         padding: 16px 24px;
         flex-direction: column;
@@ -56,14 +59,16 @@ const props = defineProps<{
         align-self: stretch;
         border-radius: 4px;
         border: 1px solid $primary;
-        background: $white;
+        background: $white; // TODO use existing css vars over sass vars
         box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.20), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.12);
-        &:hover{
-            background: $off-white;
+        &:hover {
+            background: $off-white; // TODO do we really need a new color for this?
         }
     }
 
-    &__label{
+    // TODO use typography classes for text styling
+
+    &__label {
         display: flex;
         align-items: center;
         width: 100%;
@@ -76,7 +81,7 @@ const props = defineProps<{
         text-transform: none;
     }
 
-    &__powered{
+    &__powered {
         margin-left: auto;
         color: var(--text-default-contrast);
         text-align: center;
@@ -86,7 +91,7 @@ const props = defineProps<{
         text-transform: none;
     }
 
-    &__header{
+    &__header {
         align-self: stretch;
         color: var(--text-default-contrast);
         text-align: center;
@@ -95,7 +100,7 @@ const props = defineProps<{
         line-height: 130%;
     }
 
-    &__subheader{
+    &__subheader {
         align-self: stretch;
         color: var(--text-default-contrast);
         text-align: center;

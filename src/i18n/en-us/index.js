@@ -69,11 +69,13 @@ export default {
     },
     evm_buy: {
         buy_telos: 'Buy Telos',
+        powered_by: 'Powered by {provider}',
         simplex: {
             button_label: 'EVM Token',
             powered_by: 'Simplex',
             header: 'Receive TLOS directly on Telos EVM network.',
             subheader: 'Not available for all U.S. based customers',
+            link: '',
         },
         topper: {
             button_label: 'ERC20 on Ethereum',
@@ -81,7 +83,6 @@ export default {
             header: 'Receive ERC20 TLOS ptoken on the Ethereum mainnet.',
             subheader: 'The Telos ERC20 token on Ethereum can be bridged to Telos Native or Telos EVM on ',
             subheader_link: 'https://dapp.ptokens.io/#/swap?asset=tlos&from=eth&to=telos',
-            subheader_link_text: 'dapp.ptokens.io',
         },
     },
     evm_wallet: {
@@ -219,6 +220,7 @@ export default {
         error_message_disconnect: 'We\'re sorry, it looks like you\'re not connected to the internet. Please check your network connection and try again.',
         error_see_details_label: 'See Details',
         error_details_title: 'Error Details',
+        error_redirecting: 'There was an error redirecting, please try again later',
         neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
         neutral_message_staking: 'Staking <b>{quantity}</b>',
         neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',

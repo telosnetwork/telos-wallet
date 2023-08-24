@@ -1,33 +1,42 @@
 <script lang="ts" setup>
-import { AxiosInstance } from 'axios';
-import AppPage from 'components/evm/AppPage.vue';
-import { logger } from 'ethers';
-import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
-import { useAccountStore } from 'src/antelope';
 import { computed, inject, ref } from 'vue';
+import { AxiosInstance } from 'axios';
+import { useI18n } from 'vue-i18n';
 
-const widgetLink = ref('');
-const address = useAccountStore().currentEvmAccount?.address;
-const displayWidget = ref<boolean>(false);
+import { useAccountStore } from 'src/antelope';
+
+import AppPage from 'components/evm/AppPage.vue';
+import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
+
 const telosApi = inject('$telosApi') as AxiosInstance;
 const errorNotification = inject('$errorNotification') as any;
-const isMainnet = computed(() => process.env.CHAIN_NAME === 'telos');
+const { t: $t } = useI18n();
 
+// data
+const widgetLink = ref('');
+const displayWidget = ref(false);
+
+// computed
+const address = computed(() => useAccountStore().currentEvmAccount?.address);
+const isMainnet = computed(() => process.env.CHAIN_NAME === 'telos'); // TODO make this multi chain compatible
+
+// methods
 async function fetchLink(name: string) {
     try {
-        if (name === 'topper'){
+        if (name === 'topper') {
+            // TODO make this multi chain compatible (should come from chain config)
             const bootstrapToken = isMainnet.value ? (await telosApi.get(`/evm/getTopperToken?address=${address}`)).data : (await telosApi.get(`/evm/getTopperToken?address=${address}&sandbox=true`)).data;
             widgetLink.value = isMainnet.value ? `https://app.topperpay.com/?bt=${bootstrapToken}` : `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`;
             displayWidget.value = true;
-        }else if (name === 'simplex'){
+        } else if (name === 'simplex'){
             widgetLink.value = 'https://www.telos.net/#buy-tlos-simplex';
             window.open(widgetLink.value, '_blank');
             // TODO implement Simplex Form widget
             // widgetLink.value = 'https://iframe.simplex-affiliates.com/form?uid=31fe3fa4-a59f-499b-9371-7e7d8c08f8d0&referrer=http%3A%2F%2Flocalhost%3A8081%2F';
             // displayWidget.value = true;
         }
-    }catch(e){
-        errorNotification('There was an error redirecting, please try again later');
+    } catch(e){
+        errorNotification($t('notification.error_redirecting'));
     }
 }
 
