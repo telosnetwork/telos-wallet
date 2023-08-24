@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { AxiosInstance } from 'axios';
 import AppPage from 'components/evm/AppPage.vue';
+import { logger } from 'ethers';
 import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
 import { useAccountStore } from 'src/antelope';
 import { inject, ref } from 'vue';
@@ -14,23 +15,22 @@ const errorNotification = inject('$errorNotification') as any;
 async function fetchLink(name: string) {
     try {
         if (name === 'topper'){
-            const bootstrapToken = (await telosApi.get(`/evm/getTopperToken?address=${address}`)).data;
-            widgetLink.value = `https://app.topperpay.com/?bt=${bootstrapToken}`;
+            const bootstrapToken = (await telosApi.get(`/evm/getTopperToken?address=${address}&sandbox=true`)).data; //TODO remove `sandbox` query param
+            widgetLink.value = `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`; //TODO remove 'sandbox'
+            displayWidget.value = true;
         }else if (name === 'simplex'){
             widgetLink.value = 'https://www.telos.net/#buy-tlos-simplex';
+            window.open(widgetLink.value, '_blank');
             // widgetLink.value = 'https://iframe.simplex-affiliates.com/form?uid=31fe3fa4-a59f-499b-9371-7e7d8c08f8d0&referrer=http%3A%2F%2Flocalhost%3A8081%2F';
+            // displayWidget.value = true;
         }
-        // TODO: display widget link in iframe
-        // toggleWidget.value = true;
-        //temp solution just redirects to new tab, remove when iframe is enabled for all options
-        window.open(widgetLink.value, '_blank')?.focus();
     }catch(e){
         errorNotification('There was an error redirecting, please try again later');
     }
 }
 
 function returnToOptions(){
-    widgetLink.value = '';
+    displayWidget.value = false;
 }
 
 </script>
@@ -49,7 +49,7 @@ function returnToOptions(){
             <div class="c-buy-page__return" @click="returnToOptions"> &lt; Back to selection </div>
             <iframe
                 :src="widgetLink"
-                height="500px"
+                height="1000px"
                 width="100%"
                 allowfullscreen="true"
             ></iframe>
