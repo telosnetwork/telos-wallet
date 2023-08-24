@@ -95,5 +95,13 @@ function returnToOptions(){
     &__header{
         padding: 88px 0px 104px;
     }
+
+    &__iframe{
+        a {
+            font-size: 22px;
+            color: var(--link-color);
+            cursor: pointer;
+        }
+    }
 }
 </style>
