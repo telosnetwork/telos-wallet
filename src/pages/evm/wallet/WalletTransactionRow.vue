@@ -3,7 +3,7 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { ShapedTransactionRow } from 'src/antelope/types';
+import { ShapedErc20TransactionRow, ShapedNftTransactionRow } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getLongDate } from 'src/antelope/stores/utils';
 import { useChainStore, useUserStore } from 'src/antelope';
@@ -30,7 +30,7 @@ export default defineComponent({
     },
     props: {
         transaction: {
-            type: Object as PropType<ShapedTransactionRow>,
+            type: Object as PropType<ShapedErc20TransactionRow | ShapedNftTransactionRow>,
             required: true,
         },
     },

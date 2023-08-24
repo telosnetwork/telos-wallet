@@ -42,6 +42,17 @@ export interface TransactionValueData {
     fiatValue?: number;
 }
 
+export interface NftTransactionData {
+    quantity: number;
+    tokenId: string;
+    tokenName: string;
+    collectionAddress: string;
+    collectionName?: string;
+    imgSrc?: string;
+    videoSrc?: string;
+    type: 'image' | 'video' | 'audio' | 'unknown';
+}
+
 export const EvmSwapFunctionNames = [
     'swapExactTokensForTokens',
     'swapTokensForExactTokens',
@@ -53,8 +64,8 @@ export const EvmSwapFunctionNames = [
 ];
 
 export interface ShapedTransactionRow {
-    id: string;
-    epoch: number;
+    id: string; // transaction ID
+    epoch: number; // epoch in milliseconds
     // action should be 'send', 'receive', 'swap', 'contractCreation', or some other action like 'approve'
     // a swap is any function in EvmSwapFunctionNames
     actionName: string;
@@ -62,11 +73,19 @@ export interface ShapedTransactionRow {
     fromPrettyName?: string;
     to: string; // address
     toPrettyName?: string;
-    valuesIn: TransactionValueData[];
-    valuesOut: TransactionValueData[];
     gasUsed?: number; // gas used in TLOS
     gasFiatValue?: number; // gas used in Fiat
     failed?: boolean;
+}
+
+export interface ShapedErc20TransactionRow extends ShapedTransactionRow {
+    valuesIn: TransactionValueData[];
+    valuesOut: TransactionValueData[];
+}
+
+export interface ShapedNftTransactionRow extends ShapedTransactionRow {
+    nftsIn: NftTransactionData[];
+    nftsOut: NftTransactionData[];
 }
 
 export interface IndexerAccountTransactionsContractData {

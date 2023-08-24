@@ -24,13 +24,16 @@ import {
     EvmTransaction,
     AntelopeError,
     IndexerTransactionsFilter,
-    ShapedTransactionRow,
     ParsedIndexerAccountTransactionsContract,
-    EVMTransactionsPaginationData, TransactionValueData, EvmSwapFunctionNames,
+    EVMTransactionsPaginationData,
+    TransactionValueData,
+    EvmSwapFunctionNames,
+    ShapedErc20TransactionRow,
+    ShapedNftTransactionRow,
+    ShapedTransactionRow,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
 import { getAntelope, useContractStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
@@ -51,7 +54,7 @@ export interface HistoryState {
         [label: Label]: number,
     },
     __shaped_evm_transaction_rows: {
-        [label: Label]: ShapedTransactionRow[],
+        [label: Label]: (ShapedErc20TransactionRow | ShapedNftTransactionRow)[],
     };
     __evm_transactions_pagination_data: {
         [label: Label]: EVMTransactionsPaginationData,
@@ -59,13 +62,14 @@ export interface HistoryState {
 }
 
 const store_name = 'history';
+const max_response_transactions = 5000;
 
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
     getters: {
         getEVMTransactions: state => (label: Label): EvmTransaction[] => state.__evm_transactions[label].transactions,
         getEVMTransactionsFilter: state => state.__evm_filter,
-        getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
+        getShapedTransactionRows: state => (label: Label): (ShapedErc20TransactionRow | ShapedNftTransactionRow)[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
     },
@@ -94,11 +98,43 @@ export const useHistoryStore = defineStore(store_name, {
             feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
-                const response = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
-                const contracts = response.contracts;
-                const transactions = response.results;
+                // eztodo make UI element to indicate more than 5000 txs?
+                const filter = {
+                    // address: this.__evm_filter.address, // eztodo clean up filter object
+                    address: '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607',
+                    limit: max_response_transactions,
+                    offset: 0,
+                    includeAbi: true,
+                    includePagination: true,
+                };
 
-                this.setEvmTransactionsRowCount(label, response.total_count);
+                const responseErc20   = await chain_settings.getEVMTransactions({
+                    ...filter,
+                    type: 'erc20',
+                });
+                const responseErc721 = await chain_settings.getEVMTransactions({
+                    ...filter,
+                    type: 'erc721',
+                });
+                const responseErc1155 = await chain_settings.getEVMTransactions({
+                    ...filter,
+                    type: 'erc1155',
+                });
+
+                const contracts = {
+                    ...responseErc20.contracts,
+                    ...responseErc721.contracts,
+                    ...responseErc1155.contracts,
+                };
+                const transactions = [
+                    ...responseErc20.results,
+                    ...responseErc721.results,
+                    ...responseErc1155.results,
+                ].sort((a, b) => b.timestamp - a.timestamp); // eztodo verify that this sort is correct
+
+                // eztodo for some reason, all results objects are the same
+                debugger;
+                this.setEvmTransactionsRowCount(label, transactions.length);
 
                 const contractAddresses = Object.keys(contracts);
                 const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
@@ -179,6 +215,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                 if (!isFailed) {
                     if (+tx.value) {
+                        // eztodo should i be using WEI_PRECISION here?
                         const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
                         const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
@@ -265,8 +302,11 @@ export const useHistoryStore = defineStore(store_name, {
                     failed: isFailed,
                 } as ShapedTransactionRow;
 
+                console.log(shapedTx);
+
+
                 // The shapedTxs may not be in the same order as the transactions
-                this.__shaped_evm_transaction_rows[label][index] = shapedTx;
+                // this.__shaped_evm_transaction_rows[label][index] = shapedTx;
 
                 feedbackStore.unsetLoading(loadingFlag);
             });
@@ -282,7 +322,7 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('setTransactions', label, transactions);
             useHistoryStore().__evm_transactions[label].transactions = transactions;
         },
-        setShapedTransactionRows(label: Label, transactions: ShapedTransactionRow[]) {
+        setShapedTransactionRows(label: Label, transactions: (ShapedErc20TransactionRow | ShapedNftTransactionRow)[]) {
             this.trace('setShapedTransactionRows', transactions);
             this.__shaped_evm_transaction_rows[label] = transactions;
         },

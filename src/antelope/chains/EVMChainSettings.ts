@@ -376,8 +376,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const includePagination = true;
         const logTopic = filter.logTopic;
         const full = filter.full ?? true;
+        const type = filter.type;
 
-        let aux = {};
+        let aux = {
+            type,
+        } as Record<string, unknown>;
 
         if (limit !== undefined) {
             aux = { limit, ...aux };

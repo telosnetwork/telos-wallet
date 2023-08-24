@@ -28,4 +28,5 @@ export interface IndexerTransactionsFilter {
     logTopic?: string; // match to the transaction logs' first topic
     full?: string; // Add internal transactions to the response
     forceMetadata?: number; // 1 to force metadata to be returned
+    type?: 'erc20' | 'erc721' | 'erc1155'; // filter by token type
 }
