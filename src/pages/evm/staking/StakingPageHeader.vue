@@ -3,7 +3,7 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber, ethers } from 'ethers';
 
-import { useUserStore, useBalancesStore, useChainStore } from 'src/antelope';
+import { useUserStore, useBalancesStore, useChainStore, useRexStore } from 'src/antelope';
 import { convertCurrency, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { NativeCurrencyAddress } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -42,9 +42,9 @@ const stakedExpressedInSystemBalanceBn = computed(() => {
         return undefined;
     }
 });
-const systemTokenPrice = ref(systemToken.price.value);
+const systemTokenPrice = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value);
 const stakedFiatValueBn = computed(() => {
-    if (stakedExpressedInSystemBalanceBn.value && systemTokenPrice.value) {
+    if (stakedExpressedInSystemBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
         return convertCurrency(stakedExpressedInSystemBalanceBn.value, stakedToken.decimals, systemToken.decimals, ratioNumber);
     } else {
@@ -53,12 +53,42 @@ const stakedFiatValueBn = computed(() => {
 });
 
 // Second cell: Unstaking
-const unstakingFiatValueText = ref('$ 200.72');
-const unstakingBalanceBn = ref(stakedTokenBalanceBn);
+const unstakingBalanceBn = computed(() => {
+    const rexData = useRexStore().getRexData(label);
+    if (rexData) {
+        const totalBalance = rexData.balance;
+        const withdrawableBalance = rexData.withdrawable;
+        if (totalBalance && withdrawableBalance) {
+            return totalBalance.sub(withdrawableBalance);
+        } else {
+            return undefined;
+        }
+    } else {
+        return undefined;
+    }
+});
+const unstakingFiatValueBn = computed(() => {
+    if (unstakingBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
+        const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
+        return convertCurrency(unstakingBalanceBn.value, stakedToken.decimals, systemToken.decimals, ratioNumber);
+    } else {
+        return undefined;
+    }
+});
+const isUnstakingLoading = computed(() => unstakingBalanceBn.value === undefined);
 
 // Third cell: Withdrawable
-const withdrawableFiatValueText = ref('$ 123.02');
-const withdrawableBalanceBn = ref(unstakedRatio);
+const withdrawableBalanceBn = computed(() => useRexStore().getRexData(label)?.withdrawable);
+const withdrawableFiatValueBn = computed(() => {
+    if (withdrawableBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
+        const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
+        return convertCurrency(withdrawableBalanceBn.value, stakedToken.decimals, systemToken.decimals, ratioNumber);
+    } else {
+        return undefined;
+    }
+});
+const isWithdrawableLoading = computed(() => withdrawableBalanceBn.value === undefined);
+
 
 const apyPrittyPrint = computed(() => {
     const apy = chainStore.currentEvmChain?.apy;
@@ -72,8 +102,15 @@ const apyisLoading = computed(() => apyPrittyPrint.value === '--');
 const unlockPeriod = ref('10 days');
 
 // tvlAmountBn is a BigNumber representing 10 ETH (or 10 TLOS) with WEI_PRECISION decimals
-const tvlAmountBn = ref(ethers.utils.parseUnits('102400.0', WEI_PRECISION));
-const evmNetworkName = ref('Telos EVM');
+const tvlAmountBn = computed(() => {
+    const totalStaking = useRexStore().getRexData(label)?.totalStaking;
+    if (totalStaking) {
+        return totalStaking;
+    } else {
+        return undefined;
+    }
+});
+const evmNetworkName = computed(() => chainStore.currentEvmChain?.settings.getDisplay() ?? '');
 
 const firstLineData = computed(() => [{
     label: $t('evm_stake.staked_card_label', { symbol: systemToken.symbol }),
@@ -86,16 +123,18 @@ const firstLineData = computed(() => [{
 }, {
     label: $t('evm_stake.unstaking_card_label'),
     tooltip: $t('evm_stake.unstaking_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol, unlockPeriod: unlockPeriod.value }),
-    primaryText: unstakingFiatValueText.value,
-    secondaryText: prettyPrintToken(unstakingBalanceBn.value, systemToken.symbol),
+    primaryText: prettyPrintToken(unstakingFiatValueBn.value, fiatCurrency.value),
+    secondaryText: isUnstakingLoading.value ? '' : prettyPrintToken(unstakingBalanceBn.value, systemToken.symbol),
+    isPrimaryLoading: isUnstakingLoading.value,
     lowContrastSecondaryText: true,
     useSmallBox: true,
 }, {
     label: $t('evm_stake.withdrawable_card_label'),
     tooltip: $t('evm_stake.withdrawable_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol, unlockPeriod: unlockPeriod.value }),
-    primaryText: withdrawableFiatValueText.value,
-    secondaryText: prettyPrintToken(withdrawableBalanceBn.value, systemToken.symbol),
+    primaryText: prettyPrintToken(withdrawableFiatValueBn.value, fiatCurrency.value),
+    secondaryText: isWithdrawableLoading.value ? '' : prettyPrintToken(withdrawableBalanceBn.value, systemToken.symbol),
     lowContrastSecondaryText: true,
+    isPrimaryLoading: isWithdrawableLoading.value,
     useSmallBox: true,
 }]);
 

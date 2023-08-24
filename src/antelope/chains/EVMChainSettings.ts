@@ -215,6 +215,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemToken(): TokenClass;
     abstract getStakedSystemToken(): TokenClass;
     abstract getWrappedSystemToken(): TokenClass;
+    abstract getEscrowContractAddress(): string;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
