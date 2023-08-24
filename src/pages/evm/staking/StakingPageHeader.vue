@@ -26,25 +26,12 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
-<<<<<<< HEAD
 const stakedTokenBalanceBn = ref(undefined as BigNumber | undefined);
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
     if (stakedTokenBalanceBn.value && !unstakedRatio.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(unstakedRatio.value, stakedToken.decimals);
-=======
-const stakedTokenBalanceBn = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === stakedToken.symbol)?.amount);
-const stakedRatio = computed(() => chainStore.getStakedRatio(label));
-const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || stakedRatio.value.isZero());
-const stakedExpressedInSystemBalanceBn = computed(() => {
-    if (stakedTokenBalanceBn.value && !stakedRatio.value.isZero()) {
-        console.log('stakedRatio', stakedRatio.value.toString());
-        const inverseRatio = ethers.constants.One.mul(ethers.constants.One).div(stakedRatio.value);
-        console.log('inverseRatio', inverseRatio.toString());
-        const ratioNumber = ethers.utils.formatUnits(inverseRatio, stakedToken.decimals);
-        console.log('ratioNumber', ratioNumber);
->>>>>>> 8c4d4930 (saving WIP)
         return convertCurrency(stakedTokenBalanceBn.value, stakedToken.decimals, stakedToken.decimals, ratioNumber);
     } else {
         return undefined;
