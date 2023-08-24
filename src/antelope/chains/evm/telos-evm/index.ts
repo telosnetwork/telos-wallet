@@ -50,7 +50,7 @@ const RPC_ENDPOINT = {
     port: 443,
     path: '/evm',
 };
-
+const ESCROW_CONTRACT_ADDRESS = '0x95F5713A1422Aa3FBD3DCB8D553945C128ee3855';
 const API_ENDPOINT = 'https://api.telos.net/v1';
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://teloscan.io';
@@ -100,6 +100,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getWrappedSystemToken(): TokenClass {
         return W_TOKEN;
+    }
+
+    getEscrowContractAddress(): string {
+        return ESCROW_CONTRACT_ADDRESS;
     }
 
     async getUsdPrice(): Promise<number> {
