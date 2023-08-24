@@ -25,7 +25,7 @@ async function fetchLink(name: string) {
     try {
         if (name === 'topper') {
             // TODO make this multi chain compatible (should come from chain config)
-            const bootstrapToken = isMainnet.value ? (await telosApi.get(`/evm/getTopperToken?address=${address.value}`)).data : (await telosApi.get(`/evm/getTopperToken?address=${address}&sandbox=true`)).data;
+            const bootstrapToken = isMainnet.value ? (await telosApi.get(`/evm/getTopperToken?address=${address.value}`)).data : (await telosApi.get(`/evm/getTopperToken?address=${address.value}&sandbox=true`)).data;
             widgetLink.value = isMainnet.value ? `https://app.topperpay.com/?bt=${bootstrapToken}` : `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`;
             displayWidget.value = true;
         } else if (name === 'simplex'){
