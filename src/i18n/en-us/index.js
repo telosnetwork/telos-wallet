@@ -70,6 +70,7 @@ export default {
     evm_buy: {
         buy_telos: 'Buy Telos',
         powered_by: 'powered by {provider}',
+        back_to_selection: 'Back to selection',
         simplex: {
             button_label: 'EVM Token',
             powered_by: 'Simplex',

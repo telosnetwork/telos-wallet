@@ -71,8 +71,8 @@ const goToRoute = (name: string) => {
             tabindex="0"
             role="link"
             :aria-label="$t('evm_wallet.link_to_buy_aria')"
-            @keydown.space.enter="goToRoute('buy')"
-            @click="goToRoute('buy')"
+            @keydown.space.enter="goToRoute('evm-buy')"
+            @click="goToRoute('evm-buy')"
         >
             <InlineSvg
                 :src="require('src/assets/icon--buy.svg')"

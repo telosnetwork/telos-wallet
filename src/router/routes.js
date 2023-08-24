@@ -87,7 +87,7 @@ const routes = [
             },
             {
                 path: 'buy',
-                name: 'buy',
+                name: 'evm-buy',
                 meta: {
                     requiresAuth: true,
                 },

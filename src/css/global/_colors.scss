@@ -9,7 +9,6 @@ $gradientPurple: #8946DF;
 $lightBlue: #31C1EE;
 $gray: #CBCAF9;
 $white: #FFFFFF;
-$off-white:#F6F6FE;
 $blackDark: #130C3F;
 $purple: #8946DF;
 $saveBtn: #2e1f4f;
@@ -24,7 +23,8 @@ $saveBtn: #2e1f4f;
     $accent-2: #505DCD;
     $accent-3: #DDD1FF;
     $accent-4: #A5A6F6;
-    $page-header: #F7F5FF;
+    $accent-5: #F6F6FE;
+    $accent-6: #F7F5FF;
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
     $high-contrast-text-color: #282828;
     $default-contrast-text-color: #4D4D4D;
@@ -44,6 +44,8 @@ $saveBtn: #2e1f4f;
     --accent-color-2: #{$accent-2};
     --accent-color-3: #{$accent-3};
     --accent-color-4: #{$accent-4};
+    --accent-color-5: #{$accent-5};
+    --accent-color-6: #{$accent-6};
     --negative-color: #{$negative};
     --positive-color: #{$positive};
     --warning-color-ui: #{$warning};
@@ -53,9 +55,9 @@ $saveBtn: #2e1f4f;
     --positive-muted: #{rgba($positive, 0.5)};
 
     --bg-color: #{$canvas};
-    --bg-color-hover: #{$page-header};
+    --bg-color-hover: #{$accent-6};
 
-    --header-bg-color: #{$page-header};
+    --header-bg-color: #{$accent-6};
 }
 
 // Dark Mode

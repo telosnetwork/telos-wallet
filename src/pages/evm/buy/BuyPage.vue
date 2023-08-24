@@ -18,13 +18,12 @@ const displayWidget = ref(false);
 
 // computed
 const address = computed(() => useAccountStore().currentEvmAccount?.address);
-const isMainnet = computed(() => process.env.CHAIN_NAME === 'telos'); // TODO make this multi chain compatible
+const isMainnet = computed(() => process.env.CHAIN_NAME === 'telos');
 
 // methods
 async function fetchLink(name: string) {
     try {
         if (name === 'topper') {
-            // TODO make this multi chain compatible (should come from chain config)
             const bootstrapToken = isMainnet.value ? (await telosApi.get(`/evm/getTopperToken?address=${address.value}`)).data : (await telosApi.get(`/evm/getTopperToken?address=${address.value}&sandbox=true`)).data;
             widgetLink.value = isMainnet.value ? `https://app.topperpay.com/?bt=${bootstrapToken}` : `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`;
             displayWidget.value = true;
@@ -50,21 +49,35 @@ function returnToOptions(){
 <template>
 <AppPage>
     <template v-slot:header >
-        <h1 class="c-buy-page__header">{{ $t('evm_buy.buy_telos') }}</h1>
+        <h1 class="q-mb-xl">{{ $t('evm_buy.buy_telos') }}</h1>
     </template>
 
-    <div>
-        <div
-            v-if="displayWidget"
-            class="c-buy-page__iframe"
-        >
-            <a class="c-buy-page__return" @click="returnToOptions"> &lt; Back to selection </a>
-            <iframe
-                :src="widgetLink"
-                height="1000px"
-                width="100%"
-                allowfullscreen="true"
-            ></iframe>
+    <div class="c-buy-page__content">
+        <div v-if="displayWidget">
+            <div
+                :aria-label="$t('evm_buy.back_to_selection')"
+                class="c-buy-page__back-link"
+                tabindex="0"
+                role="link"
+                @keypress.space.enter="returnToOptions"
+                @click="returnToOptions"
+            >
+                <q-icon
+                    name="arrow_back_ios"
+                    size="16px"
+                    class="c-buy-page__back-icon"
+                />
+                <span class="q-ml-xs o-text--link">{{ $t('evm_buy.back_to_selection') }}</span>
+            </div>
+            <br>
+            <div class="c-buy-page__ptoken-iframe-container">
+                <iframe
+                    :src="widgetLink"
+                    allowfullscreen="true"
+                    class="c-buy-page__ptoken-iframe"
+                ></iframe>
+            </div>
+
         </div>
         <div v-else class="c-buy-page__options">
             <BuyPageOption
@@ -73,7 +86,6 @@ function returnToOptions(){
                 :header="$t('evm_buy.simplex.header')"
                 :subheader="$t('evm_buy.simplex.subheader')"
                 :widget="false"
-                class="c-buy-page__option"
                 @fetchLink="fetchLink('simplex')"
             />
             <BuyPageOption
@@ -84,7 +96,6 @@ function returnToOptions(){
                 :widget="true"
                 :subheaderLink="$t('evm_buy.topper.subheader_link')"
                 :subheaderLinkText="$t('evm_buy.topper.subheader_link_text')"
-                class="c-buy-page__option"
                 @fetchLink="fetchLink('topper')"
             />
         </div>
@@ -94,30 +105,46 @@ function returnToOptions(){
 
 <style lang="scss">
 .c-buy-page {
-    &__options{
+    &__content {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    &__options {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         align-items: flex-start;
-        gap: 88px;
+        gap: 42px;
         margin-top: 20px;
         margin-bottom: 48px;
 
-        @include md-and-up {
-            gap: 160px;
+        @include lg-and-up {
+            gap: 128px;
         }
     }
 
-    &__header{
-        padding: 88px 0px 104px;
+    &__back-link {
+        display: flex;
+        align-items: center;
+        width: max-content;
+        cursor: pointer;
     }
 
-    &__iframe{
-        a {
-            font-size: 22px;
-            color: var(--link-color);
-            cursor: pointer;
-        }
+    &__back-icon {
+        color: var(--link-color);
+    }
+
+    &__ptoken-iframe-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__ptoken-iframe {
+        margin: auto;
+        width: 100%;
+        max-width: 800px;
+        height: 80vh;
     }
 }
 </style>

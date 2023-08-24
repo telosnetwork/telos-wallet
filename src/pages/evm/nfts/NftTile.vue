@@ -66,7 +66,7 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
 <style lang="scss">
 .c-nft-tile {
     border-radius: 4px;
-    border: 1px solid $page-header;
+    border: 1px solid var(--accent-color-6);
     padding: 16px 24px;
 
     display: flex;

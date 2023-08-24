@@ -140,6 +140,18 @@ p {
     @include text--small-bold;
 }
 
+.o-text--link {
+    @include text--paragraph;
+
+    color: var(--link-color) !important;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
 /* Utilities classes */
 @mixin link-color-text {
     color: var(--link-color) !important;

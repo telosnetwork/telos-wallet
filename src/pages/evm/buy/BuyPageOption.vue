@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { QBtn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -18,24 +17,31 @@ const { t: $t } = useI18n();
 
 <template>
 <div class="c-buy-page-option">
-    <QBtn class="c-buy-page-option__button" @click="$emit('fetch-link')" >
+    <q-btn class="c-buy-page-option__button" @click="$emit('fetch-link')" >
         <div class="c-buy-page-option__label">
             <img
                 src="https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg"
-                class="c-wallet-balance-row__logo"
-                height="22"
-                width="22"
+                height="24"
+                width="24"
                 aria-hidden="true"
                 alt="Token logo"
             >
-            {{ buttonLabel }}
+            <span class="c-buy-page-option__button-label">{{ buttonLabel }}</span>
             <q-icon v-if="!widget" size="16px" name="launch" />
         </div>
         <div class="c-buy-page-option__powered">{{ $t('evm_buy.powered_by', { provider: poweredBy }) }}</div>
-    </QBtn>
+    </q-btn>
     <div class="c-buy-page-option__header">{{ header }}</div>
-    <div class="c-buy-page-option__subheader">{{ subheader }}
-        <a v-if="subheaderLink" :href='subheaderLink' target="_blank">{{ subheaderLinkText }}</a>
+    <div class="c-buy-page-option__subheader">
+        {{ subheader }}
+        <a
+            v-if="subheaderLink"
+            :href="subheaderLink"
+            target="_blank"
+            class="o-text--link"
+        >
+            {{ subheaderLinkText }}
+        </a>
     </div>
 </div>
 </template>
@@ -58,15 +64,24 @@ const { t: $t } = useI18n();
         gap: 4px;
         align-self: stretch;
         border-radius: 4px;
-        border: 1px solid $primary;
-        background: $white; // TODO use existing css vars over sass vars
-        box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.20), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.12);
+        background-color: var(--bg-color);
+        border: 1px solid var(--accent-color);
+        transition: background-color 0.2s ease;
+
         &:hover {
-            background: $off-white; // TODO do we really need a new color for this?
+            background-color: var(--accent-color-5);
         }
     }
 
-    // TODO use typography classes for text styling
+    &__button-label {
+        @include text--header-4;
+
+        @include md-and-up {
+            @include text--header-2;
+        }
+
+        text-transform: none;
+    }
 
     &__label {
         display: flex;
@@ -75,38 +90,31 @@ const { t: $t } = useI18n();
         gap: 4px;
         align-self: stretch;
         color: var(--text-default-contrast);
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 130%;
-        text-transform: none;
     }
 
     &__powered {
         margin-left: auto;
         color: var(--text-default-contrast);
         text-align: center;
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 150%;
         text-transform: none;
+
+        @include text--small;
     }
 
     &__header {
         align-self: stretch;
         color: var(--text-default-contrast);
         text-align: center;
-        font-size: 20px;
-        font-weight: 600;
-        line-height: 130%;
+
+        @include text--header-4;
     }
 
     &__subheader {
         align-self: stretch;
         color: var(--text-default-contrast);
         text-align: center;
-        font-size: 16px;
-        font-weight: 400;
-        line-height: 150%;
+
+        @include text--paragraph;
     }
 }
 </style>
