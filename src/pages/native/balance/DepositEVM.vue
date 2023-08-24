@@ -1,6 +1,5 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import BigNumber from 'bignumber.js';
 
 export default {
     name: 'WithdrawEVM',

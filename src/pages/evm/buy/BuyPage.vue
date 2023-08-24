@@ -4,23 +4,25 @@ import AppPage from 'components/evm/AppPage.vue';
 import { logger } from 'ethers';
 import BuyPageOption from 'pages/evm/buy/BuyPageOption.vue';
 import { useAccountStore } from 'src/antelope';
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 
 const widgetLink = ref('');
 const address = useAccountStore().currentEvmAccount?.address;
 const displayWidget = ref<boolean>(false);
 const telosApi = inject('$telosApi') as AxiosInstance;
 const errorNotification = inject('$errorNotification') as any;
+const isMainnet = computed(() => process.env.CHAIN_NAME === 'telos');
 
 async function fetchLink(name: string) {
     try {
         if (name === 'topper'){
-            const bootstrapToken = (await telosApi.get(`/evm/getTopperToken?address=${address}&sandbox=true`)).data; //TODO remove `sandbox` query param
-            widgetLink.value = `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`; //TODO remove 'sandbox'
+            const bootstrapToken = isMainnet.value ? (await telosApi.get(`/evm/getTopperToken?address=${address}`)).data : (await telosApi.get(`/evm/getTopperToken?address=${address}&sandbox=true`)).data;
+            widgetLink.value = isMainnet.value ? `https://app.topperpay.com/?bt=${bootstrapToken}` : `https://app.sandbox.topperpay.com/?bt=${bootstrapToken}`;
             displayWidget.value = true;
         }else if (name === 'simplex'){
             widgetLink.value = 'https://www.telos.net/#buy-tlos-simplex';
             window.open(widgetLink.value, '_blank');
+            // TODO implement Simplex Form widget
             // widgetLink.value = 'https://iframe.simplex-affiliates.com/form?uid=31fe3fa4-a59f-499b-9371-7e7d8c08f8d0&referrer=http%3A%2F%2Flocalhost%3A8081%2F';
             // displayWidget.value = true;
         }
