@@ -74,8 +74,6 @@ export default {
             powered_by: 'Simplex',
             header: 'Receive TLOS directly on Telos EVM network.',
             subheader: 'Not available for all U.S. based customers',
-            link: '',
-            subheader_link_text: '',
         },
         topper: {
             button_label: 'ERC20 on Ethereum',
