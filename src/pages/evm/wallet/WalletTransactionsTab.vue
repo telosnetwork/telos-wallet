@@ -36,7 +36,10 @@ export default defineComponent({
             return this.shapedTransactions.map(tx => tx.id);
         },
         loading() {
-            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount') && !this.hideLoadingState;
+            // eztodo when loading balances tab then clicking transactions tab, it says "showing 5 of 0 transactions"
+            const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
+            const transfersLoading = feedbackStore.isLoading('history.fetchEVMTransfersForAccount');
+            return (txLoading || transfersLoading) && !this.hideLoadingState;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -62,6 +65,7 @@ export default defineComponent({
         shapedTransactions(newValue) {
             this.pagination.rowsNumber = newValue.length;
         },
+        // eztodo debounce fetch tx
         address() {
             // address can be initially undefined; wait to load txs until it's defined
             // also reload txs if the user switches accounts
@@ -79,7 +83,9 @@ export default defineComponent({
         // eztodo add interval for transfers
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
-                this.hideLoadingState = true;
+                if (this.shapedTransactions.length > 0) {
+                    this.hideLoadingState = true;
+                }
 
                 this.getTransactions().finally(() => {
                     this.enableLoadingState();
@@ -128,6 +134,7 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
+                    await historyStore.fetchEVMTransfersForAccount('current');
                     await historyStore.fetchEVMTransactionsForAccount('current');
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
                 } catch (e) {

@@ -427,6 +427,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
         contract,
         includeAbi,
     }: IndexerTransfersFilter): Promise<IndexerAccountTransfersResponse> {
+        console.log(account); // eztodo remove this
+
         let aux = {};
 
         if (limit !== undefined) {
