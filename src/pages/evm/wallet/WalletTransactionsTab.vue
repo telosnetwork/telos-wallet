@@ -76,6 +76,7 @@ export default defineComponent({
             this.hideLoadingState = true;
         }
 
+        // eztodo add interval for transfers
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
                 this.hideLoadingState = true;

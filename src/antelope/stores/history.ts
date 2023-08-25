@@ -24,16 +24,16 @@ import {
     EvmTransaction,
     AntelopeError,
     IndexerTransactionsFilter,
+    ShapedTransactionRow,
     ParsedIndexerAccountTransactionsContract,
     EVMTransactionsPaginationData,
     TransactionValueData,
     EvmSwapFunctionNames,
-    ShapedErc20TransactionRow,
-    ShapedNftTransactionRow,
-    ShapedTransactionRow,
+    EvmTransfer,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
+import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
 import { getAntelope, useContractStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
@@ -41,7 +41,7 @@ import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
-
+export const transfers_filter_limit = 10000;
 
 export interface HistoryState {
     __evm_filter: IndexerTransactionsFilter;
@@ -54,22 +54,26 @@ export interface HistoryState {
         [label: Label]: number,
     },
     __shaped_evm_transaction_rows: {
-        [label: Label]: (ShapedErc20TransactionRow | ShapedNftTransactionRow)[],
+        [label: Label]: ShapedTransactionRow[],
     };
     __evm_transactions_pagination_data: {
         [label: Label]: EVMTransactionsPaginationData,
     },
+    __evm_transfers: {
+        [label: Label]: {
+            transfers: EvmTransfer[],
+        },
+    },
 }
 
 const store_name = 'history';
-const max_response_transactions = 5000;
 
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
     getters: {
         getEVMTransactions: state => (label: Label): EvmTransaction[] => state.__evm_transactions[label].transactions,
         getEVMTransactionsFilter: state => state.__evm_filter,
-        getShapedTransactionRows: state => (label: Label): (ShapedErc20TransactionRow | ShapedNftTransactionRow)[] => state.__shaped_evm_transaction_rows[label],
+        getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
     },
@@ -98,43 +102,16 @@ export const useHistoryStore = defineStore(store_name, {
             feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
-                // eztodo make UI element to indicate more than 5000 txs?
-                const filter = {
-                    // address: this.__evm_filter.address, // eztodo clean up filter object
-                    address: '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607',
-                    limit: max_response_transactions,
-                    offset: 0,
-                    includeAbi: true,
-                    includePagination: true,
-                };
+                // eztodo erc1155 are not returned by indexer for nft detail page
+                if (!this.__evm_transfers[label].transfers.length) {
+                    await this.fetchEVMTransfersForAccount(label);
+                }
 
-                const responseErc20   = await chain_settings.getEVMTransactions({
-                    ...filter,
-                    type: 'erc20',
-                });
-                const responseErc721 = await chain_settings.getEVMTransactions({
-                    ...filter,
-                    type: 'erc721',
-                });
-                const responseErc1155 = await chain_settings.getEVMTransactions({
-                    ...filter,
-                    type: 'erc1155',
-                });
+                const response = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
+                const contracts = response.contracts;
+                const transactions = response.results;
 
-                const contracts = {
-                    ...responseErc20.contracts,
-                    ...responseErc721.contracts,
-                    ...responseErc1155.contracts,
-                };
-                const transactions = [
-                    ...responseErc20.results,
-                    ...responseErc721.results,
-                    ...responseErc1155.results,
-                ].sort((a, b) => b.timestamp - a.timestamp); // eztodo verify that this sort is correct
-
-                // eztodo for some reason, all results objects are the same
-                debugger;
-                this.setEvmTransactionsRowCount(label, transactions.length);
+                this.setEvmTransactionsRowCount(label, response.total_count);
 
                 const contractAddresses = Object.keys(contracts);
                 const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
@@ -166,6 +143,47 @@ export const useHistoryStore = defineStore(store_name, {
             }
         },
 
+        // fetch all token transfers for an account (erc20, erc721, erc155)
+        // eztodo pass in token type?
+        async fetchEVMTransfersForAccount(label: Label = 'current'): Promise<void> {
+            const feedbackStore = useFeedbackStore();
+
+            this.trace('fetchEVMTransfersForAccount', label);
+            feedbackStore.setLoading('history.fetchEVMTransfersForAccount');
+
+            const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
+
+            try {
+                const [
+                    erc20TransferResponse,
+                    erc721TransferResponse,
+                    erc1155TransferResponse,
+                ] = await Promise.all(['erc20', 'erc721', 'erc1155'].map(
+                    type => chainSettings.getEVMTransfers({
+                        includePagination: true,
+                        account: this.__evm_filter.address,
+                        limit: transfers_filter_limit,
+                        type: type as 'erc20' | 'erc721' | 'erc1155',
+                    }),
+                ));
+                const transfers = [
+                    ...erc20TransferResponse.results,
+                    ...erc721TransferResponse.results,
+                    ...erc1155TransferResponse.results,
+                ];
+
+                transfers.sort((a, b) => b.timestamp - a.timestamp);
+
+                this.setEVMTransfers(label, transfers);
+            } catch (error) {
+                this.clearEVMTansfers();
+                // eztodo this error localization
+                throw new AntelopeError('antelope.history.error_fetching_transfers');
+            } finally {
+                feedbackStore.unsetLoading('history.fetchEVMTransfersForAccount');
+            }
+        },
+
         async shapeTransactions(label: Label = 'current', transactions: EvmTransaction[]) {
             this.trace('shapeTransactions', label);
             const feedbackStore = useFeedbackStore();
@@ -176,6 +194,13 @@ export const useHistoryStore = defineStore(store_name, {
             const contractStore = useContractStore();
             const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
+
+            // eztodo perhaps i can get all transfers (erc20, erc1155, erc721) then check each transaction hash against the list of transfers. if there is a match,
+            // i can then call the NFT endpoint to get the token info. 3 issues: each of the transfers calls takes a long time, so they need to be gotten at some point
+            // in the background. also the transfers list can become stale, so they need to be refetched periodically. also, each transfers call needs a limit (say, 5000) or the
+            // response may be way too large. if the user goes far enough back in their tx history, they will eventually hit a point where the transactions exceed the transfers
+            // this request https://api.teloscan.io/v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers?type=erc721&limit=9999999&offset=0&includePagination=false&includeAbi=false
+            // response is 70kb and took 2 seconds
 
             transactions.forEach(async (tx) => {
                 const index = transactions.findIndex(t => t.hash === tx.hash);
@@ -215,7 +240,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                 if (!isFailed) {
                     if (+tx.value) {
-                        // eztodo should i be using WEI_PRECISION here?
+                        // eztodo change from WEI_PRECISION to token decimals
                         const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
                         const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
@@ -302,11 +327,8 @@ export const useHistoryStore = defineStore(store_name, {
                     failed: isFailed,
                 } as ShapedTransactionRow;
 
-                console.log(shapedTx);
-
-
                 // The shapedTxs may not be in the same order as the transactions
-                // this.__shaped_evm_transaction_rows[label][index] = shapedTx;
+                this.__shaped_evm_transaction_rows[label][index] = shapedTx;
 
                 feedbackStore.unsetLoading(loadingFlag);
             });
@@ -322,7 +344,7 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('setTransactions', label, transactions);
             useHistoryStore().__evm_transactions[label].transactions = transactions;
         },
-        setShapedTransactionRows(label: Label, transactions: (ShapedErc20TransactionRow | ShapedNftTransactionRow)[]) {
+        setShapedTransactionRows(label: Label, transactions: ShapedTransactionRow[]) {
             this.trace('setShapedTransactionRows', transactions);
             this.__shaped_evm_transaction_rows[label] = transactions;
         },
@@ -336,6 +358,14 @@ export const useHistoryStore = defineStore(store_name, {
             this.setEVMTransactions('current', []);
             this.setShapedTransactionRows('current', []);
             this.setEvmTransactionsRowCount('current', 0);
+        },
+        setEVMTransfers(label: Label, transfers: EvmTransfer[]) {
+            this.trace('setEVMTransfers', transfers);
+            this.__evm_transfers[label].transfers = transfers;
+        },
+        clearEVMTansfers() {
+            this.trace('clearEVMTansfers');
+            this.setEVMTransfers('current', []);
         },
     },
 });
@@ -356,4 +386,9 @@ const historyInitialState: HistoryState = {
         current: [],
     },
     __evm_transactions_pagination_data: {},
+    __evm_transfers: {
+        current: {
+            transfers: [],
+        },
+    },
 };

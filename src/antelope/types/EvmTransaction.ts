@@ -132,3 +132,23 @@ export interface TransactionResponse {
 export interface NativeTransactionResponse extends TransactionResponse {
     __?: string;
 }
+
+export interface IndexerAccountTransfersResponse {
+    contracts: {
+        [contractHash: string]: IndexerAccountTransactionsContractData
+    };
+    results: EvmTransfer[]
+    total_count?: number; // included if includePagination is true in the request
+    more?: boolean; // included if includePagination is true in the request
+}
+
+export interface EvmTransfer {
+    amount: string, // a string representing an integer
+    contract: string, // contract address of the token being transferred
+    blockNumber: number, // an integer representing the block number of the transfer
+    from: string, // address of the sender
+    to: string; // address of the receiver
+    type: 'erc20' | 'erc721' | 'erc1155', // type of token being transferred
+    transaction: string; // transaction hash
+    timestamp: number; // integer representing ms from epoch
+}

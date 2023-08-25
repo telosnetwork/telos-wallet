@@ -28,5 +28,16 @@ export interface IndexerTransactionsFilter {
     logTopic?: string; // match to the transaction logs' first topic
     full?: string; // Add internal transactions to the response
     forceMetadata?: number; // 1 to force metadata to be returned
+}
+
+export interface IndexerTransfersFilter {
+    account: string;
     type?: 'erc20' | 'erc721' | 'erc1155'; // filter by token type
+    limit?: number; // integer value to limit number of results
+    offset?: number; // integer value to offset the results of the query
+    includePagination?: boolean; // include the total count and more flag in response
+    endBlock?: number; // last block to include in the query
+    startBlock?: number; // first block to include in the query
+    contract?: string; // filter by contract address
+    includeAbi?: boolean; // indicate whether to include abi
 }
