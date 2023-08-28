@@ -26,6 +26,7 @@ import {
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
+import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getAntelope } from 'src/antelope';
 
 
@@ -281,8 +282,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    // If we have market data we use it
-                    if (typeof contractData.calldata === 'object') {
+                    const priceUpdatedWithinTenMins = !!contractData.calldata.marketdata_updated && dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, 10);
+
+                    // If we have market data we use it, as long as the price was updated within the last 10 minutes
+                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
