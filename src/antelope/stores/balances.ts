@@ -50,6 +50,7 @@ import {
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
+import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -181,6 +182,7 @@ export const useBalancesStore = defineStore(store_name, {
                 const chain_settings = chain.getChain(label).settings as EVMChainSettings;
                 const sysToken = chain_settings.getSystemToken();
                 const wrpToken = chain_settings.getWrappedSystemToken();
+                const stkToken = chain_settings.getStakedSystemToken();
 
                 // get the price for both system and wrapped tokens
                 const price = (await chain_settings.getUsdPrice()).toString();
@@ -188,7 +190,6 @@ export const useBalancesStore = defineStore(store_name, {
                 sysToken.market = new TokenMarketData(marketInfo);
                 wrpToken.market = new TokenMarketData(marketInfo);
 
-<<<<<<< HEAD
                 // Now we preview a deposit of 1 SYS to get the ratio
                 const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
 
@@ -210,8 +211,6 @@ export const useBalancesStore = defineStore(store_name, {
                     this.trace('updateSystemTokensPrices', `STLOS price: ${toRaw(stkMarketInfo)}`);
                 }
 
-=======
->>>>>>> dbe666228e35dd0f9ba957cf7cce88e1994272f4
             } catch (error) {
                 console.error(error);
                 // we won't thorw an error here, as it is not critical
