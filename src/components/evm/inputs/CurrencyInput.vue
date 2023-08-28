@@ -924,6 +924,13 @@ export default defineComponent({
         showEmptyError() {
             this.inputIsDirty = true;
         },
+
+        // can be called from outside the component to remove the error state for empty input
+        resetEmptyError() {
+            this.$nextTick(() => {
+                this.inputIsDirty = false;
+            });
+        },
     },
 });
 </script>

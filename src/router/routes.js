@@ -25,6 +25,9 @@ const routes = [
     {
         path: '/evm',
         component: () => import('layouts/EVMLayout.vue'),
+        meta: {
+            requiresAuth: true,
+        },
         children: [
             {
                 path: 'wallet',
@@ -77,6 +80,9 @@ const routes = [
             {
                 path: 'wrap',
                 name: 'evm-wrap',
+                meta: {
+                    requiresAuth: true,
+                },
                 component: () => import('pages/evm/wrap/WrapPage.vue'),
             },
         ],
