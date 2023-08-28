@@ -44,6 +44,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     private _debouncedPrepareTokenConfigResolver: ((value: unknown) => void) | null;
     private web3Modal: Web3Modal;
     private unsubscribeWeb3Modal: null | (() => void) = null;
+    private usingQR = false;
 
     options: Web3ModalConfig;
     wagmiClient: EthereumClient;
@@ -77,6 +78,20 @@ export class WalletConnectAuth extends EVMAuthenticator {
         try {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
+
+            // We are successfully logged in. Let's find out if we are using QR
+            this.usingQR = false;
+            const injected = new InjectedConnector();
+            const provider = toRaw(await injected.getProvider());
+            if (typeof provider === 'undefined') {
+                this.usingQR = true;
+            } else {
+                const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
+                const sameAddress = providerAddress === address;
+                this.usingQR = !sameAddress;
+                this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
+            }
+            this.trace('walletConnectLogin', 'using QR:', this.usingQR);
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {
@@ -149,7 +164,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.trace('login', 'web3Modal.openModal()');
 
                 this.unsubscribeWeb3Modal = this.web3Modal.subscribeModal(async (newState) => {
-                    this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
+                    this.trace('login', 'web3Modal.subscribeModal ', toRaw(newState), wagmiConnected);
 
                     if (newState.open === true) {
                         this.trace(
@@ -198,6 +213,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // having this two properties attached to the authenticator instance may bring some problems
     // so after we use them we nned to clear them to avoid that problems
     clearAuthenticator(): void {
+        this.trace('clearAuthenticator');
+        this.usingQR = false;
         this.options = null as unknown as Web3ModalConfig;
         this.wagmiClient = null as unknown as EthereumClient;
     }
@@ -354,11 +371,17 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         let web3Provider = null;
-        if (usePlatformStore().isMobile) {
+        if (usePlatformStore().isMobile || this.usingQR) {
             const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
             const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
             web3Provider = new ethers.providers.JsonRpcProvider(url);
             this.trace('web3Provider', 'JsonRpcProvider ->', web3Provider);
+
+            // This is a hack to make the QR code work.
+            // this code is going to be used in EVMAuthenticator.ts login method
+            const listAccounts: () => Promise<`0x${string}`[]> = async () => [getAccount().address as addressString];
+            web3Provider.listAccounts = listAccounts;
+
         } else {
             web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
             this.trace('web3Provider', 'Web3Provider ->', web3Provider);
@@ -385,6 +408,16 @@ export class WalletConnectAuth extends EVMAuthenticator {
             }
             resolve(provider as unknown as ethers.providers.ExternalProvider);
         });
+    }
+
+    async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
+        this.trace('ensureCorrectChain', 'QR:', this.usingQR);
+        if (this.usingQR) {
+            // we don't have tools to check the chain when using QR
+            return this.web3Provider();
+        } else {
+            return super.ensureCorrectChain();
+        }
     }
 
 }
