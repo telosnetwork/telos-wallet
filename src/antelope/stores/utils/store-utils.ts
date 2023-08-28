@@ -33,7 +33,7 @@
  * console.log(callCounter); // 1
  */
 export function debounceAsync<Context, Args extends Array<unknown>, FnReturnType>(
-    func: (...args: Args) => Promise<FnReturnType> | FnReturnType,
+    func: (this: Context, ...args: Args) => Promise<FnReturnType> | FnReturnType,
     wait: number,
 ): (...args: Args) => Promise<FnReturnType> {
 
@@ -56,12 +56,14 @@ export function debounceAsync<Context, Args extends Array<unknown>, FnReturnType
                 const result = await func.apply(context, args);
 
                 // Resolve all pending promises
-                for (const pendingResolve of pendingResolves) {
-                    pendingResolve(result);
-                }
+                pendingResolves.forEach(pendingResolve => pendingResolve(result));
 
                 // Clear the pendingResolves array
                 pendingResolves = [];
+
+                // clean up the timeout
+                clearTimeout(timeout);
+                timeout = undefined;
             }, wait);
         });
     };
