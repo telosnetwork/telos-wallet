@@ -50,6 +50,7 @@ export interface NftTransactionData {
     collectionName?: string;
     imgSrc?: string;
     videoSrc?: string;
+    audioSrc?: string;
     type: 'image' | 'video' | 'audio' | 'unknown';
 }
 

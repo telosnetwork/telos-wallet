@@ -31,6 +31,7 @@ import {
     EvmSwapFunctionNames,
     EvmTransfer,
     IndexerContractData,
+    NftTransactionData,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
@@ -213,6 +214,7 @@ export const useHistoryStore = defineStore(store_name, {
             const feedbackStore = useFeedbackStore();
             const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
+            const nftStore = useNftsStore();
             const chain_settings = chain.settings as EVMChainSettings;
             const indexer = chain_settings.getIndexer();
             const contractStore = useContractStore();
@@ -226,6 +228,7 @@ export const useHistoryStore = defineStore(store_name, {
             // this request https://api.teloscan.io/v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers?type=erc721&limit=9999999&offset=0&includePagination=false&includeAbi=false
             // response is 70kb and took 2 seconds
 
+            const allNftTransfers = this.__evm_transfers[label].transfers;
             transactions.forEach(async (tx) => {
                 const index = transactions.findIndex(t => t.hash === tx.hash);
 
@@ -235,7 +238,6 @@ export const useHistoryStore = defineStore(store_name, {
                 feedbackStore.setLoading(loadingFlag);
 
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
-                const nftTransfers = this.__evm_transfers[label].transfers;
                 const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -249,6 +251,9 @@ export const useHistoryStore = defineStore(store_name, {
 
                 const valuesIn: TransactionValueData[] = [];
                 const valuesOut: TransactionValueData[] = [];
+
+                const nftsIn: NftTransactionData[] = [];
+                const nftsOut: NftTransactionData[] = [];
 
                 const isFailed = tx.status !== '0x1';
                 const isContractCreation = !tx.to && !!tx.contractAddress;
@@ -286,20 +291,60 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
+                    // eztodo for reference, a tx with multiple 1155 xfers: https://www.teloscan.io/tx/0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5
                     // eztodo for reference, a 721 tx : 0x893c7d83b2bef2758e3bed78ba2ca93a3102059f6c6da0d91aa58b6f1a62ab75
-                    const nftTransferIndex = nftTransfers.findIndex(t => t.transaction === tx.hash);
-                    const nftId = nftTransfers[nftTransferIndex]?.id;
+                    const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction === tx.hash);
+                    if (nftTransfersInTx.length > 0) {
+                        // there is at least 1 NFT transfer in this transaction
+                        const nftDetailList = await Promise.all(nftTransfersInTx.map(transfer => nftStore.fetchNftDetails(label, transfer.contract, transfer.id ?? '')));
 
-                    if (nftTransferIndex >= 0 && nftId !== undefined) {
-                        // transfer is an NFT transfer
-                        const nftDetails = await useNftsStore().fetchNftDetails(label, nftTransfers[nftTransferIndex].contract, nftId);
-                        console.log(nftDetails);
+                        // nftStore.fetchNftDetails(label, transfer.contract, transfer.id ?? '')
+                        nftDetailList.forEach((nftDetails, index) => {
+                            if (nftDetails) {
+                                let nftMediaType: 'image' | 'video' | 'audio' | 'unknown' = 'unknown';
 
-                        // eztodo remove, pepegurl
-                        if (nftTransfers[nftTransferIndex].contract === '0x78cb091062cc8c32CD9c814599d1987b1dCc5093') {
-                            debugger;
-                        }
+                                if (nftDetails.audioSrc) {
+                                    nftMediaType = 'audio';
+                                } else if (nftDetails.videoSrc) {
+                                    nftMediaType = 'video';
+                                } else if (nftDetails.imageSrcFull) {
+                                    nftMediaType = 'image';
+                                }
+
+                                const transferInfo = nftTransfersInTx[index];
+                                const shapedNftTransfer = {
+                                    quantity: +(transferInfo.amount || 1),
+                                    tokenId: transferInfo.id ?? '',
+                                    tokenName: nftDetails.name,
+                                    collectionAddress: transferInfo.contract,
+                                    collectionName: nftDetails.contractPrettyName,
+                                    type: nftMediaType,
+                                    imgSrc: nftDetails.imageSrcFull,
+                                    videoSrc: nftDetails.videoSrc,
+                                    audioSrc: nftDetails.audioSrc,
+                                };
+                                // debugger;
+                                // eztodo use userAddressLower
+                                if (transferInfo.from.toLowerCase() === '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase()) {
+                                    nftsOut.push(shapedNftTransfer);
+                                } else if (transferInfo.to.toLowerCase() === '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase()) {
+                                    nftsIn.push(shapedNftTransfer);
+                                }
+                            }
+                        });
                     }
+
+
+                    // if (nftTransferIndex >= 0 && nftId !== undefined) {
+                    //     // transfer is an NFT transfer
+                    //     const nftDetails = await useNftsStore().fetchNftDetails(label, nftTransfers[nftTransferIndex].contract, nftId);
+                    //     console.log(nftDetails);
+
+                    //     // eztodo remove, pepegurl
+                    //     if (nftTransfers[nftTransferIndex].contract === '0x78cb091062cc8c32CD9c814599d1987b1dCc5093') {
+                    //         debugger;
+                    //     }
+                    // }
 
                     for (const tokenXfer of erc20Transfers) {
                         if (tokenXfer.symbol && tokenXfer.decimals) {
@@ -363,6 +408,8 @@ export const useHistoryStore = defineStore(store_name, {
                     toPrettyName,
                     valuesIn,
                     valuesOut,
+                    nftsIn,
+                    nftsOut,
                     gasUsed: +gasUsedInTlos,
                     gasFiatValue: gasInUsd,
                     failed: isFailed,

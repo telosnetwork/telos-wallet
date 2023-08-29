@@ -156,6 +156,14 @@ export default defineComponent({
 
 <template>
 <div class="c-transaction-row">
+    <img
+        v-for="(nftIn, index) in transaction.nftsIn"
+        :key="index"
+        :src="nftIn.imgSrc"
+        height="24"
+        width="24"
+    >
+    <!-- eztodo remove image here ^ -->
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
         <div class="c-transaction-row__interaction-icon-container">
             <InlineSvg
