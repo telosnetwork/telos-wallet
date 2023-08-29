@@ -38,10 +38,6 @@ const stakedExpressedInSystemBalanceBn = computed(() => {
         return undefined;
     }
 });
-<<<<<<< HEAD
-=======
-const systemTokenPrice = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value);
->>>>>>> 4865998c (Fetching real Rex data for the staking page header)
 const stakedFiatValueBn = computed(() => {
     if (stakedExpressedInSystemBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
@@ -120,10 +116,6 @@ const apyPrittyPrint = computed(() => {
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
 const unlockPeriod = ref($t('evm_stake.unstaking_period'));
 
-<<<<<<< HEAD
-=======
-// tvlAmountBn is a BigNumber representing 10 ETH (or 10 TLOS) with WEI_PRECISION decimals
->>>>>>> 4865998c (Fetching real Rex data for the staking page header)
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;
     if (totalStaking) {
@@ -133,7 +125,6 @@ const tvlAmountBn = computed(() => {
     }
 });
 const evmNetworkName = computed(() => chainStore.currentEvmChain?.settings.getDisplay() ?? '');
-<<<<<<< HEAD
 
 const totalFiatValueBn = computed(() => {
     const stakedFiatValue = stakedFiatValueBn.value ?? BigNumber.from(0);
@@ -141,8 +132,6 @@ const totalFiatValueBn = computed(() => {
     const withdrawableFiatValue = withdrawableFiatValueBn.value ?? BigNumber.from(0);
     return stakedFiatValue.add(unstakingFiatValue).add(withdrawableFiatValue);
 });
-=======
->>>>>>> 4865998c (Fetching real Rex data for the staking page header)
 
 const firstLineData = computed(() => [{
     label: $t('evm_stake.staked_card_label', { symbol: systemToken.symbol }),
