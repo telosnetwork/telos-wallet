@@ -391,7 +391,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
      * @param address address of the contract
      * @param contract contract instance to be cached
      */
-    addContract(address: string, contract: EvmContract) {
+    addContract(address: string, contract: EvmContract | false) {
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
             this.contracts[key] = {
@@ -412,18 +412,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
      * @param address address of the contract
      */
     setContractAsNotExisting(address: string) {
-        const key = address.toLowerCase();
-        if (!this.contracts[key]) {
-            this.contracts[key] = {
-                promise: Promise.resolve(false),
-            };
-        } else {
-            if (this.contracts[key].resolve) {
-                this.contracts[key].resolve?.(false);
-            } else {
-                console.error('Error: Contract already exists', address);
-            }
-        }
+        return this.addContract(address, false);
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
