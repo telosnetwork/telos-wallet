@@ -30,12 +30,13 @@ import {
     TransactionValueData,
     EvmSwapFunctionNames,
     EvmTransfer,
+    IndexerContractData,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { getAntelope, useContractStore, useUserStore } from '..';
+import { getAntelope, useContractStore, useNftsStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
@@ -76,6 +77,7 @@ export const useHistoryStore = defineStore(store_name, {
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
+        getEVMTransfers: state => (label: Label): EvmTransfer[] => state.__evm_transfers[label].transfers,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -103,20 +105,22 @@ export const useHistoryStore = defineStore(store_name, {
 
             try {
                 // eztodo erc1155 are not returned by indexer for nft detail page
+                // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
+                // which returns data required for the UI
                 if (!this.__evm_transfers[label].transfers.length) {
-                    await this.fetchEVMTransfersForAccount(label);
+                    await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
 
-                const response = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
-                const contracts = response.contracts;
-                const transactions = response.results;
+                const transactionsResponse = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
+                const contracts = transactionsResponse.contracts;
+                const transactions = transactionsResponse.results;
 
-                this.setEvmTransactionsRowCount(label, response.total_count);
+                this.setEvmTransactionsRowCount(label, transactionsResponse.total_count);
 
                 const contractAddresses = Object.keys(contracts);
                 const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
                 contractAddresses.forEach((address: string) => {
-                    const extraInfo = JSON.parse(contracts[address].calldata);
+                    const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
                     parsedContracts[address] = {
                         ...contracts[address],
                         ...extraInfo,
@@ -143,10 +147,12 @@ export const useHistoryStore = defineStore(store_name, {
             }
         },
 
-        // fetch all token transfers for an account (erc20, erc721, erc155)
+        // fetch all NFT transfers for an account (erc721, erc155)
         // eztodo pass in token type?
-        async fetchEVMTransfersForAccount(label: Label = 'current'): Promise<void> {
+        async fetchEvmNftTransfersForAccount(label: Label, account: string): Promise<void> {
+            // eztodo verify account
             const feedbackStore = useFeedbackStore();
+            const contractStore = useContractStore();
 
             this.trace('fetchEVMTransfersForAccount', label);
             feedbackStore.setLoading('history.fetchEVMTransfersForAccount');
@@ -155,19 +161,37 @@ export const useHistoryStore = defineStore(store_name, {
 
             try {
                 const [
-                    erc20TransferResponse,
                     erc721TransferResponse,
                     erc1155TransferResponse,
-                ] = await Promise.all(['erc20', 'erc721', 'erc1155'].map(
+                ] = await Promise.all(['erc721', 'erc1155'].map(
                     type => chainSettings.getEVMTransfers({
                         includePagination: true,
-                        account: this.__evm_filter.address,
+                        account,
                         limit: transfers_filter_limit,
-                        type: type as 'erc20' | 'erc721' | 'erc1155',
+                        type: type as 'erc721' | 'erc1155',
                     }),
                 ));
+
+                const erc721Contracts = erc721TransferResponse.contracts;
+                const erc1155Contracts = erc1155TransferResponse.contracts;
+
+                [erc721Contracts, erc1155Contracts].forEach((contracts) => {
+                    const contractAddresses = Object.keys(contracts);
+                    const parsedContracts: Record<string, IndexerContractData> = {};
+                    contractAddresses.forEach((address: string) => {
+                        const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
+
+                        parsedContracts[address] = {
+                            ...contracts[address],
+                            ...extraInfo,
+                        };
+                    });
+                    contractAddresses.forEach((address) => {
+                        contractStore.addContractToCache(address, parsedContracts[address]);
+                    });
+                });
+
                 const transfers = [
-                    ...erc20TransferResponse.results,
                     ...erc721TransferResponse.results,
                     ...erc1155TransferResponse.results,
                 ];
@@ -205,11 +229,13 @@ export const useHistoryStore = defineStore(store_name, {
             transactions.forEach(async (tx) => {
                 const index = transactions.findIndex(t => t.hash === tx.hash);
 
+                // eztodo is this actually done parallely?
                 // Each of these calls is a separate context, so we can do them in parallel
                 const loadingFlag = `history.shapeTransactions-${index}`;
                 feedbackStore.setLoading(loadingFlag);
 
-                const transfers = await contractStore.getTransfersFromTransaction(tx);
+                const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
+                const nftTransfers = this.__evm_transfers[label].transfers;
                 const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -260,7 +286,22 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
-                    for (const tokenXfer of transfers) {
+                    // eztodo for reference, a 721 tx : 0x893c7d83b2bef2758e3bed78ba2ca93a3102059f6c6da0d91aa58b6f1a62ab75
+                    const nftTransferIndex = nftTransfers.findIndex(t => t.transaction === tx.hash);
+                    const nftId = nftTransfers[nftTransferIndex]?.id;
+
+                    if (nftTransferIndex >= 0 && nftId !== undefined) {
+                        // transfer is an NFT transfer
+                        const nftDetails = await useNftsStore().fetchNftDetails(label, nftTransfers[nftTransferIndex].contract, nftId);
+                        console.log(nftDetails);
+
+                        // eztodo remove, pepegurl
+                        if (nftTransfers[nftTransferIndex].contract === '0x78cb091062cc8c32CD9c814599d1987b1dCc5093') {
+                            debugger;
+                        }
+                    }
+
+                    for (const tokenXfer of erc20Transfers) {
                         if (tokenXfer.symbol && tokenXfer.decimals) {
                             let transferAmountInFiat: number | undefined;
 
@@ -299,7 +340,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                     if (isContractCreation) {
                         actionName = 'contractCreation';
-                    } else if (+tx.value && transfers.length === 0 && !functionName) {
+                    } else if (+tx.value && erc20Transfers.length === 0 && !functionName) {
                         if (tx.from?.toLowerCase() === userAddressLower) {
                             actionName = 'send';
                         } else if (tx.to?.toLowerCase() === userAddressLower) {

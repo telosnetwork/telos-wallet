@@ -26,7 +26,7 @@ export default defineComponent({
         },
         errorsFound: false,
         hideLoadingState: false,
-        fetchTransactionsInterval: null as null | NodeJS.Timer,
+        fetchTransactionsInterval: null as null | ReturnType<typeof setInterval>,
     }),
     computed: {
         doLiveUpdate() {
@@ -134,7 +134,9 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
-                    await historyStore.fetchEVMTransfersForAccount('current');
+                    if (historyStore.getEVMTransfers('current').length === 0) {
+                        await historyStore.fetchEvmNftTransfersForAccount('current', this.address);
+                    }
                     await historyStore.fetchEVMTransactionsForAccount('current');
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
                 } catch (e) {

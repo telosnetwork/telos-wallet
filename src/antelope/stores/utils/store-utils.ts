@@ -4,9 +4,9 @@
  * The debounced function delays invoking the function until after `wait` milliseconds have passed since the last time the debounced function was invoked.
  * Multiple calls within the same "debounce window" will resolve to the same value.
  *
- * @template Context The `this` context the function will be invoked with.
- * @template Args The argument types for the function.
- * @template FnReturnType The return type for the function.
+ * @template Context The type of the `this` context the function will be invoked with.
+ * @template Args The argument types for the function to be debounced.
+ * @template FnReturnType The return type for the function to be debounced.
  *
  * @param {(...args: Args) => Promise<FnReturnType> | FnReturnType} func - The function to debounce. Can return a Promise or a value.
  * @param {number} wait - The number of milliseconds to delay.
@@ -32,6 +32,7 @@
  * console.log(callTwoResult); // 'xyz'
  * console.log(callCounter); // 1
  */
+// eztodo document how this should be used in the context of a store or object, like with the function ()... rather than arrow function
 export function debounceAsync<Context, Args extends Array<unknown>, FnReturnType>(
     func: (this: Context, ...args: Args) => Promise<FnReturnType> | FnReturnType,
     wait: number,
@@ -41,7 +42,7 @@ export function debounceAsync<Context, Args extends Array<unknown>, FnReturnType
         throw new Error('Invalid wait time. Wait time must be a positive integer.');
     }
 
-    let timeout: NodeJS.Timeout | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     let pendingResolves: Array<(value: FnReturnType) => void> = [];
 
     return function (this: Context, ...args: Args): Promise<FnReturnType> {

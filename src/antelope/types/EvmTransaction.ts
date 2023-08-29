@@ -76,19 +76,17 @@ export interface ShapedTransactionRow {
     gasUsed?: number; // gas used in TLOS
     gasFiatValue?: number; // gas used in Fiat
     failed?: boolean;
-}
 
-export interface ShapedErc20TransactionRow extends ShapedTransactionRow {
+    // ERC20 data
     valuesIn: TransactionValueData[];
     valuesOut: TransactionValueData[];
-}
 
-export interface ShapedNftTransactionRow extends ShapedTransactionRow {
+    // ERC721 & ERC1155 data
     nftsIn: NftTransactionData[];
     nftsOut: NftTransactionData[];
 }
 
-export interface IndexerAccountTransactionsContractData {
+export interface IndexerContractData {
     symbol: string;
     creator: string;
     address: string;
@@ -104,7 +102,7 @@ export interface IndexerAccountTransactionsContractData {
     transaction: string; // creation tx for contract
 }
 
-export interface ParsedIndexerAccountTransactionsContract extends IndexerAccountTransactionsContractData {
+export interface ParsedIndexerAccountTransactionsContract extends IndexerContractData {
     price?: string; // string representation of number
     holders?: number;
     marketdata_updated?: string; // epoch
@@ -117,7 +115,7 @@ export interface EVMTransactionsPaginationData {
 
 export interface IndexerAccountTransactionsResponse {
     contracts: {
-        [contractHash: string]: IndexerAccountTransactionsContractData
+        [contractHash: string]: IndexerContractData
     };
     results: EvmTransaction[]
     total_count: number;
@@ -135,7 +133,7 @@ export interface NativeTransactionResponse extends TransactionResponse {
 
 export interface IndexerAccountTransfersResponse {
     contracts: {
-        [contractHash: string]: IndexerAccountTransactionsContractData
+        [contractHash: string]: IndexerContractData
     };
     results: EvmTransfer[]
     total_count?: number; // included if includePagination is true in the request
@@ -151,4 +149,5 @@ export interface EvmTransfer {
     type: 'erc20' | 'erc721' | 'erc1155', // type of token being transferred
     transaction: string; // transaction hash
     timestamp: number; // integer representing ms from epoch
+    id?: string; // id of the NFT transferred (ERC721 or ERC1155 only)
 }

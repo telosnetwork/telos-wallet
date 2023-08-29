@@ -79,7 +79,8 @@ export const useContractStore = defineStore(store_name, {
             return this.__processing[addressLower];
         },
 
-        async getTransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
+        // get transfer information from a transaction (ERC20 and native token only)
+        async getErc20TransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
             if (!transaction.logs || transaction.logs?.length === 0){
                 return [];
             }

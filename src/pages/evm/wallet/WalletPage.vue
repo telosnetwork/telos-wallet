@@ -46,7 +46,7 @@ watch(accountStore, (newAccountStoreState) => {
             limit: 5,
             includeAbi: true,
         });
-        historyStore.fetchEVMTransfersForAccount('current').then(() => {
+        historyStore.fetchEvmNftTransfersForAccount('current', newAccount.address).then(() => {
             historyStore.fetchEVMTransactionsForAccount('current');
         });
     }
