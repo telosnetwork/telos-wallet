@@ -3,6 +3,7 @@ import { Web3ModalConfig } from '@web3modal/html';
 import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
 import { installAntelope } from 'src/antelope';
+import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
     WalletConnectAuth,
@@ -58,6 +59,20 @@ export default boot(({ app }) => {
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string, payload?: Record<string, unknown>) => app.config.globalProperties.$t(key, payload ? payload : {}));
+
+    // setting transaction error handler --
+    ant.config.setTransactionErrorHandler((err: object) => {
+        if (err instanceof AntelopeError) {
+            const evmErr = err as AntelopeError;
+            if (evmErr.message === 'antelope.evm.error_transaction_canceled') {
+                ant.config.notifyNeutralMessageHandler(ant.config.localizationHandler(evmErr.message));
+            } else {
+                ant.config.notifyFailureMessage(ant.config.localizationHandler(evmErr.message), evmErr.payload);
+            }
+        } else {
+            ant.config.notifyFailureMessage(ant.config.localizationHandler('evm_wallet.general_error'));
+        }
+    });
 
     // set evm authenticators --
     const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;

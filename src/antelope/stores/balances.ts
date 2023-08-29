@@ -278,10 +278,11 @@ export const useBalancesStore = defineStore(store_name, {
             this.setWagmiSystemTokenTransferConfig(null, label);
         },
         async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
-            this.trace('transferTokens', token, to, amount.toString(), memo);
+            const funcname = 'transferTokens';
+            this.trace(funcname, token, to, amount.toString(), memo);
             const label = 'logged';
             try {
-                useFeedbackStore().setLoading('transferTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
@@ -295,18 +296,20 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('transferTokens');
+                useFeedbackStore().unsetLoading(funcname);
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
             }
         },
         async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
-            this.trace('wrapSystemTokens', amount.toString());
+            const funcname = 'wrapSystemTokens';
+            this.trace(funcname, amount.toString());
             const label = 'logged';
             try {
-                useFeedbackStore().setLoading('wrapSystemTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     console.error('ERROR: wrap not supported on native');
@@ -318,17 +321,19 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('wrapSystemTokens');
+                useFeedbackStore().unsetLoading(funcname);
             }
         },
         async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
-            this.trace('unwrapSystemTokens', amount.toString());
+            const funcname = 'unwrapSystemTokens';
+            this.trace(funcname, amount.toString());
             const label = 'logged';
             try {
-                useFeedbackStore().setLoading('unwrapSystemTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     console.error('ERROR: unwrap not supported on native');
@@ -340,10 +345,11 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('unwrapSystemTokens');
+                useFeedbackStore().unsetLoading(funcname);
             }
         },
         async transferNativeTokens(
