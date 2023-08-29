@@ -123,16 +123,6 @@ async function handleCtaClick() {
             });
         } catch (err) {
             console.error(err);
-            if (err instanceof AntelopeError) {
-                const evmErr = err as AntelopeError;
-                if (evmErr.message === 'antelope.evm.error_transaction_canceled') {
-                    ant.config.notifyNeutralMessageHandler($t(evmErr.message));
-                } else {
-                    ant.config.notifyFailureMessage($t(evmErr.message), evmErr.payload);
-                }
-            } else {
-                ant.config.notifyFailureMessage($t('evm_wallet.general_error'));
-            }
         }
     }
 }
