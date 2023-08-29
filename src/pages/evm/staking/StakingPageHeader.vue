@@ -124,6 +124,10 @@ const tvlAmountBn = computed(() => {
 });
 const evmNetworkName = computed(() => chainStore.currentEvmChain?.settings.getDisplay() ?? '');
 
+<<<<<<< HEAD
+=======
+// stakedFiatValueBn + unstakingFiatValueBn + isWithdrawableLoading
+>>>>>>> 958b7ab3 (addressing feedback)
 const totalFiatValueBn = computed(() => {
     const stakedFiatValue = stakedFiatValueBn.value ?? BigNumber.from(0);
     const unstakingFiatValue = unstakingFiatValueBn.value ?? BigNumber.from(0);
@@ -178,6 +182,7 @@ const secondLineData = computed(() => [{
     useSmallBox: true,
 }]);
 
+<<<<<<< HEAD
 // creatmos un interval que cada 5 segundos verifique si cada uno de los loadings es true o false.
 // por cada loading que encontremos en true, debemos llamar a actualizar las dependendicas de ese loading
 // si todos los loadings son false, entonces podemos parar el intervalo
@@ -216,6 +221,8 @@ const intervalTimer = setInterval(() => {
     }
 }, 5000);
 
+=======
+>>>>>>> 958b7ab3 (addressing feedback)
 function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
     let decimals = symbol === fiatCurrency.value ? 2 : 4;
     if (!amount || amount.isZero()) {
@@ -235,6 +242,14 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
 
 <template>
 <div class="c-staking-header">
+<<<<<<< HEAD
+=======
+    <div class="text-center q-mb-xl">
+        <h5>{{ $t('evm_stake.total_of_staked_unstaking_and_withdrawable', { token: systemToken.name }) }}</h5>
+        <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
+    </div>
+
+>>>>>>> 958b7ab3 (addressing feedback)
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
     <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
 </div>
