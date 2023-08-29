@@ -26,7 +26,7 @@ const props = defineProps<{
         }"
     >
         <div class="c-scrollable-info-cards__card-header">
-            <h5 class="u-text--low-contrast">
+            <h5 class="c-scrollable-info-cards__card-header-label u-text--low-contrast">
                 {{ card.label }}
             </h5>
 
@@ -109,6 +109,10 @@ const props = defineProps<{
         align-items: center;
         justify-content: space-between;
         margin-bottom: 4px;
+    }
+
+    &__card-header-label {
+        white-space: nowrap;
     }
 }
 </style>
