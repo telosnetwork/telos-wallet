@@ -190,7 +190,7 @@ export default {
         unwrap_input_label: 'Unwrapping Amount',
     },
     evm_stake: {
-        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdraw-able {token}',
+        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdrawable {token}',
         staked_card_label: 'Staked {symbol}',
         staked_card_tooltip: 'Staked tokens:\n\n' +
         'This reflects the total amount of staked {systemSymbol} tokens associated with the current account.\n' +
@@ -201,8 +201,8 @@ export default {
         'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
-        withdrawable_card_label: 'Withdraw-able',
-        withdrawable_card_tooltip: 'Withdraw-able tokens:\n\n' +
+        withdrawable_card_label: 'withdrawable',
+        withdrawable_card_tooltip: 'withdrawable tokens:\n\n' +
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
@@ -218,6 +218,7 @@ export default {
         tvl_card_label: 'TVL',
         tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
+        unstaking_period: '10 days',
     },
     notification:{
         success_title_trx: 'Success',

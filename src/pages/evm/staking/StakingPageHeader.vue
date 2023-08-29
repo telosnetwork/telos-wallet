@@ -17,9 +17,6 @@ const userStore = useUserStore();
 const balancesStore = useBalancesStore();
 const chainStore = useChainStore();
 const chainSettings = (chainStore.loggedChain.settings as EVMChainSettings);
-// data
-const loading = ref(true);
-
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -27,7 +24,6 @@ const fiatCurrency = computed(() => userStore.fiatCurrency);
 const systemToken = chainSettings.getSystemToken();
 const stakedToken = chainSettings.getStakedSystemToken();
 
-const totalFiatValueText = ref('$ 4,324.35');
 
 // First cell: Staked
 const stakedTokenBalanceBn = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === stakedToken.symbol)?.amount);
@@ -36,7 +32,6 @@ const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined 
 const stakedExpressedInSystemBalanceBn = computed(() => {
     if (stakedTokenBalanceBn.value && !unstakedRatio.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(unstakedRatio.value, stakedToken.decimals);
-        console.log('ratioNumber', ratioNumber);
         return convertCurrency(stakedTokenBalanceBn.value, stakedToken.decimals, stakedToken.decimals, ratioNumber);
     } else {
         return undefined;
@@ -99,7 +94,7 @@ const apyPrittyPrint = computed(() => {
     }
 });
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
-const unlockPeriod = ref('10 days');
+const unlockPeriod = ref($t('evm_stake.unstaking_period'));
 
 // tvlAmountBn is a BigNumber representing 10 ETH (or 10 TLOS) with WEI_PRECISION decimals
 const tvlAmountBn = computed(() => {
@@ -111,6 +106,14 @@ const tvlAmountBn = computed(() => {
     }
 });
 const evmNetworkName = computed(() => chainStore.currentEvmChain?.settings.getDisplay() ?? '');
+
+// stakedFiatValueBn + unstakingFiatValueBn + isWithdrawableLoading
+const totalFiatValueBn = computed(() => {
+    const stakedFiatValue = stakedFiatValueBn.value ?? BigNumber.from(0);
+    const unstakingFiatValue = unstakingFiatValueBn.value ?? BigNumber.from(0);
+    const withdrawableFiatValue = withdrawableFiatValueBn.value ?? BigNumber.from(0);
+    return stakedFiatValue.add(unstakingFiatValue).add(withdrawableFiatValue);
+});
 
 const firstLineData = computed(() => [{
     label: $t('evm_stake.staked_card_label', { symbol: systemToken.symbol }),
@@ -159,20 +162,14 @@ const secondLineData = computed(() => [{
     useSmallBox: true,
 }]);
 
-
-// methods
-onBeforeMount(() => {
-    chainSettings.getUsdPrice().then((price) => {
-        // systemTokenPrice.value = price;
-    }).finally(() => {
-        loading.value = false;
-    });
-});
-
 function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
+    let decimals = symbol === fiatCurrency.value ? 2 : 4;
+    if (!amount || amount.isZero()) {
+        decimals = 1;
+    }
     return prettyPrintCurrency(
         amount ?? BigNumber.from(0),
-        4,
+        decimals,
         fiatLocale.value,
         false,
         symbol,
@@ -186,7 +183,7 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
 <div class="c-staking-header">
     <div class="text-center q-mb-xl">
         <h5>{{ $t('evm_stake.total_of_staked_unstaking_and_withdrawable', { token: systemToken.name }) }}</h5>
-        <h1 class="u-text--high-contrast">{{ totalFiatValueText }}</h1>
+        <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
     </div>
 
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
