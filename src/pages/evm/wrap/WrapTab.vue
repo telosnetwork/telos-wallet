@@ -125,7 +125,11 @@ async function handleCtaClick() {
             console.error(err);
             if (err instanceof AntelopeError) {
                 const evmErr = err as AntelopeError;
-                ant.config.notifyFailureMessage($t(evmErr.message), evmErr.payload);
+                if (evmErr.message === 'antelope.evm.error_transaction_canceled') {
+                    ant.config.notifyNeutralMessageHandler($t(evmErr.message));
+                } else {
+                    ant.config.notifyFailureMessage($t(evmErr.message), evmErr.payload);
+                }
             } else {
                 ant.config.notifyFailureMessage($t('evm_wallet.general_error'));
             }
