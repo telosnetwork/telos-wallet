@@ -392,7 +392,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
      * @param address address of the contract
      * @param contract contract instance to be cached
      */
+<<<<<<< HEAD
     addContract(address: string, contract: EvmContract | false) {
+=======
+    addContract(address: string, contract: EvmContract) {
+>>>>>>> 958b7ab3 (addressing feedback)
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
             this.contracts[key] = {
