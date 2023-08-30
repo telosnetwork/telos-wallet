@@ -12,6 +12,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
 import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 const userStore = useUserStore();
 
@@ -35,6 +36,12 @@ export default defineComponent({
         },
     },
     computed: {
+        test() {
+            if (this.transaction.id.toLowerCase() === '0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5') {
+                debugger;
+            }
+            return '';
+        },
         fiatLocale(): string {
             return useUserStore().fiatLocale;
         },
@@ -150,20 +157,31 @@ export default defineComponent({
 
             return `${formatted} ${symbol}`;
         },
+        getShapedTokenName(name: string, id: string) {
+            // if the token name includes the ID, remove the ID because we display ID separately
+            // eztodo make this a util function
+            let shapedName = name;
+            if (name.includes(id)) {
+                shapedName = name.replace(id, '');
+
+                if (shapedName[shapedName.length - 1] === '#') {
+                    shapedName = shapedName.slice(0, -1);
+                }
+            }
+            return shapedName.trim();
+        },
+        getTruncatedAddress(address: string) {
+            return truncateAddress(address);
+        },
     },
 });
 </script>
 
 <template>
-<div class="c-transaction-row">
-    <img
-        v-for="(nftIn, index) in transaction.nftsIn"
-        :key="index"
-        :src="nftIn.imgSrc"
-        height="24"
-        width="24"
-    >
-    <!-- eztodo remove image here ^ -->
+<div
+    class="c-transaction-row"
+    :class="{ test: transaction.id.toLowerCase() === '0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5' }"
+>
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
         <div class="c-transaction-row__interaction-icon-container">
             <InlineSvg
@@ -178,7 +196,7 @@ export default defineComponent({
             />
         </div>
 
-        <div>
+        <div class="c-transaction-row__interaction-text-container">
             <div class="c-transaction-row__primary-interaction-text">
                 <template v-if="actionHasDescriptiveText">
                     <span class="c-transaction-row__action-description">
@@ -250,6 +268,45 @@ export default defineComponent({
         </div>
 
         <div
+            v-for="(nftTransfer, index) in transaction.nftsOut"
+            :key="`nfts-out-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <div class="c-transaction-row__nft c-transaction-row__nft--out">
+                <span>-{{ nftTransfer.quantity }}</span>
+                <!-- eztodo add test case for no image src -->
+                <img
+                    v-if="nftTransfer.imgSrc"
+                    :src="nftTransfer.imgSrc"
+                    :alt="nftTransfer.tokenName"
+                    height="40"
+                    width="40"
+                    class="c-transaction-row__nft-thumbnail"
+                >
+                <q-icon
+                    v-else
+                    name="o_image_not_supported"
+                    color="grey"
+                    size="40px"
+                />
+                <div class="c-transaction-row__nft-info-container">
+                    <div class="c-transaction-row__nft-name-container">
+                        <div class="c-transaction-row__nft-name">
+                            {{ getShapedTokenName(nftTransfer.tokenName, nftTransfer.tokenId) }}
+                        </div>
+                        <div class="c-transaction-row__nft-id">
+                            #{{ nftTransfer.tokenId }}
+                        </div>
+                    </div>
+                    <div class="c-transaction-row__nft-collection">
+                        {{ nftTransfer?.collectionName ?? getTruncatedAddress(nftTransfer.collectionAddress) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- eztodo scroll up when changing rowsperpage or page number -->
+        <div
             v-for="(values, index) in transaction.valuesIn"
             :key="`values-in-${index}`"
             class="c-transaction-row__value-container"
@@ -269,6 +326,45 @@ export default defineComponent({
                 +{{ formatAmount(values.fiatValue) }}
             </span>
         </div>
+
+        <div
+            v-for="(nftTransfer, index) in transaction.nftsIn"
+            :key="`nfts-in-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <div class="c-transaction-row__nft c-transaction-row__nft--in">
+                <span>+{{ nftTransfer.quantity }}</span>
+                <!-- eztodo add test case for no image src -->
+                <img
+                    v-if="nftTransfer.imgSrc"
+                    :src="nftTransfer.imgSrc"
+                    :alt="nftTransfer.tokenName"
+                    height="40"
+                    width="40"
+                    class="c-transaction-row__nft-thumbnail"
+                >
+                <q-icon
+                    v-else
+                    name="o_image_not_supported"
+                    color="grey"
+                    size="40px"
+                />
+                <div class="c-transaction-row__nft-info-container">
+                    <div class="c-transaction-row__nft-name-container">
+                        <div class="c-transaction-row__nft-name">
+                            {{ getShapedTokenName(nftTransfer.tokenName, nftTransfer.tokenId) }}
+                        </div>
+                        <div class="c-transaction-row__nft-id">
+                            #{{ nftTransfer.tokenId }}
+                        </div>
+                    </div>
+                    <div class="c-transaction-row__nft-collection">
+                        {{ nftTransfer?.collectionName ?? getTruncatedAddress(nftTransfer.collectionAddress) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
@@ -296,6 +392,9 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
+.test {
+    border: 1px solid red;
+}
 .c-transaction-row {
     max-width: 1000px;
     padding: 16px 8px;
@@ -309,7 +408,7 @@ export default defineComponent({
 
     @include sm-and-up {
         gap: 32px;
-        grid-template: 'a b c' / auto auto max-content;
+        grid-template: 'a b c' / max-content auto max-content;
     }
 
     &__info-container {
@@ -318,13 +417,14 @@ export default defineComponent({
 
         &--first {
             display: grid;
+            grid-area: a;
             grid-template: 'a b c' auto / min-content auto max-content;
             gap: 8px;
 
             @include sm-and-up {
                 grid-template:
                     'a b' auto
-                    'c c' auto
+                    'c c' min-content
                     / 16px max-content;
             }
         }
@@ -340,6 +440,7 @@ export default defineComponent({
 
         &--second {
             display: flex;
+            grid-area: b;
             flex-direction: column;
             gap: 8px;
 
@@ -350,6 +451,7 @@ export default defineComponent({
 
         &--third {
             display: flex;
+            grid-area: c;
             align-items: center;
             gap: 4px;
 
@@ -367,12 +469,18 @@ export default defineComponent({
     }
 
     &__interaction-icon-container {
+        grid-area: a;
         height: 16px;
         width: 16px;
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        // align-self: center;
+    }
+
+    &__interaction-text-container {
+        grid-area: b;
+        max-width: 100%;
+        min-width: 0;
     }
 
     &__interaction-icon {
@@ -428,6 +536,7 @@ export default defineComponent({
     }
 
     &__timestamp {
+        grid-area: c;
         display: flex;
         align-items: flex-start;
         justify-content: flex-end;
@@ -486,6 +595,61 @@ export default defineComponent({
         &--small {
             @include text--small;
         }
+    }
+
+    &__nft {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        overflow: hidden;
+
+        &--out {
+            color: var(--negative-color);
+        }
+
+        &--in {
+            color: var(--positive-color);
+        }
+    }
+
+    &__nft-thumbnail {
+        height: 40px;
+        width: 40px;
+        border-radius: 4px;
+    }
+
+    &__nft-info-container {
+        min-width: 0;
+        max-width: 150px;
+
+        @include sm-and-up {
+            max-width: 200px;
+        }
+    }
+
+    &__nft-name-container {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        align-items: center;
+    }
+
+    &__nft-name,
+    &__nft-id,
+    &__nft-collection {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__nft-name {
+        @include text--paragraph;
+    }
+
+    &__nft-id {
+        @include text--paragraph-bold;
+        flex-shrink: 0;
+        max-width: 70%;
     }
 
     &__gas-icon-container {

@@ -109,10 +109,6 @@ export default defineComponent({
                 this.hideLoadingState = false;
             }, 550);
         },
-        isLoadingTransaction(i: number) {
-            const loadingFlag = `history.shapeTransactions-${i}`;
-            return feedbackStore.isLoading(loadingFlag);
-        },
         async getTransactions() {
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;

@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE } from 'src/antelope/types';
+import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE, NftTokenInterface } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
@@ -180,8 +180,8 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async fetchNftDetails(label: Label, contract: string, tokenId: string): Promise<NFTClass | null> {
-            this.trace('fetchNftDetails', label, contract, tokenId);
+        async fetchNftDetails(label: Label, contract: string, tokenId: string, type: NftTokenInterface): Promise<NFTClass | null> {
+            this.trace('fetchNftDetails', label, contract, tokenId, type);
             let promise = Promise.resolve(null) as Promise<NFTClass | null>;
             try {
                 const chain = useChainStore().getChain(label);
@@ -236,7 +236,7 @@ export const useNftsStore = defineStore(store_name, {
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
-                            ERC721_TYPE,
+                            type.toUpperCase(),
                         ).then((nft) => {
                             this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {

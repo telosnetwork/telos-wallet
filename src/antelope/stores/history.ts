@@ -32,6 +32,7 @@ import {
     EvmTransfer,
     IndexerContractData,
     NftTransactionData,
+    NftTokenInterface,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
@@ -105,6 +106,7 @@ export const useHistoryStore = defineStore(store_name, {
             feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
+                // eztodo where to debounce?
                 // eztodo erc1155 are not returned by indexer for nft detail page
                 // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
                 // which returns data required for the UI
@@ -211,7 +213,6 @@ export const useHistoryStore = defineStore(store_name, {
 
         async shapeTransactions(label: Label = 'current', transactions: EvmTransaction[]) {
             this.trace('shapeTransactions', label);
-            const feedbackStore = useFeedbackStore();
             const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
             const nftStore = useNftsStore();
@@ -229,13 +230,9 @@ export const useHistoryStore = defineStore(store_name, {
             // response is 70kb and took 2 seconds
 
             const allNftTransfers = this.__evm_transfers[label].transfers;
-            transactions.forEach(async (tx) => {
-                const index = transactions.findIndex(t => t.hash === tx.hash);
 
-                // eztodo is this actually done parallely?
-                // Each of these calls is a separate context, so we can do them in parallel
-                const loadingFlag = `history.shapeTransactions-${index}`;
-                feedbackStore.setLoading(loadingFlag);
+            const transactionShapePromises = transactions.map(async (tx) => {
+                const index = transactions.findIndex(t => t.hash === tx.hash);
 
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
                 const userAddressLower = this.__evm_filter.address.toLowerCase();
@@ -294,9 +291,19 @@ export const useHistoryStore = defineStore(store_name, {
                     // eztodo for reference, a tx with multiple 1155 xfers: https://www.teloscan.io/tx/0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5
                     // eztodo for reference, a 721 tx : 0x893c7d83b2bef2758e3bed78ba2ca93a3102059f6c6da0d91aa58b6f1a62ab75
                     const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction === tx.hash);
+
                     if (nftTransfersInTx.length > 0) {
                         // there is at least 1 NFT transfer in this transaction
-                        const nftDetailList = await Promise.all(nftTransfersInTx.map(transfer => nftStore.fetchNftDetails(label, transfer.contract, transfer.id ?? '')));
+                        const nftDetailList = await Promise.all(
+                            nftTransfersInTx.map(
+                                transfer => nftStore.fetchNftDetails(
+                                    label,
+                                    transfer.contract,
+                                    transfer.id ?? '',
+                                    transfer.type.toUpperCase() as NftTokenInterface,
+                                ),
+                            ),
+                        );
 
                         // nftStore.fetchNftDetails(label, transfer.contract, transfer.id ?? '')
                         nftDetailList.forEach((nftDetails, index) => {
@@ -415,11 +422,11 @@ export const useHistoryStore = defineStore(store_name, {
                     failed: isFailed,
                 } as ShapedTransactionRow;
 
-                // The shapedTxs may not be in the same order as the transactions
+                // The shapedTxs may not be in the same order as the transactions eztodo what does this mean
                 this.__shaped_evm_transaction_rows[label][index] = shapedTx;
-
-                feedbackStore.unsetLoading(loadingFlag);
             });
+
+            await Promise.all(transactionShapePromises);
         },
 
 
