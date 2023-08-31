@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber, ethers } from 'ethers';
 
@@ -26,7 +26,7 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
-const stakedTokenBalanceBn = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === stakedToken.symbol)?.amount);
+const stakedTokenBalanceBn = ref(undefined as BigNumber | undefined);
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
@@ -37,7 +37,7 @@ const stakedExpressedInSystemBalanceBn = computed(() => {
         return undefined;
     }
 });
-const systemTokenPrice = computed(() => balancesStore.getBalances(label).find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value);
+const systemTokenPrice = ref(undefined as BigNumber | undefined);
 const stakedFiatValueBn = computed(() => {
     if (stakedExpressedInSystemBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
@@ -46,6 +46,19 @@ const stakedFiatValueBn = computed(() => {
         return undefined;
     }
 });
+
+// watch the balances store to update the staked token balance and the system token price
+watch(() => balancesStore.getBalances(label), (balances) => {
+    const stakedTokenBalance = balances.find(balance => balance.token.symbol === stakedToken.symbol)?.amount;
+    if (stakedTokenBalance) {
+        stakedTokenBalanceBn.value = stakedTokenBalance;
+    }
+    const systemTokenPriceBalance = balances.find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value;
+    if (systemTokenPriceBalance) {
+        systemTokenPrice.value = systemTokenPriceBalance;
+    }
+});
+
 
 // Second cell: Unstaking
 const unstakingBalanceBn = computed(() => {
@@ -96,7 +109,6 @@ const apyPrittyPrint = computed(() => {
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
 const unlockPeriod = ref($t('evm_stake.unstaking_period'));
 
-// tvlAmountBn is a BigNumber representing 10 ETH (or 10 TLOS) with WEI_PRECISION decimals
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;
     if (totalStaking) {
@@ -107,7 +119,6 @@ const tvlAmountBn = computed(() => {
 });
 const evmNetworkName = computed(() => chainStore.currentEvmChain?.settings.getDisplay() ?? '');
 
-// stakedFiatValueBn + unstakingFiatValueBn + isWithdrawableLoading
 const totalFiatValueBn = computed(() => {
     const stakedFiatValue = stakedFiatValueBn.value ?? BigNumber.from(0);
     const unstakingFiatValue = unstakingFiatValueBn.value ?? BigNumber.from(0);
