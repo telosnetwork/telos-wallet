@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { formatWei } from 'src/antelope/stores/utils';
+import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 
 export const TOKEN_PRICE_DECIMALS = 18;
@@ -89,7 +89,7 @@ export class TokenPrice {
     }
 
     get decimals(): number {
-        return this.market?.info.decimals || 18;
+        return this.market?.info.decimals || TOKEN_PRICE_DECIMALS;
     }
 
     // Returns the token price as BigNumber
@@ -193,7 +193,7 @@ export class TokenClass implements TokenSourceInfo {
         this.chainId = sourceInfo.chainId;
         this.network = sourceInfo.network;
         this.name = sourceInfo.name;
-        this.decimals = sourceInfo.decimals ?? sourceInfo.precision ?? 18;
+        this.decimals = sourceInfo.decimals ?? sourceInfo.precision ?? WEI_PRECISION;
         this.isSystem = sourceInfo.isSystem;
         this.isNative = sourceInfo.isNative;
         this.logo = sourceInfo.logo ?? sourceInfo.logoURI;

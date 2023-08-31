@@ -279,12 +279,14 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         setStakedRatio(label: string, ratio: ethers.BigNumber) {
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, 18));
+            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
             this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
             (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
         },
         setUnstakedRatio(label: string, ratio: ethers.BigNumber) {
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, 18));
+            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
             this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
             (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
         },
