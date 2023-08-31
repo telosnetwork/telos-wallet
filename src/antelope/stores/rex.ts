@@ -119,6 +119,7 @@ export const useRexStore = defineStore(store_name, {
             this.setTotalStaking(label, totalStaking);
         },
         /**
+<<<<<<< HEAD
          * This method should be called to update the REX data for a given context.
          * @param label identifies the context (account and network) for the data
          */
@@ -130,6 +131,8 @@ export const useRexStore = defineStore(store_name, {
             }
         },
         /**
+=======
+>>>>>>> f90833ad (addressing Erza's feedback)
          * This method shopuld be called to quiery the REX data for a given account,
          * along with the current stato of the total staked tokens on the system.
          * @param label identifies the context (network on this case) for the data
