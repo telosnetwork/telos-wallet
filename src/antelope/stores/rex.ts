@@ -18,6 +18,7 @@ import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
 import { getAntelope, useChainStore, useEVMStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
 
@@ -69,6 +70,12 @@ export const useRexStore = defineStore(store_name, {
                 },
             });
         },
+        /**
+         * auxiliar method to get a contract instance. Only used internally.
+         * @param label identifies the context (network on this case) for the data
+         * @param address the contract address
+         * @returns the contract instance
+         */
         async getContractInstance(label: string, address: string) {
             const authenticator = useAccountStore().getEVMAuthenticator(label);
             if (!authenticator) {
@@ -83,35 +90,60 @@ export const useRexStore = defineStore(store_name, {
             const contractInstance = await contract.getContractInstance();
             return contractInstance;
         },
+        /**
+         * auxiliar method to get the staked system contract instance
+         * @param label identifies the context (network on this case) for the data
+         * @returns the contract instance
+         */
         async getStakedSystemContractInstance(label: string) {
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().address;
             return this.getContractInstance(label, address);
         },
+        /**
+         * auxiliar method to get the escrow contract instance
+         * @param label identifies the context (network on this case) for the data
+         * @returns the contract instance
+         */
         async getEscrowContractInstance(label: string) {
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getEscrowContractAddress();
             return this.getContractInstance(label, address);
         },
+        /**
+         * This method queries the total amount of staked tokens in the system and maintains it in the store.
+         * @param label identifies the context (network on this case) for the data
+         */
         async updateTotalStaking(label: string) {
             this.trace('updateTotalStaking', label);
             const contract = await this.getStakedSystemContractInstance(label);
             const totalStaking = await contract.totalAssets();
             this.setTotalStaking(label, totalStaking);
         },
+        /**
+         * This method shopuld be called to quiery the REX data for a given account,
+         * along with the current stato of the total staked tokens on the system.
+         * @param label identifies the context (network on this case) for the data
+         * @param account the account to update the data for
+         */
         async updateRexDataForAccount(label: string, account: AccountModel | null) {
             this.trace('updateRexDataForAccount', label, account);
             useFeedbackStore().setLoading('updateRexDataForAccount');
             try {
                 await Promise.all([
-                    this.updateWithdrawable(label),
-                    this.updateDeposits(label),
-                    this.updateBalance(label),
-                    this.updateTotalStaking(label),
+                    this.updateWithdrawable(label),  // account's data
+                    this.updateDeposits(label),      // account's data
+                    this.updateBalance(label),       // account's data
+                    this.updateTotalStaking(label),  // system's data
                 ]);
             } catch (error) {
                 console.error(error);
                 useFeedbackStore().unsetLoading('updateRexDataForAccount');
             }
         },
+        /**
+         * This method queries the withdrawable amount for a given account and maintains it in the store.
+         * The withdrawable amount is the amount of tokens that can be withdrawn from the REX system right now.
+         * @param label identifies the context (account-network) for the data
+         */
         async updateWithdrawable(label: string) {
             this.trace('updateWithdrawable', label);
             const contract = await this.getEscrowContractInstance(label);
@@ -119,6 +151,12 @@ export const useRexStore = defineStore(store_name, {
             const withdrawable = await contract.maxWithdraw(address);
             this.setWithdrawable(label, withdrawable);
         },
+        /**
+         * This method queries the deposits for a given account and maintains it in the store.
+         * The deposits contains a list of individual whitdrawls attempts, each with an amount and a date.
+         * If the date is in the future, the amount is not available for withdrawal yet.
+         * @param label identifies the context (account-network) for the data
+         */
         async updateDeposits(label: string) {
             this.trace('updateDeposits', label);
             const contract = await this.getEscrowContractInstance(label);
@@ -126,6 +164,11 @@ export const useRexStore = defineStore(store_name, {
             const deposits = await contract.depositsOf(address);
             this.setDeposits(label, deposits);
         },
+        /**
+         * This method queries the balance for a given account and maintains it in the store.
+         * The account's balance is the sum of all the deposits (withdrawable or not)
+         * @param label identifies the context (account-network) for the data
+         */
         async updateBalance(label: string) {
             this.trace('updateBalance', label);
             const contract = await this.getEscrowContractInstance(label);
@@ -133,26 +176,29 @@ export const useRexStore = defineStore(store_name, {
             const balance = await contract.balanceOf(address);
             this.setBalance(label, balance);
         },
+        getStakingDecimals() {
+            return useChainStore().currentEvmChain?.settings.getStakedSystemToken().decimals || WEI_PRECISION;
+        },
         // commits ---------------
         setWithdrawable(label: string, withdrawable: ethers.BigNumber) {
-            const num = parseFloat(ethers.utils.formatUnits(withdrawable, 18));
+            const num = parseFloat(ethers.utils.formatUnits(withdrawable, this.getStakingDecimals()));
             this.trace('setWithdrawable', label, num);
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).withdrawable = withdrawable;
         },
         setDeposits(label: string, deposits: EvmRexDeposit[]) {
-            this.trace('setDeposits', label, ... deposits.map(d => parseFloat(ethers.utils.formatUnits(d.amount, 18))));
+            this.trace('setDeposits', label, ... deposits.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).deposits = deposits;
         },
         setBalance(label: string, balance: ethers.BigNumber) {
-            const num = parseFloat(ethers.utils.formatUnits(balance, 18));
+            const num = parseFloat(ethers.utils.formatUnits(balance, this.getStakingDecimals()));
             this.trace('setBalance', label, num);
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).balance = balance;
         },
         setTotalStaking(label: string, totalStaking: ethers.BigNumber) {
-            const num = parseFloat(ethers.utils.formatUnits(totalStaking, 18));
+            const num = parseFloat(ethers.utils.formatUnits(totalStaking, this.getStakingDecimals()));
             this.trace('setTotalStaking', label, num);
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).totalStaking = totalStaking;

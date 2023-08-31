@@ -28,6 +28,7 @@ import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getAntelope } from 'src/antelope';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -525,10 +526,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
-        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), 18);
+        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), WEI_PRECISION);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
-        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', WEI_PRECISION));
         return { system, fiat };
     }
     async getLatestBlock(): Promise<ethers.BigNumber> {
