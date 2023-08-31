@@ -194,7 +194,7 @@ export const useChainStore = defineStore(store_name, {
             // Now we preview a deposit of 1 SYS to get the ratio
             const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
             const stakedRatio:ethers.BigNumber = await contractInstance.previewDeposit(oneSys);
-            const unstakedRatio:ethers.BigNumber = await contractInstance.previewWithdraw(oneSys);
+            const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
 
             // Finally we update the store
             this.setStakedRatio(label, stakedRatio);
