@@ -66,20 +66,6 @@ const systemTokenPrice = computed(() => {
 });
 
 
-
-// watch the balances store to update the staked token balance and the system token price
-watch(() => balancesStore.getBalances(label), (balances) => {
-    const stakedTokenBalance = balances.find(balance => balance.token.symbol === stakedToken.symbol)?.amount;
-    if (stakedTokenBalance) {
-        stakedTokenBalanceBn.value = stakedTokenBalance;
-    }
-    const systemTokenPriceBalance = balances.find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value;
-    if (systemTokenPriceBalance) {
-        systemTokenPrice.value = systemTokenPriceBalance;
-    }
-});
-
-
 // Second cell: Unstaking
 const unstakingBalanceBn = computed(() => {
     const rexData = useRexStore().getRexData(label);
