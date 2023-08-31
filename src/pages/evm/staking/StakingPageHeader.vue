@@ -65,7 +65,6 @@ const systemTokenPrice = computed(() => {
     }
 });
 
-
 // Second cell: Unstaking
 const unstakingBalanceBn = computed(() => {
     const rexData = useRexStore().getRexData(label);
