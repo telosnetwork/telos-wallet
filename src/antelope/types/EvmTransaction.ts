@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { NftTokenInterface } from 'src/antelope/types';
 
 export type EvmTransactionTopic = string[];
 
@@ -52,6 +53,7 @@ export interface NftTransactionData {
     videoSrc?: string;
     audioSrc?: string;
     type: 'image' | 'video' | 'audio' | 'unknown';
+    nftInterface: NftTokenInterface;
 }
 
 export const EvmSwapFunctionNames = [

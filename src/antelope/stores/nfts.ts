@@ -132,6 +132,7 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
+            // eztodo revert
             const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
 
             // we initialize the inventory for this label or take the existing one
@@ -190,7 +191,7 @@ export const useNftsStore = defineStore(store_name, {
                 // If we already have an inventory for that label, we search for the NFT in that list first
                 if (this.__inventory[label]) {
                     const nft = this.__inventory[label].list.find(
-                        nft => nft.item.contract.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
+                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;
@@ -206,7 +207,7 @@ export const useNftsStore = defineStore(store_name, {
                 this.__contracts[network] = this.__contracts[network] || {};
                 if (this.__contracts[network][contract]) {
                     const nft = this.__contracts[network][contract].list.find(
-                        nft => nft.item.contract.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
+                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;

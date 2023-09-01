@@ -43,6 +43,10 @@ export class NFTContractClass {
     constructor(
         source: IndexerNftContract,
     ) {
+        // eztodo this
+        if (!source) {
+            debugger;
+        }
         this.indexer = source;
     }
 

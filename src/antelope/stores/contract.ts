@@ -62,7 +62,7 @@ export const useContractStore = defineStore(store_name, {
                 let contract = { address: address };
                 try {
                     const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                    const response = await indexer.get(`/contract/${address}?full=true&includeAbi=true`);
+                    const response = await indexer.get(`/v1/contract/${address}?full=true&includeAbi=true`);
                     if (response.data?.success && response.data.results.length > 0){
                         contract = response.data.results[0];
                     }

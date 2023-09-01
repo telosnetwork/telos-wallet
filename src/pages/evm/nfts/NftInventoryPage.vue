@@ -17,7 +17,6 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
-import { isAddress } from 'ethers/lib/utils.js';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { storeToRefs } from 'pinia';
 

@@ -1,18 +1,19 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-
 import InlineSvg from 'vue-inline-svg';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { useChainStore, useNftsStore, useUserStore } from 'src/antelope';
+import { NFTClass, ShapedTransactionRow } from 'src/antelope/types';
+
 import { getLongDate } from 'src/antelope/stores/utils';
-import { useChainStore, useUserStore } from 'src/antelope';
-import { ShapedTransactionRow } from 'src/antelope/types';
+import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 
 const userStore = useUserStore();
 
@@ -28,6 +29,7 @@ export default defineComponent({
         TimeStamp,
         ExternalLink,
         InlineSvg,
+        NftViewer,
     },
     props: {
         transaction: {
@@ -35,13 +37,11 @@ export default defineComponent({
             required: true,
         },
     },
+    data: () => ({
+        loading: true,
+        nftData: {} as Record<string, NFTClass>, // keyed like {contract address}-{tokenId}
+    }),
     computed: {
-        test() {
-            if (this.transaction.id.toLowerCase() === '0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5') {
-                debugger;
-            }
-            return '';
-        },
         fiatLocale(): string {
             return useUserStore().fiatLocale;
         },
@@ -144,6 +144,27 @@ export default defineComponent({
             return this.formatAmount(this.transaction.gasFiatValue ?? 0, undefined, true);
         },
     },
+    async created() {
+        const nftTransfers = [...this.transaction.nftsIn, ...this.transaction.nftsOut];
+
+        if (nftTransfers.length) {
+            await Promise.all(nftTransfers.map(
+                async (nftTransfer) => {
+                    const nftDetails = await useNftsStore().fetchNftDetails(
+                        'current',
+                        nftTransfer.collectionAddress,
+                        nftTransfer.tokenId,
+                        nftTransfer.nftInterface,
+                    );
+                    if (nftDetails) {
+                        this.nftData[`${nftTransfer.collectionAddress}-${nftTransfer.tokenId}`] = nftDetails;
+                    }
+                },
+            ));
+        }
+
+        this.loading = false;
+    },
     methods: {
         formatAmount(amount: number, symbol: string = userStore.fiatCurrency, useSymbolCharacter: boolean = false) {
             const decimals = symbol === userStore.fiatCurrency ? 2 : 4;
@@ -173,15 +194,15 @@ export default defineComponent({
         getTruncatedAddress(address: string) {
             return truncateAddress(address);
         },
+        getCachedNftData(collectionAddress: string, tokenId: string): NFTClass | undefined {
+            return this.nftData[`${collectionAddress}-${tokenId}`];
+        },
     },
 });
 </script>
 
 <template>
-<div
-    class="c-transaction-row"
-    :class="{ test: transaction.id.toLowerCase() === '0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5' }"
->
+<div class="c-transaction-row">
     <div class="c-transaction-row__info-container c-transaction-row__info-container--first">
         <div class="c-transaction-row__interaction-icon-container">
             <InlineSvg
@@ -272,22 +293,15 @@ export default defineComponent({
             :key="`nfts-out-${index}`"
             class="c-transaction-row__value-container"
         >
-            <div class="c-transaction-row__nft c-transaction-row__nft--out">
+            <div
+                v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                class="c-transaction-row__nft c-transaction-row__nft--out"
+            >
                 <span>-{{ nftTransfer.quantity }}</span>
-                <!-- eztodo add test case for no image src -->
-                <img
-                    v-if="nftTransfer.imgSrc"
-                    :src="nftTransfer.imgSrc"
-                    :alt="nftTransfer.tokenName"
-                    height="40"
-                    width="40"
-                    class="c-transaction-row__nft-thumbnail"
-                >
-                <q-icon
-                    v-else
-                    name="o_image_not_supported"
-                    color="grey"
-                    size="40px"
+                <NftViewer
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId) as NFTClass"
+                    :previewMode="false"
+                    :tileMode="false"
                 />
                 <div class="c-transaction-row__nft-info-container">
                     <div class="c-transaction-row__nft-name-container">
@@ -332,22 +346,16 @@ export default defineComponent({
             :key="`nfts-in-${index}`"
             class="c-transaction-row__value-container"
         >
-            <div class="c-transaction-row__nft c-transaction-row__nft--in">
+            <div
+                v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                class="c-transaction-row__nft c-transaction-row__nft--in"
+            >
                 <span>+{{ nftTransfer.quantity }}</span>
-                <!-- eztodo add test case for no image src -->
-                <img
-                    v-if="nftTransfer.imgSrc"
-                    :src="nftTransfer.imgSrc"
-                    :alt="nftTransfer.tokenName"
-                    height="40"
-                    width="40"
-                    class="c-transaction-row__nft-thumbnail"
-                >
-                <q-icon
-                    v-else
-                    name="o_image_not_supported"
-                    color="grey"
-                    size="40px"
+                <!-- eztodo add test case to PR for no image src -->
+                <NftViewer
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId) as NFTClass"
+                    :previewMode="false"
+                    :tileMode="false"
                 />
                 <div class="c-transaction-row__nft-info-container">
                     <div class="c-transaction-row__nft-name-container">
@@ -392,9 +400,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.test {
-    border: 1px solid red;
-}
 .c-transaction-row {
     max-width: 1000px;
     padding: 16px 8px;

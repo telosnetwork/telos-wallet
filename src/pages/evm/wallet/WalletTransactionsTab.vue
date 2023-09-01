@@ -153,6 +153,7 @@ export default defineComponent({
         <h2>{{ $t('global.transactions') }}</h2>
         <span v-if="totalRowsText">{{ totalRowsText }}</span>
     </div>
+
     <template v-if="loading">
         <q-skeleton
             v-for="i of pagination.rowsCurrentPage"
@@ -169,21 +170,12 @@ export default defineComponent({
         {{ $t('evm_wallet.no_transactions_found') }}
     </h5>
 
-    <template
-        v-for="i of pagination.rowsCurrentPage"
-        v-else
-        :key="`tx-${i}`"
-    >
-        <template v-if="!shapedTransactions[i-1]">
-            <q-skeleton
-                type="QToolbar"
-                class="q-mb-lg"
-            />
-        </template>
-
+    <!-- eztodo transactions dont exist on teloscan -->
+    <template v-else>
         <WalletTransactionRow
-            v-else
-            :transaction="shapedTransactions[i-1]"
+            v-for="(tx, index) of shapedTransactions"
+            :key="`tx-${index}`"
+            :transaction="tx"
             class="q-mb-lg"
         />
     </template>

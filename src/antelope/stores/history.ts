@@ -107,7 +107,6 @@ export const useHistoryStore = defineStore(store_name, {
 
             try {
                 // eztodo where to debounce?
-                // eztodo erc1155 are not returned by indexer for nft detail page
                 // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
                 // which returns data required for the UI
                 if (!this.__evm_transfers[label].transfers.length) {
@@ -135,23 +134,23 @@ export const useHistoryStore = defineStore(store_name, {
                 });
 
                 this.setEVMTransactions(label, transactions);
-                // we do the shaping of transactions in background to speed up the UI
 
                 await this.shapeTransactions(label, transactions);
 
                 // there's an instant between this point and the appearance of the first transaction to show
                 // so we add a small delay to avoid flickering
+                // eztodo verify this is necessary
                 setTimeout(() => {
                     feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
                 }, 500);
             } catch (error) {
                 feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
+                console.error(error);
                 throw new AntelopeError('antelope.history.error_fetching_transactions');
             }
         },
 
         // fetch all NFT transfers for an account (erc721, erc155)
-        // eztodo pass in token type?
         async fetchEvmNftTransfersForAccount(label: Label, account: string): Promise<void> {
             // eztodo verify account
             const feedbackStore = useFeedbackStore();
@@ -232,10 +231,10 @@ export const useHistoryStore = defineStore(store_name, {
             const allNftTransfers = this.__evm_transfers[label].transfers;
 
             const transactionShapePromises = transactions.map(async (tx) => {
-                const index = transactions.findIndex(t => t.hash === tx.hash);
-
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
-                const userAddressLower = this.__evm_filter.address.toLowerCase();
+                // const userAddressLower = this.__evm_filter.address.toLowerCase();
+                // eztodo revert
+                const userAddressLower = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
                 const gasUsedInTlos = getGasInTlos(tx.gasused, tx.gasPrice);
@@ -266,9 +265,10 @@ export const useHistoryStore = defineStore(store_name, {
 
                 let actionName = '';
 
+                // eztodo replace instances of +tx.value
                 if (!isFailed) {
                     if (+tx.value) {
-                        // eztodo change from WEI_PRECISION to token decimals
+                        // eztodo change from WEI_PRECISION to token decimals?
                         const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
                         const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
@@ -293,7 +293,8 @@ export const useHistoryStore = defineStore(store_name, {
                     const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction === tx.hash);
 
                     if (nftTransfersInTx.length > 0) {
-                        // there is at least 1 NFT transfer in this transaction
+                        // there is at least 1 NFT transfer in this transaction,
+                        // so we need to fetch the NFT details for each transfer in this transaction
                         const nftDetailList = await Promise.all(
                             nftTransfersInTx.map(
                                 transfer => nftStore.fetchNftDetails(
@@ -305,7 +306,6 @@ export const useHistoryStore = defineStore(store_name, {
                             ),
                         );
 
-                        // nftStore.fetchNftDetails(label, transfer.contract, transfer.id ?? '')
                         nftDetailList.forEach((nftDetails, index) => {
                             if (nftDetails) {
                                 let nftMediaType: 'image' | 'video' | 'audio' | 'unknown' = 'unknown';
@@ -326,32 +326,20 @@ export const useHistoryStore = defineStore(store_name, {
                                     collectionAddress: transferInfo.contract,
                                     collectionName: nftDetails.contractPrettyName,
                                     type: nftMediaType,
+                                    nftInterface: transferInfo.type.toUpperCase() as NftTokenInterface,
                                     imgSrc: nftDetails.imageSrcFull,
                                     videoSrc: nftDetails.videoSrc,
                                     audioSrc: nftDetails.audioSrc,
                                 };
-                                // debugger;
-                                // eztodo use userAddressLower
-                                if (transferInfo.from.toLowerCase() === '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase()) {
+
+                                if (transferInfo.from.toLowerCase() === userAddressLower) {
                                     nftsOut.push(shapedNftTransfer);
-                                } else if (transferInfo.to.toLowerCase() === '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase()) {
+                                } else if (transferInfo.to.toLowerCase() === userAddressLower) {
                                     nftsIn.push(shapedNftTransfer);
                                 }
                             }
                         });
                     }
-
-
-                    // if (nftTransferIndex >= 0 && nftId !== undefined) {
-                    //     // transfer is an NFT transfer
-                    //     const nftDetails = await useNftsStore().fetchNftDetails(label, nftTransfers[nftTransferIndex].contract, nftId);
-                    //     console.log(nftDetails);
-
-                    //     // eztodo remove, pepegurl
-                    //     if (nftTransfers[nftTransferIndex].contract === '0x78cb091062cc8c32CD9c814599d1987b1dCc5093') {
-                    //         debugger;
-                    //     }
-                    // }
 
                     for (const tokenXfer of erc20Transfers) {
                         if (tokenXfer.symbol && tokenXfer.decimals) {
@@ -369,7 +357,6 @@ export const useHistoryStore = defineStore(store_name, {
                                 transferAmountInFiat = tokenFiatPrice ?
                                     tokenFiatPrice * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
                                     undefined;
-
                             }
 
                             if (tokenXfer.from?.toLowerCase() === userAddressLower) {
@@ -390,22 +377,30 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
+                    const txIsASwap    = (valuesIn.length  > 0 || nftsIn.length  > 0) && (valuesOut.length > 0 || nftsOut.length > 0);
+                    const txIsASend    = (valuesOut.length > 0 || nftsOut.length > 0) && (valuesIn.length  === 0 && nftsIn.length  === 0);
+                    const txIsAReceive = (valuesIn.length  > 0 || nftsIn.length  > 0) && (valuesOut.length === 0 && nftsOut.length === 0);
+
+                    // eztodo occasional error when live fetching txs
                     if (isContractCreation) {
                         actionName = 'contractCreation';
-                    } else if (+tx.value && erc20Transfers.length === 0 && !functionName) {
-                        if (tx.from?.toLowerCase() === userAddressLower) {
-                            actionName = 'send';
-                        } else if (tx.to?.toLowerCase() === userAddressLower) {
-                            actionName = 'receive';
-                        }
-                    } else if (EvmSwapFunctionNames.includes(functionName)) {
+                    } else if (functionName === 'mint') {
+                        actionName = 'mint'; // eztodo handle this in the UI, add it to the correct interface as comment
+                    } else if (txIsASend) {
+                        // eztodo fix nft send/receive label
+                        // eztodo special case for mint
+                        actionName = 'send';
+                    } else if (txIsAReceive) {
+                        actionName = 'receive';
+                    } else if (txIsASwap) {
+                        // eztodo remove swapfunctionnames const
                         actionName = 'swap';
                     } else if (functionName) {
                         actionName = functionName;
                     }
                 }
 
-                const shapedTx = {
+                return {
                     id: tx.hash,
                     epoch: tx.timestamp / 1000,
                     actionName,
@@ -421,12 +416,13 @@ export const useHistoryStore = defineStore(store_name, {
                     gasFiatValue: gasInUsd,
                     failed: isFailed,
                 } as ShapedTransactionRow;
-
-                // The shapedTxs may not be in the same order as the transactions eztodo what does this mean
-                this.__shaped_evm_transaction_rows[label][index] = shapedTx;
             });
 
-            await Promise.all(transactionShapePromises);
+            const shapedTransactions = await Promise.all(transactionShapePromises);
+            this.setShapedTransactionRows(label, shapedTransactions);
+
+            // eztodo this one is frigged up, page 2 mind flayers
+            // https://www.teloscan.io/tx/0xa9d8d348dd524be0e649fabb9d8f9916b1f7c2222ea856e81a2ad91b219cf1b3
         },
 
 
