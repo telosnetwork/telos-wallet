@@ -10,6 +10,10 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
 
 import ScrollableInfoCards from 'components/evm/ScrollableInfoCards.vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
 
 const label = 'current';
 const { t: $t } = useI18n();
@@ -26,7 +30,6 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
-const stakedTokenBalanceBn = ref(undefined as BigNumber | undefined);
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
@@ -37,7 +40,6 @@ const stakedExpressedInSystemBalanceBn = computed(() => {
         return undefined;
     }
 });
-const systemTokenPrice = ref(undefined as BigNumber | undefined);
 const stakedFiatValueBn = computed(() => {
     if (stakedExpressedInSystemBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
@@ -46,18 +48,25 @@ const stakedFiatValueBn = computed(() => {
         return undefined;
     }
 });
-
-// watch the balances store to update the staked token balance and the system token price
-watch(() => balancesStore.getBalances(label), (balances) => {
+const stakedTokenBalanceBn = computed(() => {
+    const balances = balancesStore.getBalances(label);
     const stakedTokenBalance = balances.find(balance => balance.token.symbol === stakedToken.symbol)?.amount;
     if (stakedTokenBalance) {
-        stakedTokenBalanceBn.value = stakedTokenBalance;
-    }
-    const systemTokenPriceBalance = balances.find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value;
-    if (systemTokenPriceBalance) {
-        systemTokenPrice.value = systemTokenPriceBalance;
+        return stakedTokenBalance;
+    } else {
+        return undefined;
     }
 });
+const systemTokenPrice = computed(() => {
+    const balances = balancesStore.getBalances(label);
+    const systemTokenPriceBalance = balances.find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value;
+    if (systemTokenPriceBalance) {
+        return systemTokenPriceBalance;
+    } else {
+        return undefined;
+    }
+});
+
 
 
 // Second cell: Unstaking
@@ -172,6 +181,44 @@ const secondLineData = computed(() => [{
     lowContrastSecondaryText: false,
     useSmallBox: true,
 }]);
+
+// creatmos un interval que cada 5 segundos verifique si cada uno de los loadings es true o false.
+// por cada loading que encontremos en true, debemos llamar a actualizar las dependendicas de ese loading
+// si todos los loadings son false, entonces podemos parar el intervalo
+
+const intervalTimer = setInterval(() => {
+
+    // is staking still loading?
+    if (isStakedLoading.value) {
+        // if staked balance is still undefined we force the balances update
+        if (stakedTokenBalanceBn.value === undefined) {
+            balancesStore.updateBalances(label);
+        }
+        // if unstaked ratio is still zero we force the chain update
+        if (unstakedRatio.value.isZero()) {
+            chainStore.updateStakedRatio(label);
+        }
+    }
+    // is unstaking still loading?
+    if (isUnstakingLoading.value || isWithdrawableLoading.value) {
+        // we need to update rex data
+        useRexStore().updateRexData(label);
+    }
+    if (apyisLoading.value) {
+        // force apy update
+        chainStore.updateApy(label);
+    }
+
+    if (
+        // we are not in the staking page or...
+        route.path !== '/evm/staking' ||
+        // all loadings are false at the same time
+        (!isStakedLoading.value && !isUnstakingLoading.value && !isWithdrawableLoading.value && !apyisLoading.value)
+    ) {
+        clearInterval(intervalTimer);
+    } else {
+    }
+}, 5000);
 
 function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
     let decimals = symbol === fiatCurrency.value ? 2 : 4;
