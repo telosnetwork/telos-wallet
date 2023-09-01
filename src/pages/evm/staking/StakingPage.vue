@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppPage from 'components/evm/AppPage.vue';
 import StakingPageHeader from 'pages/evm/staking/StakingPageHeader.vue';
+import StakingTab from 'pages/evm/staking/StakingTab.vue';
 
 const tabs = ['stake', 'unstake', 'withdraw'];
 </script>
@@ -12,7 +13,7 @@ const tabs = ['stake', 'unstake', 'withdraw'];
     </template>
 
     <template v-slot:stake>
-        <p>stake tab</p>
+        <StakingTab />
     </template>
 
     <template v-slot:unstake>
