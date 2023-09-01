@@ -46,8 +46,6 @@ const stakedFiatValueBn = computed(() => {
         return undefined;
     }
 });
-
-// watch the balances store to update the staked token balance and the system token price
 watch(() => balancesStore.getBalances(label), (balances) => {
     const stakedTokenBalance = balances.find(balance => balance.token.symbol === stakedToken.symbol)?.amount;
     if (stakedTokenBalance) {
