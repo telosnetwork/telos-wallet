@@ -13,7 +13,7 @@ import {
     createTraceFunction,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { AntelopeError, Label } from 'src/antelope/types';
+import { AntelopeError, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
 import { getAntelope, useChainStore, useEVMStore } from 'src/antelope';
@@ -187,8 +187,19 @@ export const useRexStore = defineStore(store_name, {
             const balance = await contract.balanceOf(address);
             this.setBalance(label, balance);
         },
+        /**
+         * utility method to get the number of decimals for the staked system token
+         * @returns the number of decimals for the staked system token
+         */
         getStakingDecimals() {
             return useChainStore().currentEvmChain?.settings.getStakedSystemToken().decimals || WEI_PRECISION;
+        },
+        // transactions ----------
+        async stakeSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            // TODO: implement
+            console.error('stakeSystemTokens not implemented yet');
+            this.trace('stakeSystemTokens', label, amount);
+            return {} as TransactionResponse;
         },
         // commits ---------------
         setWithdrawable(label: string, withdrawable: ethers.BigNumber) {
