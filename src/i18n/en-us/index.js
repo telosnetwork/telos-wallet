@@ -202,11 +202,7 @@ export default {
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
         withdrawable_card_label: 'withdrawable',
-<<<<<<< HEAD
         withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
-=======
-        withdrawable_card_tooltip: 'withdrawable tokens:\n\n' +
->>>>>>> 958b7ab3 (addressing feedback)
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
