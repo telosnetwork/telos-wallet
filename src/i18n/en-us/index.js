@@ -202,11 +202,7 @@ export default {
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
         withdrawable_card_label: 'withdrawable',
-<<<<<<< HEAD
         withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
-=======
-        withdrawable_card_tooltip: 'withdrawable tokens:\n\n' +
->>>>>>> 958b7ab3 (addressing feedback)
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
@@ -223,6 +219,15 @@ export default {
         tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
         unstaking_period: '10 days',
+        stake_input_label: 'Staking Amount',
+        stake: 'Stake',
+        stake_button_label: 'Stake {systemSymbol} to {stakedSymbol}',
+        stake_sidebar_title: 'Why stake {symbol}?',
+        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS grants you access to',
+        stake_sidebar_content_fragment_2_bold: ' continuous rewards ',
+        stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
+        stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
+        stake_sidebar_content_fragment_5: 'No further action is required.',
     },
     notification:{
         success_title_trx: 'Success',
