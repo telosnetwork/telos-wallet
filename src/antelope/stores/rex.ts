@@ -118,6 +118,13 @@ export const useRexStore = defineStore(store_name, {
             const totalStaking = await contract.totalAssets();
             this.setTotalStaking(label, totalStaking);
         },
+        async updateRexData(label: string) {
+            this.trace('updateRexData', label);
+            const account = useAccountStore().getAccount(label);
+            if (account) {
+                await this.updateRexDataForAccount(label, account);
+            }
+        },
         /**
          * This method should be called to update the REX data for a given context.
          * @param label identifies the context (account and network) for the data
