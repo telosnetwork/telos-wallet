@@ -175,7 +175,7 @@ export default {
         },
     },
     watch: {
-        async showDepositEVMDlg() {
+        showDepositEVMDlg() {
             if (this.showDlg) {
                 this.$emit('addEvmNetwork');
             };
