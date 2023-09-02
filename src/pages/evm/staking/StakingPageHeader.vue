@@ -66,7 +66,6 @@ const systemTokenPrice = computed(() => {
 });
 
 
-
 // Second cell: Unstaking
 const unstakingBalanceBn = computed(() => {
     const rexData = useRexStore().getRexData(label);
@@ -180,10 +179,7 @@ const secondLineData = computed(() => [{
     useSmallBox: true,
 }]);
 
-// creatmos un interval que cada 5 segundos verifique si cada uno de los loadings es true o false.
-// por cada loading que encontremos en true, debemos llamar a actualizar las dependendicas de ese loading
-// si todos los loadings son false, entonces podemos parar el intervalo
-
+// interval to update data
 const intervalTimer = setInterval(() => {
 
     // is staking still loading?
