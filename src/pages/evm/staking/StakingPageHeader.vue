@@ -195,9 +195,6 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
         <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
     </div>
 
-    <div>{{ stakedTokenBalanceBn?.toString() }}</div>
-    <div>{{ stakedRatio?.toString() }}</div>
-
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
     <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
 </div>
