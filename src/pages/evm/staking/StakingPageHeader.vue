@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber, ethers } from 'ethers';
 
 import { useUserStore, useBalancesStore, useChainStore, useRexStore } from 'src/antelope';
 import { convertCurrency, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { NativeCurrencyAddress } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 import ScrollableInfoCards from 'components/evm/ScrollableInfoCards.vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
-const router = useRouter();
 const route = useRoute();
 
 const label = 'current';
