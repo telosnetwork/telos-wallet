@@ -87,6 +87,13 @@ export const useBalancesStore = defineStore(store_name, {
                 await useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
             }, 10000);
         },
+        async updateBalances(label: string) {
+            this.trace('updateBalances', label);
+            const account = useAccountStore().getAccount(label);
+            if (account) {
+                await this.updateBalancesForAccount(label, account);
+            }
+        },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
             this.trace('updateBalancesForAccount', label, account);
             try {
