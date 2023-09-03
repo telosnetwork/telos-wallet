@@ -10,6 +10,7 @@ import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
+
     readonly label: string;
     readonly trace: (message: string, ...args: unknown[]) => void;
 
@@ -27,6 +28,8 @@ export abstract class EVMAuthenticator {
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
     abstract wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;

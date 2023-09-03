@@ -35,7 +35,6 @@ import {
     useFeedbackStore,
     useChainStore,
     useEVMStore,
-    usePlatformStore,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -51,6 +50,7 @@ import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -254,36 +254,14 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
-            this.trace('subscribeForTransactionReceipt', response.hash);
-            if (account.isNative) {
-                throw new AntelopeError('Not implemented yet for native');
-            } else {
-                const authenticator = account.authenticator as EVMAuthenticator;
-                const provider = await authenticator.web3Provider();
-                if (provider) {
-                    // instead of await, we use then() to return the response immediately
-                    // and perform the balance update in the background
-                    const whenConfirmed = provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
-                        this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
-                        if (receipt.status === 1) {
-                            const account = useAccountStore().loggedAccount;
-                            if (account?.account) {
-                                this.updateBalancesForAccount('logged', account);
-                            }
-                        }
-                        return receipt;
-                    });
-                    // we add the wait method to the response,
-                    // so that the caller can subscribe to the confirmation event
-                    response.wait = async () => whenConfirmed;
-                } else {
-                    if (usePlatformStore().isMobile) {
-                        response.wait = async () => Promise.resolve({} as ethers.providers.TransactionReceipt);
-                    } else {
-                        throw new AntelopeError('antelope.evm.error_no_provider');
-                    }
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
+                this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+                if (receipt.status === 1) {
+                    this.updateBalancesForAccount('logged', account);
                 }
-            }
+                return receipt;
+            });
             return response;
         },
         async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {

@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
+import { useAccountStore, useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import {
     AntelopeError,
     ERC20_TYPE,
@@ -249,6 +249,42 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
             resolve();
         });
     }
+
+    async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
+        this.trace('stakeSystemTokens', amount.toString());
+
+        const chain = useChainStore().getChain(this.label);
+        const stakedToken = (chain.settings as EVMChainSettings).getStakedSystemToken();
+
+        const evm = useEVMStore();
+        const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
+        if (contract) {
+            const contractInstance = await contract.getContractInstance();
+            const transaction = (await contractInstance.depositTLOS({ value: amount })) as EvmTransactionResponse;
+            return transaction;
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: stakedToken.address });
+        }
+    }
+
+    async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
+        this.trace('unstakeSystemTokens', amount.toString());
+
+        const chain = useChainStore().getChain(this.label);
+        const stakedToken = (chain.settings as EVMChainSettings).getStakedSystemToken();
+
+        const evm = useEVMStore();
+        const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
+        if (contract) {
+            const contractInstance = await contract.getContractInstance();
+            const amountInWei = amount.toString();
+            const address = useAccountStore().getAccount(this.label).account;
+            return contractInstance.withdraw(amountInWei, address, address);
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: stakedToken.address });
+        }
+    }
+
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);

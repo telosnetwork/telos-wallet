@@ -353,6 +353,18 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return await writeContract(sendConfig);
     }
 
+    async stakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
+        // TODO: implement
+        this.trace('stakeSystemTokens', amount.toString());
+        return Promise.resolve({} as WriteContractResult);
+    }
+
+    async unstakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
+        // TODO: implement
+        this.trace('unstakeSystemTokens', amount.toString());
+        return Promise.resolve({} as WriteContractResult);
+    }
+
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
 

@@ -245,7 +245,7 @@ export default {
         error_see_details_label: 'See Details',
         error_details_title: 'Error Details',
         neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
-        neutral_message_staking: 'Staking <b>{quantity}</b>',
+        neutral_message_staking: 'Staking <b>{quantity} {symbol}</b>',
         neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
@@ -531,6 +531,7 @@ export default {
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
             error_no_default_authenticator: 'No default authenticator found',
+            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
@@ -545,6 +546,9 @@ export default {
         balances: {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
+        },
+        rex: {
+            error_contract_not_found: 'Contract not found for address {address}',
         },
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
