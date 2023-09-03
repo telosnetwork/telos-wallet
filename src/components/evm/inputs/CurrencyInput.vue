@@ -931,15 +931,20 @@ export default defineComponent({
                 this.inputIsDirty = false;
             });
         },
+
+        // utility to convert to string properties attrs typed as never
+        asString(val: unknown): string {
+            return val as string;
+        },
     },
 });
 </script>
 
 <template>
 <div
-    :id="($attrs.id as string)"
+    :id="asString($attrs.id)"
     :class="{
-        [$attrs.class as string]: !!$attrs.class,
+        [asString($attrs.class)]: !!$attrs.class,
         'c-currency-input': true,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,

@@ -365,6 +365,19 @@ export class OreIdAuth extends EVMAuthenticator {
         } as EvmTransactionResponse;
     }
 
+    async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
+        // TODO: implement
+        this.trace('stakeSystemTokens', amount.toString());
+        return Promise.resolve({} as EvmTransactionResponse);
+    }
+
+    async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
+        // TODO: implement
+        this.trace('unstakeSystemTokens', amount.toString());
+        return Promise.resolve({} as EvmTransactionResponse);
+    }
+
+
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
         return true;
