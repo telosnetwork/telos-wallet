@@ -28,6 +28,8 @@ import {
     EvmABI,
     TokenClass,
     addressString,
+    stlosAbiDeposit,
+    stlosAbiWithdraw,
     wtlosAbiDeposit,
     wtlosAbiWithdraw,
 } from 'src/antelope/types';
@@ -338,6 +340,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async unwrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        this.trace('unwrapSystemToken', amount.toString());
         const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
 
@@ -354,15 +357,39 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async stakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
-        // TODO: implement
         this.trace('stakeSystemTokens', amount.toString());
-        return Promise.resolve({} as WriteContractResult);
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
+
+        console.assert(stlosAbiDeposit.length === 1, 'warning: we are assuming stlosAbiDeposit has only one method');
+        const sendConfig = await prepareWriteContract({
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: stakedSystemTokenContractAddress,
+            abi: stlosAbiDeposit,
+            functionName: stlosAbiDeposit[0].name,
+            args: [],
+            value: BigInt(amount.toString()),
+        });
+
+        return await writeContract(sendConfig);
     }
 
     async unstakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
-        // TODO: implement
         this.trace('unstakeSystemTokens', amount.toString());
-        return Promise.resolve({} as WriteContractResult);
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
+
+        console.assert(stlosAbiWithdraw.length === 1, 'warning: we are assuming stlosAbiWithdraw has only one method');
+        const sendConfig = await prepareWriteContract({
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: stakedSystemTokenContractAddress,
+            abi: stlosAbiWithdraw,
+            functionName: stlosAbiWithdraw[0].name,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            args: [amount] as any[],
+        });
+
+        return await writeContract(sendConfig);
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
