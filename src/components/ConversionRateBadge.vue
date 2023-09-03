@@ -18,7 +18,6 @@ const props = defineProps<{
 const fiatLocale = computed(() => userStore.fiatLocale);
 
 const label = computed(() => {
-    console.log('label computed: ', props.tokenOneSymbol, props.tokenTwoSymbol, props.tokenTwoAmount.toString(), fiatLocale.value, props.tokenTwoDecimals);
     const abbreviate = props.decimals === 0;
     const prettyTokenTwoAmount = prettyPrintCurrency(
         props.tokenTwoAmount,

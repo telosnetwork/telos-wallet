@@ -42,16 +42,12 @@ const stakedTokenDecimals = stakedToken.decimals;
 const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(ethers.constants.Zero);
 const estimatedGas = ref(ethers.constants.Zero);
-const stakedRatio = computed(() => {
-    console.log('stakedRatio computed: ', chainStore.getStakedRatio(label).toString());
-    return chainStore.getStakedRatio(label);
-});
+const stakedRatio = computed(() => chainStore.getStakedRatio(label));
 const outputModelValue = computed(() => {
     if (stakedRatio.value.isZero()) {
         return ethers.constants.Zero;
     }
     const output = inputModelValue.value.mul(stakedRatio.value).div(oneEth);
-    console.log('outputModelValue computed: ', output.toString());
     return output;
 });
 // computed
