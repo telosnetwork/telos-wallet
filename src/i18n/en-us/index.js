@@ -228,6 +228,9 @@ export default {
         stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
         stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
         stake_sidebar_content_fragment_5: 'No further action is required.',
+        unstake_input_label: 'Unstaking Amount',
+        unstake: 'Unstake',
+        unstake_button_label: 'Unstake {stakedSymbol} to {systemSymbol}',
     },
     notification:{
         success_title_trx: 'Success',

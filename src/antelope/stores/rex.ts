@@ -215,7 +215,7 @@ export const useRexStore = defineStore(store_name, {
             return response;
         },
         /**
-         * Performs the staking of System Tokens for a giuven account on the REX system of a given network.
+         * Performs the staking of System Tokens for a given account on the REX system of a given network.
          * @param label identifies the context (account-network) for the data
          * @param amount the amount of tokens to stake
          * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
@@ -229,6 +229,30 @@ export const useRexStore = defineStore(store_name, {
                 const account = useAccountStore().getAccount(label);
                 const authenticator = useAccountStore().getEVMAuthenticator(label);
                 return await authenticator.stakeSystemTokens(amount)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
+        /**
+         * Performs the unstaking of Staked System tokens for a given account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to unstake
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async unstakeEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'unstakeEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.unstakeSystemTokens(amount)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
                 const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
