@@ -17,7 +17,6 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
-import { AntelopeError } from 'src/antelope/types';
 
 const label = 'current';
 
