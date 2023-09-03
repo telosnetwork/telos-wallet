@@ -52,6 +52,7 @@ import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };

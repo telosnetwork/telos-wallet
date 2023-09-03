@@ -16,10 +16,10 @@ import {
 import { AntelopeError, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { getAntelope, useChainStore, useEVMStore } from 'src/antelope';
+import { getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
-
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 
 export interface EvmRexDeposit {
@@ -85,7 +85,7 @@ export const useRexStore = defineStore(store_name, {
             const contract = await useEVMStore().getContract(authenticator, address);
             if (!contract) {
                 this.trace('getStakedSystemContractInstance', label, '-> no contract');
-                throw new AntelopeError('antelope.chain.error_no_default_authenticator');
+                throw new AntelopeError('antelope.rex.error_contract_not_found', { address });
             }
             const contractInstance = await contract.getContractInstance();
             return contractInstance;
@@ -188,18 +188,55 @@ export const useRexStore = defineStore(store_name, {
             this.setBalance(label, balance);
         },
         /**
-         * utility method to get the number of decimals for the staked system token
+         * utility function to get the number of decimals for the staked system token
          * @returns the number of decimals for the staked system token
          */
         getStakingDecimals() {
             return useChainStore().currentEvmChain?.settings.getStakedSystemToken().decimals || WEI_PRECISION;
         },
         // transactions ----------
-        async stakeSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
-            // TODO: implement
-            console.error('stakeSystemTokens not implemented yet');
-            this.trace('stakeSystemTokens', label, amount);
-            return {} as TransactionResponse;
+        /**
+         * This methos sould be called by any transaction performed by this store. It subscribes to the transaction
+         * receipt and updates the balance and rex status for the account if the transaction is successful.
+         * @param account account performing the transaction
+         * @param response the transaction response holding the hash
+         * @returns the same transaction response but modified by the utility function subscribeForTransactionReceipt
+         */
+        async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
+                this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+                if (receipt.status === 1) {
+                    this.updateRexDataForAccount('logged', account);
+                    useBalancesStore().updateBalancesForAccount('logged', account);
+                }
+                return receipt;
+            });
+            return response;
+        },
+        /**
+         * Performs the staking of System Tokens for a giuven account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to stake
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async stakeEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'stakeEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.stakeSystemTokens(amount)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
         },
         // commits ---------------
         setWithdrawable(label: string, withdrawable: ethers.BigNumber) {
