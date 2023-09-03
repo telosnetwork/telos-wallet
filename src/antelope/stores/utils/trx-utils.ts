@@ -13,6 +13,8 @@ export async function subscribeForTransactionReceipt(account: AccountModel, resp
         const provider = await authenticator.web3Provider();
         if (provider) {
             const whenConfirmed = provider.waitForTransaction(response.hash);
+            // TODO: remove this console error
+            console.error('subscribeForTransactionReceipt CONFIRMED!!', response.hash);
             // we add the wait method to the response,
             // so that the caller can subscribe to the confirmation event
             response.wait = async () => whenConfirmed;
