@@ -99,7 +99,7 @@ const props = defineProps<{
         @include sm-and-up {
             width: 300px;
             &--small {
-                width: 220px;
+                width: 250px;
             }
         }
     }
