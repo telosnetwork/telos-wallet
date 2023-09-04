@@ -43,6 +43,9 @@ export class AntelopeConfig {
     // localization handler --
     private __localization_handler: (key: string, payload?: Record<string, unknown>) => string = (key: string) => key;
 
+    // transaction error handler --
+    private __transaction_error_handler: (err: AntelopeError, trxFailed: string) => void = () => void 0;
+
     // error to string handler --
     private __error_to_string_handler: (error: unknown) => string = (error: unknown) => {
         try {
@@ -164,6 +167,10 @@ export class AntelopeConfig {
         return this.__localization_handler;
     }
 
+    get transactionErrorHandler() {
+        return this.__transaction_error_handler;
+    }
+
     get errorToStringHandler() {
         return this.__error_to_string_handler;
     }
@@ -226,6 +233,11 @@ export class AntelopeConfig {
     // setting translation handler --
     public setLocalizationHandler(handler: (key: string, payload?: Record<string, unknown>) => string) {
         this.__localization_handler = handler;
+    }
+
+    // setting transaction error handler --
+    public setTransactionErrorHandler(handler: (err: AntelopeError, trxFailed: string) => void) {
+        this.__transaction_error_handler = handler;
     }
 
     // setting error to string handler --

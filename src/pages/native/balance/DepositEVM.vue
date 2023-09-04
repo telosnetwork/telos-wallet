@@ -1,5 +1,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
+const MINIMUM_RAM_BYTES = 1000;
 
 export default {
     name: 'WithdrawEVM',
@@ -86,6 +87,12 @@ export default {
             }
         },
         async generateAddress(){
+            const accountInfo = await this.$store.$api.getAccount(this.accountName);
+
+            if (accountInfo.ram_quota - accountInfo.ram_usage <= MINIMUM_RAM_BYTES){ // If account (often newly created account) does not have sufficient RAM, notify user
+                this.$errorNotification(this.$t('resources.insufficient_ram'));
+                return;
+            }
             const actions = [];
             if (!this.evmAddress) {
                 actions.push({
