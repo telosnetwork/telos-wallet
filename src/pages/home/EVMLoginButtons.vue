@@ -54,16 +54,16 @@ export default defineComponent({
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            setAuthenticator(name, 'logged');
+            setAuthenticator(name, 'current');
         };
         const setMetamaskAuthenticator = async () => {
-            setAuthenticator('Metamask', 'logged');
+            setAuthenticator('Metamask', 'current');
         };
         const setSafepalAuthenticator = async () => {
-            setAuthenticator('SafePal', 'logged');
+            setAuthenticator('SafePal', 'current');
         };
         const setWalletConnectAuthenticator = async () => {
-            setAuthenticator('WalletConnect', 'logged');
+            setAuthenticator('WalletConnect', 'current');
         };
 
         const setAuthenticator = async(name: string, label: string) => {

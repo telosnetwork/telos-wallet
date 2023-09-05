@@ -44,8 +44,7 @@ export abstract class EVMAuthenticator {
         this.trace('login', network);
         const chain = useChainStore();
         try {
-            chain.setLoggedChain(network);
-            chain.setCurrentChain(network);
+            chain.setChain('current', network);
 
             const checkProvider = await this.ensureCorrectChain() as ethers.providers.Web3Provider;
 

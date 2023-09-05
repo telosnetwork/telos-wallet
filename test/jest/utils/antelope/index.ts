@@ -21,7 +21,7 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
         getAutenticator: () => ({
             newInstance: (label: string) => ({
                 label,
-                isConnectedTo: () => Promise.resolve(label === 'logged'),
+                isConnectedTo: () => Promise.resolve(label === 'current'),
             }),
         }),
     },

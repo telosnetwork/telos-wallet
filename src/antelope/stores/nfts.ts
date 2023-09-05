@@ -50,8 +50,8 @@ const store_name = 'nfts';
 export const useNftsStore = defineStore(store_name, {
     state: (): NftsState => (nftsInitialState),
     getters: {
-        loggedInventory: state => state.__inventory['logged']?.list,
-        loggedInventoryLoading: state => state.__inventory['logged']?.loading,
+        loggedInventory: state => state.__inventory['current']?.list,
+        loggedInventoryLoading: state => state.__inventory['current']?.loading,
         getInventory: state => (label: string) => state.__inventory[label],
         getUserFilter: state => state.__user_filter,
         getCollectionList: state => (label: string): NftCollectionListItem[] => {

@@ -62,7 +62,7 @@ const store_name = 'balances';
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
     getters: {
-        loggedBalances: state => state.__balances['logged'] ?? [],
+        loggedBalances: state => state.__balances['current'] ?? [],
         currentBalances: state => state.__balances['current'] ?? [],
         getBalances: state => (label: string) => state.__balances[label] ?? [],
     },
@@ -237,7 +237,7 @@ export const useBalancesStore = defineStore(store_name, {
                         if (receipt.status === 1) {
                             const account = useAccountStore().loggedAccount;
                             if (account?.account) {
-                                this.updateBalancesForAccount('logged', account);
+                                this.updateBalancesForAccount('current', account);
                             }
                         }
                         return receipt;
@@ -280,7 +280,7 @@ export const useBalancesStore = defineStore(store_name, {
         async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             const funcname = 'transferTokens';
             this.trace(funcname, token, to, amount.toString(), memo);
-            const label = 'logged';
+            const label = 'current';
             try {
                 useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
@@ -307,7 +307,7 @@ export const useBalancesStore = defineStore(store_name, {
         async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
             const funcname = 'wrapSystemTokens';
             this.trace(funcname, amount.toString());
-            const label = 'logged';
+            const label = 'current';
             try {
                 useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
@@ -331,7 +331,7 @@ export const useBalancesStore = defineStore(store_name, {
         async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
             const funcname = 'unwrapSystemTokens';
             this.trace(funcname, amount.toString());
-            const label = 'logged';
+            const label = 'current';
             try {
                 useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
@@ -442,9 +442,6 @@ export const useBalancesStore = defineStore(store_name, {
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
                 this.sortBalances(label);
-                if (useAccountStore().currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
-                }
             }
         },
         updateBalance(label: string, balance: TokenBalance): void {
@@ -456,9 +453,6 @@ export const useBalancesStore = defineStore(store_name, {
                 ) {
                     this.__balances[label][index].balance = balance.amount;
                     this.sortBalances(label);
-                    if (useAccountStore().currentIsLogged && label === 'current') {
-                        this.__balances['logged'] = this.__balances[label];
-                    }
                 }
             }
         },
@@ -467,9 +461,6 @@ export const useBalancesStore = defineStore(store_name, {
             const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 this.__balances[label].splice(index, 1);
-            }
-            if (useAccountStore().currentIsLogged && label === 'current') {
-                this.__balances['logged'] = this.__balances[label];
             }
         },
         clearAllWagmiTokenTransferConfigs(label: Label) {

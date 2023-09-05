@@ -93,7 +93,7 @@ export default defineComponent({
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances('current');
         },
         showContractLink(): boolean {
             return !!this.token?.address;

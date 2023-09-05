@@ -91,7 +91,7 @@ onBeforeMount(() => {
 });
 
 async function handleCtaClick() {
-    const label = 'logged';
+    const label = 'current';
     if (!await accountStore.isConnectedToCorrectNetwork(label)) {
         const networkName = useChainStore().loggedChain.settings.getDisplay();
         const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });

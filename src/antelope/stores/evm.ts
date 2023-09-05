@@ -474,7 +474,7 @@ export const useEVMStore = defineStore(store_name, {
 
         async getToken(authenticator: EVMAuthenticator, address:string, suspectedType:string): Promise<TokenClass | null> {
             if (suspectedType.toUpperCase() === ERC20_TYPE) {
-                const chain = useChainStore().getChain('logged');
+                const chain = useChainStore().getChain('current');
                 const list = await chain.settings.getTokenList();
                 const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
                 if (token) {

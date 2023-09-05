@@ -33,7 +33,7 @@ describe('EVMLoginButtons.vue', () => {
             it('should call accountStore loginEVM method 2', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
                 wrapper.vm.setMetamaskAuthenticator();
-                const label = 'logged';
+                const label = 'current';
                 const network = storeMock.MockData.Network;
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalledWith(expect.objectContaining({

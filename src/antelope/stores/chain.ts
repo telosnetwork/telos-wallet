@@ -103,11 +103,11 @@ const store_name = 'chain';
 export const useChainStore = defineStore(store_name, {
     state: (): ChainState => (chainInitialState),
     getters: {
-        loggedChain: state => state.__chains['logged'],
+        loggedChain: state => state.__chains['current'],
         currentChain: state => state.__chains['current'],
-        loggedEvmChain: state => state.__chains['logged'].settings.isNative() ? undefined : state.__chains['logged'] as EvmChainModel,
+        loggedEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
         currentEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
-        loggedNativeChain: state => state.__chains['logged'].settings.isNative() ? state.__chains['logged'] as NativeChainModel : undefined,
+        loggedNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
         currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
@@ -198,13 +198,6 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         // Commits ----
-        setLoggedChain(network: string) {
-            this.setChain('current', network);
-            this.setChain('logged', network);
-        },
-        setCurrentChain(network: string) {
-            this.setChain('current', network);
-        },
         setChain(label: string, network: string) {
             this.trace('setChain', label, network);
             if (network in settings) {

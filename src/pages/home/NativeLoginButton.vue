@@ -51,7 +51,7 @@ export default defineComponent({
         setDefaultNativeChain() {
             const network = process.env.CHAIN_NAME || 'telos';
             const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
+            chainStore.setChain('current', network);
         },
         // end of antelope methods
         ...mapActions('account', [

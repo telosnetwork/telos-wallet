@@ -6,7 +6,7 @@ import { defineStore } from 'pinia';
 import {
     Label, TokenClass,
 } from 'src/antelope/types';
-import { getAntelope, useAccountStore, useFeedbackStore, useChainStore } from 'src/antelope';
+import { getAntelope, useFeedbackStore, useChainStore } from 'src/antelope';
 import { toRaw } from 'vue';
 import { errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
@@ -22,7 +22,7 @@ const store_name = 'tokens';
 export const useTokensStore = defineStore(store_name, {
     state: (): TokensState => (tokensInitialState),
     getters: {
-        loggedTokens: state => state.__tokens['logged'],
+        loggedTokens: state => state.__tokens['current'],
         currentTokens: state => state.__tokens['current'],
         getTokens: state => (label: string) => state.__tokens[label],
     },
@@ -46,10 +46,6 @@ export const useTokensStore = defineStore(store_name, {
                 let tokens: TokenClass[] = [];
                 tokens = await chain.settings.getTokenList();
                 this.__tokens[label] = tokens;
-                const accountStore = useAccountStore();
-                if (accountStore.currentIsLogged && label === 'current') {
-                    this.__tokens['logged'] = tokens;
-                }
                 this.trace('updateTokensForNetwork', 'token: ', tokens);
             } catch (error) {
                 console.error('Error: ', errorToString(error));

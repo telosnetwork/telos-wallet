@@ -80,8 +80,7 @@ export class Antelope {
                 console.error('No chain name specified in environment config; the application will not run correctly');
             } else {
                 const network: string = chainNetworkNames[process.env.CHAIN_NAME];
-
-                chainStore.setCurrentChain(network);
+                chainStore.setChain('current', network);
             }
         }
 

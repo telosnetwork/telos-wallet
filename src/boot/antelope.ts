@@ -97,7 +97,7 @@ export default boot(({ app }) => {
     // Otherwise we just let the store decide which network to connect to
     const network = new URLSearchParams(window.location.search).get('network');
     if (network) {
-        ant.stores.chain.setCurrentChain(network);
+        ant.stores.chain.setChain('current', network);
     }
 
 });

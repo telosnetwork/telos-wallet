@@ -114,7 +114,7 @@ export default defineComponent({
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances('current');
         },
         showContractLink(): boolean {
             return this.token?.address !== NativeCurrencyAddress;
@@ -167,7 +167,7 @@ export default defineComponent({
             return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
         authIsReadyForTransfer(): boolean {
-            return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
+            return accountStore.getEVMAuthenticator('current')?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol);
@@ -222,7 +222,7 @@ export default defineComponent({
         async startTransfer() {
 
             // before sending the transaction, we check if the user is connected to the correct network
-            const label = 'logged';
+            const label = 'current';
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
                 const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                 const networkName = useChainStore().loggedChain.settings.getDisplay();
