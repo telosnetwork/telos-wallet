@@ -28,6 +28,7 @@ import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getAntelope } from 'src/antelope';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -41,6 +42,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External query API support
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+
+    // External query API support
+    protected api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
 
     // External trusted metadata bucket for EVM contracts
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getTrustedContractsBucket() });
@@ -61,7 +65,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     tokenListPromise: Promise<TokenClass[]> | null = null;
 
     // EvmContracts cache mapped by address
-    protected contracts: Record<string, EvmContract | false> = {};
+    protected contracts: Record<string, {
+        promise: Promise<EvmContract | false>;
+        resolve?: (value: EvmContract | false) => void;
+    }> = {};
 
     constructor(network: string) {
         this.network = network;
@@ -210,10 +217,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemToken(): TokenClass;
     abstract getStakedSystemToken(): TokenClass;
     abstract getWrappedSystemToken(): TokenClass;
+    abstract getEscrowContractAddress(): string;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
     abstract getRPCEndpoint(): RpcEndpoint;
+    abstract getApiEndpoint(): string;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
     abstract getBuyMoreOfTokenLink(): string;
@@ -225,6 +234,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
     abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
+
+    async getApy(): Promise<string> {
+        const response = await this.api.get('apy/evm');
+        return response.data as string;
+    }
 
     async getBalances(account: string): Promise<TokenBalance[]> {
         if (!this.hasIndexerSupport()) {
@@ -351,23 +365,55 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return `${token.symbol}-${token.address}-${this.getNetwork()}`;
     }
 
-    getContract(address: string): EvmContract | false | null {
+    /**
+     * This method returns the cached value for the requested contract which can be one of three values:
+     * - Promise<EvmContract> if the contract is already cached
+     * - Promise<null> if the contract was never requested before
+     * - Promise<false> if the contract was requested, not found and set as not existing (to avoid requesting it again)
+     * @param address contract requested
+     * @returns Promise for the requested contract or false if it doesn't exist
+     */
+    async getContract(address: string): Promise<EvmContract | false | null> {
         const key = address.toLowerCase();
-        return this.contracts[key] ?? null;
+        const returnValue = this.contracts[key]?.promise ?? null;
+        if (!this.contracts[key]) {
+            this.contracts[key] = {
+                promise: Promise.resolve(false),
+            };
+            this.contracts[key].promise = new Promise((resolve) => {
+                this.contracts[key].resolve = resolve;
+            });
+        }
+        return returnValue;
     }
 
-    addContract(address: string, contract: EvmContract) {
+    /**
+     * This method adds a contract to the cache and resolves the promise for it
+     * @param address address of the contract
+     * @param contract contract instance to be cached
+     */
+    addContract(address: string, contract: EvmContract | false) {
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
-            this.contracts[key] = contract;
+            this.contracts[key] = {
+                promise: Promise.resolve(contract),
+            };
+        } else {
+            if (this.contracts[key].resolve) {
+                this.contracts[key].resolve?.(contract);
+            } else {
+                console.error('Error: Contract already exists', address);
+            }
         }
     }
 
+    /**
+     * This method sets a contract as not existing and resolves the promise to false for it.
+     * This is done to distinguish between a contract that was never requested before and one that was requested and not found.
+     * @param address address of the contract
+     */
     setContractAsNotExisting(address: string) {
-        const key = address.toLowerCase();
-        if (!this.contracts[key]) {
-            this.contracts[key] = false;
-        }
+        return this.addContract(address, false);
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
@@ -480,10 +526,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
-        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), 18);
+        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), WEI_PRECISION);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
-        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', WEI_PRECISION));
         return { system, fiat };
     }
     async getLatestBlock(): Promise<ethers.BigNumber> {

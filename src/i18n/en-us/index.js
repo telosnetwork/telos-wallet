@@ -190,7 +190,7 @@ export default {
         unwrap_input_label: 'Unwrapping Amount',
     },
     evm_stake: {
-        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdraw-able {token}',
+        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdrawable {token}',
         staked_card_label: 'Staked {symbol}',
         staked_card_tooltip: 'Staked tokens:\n\n' +
         'This reflects the total amount of staked {systemSymbol} tokens associated with the current account.\n' +
@@ -201,13 +201,14 @@ export default {
         'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
         'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
         'During this time you cannot interact with this {systemSymbol}.',
-        withdrawable_card_label: 'Withdraw-able',
-        withdrawable_card_tooltip: 'Withdraw-able tokens:\n\n' +
+        withdrawable_card_label: 'withdrawable',
+        withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
         'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
         apy_card_label: 'APY',
-        apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
+        apy_card_tooltip: 'APY: Annual Percentage Yield\n\n' +
+        'The annual rate of return after taking compound interest into account.\n' +
         'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
         'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
         'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
@@ -216,8 +217,10 @@ export default {
         'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
         'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
         tvl_card_label: 'TVL',
-        tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
+        tvl_card_tooltip: 'TVL: Total Value Locked\n\n' +
+        'The current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
+        unstaking_period: '10 days',
     },
     notification:{
         success_title_trx: 'Success',
@@ -518,6 +521,7 @@ export default {
             error_update_data: 'Error in updating data',
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
+            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',

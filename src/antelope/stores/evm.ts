@@ -62,7 +62,7 @@ export interface EVMState {
 const store_name = 'evm';
 
 const createManager = (authenticator: EVMAuthenticator):EvmContractManagerI => ({
-    getSigner: async () => toRaw((await authenticator.web3Provider()).getSigner()),
+    getSigner: async () => toRaw((await authenticator.web3Provider()).getSigner(useAccountStore().getAccount(authenticator.label).account)),
     getWeb3Provider: () => authenticator.web3Provider(),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
@@ -332,7 +332,8 @@ export const useEVMStore = defineStore(store_name, {
             // Get from already queried contracts, add token data if needed & not present
             // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
             const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
-            const cached = chain_settings.getContract(addressLower);
+            const cached = await chain_settings.getContract(addressLower);
+            this.trace('getContract', address, 'cached:', cached);
             // If cached is null, it means this is the first time this address is queried
             if (cached !== null) {
                 if (
@@ -346,10 +347,6 @@ export const useEVMStore = defineStore(store_name, {
                     return cached || null;
                 }
             }
-
-
-            // We mark this address as not existing so we don't query it again
-            chain_settings.setContractAsNotExisting(addressLower);
 
             // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
             const creationInfo = await this.getContractCreation(authenticator, addressLower);
@@ -369,8 +366,15 @@ export const useEVMStore = defineStore(store_name, {
                 return contract;
             }
 
-            this.trace('getContract', 'returning empty contract', address, creationInfo);
-            return await this.getEmptyContract(authenticator, addressLower, creationInfo);
+            if (creationInfo) {
+                this.trace('getContract', 'returning empty contract', address, creationInfo);
+                return await this.getEmptyContract(authenticator, addressLower, creationInfo);
+            } else {
+                // We mark this address as not existing so we don't query it again
+                this.trace('getContract', 'returning null', address);
+                chain_settings.setContractAsNotExisting(addressLower);
+                return null;
+            }
         },
 
         async checkBucket(authenticator: EVMAuthenticator, address:string): Promise<EvmContractMetadata | null> {
