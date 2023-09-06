@@ -26,6 +26,7 @@ export interface PlatformState {
     __is_brave_browser: boolean;
     __is_ios_mobile: boolean;
     __is_mobile: boolean;
+    __evm_nav_is_collapsed: boolean;
 }
 
 const store_name = 'platform';
@@ -94,6 +95,11 @@ export const usePlatformStore = defineStore(store_name, {
                 console.error('Error: ', errorToString(error));
             }
         },
+        setEvmMenuIsCollapsed(value: boolean) {
+            this.trace('setEvmMenuIsLeft', value);
+
+            this.__evm_nav_is_collapsed = value;
+        },
     },
 });
 
@@ -102,4 +108,5 @@ const platformInitialState: PlatformState = {
     __is_brave_browser: false,
     __is_ios_mobile: false,
     __is_mobile: false,
+    __evm_nav_is_collapsed: false,
 };

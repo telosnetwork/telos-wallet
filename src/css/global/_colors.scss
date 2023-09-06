@@ -23,7 +23,8 @@ $saveBtn: #2e1f4f;
     $accent-2: #505DCD;
     $accent-3: #DDD1FF;
     $accent-4: #A5A6F6;
-    $page-header: #F7F5FF;
+    $accent-5: #F7F5FF;
+    $page-header: #F7F5FF; // eztodo this
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
     $high-contrast-text-color: #282828;
     $default-contrast-text-color: #4D4D4D;
@@ -43,6 +44,7 @@ $saveBtn: #2e1f4f;
     --accent-color-2: #{$accent-2};
     --accent-color-3: #{$accent-3};
     --accent-color-4: #{$accent-4};
+    --accent-color-5: #{$accent-5};
     --negative-color: #{$negative};
     --positive-color: #{$positive};
     --warning-color-ui: #{$warning};

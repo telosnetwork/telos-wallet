@@ -39,7 +39,7 @@ export default defineComponent({
     },
     data: () => ({
         loading: true,
-        nftData: {} as Record<string, NFTClass>, // keyed like {contract address}-{tokenId}
+        nftData: {} as Record<string, NFTClass>, // keyed like {contract address lowercase}-{tokenId}
     }),
     computed: {
         fiatLocale(): string {
@@ -157,7 +157,7 @@ export default defineComponent({
                         nftTransfer.nftInterface,
                     );
                     if (nftDetails) {
-                        this.nftData[`${nftTransfer.collectionAddress}-${nftTransfer.tokenId}`] = nftDetails;
+                        this.nftData[`${nftTransfer.collectionAddress.toLowerCase()}-${nftTransfer.tokenId}`] = nftDetails;
                     }
                 },
             ));
@@ -195,7 +195,7 @@ export default defineComponent({
             return truncateAddress(address);
         },
         getCachedNftData(collectionAddress: string, tokenId: string): NFTClass | undefined {
-            return this.nftData[`${collectionAddress}-${tokenId}`];
+            return this.nftData[`${collectionAddress.toLowerCase()}-${tokenId}`];
         },
     },
 });
@@ -319,7 +319,7 @@ export default defineComponent({
             </div>
         </div>
 
-        <!-- eztodo scroll up when changing rowsperpage or page number -->
+        <!-- eztodo scroll up when changing rowsperpage or page number, revert all changes here -->
         <div
             v-for="(values, index) in transaction.valuesIn"
             :key="`values-in-${index}`"

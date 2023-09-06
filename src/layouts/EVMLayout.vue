@@ -1,5 +1,25 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue';
+import { debounce } from 'quasar';
+
+import { usePlatformStore } from 'src/antelope';
+
 import AppNav from 'components/evm/AppNav.vue';
+
+const platformStore = usePlatformStore();
+
+const resizeListener = debounce(() => {
+    platformStore.setEvmMenuIsCollapsed(window.innerWidth < 1024);
+}, 100);
+
+onMounted(() => {
+    resizeListener();
+    window.addEventListener('resize', resizeListener);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', resizeListener);
+});
 </script>
 
 <template>
