@@ -25,8 +25,8 @@ export default defineComponent({
             rowsNumber: 0,
         },
         errorsFound: false,
-        hideLoadingState: false,
         fetchTransactionsInterval: null as null | ReturnType<typeof setInterval>,
+        initialLoadComplete: false,
     }),
     computed: {
         doLiveUpdate() {
@@ -38,8 +38,14 @@ export default defineComponent({
         loading() {
             // eztodo when loading balances tab then clicking transactions tab, it says "showing 5 of 0 transactions"
             const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
-            const transfersLoading = feedbackStore.isLoading('history.fetchEVMTransfersForAccount');
-            return (txLoading || transfersLoading) && !this.hideLoadingState;
+            const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
+            const actionsInProgress = txLoading || transfersLoading;
+            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete;
+
+            // don't show the loading state if we're on the first page and transactions are already present
+            // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
+            // or 2. the user is on the first page and we are re-fetching transactions on an interval
+            return actionsInProgress && !hideLoadingState;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -69,6 +75,8 @@ export default defineComponent({
         address() {
             // address can be initially undefined; wait to load txs until it's defined
             // also reload txs if the user switches accounts
+            console.log('getting txs from addy change'); // eztodo
+
             this.getTransactions();
         },
         pagination() {
@@ -76,26 +84,23 @@ export default defineComponent({
         },
     },
     created() {
-        if (this.shapedTransactions.length > 0) {
-            this.hideLoadingState = true;
+        if (this.shapedTransactions.length) {
+            this.initialLoadComplete = true;
         }
 
         // eztodo add interval for transfers
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
-                if (this.shapedTransactions.length > 0) {
-                    this.hideLoadingState = true;
-                }
+                // eztodo
+                console.log('getting txs from interval');
 
-                this.getTransactions().finally(() => {
-                    this.enableLoadingState();
-                });
+                this.getTransactions();
             }
         }, 13000);
 
-        this.getTransactions().finally(() => {
-            this.enableLoadingState();
-        });
+        // this.getTransactions().finally(() => {
+        //     this.initialLoadComplete = true;
+        // });
     },
     unmounted() {
         if (this.fetchTransactionsInterval) {
@@ -103,13 +108,9 @@ export default defineComponent({
         }
     },
     methods: {
-        enableLoadingState() {
-            // a timeout of 500ms is used in the history store to prevent the loading state from flashing; account for that here
-            setTimeout(() => {
-                this.hideLoadingState = false;
-            }, 550);
-        },
         async getTransactions() {
+            console.log('getTransactions');
+
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
 
@@ -135,6 +136,7 @@ export default defineComponent({
                     }
                     await historyStore.fetchEVMTransactionsForAccount('current');
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                    this.initialLoadComplete = true;
                 } catch (e) {
                     if (e instanceof AntelopeError) {
                         getAntelope().config.notifyFailureMessage(e.message, e.payload);

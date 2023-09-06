@@ -62,7 +62,7 @@ export interface HistoryState {
     __evm_transactions_pagination_data: {
         [label: Label]: EVMTransactionsPaginationData,
     },
-    __evm_transfers: {
+    __evm_nft_transfers: {
         [label: Label]: {
             transfers: EvmTransfer[],
         },
@@ -70,6 +70,10 @@ export interface HistoryState {
 }
 
 const store_name = 'history';
+
+let fetchAccoutTransactionsIsRunning = false;
+let shouldRefetchAccoutTransactions = false;
+// let fetchNftTransfersQueued: null | { label: Label, account: string } = null;
 
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
@@ -79,7 +83,7 @@ export const useHistoryStore = defineStore(store_name, {
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
-        getEVMTransfers: state => (label: Label): EvmTransfer[] => state.__evm_transfers[label].transfers,
+        getEVMTransfers: state => (label: Label): EvmTransfer[] => state.__evm_nft_transfers[label].transfers,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -99,17 +103,26 @@ export const useHistoryStore = defineStore(store_name, {
         async fetchEVMTransactionsForAccount(label: Label = 'current') {
             this.trace('fetchEVMTransactionsForAccount', label);
             const feedbackStore = useFeedbackStore();
+
+            if (!fetchAccoutTransactionsIsRunning) {
+                feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
+                fetchAccoutTransactionsIsRunning = true;
+            } else {
+                shouldRefetchAccoutTransactions = true;
+                return;
+            }
+
             const chain = useChainStore().getChain(label);
             const chain_settings = chain.settings as EVMChainSettings;
             const contractStore = useContractStore();
 
-            feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
+                shouldRefetchAccoutTransactions = false;
                 // eztodo where to debounce?
                 // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
                 // which returns data required for the UI
-                if (!this.__evm_transfers[label].transfers.length) {
+                if (!this.__evm_nft_transfers[label].transfers.length) {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
 
@@ -136,17 +149,17 @@ export const useHistoryStore = defineStore(store_name, {
                 this.setEVMTransactions(label, transactions);
 
                 await this.shapeTransactions(label, transactions);
-
-                // there's an instant between this point and the appearance of the first transaction to show
-                // so we add a small delay to avoid flickering
-                // eztodo verify this is necessary
-                setTimeout(() => {
-                    feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
-                }, 500);
             } catch (error) {
-                feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
                 console.error(error);
                 throw new AntelopeError('antelope.history.error_fetching_transactions');
+            } finally {
+                fetchAccoutTransactionsIsRunning = false;
+
+                if (shouldRefetchAccoutTransactions) {
+                    await this.fetchEVMTransactionsForAccount(label);
+                } else {
+                    feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
+                }
             }
         },
 
@@ -156,8 +169,9 @@ export const useHistoryStore = defineStore(store_name, {
             const feedbackStore = useFeedbackStore();
             const contractStore = useContractStore();
 
-            this.trace('fetchEVMTransfersForAccount', label);
-            feedbackStore.setLoading('history.fetchEVMTransfersForAccount');
+            this.trace('fetchEvmNftTransfersForAccount', label);
+
+            feedbackStore.setLoading('history.fetchEvmNftTransfersForAccount');
 
             const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
 
@@ -206,7 +220,7 @@ export const useHistoryStore = defineStore(store_name, {
                 // eztodo this error localization
                 throw new AntelopeError('antelope.history.error_fetching_transfers');
             } finally {
-                feedbackStore.unsetLoading('history.fetchEVMTransfersForAccount');
+                feedbackStore.unsetLoading('history.fetchEvmNftTransfersForAccount');
             }
         },
 
@@ -228,7 +242,7 @@ export const useHistoryStore = defineStore(store_name, {
             // this request https://api.teloscan.io/v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers?type=erc721&limit=9999999&offset=0&includePagination=false&includeAbi=false
             // response is 70kb and took 2 seconds
 
-            const allNftTransfers = this.__evm_transfers[label].transfers;
+            const allNftTransfers = this.__evm_nft_transfers[label].transfers;
 
             const transactionShapePromises = transactions.map(async (tx) => {
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
@@ -452,7 +466,7 @@ export const useHistoryStore = defineStore(store_name, {
         },
         setEVMTransfers(label: Label, transfers: EvmTransfer[]) {
             this.trace('setEVMTransfers', transfers);
-            this.__evm_transfers[label].transfers = transfers;
+            this.__evm_nft_transfers[label].transfers = transfers;
         },
         clearEVMTansfers() {
             this.trace('clearEVMTansfers');
@@ -477,7 +491,7 @@ const historyInitialState: HistoryState = {
         current: [],
     },
     __evm_transactions_pagination_data: {},
-    __evm_transfers: {
+    __evm_nft_transfers: {
         current: {
             transfers: [],
         },

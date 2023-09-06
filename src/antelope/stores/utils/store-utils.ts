@@ -33,6 +33,7 @@
  * console.log(callCounter); // 1
  */
 // eztodo document how this should be used in the context of a store or object, like with the function ()... rather than arrow function
+// eztodo remove?
 export function debounceAsync<Context, Args extends Array<unknown>, FnReturnType>(
     func: (this: Context, ...args: Args) => Promise<FnReturnType> | FnReturnType,
     wait: number,

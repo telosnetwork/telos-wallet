@@ -94,4 +94,22 @@ describe('debounceAsync', () => {
         expect(await firstCall).toBe(returnValue.concat('two'));
         expect(await secondCall).toBe(returnValue.concat('two'));
     });
+
+    it('should properly handle the "this" context of the caller', async () => {
+        const ID = '123';
+        const testObject = {
+            id: ID,
+            debouncedMethod: debounceAsync(async function (this: { id: string }, str: string) {
+                return this.id.concat(str);
+            }, 1000),
+        };
+
+        const firstCall = testObject.debouncedMethod('abc');
+        jest.advanceTimersByTime(100);
+        const secondCall = testObject.debouncedMethod('xyz');
+        jest.advanceTimersByTime(3000);
+
+        expect(await firstCall).toBe(ID.concat('xyz'));
+        expect(await secondCall).toBe(ID.concat('xyz'));
+    });
 });
