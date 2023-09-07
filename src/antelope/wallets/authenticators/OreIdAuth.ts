@@ -337,7 +337,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
         // prepare variables
         const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
-        const systemTokenContractAddress = chainSettings.getSystemToken().address as addressString;
+        const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
         const from = this.userChainAccount?.chainAccount as addressString;
         const value = amount.toHexString();
         const abi = stlosAbiDeposit;
@@ -346,7 +346,7 @@ export class OreIdAuth extends EVMAuthenticator {
         // transaction body: stake system token
         const stakeTransaction = {
             from,
-            to: systemTokenContractAddress,
+            to: stakedSystemTokenContractAddress,
             value,
             'contract': {
                 abi,
@@ -364,7 +364,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
         // prepare variables
         const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
-        const systemTokenContractAddress = chainSettings.getSystemToken().address as addressString;
+        const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
         const from = this.userChainAccount?.chainAccount as addressString;
         const value = amount.toHexString();
         const abi = stlosAbiWithdraw;
@@ -372,7 +372,7 @@ export class OreIdAuth extends EVMAuthenticator {
         // transaction body: unstake system token
         const unstakeTransaction = {
             from,
-            to: systemTokenContractAddress,
+            to: stakedSystemTokenContractAddress,
             'contract': {
                 abi,
                 'parameters': [value],
