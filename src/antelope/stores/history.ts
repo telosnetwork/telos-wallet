@@ -254,9 +254,7 @@ export const useHistoryStore = defineStore(store_name, {
 
             const transactionShapePromises = transactions.map(async (tx) => {
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
-                // const userAddressLower = this.__evm_filter.address.toLowerCase();
-                // eztodo revert, note this location in the testing notes
-                const userAddressLower = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase();
+                const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
                 const gasUsedInTlos = getGasInTlos(tx.gasused, tx.gasPrice);

@@ -132,8 +132,7 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
-            // eztodo revert
-            const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
+            const owner = account.account;
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {
