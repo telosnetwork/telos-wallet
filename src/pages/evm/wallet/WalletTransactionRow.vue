@@ -8,7 +8,7 @@ import { NFTClass, ShapedTransactionRow } from 'src/antelope/types';
 
 import { getLongDate } from 'src/antelope/stores/utils';
 import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { getShapedNftName, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
@@ -179,22 +179,12 @@ export default defineComponent({
             return `${formatted} ${symbol}`;
         },
         getShapedTokenName(name: string, id: string) {
-            // if the token name includes the ID, remove the ID because we display ID separately
-            // eztodo make this a util function
-            let shapedName = name;
-            if (name.includes(id)) {
-                shapedName = name.replace(id, '');
-
-                if (shapedName[shapedName.length - 1] === '#') {
-                    shapedName = shapedName.slice(0, -1);
-                }
-            }
-            return shapedName.trim();
+            return getShapedNftName(name, id);
         },
         getTruncatedAddress(address: string) {
             return truncateAddress(address);
         },
-        getCachedNftData(collectionAddress: string, tokenId: string): NFTClass | undefined {
+        getCachedNftData(collectionAddress: string, tokenId: string): NFTClass {
             return this.nftData[`${collectionAddress.toLowerCase()}-${tokenId}`];
         },
     },
@@ -319,7 +309,6 @@ export default defineComponent({
             </div>
         </div>
 
-        <!-- eztodo scroll up when changing rowsperpage or page number, revert all changes here -->
         <div
             v-for="(values, index) in transaction.valuesIn"
             :key="`values-in-${index}`"
@@ -351,12 +340,13 @@ export default defineComponent({
                 class="c-transaction-row__nft c-transaction-row__nft--in"
             >
                 <span>+{{ nftTransfer.quantity }}</span>
-                <!-- eztodo add test case to PR for no image src -->
+
                 <NftViewer
-                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId) as NFTClass"
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
                     :previewMode="false"
                     :tileMode="false"
                 />
+
                 <div class="c-transaction-row__nft-info-container">
                     <div class="c-transaction-row__nft-name-container">
                         <div class="c-transaction-row__nft-name">
