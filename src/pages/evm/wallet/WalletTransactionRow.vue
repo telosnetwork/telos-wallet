@@ -187,6 +187,15 @@ export default defineComponent({
         getCachedNftData(collectionAddress: string, tokenId: string): NFTClass {
             return this.nftData[`${collectionAddress.toLowerCase()}-${tokenId}`];
         },
+        goToNftDetailPage(collectionAddress: string, tokenId: string) {
+            this.$router.push({
+                name: 'evm-nft-details',
+                query: {
+                    contract: collectionAddress,
+                    id: tokenId,
+                },
+            });
+        },
     },
 });
 </script>
@@ -286,6 +295,11 @@ export default defineComponent({
             <div
                 v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
                 class="c-transaction-row__nft c-transaction-row__nft--out"
+                role="link"
+                tabindex="0"
+                :aria-label="$t('nft.link_to_nft_details', { name: nftTransfer.tokenName })"
+                @click="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                @keypress.space.enter="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
             >
                 <span>-{{ nftTransfer.quantity }}</span>
                 <NftViewer
@@ -338,6 +352,11 @@ export default defineComponent({
             <div
                 v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
                 class="c-transaction-row__nft c-transaction-row__nft--in"
+                role="link"
+                tabindex="0"
+                :aria-label="$t('nft.link_to_nft_details', { name: nftTransfer.tokenName })"
+                @click="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                @keypress.space.enter="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
             >
                 <span>+{{ nftTransfer.quantity }}</span>
 
@@ -597,6 +616,7 @@ export default defineComponent({
         gap: 8px;
         align-items: center;
         overflow: hidden;
+        cursor: pointer;
 
         &--out {
             color: var(--negative-color);
