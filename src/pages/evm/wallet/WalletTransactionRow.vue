@@ -3,7 +3,7 @@ import { defineComponent, PropType } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { useChainStore, useNftsStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
 import { NFTClass, ShapedTransactionRow } from 'src/antelope/types';
 
 import { getLongDate } from 'src/antelope/stores/utils';
@@ -289,7 +289,7 @@ export default defineComponent({
             >
                 <span>-{{ nftTransfer.quantity }}</span>
                 <NftViewer
-                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId) as NFTClass"
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
                     :previewMode="false"
                     :tileMode="false"
                 />
