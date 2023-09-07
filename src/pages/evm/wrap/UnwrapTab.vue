@@ -2,7 +2,7 @@
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
 
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
@@ -75,7 +75,7 @@ onBeforeMount(() => {
 });
 
 async function handleUnwrapClick() {
-    const label = 'current';
+    const label = CURRENT_CONTEXT;
     if (!await accountStore.isConnectedToCorrectNetwork(label)) {
         const networkName = useChainStore().loggedChain.settings.getDisplay();
         const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });

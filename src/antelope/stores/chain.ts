@@ -17,6 +17,7 @@
 
 import { defineStore } from 'pinia';
 import {
+    CURRENT_CONTEXT,
     useFeedbackStore,
 } from 'src/antelope';
 
@@ -103,12 +104,12 @@ const store_name = 'chain';
 export const useChainStore = defineStore(store_name, {
     state: (): ChainState => (chainInitialState),
     getters: {
-        loggedChain: state => state.__chains['current'],
-        currentChain: state => state.__chains['current'],
-        loggedEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
-        currentEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
-        loggedNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
-        currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
+        loggedChain: state => state.__chains[CURRENT_CONTEXT],
+        currentChain: state => state.__chains[CURRENT_CONTEXT],
+        loggedEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        currentEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        loggedNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
+        currentNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
         // TODO: remove the 'as EVMChainSettings' when the native chains are implemented

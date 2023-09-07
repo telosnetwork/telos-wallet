@@ -40,6 +40,7 @@ import {
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import {
+    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useChainStore,
@@ -474,7 +475,7 @@ export const useEVMStore = defineStore(store_name, {
 
         async getToken(authenticator: EVMAuthenticator, address:string, suspectedType:string): Promise<TokenClass | null> {
             if (suspectedType.toUpperCase() === ERC20_TYPE) {
-                const chain = useChainStore().getChain('current');
+                const chain = useChainStore().getChain(CURRENT_CONTEXT);
                 const list = await chain.settings.getTokenList();
                 const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
                 if (token) {

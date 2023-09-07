@@ -5,6 +5,7 @@ import * as storeMock from 'test/jest/utils/antelope';
 const WARNING_MESSAGE = 'warning-message';
 
 import EVMLoginButtons from 'src/pages/home/EVMLoginButtons.vue';
+import { CURRENT_CONTEXT } from 'src/antelope';
 
 const mountComponent = () => shallowMount(EVMLoginButtons, {
     mocks: {
@@ -33,7 +34,7 @@ describe('EVMLoginButtons.vue', () => {
             it('should call accountStore loginEVM method 2', () => {
                 const methodSpy = jest.spyOn(storeMock.useAccountStore(), 'loginEVM');
                 wrapper.vm.setMetamaskAuthenticator();
-                const label = 'current';
+                const label = CURRENT_CONTEXT;
                 const network = storeMock.MockData.Network;
                 wrapper.vm.$nextTick(() => {
                     expect(methodSpy).toHaveBeenCalledWith(expect.objectContaining({

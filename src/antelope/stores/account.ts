@@ -19,6 +19,7 @@ import { API } from '@greymass/eosio';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
+    CURRENT_CONTEXT,
     useBalancesStore,
     useFeedbackStore,
     useHistoryStore,
@@ -91,19 +92,19 @@ const store_name = 'account';
 export const useAccountStore = defineStore(store_name, {
     state: (): AccountState => (accountInitialState),
     getters: {
-        isAuthenticated: state => !!state.__accounts['current'],
-        loggedAccount: state => state.__accounts['current'],
-        loggedIsNative: state => state.__accounts['current']?.isNative,
-        loggedEvmAccount: state => (state.__accounts['current']?.isNative ?
-            null : state.__accounts['current']) as EvmAccountModel,
-        loggedNativeAccount: state => (state.__accounts['current']?.isNative ?
-            state.__accounts['current'] : null) as NativeAccountModel,
-        currentAccount: state => ({ ...state.__accounts['current'] }),
-        currentEvmAccount: state => (state.__accounts['current']?.isNative ?
-            null : state.__accounts['current']) as EvmAccountModel,
+        isAuthenticated: state => !!state.__accounts[CURRENT_CONTEXT],
+        loggedAccount: state => state.__accounts[CURRENT_CONTEXT],
+        loggedIsNative: state => state.__accounts[CURRENT_CONTEXT]?.isNative,
+        loggedEvmAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            null : state.__accounts[CURRENT_CONTEXT]) as EvmAccountModel,
+        loggedNativeAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            state.__accounts[CURRENT_CONTEXT] : null) as NativeAccountModel,
+        currentAccount: state => ({ ...state.__accounts[CURRENT_CONTEXT] }),
+        currentEvmAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            null : state.__accounts[CURRENT_CONTEXT]) as EvmAccountModel,
         currentIsLogged: state =>
-            state.__accounts['current']?.account === state.__accounts['current']?.account &&
-            state.__accounts['current']?.network === state.__accounts['current']?.network,
+            state.__accounts[CURRENT_CONTEXT]?.account === state.__accounts[CURRENT_CONTEXT]?.account &&
+            state.__accounts[CURRENT_CONTEXT]?.network === state.__accounts[CURRENT_CONTEXT]?.network,
         getAccount: state => (label: Label) => ({ ...state.__accounts[label] }),
         getAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator,
         getEVMAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator as EVMAuthenticator,
@@ -142,7 +143,7 @@ export const useAccountStore = defineStore(store_name, {
                     localStorage.setItem('autoLogin', authenticator.getName());
 
                     success = true;
-                    this.fetchAccountDataFor('current', nativeAccount);
+                    this.fetchAccountDataFor(CURRENT_CONTEXT, nativeAccount);
                     getAntelope().events.onLoggedIn.next(nativeAccount);
                 }
             } catch (error) {
@@ -187,7 +188,7 @@ export const useAccountStore = defineStore(store_name, {
                     localStorage.setItem('isNative', 'false');
                     localStorage.setItem('autoLogin', authenticator.getName());
                     success = true;
-                    this.fetchAccountDataFor('current', evmAccount);
+                    this.fetchAccountDataFor(CURRENT_CONTEXT, evmAccount);
                     getAntelope().events.onLoggedIn.next(evmAccount);
                 } else {
                     console.error('Error: ', 'EVM login failed??');
@@ -213,7 +214,7 @@ export const useAccountStore = defineStore(store_name, {
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                const logged = this.__accounts['current'];
+                const logged = this.__accounts[CURRENT_CONTEXT];
                 const { authenticator } = logged;
                 try {
                     authenticator && (await authenticator.logout());
@@ -232,7 +233,7 @@ export const useAccountStore = defineStore(store_name, {
 
         async autoLogin(): Promise<boolean> {
             this.trace('autoLogin');
-            const label = 'current';
+            const label = CURRENT_CONTEXT;
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
                 const network = localStorage.getItem('network');
@@ -335,7 +336,7 @@ export const useAccountStore = defineStore(store_name, {
         // commits -------
         setAccount(account: AccountModel | null) {
             this.trace('setAccount', account);
-            const label = 'current';
+            const label = CURRENT_CONTEXT;
             const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
             try {
                 if (account) {

@@ -80,7 +80,7 @@ export class Antelope {
                 console.error('No chain name specified in environment config; the application will not run correctly');
             } else {
                 const network: string = chainNetworkNames[process.env.CHAIN_NAME];
-                chainStore.setChain('current', network);
+                chainStore.setChain(CURRENT_CONTEXT, network);
             }
         }
 
@@ -142,3 +142,7 @@ export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useEVMStore } from 'src/antelope/stores/evm';
 export { useNftsStore } from 'src/antelope/stores/nfts';
 
+// this constant is used for a temporal workaround for the multi-context issue
+// https://github.com/telosnetwork/telos-wallet/issues/582
+
+export const CURRENT_CONTEXT = 'current';
