@@ -7,7 +7,7 @@ import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
-import { useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
@@ -28,7 +28,7 @@ const nftId = route.query.id as string;
 
 onBeforeMount(() => {
     if (contractAddress && nftId) {
-        nftStore.fetchNftDetails('current', contractAddress, nftId).then((nftResponse) => {
+        nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId).then((nftResponse) => {
             nft.value = nftResponse ?? null;
             loading.value = false;
         });
