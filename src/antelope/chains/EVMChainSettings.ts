@@ -329,8 +329,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                     }
                     const contract_source = response.contracts[item_source.contract];
-                    // eztodo temporary
+
                     if (!contract_source) {
+                        // this case only happens if the indexer fails to index contract data
                         continue;
                     }
                     const contract = new NFTContractClass(contract_source);

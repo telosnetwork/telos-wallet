@@ -149,8 +149,7 @@ function calculateHoverPreviewPosition() {
     };
     const hoverElementSize = 278;
 
-    // eztodo make some notes about this logic
-    // eztodo consolidate setproperties
+    // true if there is enough room between the icon and navbar to fit the hover element; if false, the hover element will be shown below
     const hoverElementWillFitAbove = (iconRect.top > (hoverElementSize + chevronHeight + padding + navBarHeight));
 
     // the amount that the hover element would be clipped by the left nav / left side of the window
@@ -191,8 +190,6 @@ function setHoverPreviewVisibility(visible: boolean) {
     }
 
     // set position variables
-    // eztodo handle scroll
-    // eztodo only calculate position if hovering
     calculateHoverPreviewPosition();
     isHovering.value = visible;
 }
@@ -484,7 +481,7 @@ function setHoverPreviewVisibility(visible: boolean) {
         min-height: 270px;
         max-width: 432px;
         border-radius: 4px;
-        background-color: var(--header-bg-color);
+        background-color: var(--accent-color-5);
         border: 1px solid var(--header-item-outline-color);
     }
 
@@ -512,7 +509,7 @@ function setHoverPreviewVisibility(visible: boolean) {
         left: var(--hover-preview-x);
         top: var(--hover-preview-y);
         background: var(--accent-color-5);
-        z-index: 9999; // eztodo this
+        z-index: $z-index--nft-hover-preview;
         border-radius: 4px;
         padding: 8px;
 
@@ -525,7 +522,6 @@ function setHoverPreviewVisibility(visible: boolean) {
             height: 24px;
             width: 24px;
             background: linear-gradient(45deg, var(--accent-color-5) 50%, transparent 50%);
-            z-index: -1;
             box-shadow: -3px 4px 5px -4px rgba(0,0,0,0.6);
         }
     }

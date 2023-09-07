@@ -105,7 +105,7 @@ export default defineComponent({
 
     &__header {
         color: var(--header-text-color);
-        background: var(--header-bg-color);
+        background: var(--accent-color-5);
 
         padding-top: 24px;
         position: relative;

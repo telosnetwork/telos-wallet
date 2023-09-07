@@ -27,7 +27,7 @@ export default defineComponent({
         errorsFound: false,
         fetchTransactionsInterval: null as null | ReturnType<typeof setInterval>,
         initialLoadComplete: false,
-        rowsPerPageUpdating: false, // eztodo comment here
+        rowsPerPageUpdating: false, // used to ensure loading state is shown when rows per page is updated
     }),
     computed: {
         doLiveUpdate() {
@@ -41,8 +41,6 @@ export default defineComponent({
             const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
             const actionsInProgress = txLoading || transfersLoading;
             const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete && !this.rowsPerPageUpdating;
-
-            // eztodo odd behavior for video NFT icons
 
             // don't show the loading state if we're on the first page and transactions are already present
             // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
@@ -197,7 +195,7 @@ export default defineComponent({
         gap: 8px;
         padding-bottom: 24px;
         margin-bottom: 24px;
-        border-bottom: 2px solid $page-header;
+        border-bottom: 2px solid var(--accent-color-5);
 
         @media only screen and (min-width: $breakpoint-sm-min) {
             flex-direction: row;

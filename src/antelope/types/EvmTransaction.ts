@@ -59,9 +59,7 @@ export interface NftTransactionData {
 export interface ShapedTransactionRow {
     id: string; // transaction ID
     epoch: number; // epoch in milliseconds
-    // eztodo are there nft swap functions? should mint be showed differently?
     // action should be 'send', 'receive', 'swap', 'contractCreation', or some other action like 'approve'
-    // a swap is any function in EvmSwapFunctionNames
     actionName: string;
     from: string; // address
     fromPrettyName?: string;

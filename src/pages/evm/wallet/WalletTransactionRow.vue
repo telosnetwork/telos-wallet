@@ -393,7 +393,7 @@ export default defineComponent({
 .c-transaction-row {
     max-width: 1000px;
     padding: 16px 8px;
-    border-bottom: 2px solid $page-header;
+    border-bottom: 2px solid var(--accent-color-5);
     display: grid;
     gap: 16px;
     grid-template:

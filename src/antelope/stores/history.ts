@@ -310,8 +310,6 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
-                    // eztodo for reference, a tx with multiple 1155 xfers: https://www.teloscan.io/tx/0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5
-                    // eztodo for reference, a 721 tx : 0x893c7d83b2bef2758e3bed78ba2ca93a3102059f6c6da0d91aa58b6f1a62ab75
                     const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction.toLowerCase() === tx.hash.toLowerCase());
 
                     if (nftTransfersInTx.length > 0) {
@@ -436,9 +434,6 @@ export const useHistoryStore = defineStore(store_name, {
 
             const shapedTransactions = await Promise.all(transactionShapePromises);
             this.setShapedTransactionRows(label, shapedTransactions);
-
-            // eztodo this one is frigged up, page 2 mind flayers
-            // https://www.teloscan.io/tx/0xa9d8d348dd524be0e649fabb9d8f9916b1f7c2222ea856e81a2ad91b219cf1b3
         },
 
 
