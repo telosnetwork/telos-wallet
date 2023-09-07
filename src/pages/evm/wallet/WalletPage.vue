@@ -40,15 +40,14 @@ watch(accountStore, (newAccountStoreState) => {
 
     // if user is on the balances screen, prefetch transactions & transfers
     if (newAccount?.address && route.query.tab !== 'transactions') {
+        console.log('prefetching transactions'); // eztodo
         historyStore.setEVMTransactionsFilter({
             address: newAccount.address,
             offset: 0,
             limit: 5,
             includeAbi: true,
         });
-        historyStore.fetchEvmNftTransfersForAccount('current', newAccount.address).then(() => {
-            historyStore.fetchEVMTransactionsForAccount('current');
-        });
+        historyStore.fetchEVMTransactionsForAccount('current');
     }
 }, { immediate: true });
 

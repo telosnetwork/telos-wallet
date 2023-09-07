@@ -28,7 +28,6 @@ import {
     ParsedIndexerAccountTransactionsContract,
     EVMTransactionsPaginationData,
     TransactionValueData,
-    EvmSwapFunctionNames,
     EvmTransfer,
     IndexerContractData,
     NftTransactionData,
@@ -401,8 +400,6 @@ export const useHistoryStore = defineStore(store_name, {
                     } else if (functionName === 'mint') {
                         actionName = 'mint'; // eztodo handle this in the UI, add it to the correct interface as comment
                     } else if (txIsASend) {
-                        // eztodo fix nft send/receive label
-                        // eztodo special case for mint
                         actionName = 'send';
                     } else if (txIsAReceive) {
                         actionName = 'receive';

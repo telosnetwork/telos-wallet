@@ -53,6 +53,9 @@ export default defineComponent({
         shapedTransactions() {
             return historyStore.getShapedTransactionRows('current') ?? [];
         },
+        totalRows() {
+            return historyStore.getEvmTransactionsRowCount('current');
+        },
         totalRowsText() {
             if (this.loading) {
                 return '';
@@ -62,25 +65,25 @@ export default defineComponent({
                 'evm_wallet.viewing_n_transactions',
                 {
                     rowsPerPage,
-                    totalRows: this.pagination.rowsNumber,
+                    totalRows: this.totalRows,
                 },
             );
         },
     },
     watch: {
-        shapedTransactions(newValue) {
-            this.pagination.rowsNumber = newValue.length;
-        },
-        // eztodo debounce fetch tx
         address() {
             // address can be initially undefined; wait to load txs until it's defined
             // also reload txs if the user switches accounts
-            console.log('getting txs from addy change'); // eztodo
-
             this.getTransactions();
         },
         pagination() {
             this.getTransactions();
+        },
+        totalRows: {
+            immediate: true,
+            handler(newValue) {
+                this.pagination.rowsNumber = newValue;
+            },
         },
     },
     created() {
@@ -109,8 +112,6 @@ export default defineComponent({
     },
     methods: {
         async getTransactions() {
-            console.log('getTransactions');
-
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
 
@@ -131,9 +132,6 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
-                    if (historyStore.getEVMTransfers('current').length === 0) {
-                        await historyStore.fetchEvmNftTransfersForAccount('current', this.address);
-                    }
                     await historyStore.fetchEVMTransactionsForAccount('current');
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
                     this.initialLoadComplete = true;

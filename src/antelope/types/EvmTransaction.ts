@@ -56,16 +56,6 @@ export interface NftTransactionData {
     nftInterface: NftTokenInterface;
 }
 
-export const EvmSwapFunctionNames = [
-    'swapExactTokensForTokens',
-    'swapTokensForExactTokens',
-    'swapExactETHForTokens',
-    'swapTokensForExactETH',
-    'swapExactTokensForETH',
-    'swapETHForExactTokens',
-    'swapETHToTokens',
-];
-
 export interface ShapedTransactionRow {
     id: string; // transaction ID
     epoch: number; // epoch in milliseconds
