@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE, NftTokenInterface } from 'src/antelope/types';
+import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
