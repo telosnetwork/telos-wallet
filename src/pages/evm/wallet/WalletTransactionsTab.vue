@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
-import { getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 import { AntelopeError } from 'src/antelope/types';
 
 
@@ -51,10 +51,10 @@ export default defineComponent({
             return accountStore.loggedEvmAccount?.address ?? '';
         },
         shapedTransactions() {
-            return historyStore.getShapedTransactionRows('current') ?? [];
+            return historyStore.getShapedTransactionRows(CURRENT_CONTEXT) ?? [];
         },
         totalRows() {
-            return historyStore.getEvmTransactionsRowCount('current');
+            return historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
         },
         totalRowsText() {
             if (this.loading) {
@@ -129,8 +129,8 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
-                    await historyStore.fetchEVMTransactionsForAccount('current');
-                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                    await historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
+                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
                     this.initialLoadComplete = true;
                 } catch (e) {
                     if (e instanceof AntelopeError) {

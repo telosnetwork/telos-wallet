@@ -5,7 +5,7 @@ import { TokenBalance } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 
 const route = useRoute();
@@ -46,7 +46,7 @@ watch(accountStore, (newAccountStoreState) => {
             limit: 5,
             includeAbi: true,
         });
-        historyStore.fetchEVMTransactionsForAccount('current');
+        historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
     }
 }, { immediate: true });
 

@@ -21,12 +21,13 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
         getAutenticator: () => ({
             newInstance: (label: string) => ({
                 label,
-                isConnectedTo: () => Promise.resolve(label === 'logged'),
+                isConnectedTo: () => Promise.resolve(true),
             }),
         }),
     },
 }));
 
+const CURRENT_CONTEXT = 'current';
 
 jest.mock('src/antelope', () => ({
     useChainStore,
@@ -35,6 +36,7 @@ jest.mock('src/antelope', () => ({
     useFeedbackStore,
     usePlatformStore,
     getAntelope,
+    CURRENT_CONTEXT,
 }));
 
 

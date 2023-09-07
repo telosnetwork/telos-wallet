@@ -151,7 +151,7 @@ export default defineComponent({
             await Promise.all(nftTransfers.map(
                 async (nftTransfer) => {
                     const nftDetails = await useNftsStore().fetchNftDetails(
-                        'current',
+                        CURRENT_CONTEXT,
                         nftTransfer.collectionAddress,
                         nftTransfer.tokenId,
                         nftTransfer.nftInterface,

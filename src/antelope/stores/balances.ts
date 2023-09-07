@@ -36,6 +36,7 @@ import {
     useChainStore,
     useEVMStore,
     usePlatformStore,
+    CURRENT_CONTEXT,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -62,8 +63,8 @@ const store_name = 'balances';
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
     getters: {
-        loggedBalances: state => state.__balances['logged'] ?? [],
-        currentBalances: state => state.__balances['current'] ?? [],
+        loggedBalances: state => state.__balances[CURRENT_CONTEXT] ?? [],
+        currentBalances: state => state.__balances[CURRENT_CONTEXT] ?? [],
         getBalances: state => (label: string) => state.__balances[label] ?? [],
     },
     actions: {
@@ -74,7 +75,7 @@ export const useBalancesStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    if (label === 'current') {
+                    if (label === CURRENT_CONTEXT) {
                         await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                     }
                 },
@@ -82,7 +83,7 @@ export const useBalancesStore = defineStore(store_name, {
 
             // update logged balances every 10 seconds
             setInterval(async () => {
-                await useBalancesStore().updateBalancesForAccount('current', useAccountStore().loggedAccount);
+                await useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
             }, 10000);
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
@@ -237,7 +238,7 @@ export const useBalancesStore = defineStore(store_name, {
                         if (receipt.status === 1) {
                             const account = useAccountStore().loggedAccount;
                             if (account?.account) {
-                                this.updateBalancesForAccount('logged', account);
+                                this.updateBalancesForAccount(CURRENT_CONTEXT, account);
                             }
                         }
                         return receipt;
@@ -278,10 +279,11 @@ export const useBalancesStore = defineStore(store_name, {
             this.setWagmiSystemTokenTransferConfig(null, label);
         },
         async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
-            this.trace('transferTokens', token, to, amount.toString(), memo);
-            const label = 'logged';
+            const funcname = 'transferTokens';
+            this.trace(funcname, token, to, amount.toString(), memo);
+            const label = CURRENT_CONTEXT;
             try {
-                useFeedbackStore().setLoading('transferTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
@@ -295,18 +297,20 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('transferTokens');
+                useFeedbackStore().unsetLoading(funcname);
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
             }
         },
         async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
-            this.trace('wrapSystemTokens', amount.toString());
-            const label = 'logged';
+            const funcname = 'wrapSystemTokens';
+            this.trace(funcname, amount.toString());
+            const label = CURRENT_CONTEXT;
             try {
-                useFeedbackStore().setLoading('wrapSystemTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     console.error('ERROR: wrap not supported on native');
@@ -318,17 +322,19 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('wrapSystemTokens');
+                useFeedbackStore().unsetLoading(funcname);
             }
         },
         async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
-            this.trace('unwrapSystemTokens', amount.toString());
-            const label = 'logged';
+            const funcname = 'unwrapSystemTokens';
+            this.trace(funcname, amount.toString());
+            const label = CURRENT_CONTEXT;
             try {
-                useFeedbackStore().setLoading('unwrapSystemTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     console.error('ERROR: unwrap not supported on native');
@@ -340,10 +346,11 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('unwrapSystemTokens');
+                useFeedbackStore().unsetLoading(funcname);
             }
         },
         async transferNativeTokens(
@@ -436,9 +443,6 @@ export const useBalancesStore = defineStore(store_name, {
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
                 this.sortBalances(label);
-                if (useAccountStore().currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
-                }
             }
         },
         updateBalance(label: string, balance: TokenBalance): void {
@@ -450,9 +454,6 @@ export const useBalancesStore = defineStore(store_name, {
                 ) {
                     this.__balances[label][index].balance = balance.amount;
                     this.sortBalances(label);
-                    if (useAccountStore().currentIsLogged && label === 'current') {
-                        this.__balances['logged'] = this.__balances[label];
-                    }
                 }
             }
         },
@@ -461,9 +462,6 @@ export const useBalancesStore = defineStore(store_name, {
             const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 this.__balances[label].splice(index, 1);
-            }
-            if (useAccountStore().currentIsLogged && label === 'current') {
-                this.__balances['logged'] = this.__balances[label];
             }
         },
         clearAllWagmiTokenTransferConfigs(label: Label) {

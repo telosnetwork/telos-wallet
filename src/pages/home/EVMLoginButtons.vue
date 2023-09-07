@@ -1,5 +1,5 @@
 <script lang="ts">
-import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
@@ -54,16 +54,16 @@ export default defineComponent({
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            setAuthenticator(name, 'logged');
+            setAuthenticator(name, CURRENT_CONTEXT);
         };
         const setMetamaskAuthenticator = async () => {
-            setAuthenticator('Metamask', 'logged');
+            setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
         const setSafepalAuthenticator = async () => {
-            setAuthenticator('SafePal', 'logged');
+            setAuthenticator('SafePal', CURRENT_CONTEXT);
         };
         const setWalletConnectAuthenticator = async () => {
-            setAuthenticator('WalletConnect', 'logged');
+            setAuthenticator('WalletConnect', CURRENT_CONTEXT);
         };
 
         const setAuthenticator = async(name: string, label: string) => {

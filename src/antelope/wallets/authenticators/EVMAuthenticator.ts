@@ -2,7 +2,7 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
-import { getAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -44,8 +44,7 @@ export abstract class EVMAuthenticator {
         this.trace('login', network);
         const chain = useChainStore();
         try {
-            chain.setLoggedChain(network);
-            chain.setCurrentChain(network);
+            chain.setChain(CURRENT_CONTEXT, network);
 
             const checkProvider = await this.ensureCorrectChain() as ethers.providers.Web3Provider;
 

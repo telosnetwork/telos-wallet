@@ -9,7 +9,7 @@ import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { NFTClass, ShapedNFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
@@ -83,7 +83,7 @@ const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
-const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory('logged') as NFTClass[]) : []);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFTClass[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -91,7 +91,7 @@ const nftsToShow = computed(() => {
 
     return nfts.value.slice(start, end);
 });
-const collectionList = computed(() => nftStore.getCollectionList('logged') || []);
+const collectionList = computed(() => nftStore.getCollectionList(CURRENT_CONTEXT) || []);
 const collectionSelectOptions = computed(() => collectionList.value.map(item => item.name));
 const tableRows = computed(() => {
     if (showNftsAsTiles.value) {
@@ -163,7 +163,7 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
 watch(accountStore, (store) => {
     // fetch initial data
     if (store.loggedAccount) {
-        nftStore.updateNFTsForAccount('logged', toRaw(store.loggedAccount)).finally(() => {
+        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, toRaw(store.loggedAccount)).finally(() => {
             nftsLoaded.value = true;
         });
     }
@@ -294,7 +294,7 @@ let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
         if (accountStore.loggedAccount) {
-            await nftStore.updateNFTsForAccount('logged', accountStore.loggedAccount);
+            await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount);
         }
     }, 13000);
 });

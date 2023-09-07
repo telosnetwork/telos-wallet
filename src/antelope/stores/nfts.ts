@@ -7,7 +7,7 @@ import { defineStore } from 'pinia';
 
 import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE, NftTokenInterface } from 'src/antelope/types';
 
-import { useFeedbackStore, getAntelope, useChainStore, useEVMStore } from 'src/antelope';
+import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
 import { AccountModel } from 'src/antelope/stores/account';
@@ -50,8 +50,8 @@ const store_name = 'nfts';
 export const useNftsStore = defineStore(store_name, {
     state: (): NftsState => (nftsInitialState),
     getters: {
-        loggedInventory: state => state.__inventory['logged']?.list,
-        loggedInventoryLoading: state => state.__inventory['logged']?.loading,
+        loggedInventory: state => state.__inventory[CURRENT_CONTEXT]?.list,
+        loggedInventoryLoading: state => state.__inventory[CURRENT_CONTEXT]?.loading,
         getInventory: state => (label: string) => state.__inventory[label],
         getUserFilter: state => state.__user_filter,
         getCollectionList: state => (label: string): NftCollectionListItem[] => {

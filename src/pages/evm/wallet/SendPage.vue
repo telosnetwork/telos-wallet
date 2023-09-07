@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -114,7 +114,7 @@ export default defineComponent({
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances(CURRENT_CONTEXT);
         },
         showContractLink(): boolean {
             return this.token?.address !== NativeCurrencyAddress;
@@ -167,7 +167,7 @@ export default defineComponent({
             return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
         authIsReadyForTransfer(): boolean {
-            return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
+            return accountStore.getEVMAuthenticator(CURRENT_CONTEXT)?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol);
@@ -222,7 +222,7 @@ export default defineComponent({
         async startTransfer() {
 
             // before sending the transaction, we check if the user is connected to the correct network
-            const label = 'logged';
+            const label = CURRENT_CONTEXT;
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
                 const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                 const networkName = useChainStore().loggedChain.settings.getDisplay();
@@ -267,12 +267,6 @@ export default defineComponent({
                     }
                 }).catch((err) => {
                     console.error(err);
-                    if (err instanceof AntelopeError) {
-                        const evmErr = err as AntelopeError;
-                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
-                    } else {
-                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
-                    }
                 });
             } else {
                 ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));

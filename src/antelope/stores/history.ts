@@ -37,7 +37,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { getAntelope, useContractStore, useNftsStore, useUserStore } from '..';
+import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
@@ -108,7 +108,7 @@ export const useHistoryStore = defineStore(store_name, {
         // actions ---
 
         // fetch all transactions for the account defined in __evm_filter.address
-        async fetchEVMTransactionsForAccount(label: Label = 'current') {
+        async fetchEVMTransactionsForAccount(label: Label = CURRENT_CONTEXT) {
             this.trace('fetchEVMTransactionsForAccount', label);
             const feedbackStore = useFeedbackStore();
 
@@ -239,7 +239,7 @@ export const useHistoryStore = defineStore(store_name, {
             }
         },
 
-        async shapeTransactions(label: Label = 'current', transactions: EvmTransaction[]) {
+        async shapeTransactions(label: Label = CURRENT_CONTEXT, transactions: EvmTransaction[]) {
             this.trace('shapeTransactions', label);
             const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
@@ -455,17 +455,17 @@ export const useHistoryStore = defineStore(store_name, {
         clearEvmTransactions() {
             this.trace('clearEvmTransactions');
             this.setEVMTransactionsFilter({ address: '' });
-            this.setEVMTransactions('current', []);
-            this.setShapedTransactionRows('current', []);
-            this.setEvmTransactionsRowCount('current', 0);
+            this.setEVMTransactions(CURRENT_CONTEXT, []);
+            this.setShapedTransactionRows(CURRENT_CONTEXT, []);
+            this.setEvmTransactionsRowCount(CURRENT_CONTEXT, 0);
         },
-        setEVMTransfers(label: Label, transfers: EvmTransfer[]) {
+        setEVMTransfers(label: Label, transfers: EvmTransfer[]): void {
             this.trace('setEVMTransfers', transfers);
             this.__evm_nft_transfers[label].transfers = transfers;
         },
-        clearEVMTansfers() {
+        clearEVMTansfers(): void {
             this.trace('clearEVMTansfers');
-            this.setEVMTransfers('current', []);
+            this.setEVMTransfers(CURRENT_CONTEXT, []);
         },
     },
 });
