@@ -27,6 +27,7 @@ export default defineComponent({
         errorsFound: false,
         fetchTransactionsInterval: null as null | ReturnType<typeof setInterval>,
         initialLoadComplete: false,
+        rowsPerPageUpdating: false, // eztodo comment here
     }),
     computed: {
         doLiveUpdate() {
@@ -36,11 +37,12 @@ export default defineComponent({
             return this.shapedTransactions.map(tx => tx.id);
         },
         loading() {
-            // eztodo when loading balances tab then clicking transactions tab, it says "showing 5 of 0 transactions"
             const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
             const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
             const actionsInProgress = txLoading || transfersLoading;
-            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete;
+            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete && !this.rowsPerPageUpdating;
+
+            // eztodo odd behavior for video NFT icons
 
             // don't show the loading state if we're on the first page and transactions are already present
             // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
@@ -76,8 +78,13 @@ export default defineComponent({
             // also reload txs if the user switches accounts
             this.getTransactions();
         },
-        pagination() {
-            this.getTransactions();
+        pagination(newPagination, oldPagination) {
+            if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
+                this.rowsPerPageUpdating = true;
+            }
+            this.getTransactions().finally(() => {
+                this.rowsPerPageUpdating = false;
+            });
         },
         totalRows: {
             immediate: true,
@@ -91,19 +98,11 @@ export default defineComponent({
             this.initialLoadComplete = true;
         }
 
-        // eztodo add interval for transfers
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
-                // eztodo
-                console.log('getting txs from interval');
-
                 this.getTransactions();
             }
         }, 13000);
-
-        // this.getTransactions().finally(() => {
-        //     this.initialLoadComplete = true;
-        // });
     },
     unmounted() {
         if (this.fetchTransactionsInterval) {
@@ -170,7 +169,6 @@ export default defineComponent({
         {{ $t('evm_wallet.no_transactions_found') }}
     </h5>
 
-    <!-- eztodo transactions dont exist on teloscan -->
     <template v-else>
         <WalletTransactionRow
             v-for="(tx, index) of shapedTransactions"

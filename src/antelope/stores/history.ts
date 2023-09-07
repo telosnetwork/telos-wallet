@@ -41,6 +41,7 @@ import { getAntelope, useContractStore, useNftsStore, useUserStore } from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
 export const transfers_filter_limit = 10000;
@@ -70,9 +71,15 @@ export interface HistoryState {
 
 const store_name = 'history';
 
+// these are used to prevent multiple fetches from happening at the same time;
+// if a fetch is already running, the next fetch will be queued up and run after the current fetch is complete
+// without ending the loading state. This prevents the loading state from flickering on and off if
+// subsequent calls are made to the fetch method before it returns
+// (e.g. when loading the balances tab, which prefetches transactions, and quickly switching to the transactions tab)
 let fetchAccoutTransactionsIsRunning = false;
 let shouldRefetchAccoutTransactions = false;
-// let fetchNftTransfersQueued: null | { label: Label, account: string } = null;
+
+let nftTransfersUpdated : number | null = null; // the time in milliseconds since epoch when the NFT transfers were last updated
 
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
@@ -99,6 +106,8 @@ export const useHistoryStore = defineStore(store_name, {
         },
 
         // actions ---
+
+        // fetch all transactions for the account defined in __evm_filter.address
         async fetchEVMTransactionsForAccount(label: Label = 'current') {
             this.trace('fetchEVMTransactionsForAccount', label);
             const feedbackStore = useFeedbackStore();
@@ -118,10 +127,14 @@ export const useHistoryStore = defineStore(store_name, {
 
             try {
                 shouldRefetchAccoutTransactions = false;
-                // eztodo where to debounce?
                 // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
                 // which returns data required for the UI
-                if (!this.__evm_nft_transfers[label].transfers.length) {
+                // so if the user has not fetched NFT transfers yet, or if the NFT transfers are stale (3 mins),
+                // fetch them now
+                if (
+                    !this.__evm_nft_transfers[label].transfers.length ||
+                    (nftTransfersUpdated && dateIsWithinXMinutes(nftTransfersUpdated, 3))
+                ) {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
 
@@ -141,6 +154,7 @@ export const useHistoryStore = defineStore(store_name, {
                     };
                 });
 
+                // cache contracts
                 contractAddresses.forEach((address) => {
                     contractStore.addContractToCache(address, parsedContracts[address]);
                 });
@@ -164,7 +178,6 @@ export const useHistoryStore = defineStore(store_name, {
 
         // fetch all NFT transfers for an account (erc721, erc155)
         async fetchEvmNftTransfersForAccount(label: Label, account: string): Promise<void> {
-            // eztodo verify account
             const feedbackStore = useFeedbackStore();
             const contractStore = useContractStore();
 
@@ -175,6 +188,7 @@ export const useHistoryStore = defineStore(store_name, {
             const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
 
             try {
+                // get all erc721 and erc1155 transfers for the given account
                 const [
                     erc721TransferResponse,
                     erc1155TransferResponse,
@@ -187,9 +201,10 @@ export const useHistoryStore = defineStore(store_name, {
                     }),
                 ));
 
-                const erc721Contracts = erc721TransferResponse.contracts;
+                const erc721Contracts  = erc721TransferResponse.contracts;
                 const erc1155Contracts = erc1155TransferResponse.contracts;
 
+                // cache all contracts
                 [erc721Contracts, erc1155Contracts].forEach((contracts) => {
                     const contractAddresses = Object.keys(contracts);
                     const parsedContracts: Record<string, IndexerContractData> = {};
@@ -211,14 +226,15 @@ export const useHistoryStore = defineStore(store_name, {
                     ...erc1155TransferResponse.results,
                 ];
 
+                // sort transfers from new to old
                 transfers.sort((a, b) => b.timestamp - a.timestamp);
 
                 this.setEVMTransfers(label, transfers);
             } catch (error) {
                 this.clearEVMTansfers();
-                // eztodo this error localization
-                throw new AntelopeError('antelope.history.error_fetching_transfers');
+                throw new AntelopeError('antelope.history.error_fetching_nft_transfers');
             } finally {
+                nftTransfersUpdated = (new Date()).getTime();
                 feedbackStore.unsetLoading('history.fetchEvmNftTransfersForAccount');
             }
         },
@@ -234,19 +250,12 @@ export const useHistoryStore = defineStore(store_name, {
             const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
 
-            // eztodo perhaps i can get all transfers (erc20, erc1155, erc721) then check each transaction hash against the list of transfers. if there is a match,
-            // i can then call the NFT endpoint to get the token info. 3 issues: each of the transfers calls takes a long time, so they need to be gotten at some point
-            // in the background. also the transfers list can become stale, so they need to be refetched periodically. also, each transfers call needs a limit (say, 5000) or the
-            // response may be way too large. if the user goes far enough back in their tx history, they will eventually hit a point where the transactions exceed the transfers
-            // this request https://api.teloscan.io/v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers?type=erc721&limit=9999999&offset=0&includePagination=false&includeAbi=false
-            // response is 70kb and took 2 seconds
-
             const allNftTransfers = this.__evm_nft_transfers[label].transfers;
 
             const transactionShapePromises = transactions.map(async (tx) => {
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
                 // const userAddressLower = this.__evm_filter.address.toLowerCase();
-                // eztodo revert
+                // eztodo revert, note this location in the testing notes
                 const userAddressLower = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -254,7 +263,9 @@ export const useHistoryStore = defineStore(store_name, {
                 const gasInUsdBn = convertCurrency(gasUsedInTlosBn, WEI_PRECISION, 2, tlosInUsd);
                 const gasInUsd = +(formatUnits(gasInUsdBn, 2));
 
-                // all contracts in transactions are cached, no need to use getContract
+                const systemTokenDecimals = chainSettings.getSystemToken().decimals;
+
+                // all contracts in transactions are already cached, no need to use getContract
                 const toPrettyName = contractStore.__cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
                 const fromPrettyName = contractStore.__cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
 
@@ -278,23 +289,21 @@ export const useHistoryStore = defineStore(store_name, {
 
                 let actionName = '';
 
-                // eztodo replace instances of +tx.value
                 if (!isFailed) {
                     if (+tx.value) {
-                        // eztodo change from WEI_PRECISION to token decimals?
-                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
+                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), systemTokenDecimals, 2, tlosInUsd);
                         const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
                         if (tx.from?.toLowerCase() === userAddressLower) {
                             valuesOut.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                amount: +formatUnits(tx.value, systemTokenDecimals),
                                 symbol: chainSettings.getSystemToken().symbol,
                                 fiatValue: valueInFiat,
                             });
                         }
                         if (tx.to?.toLowerCase() === userAddressLower) {
                             valuesIn.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                amount: +formatUnits(tx.value, systemTokenDecimals),
                                 symbol: chainSettings.getSystemToken().symbol,
                                 fiatValue: valueInFiat,
                             });
@@ -303,7 +312,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                     // eztodo for reference, a tx with multiple 1155 xfers: https://www.teloscan.io/tx/0xf7a2cadfce5adcd33c592d3aa277bf87ea5c06961e6a7e4f12e6a2bae7b595e5
                     // eztodo for reference, a 721 tx : 0x893c7d83b2bef2758e3bed78ba2ca93a3102059f6c6da0d91aa58b6f1a62ab75
-                    const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction === tx.hash);
+                    const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction.toLowerCase() === tx.hash.toLowerCase());
 
                     if (nftTransfersInTx.length > 0) {
                         // there is at least 1 NFT transfer in this transaction,
@@ -394,17 +403,13 @@ export const useHistoryStore = defineStore(store_name, {
                     const txIsASend    = (valuesOut.length > 0 || nftsOut.length > 0) && (valuesIn.length  === 0 && nftsIn.length  === 0);
                     const txIsAReceive = (valuesIn.length  > 0 || nftsIn.length  > 0) && (valuesOut.length === 0 && nftsOut.length === 0);
 
-                    // eztodo occasional error when live fetching txs
                     if (isContractCreation) {
                         actionName = 'contractCreation';
-                    } else if (functionName === 'mint') {
-                        actionName = 'mint'; // eztodo handle this in the UI, add it to the correct interface as comment
                     } else if (txIsASend) {
                         actionName = 'send';
                     } else if (txIsAReceive) {
                         actionName = 'receive';
                     } else if (txIsASwap) {
-                        // eztodo remove swapfunctionnames const
                         actionName = 'swap';
                     } else if (functionName) {
                         actionName = functionName;

@@ -310,9 +310,9 @@ function setHoverPreviewVisibility(visible: boolean) {
     >
         <q-skeleton v-if="isMediaLoading && !passedMaxLoadingTime" type="rect" class="c-nft-viewer__list-image" />
         <q-icon
-            v-else-if="nft.videoSrc && !(isMediaLoading && passedMaxLoadingTime)"
+            v-else-if="nft.videoSrc"
             name="o_movie"
-            :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+            :alt="imageAlt"
             size="md"
             color="grey-7"
             class="c-nft-viewer__list-image"

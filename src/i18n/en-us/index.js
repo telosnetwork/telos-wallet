@@ -482,6 +482,7 @@ export default {
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
+            error_fetching_nft_transfers: 'Unexpected error fetching NFT transfers. Please refresh the page to try again.',
         },
         chain: {
             error_update_data: 'Error in updating data',
