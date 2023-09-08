@@ -89,7 +89,7 @@ export const useHistoryStore = defineStore(store_name, {
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
-        getEVMTransfers: state => (label: Label): EvmTransfer[] => state.__evm_nft_transfers[label].transfers,
+        getEvmNftTransfers: state => (label: Label): EvmTransfer[] => state.__evm_nft_transfers[label].transfers,
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -193,7 +193,7 @@ export const useHistoryStore = defineStore(store_name, {
                     erc721TransferResponse,
                     erc1155TransferResponse,
                 ] = await Promise.all(['erc721', 'erc1155'].map(
-                    type => chainSettings.getEVMTransfers({
+                    type => chainSettings.getEvmNftTransfers({
                         includePagination: true,
                         account,
                         limit: transfers_filter_limit,

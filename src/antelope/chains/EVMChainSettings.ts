@@ -421,7 +421,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(response => response.data as IndexerAccountTransactionsResponse);
     }
 
-    async getEVMTransfers({
+    async getEvmNftTransfers({
         account,
         type,
         limit,
