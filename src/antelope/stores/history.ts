@@ -229,7 +229,7 @@ export const useHistoryStore = defineStore(store_name, {
                 // sort transfers from new to old
                 transfers.sort((a, b) => b.timestamp - a.timestamp);
 
-                this.setEVMTransfers(label, transfers);
+                this.setEvmNftTransfers(label, transfers);
             } catch (error) {
                 this.clearEvmNftTransfers();
                 throw new AntelopeError('antelope.history.error_fetching_nft_transfers');
@@ -459,13 +459,13 @@ export const useHistoryStore = defineStore(store_name, {
             this.setShapedTransactionRows(CURRENT_CONTEXT, []);
             this.setEvmTransactionsRowCount(CURRENT_CONTEXT, 0);
         },
-        setEVMTransfers(label: Label, transfers: EvmTransfer[]): void {
-            this.trace('setEVMTransfers', transfers);
+        setEvmNftTransfers(label: Label, transfers: EvmTransfer[]): void {
+            this.trace('setEvmNftTransfers', transfers);
             this.__evm_nft_transfers[label].transfers = transfers;
         },
         clearEvmNftTransfers(): void {
             this.trace('clearEvmNftTransfers');
-            this.setEVMTransfers(CURRENT_CONTEXT, []);
+            this.setEvmNftTransfers(CURRENT_CONTEXT, []);
         },
     },
 });
