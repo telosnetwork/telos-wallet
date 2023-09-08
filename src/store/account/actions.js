@@ -41,7 +41,7 @@ export const login = async function(
             e.message ||
             e.reason;
         commit('general/setErrorMsg', error, { root: true });
-        console.erorr('Login error: ', error);
+        console.error('Login error: ', error);
     } finally {
         commit('setLoadingWallet');
     }
