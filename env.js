@@ -22,8 +22,8 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
-    APP_OREID_APP_ID_NATIVE: 't_a61e9926d5204387a9ac113dfce7cbc5',
-    APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
+    OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
+    OREID_APP_ID_NATIVE: 't_a61e9926d5204387a9ac113dfce7cbc5',
 };
 
 const MAINNET = {
@@ -37,8 +37,8 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
-    APP_OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
-    APP_OREID_APP_ID_NATIVE: 'p_751f87258d5b40998b55c626d612fd4e', // @TODO replace with main net production ID
+    OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
+    OREID_APP_ID_NATIVE: 'p_751f87258d5b40998b55c626d612fd4e',
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;

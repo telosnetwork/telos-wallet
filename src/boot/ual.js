@@ -150,7 +150,7 @@ export default boot(async ({ app, store }) => {
             signHandler,
         }),
         new OreIdAuthenticator([chain], {
-            appId: process.env.APP_OREID_APP_ID_NATIVE,
+            appId: process.env.OREID_APP_ID_NATIVE,
             plugins: { popup: WebPopup() },
         },
         AuthProvider.Google),
