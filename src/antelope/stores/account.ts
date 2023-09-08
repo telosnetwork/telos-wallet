@@ -279,7 +279,6 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('isConnectedToCorrectNetwork', label);
             try {
                 useFeedbackStore().setLoading('account.isConnectedToCorrectNetwork');
-                console.log('label ---> ', label, useAccountStore().getAccount(label));
                 const authenticator = useAccountStore().getAccount(label)?.authenticator as EVMAuthenticator;
                 return authenticator.isConnectedToCorrectChain();
             } catch (error) {
