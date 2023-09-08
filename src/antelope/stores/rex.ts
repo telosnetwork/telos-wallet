@@ -16,7 +16,7 @@ import {
 import { AntelopeError, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
+import { getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
@@ -207,8 +207,8 @@ export const useRexStore = defineStore(store_name, {
             subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
                 this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
                 if (receipt.status === 1) {
-                    this.updateRexDataForAccount(CURRENT_CONTEXT, account);
-                    useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, account);
+                    this.updateRexDataForAccount('logged', account);
+                    useBalancesStore().updateBalancesForAccount('logged', account);
                 }
                 return receipt;
             });

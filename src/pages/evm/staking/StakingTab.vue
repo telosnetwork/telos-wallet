@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
 import {
-    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useBalancesStore,
@@ -97,7 +96,7 @@ const availableTostake = computed(() => {
     return available;
 });
 const formIsValid = computed(() =>
-    !outputModelValue.value.isZero() &&
+    !inputModelValue.value.isZero() &&
     inputModelValue.value.lt(availableTostake.value),
 );
 const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('stakeEVMSystemTokens'));
@@ -113,7 +112,7 @@ onBeforeMount(() => {
 });
 
 async function handleCtaClick() {
-    const label = CURRENT_CONTEXT;
+    const label = 'logged';
     if (!await accountStore.isConnectedToCorrectNetwork(label)) {
         const networkName = useChainStore().loggedChain.settings.getDisplay();
         const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
