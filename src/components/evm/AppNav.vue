@@ -290,6 +290,14 @@ export default defineComponent({
                     aria-hidden="true"
                 />
                 {{ $t('nav.staking') }}
+                <span class="c-app-nav__apy-box">  {{ $t('evm_stake.apy_card_label') }}
+                    <q-spinner
+                        v-if="isLoadingApy"
+                        color="white"
+                        class="c-app-nav__apy-spinner"
+                    />
+                    <b> {{ prettyPrintApy }}</b>
+                </span>
             </li>
 
             <li
