@@ -174,23 +174,33 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async getSystemTokenBalance(address: addressString | string): Promise<ethers.BigNumber> {
         this.trace('getSystemTokenBalance', address);
-        const provider = await this.web3Provider();
-        if (provider) {
-            return provider.getBalance(address);
-        } else {
-            throw new AntelopeError('antelope.evm.error_no_provider');
+        try {
+            const provider = await this.web3Provider();
+            if (provider) {
+                return provider.getBalance(address);
+            } else {
+                throw new AntelopeError('antelope.evm.error_no_provider');
+            }
+        } catch (e) {
+            console.error('getSystemTokenBalance', e, address);
+            throw e;
         }
     }
 
     async getERC20TokenBalance(address: addressString, token: addressString): Promise<ethers.BigNumber> {
         this.trace('getERC20TokenBalance', [address, token]);
-        const provider = await this.web3Provider();
-        if (provider) {
-            const erc20Contract = new ethers.Contract(token, erc20Abi, provider);
-            const balance = await erc20Contract.balanceOf(address);
-            return balance;
-        } else {
-            throw new AntelopeError('antelope.evm.error_no_provider');
+        try {
+            const provider = await this.web3Provider();
+            if (provider) {
+                const erc20Contract = new ethers.Contract(token, erc20Abi, provider);
+                const balance = await erc20Contract.balanceOf(address);
+                return balance;
+            } else {
+                throw new AntelopeError('antelope.evm.error_no_provider');
+            }
+        } catch (e) {
+            console.error('getERC20TokenBalance', e, address, token);
+            throw e;
         }
     }
 
@@ -257,7 +267,6 @@ export class OreIdAuth extends EVMAuthenticator {
         const oreIdInstance = oreId as OreId;
 
         // sign a blockchain transaction
-        this.trace('createTransaction()');
         const transaction = await oreIdInstance.createTransaction({
             transaction: json,
             chainAccount: from,
@@ -269,10 +278,7 @@ export class OreIdAuth extends EVMAuthenticator {
         });
 
         // have the user approve signature
-        this.trace('Signing a transaction...', transaction);
-
         const { transactionId } = await oreIdInstance.popup.sign({ transaction });
-        this.trace('transactionId:', transactionId);
 
         return {
             hash: transactionId,
@@ -391,11 +397,17 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         this.trace('web3Provider');
-        const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
-        const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
-        const web3Provider = new ethers.providers.JsonRpcProvider(url);
-        await web3Provider.ready;
-        return web3Provider as ethers.providers.Web3Provider;
+        try {
+            const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+            const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+            const jsonRpcProvider = new ethers.providers.JsonRpcProvider(url);
+            await jsonRpcProvider.ready;
+            const web3Provider = jsonRpcProvider as ethers.providers.Web3Provider;
+            return web3Provider;
+        } catch (e) {
+            console.error('web3Provider', e);
+            throw e;
+        }
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {
@@ -412,70 +424,3 @@ export class OreIdAuth extends EVMAuthenticator {
     }
 
 }
-
-/*
--- Documentations --
-
----
-sidebar_positon: 4
-hide_table_of_contents: true
-title: Reading data from a Contract
----
-
-# Reading data from a Contract
-
-## Interacting
-
-On EVM the ontracts may hold data in a private way, which means is not accesible to the public. However, the contracts may have public methods that allow to read the data. These methods are called `view` or `pure` methods. The `view` methods are the ones that read data from the blockchain, while the `pure` methods are the ones that do not read data from the blockchain. Both methods are free to use and do not require any signing.
-
-In order execute a read function, you need to instantiate a contract object and call the method you want to execute. In this chapter we will show how to read the `balanceOf` method from the `ERC20` contract using JsonRpcProvider as the provider for remote access to the blockchain.
-
-### Create the web3 provider
-
-First, we need to create a web3 provider. In this example we will use the `JsonRpcProvider` as the provider for remote access to the blockchain.
-
-```typescript
-async web3Provider(): Promise<ethers.providers.Web3Provider> {
-    const RPC_ENDPOINT = {
-        protocol: 'https',
-        host: 'mainnet.telos.net',
-        port: 443,
-        path: '/evm',
-    };
-    const url = `${RPC_ENDPOINT.protocol}://${RPC_ENDPOINT.host}:${RPC_ENDPOINT.port}${RPC_ENDPOINT.path ?? ''}`;
-    const web3Provider = new ethers.providers.JsonRpcProvider(url);
-    await web3Provider.ready;
-    return web3Provider as ethers.providers.Web3Provider;
-}
-```
-
-### Create the contract object
-
-Then, we need to create a contract object. In this example we will use the `ERC20` contract.
-
-```typescript
-const provider = await this.web3Provider();
-// you don't need the whole ABI, just the methods you want to call
-const erc20Abi = [
-    'function balanceOf(address account) view returns (uint256)',
-];
-const erc20Contract = new ethers.Contract(token, erc20Abi, provider);
-```
-
-### Call the method
-
-Finally, we need to call the method. In this example we will call the `balanceOf` method.
-
-```typescript
-const balance: ethers.BigNumber = await erc20Contract.balanceOf(address);
-
-// you can convert the balance to a number using the ethers.utils.formatUnits method
-const tokenDecimals = 18;
-const balanceNumber: number = ethers.utils.formatUnits(balance, tokenDecimals);
-```
-
-## Conclusion
-
-In this chapter we have shown how to read data from a contract using the `view` methods, prforming a remote call to the blockchain endpoint through the `JsonRpcProvider` provider. You can execute any `view` or `pure` method from any contract using the same approach. All you need is a provider and the contract ABI.
-
-*/
