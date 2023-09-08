@@ -273,7 +273,7 @@ export const useBalancesStore = defineStore(store_name, {
             subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
                 this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
                 if (receipt.status === 1) {
-                    this.updateBalancesForAccount('logged', account);
+                    this.updateBalancesForAccount(CURRENT_CONTEXT, account);
                 }
                 return receipt;
             });
