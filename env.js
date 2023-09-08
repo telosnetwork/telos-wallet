@@ -22,8 +22,7 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
-    // APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
-    APP_OREID_APP_ID: 't_23991cde82994c88bb582c019a9c45e1',
+    APP_OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
 };
 
 const MAINNET = {
