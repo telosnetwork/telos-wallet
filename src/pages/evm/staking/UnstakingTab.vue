@@ -18,7 +18,6 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
-import { AntelopeError } from 'src/antelope/types';
 
 const label = 'current';
 
@@ -43,43 +42,35 @@ const stakedTokenDecimals = stakedToken.decimals;
 const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(ethers.constants.Zero);
 const estimatedGas = ref(ethers.constants.Zero);
-const stakedRatio = computed(() => chainStore.getStakedRatio(label));
+const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const outputModelValue = computed(() => {
-    if (stakedRatio.value.isZero()) {
+    if (unstakedRatio.value.isZero()) {
         return ethers.constants.Zero;
     }
-    const output = inputModelValue.value.mul(stakedRatio.value).div(oneEth);
+    const output = inputModelValue.value.mul(unstakedRatio.value).div(oneEth);
     return output;
 });
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
 const fiatCurrency = computed(() => userStore.fiatCurrency);
-const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
-    balance => balance.token.contract === systemToken.address)[0],
+const stakedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
+    balance => balance.token.contract === stakedToken.address)[0],
 );
-const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
-const systemTokenBalance = computed(() => systemTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
+// const systemTokenFiatPrice = computed(() => stakedTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
+const stakedTokenBalance = computed(() => stakedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 const sidebarContent = computed(() => {
     const header = $t('evm_stake.stake_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
         text: $t(
-            'evm_stake.stake_sidebar_content_fragment_1',
-            { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
+            'evm_stake.unstake_sidebar_content_fragment_1',
+            { systemSymbol: systemTokenSymbol },
         ),
     }, {
-        text: $t('evm_stake.stake_sidebar_content_fragment_2_bold'),
+        text: $t('evm_stake.unstake_sidebar_content_fragment_2_bold'),
         bold: true,
     }, {
         text: $t(
-            'evm_stake.stake_sidebar_content_fragment_3',
-            { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
-        ),
-    }, {
-        text: $t('evm_stake.stake_sidebar_content_fragment_4_bold'),
-        bold: true,
-    }, {
-        text: $t(
-            'evm_stake.stake_sidebar_content_fragment_5',
+            'evm_stake.unstake_sidebar_content_fragment_3',
             { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
         ),
     }];
@@ -89,8 +80,8 @@ const sidebarContent = computed(() => {
         content,
     };
 });
-const availableTostake = computed(() => {
-    const available = systemTokenBalance.value.sub(estimatedGas.value);
+const availableToUnstake = computed(() => {
+    const available = stakedTokenBalance.value.sub(estimatedGas.value);
 
     if (available.lt(0)) {
         return ethers.constants.Zero;
@@ -98,10 +89,10 @@ const availableTostake = computed(() => {
     return available;
 });
 const formIsValid = computed(() =>
-    !inputModelValue.value.isZero() &&
-    inputModelValue.value.lt(availableTostake.value),
+    !outputModelValue.value.isZero() &&
+    inputModelValue.value.lt(availableToUnstake.value),
 );
-const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('stakeEVMSystemTokens'));
+const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unstakeEVMSystemTokens'));
 
 
 // methods
@@ -128,11 +119,11 @@ async function handleCtaClick() {
 
     if (formIsValid.value) {
         try {
-            const tx = await useRexStore().stakeEVMSystemTokens(label, inputModelValue.value);
-            const formattedAmount = formatWei(inputModelValue.value, systemTokenDecimals, WEI_PRECISION);
+            const tx = await useRexStore().unstakeEVMSystemTokens(label, inputModelValue.value);
+            const formattedAmount = formatWei(inputModelValue.value, stakedTokenDecimals, WEI_PRECISION);
 
             const dismiss = ant.config.notifyNeutralMessageHandler(
-                $t('notification.neutral_message_staking', { quantity: formattedAmount, symbol: systemTokenSymbol }),
+                $t('notification.neutral_message_unstaking', { quantity: formattedAmount, symbol: stakedTokenSymbol }),
             );
 
             tx.wait().then(() => {
@@ -157,12 +148,12 @@ async function handleCtaClick() {
     <!-- convert ratio 1:stakedRatio -->
     <div class="row q-mb-xl">
         <div class="col-12">
-            <div class="c-stake-tab__badge-container">
+            <div class="c-unstake-tab__badge-container">
                 <ConversionRateBadge
-                    :token-one-symbol="systemTokenSymbol"
-                    :token-two-symbol="stakedTokenSymbol"
-                    :token-two-decimals="systemTokenDecimals"
-                    :token-two-amount="stakedRatio"
+                    :token-one-symbol="stakedTokenSymbol"
+                    :token-two-symbol="systemTokenSymbol"
+                    :token-two-decimals="stakedTokenDecimals"
+                    :token-two-amount="unstakedRatio"
                     :decimals="uiDecimals"
                 />
             </div>
@@ -174,16 +165,13 @@ async function handleCtaClick() {
         <div class="col-12">
             <CurrencyInput
                 v-model="inputModelValue"
-                :symbol="systemTokenSymbol"
-                :decimals="systemTokenDecimals"
+                :symbol="stakedTokenSymbol"
+                :decimals="stakedTokenDecimals"
                 :decimals-to-display="uiDecimals"
-                :secondary-currency-code="fiatCurrency"
-                :secondary-currency-decimals="2"
-                :secondary-currency-conversion-factor="systemTokenFiatPrice"
                 :locale="fiatLocale"
-                :label="$t('evm_stake.stake_input_label')"
-                :max-value="availableTostake"
-                class="c-stake-tab__input"
+                :label="$t('evm_stake.unstake_input_label')"
+                :max-value="availableToUnstake"
+                class="c-unstake-tab__input"
             />
         </div>
     </div>
@@ -205,12 +193,12 @@ async function handleCtaClick() {
         <div class="col-12">
             <CurrencyInput
                 v-model="outputModelValue"
-                :symbol="stakedTokenSymbol"
-                :decimals="stakedTokenDecimals"
+                :symbol="systemTokenSymbol"
+                :decimals="systemTokenDecimals"
                 :decimals-to-display="uiDecimals"
                 :locale="fiatLocale"
                 :label="$t('evm_stake.stake_input_label')"
-                class="c-stake-tab__input"
+                class="c-unstake-tab__input"
                 readonly="readonly"
             />
         </div>
@@ -219,14 +207,14 @@ async function handleCtaClick() {
     <!-- stake button -->
     <div class="row">
         <div class="col-12">
-            <div class="c-stake-tab__cta-container">
+            <div class="c-unstake-tab__cta-container">
                 <q-btn
                     color="primary"
                     :disable="!formIsValid"
                     :loading="ctaIsLoading"
-                    :label="$t('evm_stake.stake')"
+                    :label="$t('evm_stake.unstake')"
                     :aria-label="$t(
-                        'evm_stake.stake_button_label',
+                        'evm_stake.unstake_button_label',
                         { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
                     )"
                     @click="handleCtaClick"
@@ -238,7 +226,7 @@ async function handleCtaClick() {
 </template>
 
 <style lang="scss">
-.c-stake-tab {
+.c-unstake-tab {
     &__badge-container,
     &__cta-container,
     &__input {
