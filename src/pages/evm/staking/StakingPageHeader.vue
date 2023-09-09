@@ -235,6 +235,10 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
 
 <template>
 <div class="c-staking-header">
+    <div class="text-center q-mb-xl">
+        <h5>{{ $t('evm_stake.total_of_staked_unstaking_and_withdrawable', { token: systemToken.name }) }}</h5>
+        <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
+    </div>
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
     <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
 </div>
