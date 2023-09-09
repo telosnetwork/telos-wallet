@@ -250,7 +250,7 @@ export default {
         error_details_title: 'Error Details',
         neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
         neutral_message_staking: 'Staking <b>{quantity} {symbol}</b>',
-        neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
+        neutral_message_unstaking: 'Unstaking <b>{quantity} {symbol}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
