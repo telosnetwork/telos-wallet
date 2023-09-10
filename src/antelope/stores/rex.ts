@@ -13,7 +13,7 @@ import {
     createTraceFunction,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { AntelopeError, Label, TransactionResponse } from 'src/antelope/types';
+import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
 import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
@@ -21,11 +21,6 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
-
-export interface EvmRexDeposit {
-    amount: ethers.BigNumber;
-    until: ethers.BigNumber;
-}
 
 export interface RexModel {
     withdrawable: ethers.BigNumber;
