@@ -53,10 +53,13 @@ const outputModelValue = computed(() => {
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
 const fiatCurrency = computed(() => userStore.fiatCurrency);
+const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
+    balance => balance.token.contract === systemToken.address)[0],
+);
+const systemTokenFiatPrice = computed(() => systemTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
 const stakedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
     balance => balance.token.contract === stakedToken.address)[0],
 );
-// const systemTokenFiatPrice = computed(() => stakedTokenBalanceInfo.value?.token.price.getAmountInFiatStr(1) ?? '1');
 const stakedTokenBalance = computed(() => stakedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 const sidebarContent = computed(() => {
     const header = $t('evm_stake.stake_sidebar_title', { symbol: systemTokenSymbol });
@@ -196,15 +199,18 @@ async function handleCtaClick() {
                 :symbol="systemTokenSymbol"
                 :decimals="systemTokenDecimals"
                 :decimals-to-display="uiDecimals"
+                :secondary-currency-code="fiatCurrency"
+                :secondary-currency-decimals="2"
+                :secondary-currency-conversion-factor="systemTokenFiatPrice"
                 :locale="fiatLocale"
-                :label="$t('evm_stake.stake_input_label')"
+                :label="$t('evm_stake.unstake_output_label')"
                 class="c-unstake-tab__input"
                 readonly="readonly"
             />
         </div>
     </div>
 
-    <!-- stake button -->
+    <!-- unstake button -->
     <div class="row">
         <div class="col-12">
             <div class="c-unstake-tab__cta-container">

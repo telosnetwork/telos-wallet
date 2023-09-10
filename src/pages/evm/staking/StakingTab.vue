@@ -208,7 +208,7 @@ async function handleCtaClick() {
                 :decimals="stakedTokenDecimals"
                 :decimals-to-display="uiDecimals"
                 :locale="fiatLocale"
-                :label="$t('evm_stake.stake_input_label')"
+                :label="$t('evm_stake.stake_output_label')"
                 class="c-stake-tab__input"
                 readonly="readonly"
             />
