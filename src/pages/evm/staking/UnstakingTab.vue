@@ -245,5 +245,8 @@ async function handleCtaClick() {
         display: flex;
         justify-content: flex-end;
     }
+    &__cta-container {
+        margin-top: 8px;
+    }
 }
 </style>
