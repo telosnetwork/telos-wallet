@@ -382,7 +382,7 @@ export class OreIdAuth extends EVMAuthenticator {
             'contract': {
                 abi,
                 'parameters': [value],
-                'method': 'withdraw',
+                'method': stlosAbiWithdraw[0].name,
             },
         } as unknown as JSONObject;
 
