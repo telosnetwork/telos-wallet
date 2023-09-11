@@ -25,6 +25,9 @@ const routes = [
     {
         path: '/evm',
         component: () => import('layouts/EVMLayout.vue'),
+        meta: {
+            requiresAuth: true,
+        },
         children: [
             {
                 path: 'wallet',
@@ -74,11 +77,14 @@ const routes = [
             //     name: 'evm-staking',
             //     component: () => import('pages/evm/staking/StakingPage.vue'),
             // },
-            // {
-            //     path: 'wrap',
-            //     name: 'evm-wrap',
-            //     component: () => import('pages/evm/wrap/WrapPage.vue'),
-            // },
+            {
+                path: 'wrap',
+                name: 'evm-wrap',
+                meta: {
+                    requiresAuth: true,
+                },
+                component: () => import('pages/evm/wrap/WrapPage.vue'),
+            },
         ],
     },
 
@@ -110,6 +116,11 @@ const routes = [
                 path: 'nfts',
                 name: 'demos.nfts',
                 component: () => import('pages/demo/NftDemos.vue'),
+            },
+            {
+                path: 'scrollable-cards',
+                name: 'demos.scrollable-cards',
+                component: () => import('pages/demo/ScrollableInfoCardDemos.vue'),
             },
         ],
     },

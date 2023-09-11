@@ -62,7 +62,7 @@ export const useContractStore = defineStore(store_name, {
                 let contract = { address: address };
                 try {
                     const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                    const response = await indexer.get(`/contract/${address}?full=true&includeAbi=true`);
+                    const response = await indexer.get(`/v1/contract/${address}?full=true&includeAbi=true`);
                     if (response.data?.success && response.data.results.length > 0){
                         contract = response.data.results[0];
                     }
@@ -79,7 +79,8 @@ export const useContractStore = defineStore(store_name, {
             return this.__processing[addressLower];
         },
 
-        async getTransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
+        // get transfer information from a transaction (ERC20 and native token only)
+        async getErc20TransfersFromTransaction(transaction: EvmTransaction): Promise<Erc20Transfer[]> {
             if (!transaction.logs || transaction.logs?.length === 0){
                 return [];
             }

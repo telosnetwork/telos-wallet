@@ -6,7 +6,7 @@ import { defineStore } from 'pinia';
 import {
     Label, TokenClass,
 } from 'src/antelope/types';
-import { getAntelope, useAccountStore, useFeedbackStore, useChainStore } from 'src/antelope';
+import { getAntelope, useFeedbackStore, useChainStore, CURRENT_CONTEXT } from 'src/antelope';
 import { toRaw } from 'vue';
 import { errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
@@ -22,8 +22,8 @@ const store_name = 'tokens';
 export const useTokensStore = defineStore(store_name, {
     state: (): TokensState => (tokensInitialState),
     getters: {
-        loggedTokens: state => state.__tokens['logged'],
-        currentTokens: state => state.__tokens['current'],
+        loggedTokens: state => state.__tokens[CURRENT_CONTEXT],
+        currentTokens: state => state.__tokens[CURRENT_CONTEXT],
         getTokens: state => (label: string) => state.__tokens[label],
     },
     actions: {
@@ -31,7 +31,7 @@ export const useTokensStore = defineStore(store_name, {
         init: () => {
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onNetworkChanged.pipe(
-                filter(e => e.label === 'current'),
+                filter(e => e.label === CURRENT_CONTEXT),
             ).subscribe({
                 next: ({ label, chain }) => {
                     useTokensStore().updateTokensForNetwork(label, toRaw(chain));
@@ -46,10 +46,6 @@ export const useTokensStore = defineStore(store_name, {
                 let tokens: TokenClass[] = [];
                 tokens = await chain.settings.getTokenList();
                 this.__tokens[label] = tokens;
-                const accountStore = useAccountStore();
-                if (accountStore.currentIsLogged && label === 'current') {
-                    this.__tokens['logged'] = tokens;
-                }
                 this.trace('updateTokensForNetwork', 'token: ', tokens);
             } catch (error) {
                 console.error('Error: ', errorToString(error));

@@ -105,7 +105,7 @@ export default defineComponent({
 
     &__header {
         color: var(--header-text-color);
-        background: var(--header-bg-color);
+        background: var(--accent-color-5);
 
         padding-top: 24px;
         position: relative;
@@ -122,9 +122,12 @@ export default defineComponent({
     }
 
     &__tabs {
-        margin-top: 48px;
         flex-grow: 1;
         color: var(--header-text-color);
+
+        @include sm-and-up {
+            margin-top: 36px;
+        }
 
         // quasar override
         .q-tab__indicator {

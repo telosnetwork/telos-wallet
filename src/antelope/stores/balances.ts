@@ -36,6 +36,7 @@ import {
     useChainStore,
     useEVMStore,
     usePlatformStore,
+    CURRENT_CONTEXT,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -62,8 +63,8 @@ const store_name = 'balances';
 export const useBalancesStore = defineStore(store_name, {
     state: (): BalancesState => (balancesInitialState),
     getters: {
-        loggedBalances: state => state.__balances['logged'] ?? [],
-        currentBalances: state => state.__balances['current'] ?? [],
+        loggedBalances: state => state.__balances[CURRENT_CONTEXT] ?? [],
+        currentBalances: state => state.__balances[CURRENT_CONTEXT] ?? [],
         getBalances: state => (label: string) => state.__balances[label] ?? [],
     },
     actions: {
@@ -74,7 +75,7 @@ export const useBalancesStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    if (label === 'current') {
+                    if (label === CURRENT_CONTEXT) {
                         await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
                     }
                 },
@@ -82,7 +83,7 @@ export const useBalancesStore = defineStore(store_name, {
 
             // update logged balances every 10 seconds
             setInterval(async () => {
-                await useBalancesStore().updateBalancesForAccount('current', useAccountStore().loggedAccount);
+                await useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
             }, 10000);
         },
         async updateBalancesForAccount(label: string, account: AccountModel | null) {
@@ -99,21 +100,53 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     if (account?.account) {
+
+                        // first we assert that the balances array exists and is the same until the user changes
+                        this.__balances[label] = this.__balances[label] ?? [];
+
+                        // then we wait for the chain indexer to be consulted at least once
+                        this.trace('updateBalancesForAccount', 'await chain_settings.initialized()');
+                        await chain_settings.initialized();
+
+                        // if the chain index is healthy, we use it to fetch the all the balances at once
                         if (chain_settings.isIndexerHealthy()) {
                             this.trace('updateBalancesForAccount', 'Indexer OK!');
-                            if (account?.account) {
-                                this.__balances[label] = await chain_settings.getBalances(account.account);
-                                // if new account with no index records display default zero TLOS balance
-                                if (this.__balances[label].length === 0){
-                                    await this.updateSystemBalanceForAccount(label, account.account as addressString);
-                                }
-                                this.sortBalances(label);
-                                useFeedbackStore().unsetLoading('updateBalancesForAccount');
+
+                            // Workaround-WTLOS: to fix the WTLOS balance while the indexer is not doing it after a successful withdraw (unwrap)
+                            // We need to get the value ready to overwrite immediately and therefore avoid the blink
+                            const wrapTokens = chain_settings.getWrappedSystemToken();
+                            const authenticator = account.authenticator as EVMAuthenticator;
+                            const wrapBalance = await authenticator.getERC20TokenBalance(account.account, wrapTokens.address);
+
+                            // now we call the indexer
+                            const newBalances = await chain_settings.getBalances(account.account);
+
+                            if (this.__balances[label].length === 0) {
+                                // we add all system tokens with balance zero to the balances array to make sure they all always appear
+                                const systemTokens = chain_settings.getSystemTokens();
+                                systemTokens.forEach((token) => {
+                                    const balance = newBalances.find(b => b.token.id === token.id);
+                                    if (!balance) {
+                                        this.addNewBalance(label, new TokenBalance(token, BigNumber.from(0)));
+                                    }
+                                });
                             }
+
+                            // we update the existing balances array with the new balances
+                            newBalances.forEach((balance) => {
+                                this.processBalanceForToken(label, balance.token, balance.amount);
+                            });
+
+                            // Workaround-WTLOS: now we overwrite the value with the one taken from the contract
+                            this.processBalanceForToken(label, wrapTokens, wrapBalance);
+
+                            this.sortBalances(label);
+
+                            useFeedbackStore().unsetLoading('updateBalancesForAccount');
                         } else {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
-                            this.__balances[label] = this.__balances[label] ?? [];
+                            await this.updateSystemTokensPrices(label);
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
@@ -129,7 +162,6 @@ export const useBalancesStore = defineStore(store_name, {
                                     }),
                                 );
 
-
                             Promise.allSettled(promises).then(() => {
                                 useFeedbackStore().unsetLoading('updateBalancesForAccount');
                                 this.trace('updateBalancesForAccount', 'balances:', toRaw(this.__balances[label]));
@@ -142,17 +174,34 @@ export const useBalancesStore = defineStore(store_name, {
                 console.error('Error: ', error);
             }
         },
+        async updateSystemTokensPrices(label: string): Promise<void> {
+            this.trace('updateSystemTokensPrices', label);
+            try {
+                // take the three system tokens
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+                const sysToken = chain_settings.getSystemToken();
+                const wrpToken = chain_settings.getWrappedSystemToken();
 
+                // get the price for both system and wrapped tokens
+                const price = (await chain_settings.getUsdPrice()).toString();
+                const marketInfo = { price } as MarketSourceInfo;
+                sysToken.market = new TokenMarketData(marketInfo);
+                wrpToken.market = new TokenMarketData(marketInfo);
+
+            } catch (error) {
+                console.error(error);
+                // we won't thorw an error here, as it is not critical
+            }
+        },
         async updateSystemBalanceForAccount(label: string, address: addressString): Promise<void> {
+            this.trace('updateSystemBalanceForAccount', label, address);
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const token = chain_settings.getSystemToken();
+            const sys_token = chain_settings.getSystemToken();
             const price = (await chain_settings.getUsdPrice()).toString();
             const marketInfo = { price } as MarketSourceInfo;
-            const marketData = new TokenMarketData(marketInfo);
-            token.market = marketData;
-
+            sys_token.market = new TokenMarketData(marketInfo);
             const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
-            this.processBalanceForToken(label, token, balanceBn);
+            this.processBalanceForToken(label, sys_token, balanceBn);
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();
@@ -189,7 +238,7 @@ export const useBalancesStore = defineStore(store_name, {
                         if (receipt.status === 1) {
                             const account = useAccountStore().loggedAccount;
                             if (account?.account) {
-                                this.updateBalancesForAccount('logged', account);
+                                this.updateBalancesForAccount(CURRENT_CONTEXT, account);
                             }
                         }
                         return receipt;
@@ -230,10 +279,11 @@ export const useBalancesStore = defineStore(store_name, {
             this.setWagmiSystemTokenTransferConfig(null, label);
         },
         async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
-            this.trace('transferTokens', token, to, amount.toString(), memo);
-            const label = 'logged';
+            const funcname = 'transferTokens';
+            this.trace(funcname, token, to, amount.toString(), memo);
+            const label = CURRENT_CONTEXT;
             try {
-                useFeedbackStore().setLoading('transferTokens');
+                useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
@@ -247,11 +297,60 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
             } finally {
-                useFeedbackStore().unsetLoading('transferTokens');
+                useFeedbackStore().unsetLoading(funcname);
                 await useBalancesStore().updateBalancesForAccount(label, toRaw(useAccountStore().loggedAccount));
+            }
+        },
+        async wrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            const funcname = 'wrapSystemTokens';
+            this.trace(funcname, amount.toString());
+            const label = CURRENT_CONTEXT;
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: wrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_wrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.wrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
+        async unwrapSystemTokens(amount: BigNumber): Promise<TransactionResponse> {
+            const funcname = 'unwrapSystemTokens';
+            this.trace(funcname, amount.toString());
+            const label = CURRENT_CONTEXT;
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const chain = useChainStore().loggedChain;
+                if (chain.settings.isNative()) {
+                    console.error('ERROR: unwrap not supported on native');
+                    throw new AntelopeError('antelope.evm.error_unwrap_not_supported_on_native');
+                } else {
+                    const account = useAccountStore().loggedAccount as EvmAccountModel;
+                    const authenticator = useAccountStore().getEVMAuthenticator(label);
+                    return await authenticator.unwrapSystemToken(amount)
+                        .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                }
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
             }
         },
         async transferNativeTokens(
@@ -344,9 +443,6 @@ export const useBalancesStore = defineStore(store_name, {
             } else {
                 this.__balances[label] = [...this.__balances[label], balance];
                 this.sortBalances(label);
-                if (useAccountStore().currentIsLogged && label === 'current') {
-                    this.__balances['logged'] = this.__balances[label];
-                }
             }
         },
         updateBalance(label: string, balance: TokenBalance): void {
@@ -358,9 +454,6 @@ export const useBalancesStore = defineStore(store_name, {
                 ) {
                     this.__balances[label][index].balance = balance.amount;
                     this.sortBalances(label);
-                    if (useAccountStore().currentIsLogged && label === 'current') {
-                        this.__balances['logged'] = this.__balances[label];
-                    }
                 }
             }
         },
@@ -369,9 +462,6 @@ export const useBalancesStore = defineStore(store_name, {
             const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 this.__balances[label].splice(index, 1);
-            }
-            if (useAccountStore().currentIsLogged && label === 'current') {
-                this.__balances['logged'] = this.__balances[label];
             }
         },
         clearAllWagmiTokenTransferConfigs(label: Label) {

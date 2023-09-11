@@ -2,7 +2,7 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
-import { getAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -25,19 +25,26 @@ export abstract class EVMAuthenticator {
     abstract getERC20TokenBalance(address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
     abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult | WriteContractResult>;
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
+    abstract wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
+    abstract getSigner(): Promise<ethers.Signer>;
 
     // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;
+
+    // indicates the authenticator is ready to transfer tokens
+    readyForTransfer(): boolean {
+        return true;
+    }
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chain = useChainStore();
         try {
-            chain.setLoggedChain(network);
-            chain.setCurrentChain(network);
+            chain.setChain(CURRENT_CONTEXT, network);
 
             const checkProvider = await this.ensureCorrectChain() as ethers.providers.Web3Provider;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
 import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
@@ -15,6 +15,7 @@ export default defineComponent({
         const ant = getAntelope();
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
+        const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -23,11 +24,13 @@ export default defineComponent({
 
         const supportsSafePal = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e._isSafePal;
+            return e && (isMobile.value ? e.isSafePal : e._isSafePal);
         });
 
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
+        const injectedProviderDetected = computed(() => !!window.ethereum);
+        const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value || (isMobile.value && isBraveBrowser.value)); // temp solution until Brave support is added https://github.com/telosnetwork/telos-wallet/issues/501
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -51,16 +54,16 @@ export default defineComponent({
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            setAuthenticator(name, 'logged');
+            setAuthenticator(name, CURRENT_CONTEXT);
         };
         const setMetamaskAuthenticator = async () => {
-            setAuthenticator('Metamask', 'logged');
+            setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
         const setSafepalAuthenticator = async () => {
-            setAuthenticator('SafePal', 'logged');
+            setAuthenticator('SafePal', CURRENT_CONTEXT);
         };
         const setWalletConnectAuthenticator = async () => {
-            setAuthenticator('WalletConnect', 'logged');
+            setAuthenticator('WalletConnect', CURRENT_CONTEXT);
         };
 
         const setAuthenticator = async(name: string, label: string) => {
@@ -101,6 +104,7 @@ export default defineComponent({
             supportsSafePal,
             showMetamaskButton,
             showSafePalButton,
+            showWalletConnectButton,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setSafepalAuthenticator,
@@ -117,19 +121,19 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
 
     <!-- Google OAuth Provider -->
-    <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--oreid" @click="setOreIdAuthenticator('google')">
+    <div class="c-evm-login-buttons__option" @click="setOreIdAuthenticator('google')">
         <template v-if="isLoadingOreId('google')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
         <template v-else>
             <img
                 width="24"
-                class="c-evm-login-buttons__icon"
+                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--oreid"
                 src="~assets/logo--tlos.svg"
             >
             {{ $t('home.login_with_social_media') }}
         </template>
-    </div-->
+    </div>
 
     <!-- Metamask Authenticator button -->
     <div
@@ -174,7 +178,11 @@ export default defineComponent({
     </div>
 
     <!-- WalletConnect Authenticator button -->
-    <div class="c-evm-login-buttons__option" @click="setWalletConnectAuthenticator()">
+    <div
+        v-if="showWalletConnectButton"
+        class="c-evm-login-buttons__option"
+        @click="setWalletConnectAuthenticator()"
+    >
         <template v-if="isLoading('WalletConnect.login')">
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </template>
@@ -213,63 +221,42 @@ export default defineComponent({
         margin-bottom: 16px;
     }
 
-    &__option{
+    &__icon {
+        margin-top: -1px;
+        transition: all 0.3s;
+    }
+
+    &__option {
+        display: flex;
+        gap: 8px;
+
         width: 224px;
         height: 54px;
         color: $white;
-        border: solid $white;
-        border-width: 1px;
+        outline-color: $white;
+        outline-width: 1px;
+        outline-style: solid;
         border-radius: 4px;
         font-size: 16px;
-        font-weight: 600;
-        padding-top: 14px;
-        padding-left: 14px;
-        padding-right: 14px;
+        font-weight: 500;
+        padding: 14px;
         cursor: pointer;
 
-        #{$self}__icon, img {
-            display: inline-block;
-            vertical-align:top;
-            margin-right: 8px;
+        &:hover {
+            color: $white;
+            outline-color: $white;
+            outline-width: 2px;
         }
 
-        // &:hover {
-        //     color: $white;
-        //     border-color: $white;
-        // }
+        &:not(:hover) #{$self}__icon {
+            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.8;
 
-        // &:not(:hover) #{$self}__icon {
-        //     &--oreid {
-        //         opacity: 1;
-        //     }
-        //     &--metamask, &--safepal, &--wallet-connect {
-        //         opacity: 0.3;
-        //     }
-        //     &--metamask {
-        //         .st3, .st8, .st9 {
-        //             fill: $blackDark;
-        //             stroke: $blackDark;
-        //         }
-        //         .st0, .st1, .st2, .st4, .st5, .st6, .st7 {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //     }
-        //     &--safepal {
-        //         path {
-        //             fill: $white;
-        //         }
-        //     }
-        //     &--wallet-connect {
-        //         circle {
-        //             fill: $white;
-        //             stroke: $blackDark;
-        //         }
-        //         path {
-        //             fill: $blackDark;
-        //         }
-        //     }
-        // }
+                @include mobile-only {
+                    opacity: 1;
+                }
+            }
+        }
     }
 }
 </style>

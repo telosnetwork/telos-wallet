@@ -17,6 +17,7 @@
 
 import { defineStore } from 'pinia';
 import {
+    CURRENT_CONTEXT,
     useFeedbackStore,
 } from 'src/antelope';
 
@@ -103,12 +104,12 @@ const store_name = 'chain';
 export const useChainStore = defineStore(store_name, {
     state: (): ChainState => (chainInitialState),
     getters: {
-        loggedChain: state => state.__chains['logged'],
-        currentChain: state => state.__chains['current'],
-        loggedEvmChain: state => state.__chains['logged'].settings.isNative() ? undefined : state.__chains['logged'] as EvmChainModel,
-        currentEvmChain: state => state.__chains['current'].settings.isNative() ? undefined : state.__chains['current'] as EvmChainModel,
-        loggedNativeChain: state => state.__chains['logged'].settings.isNative() ? state.__chains['logged'] as NativeChainModel : undefined,
-        currentNativeChain: state => state.__chains['current'].settings.isNative() ? state.__chains['current'] as NativeChainModel : undefined,
+        loggedChain: state => state.__chains[CURRENT_CONTEXT],
+        currentChain: state => state.__chains[CURRENT_CONTEXT],
+        loggedEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        currentEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        loggedNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
+        currentNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
         getTokens: state => (label: string) => state.__chains[label].tokens,
         // TODO: remove the 'as EVMChainSettings' when the native chains are implemented
@@ -121,7 +122,7 @@ export const useChainStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: createInitFunction(store_name),
         // Updates ----
-        async updateChainData(label: string) {
+        async updateChainData(label: string): Promise<void> {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
@@ -137,17 +138,20 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateChainData');
             }
         },
-        async updateSettings(label: string) {
-            this.getChain(label).settings.init().then(() => {
-                getAntelope().events.onChainIndexer.next({ label, isHealthy: true });
+        async updateSettings(label: string): Promise<void> {
+            this.trace('updateSettings', label);
+            const settings = this.getChain(label).settings as EVMChainSettings;
+            settings.init().then(() => {
+                this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
+                getAntelope().events.onChainIndexerReady.next({ label, ready: true });
             }).catch((error) => {
                 console.error(error);
                 throw new Error('antelope.chain.error_settings');
             });
         },
-        async updateApy(label: string) {
+        async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
-            this.trace('updateApy');
+            this.trace('updateApy', label);
             const chain = this.getChain(label);
             try {
                 if (chain.settings.isNative()) {
@@ -162,7 +166,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateApy');
             }
         },
-        async updateGasPrice(label: string) {
+        async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
             this.trace('updateGasPrice');
             const chain = this.getChain(label);
@@ -177,7 +181,7 @@ export const useChainStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateGasPrice');
             }
         },
-        async updateTokenList(label: string) {
+        async updateTokenList(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
             const chain = this.getChain(label);
@@ -195,13 +199,6 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         // Commits ----
-        setLoggedChain(network: string) {
-            this.setChain('current', network);
-            this.setChain('logged', network);
-        },
-        setCurrentChain(network: string) {
-            this.setChain('current', network);
-        },
         setChain(label: string, network: string) {
             this.trace('setChain', label, network);
             if (network in settings) {

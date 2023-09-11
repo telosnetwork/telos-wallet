@@ -55,7 +55,7 @@ To use this component, slots must be named as the index in the list, starting at
         border-radius: 50%;
         height: 24px;
         width: 24px;
-        border: 1px solid $page-header;
+        border: 1px solid var(--accent-color-5);
         justify-content: center;
         align-items: center;
     }

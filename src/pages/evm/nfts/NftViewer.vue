@@ -1,19 +1,16 @@
 <script setup lang="ts">
-
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
-import { usePlatformStore, useUserStore } from 'src/antelope';
-
-import ToolTip from 'src/components/ToolTip.vue';
+import { usePlatformStore } from 'src/antelope';
 
 const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
-const { fiatLocale } = useUserStore();
 
 const props = defineProps<{
     nft: ShapedNFT,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
+    tileMode: boolean,
 }>();
 
 // data
@@ -23,14 +20,23 @@ const nftTypes = {
     audio: 'audio',
     none: 'none',
 };
+const rootElement = ref<HTMLDivElement | null>(null);
+const iconElement = ref<HTMLDivElement | null>(null);
 
 const videoIsPlaying = ref(false);
 const videoIsAtEnd = ref(false);
 const videoElement = ref<HTMLVideoElement | null>(null);
-
+const isMediaLoading = ref(true);
+const passedMaxLoadingTime = ref(false);
+const isHovering = ref(false);
 
 // computed
 const isIos = computed(() => platformStore.isIOSMobile);
+const isMobile = computed(() => platformStore.isMobile);
+
+// 'icon mode' is when the nft is displayed as an icon in a list, such as in the NFT inventory in table view
+const isIconMode = computed(() => !props.tileMode && !props.previewMode);
+const showHoverContainer = computed(() => isIconMode.value && isHovering.value);
 
 const nftType = computed(() => {
     if (props.nft.imageSrcFull && !props.nft.audioSrc && !props.nft.videoSrc) {
@@ -44,9 +50,8 @@ const nftType = computed(() => {
     }
 });
 
-const showCoverImage = computed(() =>
-    [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) ||
-    props.previewMode,
+const showCoverImage = computed(
+    () => [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode,
 );
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrcFull);
 
@@ -91,17 +96,11 @@ const iconOverlayName = computed(() => {
     return 'o_image_not_supported';
 });
 
-const quantityBadgeText = computed(() => {
-    if (props.nft.quantity <= 1) {
-        return '';
-    }
-
-    const number = Intl.NumberFormat(fiatLocale, { notation: 'compact' }).format(props.nft.quantity);
-
-    return `x${number}`;
+onMounted(() => {
+    setTimeout(() => {
+        passedMaxLoadingTime.value = true;
+    }, 5000);
 });
-
-const quantityTooltipText = computed(() => Intl.NumberFormat(fiatLocale).format(props.nft.quantity));
 
 // methods
 function playVideo() {
@@ -123,115 +122,285 @@ function toggleVideoPlay(playOnly?: boolean) {
     }
 }
 
+function calculateHoverPreviewPosition() {
+    const root = rootElement.value;
+    const iconContainerElement = iconElement.value;
+    if (!root || !iconContainerElement) {
+        return;
+    }
+
+    // the height of the chevron on the hover element that points to the root element
+    const chevronHeight = 14;
+    // the minimum padding between the hover element and the border of the window / the edge of the left navbar
+    const padding = 16;
+    // the width of the left nav
+    const leftNavWidth = platformStore.__evm_nav_is_collapsed ? 0 : 300;
+    // the height of the top navbar
+    const navBarHeight = 64;
+    // width of the chevron's base
+    const chevronWidth = 17;
+
+    const iconRect = iconContainerElement.getBoundingClientRect();
+    const iconWidth = iconRect.width;
+    const iconHeight = iconRect.height;
+    const iconElementCenter = {
+        x: iconRect.left + iconWidth / 2,
+        y: iconRect.top + iconHeight / 2,
+    };
+    const hoverElementSize = 278;
+
+    // true if there is enough room between the icon and navbar to fit the hover element; if false, the hover element will be shown below
+    const hoverElementWillFitAbove = (iconRect.top > (hoverElementSize + chevronHeight + padding + navBarHeight));
+
+    // the amount that the hover element would be clipped by the left nav / left side of the window
+    const leftClipped = Math.max((leftNavWidth - (iconElementCenter.x - hoverElementSize / 2)), 0);
+    const rightClipped = Math.max((iconElementCenter.x + hoverElementSize / 2) - document.documentElement.clientWidth, 0);
+    const leftOffset = leftClipped ? leftClipped + padding : 0;
+    const rightOffset = rightClipped ? rightClipped + padding : 0;
+
+    // the 'left' value in pixels that has to be set on the chevron to center it over the NFT icon
+    let chevronXOffset = hoverElementSize / 2 - chevronWidth / 2;
+
+    if (leftOffset) {
+        chevronXOffset -= leftOffset;
+    } else if (rightOffset) {
+        chevronXOffset += rightOffset;
+    }
+
+    root.style.setProperty('--hover-preview-x', `${iconElementCenter.x - hoverElementSize / 2 + leftOffset - rightOffset}px`);
+    root.style.setProperty('--hover-preview-chevron-x', `${chevronXOffset}px`);
+
+    if (hoverElementWillFitAbove) {
+        root.style.setProperty('--hover-preview-y', `${iconElementCenter.y - iconHeight/2 - padding - hoverElementSize - 4}px`);
+        root.style.setProperty('--hover-preview-chevron-y', `${hoverElementSize - 13.5}px`);
+        root.style.setProperty('--hover-preview-chevron-rotation', '-45deg');
+
+    } else {
+        root.style.setProperty('--hover-preview-y', `${iconElementCenter.y + iconHeight / 2 + padding}px`);
+        root.style.setProperty('--hover-preview-chevron-y', '-12px');
+        root.style.setProperty('--hover-preview-chevron-rotation', '135deg');
+    }
+}
+
+function setHoverPreviewVisibility(visible: boolean) {
+    if (isMobile.value) {
+        // never show the NFT preview on mobile
+        isHovering.value = false;
+        return;
+    }
+
+    // set position variables
+    calculateHoverPreviewPosition();
+    isHovering.value = visible;
+}
 </script>
 
 <template>
 <div
+    ref="rootElement"
     :class="{
         'c-nft-viewer': true,
-        'c-nft-viewer--preview': previewMode,
-        'c-nft-viewer--video': nftType === nftTypes.video,
+        'c-nft-viewer--icon-mode': isIconMode,
     }"
 >
-    <div class="c-nft-viewer__media-container">
-        <div v-if="showCoverImage" class="c-nft-viewer__image-container">
-            <img
-                v-if="!showPlaceholderCoverImage"
-                :src="nft.imageSrcFull"
-                :alt="imageAlt"
-                :class="{
-                    'c-nft-viewer__image': true,
-                    'c-nft-viewer__image--preview': previewMode,
-                }"
-            >
+    <div
+        v-if="props.tileMode"
+        :class="{
+            'c-nft-viewer__nft-container': true,
+            'c-nft-viewer__nft-container--preview': previewMode,
+            'c-nft-viewer__nft-container--video': nftType === nftTypes.video,
+        }"
+    >
+        <div class="c-nft-viewer__media-container">
+            <div v-if="showCoverImage" class="c-nft-viewer__image-container">
+                <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
+                <img
+                    v-show="!showPlaceholderCoverImage && !isMediaLoading"
+                    :src="nft.imageSrcFull"
+                    :alt="imageAlt"
+                    class="c-nft-viewer__image"
+                    @load="isMediaLoading = false"
+                >
+                <div
+                    v-show="nftType === nftTypes.video && !isMediaLoading"
+                    class="c-nft-viewer__video-container"
+                    tabindex="0"
+                    role="preview"
+                >
+                    <video
+                        ref="videoElement"
+                        :controls="false"
+                        :src="nft.videoSrc"
+                        :poster="nft.imageSrcFull"
+                        playsinline
+                        class="c-nft-viewer__video"
+                        @loadeddata="isMediaLoading = false"
+                    ></video>
+                </div>
+                <q-icon
+                    v-if="passedMaxLoadingTime && isMediaLoading"
+                    :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+                    name="o_broken_image"
+                    size="md"
+                    color="grey-7"
+                    class="c-nft-viewer__image"
+                />
+            </div>
+
             <div
                 v-else-if="nftType === nftTypes.video"
                 class="c-nft-viewer__video-container"
                 tabindex="0"
-                role="preview"
-            ><video
-                ref="videoElement"
-                :controls="false"
-                :src="nft.videoSrc"
-                :poster="nft.imageSrcFull"
-                playsinline
-                :class="{
-                    'c-nft-viewer__video': true,
-                    'c-nft-viewer__video--preview': previewMode,
-                }"
-            ></video></div>
-            <div v-else class="c-nft-viewer__placeholder-image"></div>
+                role="button"
+                :aria-label="$t('nft.play_video')"
+                @click="playVideo"
+                @keypress.space.enter.prevent="toggleVideoPlay(false)"
+            >
+                <video
+                    v-show="!isMediaLoading"
+                    ref="videoElement"
+                    :src="nft.videoSrc"
+                    :controls="videoIsPlaying || isIos"
+                    :poster="nft.imageSrcFull"
+                    playsinline
+                    class="c-nft-viewer__video"
+                    @loadeddata="isMediaLoading = false"
+                    @play="
+                        videoIsPlaying = true;
+                        videoIsAtEnd = false;
+                    "
+                    @pause="
+                        videoIsPlaying = false;
+                        videoIsAtEnd = false;
+                    "
+                    @ended="
+                        videoIsPlaying = false;
+                        videoIsAtEnd = true;
+                    "
+                ></video>
+            </div>
+
+            <template v-if="!isMediaLoading && iconOverlayName">
+                <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
+
+                <q-icon
+                    :name="iconOverlayName"
+                    size="lg"
+                    color="primary"
+                    class="c-nft-viewer__overlay-icon"
+                />
+            </template>
         </div>
 
-        <div
-            v-else-if="nftType === nftTypes.video"
-            class="c-nft-viewer__video-container"
-            tabindex="0"
-            role="button"
-            :aria-label="$t('nft.play_video')"
-            @click="playVideo"
-            @keypress.space.enter.prevent="toggleVideoPlay(false)"
-        >
-            <video
-                ref="videoElement"
-                :src="nft.videoSrc"
-                :controls="videoIsPlaying || isIos"
-                :poster="nft.imageSrcFull"
-                playsinline
-                class="c-nft-viewer__video"
-                @play="videoIsPlaying = true; videoIsAtEnd = false"
-                @pause="videoIsPlaying = false; videoIsAtEnd = false"
-                @ended="videoIsPlaying = false; videoIsAtEnd = true"
-            ></video>
-        </div>
-
-        <template v-if="iconOverlayName">
-            <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
-
-            <q-icon
-                :name="iconOverlayName"
-                size="lg"
-                color="primary"
-                class="c-nft-viewer__overlay-icon"
-            />
-        </template>
+        <audio
+            v-if="nftType === nftTypes.audio && !previewMode"
+            controls
+            :src="nft.audioSrc"
+            class="c-nft-viewer__audio"
+        ></audio>
     </div>
-
-
-    <audio
-        v-if="nftType === nftTypes.audio && !previewMode"
-        controls
-        :src="nft.audioSrc"
-        class="c-nft-viewer__audio"
-    ></audio>
-
-    <div v-if="quantityBadgeText" class="c-nft-viewer__quantity-badge">
-        <ToolTip :text="quantityTooltipText" :hideIcon="true">
-            {{ quantityBadgeText }}
-        </ToolTip>
+    <div
+        v-else
+        ref="iconElement"
+        @mouseenter="setHoverPreviewVisibility(true)"
+        @mouseleave="setHoverPreviewVisibility(false)"
+    >
+        <q-skeleton v-if="isMediaLoading && !passedMaxLoadingTime" type="rect" class="c-nft-viewer__list-image" />
+        <q-icon
+            v-else-if="nft.videoSrc"
+            name="o_movie"
+            :alt="imageAlt"
+            size="md"
+            color="grey-7"
+            class="c-nft-viewer__list-image"
+        />
+        <q-icon
+            v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imageSrcFull)"
+            name="o_broken_image"
+            :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+            size="md"
+            color="grey-7"
+            class="c-nft-viewer__list-image"
+        />
+        <img
+            v-show="!isMediaLoading && nft.imageSrcFull"
+            :src="nft.imageSrcFull"
+            :alt="`${$t('nft.collectible')} ${imageAlt}`"
+            class="c-nft-viewer__list-image"
+            height="40"
+            width="40"
+            @load="isMediaLoading = false"
+        >
+    </div>
+    <div v-if="showHoverContainer" class="c-nft-viewer__hover-container shadow-3">
+        <div class="c-nft-viewer__image-container">
+            <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
+            <img
+                v-show="!showPlaceholderCoverImage && !isMediaLoading"
+                :src="nft.imageSrcFull"
+                :alt="imageAlt"
+                class="c-nft-viewer__image"
+                @load="isMediaLoading = false"
+            >
+            <div
+                v-show="nftType === nftTypes.video && !isMediaLoading"
+                class="c-nft-viewer__video-container"
+                tabindex="0"
+                role="preview"
+            >
+                <video
+                    ref="videoElement"
+                    :controls="false"
+                    :src="nft.videoSrc"
+                    :poster="nft.imageSrcFull"
+                    playsinline
+                    autoplay
+                    muted
+                    class="c-nft-viewer__video"
+                    @loadeddata="isMediaLoading = false"
+                ></video>
+            </div>
+            <q-icon
+                v-if="passedMaxLoadingTime && isMediaLoading"
+                :alt="`${$t('nft.broken_image')} ${imageAlt}`"
+                name="o_broken_image"
+                size="md"
+                color="grey-7"
+                class="c-nft-viewer__image"
+            />
+        </div>
     </div>
 </div>
-</template>
 
+</template>
 <style lang="scss">
 .c-nft-viewer {
     $this: &;
-
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    $list-icon-size: 40px;
     height: 100%;
-    width: 100%;
-    gap: 8px;
 
-    &--preview {
-        max-height: 270px;
+    &--icon-mode {
+        height: $list-icon-size;
+        width: $list-icon-size;
     }
 
-    &--video:hover:not(#{$this}--preview) {
-        #{$this}__overlay-icon-bg,
-        #{$this}__overlay-icon {
-            transform: scale(1.1);
+    &__nft-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        gap: 8px;
+
+        &--preview {
+            max-height: 270px;
+        }
+
+        &--video:hover:not(#{$this}--preview) {
+            #{$this}__overlay-icon-bg,
+            #{$this}__overlay-icon {
+                transform: scale(1.1);
+            }
         }
     }
 
@@ -242,7 +411,8 @@ function toggleVideoPlay(playOnly?: boolean) {
     }
 
     &__image-container,
-    &__video-container {
+    &__video-container,
+    &__blank-container {
         width: 100%;
     }
 
@@ -261,12 +431,17 @@ function toggleVideoPlay(playOnly?: boolean) {
         width: auto;
         max-width: 100%;
         max-height: 100%;
+    }
 
-        &--preview {
-            height: 100%;
-            width: 100%;
-            object-fit: cover;
-        }
+    &__image-loading {
+        height: 100%;
+        width: 100%;
+    }
+
+    &__list-image {
+        border-radius: 4px;
+        height: $list-icon-size;
+        width: $list-icon-size;
     }
 
     &__overlay-icon-bg,
@@ -287,7 +462,7 @@ function toggleVideoPlay(playOnly?: boolean) {
         pointer-events: none;
 
         border-radius: 50%;
-        background: #FFFFFFA0;
+        background: #ffffffa0;
     }
 
     &__overlay-icon {
@@ -306,8 +481,8 @@ function toggleVideoPlay(playOnly?: boolean) {
         min-height: 270px;
         max-width: 432px;
         border-radius: 4px;
-        background-color: var(--header-bg-color);
-        border: 1px solid darken($page-header, 5%);
+        background-color: var(--accent-color-5);
+        border: 1px solid var(--header-item-outline-color);
     }
 
     &__video-container {
@@ -317,10 +492,6 @@ function toggleVideoPlay(playOnly?: boolean) {
     &__video {
         width: 100%;
         cursor: pointer;
-
-        &--preview {
-            border-radius: 4px;
-        }
     }
 
     &__audio {
@@ -331,21 +502,28 @@ function toggleVideoPlay(playOnly?: boolean) {
         flex-shrink: 0;
     }
 
-    &__quantity-badge {
-        @include text--small-bold;
+    &__hover-container {
+        position: fixed;
+        height: 278px;
+        width: 278px;
+        left: var(--hover-preview-x);
+        top: var(--hover-preview-y);
+        background: var(--accent-color-5);
+        z-index: $z-index--nft-hover-preview;
+        border-radius: 4px;
+        padding: 8px;
 
-        position: absolute;
-        right: -0.5px; // 0.5px to prevent clipping issue
-        bottom: -0.5px;
-        width: 56px;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        color: var(--accent-color-2);
-        border-radius: 4px 0 4px 0;
-        background-color: var(--bg-color);
+        &::before {
+            content: '';
+            position: absolute;
+            top: var(--hover-preview-chevron-y);
+            left: var(--hover-preview-chevron-x);
+            transform: rotate(var(--hover-preview-chevron-rotation));
+            height: 24px;
+            width: 24px;
+            background: linear-gradient(45deg, var(--accent-color-5) 50%, transparent 50%);
+            box-shadow: -3px 4px 5px -4px rgba(0,0,0,0.6);
+        }
     }
 }
 </style>

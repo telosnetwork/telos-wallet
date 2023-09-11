@@ -19,6 +19,7 @@ import { API } from '@greymass/eosio';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
+    CURRENT_CONTEXT,
     useBalancesStore,
     useFeedbackStore,
     useHistoryStore,
@@ -34,8 +35,9 @@ import {
     addressString,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
-import { getChecksumAddress, truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
+import { getAddress } from 'ethers/lib/utils';
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -90,19 +92,19 @@ const store_name = 'account';
 export const useAccountStore = defineStore(store_name, {
     state: (): AccountState => (accountInitialState),
     getters: {
-        isAuthenticated: state => !!state.__accounts['logged'],
-        loggedAccount: state => state.__accounts['logged'],
-        loggedIsNative: state => state.__accounts['logged']?.isNative,
-        loggedEvmAccount: state => (state.__accounts['logged']?.isNative ?
-            null : state.__accounts['logged']) as EvmAccountModel,
-        loggedNativeAccount: state => (state.__accounts['logged']?.isNative ?
-            state.__accounts['logged'] : null) as NativeAccountModel,
-        currentAccount: state => ({ ...state.__accounts['current'] }),
-        currentEvmAccount: state => (state.__accounts['current']?.isNative ?
-            null : state.__accounts['current']) as EvmAccountModel,
+        isAuthenticated: state => !!state.__accounts[CURRENT_CONTEXT],
+        loggedAccount: state => state.__accounts[CURRENT_CONTEXT],
+        loggedIsNative: state => state.__accounts[CURRENT_CONTEXT]?.isNative,
+        loggedEvmAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            null : state.__accounts[CURRENT_CONTEXT]) as EvmAccountModel,
+        loggedNativeAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            state.__accounts[CURRENT_CONTEXT] : null) as NativeAccountModel,
+        currentAccount: state => ({ ...state.__accounts[CURRENT_CONTEXT] }),
+        currentEvmAccount: state => (state.__accounts[CURRENT_CONTEXT]?.isNative ?
+            null : state.__accounts[CURRENT_CONTEXT]) as EvmAccountModel,
         currentIsLogged: state =>
-            state.__accounts['logged']?.account === state.__accounts['current']?.account &&
-            state.__accounts['logged']?.network === state.__accounts['current']?.network,
+            state.__accounts[CURRENT_CONTEXT]?.account === state.__accounts[CURRENT_CONTEXT]?.account &&
+            state.__accounts[CURRENT_CONTEXT]?.network === state.__accounts[CURRENT_CONTEXT]?.network,
         getAccount: state => (label: Label) => ({ ...state.__accounts[label] }),
         getAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator,
         getEVMAuthenticator: state => (label: Label) => state.__accounts[label]?.authenticator as EVMAuthenticator,
@@ -133,8 +135,7 @@ export const useAccountStore = defineStore(store_name, {
                         permission,
                         authenticator,
                     } as NativeAccountModel;
-                    this.setCurrentAccount(nativeAccount);
-                    this.setLoggedAccount(nativeAccount);
+                    this.setAccount(nativeAccount);
 
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
@@ -142,7 +143,7 @@ export const useAccountStore = defineStore(store_name, {
                     localStorage.setItem('autoLogin', authenticator.getName());
 
                     success = true;
-                    this.fetchAccountDataFor('logged', nativeAccount);
+                    this.fetchAccountDataFor(CURRENT_CONTEXT, nativeAccount);
                     getAntelope().events.onLoggedIn.next(nativeAccount);
                 }
             } catch (error) {
@@ -155,6 +156,7 @@ export const useAccountStore = defineStore(store_name, {
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 
@@ -164,7 +166,7 @@ export const useAccountStore = defineStore(store_name, {
                 this.trace('loginEVM', 'authenticator finished with address', rawAddress);
 
                 if (rawAddress) {
-                    const address = getChecksumAddress(rawAddress);
+                    const address = getAddress(rawAddress) as addressString;
 
                     const displayAddress = truncateAddress(address);
 
@@ -180,15 +182,14 @@ export const useAccountStore = defineStore(store_name, {
                         displayAddress,
                         authenticator,
                     };
-                    this.setCurrentAccount(evmAccount);
-                    this.setLoggedAccount(evmAccount);
+                    this.setAccount(evmAccount);
 
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
                     localStorage.setItem('isNative', 'false');
                     localStorage.setItem('autoLogin', authenticator.getName());
                     success = true;
-                    this.fetchAccountDataFor('logged', evmAccount);
+                    this.fetchAccountDataFor(CURRENT_CONTEXT, evmAccount);
                     getAntelope().events.onLoggedIn.next(evmAccount);
                 } else {
                     console.error('Error: ', 'EVM login failed??');
@@ -205,6 +206,7 @@ export const useAccountStore = defineStore(store_name, {
         async logout() {
             this.trace('logout');
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 
@@ -214,7 +216,7 @@ export const useAccountStore = defineStore(store_name, {
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                const logged = this.__accounts['logged'];
+                const logged = this.__accounts[CURRENT_CONTEXT];
                 const { authenticator } = logged;
                 try {
                     authenticator && (await authenticator.logout());
@@ -222,7 +224,7 @@ export const useAccountStore = defineStore(store_name, {
                     console.error('Authenticator logout error', error);
                 }
 
-                this.setLoggedAccount(null);
+                this.setAccount(null);
                 getAntelope().events.onLoggedOut.next();
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -233,7 +235,7 @@ export const useAccountStore = defineStore(store_name, {
 
         async autoLogin(): Promise<boolean> {
             this.trace('autoLogin');
-            const label = 'logged';
+            const label = CURRENT_CONTEXT;
             try {
                 useFeedbackStore().setLoading('account.autoLogin');
                 const network = localStorage.getItem('network');
@@ -322,12 +324,7 @@ export const useAccountStore = defineStore(store_name, {
                     const chain = useChainStore().getChain(label).settings as NativeChainSettings;
                     const accountData = await chain.getAccount(nativeAccount.account);
                     nativeAccount.data = accountData;
-                    if (label === 'logged') {
-                        this.setLoggedAccount(nativeAccount);
-                    }
-                    if (label === 'current') {
-                        this.setCurrentAccount(nativeAccount);
-                    }
+                    this.setAccount(nativeAccount);
                 } else {
                     // There's no account data for EVM accounts
                 }
@@ -338,37 +335,15 @@ export const useAccountStore = defineStore(store_name, {
             }
         },
 
-        // commits
-        setCurrentAccount(account: AccountModel | null) {
-            this.trace('setCurrentAccount', account);
-            const label = 'current';
+        // commits -------
+        setAccount(account: AccountModel | null) {
+            this.trace('setAccount', account);
+            const label = CURRENT_CONTEXT;
             const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
             try {
                 if (account) {
                     this.__accounts[label] = { ...this.__accounts[label], ...account };
-                } else {
-                    delete this.__accounts[label];
-                }
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
-            } finally {
-                const after = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
-                if (before !== after) {
-                    getAntelope().events.onAccountChanged.next({
-                        label, account: toRaw(this.__accounts[label]) as AccountModel,
-                    });
-                }
-            }
-        },
-
-        setLoggedAccount(account: AccountModel | null) {
-            this.trace('setLoggedAccount', account);
-            const label = 'logged';
-            const before = `${this.__accounts[label]?.account ?? ''} ${this.__accounts[label]?.network ?? ''}`;
-            try {
-                if (account) {
-                    this.__accounts[label] = { ...this.__accounts[label], ...account };
-                    useChainStore().setLoggedChain(account.network);
+                    useChainStore().setChain(label, account.network);
                 } else {
                     delete this.__accounts[label];
                 }

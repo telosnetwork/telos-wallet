@@ -2,12 +2,12 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { ShapedNFT } from 'src/antelope/types';
+import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
-import { useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
@@ -26,12 +26,17 @@ const loading = ref(true);
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
     if (contractAddress && nftId) {
-        nftStore.fetchNftDetails('current', contractAddress, nftId).then((nftResponse) => {
-            nft.value = nftResponse ?? null;
-            loading.value = false;
-        });
+        const erc721Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+        const erc1155Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
+
+        if (erc721Details) {
+            nft.value = erc721Details;
+        } else if (erc1155Details) {
+            nft.value = erc1155Details;
+        }
+        loading.value = false;
     }
 });
 
@@ -56,8 +61,12 @@ const ownerLink = computed(() => {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.contractAddress}`;
+    return `${explorerUrl}/address/${nft.value.ownerAddress}`;
 });
+
+const filteredAttributes = computed(() =>
+    nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
+);
 
 </script>
 
@@ -90,7 +99,12 @@ const ownerLink = computed(() => {
             </template>
 
             <template v-else>
-                <NftViewer :nft="nft" :preview-mode="false" class="c-nft-details__viewer" />
+                <NftViewer
+                    :nft="nft"
+                    :previewMode="false"
+                    :tileMode="true"
+                    class="c-nft-details__viewer"
+                />
                 <NftDetailsCard title="Collection" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
                 </NftDetailsCard>
@@ -182,7 +196,7 @@ const ownerLink = computed(() => {
                 </p>
 
                 <NftDetailsCard
-                    v-for="(attribute, index) in nft.attributes"
+                    v-for="(attribute, index) in filteredAttributes"
                     :key="`nft-attr-${index}`"
                     :title="attribute.label"
                     class="q-mb-sm"

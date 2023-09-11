@@ -1,13 +1,12 @@
-import { arrayify, isHexString, keccak256 } from 'ethers/lib/utils';
-import { addressString } from 'src/antelope/stores/utils/abi';
 
 /**
  * Given some text, ellipsizes the text if it exceeds a specific length
  *
  * @param text
  * @param maxLength
+ * @returns {string}
  */
-export function truncateText(text: string, maxLength = 10) {
+export function truncateText(text: string, maxLength = 10): string {
     if (text.length <= maxLength) {
         return text;
     }
@@ -20,41 +19,29 @@ export function truncateText(text: string, maxLength = 10) {
  *
  * @param address
  * @param maxLength
+ * @returns {string}
  */
-export function truncateAddress(address: string) {
+export function truncateAddress(address: string): string {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 /**
- * convertes a address to a checksum address
- *
- * @param address
+ * Given a name and an id, returns the name without the ID. Generally in the UI, NFT name and ID are displayed next to each other;
+ * this function prevents the ID from duplicated
+ * @param name
+ * @param id
+ * @returns {string}
+ * @example
+ * getShapedNftName('SomeNft #1234', '1234') // 'SomeNft'
  */
-export function getChecksumAddress(address: string): addressString {
-    if (!isHexString(address, 20)) {
-        throw new Error(`Invalid address: ${address}`);
-    }
+export function getShapedNftName(name: string, id: string): string {
+    let shapedName = name;
+    if (name.includes(id)) {
+        shapedName = name.replace(id, '');
 
-    const addressLower = address.toLowerCase();
-
-    const chars = addressLower.substring(2).split('');
-
-    const expanded = new Uint8Array(40);
-    for (let i = 0; i < 40; i++) {
-        expanded[i] = chars[i].charCodeAt(0);
-    }
-
-    const hashed = arrayify(keccak256(expanded));
-
-    for (let i = 0; i < 40; i += 2) {
-        if ((hashed[i >> 1] >> 4) >= 8) {
-            chars[i] = chars[i].toUpperCase();
-        }
-        if ((hashed[i >> 1] & 0x0f) >= 8) {
-            chars[i + 1] = chars[i + 1].toUpperCase();
+        if (shapedName[shapedName.length - 1] === '#') {
+            shapedName = shapedName.slice(0, -1);
         }
     }
-
-    return '0x' + chars.join('') as addressString;
+    return shapedName.trim();
 }
-

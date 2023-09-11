@@ -23,7 +23,14 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmABI, TokenClass, addressString } from 'src/antelope/types';
+import {
+    AntelopeError,
+    EvmABI,
+    TokenClass,
+    addressString,
+    wtlosAbiDeposit,
+    wtlosAbiWithdraw,
+} from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { toRaw } from 'vue';
@@ -35,6 +42,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // thus, we need to implement out own debounce so that we can await the async function (in this case, _prepareTokenForTransfer)
     private _debounceTimer: number | NodeJS.Timer | null;
     private _debouncedPrepareTokenConfigResolver: ((value: unknown) => void) | null;
+    private web3Modal: Web3Modal;
+    private unsubscribeWeb3Modal: null | (() => void) = null;
+    private usingQR = false;
 
     options: Web3ModalConfig;
     wagmiClient: EthereumClient;
@@ -45,6 +55,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
         this.wagmiClient = wagmiClient;
         this._debounceTimer = null;
         this._debouncedPrepareTokenConfigResolver = null;
+
+        this.web3Modal = new Web3Modal(this.options, this.wagmiClient);
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
@@ -66,6 +78,20 @@ export class WalletConnectAuth extends EVMAuthenticator {
         try {
             this.clearAuthenticator();
             const address = getAccount().address as addressString;
+
+            // We are successfully logged in. Let's find out if we are using QR
+            this.usingQR = false;
+            const injected = new InjectedConnector();
+            const provider = toRaw(await injected.getProvider());
+            if (typeof provider === 'undefined') {
+                this.usingQR = true;
+            } else {
+                const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
+                const sameAddress = providerAddress === address;
+                this.usingQR = !sameAddress;
+                this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
+            }
+            this.trace('walletConnectLogin', 'using QR:', this.usingQR);
 
             // We are already logged in. Now let's try to force the wallet to connect to the correct network
             try {
@@ -136,9 +162,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
         } else {
             return new Promise(async (resolve) => {
                 this.trace('login', 'web3Modal.openModal()');
-                const web3Modal = new Web3Modal(this.options, this.wagmiClient);
-                web3Modal.subscribeModal(async (newState) => {
-                    this.trace('login', 'web3Modal.subscribeModal ', newState, wagmiConnected);
+
+                this.unsubscribeWeb3Modal = this.web3Modal.subscribeModal(async (newState) => {
+                    this.trace('login', 'web3Modal.subscribeModal ', toRaw(newState), wagmiConnected);
 
                     if (newState.open === true) {
                         this.trace(
@@ -166,12 +192,20 @@ export class WalletConnectAuth extends EVMAuthenticator {
                                 { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
                             );
                         }
+
+                        // this prevents multiple subscribers from being attached to the web3Modal
+                        // without this, every time the user logs out and back in again, this subscribeModal handler
+                        // runs one more time than the last time
+                        if (this.unsubscribeWeb3Modal) {
+                            this.unsubscribeWeb3Modal();
+                        }
                     }
+
                     if (wagmiConnected()) {
                         resolve(this.walletConnectLogin(network));
                     }
                 });
-                web3Modal.openModal();
+                this.web3Modal.openModal();
             });
         }
     }
@@ -179,6 +213,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // having this two properties attached to the authenticator instance may bring some problems
     // so after we use them we nned to clear them to avoid that problems
     clearAuthenticator(): void {
+        this.trace('clearAuthenticator');
+        this.usingQR = false;
         this.options = null as unknown as Web3ModalConfig;
         this.wagmiClient = null as unknown as EthereumClient;
     }
@@ -218,6 +254,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 return await writeContract(this.sendConfig as PrepareWriteContractResult<EvmABI, 'transfer', number>);
             }
         }
+    }
+
+    readyForTransfer(): boolean {
+        return !!this.sendConfig;
     }
 
     sendConfig: PrepareSendTransactionResult | PrepareWriteContractResult<EvmABI, string, number> | null = null;
@@ -271,8 +311,46 @@ export class WalletConnectAuth extends EVMAuthenticator {
             this.sendConfig = null;
         }
     }
+
     async prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void> {
+        this.sendConfig = null;
         await this._debouncedPrepareTokenConfig(token, amount, to);
+    }
+
+    async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        this.trace('wrapSystemToken', amount.toString());
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+
+        const config = {
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: wrappedSystemTokenContractAddress,
+            abi: wtlosAbiDeposit,
+            functionName: 'deposit',
+            args: [],
+            value: BigInt(amount.toString()),
+        };
+        this.trace('wrapSystemToken', 'prepareWriteContract ->', config);
+        const sendConfig = await prepareWriteContract(config);
+
+        this.trace('wrapSystemToken', 'writeContract ->', sendConfig);
+        return await writeContract(sendConfig);
+    }
+
+    async unwrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
+
+        const sendConfig = await prepareWriteContract({
+            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            address: wrappedSystemTokenContractAddress,
+            abi: wtlosAbiWithdraw,
+            functionName: 'withdraw',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            args: [amount] as any[],
+        });
+
+        return await writeContract(sendConfig);
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
@@ -293,17 +371,31 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         let web3Provider = null;
-        if (usePlatformStore().isMobile) {
+        if (usePlatformStore().isMobile || this.usingQR) {
             const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
             const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
             web3Provider = new ethers.providers.JsonRpcProvider(url);
             this.trace('web3Provider', 'JsonRpcProvider ->', web3Provider);
+
+            // This is a hack to make the QR code work.
+            // this code is going to be used in EVMAuthenticator.ts login method
+            const listAccounts: () => Promise<`0x${string}`[]> = async () => [getAccount().address as addressString];
+            web3Provider.listAccounts = listAccounts;
+
         } else {
             web3Provider = new ethers.providers.Web3Provider(await this.externalProvider());
             this.trace('web3Provider', 'Web3Provider ->', web3Provider);
         }
         await web3Provider.ready;
         return web3Provider as ethers.providers.Web3Provider;
+    }
+
+    async getSigner(): Promise<ethers.Signer> {
+        this.trace('getSigner');
+        const web3Provider = await this.web3Provider();
+        const signer = web3Provider.getSigner();
+        this.trace('getSigner', 'signer ->', signer);
+        return signer;
     }
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {
@@ -316,6 +408,16 @@ export class WalletConnectAuth extends EVMAuthenticator {
             }
             resolve(provider as unknown as ethers.providers.ExternalProvider);
         });
+    }
+
+    async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
+        this.trace('ensureCorrectChain', 'QR:', this.usingQR);
+        if (this.usingQR) {
+            // we don't have tools to check the chain when using QR
+            return this.web3Provider();
+        } else {
+            return super.ensureCorrectChain();
+        }
     }
 
 }

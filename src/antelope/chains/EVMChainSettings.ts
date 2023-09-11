@@ -22,10 +22,13 @@ import {
     NFTContractClass,
     IndexerNftItemResult,
     NFTItemClass,
+    IndexerTransfersFilter,
+    IndexerAccountTransfersResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
+import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getAntelope } from 'src/antelope';
 
 
@@ -105,6 +108,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 resolve();
             });
         });
+    }
+
+    async initialized() {
+        return this.initPromise;
     }
 
     async init(): Promise<void> {
@@ -264,8 +271,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    // If we have market data we use it
-                    if (typeof contractData.calldata === 'object') {
+                    const priceUpdatedWithinTenMins = !!contractData.calldata.marketdata_updated && dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, 10);
+
+                    // If we have market data we use it, as long as the price was updated within the last 10 minutes
+                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
@@ -320,6 +329,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                     }
                     const contract_source = response.contracts[item_source.contract];
+
+                    if (!contract_source) {
+                        // this case only happens if the indexer fails to index contract data
+                        continue;
+                    }
                     const contract = new NFTContractClass(contract_source);
                     const item = new NFTItemClass(item_source, contract);
                     const nft = new NFTClass(item);
@@ -407,6 +421,51 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(response => response.data as IndexerAccountTransactionsResponse);
     }
 
+    async getEvmNftTransfers({
+        account,
+        type,
+        limit,
+        offset,
+        includePagination,
+        endBlock,
+        startBlock,
+        contract,
+        includeAbi,
+    }: IndexerTransfersFilter): Promise<IndexerAccountTransfersResponse> {
+        let aux = {};
+
+        if (limit !== undefined) {
+            aux = { limit, ...aux };
+        }
+        if (offset !== undefined) {
+            aux = { offset, ...aux };
+        }
+        if (includeAbi !== undefined) {
+            aux = { includeAbi, ...aux };
+        }
+        if (type !== undefined) {
+            aux = { type, ...aux };
+        }
+        if (includePagination !== undefined) {
+            aux = { includePagination, ...aux };
+        }
+        if (endBlock !== undefined) {
+            aux = { endBlock, ...aux };
+        }
+        if (startBlock !== undefined) {
+            aux = { startBlock, ...aux };
+        }
+        if (contract !== undefined) {
+            aux = { contract, ...aux };
+        }
+
+        const params = aux as AxiosRequestConfig;
+        const url = `v1/account/${account}/transfers`;
+
+        return this.indexer.get(url, { params })
+            .then(response => response.data as IndexerAccountTransfersResponse);
+    }
+
     async getTokenList(): Promise<TokenClass[]> {
         if (this.tokenListPromise) {
             return this.tokenListPromise;
@@ -422,7 +481,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
             }) as unknown as TokenSourceInfo))
             .then(tokens => tokens.map(t => new TokenClass(t)))
-            .then(tokens => [this.getSystemToken(), ...tokens]);
+            .then(tokens => [this.getSystemToken(), this.getWrappedSystemToken(), this.getStakedSystemToken(), ...tokens]);
 
         return this.tokenListPromise;
     }

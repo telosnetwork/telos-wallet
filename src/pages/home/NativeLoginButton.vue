@@ -1,6 +1,6 @@
 
 <script>
-import { useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 
@@ -51,7 +51,7 @@ export default defineComponent({
         setDefaultNativeChain() {
             const network = process.env.CHAIN_NAME || 'telos';
             const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
+            chainStore.setChain(CURRENT_CONTEXT, network);
         },
         // end of antelope methods
         ...mapActions('account', [

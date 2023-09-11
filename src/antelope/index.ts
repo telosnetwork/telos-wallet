@@ -38,7 +38,7 @@ const events = {
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
     onAccountChanged: new BehaviorSubject<{label:string, account:AccountModel|null}>({ label: '', account: null }),
-    onChainIndexer: new Subject<{label:string, isHealthy:boolean}>(),
+    onChainIndexerReady: new BehaviorSubject<{label:string, ready:boolean}>({ label: '', ready: false }),
     onErrorMessage: new Subject<{name: string, message:string}>(),
 };
 export const getEvents = () => events;
@@ -80,8 +80,7 @@ export class Antelope {
                 console.error('No chain name specified in environment config; the application will not run correctly');
             } else {
                 const network: string = chainNetworkNames[process.env.CHAIN_NAME];
-
-                chainStore.setCurrentChain(network);
+                chainStore.setChain(CURRENT_CONTEXT, network);
             }
         }
 
@@ -143,3 +142,7 @@ export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useEVMStore } from 'src/antelope/stores/evm';
 export { useNftsStore } from 'src/antelope/stores/nfts';
 
+// this constant is used for a temporal workaround for the multi-context issue
+// https://github.com/telosnetwork/telos-wallet/issues/582
+
+export const CURRENT_CONTEXT = 'current';

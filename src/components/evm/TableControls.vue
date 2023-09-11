@@ -19,6 +19,10 @@ const props = defineProps({
         type: Array as PropType<number[]>,
         default: () => [5, 10, 20, 50, 100],
     },
+    rowLabel: {
+        type: String,
+        default: () => 'global.rows_per_page',
+    },
 });
 const emit = defineEmits(['pagination-updated']);
 
@@ -63,13 +67,15 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         ...props.pagination,
         page,
     });
+
+    window.scrollTo(0, 0);
 }
 </script>
 
 <template>
 <div class="c-table-controls">
     <div class="c-table-controls__left-container">
-        {{ $t('global.rows_per_page') }}:&nbsp;{{ pagination.rowsPerPage }}
+        {{ $t(rowLabel) }}:&nbsp;{{ pagination.rowsPerPage }}
 
         <q-icon
             :name="showRowsPerPageDropdown ? 'expand_more' : 'expand_less'"

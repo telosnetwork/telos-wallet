@@ -1,14 +1,11 @@
 export * from 'src/antelope/stores/utils/abi/signature';
 import { BigNumber, ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
-import { keccak256 } from '@ethersproject/keccak256';
-import { toUtf8Bytes } from '@ethersproject/strings';
-import {
-    EvmABIEntry,
-} from 'src/antelope/types';
+import { EvmABIEntry } from 'src/antelope/types';
 import { fromUnixTime, format } from 'date-fns';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { keccak256, toUtf8Bytes } from 'ethers/lib/utils';
 
 const REVERT_FUNCTION_SELECTOR = '0x08c379a0';
 const REVERT_PANIC_SELECTOR = '0x4e487b71';
@@ -82,7 +79,7 @@ export function toChecksumAddress(address: string): string {
         addy = addy.padStart(40, '0');
     }
 
-    const hash = keccak256(toUtf8Bytes(addy));
+    const hash = keccak256(toUtf8Bytes(addy)).replace('0x', '');
     let ret = '0x';
 
     for (let i = 0; i < addy.length; i++) {

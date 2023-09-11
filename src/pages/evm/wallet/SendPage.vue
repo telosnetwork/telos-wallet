@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useBalancesStore, useChainStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -18,7 +18,6 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
-const balanceStore = useBalancesStore();
 
 export default defineComponent({
     name: 'SendPage',
@@ -81,6 +80,10 @@ export default defineComponent({
             immediate: true,
             deep: true,
         },
+        selected() {
+            this.amount = BigNumber.from(0);
+            (this.$refs.currencyInput as InstanceType<typeof CurrencyInput>)?.resetEmptyError();
+        },
         isFormValid(isValid: boolean) {
             this.updateTokenTransferConfig(isValid, this.token, this.address, this.amount);
         },
@@ -111,7 +114,7 @@ export default defineComponent({
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances(CURRENT_CONTEXT);
         },
         showContractLink(): boolean {
             return this.token?.address !== NativeCurrencyAddress;
@@ -161,19 +164,13 @@ export default defineComponent({
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
         isLoading(): boolean {
-            return ant.stores.feedback.isLoading('transferEVMTokens');
+            return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
-        configIsLoading() {
-            let config;
-            if (this.token?.isSystem) {
-                config = balanceStore.__wagmiSystemTokenTransferConfig['logged'];
-            } else {
-                config = balanceStore.__wagmiTokenTransferConfig['logged'];
-            }
-            return this.isFormValid && !config;
+        authIsReadyForTransfer(): boolean {
+            return accountStore.getEVMAuthenticator(CURRENT_CONTEXT)?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
-            return !(this.token?.decimals && this.token?.symbol) || this.isLoading;
+            return !(this.token?.decimals && this.token?.symbol);
         },
     },
     created() {
@@ -225,7 +222,7 @@ export default defineComponent({
         async startTransfer() {
 
             // before sending the transaction, we check if the user is connected to the correct network
-            const label = 'logged';
+            const label = CURRENT_CONTEXT;
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
                 const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                 const networkName = useChainStore().loggedChain.settings.getDisplay();
@@ -270,12 +267,6 @@ export default defineComponent({
                     }
                 }).catch((err) => {
                     console.error(err);
-                    if (err instanceof AntelopeError) {
-                        const evmErr = err as AntelopeError;
-                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
-                    } else {
-                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
-                    }
                 });
             } else {
                 ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));
@@ -362,6 +353,7 @@ export default defineComponent({
                 <!-- Amount input -->
                 <div class="col">
                     <CurrencyInput
+                        ref="currencyInput"
                         v-model="amount"
                         v-bind="currencyInputSecondaryCurrencyBindings"
                         :loading="currencyInputIsLoading"

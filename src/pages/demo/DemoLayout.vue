@@ -6,7 +6,7 @@
     <h5>Available demos</h5>
     <ul class="q-mb-xl">
         <li class="c-demo-layout__back">
-            <router-link to="/">Back</router-link>
+            <router-link to="/">Homepage</router-link>
         </li>
         <br >
         <li>
@@ -20,6 +20,9 @@
         </li>
         <li>
             <router-link :to="{ name: 'demos.nfts' }">NFTs / Collectibles</router-link>
+        </li>
+        <li>
+            <router-link :to="{ name: 'demos.scrollable-cards' }">Scrollable Info Cards</router-link>
         </li>
     </ul>
 

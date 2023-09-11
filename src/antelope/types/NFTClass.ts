@@ -36,6 +36,8 @@ export const NFTSourceTypes = {
     NONE: 'none',
 };
 
+export type NftTokenInterface = 'ERC721' | 'ERC1155';
+
 // NFT classes ------------------
 
 export class NFTContractClass {
