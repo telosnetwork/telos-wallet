@@ -20,6 +20,8 @@ export interface ShapedNFT {
     attributes: NftAttribute[];
     imageSrcFull?: string; // if this is empty, the UI will display a generic image icon
     imageSrcIcon?: string; // as a result of shaping, this will always have a value if imageSrcFull is defined
+    isErc721: boolean; // true if this is an ERC721 NFT
+    isErc1155: boolean; // true if this is an ERC1155 NFT
 
     // only one of audioSrc or videoSrc should be present, not both
     audioSrc?: string;
@@ -54,6 +56,10 @@ export class NFTContractClass {
 
     get name(): string | undefined {
         return this.indexer.calldata?.name;
+    }
+
+    get supportedInterfaces() {
+        return this.indexer.supportedInterfaces.map(iface => iface.toLowerCase());
     }
 }
 
@@ -355,6 +361,14 @@ export class NFTClass implements ShapedNFT {
         return this.item.amount;
     }
 
+    get isErc1155(): boolean {
+        return this.item.contract.supportedInterfaces.includes('erc1155');
+    }
+
+    get isErc721(): boolean {
+        return this.item.contract.supportedInterfaces.includes('erc721');
+    }
+
     get updated() {
         return this.item.indexer.updated;
     }
@@ -394,6 +408,8 @@ export class NFTClass implements ShapedNFT {
             imageSrcIcon: this.imageSrcIcon,
             audioSrc: this.audioSrc,
             videoSrc: this.videoSrc,
+            isErc721: this.isErc721,
+            isErc1155: this.isErc1155,
         };
     }
 

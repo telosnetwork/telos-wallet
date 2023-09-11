@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { ShapedNFT } from 'src/antelope/types';
@@ -9,10 +8,10 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
+import ToolTip from 'components/ToolTip.vue';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
-const router = useRouter();
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -28,11 +27,18 @@ const nftDetailsRoute = {
     },
 };
 
+const numberFormatter = new Intl.NumberFormat(navigator.language, {
+    maximumFractionDigits: 0,
+    maximumSignificantDigits: 4,
+    notation: 'compact',
+});
+
 // computed
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 // hide ID text if the NFT name includes the ID, which is common
 const showId = computed(() => !props.nft.name.includes(props.nft.id));
+const nftQuantityText = computed(() => numberFormatter.format(props.nft.quantity));
 
 </script>
 
@@ -50,6 +56,11 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
             :preview-mode="true"
             :tile-mode="true"
         />
+        <div v-if="nft.quantity > 1" class="c-nft-tile__quantity-badge">
+            <ToolTip :text="nft.quantity.toString()" :hide-icon="true">
+                x{{ nftQuantityText }}
+            </ToolTip>
+        </div>
     </router-link>
     <div class="c-nft-tile__text-container">
         <h4 class="c-nft-tile__text">
@@ -88,6 +99,23 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
     &__link {
         height: 100%;
         text-decoration: none;
+        position: relative;
+    }
+
+    &__quantity-badge {
+        @include text--small-bold;
+
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 32px;
+        width: 56px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--bg-color);
+        border-radius: 4px 0 0 0;
+        color: var(--accent-color-2);
     }
 }
 </style>

@@ -15,6 +15,8 @@ export interface IndexerNftItemAttribute {
 }
 
 export interface IndexerNftItemResult {
+    // metadata is returned as a part of the NFT itself rather than the inexer,
+    // which is to say, it may contain arbitrary/stale/incorrect data
     metadata: {
         dna?: string;
         date?: number;

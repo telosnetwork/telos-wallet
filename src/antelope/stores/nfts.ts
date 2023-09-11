@@ -132,7 +132,7 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
-            const owner = '0xe7209d65c5BB05Ddf799b20fF0EC09E691FC3f11'; // eztodo revert this
+            const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'; // eztodo revert this
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {
@@ -184,7 +184,7 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async fetchNftDetails(label: Label, contract: string, tokenId: string, type: NftTokenInterface): Promise<NFTClass | null> {
+        async fetchNftDetails(label: Label, contract: string, tokenId: string, type?: NftTokenInterface): Promise<NFTClass | null> {
             this.trace('fetchNftDetails', label, contract, tokenId, type);
             let promise = Promise.resolve(null) as Promise<NFTClass | null>;
             try {
@@ -240,7 +240,7 @@ export const useNftsStore = defineStore(store_name, {
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
-                            type.toUpperCase(),
+                            (type ?? 'ERC721').toUpperCase(),
                         ).then((nft) => {
                             this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {

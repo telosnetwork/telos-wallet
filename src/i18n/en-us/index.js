@@ -142,6 +142,9 @@ export default {
         toggle: 'Toggle "{text}"',
         arrow_icon_alt: 'Arrow icon',
         new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
+        owner: 'Owner',
+        description: 'Description',
+        owned: 'Owned',
     },
     nft : {
         collectible: 'Collectible',

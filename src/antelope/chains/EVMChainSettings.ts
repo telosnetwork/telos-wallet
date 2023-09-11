@@ -336,6 +336,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     }
                     const contract = new NFTContractClass(contract_source);
                     const item = new NFTItemClass(item_source, contract);
+                    debugger;
                     const nft = new NFTClass(item);
                     nfts.push(nft);
                 }

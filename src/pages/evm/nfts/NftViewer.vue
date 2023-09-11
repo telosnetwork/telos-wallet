@@ -394,6 +394,14 @@ function setHoverPreviewVisibility(visible: boolean) {
 
         &--preview {
             max-height: 270px;
+
+            #{$this}__image {
+                height: 100%;
+                width: 100%;
+                max-height: unset;
+                max-width: unset;
+                object-fit: cover;
+            }
         }
 
         &--video:hover:not(#{$this}--preview) {

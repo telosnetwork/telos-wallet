@@ -18,30 +18,13 @@ const { t: $t } = useI18n();
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
-
-const nft = ref<ShapedNFT | null>(null);
-const loading = ref(true);
-
-
+const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
-onBeforeMount(async () => {
-    if (contractAddress && nftId) {
-        const erc721Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
-        const erc1155Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
-
-        if (erc721Details) {
-            nft.value = erc721Details;
-        } else if (erc1155Details) {
-            nft.value = erc1155Details;
-        }
-        loading.value = false;
-    }
-});
-
 // data
-const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+const nft = ref<ShapedNFT | null>(null);
+const loading = ref(true);
 
 
 // computed
@@ -55,19 +38,29 @@ const contractLink = computed(() => {
 
     return `${explorerUrl}/address/${contractAddress}`;
 });
-
 const ownerLink = computed(() => {
     if (!nft.value) {
         return '';
     }
 
+    // eztodo there is an issue where, when coming from the nft inventory page, the owner address is not set
     return `${explorerUrl}/address/${nft.value.ownerAddress}`;
 });
-
 const filteredAttributes = computed(() =>
     nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
+const isErc1155 = computed(() => nft.value?.isErc1155);
 
+
+// methods
+onBeforeMount(async () => {
+    if (contractAddress && nftId) {
+        nft.value = (await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId)) ?? null;
+
+        debugger;
+        loading.value = false;
+    }
+});
 </script>
 
 <template>
@@ -105,20 +98,32 @@ const filteredAttributes = computed(() =>
                     :tileMode="true"
                     class="c-nft-details__viewer"
                 />
-                <NftDetailsCard title="Collection" class="c-nft-details__header-card">
+                <NftDetailsCard :title="$t('global.collection')" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
                 </NftDetailsCard>
 
-                <NftDetailsCard title="ID" class="c-nft-details__header-card">
+                <NftDetailsCard :title="$t('global.id')" class="c-nft-details__header-card">
                     {{ nft.id }}
                 </NftDetailsCard>
 
-                <NftDetailsCard title="Owner" class="c-nft-details__header-card">
+                <NftDetailsCard :title="$t('global.owner')" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
                 </NftDetailsCard>
 
-                <NftDetailsCard v-if="nft.description" title="Description" class="c-nft-details__header-card">
+                <NftDetailsCard
+                    v-if="nft.description"
+                    :title="$t('global.description')"
+                    class="c-nft-details__header-card"
+                >
                     {{ nft.description }}
+                </NftDetailsCard>
+
+                <NftDetailsCard
+                    v-if="isErc1155"
+                    :title="$t('global.owned')"
+                    class="c-nft-details__header-card"
+                >
+                    {{ nft.quantity }}
                 </NftDetailsCard>
             </template>
 
