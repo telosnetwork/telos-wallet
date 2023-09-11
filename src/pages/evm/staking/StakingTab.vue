@@ -42,6 +42,7 @@ const stakedTokenDecimals = stakedToken.decimals;
 const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(ethers.constants.Zero);
 const estimatedGas = ref(ethers.constants.Zero);
+// computed
 const stakedRatio = computed(() => chainStore.getStakedRatio(label));
 const outputModelValue = computed(() => {
     if (stakedRatio.value.isZero()) {
@@ -50,7 +51,6 @@ const outputModelValue = computed(() => {
     const output = inputModelValue.value.mul(stakedRatio.value).div(oneEth);
     return output;
 });
-// computed
 const fiatLocale = computed(() => userStore.fiatLocale);
 const fiatCurrency = computed(() => userStore.fiatCurrency);
 const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
