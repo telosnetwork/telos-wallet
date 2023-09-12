@@ -284,9 +284,9 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
     });
 }
 
-function getNftForViewer(row: { id: string }) {
+function getNftForViewer(row: { id: string, collectionAddress: string }) {
     // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
-    return nftsToShow.value.find(nft => nft.id === row.id) as NFTClass;
+    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as NFTClass;
 }
 
 // we update the inventory while the user is on the page
