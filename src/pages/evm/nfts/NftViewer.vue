@@ -302,6 +302,7 @@ function setHoverPreviewVisibility(visible: boolean) {
     <div
         v-else
         ref="iconElement"
+        class="c-nft-viewer__icon-container"
         @mouseenter="setHoverPreviewVisibility(true)"
         @mouseleave="setHoverPreviewVisibility(false)"
     >
@@ -448,8 +449,9 @@ function setHoverPreviewVisibility(visible: boolean) {
 
     &__list-image {
         border-radius: 4px;
-        height: $list-icon-size;
-        width: $list-icon-size;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
     }
 
     &__overlay-icon-bg,
@@ -508,6 +510,11 @@ function setHoverPreviewVisibility(visible: boolean) {
         max-width: 432px;
         display: block;
         flex-shrink: 0;
+    }
+
+    &__icon-container {
+        height: 100%;
+        width: 100%;
     }
 
     &__hover-container {
