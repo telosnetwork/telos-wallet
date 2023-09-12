@@ -232,6 +232,7 @@ export default {
         unstake_input_label: 'Unstaking Amount',
         unstake_output_label: 'Unstaked Amount',
         unstake: 'Unstake',
+        unstake_sidebar_title: 'Unstaking {symbol}?',
         unstake_button_label: 'Unstake {stakedSymbol} to {systemSymbol}',
         unstake_sidebar_content_fragment_1: 'Unstaked TLOS will',
         unstake_sidebar_content_fragment_2_bold: ' remain locked for a period of 10 days, ',
