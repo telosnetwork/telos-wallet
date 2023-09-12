@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
@@ -17,7 +17,7 @@ import EVMSidebarPage from 'src/layouts/EVMSidebarPage.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
-import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
+import { formatWei } from 'src/antelope/stores/utils';
 
 const label = 'current';
 
@@ -41,7 +41,6 @@ const stakedTokenDecimals = stakedToken.decimals;
 // data
 const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(ethers.constants.Zero);
-const estimatedGas = ref(ethers.constants.Zero);
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const outputModelValue = computed(() => {
     if (unstakedRatio.value.isZero()) {
@@ -62,7 +61,7 @@ const stakedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filte
 );
 const stakedTokenBalance = computed(() => stakedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 const sidebarContent = computed(() => {
-    const header = $t('evm_stake.unstake_sidebar_title', { symbol: systemTokenSymbol });
+    const header = $t('evm_stake.stake_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
         text: $t(
             'evm_stake.unstake_sidebar_content_fragment_1',
@@ -83,29 +82,12 @@ const sidebarContent = computed(() => {
         content,
     };
 });
-const availableToUnstake = computed(() => {
-    const available = stakedTokenBalance.value.sub(estimatedGas.value);
-
-    if (available.lt(0)) {
-        return ethers.constants.Zero;
-    }
-    return available;
-});
+const availableToUnstake = computed(() => stakedTokenBalance.value);
 const formIsValid = computed(() =>
     !outputModelValue.value.isZero() &&
     inputModelValue.value.lt(availableToUnstake.value),
 );
 const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unstakeEVMSystemTokens'));
-
-
-// methods
-onBeforeMount(() => {
-    // https://github.com/telosnetwork/telos-wallet/issues/274
-    const GAS_FOR_stakePING_TOKEN = 55500;
-    chainSettings.getEstimatedGas(GAS_FOR_stakePING_TOKEN).then((gas) => {
-        estimatedGas.value = gas.system;
-    });
-});
 
 async function handleCtaClick() {
     const label = CURRENT_CONTEXT;
@@ -122,11 +104,12 @@ async function handleCtaClick() {
 
     if (formIsValid.value) {
         try {
-            const tx = await useRexStore().unstakeEVMSystemTokens(label, inputModelValue.value);
-            const formattedAmount = formatWei(inputModelValue.value, stakedTokenDecimals, WEI_PRECISION);
+            const displayDecimals = 4;
+            const tx = await useRexStore().unstakeEVMSystemTokens(label, outputModelValue.value);
+            const formattedAmount = formatWei(outputModelValue.value, systemTokenDecimals, displayDecimals);
 
             const dismiss = ant.config.notifyNeutralMessageHandler(
-                $t('notification.neutral_message_unstaking', { quantity: formattedAmount, symbol: stakedTokenSymbol }),
+                $t('notification.neutral_message_unstaking', { quantity: formattedAmount, symbol: systemTokenSymbol }),
             );
 
             tx.wait().then(() => {
@@ -163,7 +146,7 @@ async function handleCtaClick() {
         </div>
     </div>
 
-    <!-- TLOS input -->
+    <!-- STLOS input -->
     <div class="row q-mb-lg">
         <div class="col-12">
             <CurrencyInput
