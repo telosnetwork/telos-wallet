@@ -30,6 +30,7 @@ export abstract class EVMAuthenticator {
     abstract unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract withdrawStakedTokens(): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;

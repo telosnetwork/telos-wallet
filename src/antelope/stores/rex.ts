@@ -76,12 +76,12 @@ export const useRexStore = defineStore(store_name, {
         async getContractInstance(label: string, address: string) {
             const authenticator = useAccountStore().getEVMAuthenticator(label);
             if (!authenticator) {
-                this.trace('getStakedSystemContractInstance', label, '-> no authenticator');
+                this.trace('getContractInstance', label, '-> no authenticator');
                 throw new AntelopeError('antelope.chain.error_no_default_authenticator');
             }
             const contract = await useEVMStore().getContract(authenticator, address);
             if (!contract) {
-                this.trace('getStakedSystemContractInstance', label, '-> no contract');
+                this.trace('getContractInstance', label, '-> no contract');
                 throw new AntelopeError('antelope.rex.error_contract_not_found', { address });
             }
             const contractInstance = await contract.getContractInstance();
@@ -93,6 +93,7 @@ export const useRexStore = defineStore(store_name, {
          * @returns the contract instance
          */
         async getStakedSystemContractInstance(label: string) {
+            this.trace('getStakedSystemContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().address;
             return this.getContractInstance(label, address);
         },
@@ -102,6 +103,7 @@ export const useRexStore = defineStore(store_name, {
          * @returns the contract instance
          */
         async getEscrowContractInstance(label: string) {
+            this.trace('getEscrowContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getEscrowContractAddress();
             return this.getContractInstance(label, address);
         },
@@ -250,6 +252,30 @@ export const useRexStore = defineStore(store_name, {
                 const account = useAccountStore().getAccount(label);
                 const authenticator = useAccountStore().getEVMAuthenticator(label);
                 return await authenticator.unstakeSystemTokens(amount)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
+        /**
+         * Performs the withdrawal of staked tokens for a given account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to withdraw
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async withdrawEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'withdrawEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.withdrawStakedTokens()
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
                 const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);

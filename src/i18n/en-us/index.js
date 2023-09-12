@@ -239,6 +239,9 @@ export default {
         unstake_sidebar_content_fragment_3: 'after which it can be withdrawn to your account from the Withdraw tab.',
         withdraw_button_disabled: 'Nothing to withdraw',
         withdraw_button_enabled: 'Withdraw {amount} {symbol}',
+        withdrawal_available: 'Available for withdrawal',
+        unstaking_pending_time: 'Unstaking for {time}',
+        withdrawal_date: 'Withdrawal it on {date}',
     },
     notification:{
         success_title_trx: 'Success',

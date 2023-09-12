@@ -392,6 +392,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return await writeContract(sendConfig);
     }
 
+    async withdrawStakedTokens() : Promise<WriteContractResult> {
+        this.trace('withdrawStakedTokens');
+        throw new AntelopeError('antelope.evm.error_not_implemented');
+    }
+
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
 

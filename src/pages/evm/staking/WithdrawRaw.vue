@@ -8,11 +8,9 @@ import { CURRENT_CONTEXT, useChainStore, useEVMStore, useUserStore } from 'src/a
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
-import TimeStamp from 'components/TimeStamp.vue';
-import { prettyPrintCurrency, promptAddToMetamask } from 'src/antelope/stores/utils/currency-utils';
-import ExternalLink from 'components/ExternalLink.vue';
+import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { ethers } from 'ethers';
-import { getLongDate } from 'src/antelope/stores/utils';
+import { getFormatedDate } from 'src/antelope/stores/utils';
 
 const evmStore = useEVMStore();
 const userStore = useUserStore();
@@ -24,7 +22,6 @@ export default defineComponent({
     components: {
         InlineSvg,
         ToolTip,
-        // TimeStamp, // TODO: fix this
     },
     data() {
         return {
@@ -48,7 +45,21 @@ export default defineComponent({
             return this.withdrawal.until.toNumber();
         },
         longDate(): string {
-            return getLongDate(this.epoch);
+            return getFormatedDate(this.epoch, 'MMM d, yyyy hh:mm a', false);
+        },
+        pendingTime(): string {
+            const seconds = this.epoch - Date.now() / 1000;
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secondsLeft = Math.floor(seconds % 60);
+
+            const daysStr = days > 0 ? `${days} days ` : '';
+            const hoursStr = hours > 0 ? `${hours} hours ` : '';
+            const minutesStr = (!days && minutes > 0) ? `${minutes} minutes ` : '';
+            const secondsStr = (!days && !hours && secondsLeft > 0) ? `${secondsLeft} seconds ` : '';
+
+            return `${daysStr}${hoursStr}${minutesStr}${secondsStr}`;
         },
         isWithdrawable(): boolean {
             return this.epoch <= Date.now() / 1000;
@@ -139,13 +150,14 @@ export default defineComponent({
         </div>
         <div class="c-stake-withdrawal-row__left-content">
             <div>
-                <span class="c-stake-withdrawal-row__withdrawal-status">{{ withdrawalStatus }}</span>
+                <span class="c-stake-withdrawal-row__withdrawal-status">
+                    {{ isWithdrawable ? $t('evm_stake.withdrawal_available') : $t('evm_stake.unstaking_pending_time', { time: pendingTime }) }}
+                </span>
             </div>
             <div>
-                <span class="o-text--small q-mr-md">Withdraw it on Feb 12, 2023 09:32 AM</span>
-                <!--ToolTip :text="longDate" :hide-icon="true">
-                    <TimeStamp :timestamp="epoch" />
-                </ToolTip-->
+                <span class="o-text--small q-mr-md">
+                    {{ isWithdrawable ? longDate : $t('evm_stake.withdrawal_date', { date: longDate }) }}
+                </span>
             </div>
         </div>
     </div>

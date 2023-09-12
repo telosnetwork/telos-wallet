@@ -9,17 +9,15 @@ import {
     useAccountStore,
     useBalancesStore,
     useChainStore,
+    useFeedbackStore,
     useRexStore,
     useUserStore,
 } from 'src/antelope';
 
 import WithdrawRaw from 'src/pages/evm/staking/WithdrawRaw.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
-import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
-import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
+import { formatWei } from 'src/antelope/stores/utils';
 
-const label = 'current';
 
 const { t: $t } = useI18n();
 const uiDecimals = 2;
@@ -30,6 +28,7 @@ const userStore = useUserStore();
 const balanceStore = useBalancesStore();
 const accountStore = useAccountStore();
 const rexStore = useRexStore();
+const feed = useFeedbackStore();
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -38,15 +37,52 @@ const stakedToken = chainSettings.getStakedSystemToken();
 const stakedTokenSymbol = stakedToken.symbol;
 const stakedTokenDecimals = stakedToken.decimals;
 
-const loading = ref(false);
+const loading = computed(() => feed.isLoading('withdrawEVMSystemTokens'));
 const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.deposits ?? []);
-const withdrawEnabled = ref(false);
 
-const withdraw = () => {
-    if (!withdrawEnabled.value) {
+// prettyPrintToken(unstakingBalanceBn.value, systemToken.symbol)
+const withdrawableBalanceBn = computed(() => useRexStore().getRexData(CURRENT_CONTEXT)?.withdrawable ?? ethers.constants.Zero);
+
+// enable only if withdrawableBalanceBn > 0
+const withdrawEnabled = computed(() => withdrawableBalanceBn.value?.gt(0) ?? false);
+
+// hadle withdraw button click
+const handleWithdrawClick = async () => {
+    if (!withdrawEnabled.value || loading.value) {
         return;
     }
-    console.log('you pressed withdraw');
+    const label = CURRENT_CONTEXT;
+    if (!accountStore.isConnectedToCorrectNetwork(label)) {
+        const networkName = chainStore.loggedChain.settings.getDisplay();
+        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+
+        ant.config.notifyFailureWithAction(errorMessage, {
+            label: ant.config.localizationHandler('evm_wallet.switch'),
+        });
+
+        return;
+    }
+
+    try {
+        const tx = await useRexStore().withdrawEVMSystemTokens(CURRENT_CONTEXT, withdrawableBalanceBn.value);
+        const formattedAmount = formatWei(withdrawableBalanceBn.value, systemTokenDecimals, 4);
+
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t('notification.neutral_message_withdrawing', { quantity: formattedAmount, symbol: systemTokenSymbol }),
+        );
+
+        tx.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${chainSettings.getExplorerUrl()}/tx/${tx.hash}`,
+            );
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            dismiss();
+        });
+    } catch (err) {
+        console.error(err);
+    }
 };
 
 
@@ -57,12 +93,13 @@ const withdraw = () => {
     <div class="c-withdraw-tab__withdraw-btn">
         <q-btn
             :label="$t(withdrawEnabled ? 'evm_stake.withdraw_button_enabled' : 'evm_stake.withdraw_button_disabled', {
-                amount: formatWei(1000000000000000, systemTokenDecimals, uiDecimals),
+                amount: formatWei(withdrawableBalanceBn, systemTokenDecimals, uiDecimals),
                 symbol: systemTokenSymbol
             })"
             :disable="!withdrawEnabled"
+            :loading="loading"
             color="primary"
-            @click="withdraw"
+            @click="handleWithdrawClick"
         />
     </div>
 

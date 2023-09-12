@@ -214,6 +214,20 @@ export function getLongDate(epoch: number): string {
     return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
 }
 
+
+/**
+ * TODO: write this doc
+ *
+ * @param epoch
+ *
+ * @return string
+ */
+export function getFormatedDate(epoch: number, timeFormat = 'MMM d, yyyy hh:mm:ss a', showUtc = false): string {
+    const offset = getFormattedUtcOffset(new Date(epoch));
+    const utc = showUtc ? ` (UTC ${offset})` : '';
+    return `${format(fromUnixTime(epoch), timeFormat)}${utc}`;
+}
+
 /*
 * Determines whether the amount is too large (more than six characters long) to be displayed in full on mobile devices
 *

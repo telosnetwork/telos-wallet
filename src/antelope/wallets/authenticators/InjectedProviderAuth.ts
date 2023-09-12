@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useAccountStore, useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
+import { useAccountStore, useChainStore, useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
 import {
     AntelopeError,
     ERC20_TYPE,
@@ -250,6 +250,11 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         });
     }
 
+    /**
+     * This method creates a Transaction to stake system tokens
+     * @param amount amount of system tokens to stake
+     * @returns transaction response with the hash and a wait() method to wait confirmation
+     */
     async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('stakeSystemTokens', amount.toString());
 
@@ -267,6 +272,11 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         }
     }
 
+    /**
+     * This method creates a Transaction to unstake system tokens
+     * @param amount amount of system tokens to unstake
+     * @returns transaction response with the hash and a wait() method to wait confirmation
+     */
     async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('unstakeSystemTokens', amount.toString());
 
@@ -285,6 +295,14 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         }
     }
 
+    /**
+     * This method creates a Transaction to withdraw all unblocked staked tokens
+     */
+    async withdrawStakedTokens() : Promise<EvmTransactionResponse> {
+        this.trace('withdrawStakedTokens');
+        const contractInstance = await useRexStore().getEscrowContractInstance(this.label);
+        return contractInstance.withdraw();
+    }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);

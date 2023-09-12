@@ -389,6 +389,11 @@ export class OreIdAuth extends EVMAuthenticator {
         return this.performOreIdTransaction(from, unstakeTransaction);
     }
 
+    async withdrawStakedTokens() : Promise<EvmTransactionResponse> {
+        this.trace('withdrawStakedTokens');
+        throw new AntelopeError('antelope.evm.error_not_implemented');
+    }
+
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
