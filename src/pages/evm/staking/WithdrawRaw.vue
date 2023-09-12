@@ -3,7 +3,7 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { useChainStore, useEVMStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore, useEVMStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
@@ -13,12 +13,12 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 const evmStore = useEVMStore();
 const userStore = useUserStore();
+const chainStore = useChainStore();
 const { fiatLocale, fiatCurrency } = userStore;
 
 export default defineComponent({
     name: 'WalletBalanceRow',
     components: {
-        ExternalLink,
         InlineSvg,
     },
     data() {
@@ -39,6 +39,11 @@ export default defineComponent({
         },
     },
     computed: {
+        token() {
+            const settings = chainStore.getChain(CURRENT_CONTEXT).settings as EVMChainSettings;
+            const token = settings.getSystemToken();
+            return token;
+        },
         truncatePrimaryValue(): boolean {
             const isMobile = this.$q.screen.lt.sm;
 
@@ -77,7 +82,7 @@ export default defineComponent({
         },
         prettySecondaryAmount(): string {
             const noSecondaryAmount = typeof this.secondaryAmount === 'string' && !this.secondaryAmount;
-            if (noSecondaryAmount || !this.tokenHasFiatValue) {
+            if (noSecondaryAmount) {
                 return '';
             }
 
@@ -91,6 +96,12 @@ export default defineComponent({
         },
     },
     methods: {
+        formatTooltipBalance(amount: number, isFiat: boolean): string {
+            const decimals = isFiat ? 2 : 4;
+            const symbol = isFiat ? fiatCurrency : this.token.symbol;
+
+            return `${prettyPrintCurrency(amount, decimals, fiatLocale)} ${symbol}`;
+        },
     },
 });
 </script>
@@ -114,7 +125,6 @@ export default defineComponent({
             </div>
             <div>
                 <span class="o-text--small q-mr-md">{{ withdrawalDate }}</span>
-                <ExternalLink :text="externalHash" :url="externalUrl" :purpose="externalPurpose" />
             </div>
         </div>
     </div>
@@ -137,45 +147,6 @@ export default defineComponent({
                 </template>
             </span>
         </div>
-
-        <q-btn
-            flat
-            dense
-            no-icon-animation
-            icon="more_vert"
-            class="c-stake-withdrawal-row__overflow"
-            :aria-label="$t('evm_wallet.balance_row_actions_aria')"
-        >
-            <q-menu anchor="bottom end" self="top right" :offset="[0, 16]">
-                <ul class="c-stake-withdrawal-row__overflow-ul">
-                    <li
-                        v-for="(item, index) in overflowMenuItems"
-                        :key="`overflow-item-${index}`"
-                        v-close-popup
-                        class="c-stake-withdrawal-row__overflow-li"
-                        tabindex="0"
-                        :aria-labelledby="`overflow-text-${index}`"
-                        @click="item.url ? goToLink(item.url) : promptAddToMetamask()"
-                        @keydown.enter.space="item.url ? goToLink(item.url) : promptAddToMetamask()"
-                    >
-                        <div class="c-stake-withdrawal-row__overflow-icon-wrapper">
-                            <InlineSvg
-                                :src="item.icon"
-                                :class="{
-                                    'c-stake-withdrawal-row__overflow-icon': true,
-                                    'c-stake-withdrawal-row__overflow-icon--stroke': item.strokeIcon,
-                                }"
-                                aria-hidden="true"
-                            />
-                        </div>
-
-                        <span :id="`overflow-text-${index}`" class="c-stake-withdrawal-row__overflow-text">
-                            {{ item.label }}
-                        </span>
-                    </li>
-                </ul>
-            </q-menu>
-        </q-btn>
     </div>
 </div>
 </template>
@@ -216,6 +187,39 @@ export default defineComponent({
     &__left-content {
         display: flex;
         flex-direction: column;
+    }
+
+    &__balance-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+
+        flex-direction: column;
+        flex-shrink: 1;
+        text-align: right;
+        min-width: 0;
+    }
+
+    &__primary-amount,
+    &__secondary-amount {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    &__primary-amount {
+        @include text--header-4;
+        color: var(--text-high-contrast);
+        display: flex;
+        align-items: center;
+        flex: 1 1 max-content;
+        text-align: right;
+    }
+
+    &__secondary-amount {
+        @include text--small;
+        color: var(--text-default-contrast);
     }
 }
 

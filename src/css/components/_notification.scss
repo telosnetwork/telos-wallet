@@ -101,10 +101,3 @@
         width: 0%;
     }
 }
-
-.q-btn.bg-primary.disabled {
-    background: var(--disabled-bg) !important;
-    color: var(--disabled-text) !important;
-    font-weight: 600;
-    cursor: not-allowed;
-}

@@ -31,8 +31,6 @@ $saveBtn: #2e1f4f;
     $native-contrast-text-color: #F7F5FF;
     $menu-text: #fff;
     $canvas: #fff;
-    $disabled-bg: #EAE9EF;
-    $disabled-text: #7F7C86;
 
     --text-high-contrast: #{$high-contrast-text-color};
     --text-default-contrast: #{$default-contrast-text-color};
@@ -58,8 +56,6 @@ $saveBtn: #2e1f4f;
 
     --header-bg-color: #{$page-header};
 
-    --disabled-bg: #{$disabled-bg};
-    --disabled-text: #{$disabled-text};
 }
 
 // Dark Mode
