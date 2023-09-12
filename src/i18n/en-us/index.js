@@ -237,6 +237,8 @@ export default {
         unstake_sidebar_content_fragment_1: 'Unstaked TLOS will',
         unstake_sidebar_content_fragment_2_bold: ' remain locked for a period of 10 days, ',
         unstake_sidebar_content_fragment_3: 'after which it can be withdrawn to your account from the Withdraw tab.',
+        withdraw_button_disabled: 'Nothing to withdraw',
+        withdraw_button_enabled: 'Withdraw {amount} {symbol}',
     },
     notification:{
         success_title_trx: 'Success',
