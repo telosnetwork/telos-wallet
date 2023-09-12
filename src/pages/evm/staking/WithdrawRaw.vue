@@ -8,8 +8,11 @@ import { CURRENT_CONTEXT, useChainStore, useEVMStore, useUserStore } from 'src/a
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
 import ToolTip from 'components/ToolTip.vue';
+import TimeStamp from 'components/TimeStamp.vue';
 import { prettyPrintCurrency, promptAddToMetamask } from 'src/antelope/stores/utils/currency-utils';
 import ExternalLink from 'components/ExternalLink.vue';
+import { ethers } from 'ethers';
+import { getLongDate } from 'src/antelope/stores/utils';
 
 const evmStore = useEVMStore();
 const userStore = useUserStore();
@@ -20,6 +23,8 @@ export default defineComponent({
     name: 'WalletBalanceRow',
     components: {
         InlineSvg,
+        ToolTip,
+        // TimeStamp, // TODO: fix this
     },
     data() {
         return {
@@ -39,10 +44,22 @@ export default defineComponent({
         },
     },
     computed: {
+        epoch() {
+            return this.withdrawal.until.toNumber();
+        },
+        longDate(): string {
+            return getLongDate(this.epoch);
+        },
+        isWithdrawable(): boolean {
+            return this.epoch <= Date.now() / 1000;
+        },
         token() {
             const settings = chainStore.getChain(CURRENT_CONTEXT).settings as EVMChainSettings;
             const token = settings.getSystemToken();
             return token;
+        },
+        tokenBalanceFiat(): number | null {
+            return this.token.price.isAvailable ? +this.token.price.getAmountInFiatStr(this.withdrawal.amount) : null;
         },
         truncatePrimaryValue(): boolean {
             const isMobile = this.$q.screen.lt.sm;
@@ -63,9 +80,7 @@ export default defineComponent({
             }
         },
         primaryAmount(): number | string {
-            // the top value is fiat if there is a fiat value for the token
-            // the top (only) value is the token balance iff token has no reliable fiat value.
-            return '100';
+            return this.tokenBalanceFiat as number;
         },
         prettyPrimaryAmount(): string {
             return prettyPrintCurrency(
@@ -78,7 +93,10 @@ export default defineComponent({
             );
         },
         secondaryAmount(): number | string {
-            return '300';
+            let amount = '0';
+            const amountBn = this.withdrawal.amount;
+            amount = ethers.utils.formatUnits(amountBn, this.token.decimals);
+            return amount;
         },
         prettySecondaryAmount(): string {
             const noSecondaryAmount = typeof this.secondaryAmount === 'string' && !this.secondaryAmount;
@@ -111,7 +129,7 @@ export default defineComponent({
     <div class="c-stake-withdrawal-row__left-container">
         <div class="c-stake-withdrawal-row__left-icon">
             <InlineSvg
-                :src="require('src/assets/icon--calendar-clock.svg')"
+                :src="require(`src/assets/icon--calendar-${isWithdrawable?'check':'clock'}.svg`)"
                 :alt="$t(iconAlt)"
                 class="c-stake-withdrawal-row__icon"
                 height="24"
@@ -124,7 +142,10 @@ export default defineComponent({
                 <span class="c-stake-withdrawal-row__withdrawal-status">{{ withdrawalStatus }}</span>
             </div>
             <div>
-                <span class="o-text--small q-mr-md">{{ withdrawalDate }}</span>
+                <span class="o-text--small q-mr-md">Withdraw it on Feb 12, 2023 09:32 AM</span>
+                <!--ToolTip :text="longDate" :hide-icon="true">
+                    <TimeStamp :timestamp="epoch" />
+                </ToolTip-->
             </div>
         </div>
     </div>

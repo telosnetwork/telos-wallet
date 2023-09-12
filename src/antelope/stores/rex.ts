@@ -50,6 +50,8 @@ export const useRexStore = defineStore(store_name, {
     state: (): RexState => (rexInitialState),
     getters: {
         getRexData: state => (label: string) => state.__rexData[label] ?? null,
+        getEvmRexData: state => (label: string) => state.__rexData[label] as EvmRexModel,
+        getNativeRexData: state => (label: string) => state.__rexData[label] as NativeRexModel,
     },
     actions: {
         trace: createTraceFunction(store_name),

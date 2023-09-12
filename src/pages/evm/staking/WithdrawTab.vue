@@ -29,6 +29,7 @@ const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
 const userStore = useUserStore();
 const balanceStore = useBalancesStore();
 const accountStore = useAccountStore();
+const rexStore = useRexStore();
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -38,7 +39,7 @@ const stakedTokenSymbol = stakedToken.symbol;
 const stakedTokenDecimals = stakedToken.decimals;
 
 const loading = ref(false);
-const allWithdrawals = ref([{} as any]);
+const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.deposits ?? []);
 const withdrawEnabled = ref(false);
 
 const withdraw = () => {
