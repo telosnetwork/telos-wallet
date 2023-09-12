@@ -62,7 +62,7 @@ const stakedTokenBalanceInfo = computed(() => balanceStore.currentBalances.filte
 );
 const stakedTokenBalance = computed(() => stakedTokenBalanceInfo.value?.amount ?? ethers.constants.Zero);
 const sidebarContent = computed(() => {
-    const header = $t('evm_stake.stake_sidebar_title', { symbol: systemTokenSymbol });
+    const header = $t('evm_stake.unstake_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
         text: $t(
             'evm_stake.unstake_sidebar_content_fragment_1',
