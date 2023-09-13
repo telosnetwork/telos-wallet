@@ -1,11 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 import {
+    MarketSourceInfo,
     NativeCurrencyAddress,
     PriceChartData,
     PriceHistory,
     PriceStats,
+    TokenMarketData,
+    TokenPrice,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 
 interface CachedPrice {
     lastFetchTime: number | null,
@@ -47,6 +51,7 @@ export const getCoingeckoUsdPrice = async (
     }
 };
 
+// fetch the fiat price for a token as a number
 export async function getFiatPriceFromIndexer(
     tokenSymbol: string,
     tokenAddress: string,
@@ -54,30 +59,45 @@ export async function getFiatPriceFromIndexer(
     indexerAxios: AxiosInstance,
     chain_settings: EVMChainSettings,
 ): Promise<number> {
+    const price = await getTokenPriceDataFromIndexer(tokenSymbol, tokenAddress, fiatCode, indexerAxios, chain_settings);
+
+    if (price) {
+        return +price.str;
+    }
+
+    return 0;
+}
+
+// fetch the price data for a particular token from the indexer
+export async function getTokenPriceDataFromIndexer(
+    tokenSymbol: string,
+    tokenAddress: string,
+    fiatCode: string,
+    indexerAxios: AxiosInstance,
+    chain_settings: EVMChainSettings,
+): Promise<TokenPrice | null> {
     const wrappedSystemAddress = chain_settings.getWrappedSystemToken().address;
     const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedSystemAddress : tokenAddress;
-    const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data;
+    const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data as { results: MarketSourceInfo [] };
 
-    const tokenMarketData = response.results.find(
-        (tokenData: Record<string, string>) => tokenData.address.toLowerCase() === actualTokenAddress.toLowerCase(),
+    const tokenMarketDataSource = response.results.find(
+        tokenData => (tokenData.address ?? '').toLowerCase() === actualTokenAddress.toLowerCase(),
     );
 
-    if (!tokenMarketData?.updated || !tokenMarketData.price) {
-        return 0;
+    if (!tokenMarketDataSource?.updated || !tokenMarketDataSource.price) {
+        return null;
     }
 
-    const lastPriceUpdated = (new Date(+tokenMarketData.updated)).getTime();
-    const now = (new Date()).getTime();
-
-    const diffInMilliseconds = Math.abs(lastPriceUpdated - now);
-    const diffInMinutes = diffInMilliseconds / (1000 * 60);
+    const lastPriceUpdated = (new Date(+tokenMarketDataSource.updated)).getTime();
 
     // only use indexer data if it is no more than 10 minutes old
-    if (diffInMinutes < 10) {
-        return tokenMarketData.price;
+    if (dateIsWithinXMinutes(lastPriceUpdated, 10)) {
+
+        const marketData = new TokenMarketData(tokenMarketDataSource);
+        return new TokenPrice(marketData);
     }
-    // if indexer data is stale use coingecko data
-    return 0;
+    // if indexer data is stale, return no data
+    return null;
 }
 
 export const getCoingeckoPriceChartData = async (

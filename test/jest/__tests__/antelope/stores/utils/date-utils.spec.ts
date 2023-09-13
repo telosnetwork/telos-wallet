@@ -6,6 +6,10 @@ describe('dateIsWithinXMinutes', () => {
         expect(() => dateIsWithinXMinutes(-1, 1)).toThrow();
     });
 
+    it('should throw an error if epochMs is not an integer', () => {
+        expect(() => dateIsWithinXMinutes(0.5, 1)).toThrow();
+    });
+
     it('should return true if the date is within the defined timeframe', () => {
         const now = Date.now();
         const fiveMinutesAgo = now - 1000 * 60 * 5;

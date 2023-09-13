@@ -37,12 +37,18 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore, useUserStore } from '..';
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useContractStore,
+    useNftsStore,
+    useTokensStore,
+    useUserStore,
+} from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
-import { getFiatPriceFromIndexer } from 'src/api/price';
 
 export const transfers_filter_limit = 10000;
 
@@ -245,7 +251,6 @@ export const useHistoryStore = defineStore(store_name, {
             const chain = useChainStore().getChain(label);
             const nftStore = useNftsStore();
             const chain_settings = chain.settings as EVMChainSettings;
-            const indexer = chain_settings.getIndexer();
             const contractStore = useContractStore();
             const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
@@ -364,16 +369,17 @@ export const useHistoryStore = defineStore(store_name, {
                             let transferAmountInFiat: number | undefined;
 
                             if (tokenXfer.symbol) {
-                                const tokenFiatPrice = await getFiatPriceFromIndexer(
-                                    tokenXfer.symbol,
-                                    tokenXfer.address,
+                                const tokenFiatPriceData = await useTokensStore().fetchTokenPriceData(
                                     userStore.fiatCurrency,
-                                    indexer,
-                                    chain_settings,
+                                    tokenXfer.address,
+                                    tokenXfer.symbol,
+                                    chain_settings.getNetwork(),
                                 );
 
-                                transferAmountInFiat = tokenFiatPrice ?
-                                    tokenFiatPrice * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
+                                const tokenFiatPriceStr = tokenFiatPriceData?.str;
+
+                                transferAmountInFiat = tokenFiatPriceStr ?
+                                    +tokenFiatPriceStr * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
                                     undefined;
                             }
 
