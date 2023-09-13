@@ -94,8 +94,6 @@ export const useTokensStore = defineStore(store_name, {
                 feedbackStore.unsetLoading('fetchTokenPriceData');
                 return cachedPriceData.priceData;
             } else if (cachedPriceData && lastFetchIsWithin10Minutes) {
-                console.log(tokenAddressLower);
-
                 // we fetched the price data recently but it was stale or incomplete at that time; do not refetch
                 feedbackStore.unsetLoading('fetchTokenPriceData');
                 return null;
