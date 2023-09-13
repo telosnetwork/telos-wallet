@@ -105,7 +105,7 @@ const tableRows = computed(() => {
     }
 
     return nftsToShow.value.map((nft: ShapedNFT) => ({
-        image: nft.imageSrcIcon || nft.imageSrcFull,
+        image: nft.imageSrc,
         name: truncateText(nft.name, 35),
         isAudio: !!nft.audioSrc,
         isVideo: !!nft.videoSrc,

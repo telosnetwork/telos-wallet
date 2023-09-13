@@ -2,12 +2,12 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
+import { ShapedNFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useAccountStore, useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
@@ -28,6 +28,7 @@ const loading = ref(true);
 
 
 // computed
+const userAddress = computed(() => useAccountStore().currentEvmAccount?.address);
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
@@ -56,8 +57,9 @@ const isErc1155 = computed(() => nft.value?.isErc1155);
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
         nft.value = (await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId)) ?? null;
+        // eztodo 1155 should not have one owner
+        // eztodo at what point does the owned count come in? it should not be a part of the nft details unless nft is 721
 
-        debugger;
         loading.value = false;
     }
 });
@@ -119,7 +121,7 @@ onBeforeMount(async () => {
                 </NftDetailsCard>
 
                 <NftDetailsCard
-                    v-if="isErc1155"
+                    v-if="isErc1155 && userAddress"
                     :title="$t('global.owned')"
                     class="c-nft-details__header-card"
                 >

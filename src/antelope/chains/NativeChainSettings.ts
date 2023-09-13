@@ -38,7 +38,7 @@ import {
     TransactionV1,
     TokenSourceInfo,
     TokenBalance,
-    NFTClass,
+    NFT,
     IndexerTransactionsFilter,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
@@ -153,11 +153,11 @@ export default abstract class NativeChainSettings implements ChainSettings {
      */
     abstract getSystemTokens(): TokenClass[];
 
-    async getNFTsInventory(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    async getNFTsInventory(owner: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
         throw new Error('Method not implemented yet getNFTsInventory() ' + + JSON.stringify({ ...filter, owner }));
     }
 
-    async getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    async getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
         throw new Error('Method not implemented yet getNFTsCollection()' + JSON.stringify({ ...filter, contract }));
     }
 

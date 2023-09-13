@@ -17,11 +17,10 @@ import {
     MarketSourceInfo,
     TokenMarketData,
     IndexerHealthResponse,
-    NFTClass,
+    NFT,
     IndexerNftResponse,
     NFTContractClass,
     IndexerNftItemResult,
-    NFTItemClass,
     IndexerTransfersFilter,
     IndexerAccountTransfersResponse,
 } from 'src/antelope/types';
@@ -289,7 +288,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
-    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
         if (!this.hasIndexerSupport()) {
             console.error('Indexer API not supported for this chain:', this.getNetwork());
             return [];
@@ -309,7 +308,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
                         console.error('Error parsing metadata', `"${contract.calldata}"`, e);
                     }
                 }
-                const nfts = [] as NFTClass[];
+                // if there are ERC1155 results, they may be returned as separate items in na array, each with the same contract address and tokenId, but different owner and quantity
+                // we need to merge each of these into a single NFT object with an owners field, which is the count of owned NFTs for each user address, so we do not have multiple
+                // instances of the same NFT in the store
+                // these results may also be ERC721, but they are straightforward to handle
+                const individualNfts = [] as NFTItemClass[];
                 for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
                     try {
                         item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
@@ -336,10 +339,15 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     }
                     const contract = new NFTContractClass(contract_source);
                     const item = new NFTItemClass(item_source, contract);
-                    debugger;
-                    const nft = new NFTClass(item);
-                    nfts.push(nft);
+
+                    individualNfts.push(item);
                 }
+
+                const nfts = [] as NFT[];
+
+                // eztodo NFTs is a list of possibly 721, possibly 1155, or mixed. the 1155 ones are results for a single owner, meaning there may be multiple items with the same id
+                // but different owner. what needs to happen is that, all 1155 with the same contract and id must be merged into a single
+                // NFT object which has an owners field, which is the count of owned NFTs for each user address
                 return nfts;
             }).catch((error) => {
                 console.error(error);
@@ -347,11 +355,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
             });
     }
 
-    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
         return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
     }
 
-    async getNFTsInventory(account: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    async getNFTsInventory(account: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
         return this.getNFTsFromIndexer(`v1/account/${account}/nfts`, filter);
     }
 
@@ -379,7 +387,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
-        const address = filter.address;
+        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;
@@ -461,7 +469,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params = aux as AxiosRequestConfig;
-        const url = `v1/account/${account}/transfers`;
+        const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers';
 
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransfersResponse);

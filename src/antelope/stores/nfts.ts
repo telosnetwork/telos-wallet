@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface } from 'src/antelope/types';
+import { Label, Network, Address, IndexerTransactionsFilter, NFT, NftTokenInterface } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
@@ -18,13 +18,13 @@ import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 export interface NFTsInventory {
     owner: Address;
-    list: NFTClass[];
+    list: NFT[];
     loading: boolean;
 }
 
 export interface NFTsCollection {
     contract: Address;
-    list: NFTClass[];
+    list: NFT[];
     loading: boolean;
 }
 
@@ -184,9 +184,9 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async fetchNftDetails(label: Label, contract: string, tokenId: string, type?: NftTokenInterface): Promise<NFTClass | null> {
+        async fetchNftDetails(label: Label, contract: string, tokenId: string, type?: NftTokenInterface): Promise<NFT | null> {
             this.trace('fetchNftDetails', label, contract, tokenId, type);
-            let promise = Promise.resolve(null) as Promise<NFTClass | null>;
+            let promise = Promise.resolve(null) as Promise<NFT | null>;
             try {
                 const chain = useChainStore().getChain(label);
                 const network = chain.settings.getNetwork();
@@ -227,11 +227,16 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
                     promise = chain.settings.getNFTsCollection(contract, new_filter).then((nfts) => {
-                        this.trace('fetchNftDetails', 'indexer returned:', nfts);
-                        this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(nfts);
+                        // if the NFT is and ERC1155, the list will contain multiple NFTs with the same ID, representing the same NFT with different owners' stats
+                        const uniqueNfts = nfts.filter((nft, index, self) => self.findIndex(n => n.id === nft.id) === index);
+                        debugger;
+
+
+                        this.trace('fetchNftDetails', 'indexer returned:', uniqueNfts);
+                        this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(uniqueNfts);
                         this.__contracts[network][contract].loading = false;
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                        return nfts.find(nft => nft.id === tokenId) || null;
+                        return uniqueNfts.find(nft => nft.id === tokenId) || null;
                     });
                 } else {
                     if (!chain.settings.isNative()) {

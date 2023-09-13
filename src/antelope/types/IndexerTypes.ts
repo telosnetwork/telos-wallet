@@ -14,22 +14,23 @@ export interface IndexerNftItemAttribute {
     display_type?: string;
 }
 
+export type IndexerNftMetadata = {
+    dna?: string;
+    date?: number;
+    name?: string;
+    image?: string;
+    edition?: number;
+    compiler?: string;
+    imageHash?: string;
+    attributes?: IndexerNftItemAttribute[];
+    description?: string;
+    [key: string]: unknown;
+} | null;
+
 export interface IndexerNftItemResult {
     // metadata is returned as a part of the NFT itself rather than the inexer,
     // which is to say, it may contain arbitrary/stale/incorrect data
-    metadata: {
-        dna?: string;
-        date?: number;
-        name?: string;
-        image?: string;
-        edition?: number;
-        compiler?: string;
-        imageHash?: string;
-        attributes?: IndexerNftItemAttribute[];
-        description?: string;
-    } | {
-        [key: string]: unknown;
-    } | null;
+    metadata: IndexerNftMetadata;
     owner: string; // address
     minter: string; // address
     tokenId: string;
