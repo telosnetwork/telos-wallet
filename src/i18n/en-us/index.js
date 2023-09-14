@@ -262,6 +262,7 @@ export default {
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
+        neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
     },
     resources: {
         title: 'Network Resources',

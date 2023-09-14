@@ -270,14 +270,13 @@ export const useBalancesStore = defineStore(store_name, {
         },
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', account.account, response.hash);
-            subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
-                this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
                 if (receipt.status === 1) {
                     this.updateBalancesForAccount(CURRENT_CONTEXT, account);
                 }
-                return receipt;
+                return newResponse;
             });
-            return response;
         },
         async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {
             const request = await prepareSendTransaction({
@@ -316,7 +315,7 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount as EvmAccountModel;
-                    return await this.transferEVMTokens(label, chain_settings, account, token, to, amount)
+                    return this.transferEVMTokens(label, chain_settings, account, token, to, amount)
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {

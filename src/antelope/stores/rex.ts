@@ -203,15 +203,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', account.account, response.hash);
-            subscribeForTransactionReceipt(account, response).then((receipt: ethers.providers.TransactionReceipt) => {
-                this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
                 if (receipt.status === 1) {
                     this.updateRexDataForAccount(CURRENT_CONTEXT, account);
                     useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, account);
                 }
-                return receipt;
+                return newResponse;
             });
-            return response;
         },
         /**
          * Performs the staking of System Tokens for a given account on the REX system of a given network.
@@ -275,7 +274,7 @@ export const useRexStore = defineStore(store_name, {
                 useFeedbackStore().setLoading(funcname);
                 const account = useAccountStore().getAccount(label);
                 const authenticator = useAccountStore().getEVMAuthenticator(label);
-                return await authenticator.withdrawStakedTokens()
+                return await authenticator.withdrawUnstakedTokens()
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
                 const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);

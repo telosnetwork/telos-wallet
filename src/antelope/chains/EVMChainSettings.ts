@@ -22,6 +22,7 @@ import {
     NFTContractClass,
     IndexerNftItemResult,
     NFTItemClass,
+    addressString,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -217,7 +218,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemToken(): TokenClass;
     abstract getStakedSystemToken(): TokenClass;
     abstract getWrappedSystemToken(): TokenClass;
-    abstract getEscrowContractAddress(): string;
+    abstract getEscrowContractAddress(): addressString;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;

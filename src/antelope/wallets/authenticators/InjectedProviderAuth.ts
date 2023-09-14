@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useAccountStore, useChainStore, useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
+import { useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
 import {
     AntelopeError,
     ERC20_TYPE,
@@ -16,7 +16,6 @@ import {
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
 
@@ -75,7 +74,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
 
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('wrapSystemToken', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
         let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
         try {
@@ -106,7 +105,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
 
     async unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('unwrapSystemToken', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address;
         let wrappedSystemTokenContractInstance: ethers.Contract | undefined;
 
@@ -137,7 +136,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     }
 
     async login(network: string): Promise<addressString | null> {
-        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+        const chainSettings = this.getChainSettings();
         const authName = this.getName();
 
         this.trace('login', network);
@@ -257,10 +256,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
      */
     async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('stakeSystemTokens', amount.toString());
-
-        const chain = useChainStore().getChain(this.label);
-        const stakedToken = (chain.settings as EVMChainSettings).getStakedSystemToken();
-
+        const stakedToken = this.getChainSettings().getStakedSystemToken();
         const evm = useEVMStore();
         const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
         if (contract) {
@@ -279,16 +275,13 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
      */
     async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('unstakeSystemTokens', amount.toString());
-
-        const chain = useChainStore().getChain(this.label);
-        const stakedToken = (chain.settings as EVMChainSettings).getStakedSystemToken();
-
+        const stakedToken = this.getChainSettings().getStakedSystemToken();
         const evm = useEVMStore();
         const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
         if (contract) {
             const contractInstance = await contract.getContractInstance();
             const amountInWei = amount.toString();
-            const address = useAccountStore().getAccount(this.label).account;
+            const address = this.getAccountAddress();
             return contractInstance.withdraw(amountInWei, address, address);
         } else {
             throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: stakedToken.address });
@@ -298,8 +291,8 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     /**
      * This method creates a Transaction to withdraw all unblocked staked tokens
      */
-    async withdrawStakedTokens() : Promise<EvmTransactionResponse> {
-        this.trace('withdrawStakedTokens');
+    async withdrawUnstakedTokens() : Promise<EvmTransactionResponse> {
+        this.trace('withdrawUnstakedTokens');
         const contractInstance = await useRexStore().getEscrowContractInstance(this.label);
         return contractInstance.withdraw();
     }
