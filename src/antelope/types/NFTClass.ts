@@ -1,50 +1,31 @@
 // NFT interfaces ---------------
 
-import { IndexerNftContract, IndexerNftItemAttribute, IndexerNftItemResult, IndexerNftMetadata } from 'src/antelope/types/IndexerTypes';
+import {
+    GenericIndexerNft,
+    IndexerNftContract,
+    IndexerNftItemAttribute,
+    IndexerNftMetadata,
+} from 'src/antelope/types/IndexerTypes';
 
 export interface NftAttribute {
     label: string;
     text: string;
 }
 
-// NFT which has been processed for display in the UI
-export interface ShapedNFT {
-    name: string;
-    id: string;
-    description?: string;
-    ownerAddress?: string; // not present for ERC1155, only ERC721, as 1155 NFTs can be owned by multiple addresses
-    contractAddress: string;
-    contractPrettyName?: string;
-    blockMinted?: number; // the block number when this NFT was minted
-    attributes: NftAttribute[];
-    imageSrc?: string; // if this is empty, the UI will display a generic image icon
-    isErc721: boolean; // true if this is an ERC721 NFT
-    isErc1155: boolean; // true if this is an ERC1155 NFT
-
-    // only one of audioSrc or videoSrc should be present, not both
-    audioSrc?: string;
-
-    // during the shaping process, if there is a video but no image given in the metadata,
-    // the first frame of the video should be extracted and set as the imageSrcFull & imageSrcIcon
-    videoSrc?: string;
-
-    getQuantity(address?: string): number; // returns the quantity of this NFT owned by the user; address should be undefined for ERC721
-}
-
 export interface NftPrecursorData {
     name: string;
     id: string;
     metadata: IndexerNftMetadata;
+    tokenId: string;
+    contractAddress: string; // address
+    updated: number; // epoch
+
     owner?: string; // undefined for ERC1155, as ERC1155 tokens can be owned by multiple addresses; use owners for ERC1155
     owners?: { [address: string]: number }; // only used for ERC1155; maps owner address to quantity owned
-    minter: string; // address
-    tokenId: string;
-    tokenUri: string;
-    contractAddress: string; // address
+    tokenUri?: string;
     imageCache?: string; // url
-    blockMinted: number;
-    updated: number; // epoch
-    transaction: string; // tx hash
+    minter?: string; // address
+    blockMinted?: number;
 }
 
 export type NftMediaType = 'image' | 'video' | 'audio' | 'none';
@@ -57,6 +38,9 @@ export const NFTSourceTypes: Record<string, NftMediaType> = {
 
 export type NftTokenInterface = 'ERC721' | 'ERC1155';
 
+// used as an intermediate type for constructing NFTs from indexer data
+export type NftRawData = { data: GenericIndexerNft, contract: NFTContractClass };
+
 
 /**
  * Construct an NFT from indexer data
@@ -64,9 +48,9 @@ export type NftTokenInterface = 'ERC721' | 'ERC1155';
  * @param indexerData The indexer data for this NFT; if the token is an ERC1155, this should be an array, as ERC1155 tokens can be owned by multiple addresses, represented by multiple IndexerNftItemResult objects
  * @returns The constructed NFT
  */
-export function ConstructNft(
+export function constructNft(
     contract: NFTContractClass,
-    indexerData: IndexerNftItemResult | IndexerNftItemResult[],
+    indexerData: GenericIndexerNft | GenericIndexerNft[],
 ) {
     const dataIsArray = Array.isArray(indexerData);
 
@@ -93,13 +77,12 @@ export function ConstructNft(
             if (!acc[item.owner]) {
                 acc[item.owner] = 0;
             }
-            acc[item.owner] += item.amount ?? 0;
+            acc[item.owner] += item.quantity ?? 0;
             return acc;
         }, {} as { [address: string]: number });
     } else {
         owner = indexerData.owner;
     }
-
 
     return new NFT(
         {
@@ -115,7 +98,6 @@ export function ConstructNft(
             imageCache: data.imageCache,
             blockMinted: data.blockMinted,
             updated: data.updated,
-            transaction: data.transaction,
         },
         contract,
     );
@@ -138,11 +120,12 @@ export class NFTContractClass {
     }
 
     get supportedInterfaces() {
-        return this.indexer.supportedInterfaces.map(iface => iface.toLowerCase());
+        return this.indexer.supportedInterfaces?.map(iface => iface.toLowerCase()) ?? [];
     }
 }
 
-export class NFT implements ShapedNFT {
+// use constructNft method to build an NFT from indexer data
+export class NFT {
     private preview: string;
     private source: string | undefined;
     private ready = true; // whether the NFT is ready to be displayed in the UI (i.e. it does not have data loading or being processed)
@@ -152,19 +135,18 @@ export class NFT implements ShapedNFT {
     readonly name: string;
     readonly id: string;
     readonly metadata: IndexerNftMetadata;
-    readonly description: string | undefined;
-    readonly owner?: string; // ERC721 only
-    readonly owners?: { [address: string]: number }; // ERC1155 only
-    readonly minter: string; // address
-    readonly tokenId: string;
-    readonly tokenUri: string;
     readonly contractAddress: string; // address
-    readonly contractPrettyName?: string;
-    readonly blockMinted: number;
     readonly updated: number; // epoch
-    readonly transaction: string; // tx hash eztodo hash of what?
     readonly attributes: NftAttribute[];
     readonly mediaType: NftMediaType;
+
+    readonly contractPrettyName?: string;
+    readonly owner?: string; // ERC721 only
+    readonly owners?: { [address: string]: number }; // ERC1155 only
+    readonly description?: string;
+    readonly tokenUri?: string;
+    readonly minter?: string; // address
+    readonly blockMinted?: number; // the block number when this NFT was minted
     readonly audioSrc?: string;
     readonly videoSrc?: string;
 
@@ -180,13 +162,14 @@ export class NFT implements ShapedNFT {
         this.owner = precursorData.owner;
         this.owners = precursorData.owners;
         this.minter = precursorData.minter;
-        this.tokenId = precursorData.tokenId;
+        this.id = precursorData.tokenId;
         this.tokenUri = precursorData.tokenUri;
         this.contractAddress = precursorData.contractAddress;
+        this.contractPrettyName = contract.name;
         this.imageCache = precursorData.imageCache;
         this.blockMinted = precursorData.blockMinted;
         this.updated = precursorData.updated;
-        this.transaction = precursorData.transaction;
+        this.description = precursorData.metadata?.description;
 
         this.attributes = ((precursorData.metadata?.attributes || []) as IndexerNftItemAttribute[]).map(attr => ({
             label: attr.trait_type,
@@ -214,7 +197,7 @@ export class NFT implements ShapedNFT {
 
     // this key property is useful when used as a key for the v-for directive
     get key(): string {
-        return `nft-${this.contractAddress}-${this.tokenId}`;
+        return `nft-${this.contractAddress}-${this.id}`;
     }
 
     get isReady(): boolean {
@@ -405,14 +388,6 @@ export class NFT implements ShapedNFT {
     }
 
     getQuantity(address?: string): number {
-        if (!address && this.isErc1155) {
-            throw new Error('Error getting quantity: address must be defined for ERC1155');
-        }
-
-        if (address && this.isErc721) {
-            throw new Error('Error getting quantity: address must be undefined for ERC721');
-        }
-
         if (this.isErc721) {
             return 1;
         }

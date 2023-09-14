@@ -16,6 +16,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
     nft: ShapedNFT,
+    quantity: number,
 }>();
 
 // data
@@ -38,7 +39,7 @@ const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 // hide ID text if the NFT name includes the ID, which is common
 const showId = computed(() => !props.nft.name.includes(props.nft.id));
-const nftQuantityText = computed(() => numberFormatter.format(props.nft.quantity));
+const nftQuantityText = computed(() => numberFormatter.format(props.quantity));
 
 </script>
 

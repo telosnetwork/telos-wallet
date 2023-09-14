@@ -18,11 +18,17 @@ import {
     TokenMarketData,
     IndexerHealthResponse,
     NFT,
-    IndexerNftResponse,
     NFTContractClass,
-    IndexerNftItemResult,
     IndexerTransfersFilter,
     IndexerAccountTransfersResponse,
+    constructNft,
+    IndexerCollectionNftsFilter,
+    IndexerAccountNftsFilter,
+    IndexerAccountNftsResponse,
+    GenericIndexerNft,
+    IndexerNftContract,
+    NftRawData,
+    IndexerCollectionNftsResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -288,79 +294,132 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
-    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
+    async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<NFT[]> {
         if (!this.hasIndexerSupport()) {
-            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            // eztodo this error
+            console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
-        const params = {
-            ... filter,
-            address: undefined,
-        };
-        return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerNftResponse)
-            .then((response) => {
-                // iterate over the contracts and parse json the calldata using try catch
-                for (const contract of Object.values(response.contracts)) {
-                    try {
-                        contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
-                    } catch (e) {
-                        console.error('Error parsing metadata', `"${contract.calldata}"`, e);
-                    }
-                }
-                // if there are ERC1155 results, they may be returned as separate items in na array, each with the same contract address and tokenId, but different owner and quantity
-                // we need to merge each of these into a single NFT object with an owners field, which is the count of owned NFTs for each user address, so we do not have multiple
-                // instances of the same NFT in the store
-                // these results may also be ERC721, but they are straightforward to handle
-                const individualNfts = [] as NFTItemClass[];
-                for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
-                    try {
-                        item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
-                    } catch (e) {
-                        console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
-                    }
-                    if (!item_source.metadata || typeof item_source.metadata !== 'object') {
-                        // we create a new metadata object with the actual string atributes of the item
-                        const list = item_source as unknown as { [key: string]: unknown };
-                        item_source.metadata =
-                            Object.keys(item_source)
-                                .filter(k => typeof list[k] === 'string')
-                                .reduce((obj, key) => {
-                                    obj[key] = list[key] as string;
-                                    return obj;
-                                }, {} as { [key: string]: string });
+        const url = `v1/contract/${collection}/nfts`;
+        const response = (await this.indexer.get(url, { params })).data as IndexerCollectionNftsResponse;
 
-                    }
-                    const contract_source = response.contracts[item_source.contract];
+        // the indexer NFT data which will be used to construct NFTs
+        const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
+            owner: nftResponse.owner,
+            metadata: JSON.parse(nftResponse.metadata),
+            tokenId: nftResponse.tokenId,
+            contract: nftResponse.contract,
+            updated: nftResponse.updated,
+            imageCache: nftResponse.imageCache,
+            tokenUri: nftResponse.tokenUri,
+            quantity: nftResponse.quantity,
+        }));
 
-                    if (!contract_source) {
-                        // this case only happens if the indexer fails to index contract data
-                        continue;
-                    }
-                    const contract = new NFTContractClass(contract_source);
-                    const item = new NFTItemClass(item_source, contract);
+        this.processNftContractsCalldata(response.contracts);
+        const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+        return this.processNftRawData(shapedNftData);
+    }
 
-                    individualNfts.push(item);
-                }
+    async getNftsForAccount(account: string, params: IndexerAccountNftsFilter): Promise<NFT[]> {
+        if (!this.hasIndexerSupport()) {
+            // eztodo this error
+            console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        const url = `v1/account/${account}/nfts`;
+        const response = (await this.indexer.get(url, { params })).data as IndexerAccountNftsResponse;
 
-                const nfts = [] as NFT[];
+        // the indexer NFT data which will be used to construct NFTs
+        const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
+            owner: account,
+            metadata: JSON.parse(nftResponse.metadata),
+            tokenId: nftResponse.tokenId,
+            contract: nftResponse.contract,
+            updated: nftResponse.updated,
+            imageCache: nftResponse.imageCache,
+            tokenUri: nftResponse.tokenUri,
+            quantity: nftResponse.amount,
+        }));
 
-                // eztodo NFTs is a list of possibly 721, possibly 1155, or mixed. the 1155 ones are results for a single owner, meaning there may be multiple items with the same id
-                // but different owner. what needs to happen is that, all 1155 with the same contract and id must be merged into a single
-                // NFT object which has an owners field, which is the count of owned NFTs for each user address
-                return nfts;
-            }).catch((error) => {
-                console.error(error);
-                return [];
+        this.processNftContractsCalldata(response.contracts);
+        const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+        return this.processNftRawData(shapedNftData);
+    }
+
+    // eztodo docs for these functions
+    processNftContractsCalldata(contracts: Record<string, IndexerNftContract>) {
+        for (const contract of Object.values(contracts)) {
+            try {
+                contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
+            } catch (e) {
+                console.error('Error parsing metadata', `"${contract.calldata}"`, e);
+            }
+        }
+    }
+
+    shapeNftRawData(
+        raw: GenericIndexerNft[],
+        contracts: Record<string, IndexerNftContract>,
+    ): NftRawData[] {
+        const shaped = [] as NftRawData[];
+        for (const item_source of raw) {
+            try {
+                // eztodo there may be an issue here with line 309 & 335
+                item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
+            } catch (e) {
+                console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
+            }
+            if (!item_source.metadata || typeof item_source.metadata !== 'object') {
+                // we create a new metadata object with the actual string atributes of the item
+                const list = item_source as unknown as { [key: string]: unknown };
+                item_source.metadata =
+                    Object.keys(item_source)
+                        .filter(k => typeof list[k] === 'string')
+                        .reduce((obj, key) => {
+                            obj[key] = list[key] as string;
+                            return obj;
+                        }, {} as { [key: string]: string });
+
+            }
+            const contract_source = contracts[item_source.contract];
+
+            if (!contract_source) {
+                // this case only happens if the indexer fails to index contract data
+                continue;
+            }
+            const contract = new NFTContractClass(contract_source);
+
+            shaped.push({
+                data: item_source,
+                contract,
             });
+        }
+
+        return shaped;
     }
 
-    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
-        return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
-    }
+    processNftRawData(shapedRawNfts: NftRawData[]): NFT[] {
+        const erc1155RawData = shapedRawNfts
+            .filter(({ contract }) => contract.supportedInterfaces.includes('erc1155'))
+            .reduce((acc, nftSource) => {
+                const { data, contract } = nftSource;
+                const key = `${contract.address}-${data.tokenId}`;
 
-    async getNFTsInventory(account: string, filter: IndexerTransactionsFilter): Promise<NFT[]> {
-        return this.getNFTsFromIndexer(`v1/account/${account}/nfts`, filter);
+                if (!acc[key]) {
+                    acc[key] = {
+                        data: [],
+                        contract,
+                    };
+                }
+                acc[key].data.push(data);
+                return acc;
+            }, {} as Record<string, { data: GenericIndexerNft[], contract: NFTContractClass }>);
+        const erc1155Nfts = Object.values(erc1155RawData).map(({ data, contract }) => constructNft(contract, data));
+
+        const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
+        const erc721Nfts = erc721RawData.map(({ data, contract }) => constructNft(contract, data));
+
+        return [...erc1155Nfts, ...erc721Nfts];
     }
 
     constructTokenId(token: TokenSourceInfo): string {
@@ -387,7 +446,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
-        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
+        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'; // eztodo revert
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;
@@ -469,7 +528,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params = aux as AxiosRequestConfig;
-        const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers';
+        const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers'; // eztodo revert
 
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransfersResponse);

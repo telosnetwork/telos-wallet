@@ -1,11 +1,18 @@
 // Indexer Nft Response --------
 
-export interface IndexerNftResponse {
+interface IndexerNftResponse {
     success: boolean;
     contracts: {
         [address: string]: IndexerNftContract;
     };
-    results: IndexerNftItemResult[];
+}
+
+export interface IndexerCollectionNftsResponse extends IndexerNftResponse {
+    results: IndexerCollectionNftResult[];
+}
+
+export interface IndexerAccountNftsResponse extends IndexerNftResponse {
+    results: IndexerAccountNftResponse[];
 }
 
 export interface IndexerNftItemAttribute {
@@ -27,20 +34,40 @@ export type IndexerNftMetadata = {
     [key: string]: unknown;
 } | null;
 
-export interface IndexerNftItemResult {
-    // metadata is returned as a part of the NFT itself rather than the inexer,
-    // which is to say, it may contain arbitrary/stale/incorrect data
-    metadata: IndexerNftMetadata;
-    owner: string; // address
-    minter: string; // address
+interface IndexerNftResult {
+    metadata: string;
     tokenId: string;
-    tokenUri: string;
-    contract: string; // address
-    imageCache?: string; // url
+    contract: string;
+    updated: number;
+    imageCache?: string;
+    tokenUri?: string;
+}
+
+// results from the /contract/{address}/nfts endpoint
+export interface IndexerCollectionNftResult extends IndexerNftResult {
+    owner: string;
+    quantity?: number; // present only for ERC1155
+}
+
+// results from the /account/{address}/nfts endpoint
+export interface IndexerAccountNftResponse extends IndexerNftResult {
+    amount?: number; // present only for ERC1155
+    minter: string;
     blockMinted: number;
-    updated: number; // epoch
-    transaction: string; // tx hash
-    amount?: number; // integer; always 1 for ERC721, sometimes greater than 1 for ERC1155
+}
+
+// used as an intermediate type for constructing NFTs from IndexerAccountNftResponse/IndexerCollectionNftResult
+export interface GenericIndexerNft {
+    metadata: Record<string, string>;
+    tokenId: string;
+    contract: string;
+    updated: number;
+    imageCache?: string;
+    tokenUri?: string;
+    owner: string;
+    quantity?: number; // present only for ERC1155
+    minter?: string;
+    blockMinted?: number;
 }
 
 export interface IndexerNftContract {
@@ -58,7 +85,7 @@ export interface IndexerNftContract {
     decimals: number | null;
     name: string;
     block: number;
-    supportedInterfaces: string[];
+    supportedInterfaces?: string[];
     transaction: string;
 }
 

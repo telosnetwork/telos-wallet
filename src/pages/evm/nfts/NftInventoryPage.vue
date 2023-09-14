@@ -10,7 +10,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
-import { NFTClass, ShapedNFT } from 'src/antelope/types';
+import { NFT } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
@@ -89,7 +89,7 @@ const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 // computed
 const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
-const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFTClass[]) : []);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFT[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -104,7 +104,7 @@ const tableRows = computed(() => {
         return [];
     }
 
-    return nftsToShow.value.map((nft: ShapedNFT) => ({
+    return nftsToShow.value.map((nft: NFT) => ({
         image: nft.imageSrc,
         name: truncateText(nft.name, 35),
         isAudio: !!nft.audioSrc,
@@ -112,7 +112,7 @@ const tableRows = computed(() => {
         id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
-        quantity: nft.quantity,
+        quantity: nft.getQuantity(accountStore.loggedAccount?.account),
     }));
 });
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
@@ -293,7 +293,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 
 function getNftForViewer(row: { id: string, collectionAddress: string }) {
     // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
-    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as NFTClass;
+    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as NFT;
 }
 
 // we update the inventory while the user is on the page
@@ -407,6 +407,7 @@ onUnmounted(() => {
                     v-for="nft in nftsToShow"
                     :key="nft.key"
                     :nft="nft"
+                    :quantity="nft.getQuantity(accountStore.loggedAccount?.account)"
                 />
             </div>
 
