@@ -137,7 +137,7 @@ export const useHistoryStore = defineStore(store_name, {
                 // fetch them now
                 if (
                     this.__evm_nft_transfers[label].size === 0 ||
-                    (nftTransfersUpdated && dateIsWithinXMinutes(nftTransfersUpdated, 3))
+                    (nftTransfersUpdated && !dateIsWithinXMinutes(nftTransfersUpdated, 3))
                 ) {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
