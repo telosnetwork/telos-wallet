@@ -2,7 +2,8 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
-import { CURRENT_CONTEXT, getAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -41,6 +42,16 @@ export abstract class EVMAuthenticator {
     // indicates the authenticator is ready to transfer tokens
     readyForTransfer(): boolean {
         return true;
+    }
+
+    // returns the associated account address acording to the label
+    getAccountAddress(): addressString {
+        return useAccountStore().getAccount(this.label).account as addressString;
+    }
+
+    // returns the associated chain settings acording to the label
+    getChainSettings(): EVMChainSettings {
+        return (useChainStore().getChain(this.label).settings as EVMChainSettings);
     }
 
     async login(network: string): Promise<addressString | null> {

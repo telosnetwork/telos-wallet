@@ -178,10 +178,7 @@ const secondLineData = computed(() => [{
     useSmallBox: true,
 }]);
 
-// creatmos un interval que cada 5 segundos verifique si cada uno de los loadings es true o false.
-// por cada loading que encontremos en true, debemos llamar a actualizar las dependendicas de ese loading
-// si todos los loadings son false, entonces podemos parar el intervalo
-
+// is interval is mean to ensure all data is eventually loaded
 const intervalTimer = setInterval(() => {
 
     // is staking still loading?

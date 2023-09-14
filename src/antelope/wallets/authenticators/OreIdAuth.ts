@@ -17,7 +17,6 @@ import {
 } from 'src/antelope/types';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { useChainStore } from 'src/antelope/stores/chain';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 
@@ -63,6 +62,11 @@ export class OreIdAuth extends EVMAuthenticator {
         return new OreIdAuth(this.options, label);
     }
 
+    // returns the associated account address acording to the label
+    getAccountAddress(): addressString {
+        return this.userChainAccount?.chainAccount as addressString;
+    }
+
     getNetworkNameFromChainNet(chainNetwork: ChainNetwork): string {
         this.trace('getNetworkNameFromChainNet', chainNetwork);
         switch (chainNetwork) {
@@ -89,7 +93,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
-        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+        const chainSettings = this.getChainSettings();
         const trackSuccessfulLogin = () => {
             this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
             chainSettings.trackAnalyticsEvent(
@@ -112,10 +116,10 @@ export class OreIdAuth extends EVMAuthenticator {
 
         if (
             localStorage.getItem('autoLogin') === this.getName() &&
-            typeof localStorage.getItem('account') === 'string'
+            typeof localStorage.getItem('rawAddress') === 'string'
         ) {
             // auto login without the popup
-            const chainAccount = localStorage.getItem('account') as addressString;
+            const chainAccount = localStorage.getItem('rawAddress') as addressString;
             this.userChainAccount = { chainAccount } as UserChainAccount;
             this.trace('login', 'userChainAccount', this.userChainAccount);
             // track the login start for auto-login procceess
@@ -209,7 +213,8 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        const from = this.userChainAccount?.chainAccount as addressString;
+        // const from = this.userChainAccount?.chainAccount as addressString;
+        const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = erc20Abi;
 
@@ -270,7 +275,7 @@ export class OreIdAuth extends EVMAuthenticator {
         const transaction = await oreIdInstance.createTransaction({
             transaction: json,
             chainAccount: from,
-            chainNetwork: this.getChainNetwork(useChainStore().getChain(this.label).settings.getNetwork()),
+            chainNetwork: this.getChainNetwork(this.getChainSettings().getNetwork()),
             signOptions: {
                 broadcast: true,
                 returnSignedTransaction: true,
@@ -291,9 +296,9 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
-        const from = this.userChainAccount?.chainAccount as addressString;
+        const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = wtlosAbiDeposit;
 
@@ -317,9 +322,9 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
-        const from = this.userChainAccount?.chainAccount as addressString;
+        const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = wtlosAbiWithdraw;
 
@@ -342,13 +347,12 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
-        const from = this.userChainAccount?.chainAccount as addressString;
+        const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = stlosAbiDeposit;
 
-        console.assert(stlosAbiDeposit.length === 1, 'warning: we are assuming stlosAbiDeposit has only one method');
         // transaction body: stake system token
         const stakeTransaction = {
             from,
@@ -369,9 +373,9 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
-        const from = this.userChainAccount?.chainAccount as addressString;
+        const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = stlosAbiWithdraw;
 
@@ -381,14 +385,13 @@ export class OreIdAuth extends EVMAuthenticator {
             to: stakedSystemTokenContractAddress,
             'contract': {
                 abi,
-                'parameters': [value],
-                'method': stlosAbiWithdraw[0].name,
+                'parameters': [value, from, from],
+                'method': 'withdraw',
             },
         } as unknown as JSONObject;
 
         return this.performOreIdTransaction(from, unstakeTransaction);
     }
-
 
     async isConnectedTo(chainId: string): Promise<boolean> {
         this.trace('isConnectedTo', chainId);
@@ -398,7 +401,7 @@ export class OreIdAuth extends EVMAuthenticator {
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         this.trace('web3Provider');
         try {
-            const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+            const p:RpcEndpoint = this.getChainSettings().getRPCEndpoint();
             const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
             const jsonRpcProvider = new ethers.providers.JsonRpcProvider(url);
             await jsonRpcProvider.ready;

@@ -17,7 +17,6 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
@@ -75,7 +74,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async walletConnectLogin(network: string): Promise<addressString | null> {
         this.trace('walletConnectLogin');
-        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+        const chainSettings = this.getChainSettings();
 
         try {
             this.clearAuthenticator();
@@ -133,7 +132,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 'WalletConnect',
                 TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
             );
-            const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+            const chainSettings = this.getChainSettings();
             chainSettings.trackAnalyticsEvent(
                 { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
             );
@@ -146,7 +145,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const wagmiConnected = () => localStorage.getItem('wagmi.connected');
-        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+        const chainSettings = this.getChainSettings();
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
         if (wagmiConnected()) {
@@ -321,11 +320,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
         this.trace('wrapSystemToken', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
 
         const config = {
-            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            chainId: +chainSettings.getChainId(),
             address: wrappedSystemTokenContractAddress,
             abi: wtlosAbiDeposit,
             functionName: 'deposit',
@@ -341,11 +340,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async unwrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
         this.trace('unwrapSystemToken', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
 
         const sendConfig = await prepareWriteContract({
-            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            chainId: +chainSettings.getChainId(),
             address: wrappedSystemTokenContractAddress,
             abi: wtlosAbiWithdraw,
             functionName: 'withdraw',
@@ -358,7 +357,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async stakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
         this.trace('stakeSystemTokens', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
 
         console.assert(stlosAbiDeposit.length === 1, 'warning: we are assuming stlosAbiDeposit has only one method');
@@ -376,20 +375,23 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async unstakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
         this.trace('unstakeSystemTokens', amount.toString());
-        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
+        const address = this.getAccountAddress();
 
-        console.assert(stlosAbiWithdraw.length === 1, 'warning: we are assuming stlosAbiWithdraw has only one method');
         const sendConfig = await prepareWriteContract({
-            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
+            chainId: +chainSettings.getChainId(),
             address: stakedSystemTokenContractAddress,
             abi: stlosAbiWithdraw,
-            functionName: stlosAbiWithdraw[0].name,
+            functionName: 'withdraw',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            args: [amount] as any[],
+            args: [amount, address, address] as any[],
         });
 
-        return await writeContract(sendConfig);
+        const trx = await writeContract(sendConfig);
+
+        this.trace('unstakeSystemTokens', '--> trx:', trx);
+        return trx;
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
@@ -411,7 +413,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async web3Provider(): Promise<ethers.providers.Web3Provider> {
         let web3Provider = null;
         if (usePlatformStore().isMobile || this.usingQR) {
-            const p:RpcEndpoint = (useChainStore().getChain(this.label).settings as EVMChainSettings).getRPCEndpoint();
+            const p:RpcEndpoint = this.getChainSettings().getRPCEndpoint();
             const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
             web3Provider = new ethers.providers.JsonRpcProvider(url);
             this.trace('web3Provider', 'JsonRpcProvider ->', web3Provider);

@@ -45,17 +45,34 @@ export const stlosAbiDeposit: EvmABI = [
 
 export const stlosAbiWithdraw: EvmABI = [
     {
-        constant: false,
         inputs: [
             {
                 indexed: false,
                 internalType: 'uint256',
-                name: 'wad',
+                name: 'assets',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'receiver',
+                type: 'address',
+            },
+            {
+                indexed: false,
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+        ],
+        name: 'withdraw',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
                 type: 'uint256',
             },
         ],
-        name: 'withdrawTLOS',
-        outputs: [],
         payable: false,
         stateMutability: 'nonpayable',
         type: 'function',

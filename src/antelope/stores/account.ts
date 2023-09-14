@@ -185,6 +185,7 @@ export const useAccountStore = defineStore(store_name, {
 
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
+                    localStorage.setItem('rawAddress', rawAddress);
                     localStorage.setItem('isNative', 'false');
                     localStorage.setItem('autoLogin', authenticator.getName());
                     success = true;
