@@ -69,9 +69,7 @@ export interface HistoryState {
         [label: Label]: EVMTransactionsPaginationData,
     },
     __evm_nft_transfers: {
-        [label: Label]: {
-            transfers: EvmTransfer[],
-        },
+        [label: Label]: Map<string, EvmTransfer[]>, // key is the transaction hash in lowercase
     },
 }
 
@@ -95,7 +93,7 @@ export const useHistoryStore = defineStore(store_name, {
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
-        getEvmNftTransfers: state => (label: Label): EvmTransfer[] => state.__evm_nft_transfers[label].transfers,
+        getEvmNftTransfersForTransaction: state => (label: Label, transaction: string): EvmTransfer[] => state.__evm_nft_transfers[label].get(transaction.toLowerCase()) ?? [],
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -138,8 +136,8 @@ export const useHistoryStore = defineStore(store_name, {
                 // so if the user has not fetched NFT transfers yet, or if the NFT transfers are stale (3 mins),
                 // fetch them now
                 if (
-                    !this.__evm_nft_transfers[label].transfers.length ||
-                    (nftTransfersUpdated && dateIsWithinXMinutes(nftTransfersUpdated, 3))
+                    this.__evm_nft_transfers[label].size === 0 ||
+                    (nftTransfersUpdated && !dateIsWithinXMinutes(nftTransfersUpdated, 3))
                 ) {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
@@ -230,10 +228,16 @@ export const useHistoryStore = defineStore(store_name, {
                 const transfers = [
                     ...erc721TransferResponse.results,
                     ...erc1155TransferResponse.results,
-                ];
-
-                // sort transfers from new to old
-                transfers.sort((a, b) => b.timestamp - a.timestamp);
+                ].reduce(
+                    (acc, xfer) => {
+                        const hashLower = xfer.transaction.toLowerCase();
+                        const existingTransfers = acc.get(hashLower) ?? [];
+                        existingTransfers.push(xfer);
+                        acc.set(hashLower, existingTransfers);
+                        return acc;
+                    },
+                    new Map<string, EvmTransfer[]>(),
+                );
 
                 this.setEvmNftTransfers(label, transfers);
             } catch (error) {
@@ -254,8 +258,6 @@ export const useHistoryStore = defineStore(store_name, {
             const contractStore = useContractStore();
             const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
-
-            const allNftTransfers = this.__evm_nft_transfers[label].transfers;
 
             const transactionShapePromises = transactions.map(async (tx) => {
                 const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
@@ -313,7 +315,7 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
-                    const nftTransfersInTx = allNftTransfers.filter(transfer => transfer.transaction.toLowerCase() === tx.hash.toLowerCase());
+                    const nftTransfersInTx = this.getEvmNftTransfersForTransaction(label, tx.hash);
 
                     if (nftTransfersInTx.length > 0) {
                         // there is at least 1 NFT transfer in this transaction,
@@ -460,18 +462,27 @@ export const useHistoryStore = defineStore(store_name, {
         },
         clearEvmTransactions() {
             this.trace('clearEvmTransactions');
+
             this.setEVMTransactionsFilter({ address: '' });
-            this.setEVMTransactions(CURRENT_CONTEXT, []);
-            this.setShapedTransactionRows(CURRENT_CONTEXT, []);
-            this.setEvmTransactionsRowCount(CURRENT_CONTEXT, 0);
+            this.__evm_transactions = {
+                [CURRENT_CONTEXT]: {
+                    transactions: [],
+                },
+            };
+            this.__shaped_evm_transaction_rows = {
+                [CURRENT_CONTEXT]: [],
+            };
+            this.__total_evm_transaction_count = {
+                [CURRENT_CONTEXT]: 0,
+            };
         },
-        setEvmNftTransfers(label: Label, transfers: EvmTransfer[]): void {
+        setEvmNftTransfers(label: Label, transfers: Map<string, EvmTransfer[]>): void {
             this.trace('setEvmNftTransfers', transfers);
-            this.__evm_nft_transfers[label].transfers = transfers;
+            this.__evm_nft_transfers[label] = transfers;
         },
         clearEvmNftTransfers(): void {
             this.trace('clearEvmNftTransfers');
-            this.setEvmNftTransfers(CURRENT_CONTEXT, []);
+            this.__evm_nft_transfers = { [CURRENT_CONTEXT]: new Map() };
         },
     },
 });
@@ -493,8 +504,6 @@ const historyInitialState: HistoryState = {
     },
     __evm_transactions_pagination_data: {},
     __evm_nft_transfers: {
-        current: {
-            transfers: [],
-        },
+        current: new Map(),
     },
 };
