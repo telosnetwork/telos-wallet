@@ -240,7 +240,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                     ></video>
                 </div>
                 <q-icon
-                    v-if="(passedMaxLoadingTime && isMediaLoading) || imageError"
+                    v-if="(passedMaxLoadingTime && isMediaLoading) || (imageError && !isMediaLoading)"
                     :alt="`${$t('nft.broken_image')} ${imageAlt}`"
                     name="o_broken_image"
                     size="md"

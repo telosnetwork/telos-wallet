@@ -68,7 +68,7 @@ const nftQuantityText = computed(() => {
         return '';
     }
 
-    const quantity = nft.value.getQuantity(userAddress);
+    const quantity = nft.value.getQuantity(userAddress.value);
     if (quantity.toString().length > 6) {
         return abbreviateNumber(navigator.language, quantity);
     }

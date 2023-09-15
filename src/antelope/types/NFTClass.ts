@@ -419,7 +419,7 @@ export class NFT {
             return 1;
         }
 
-        if (!address) {
+        if (!address || typeof address !== 'string') {
             throw new Error('Error getting quantity: address must be provided for ERC1155 tokens');
         }
 
