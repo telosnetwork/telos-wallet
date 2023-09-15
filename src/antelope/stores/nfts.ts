@@ -196,16 +196,6 @@ export const useNftsStore = defineStore(store_name, {
                 const chain = useChainStore().getChain(label);
                 const network = chain.settings.getNetwork();
 
-                // If we already have an inventory for that label, we search for the NFT in that list first
-                if (this.__inventory[label]) {
-                    const nft = this.__inventory[label].list.find(
-                        nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
-                    );
-                    if (nft) {
-                        return nft;
-                    }
-                }
-
                 const new_filter = {
                     ...toRaw(this.__pagination_filter),
                     tokenId,
