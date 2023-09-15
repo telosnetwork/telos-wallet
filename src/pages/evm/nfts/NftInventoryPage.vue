@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onBeforeMount, onMounted, onUnmounted, toRaw } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, toRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -87,6 +87,7 @@ const pagination = ref<{
 const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
+const userAccount = computed(() => accountStore.loggedAccount?.account);
 const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
 const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFT[]) : []);
@@ -112,7 +113,7 @@ const tableRows = computed(() => {
         id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
-        quantity: nft.getQuantity(accountStore.loggedAccount?.account),
+        quantity: nft.getQuantity(userAccount.value),
     }));
 });
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
@@ -407,7 +408,7 @@ onUnmounted(() => {
                     v-for="nft in nftsToShow"
                     :key="nft.key"
                     :nft="nft"
-                    :quantity="nft.getQuantity(accountStore.loggedAccount?.account)"
+                    :quantity="nft.getQuantity(userAccount)"
                 />
             </div>
 
@@ -573,14 +574,6 @@ onUnmounted(() => {
         justify-content: center;
         align-items: center;
         cursor: pointer;
-    }
-
-    &__list-image {
-        // eztodo do we need this?
-        object-fit: cover;
-        border-radius: 4px;
-        height: 40px;
-        width: 40px;
     }
 
     &__tile-skeleton {

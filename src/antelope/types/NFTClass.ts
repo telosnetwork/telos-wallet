@@ -2,6 +2,7 @@
 
 import {
     GenericIndexerNft,
+    INVALID_METADATA,
     IndexerNftContract,
     IndexerNftItemAttribute,
     IndexerNftMetadata,
@@ -59,6 +60,7 @@ export function constructNft(
     }
 
     const data = Array.isArray(indexerData) ? indexerData[0] : indexerData;
+
     let owner: string | undefined;
     let owners: { [address: string]: number } | undefined;
 
@@ -74,19 +76,41 @@ export function constructNft(
         }
 
         owners = indexerData.reduce((acc, item) => {
-            if (!acc[item.owner]) {
-                acc[item.owner] = 0;
+            const ownerLower = item.owner.toLowerCase();
+            if (!acc[ownerLower]) {
+                acc[ownerLower] = 0;
             }
-            acc[item.owner] += item.quantity ?? 0;
+            acc[ownerLower] += item.quantity ?? 0;
             return acc;
         }, {} as { [address: string]: number });
     } else {
         owner = indexerData.owner;
     }
 
+    try {
+        if (data.metadata !== INVALID_METADATA) {
+            data.metadata = typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata;
+        } else {
+            data.metadata = {};
+        }
+    } catch (e) {
+        console.error('Error parsing metadata', `"${data.metadata}"`, e);
+    }
+    if (!data.metadata || typeof data.metadata !== 'object') {
+        // we create a new metadata object with the actual string atributes of the item
+        const list = data as unknown as { [key: string]: unknown };
+        data.metadata =
+            Object.keys(data)
+                .filter(k => typeof list[k] === 'string')
+                .reduce((obj, key) => {
+                    obj[key] = list[key] as string;
+                    return obj;
+                }, {} as { [key: string]: string });
+    }
+
     return new NFT(
         {
-            name: data.metadata?.name ?? '',
+            name: (data.metadata?.name ?? '') as string,
             id: '',
             metadata: data.metadata,
             owner,
@@ -139,10 +163,10 @@ export class NFT {
     readonly updated: number; // epoch
     readonly attributes: NftAttribute[];
     readonly mediaType: NftMediaType;
+    readonly owner: string; // ERC721 only
+    readonly owners: { [address: string]: number }; // ERC1155 only
 
     readonly contractPrettyName?: string;
-    readonly owner?: string; // ERC721 only
-    readonly owners?: { [address: string]: number }; // ERC1155 only
     readonly description?: string;
     readonly tokenUri?: string;
     readonly minter?: string; // address
@@ -159,8 +183,8 @@ export class NFT {
         this.name = precursorData.name;
         this.id = precursorData.id;
         this.metadata = precursorData.metadata;
-        this.owner = precursorData.owner;
-        this.owners = precursorData.owners;
+        this.owner = precursorData.owner ?? '';
+        this.owners = precursorData.owners ?? {};
         this.minter = precursorData.minter;
         this.id = precursorData.tokenId;
         this.tokenUri = precursorData.tokenUri;
@@ -193,6 +217,14 @@ export class NFT {
 
     get isErc721(): boolean {
         return this.contract.supportedInterfaces.includes('erc721');
+    }
+
+    get numberOfOwners(): number {
+        if (this.isErc721) {
+            return 1;
+        }
+
+        return Object.keys(this.owners).length;
     }
 
     // this key property is useful when used as a key for the v-for directive
@@ -392,7 +424,11 @@ export class NFT {
             return 1;
         }
 
-        return this.owners?.[address as string] || 0;
+        if (!address) {
+            throw new Error('Error getting quantity: address must be provided for ERC1155 tokens');
+        }
+
+        return this.owners?.[address.toLowerCase()] || 0;
     }
 
     watchers: (() => void)[] = [];

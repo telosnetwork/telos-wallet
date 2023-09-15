@@ -294,9 +294,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
+    // get the NFTs belonging to a particular contract (collection)
     async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<NFT[]> {
         if (!this.hasIndexerSupport()) {
-            // eztodo this error
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
@@ -313,16 +313,19 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             quantity: nftResponse.quantity,
-        }));
+        })).filter(
+            // filter out NFTs with 0 balance; undefined means ERC721
+            ({ quantity }) => quantity === undefined || quantity > 0,
+        );
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
         return this.processNftRawData(shapedNftData);
     }
 
+    // get the NFTs belonging to a particular account
     async getNftsForAccount(account: string, params: IndexerAccountNftsFilter): Promise<NFT[]> {
         if (!this.hasIndexerSupport()) {
-            // eztodo this error
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
@@ -339,14 +342,17 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             quantity: nftResponse.amount,
-        }));
+        })).filter(
+            // filter out NFTs with 0 balance; undefined means ERC721
+            ({ quantity }) => quantity === undefined || quantity > 0,
+        );
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
         return this.processNftRawData(shapedNftData);
     }
 
-    // eztodo docs for these functions
+    // ensure NFT contract calldata is an object
     processNftContractsCalldata(contracts: Record<string, IndexerNftContract>) {
         for (const contract of Object.values(contracts)) {
             try {
@@ -357,30 +363,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
     }
 
+    // shape the raw data from the indexer into a format that can be used to construct NFTs
     shapeNftRawData(
         raw: GenericIndexerNft[],
         contracts: Record<string, IndexerNftContract>,
     ): NftRawData[] {
         const shaped = [] as NftRawData[];
         for (const item_source of raw) {
-            try {
-                // eztodo there may be an issue here with line 309 & 335
-                item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
-            } catch (e) {
-                console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
-            }
-            if (!item_source.metadata || typeof item_source.metadata !== 'object') {
-                // we create a new metadata object with the actual string atributes of the item
-                const list = item_source as unknown as { [key: string]: unknown };
-                item_source.metadata =
-                    Object.keys(item_source)
-                        .filter(k => typeof list[k] === 'string')
-                        .reduce((obj, key) => {
-                            obj[key] = list[key] as string;
-                            return obj;
-                        }, {} as { [key: string]: string });
-
-            }
             const contract_source = contracts[item_source.contract];
 
             if (!contract_source) {
@@ -398,7 +387,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return shaped;
     }
 
+    // process the shaped raw data into NFTs
     processNftRawData(shapedRawNfts: NftRawData[]): NFT[] {
+        // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
+        // so we need to group these together and construct a single NFT for each unique NFT.
+        // in the constructNft factory function, we will aggregate all of the data for each unique ERC1155 NFT
         const erc1155RawData = shapedRawNfts
             .filter(({ contract }) => contract.supportedInterfaces.includes('erc1155'))
             .reduce((acc, nftSource) => {
@@ -414,6 +407,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 acc[key].data.push(data);
                 return acc;
             }, {} as Record<string, { data: GenericIndexerNft[], contract: NFTContractClass }>);
+        // note that the 'data' object sent to the constructNft factory function is an array for the ERC1155 case;
+        // each item contains the same information, but with a different 'owner' and 'quantity' field
         const erc1155Nfts = Object.values(erc1155RawData).map(({ data, contract }) => constructNft(contract, data));
 
         const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
@@ -446,7 +441,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
-        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'; // eztodo revert
+        const address = filter.address;
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;
@@ -528,7 +523,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params = aux as AxiosRequestConfig;
-        const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers'; // eztodo revert
+        const url = `v1/account/${account}/transfers`;
 
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransfersResponse);

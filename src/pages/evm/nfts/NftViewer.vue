@@ -23,6 +23,7 @@ const nftTypes = {
 const rootElement = ref<HTMLDivElement | null>(null);
 const iconElement = ref<HTMLDivElement | null>(null);
 
+const imageError = ref(false); // true if the image failed to load
 const videoIsPlaying = ref(false);
 const videoIsAtEnd = ref(false);
 const videoElement = ref<HTMLVideoElement | null>(null);
@@ -215,11 +216,12 @@ function setHoverPreviewVisibility(visible: boolean) {
             <div v-if="showCoverImage" class="c-nft-viewer__image-container">
                 <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
                 <img
-                    v-show="!showPlaceholderCoverImage && !isMediaLoading"
+                    v-show="!showPlaceholderCoverImage && !isMediaLoading && !imageError"
                     :src="nft.imageSrc"
                     :alt="imageAlt"
                     class="c-nft-viewer__image"
                     @load="isMediaLoading = false"
+                    @error="imageError = true"
                 >
                 <div
                     v-show="nftType === nftTypes.video && !isMediaLoading"
@@ -238,7 +240,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                     ></video>
                 </div>
                 <q-icon
-                    v-if="passedMaxLoadingTime && isMediaLoading"
+                    v-if="(passedMaxLoadingTime && isMediaLoading) || imageError"
                     :alt="`${$t('nft.broken_image')} ${imageAlt}`"
                     name="o_broken_image"
                     size="md"
@@ -316,7 +318,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             class="c-nft-viewer__list-image"
         />
         <q-icon
-            v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imageSrc)"
+            v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imageSrc) || imageError"
             name="o_broken_image"
             :alt="`${$t('nft.broken_image')} ${imageAlt}`"
             size="md"
@@ -324,7 +326,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             class="c-nft-viewer__list-image"
         />
         <img
-            v-show="!isMediaLoading && nft.imageSrc"
+            v-show="!isMediaLoading && nft.imageSrc && !imageError"
             :src="nft.imageSrc"
             :alt="`${$t('nft.collectible')} ${imageAlt}`"
             class="c-nft-viewer__list-image"

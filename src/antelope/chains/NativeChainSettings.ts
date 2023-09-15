@@ -39,7 +39,6 @@ import {
     TokenSourceInfo,
     TokenBalance,
     NFT,
-    IndexerTransactionsFilter,
     IndexerAccountNftsFilter,
     IndexerCollectionNftsFilter,
 } from 'src/antelope/types';

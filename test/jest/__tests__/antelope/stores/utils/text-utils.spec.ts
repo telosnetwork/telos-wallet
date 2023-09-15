@@ -1,5 +1,5 @@
 
-import { getShapedNftName, truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
+import { abbreviateNumber, getShapedNftName, truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
 
 describe('truncateText', () => {
     it('should truncate text correctly', () => {
@@ -19,5 +19,14 @@ describe('getShapedNftName', () => {
     it('should return the name without the ID', () => {
         expect(getShapedNftName('SomeNft #1234', '1234')).toEqual('SomeNft');
         expect(getShapedNftName('SomeNft 1234', '1234')).toEqual('SomeNft');
+    });
+});
+
+describe('abbreviateNumber', () => {
+    it('should abbreviate a number correctly', () => {
+        expect(abbreviateNumber('en-us', 1000)).toEqual('1K');
+        expect(abbreviateNumber('en-us', 1200)).toEqual('1.2K');
+        expect(abbreviateNumber('en-us', 120000)).toEqual('120K');
+        expect(abbreviateNumber('en-us', 1000000)).toEqual('1M');
     });
 });

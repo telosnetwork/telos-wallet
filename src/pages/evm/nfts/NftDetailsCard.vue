@@ -21,5 +21,6 @@ const props = defineProps<{
     background-color: var(--bg-color);
     padding: 16px;
     word-break: break-word;
+    white-space: pre-wrap;
 }
 </style>

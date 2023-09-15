@@ -45,3 +45,21 @@ export function getShapedNftName(name: string, id: string): string {
     }
     return shapedName.trim();
 }
+
+/**
+ * Given a number, returns a string with the number abbreviated
+ * @param num - a number
+ * @returns {string}
+ * @example
+ * abbreviateNumber(navigator.language, 1000) // '1K'
+ * abbreviateNumber(navigator.language, 1200) // '1.2K'
+ */
+export function abbreviateNumber(language: string, num: number) {
+    const numberFormatter = new Intl.NumberFormat(language, {
+        maximumFractionDigits: 0,
+        maximumSignificantDigits: 4,
+        notation: 'compact',
+    });
+
+    return numberFormatter.format(num);
+}

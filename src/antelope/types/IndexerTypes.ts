@@ -1,5 +1,7 @@
 // Indexer Nft Response --------
 
+export const INVALID_METADATA = '___INVALID_METADATA___'; // string given by indexer for NFTs with invalid metadata
+
 interface IndexerNftResponse {
     success: boolean;
     contracts: {
@@ -58,7 +60,7 @@ export interface IndexerAccountNftResponse extends IndexerNftResult {
 
 // used as an intermediate type for constructing NFTs from IndexerAccountNftResponse/IndexerCollectionNftResult
 export interface GenericIndexerNft {
-    metadata: Record<string, string>;
+    metadata: Record<string, unknown> | string; // object or JSON object string
     tokenId: string;
     contract: string;
     updated: number;

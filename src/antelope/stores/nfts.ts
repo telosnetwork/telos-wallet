@@ -18,7 +18,6 @@ import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONT
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
 import { AccountModel } from 'src/antelope/stores/account';
-import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
@@ -139,7 +138,7 @@ export const useNftsStore = defineStore(store_name, {
                 return;
             }
 
-            const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607'; // eztodo revert this
+            const owner = account.account;
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {

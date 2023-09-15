@@ -2,16 +2,18 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { ShapedNFT } from 'src/antelope/types';
+import { NFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
+import ToolTip from 'components/ToolTip.vue';
 import { CURRENT_CONTEXT, useAccountStore, useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
 import { useI18n } from 'vue-i18n';
+import { abbreviateNumber } from 'src/antelope/stores/utils/text-utils';
 
 const route = useRoute();
 const { t: $t } = useI18n();
@@ -23,7 +25,7 @@ const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
 // data
-const nft = ref<ShapedNFT | null>(null);
+const nft = ref<NFT | null>(null);
 const loading = ref(true);
 
 
@@ -40,26 +42,44 @@ const contractLink = computed(() => {
     return `${explorerUrl}/address/${contractAddress}`;
 });
 const ownerLink = computed(() => {
-    if (!nft.value) {
+    if (!nft.value || nft.value.isErc1155) {
         return '';
     }
 
-    // eztodo there is an issue where, when coming from the nft inventory page, the owner address is not set
-    return `${explorerUrl}/address/${nft.value.ownerAddress}`;
+    return `${explorerUrl}/address/${nft.value.owner}`;
 });
 const filteredAttributes = computed(() =>
     nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
-const isErc1155 = computed(() => nft.value?.isErc1155);
+const nftOwnersText = computed(() => {
+    if (!nft.value) {
+        return '';
+    }
 
+    const owners = nft.value.numberOfOwners;
+    if (owners.toString().length > 6) {
+        return abbreviateNumber(navigator.language, owners);
+    }
+
+    return owners.toString();
+});
+const nftQuantityText = computed(() => {
+    if (!nft.value) {
+        return '';
+    }
+
+    const quantity = nft.value.getQuantity(userAddress);
+    if (quantity.toString().length > 6) {
+        return abbreviateNumber(navigator.language, quantity);
+    }
+
+    return quantity.toString();
+});
 
 // methods
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
-        nft.value = (await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId)) ?? null;
-        // eztodo 1155 should not have one owner
-        // eztodo at what point does the owned count come in? it should not be a part of the nft details unless nft is 721
-
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId);
         loading.value = false;
     }
 });
@@ -108,8 +128,25 @@ onBeforeMount(async () => {
                     {{ nft.id }}
                 </NftDetailsCard>
 
-                <NftDetailsCard :title="$t('global.owner')" class="c-nft-details__header-card">
-                    <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
+                <NftDetailsCard
+                    v-if="nft.isErc721"
+                    :title="$t('global.owner')"
+                    class="c-nft-details__header-card"
+                >
+                    <ExternalLink :text="nft.owner" :url="ownerLink" />
+                </NftDetailsCard>
+
+                <NftDetailsCard
+                    v-else
+                    :title="$t('global.owners')"
+                    class="c-nft-details__header-card"
+                >
+                    <ToolTip
+                        :text="nft.numberOfOwners.toString()"
+                        :hideIcon="true"
+                    >
+                        {{ nftOwnersText }}
+                    </ToolTip>
                 </NftDetailsCard>
 
                 <NftDetailsCard
@@ -121,11 +158,16 @@ onBeforeMount(async () => {
                 </NftDetailsCard>
 
                 <NftDetailsCard
-                    v-if="isErc1155 && userAddress"
-                    :title="$t('global.owned')"
+                    v-if="nft.isErc1155 && userAddress"
+                    :title="$t('global.owned_by_you')"
                     class="c-nft-details__header-card"
                 >
-                    {{ nft.quantity }}
+                    <ToolTip
+                        :text="nft.getQuantity(userAddress).toString()"
+                        :hideIcon="true"
+                    >
+                        {{ nftQuantityText }}
+                    </ToolTip>
                 </NftDetailsCard>
             </template>
 

@@ -2,20 +2,21 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { ShapedNFT } from 'src/antelope/types';
+import { NFT } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import ToolTip from 'components/ToolTip.vue';
+import { abbreviateNumber } from 'src/antelope/stores/utils/text-utils';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const { t } = useI18n();
 
 const props = defineProps<{
-    nft: ShapedNFT,
+    nft: NFT,
     quantity: number,
 }>();
 
@@ -28,18 +29,12 @@ const nftDetailsRoute = {
     },
 };
 
-const numberFormatter = new Intl.NumberFormat(navigator.language, {
-    maximumFractionDigits: 0,
-    maximumSignificantDigits: 4,
-    notation: 'compact',
-});
-
 // computed
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 // hide ID text if the NFT name includes the ID, which is common
 const showId = computed(() => !props.nft.name.includes(props.nft.id));
-const nftQuantityText = computed(() => numberFormatter.format(props.quantity));
+const nftQuantityText = computed(() => abbreviateNumber(navigator.language, props.quantity));
 
 </script>
 
@@ -57,8 +52,8 @@ const nftQuantityText = computed(() => numberFormatter.format(props.quantity));
             :preview-mode="true"
             :tile-mode="true"
         />
-        <div v-if="nft.quantity > 1" class="c-nft-tile__quantity-badge">
-            <ToolTip :text="nft.quantity.toString()" :hide-icon="true">
+        <div v-if="quantity > 1" class="c-nft-tile__quantity-badge">
+            <ToolTip :text="quantity.toString()" :hide-icon="true">
                 x{{ nftQuantityText }}
             </ToolTip>
         </div>
