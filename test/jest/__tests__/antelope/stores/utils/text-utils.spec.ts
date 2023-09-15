@@ -19,6 +19,10 @@ describe('getShapedNftName', () => {
     it('should return the name without the ID', () => {
         expect(getShapedNftName('SomeNft #1234', '1234')).toEqual('SomeNft');
         expect(getShapedNftName('SomeNft 1234', '1234')).toEqual('SomeNft');
+
+        // it should only remove the ID if it's at the end of the name, after a space
+        expect(getShapedNftName('Some1234Nft', '1234')).toEqual('Some1234Nft');
+        expect(getShapedNftName('Fake ERC721', '1')).toEqual('Fake ERC721');
     });
 });
 

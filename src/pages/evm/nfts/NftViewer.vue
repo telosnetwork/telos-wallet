@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
-import { ShapedNFT } from 'src/antelope/types';
+import { NFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore } from 'src/antelope';
 
@@ -8,7 +8,7 @@ const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
 
 const props = defineProps<{
-    nft: ShapedNFT,
+    nft: NFT,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
     tileMode: boolean,
 }>();

@@ -36,8 +36,10 @@ export function truncateAddress(address: string): string {
  */
 export function getShapedNftName(name: string, id: string): string {
     let shapedName = name;
-    if (name.includes(id)) {
-        shapedName = name.replace(id, '');
+    const idAtTheEndRegex = new RegExp(` #?${id}$`);
+
+    if (name.match(idAtTheEndRegex)?.length) {
+        shapedName = name.replace(idAtTheEndRegex, '');
 
         if (shapedName[shapedName.length - 1] === '#') {
             shapedName = shapedName.slice(0, -1);

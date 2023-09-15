@@ -9,7 +9,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { abbreviateNumber } from 'src/antelope/stores/utils/text-utils';
+import { abbreviateNumber, getShapedNftName } from 'src/antelope/stores/utils/text-utils';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
@@ -33,7 +33,7 @@ const nftDetailsRoute = {
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 // hide ID text if the NFT name includes the ID, which is common
-const showId = computed(() => !props.nft.name.includes(props.nft.id));
+const nftName = computed(() => getShapedNftName(props.nft.name, props.nft.id));
 const nftQuantityText = computed(() => abbreviateNumber(navigator.language, props.quantity));
 
 </script>
@@ -61,9 +61,9 @@ const nftQuantityText = computed(() => abbreviateNumber(navigator.language, prop
     <div class="c-nft-tile__text-container">
         <h4 class="c-nft-tile__text">
             <span v-if="nft.name" class="u-text--high-contrast q-pr-sm">
-                {{nft.name}}
+                {{ nftName }}
             </span>
-            <span v-if="showId" class="u-text--default-contrast">{{nft.id}}</span>
+            <span class="u-text--default-contrast">{{nft.id}}</span>
         </h4>
         <ExternalLink :text="creatorLinkText" :url="creatorLinkUrl" />
     </div>

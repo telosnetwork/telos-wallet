@@ -17,8 +17,6 @@ export interface NftPrecursorData {
     name: string;
     id: string;
     metadata: IndexerNftMetadata;
-    tokenId: string;
-    contractAddress: string; // address
     updated: number; // epoch
 
     owner?: string; // undefined for ERC1155, as ERC1155 tokens can be owned by multiple addresses; use owners for ERC1155
@@ -111,14 +109,12 @@ export function constructNft(
     return new NFT(
         {
             name: (data.metadata?.name ?? '') as string,
-            id: '',
+            id: data.tokenId,
             metadata: data.metadata,
             owner,
             owners,
             minter: data.minter,
-            tokenId: data.tokenId,
             tokenUri: data.tokenUri,
-            contractAddress: data.contract,
             imageCache: data.imageCache,
             blockMinted: data.blockMinted,
             updated: data.updated,
@@ -179,6 +175,8 @@ export class NFT {
         contract: NFTContractClass,
     ) {
         this.contract = contract;
+        this.contractAddress = contract.address;
+        this.contractPrettyName = contract.name;
 
         this.name = precursorData.name;
         this.id = precursorData.id;
@@ -186,10 +184,7 @@ export class NFT {
         this.owner = precursorData.owner ?? '';
         this.owners = precursorData.owners ?? {};
         this.minter = precursorData.minter;
-        this.id = precursorData.tokenId;
         this.tokenUri = precursorData.tokenUri;
-        this.contractAddress = precursorData.contractAddress;
-        this.contractPrettyName = contract.name;
         this.imageCache = precursorData.imageCache;
         this.blockMinted = precursorData.blockMinted;
         this.updated = precursorData.updated;
