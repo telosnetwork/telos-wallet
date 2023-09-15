@@ -412,7 +412,7 @@ export default defineComponent({
 .c-transaction-row {
     max-width: 1000px;
     padding: 16px 8px;
-    border-bottom: 2px solid var(--accent-color-5);
+    border-bottom: 1px solid var(--accent-color-3);
     display: grid;
     gap: 16px;
     grid-template:

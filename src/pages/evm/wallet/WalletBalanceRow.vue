@@ -342,7 +342,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     border-radius: 4px;
-    border-bottom: 2px solid var(--accent-color-5);
+    border-bottom: 1px solid var(--accent-color-3);
     padding: 24px 4px;
     overflow-x: hidden;
     max-width: 100%;

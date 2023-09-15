@@ -73,7 +73,7 @@ const nftQuantityText = computed(() => abbreviateNumber(navigator.language, prop
 <style lang="scss">
 .c-nft-tile {
     border-radius: 4px;
-    border: 1px solid var(--accent-color-5);
+    border: 1px solid var(--accent-color-3);
     padding: 16px 24px;
 
     display: flex;

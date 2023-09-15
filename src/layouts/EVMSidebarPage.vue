@@ -102,7 +102,7 @@ function handleExpansionItemUpdate() {
 
     &__expansion-item {
         border-radius: 4px;
-        border: 2px solid var(--accent-color-5);
+        border: 1px solid var(--accent-color-3);
         margin-bottom: 8px;
         height: fit-content;
 
