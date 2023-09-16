@@ -18,7 +18,7 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
         errorToStringHandler: jest.fn(),
     },
     wallets: {
-        getAutenticator: () => ({
+        getAuthenticator: () => ({
             newInstance: (label: string) => ({
                 label,
                 isConnectedTo: () => Promise.resolve(true),

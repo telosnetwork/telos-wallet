@@ -49,7 +49,7 @@ export default defineComponent({
 
         const setOreIdAuthenticator = async (provider: string) => {
             const name = 'OreId';
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (auth) {
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
@@ -67,7 +67,7 @@ export default defineComponent({
         };
 
         const setAuthenticator = async(name: string, label: string) => {
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
