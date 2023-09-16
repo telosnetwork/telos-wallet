@@ -158,13 +158,21 @@ export const accountExists = async function({ commit, dispatch }, accountName) {
 };
 
 export const setEvmState = async function({ commit, dispatch }) {
+    let evmAccount;
+
     if (!this.state.account.accountName) {
         return;
     }
 
-    const evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
-        this.state.account.accountName,
-    );
+    // If linked evm address does not exist, disregard error
+    try {
+        evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
+            this.state.account.accountName,
+        );
+    } catch(e) {
+        // `No address associated with ${account}` unnec error thrown on failed lookup
+        return;
+    }
 
     if (evmAccount && evmAccount.address){
         commit('setEvmAddress', evmAccount.address);

@@ -179,7 +179,7 @@ export default defineComponent({
         },
 
         async checkResources() {
-            if (!accountName) {
+            if (!this.accountName) {
                 return;
             }
             await this.getRamPrice();
