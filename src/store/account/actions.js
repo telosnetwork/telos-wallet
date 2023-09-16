@@ -21,9 +21,8 @@ export const login = async function(
         const users = await authenticator.login(account);
         if (users.length) {
             // OreId has it's own authorization service, only init fuel service for other ual users
-            const account = (users[0]).constructor.name === 'OreUser' ? users[0] : await initFuelUserWrapper(users[0]);
-            const accountName = await account.getAccountName();
-            this.$ualUser = account;
+            this.$ualUser = (users[0]).constructor.name === 'OreUser' ? users[0] : await initFuelUserWrapper(users[0]);
+            const accountName = await this.$ualUser.getAccountName();
             this.$type = 'ual';
             this.$idx = idx;
             commit('setAccountName', accountName);
