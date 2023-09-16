@@ -163,13 +163,13 @@ export const setEvmState = async function({ commit, dispatch }) {
         return;
     }
 
-    // If linked evm address does not exist, disregard error
+    // If linked evm address does not exist, disregard error as this will always throw for newly created native accounts
     try {
         evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
             this.state.account.accountName,
         );
     } catch(e) {
-        // `No address associated with ${account}` unnec error thrown on failed lookup
+        // `No address associated with ${account}`
         return;
     }
 
