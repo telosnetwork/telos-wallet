@@ -20,7 +20,8 @@ export const login = async function(
         commit('setJustViewer', justViewer);
         const users = await authenticator.login(account);
         if (users.length) {
-            const account = await initFuelUserWrapper(users[0]);
+            // OreId has it's own authorization service, only init fuel service for other ual users
+            const account = (users[0]).constructor.name === 'OreUser' ? users[0] : await initFuelUserWrapper(users[0]);
             const accountName = await account.getAccountName();
             this.$ualUser = account;
             this.$type = 'ual';

@@ -120,7 +120,8 @@ export const useAccountStore = defineStore(store_name, {
                 await authenticator.init();
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
-                    const ualUser = await initFuelUserWrapper(ualUsers[0]);
+                    // OreId has it's own authorization service, only init fuel service for other ual users
+                    const ualUser = (ualUsers[0]).constructor.name === 'OreIdAuthenticator' ? ualUsers[0] : await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
                     const account = await ualUser.getAccountName();
