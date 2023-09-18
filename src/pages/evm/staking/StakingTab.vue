@@ -203,7 +203,7 @@ async function handleCtaClick() {
     <div class="row q-mb-lg">
         <div class="col-12">
             <CurrencyInput
-                v-model="outputModelValue"
+                :model-value="outputModelValue"
                 :symbol="stakedTokenSymbol"
                 :decimals="stakedTokenDecimals"
                 :decimals-to-display="uiDecimals"
