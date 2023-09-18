@@ -193,6 +193,7 @@ export const useNftsStore = defineStore(store_name, {
             this.trace('fetchNftDetails', label, contract, tokenId, type);
             let promise = Promise.resolve(null) as Promise<NFT | null>;
             try {
+                const contractLower = contract.toLowerCase();
                 const chain = useChainStore().getChain(label);
                 const network = chain.settings.getNetwork();
 
@@ -203,16 +204,16 @@ export const useNftsStore = defineStore(store_name, {
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
-                if (this.__contracts[network][contract]) {
-                    const nft = this.__contracts[network][contract].list.find(
+                if (this.__contracts[network][contractLower]) {
+                    const nft = this.__contracts[network][contractLower].list.find(
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;
                     }
                 } else {
-                    this.__contracts[network][contract] = {
-                        contract,
+                    this.__contracts[network][contractLower] = {
+                        contract: contractLower,
                         list: [],
                         loading: false,
                     };
@@ -222,12 +223,13 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
                     promise = chain.settings.getNftsForCollection(contract, new_filter).then((nfts) => {
+                        const contractLower = contract.toLowerCase();
                         // if the NFT is and ERC1155, the list will contain multiple NFTs with the same ID, representing the same NFT with different owners' stats
                         const uniqueNfts = nfts.filter((nft, index, self) => self.findIndex(n => n.id === nft.id) === index);
 
                         this.trace('fetchNftDetails', 'indexer returned:', uniqueNfts);
-                        this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(uniqueNfts);
-                        this.__contracts[network][contract].loading = false;
+                        this.__contracts[network][contractLower].list = this.__contracts[network][contractLower].list.concat(uniqueNfts);
+                        this.__contracts[network][contractLower].loading = false;
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
                         return uniqueNfts.find(nft => nft.id === tokenId) || null;
                     });
@@ -240,10 +242,11 @@ export const useNftsStore = defineStore(store_name, {
                             tokenId,
                             (type ?? 'ERC721').toUpperCase(),
                         ).then((nft) => {
+                            const contractLower = contract.toLowerCase();
                             this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {
-                                this.__contracts[network][contract].list.push(nft);
-                                this.__contracts[network][contract].loading = false;
+                                this.__contracts[network][contractLower].list.push(nft);
+                                this.__contracts[network][contractLower].loading = false;
                             }
                             useFeedbackStore().unsetLoading('updateNFTsForAccount');
                             return nft;
