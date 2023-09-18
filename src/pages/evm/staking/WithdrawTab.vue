@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
@@ -7,11 +7,9 @@ import {
     CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
-    useBalancesStore,
     useChainStore,
     useFeedbackStore,
     useRexStore,
-    useUserStore,
 } from 'src/antelope';
 
 import WithdrawRaw from 'src/pages/evm/staking/WithdrawRaw.vue';
@@ -24,8 +22,6 @@ const uiDecimals = 2;
 const ant = getAntelope();
 const chainStore = useChainStore();
 const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
-const userStore = useUserStore();
-const balanceStore = useBalancesStore();
 const accountStore = useAccountStore();
 const rexStore = useRexStore();
 const feed = useFeedbackStore();
@@ -33,9 +29,6 @@ const feed = useFeedbackStore();
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
 const systemTokenDecimals = systemToken.decimals;
-const stakedToken = chainSettings.getStakedSystemToken();
-const stakedTokenSymbol = stakedToken.symbol;
-const stakedTokenDecimals = stakedToken.decimals;
 
 const loading = computed(() => feed.isLoading('withdrawEVMSystemTokens'));
 const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.deposits ?? []);
@@ -43,8 +36,8 @@ const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.d
 // prettyPrintToken(unstakingBalanceBn.value, systemToken.symbol)
 const withdrawableBalanceBn = computed(() => useRexStore().getRexData(CURRENT_CONTEXT)?.withdrawable ?? ethers.constants.Zero);
 
-// enable only if withdrawableBalanceBn > 0
-const withdrawEnabled = computed(() => withdrawableBalanceBn.value?.gt(0) ?? false);
+// enable only if withdrawableBalanceBn > 0 and not loading
+const withdrawEnabled = computed(() => withdrawableBalanceBn.value.gt(ethers.constants.Zero) && !loading.value);
 
 // hadle withdraw button click
 const handleWithdrawClick = async () => {
@@ -87,7 +80,6 @@ const handleWithdrawClick = async () => {
 
 // handler of update-rex-data event
 const updateRexData = () => {
-    console.log('WithdrawTab.updateRexData');
     useRexStore().updateRexData(CURRENT_CONTEXT);
 };
 

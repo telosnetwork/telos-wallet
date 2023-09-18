@@ -3,7 +3,7 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { CURRENT_CONTEXT, useChainStore, useEVMStore, useRexStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
@@ -12,7 +12,6 @@ import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { ethers } from 'ethers';
 import { getFormatedDate } from 'src/antelope/stores/utils';
 
-const evmStore = useEVMStore();
 const userStore = useUserStore();
 const chainStore = useChainStore();
 const { fiatLocale, fiatCurrency } = userStore;
@@ -99,11 +98,9 @@ export default defineComponent({
             }
 
             if (this.truncateSecondaryValue) {
-                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
+                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true, this.token.symbol);
             } else {
-                const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
-
-                return `${formatted} ${this.token.symbol}`;
+                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, false, this.token.symbol);
             }
         },
     },

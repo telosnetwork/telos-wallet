@@ -214,7 +214,6 @@ export class OreIdAuth extends EVMAuthenticator {
         this.checkIntegrity();
 
         // prepare variables
-        // const from = this.userChainAccount?.chainAccount as addressString;
         const from = this.getAccountAddress();
         const value = amount.toHexString();
         const abi = erc20Abi;

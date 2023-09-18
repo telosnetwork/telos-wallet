@@ -216,11 +216,11 @@ export function getLongDate(epoch: number): string {
 
 
 /**
- * TODO: write this doc
- *
- * @param epoch
- *
- * @return string
+ * Given a unix timestamp, returns string with the date in a given format showing UTC offset optionally.
+ * @param epoch seconds since epoch
+ * @param timeFormat a string containing the format of the date to be returned (based on date-fns format)
+ * @param showUtc whether to show the UTC offset
+ * @returns {string} the formatted date
  */
 export function getFormatedDate(epoch: number, timeFormat = 'MMM d, yyyy hh:mm:ss a', showUtc = false): string {
     const offset = getFormattedUtcOffset(new Date(epoch));

@@ -96,9 +96,13 @@ const availableTostake = computed(() => {
     }
     return available;
 });
+
+
 const formIsValid = computed(() =>
+    !ctaIsLoading.value &&
     !outputModelValue.value.isZero() &&
-    inputModelValue.value.lt(availableTostake.value),
+    inputModelValue.value.gt(0) &&
+    inputModelValue.value.lte(availableTostake.value),
 );
 const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('stakeEVMSystemTokens'));
 

@@ -41,6 +41,8 @@ const stakedTokenDecimals = stakedToken.decimals;
 // data
 const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals)));
 const inputModelValue = ref(ethers.constants.Zero);
+
+// computed
 const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
 const outputModelValue = computed(() => {
     if (unstakedRatio.value.isZero()) {
@@ -49,7 +51,7 @@ const outputModelValue = computed(() => {
     const output = inputModelValue.value.mul(unstakedRatio.value).div(oneEth);
     return output;
 });
-// computed
+
 const fiatLocale = computed(() => userStore.fiatLocale);
 const fiatCurrency = computed(() => userStore.fiatCurrency);
 const systemTokenBalanceInfo = computed(() => balanceStore.currentBalances.filter(
@@ -83,9 +85,12 @@ const sidebarContent = computed(() => {
     };
 });
 const availableToUnstake = computed(() => stakedTokenBalance.value);
+
 const formIsValid = computed(() =>
+    !ctaIsLoading.value &&
     !outputModelValue.value.isZero() &&
-    inputModelValue.value.lt(availableToUnstake.value),
+    inputModelValue.value.gt(0) &&
+    inputModelValue.value.lte(availableToUnstake.value),
 );
 const ctaIsLoading = computed(() => ant.stores.feedback.isLoading('unstakeEVMSystemTokens'));
 

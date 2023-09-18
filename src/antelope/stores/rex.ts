@@ -195,7 +195,7 @@ export const useRexStore = defineStore(store_name, {
         },
         // transactions ----------
         /**
-         * This methos sould be called by any transaction performed by this store. It subscribes to the transaction
+         * This method should be called by any transaction performed by this store. It subscribes to the transaction
          * receipt and updates the balance and rex status for the account if the transaction is successful.
          * @param account account performing the transaction
          * @param response the transaction response holding the hash
@@ -292,11 +292,12 @@ export const useRexStore = defineStore(store_name, {
             (this.__rexData[label] as EvmRexModel).withdrawable = withdrawable;
         },
         setDeposits(label: string, deposits: EvmRexDeposit[]) {
-            const copia = deposits.slice();
-            copia.sort((a, b) => a.until.toNumber() - b.until.toNumber());
-            this.trace('setDeposits', label, ... copia.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
+            // we need to clone the deposits parameter because it is read-only and we can't directly sort it.
+            const editable_clone = deposits.slice();
+            editable_clone.sort((a, b) => a.until.toNumber() - b.until.toNumber());
+            this.trace('setDeposits', label, ... editable_clone.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
             this.__rexData[label] = this.__rexData[label] || {};
-            (this.__rexData[label] as EvmRexModel).deposits = copia;
+            (this.__rexData[label] as EvmRexModel).deposits = editable_clone;
         },
         setBalance(label: string, balance: ethers.BigNumber) {
             const num = parseFloat(ethers.utils.formatUnits(balance, this.getStakingDecimals()));
