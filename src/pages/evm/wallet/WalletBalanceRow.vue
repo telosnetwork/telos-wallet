@@ -121,9 +121,10 @@ export default defineComponent({
             }
 
             if (this.truncateSecondaryValue) {
-                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true, this.token.symbol);
+                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
             } else {
-                return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, false, this.token.symbol);
+                const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
+                return `${formatted} ${this.token.symbol}`;
             }
         },
         tooltipWarningText(): string[] | undefined {
