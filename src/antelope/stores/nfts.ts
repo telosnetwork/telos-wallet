@@ -224,14 +224,12 @@ export const useNftsStore = defineStore(store_name, {
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
                     promise = chain.settings.getNftsForCollection(contract, new_filter).then((nfts) => {
                         const contractLower = contract.toLowerCase();
-                        // if the NFT is and ERC1155, the list will contain multiple NFTs with the same ID, representing the same NFT with different owners' stats
-                        const uniqueNfts = nfts.filter((nft, index, self) => self.findIndex(n => n.id === nft.id) === index);
 
-                        this.trace('fetchNftDetails', 'indexer returned:', uniqueNfts);
-                        this.__contracts[network][contractLower].list = this.__contracts[network][contractLower].list.concat(uniqueNfts);
+                        this.trace('fetchNftDetails', 'indexer returned:', nfts);
+                        this.__contracts[network][contractLower].list = this.__contracts[network][contractLower].list.concat(nfts);
                         this.__contracts[network][contractLower].loading = false;
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                        return uniqueNfts.find(nft => nft.id === tokenId) || null;
+                        return nfts.find(nft => nft.id === tokenId) || null;
                     });
                 } else {
                     if (!chain.settings.isNative()) {
