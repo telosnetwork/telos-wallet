@@ -573,5 +573,11 @@ export default {
             error_getting_wrapped_contract: 'An error occurred while getting the wrapped system token contract',
             error_wrap: 'An unknown error occurred while wrapping system token',
         },
+        words: {
+            days: 'days',
+            hours: 'hours',
+            minutes: 'minutes',
+            seconds: 'seconds',
+        },
     },
 };

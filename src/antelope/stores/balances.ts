@@ -271,10 +271,10 @@ export const useBalancesStore = defineStore(store_name, {
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', account.account, response.hash);
             return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
-                this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
-                if (receipt.status === 1) {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
                     this.updateBalancesForAccount(CURRENT_CONTEXT, account);
-                }
+                });
                 return newResponse;
             });
         },

@@ -204,11 +204,11 @@ export const useRexStore = defineStore(store_name, {
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', account.account, response.hash);
             return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
-                this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
-                if (receipt.status === 1) {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
                     this.updateRexDataForAccount(CURRENT_CONTEXT, account);
                     useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, account);
-                }
+                });
                 return newResponse;
             });
         },
@@ -292,9 +292,11 @@ export const useRexStore = defineStore(store_name, {
             (this.__rexData[label] as EvmRexModel).withdrawable = withdrawable;
         },
         setDeposits(label: string, deposits: EvmRexDeposit[]) {
-            this.trace('setDeposits', label, ... deposits.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
+            const copia = deposits.slice();
+            copia.sort((a, b) => a.until.toNumber() - b.until.toNumber());
+            this.trace('setDeposits', label, ... copia.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
             this.__rexData[label] = this.__rexData[label] || {};
-            (this.__rexData[label] as EvmRexModel).deposits = deposits;
+            (this.__rexData[label] as EvmRexModel).deposits = copia;
         },
         setBalance(label: string, balance: ethers.BigNumber) {
             const num = parseFloat(ethers.utils.formatUnits(balance, this.getStakingDecimals()));

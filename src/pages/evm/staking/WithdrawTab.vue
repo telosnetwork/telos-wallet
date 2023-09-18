@@ -85,6 +85,14 @@ const handleWithdrawClick = async () => {
     }
 };
 
+// handler of update-rex-data event
+const updateRexData = () => {
+    console.log('WithdrawTab.updateRexData');
+    useRexStore().updateRexData(CURRENT_CONTEXT);
+};
+
+// we call to update the data
+updateRexData();
 
 </script>
 
@@ -109,6 +117,7 @@ const handleWithdrawClick = async () => {
             :key="`withdrawal-${index}`"
             :withdrawal="withdrawal"
             class="q-mb-xs"
+            @update-rex-data="updateRexData"
         />
     </div>
     <div

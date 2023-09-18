@@ -81,7 +81,7 @@ const unstakingBalanceBn = computed(() => {
     }
 });
 const unstakingFiatValueBn = computed(() => {
-    if (unstakingBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
+    if (unstakingBalanceBn.value && !unstakingBalanceBn.value.isZero() && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
         return convertCurrency(unstakingBalanceBn.value, stakedToken.decimals, systemToken.decimals, ratioNumber);
     } else {

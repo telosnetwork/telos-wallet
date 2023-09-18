@@ -3,7 +3,7 @@ import { defineComponent, PropType } from 'vue';
 
 import InlineSvg from 'vue-inline-svg';
 
-import { CURRENT_CONTEXT, useChainStore, useEVMStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore, useEVMStore, useRexStore, useUserStore } from 'src/antelope';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
@@ -23,15 +23,12 @@ export default defineComponent({
         InlineSvg,
         ToolTip,
     },
+    emits: ['update-rex-data'],
     data() {
         return {
-            iconSrc: 'src/assets/icon--calendar-clock.svg',
-            iconAlt: '',
-            withdrawalStatus: 'Unstaking for 2 days 3 hours',
-            withdrawalDate: 'Withdraw it on Feb 12, 2023 09:32 AM',
-            externalHash: '0x3db63fd9fc379161f2e2f6381153b2a77923f8b65dd04723dd4ab6b8ef3fbc06',
-            externalUrl: 'https://teloscan.io/tx/0x3db63fd9fc379161f2e2f6381153b2a77923f8b65dd04723dd4ab6b8ef3fbc06',
-            externalPurpose: 'View on Teloscan',
+            now: Date.now(),
+            pendingTime: '',
+            timer: setTimeout(() => {}, 0),
         };
     },
     props: {
@@ -47,22 +44,8 @@ export default defineComponent({
         longDate(): string {
             return getFormatedDate(this.epoch, 'MMM d, yyyy hh:mm a', false);
         },
-        pendingTime(): string {
-            const seconds = this.epoch - Date.now() / 1000;
-            const days = Math.floor(seconds / 86400);
-            const hours = Math.floor((seconds % 86400) / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secondsLeft = Math.floor(seconds % 60);
-
-            const daysStr = days > 0 ? `${days} days ` : '';
-            const hoursStr = hours > 0 ? `${hours} hours ` : '';
-            const minutesStr = (!days && minutes > 0) ? `${minutes} minutes ` : '';
-            const secondsStr = (!days && !hours && secondsLeft > 0) ? `${secondsLeft} seconds ` : '';
-
-            return `${daysStr}${hoursStr}${minutesStr}${secondsStr}`;
-        },
         isWithdrawable(): boolean {
-            return this.epoch <= Date.now() / 1000;
+            return this.epoch <= this.now / 1000;
         },
         token() {
             const settings = chainStore.getChain(CURRENT_CONTEXT).settings as EVMChainSettings;
@@ -125,11 +108,70 @@ export default defineComponent({
         },
     },
     methods: {
+        updatePendingTime() {
+            this.now = Date.now();
+            const w_days = this.$t('antelope.words.days');
+            const w_hours = this.$t('antelope.words.hours');
+            const w_minutes = this.$t('antelope.words.minutes');
+            const w_seconds = this.$t('antelope.words.seconds');
+
+            const seconds = this.epoch - this.now / 1000;
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secondsLeft = Math.floor(seconds % 60);
+
+            const daysStr = days > 0 ? `${days} ${w_days} ` : '';
+            const hoursStr = hours > 0 ? `${hours} ${w_hours} ` : '';
+            const minutesStr = (!days && minutes > 0) ? `${minutes} ${w_minutes} ` : '';
+            const secondsStr = (!days && !hours && secondsLeft > 0) ? `${secondsLeft} ${w_seconds} ` : '';
+
+            this.pendingTime = `${daysStr}${hoursStr}${minutesStr}${secondsStr}`;
+        },
         formatTooltipBalance(amount: number, isFiat: boolean): string {
             const decimals = isFiat ? 2 : 4;
             const symbol = isFiat ? fiatCurrency : this.token.symbol;
 
             return `${prettyPrintCurrency(amount, decimals, fiatLocale)} ${symbol}`;
+        },
+        enterSecondUpdatedinterval() {
+            clearInterval(this.timer);
+            this.timer = setInterval(() => {
+                this.updatePendingTime();
+                if (this.pendingTime === '') {
+                    // final case
+                    this.$emit('update-rex-data');
+                    clearInterval(this.timer);
+                    console.log('clear interval');
+                }
+            }, 1000);
+        },
+        scheduleMinuteUpdatePendingTime() {
+            const word_seconds = this.$t('antelope.words.seconds');
+            this.updatePendingTime();
+            if (this.pendingTime.includes(word_seconds)) {
+                this.enterSecondUpdatedinterval();
+                return;
+            } else {
+                setTimeout(() => {
+                    this.updatePendingTime();
+                    this.scheduleMinuteUpdatePendingTime();
+                }, 60000);
+            }
+        },
+    },
+    mounted() {
+        this.scheduleMinuteUpdatePendingTime();
+    },
+    beforeUnmount() {
+        clearInterval(this.timer);
+    },
+    watch: {
+        withdrawal: {
+            handler() {
+                this.scheduleMinuteUpdatePendingTime();
+            },
+            deep: true,
         },
     },
 });
@@ -141,13 +183,14 @@ export default defineComponent({
         <div class="c-stake-withdrawal-row__left-icon">
             <InlineSvg
                 :src="require(`src/assets/icon--calendar-${isWithdrawable?'check':'clock'}.svg`)"
-                :alt="$t(iconAlt)"
                 class="c-stake-withdrawal-row__icon"
                 height="24"
                 width="24"
                 aria-hidden="true"
             />
         </div>
+    </div>
+    <div class="c-stake-withdrawal-row__middle-container">
         <div class="c-stake-withdrawal-row__left-content">
             <div>
                 <span class="c-stake-withdrawal-row__withdrawal-status">
@@ -188,8 +231,6 @@ export default defineComponent({
 .c-stake-withdrawal-row {
     $this: &;
 
-    display: flex;
-    justify-content: space-between;
     border-radius: 4px;
     border-bottom: 2px solid var(--header-bg-color);
     padding: 24px 4px;
@@ -197,13 +238,34 @@ export default defineComponent({
     max-width: 100%;
     min-width: 0;
 
-    &__left-container,
-    &__right-container {
-        display: flex;
-        width: max-content;
+    display: grid;
+    gap: 16px 8px;
+    justify-items: start;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+        'a b'
+        'a c';
+
+    @include sm-and-up {
+        grid-template-areas: 'a b c';
+        grid-template-columns: auto 1fr auto;
+        &__right-container {
+            justify-self: end;
+        }
     }
 
     &__left-container {
+        grid-area: a;
+    }
+    &__middle-container,
+    &__right-container {
+        display: flex;
+        width: max-content;
+        text-align: left;
+    }
+
+    &__middle-container {
+        grid-area: b;
         @include text--paragraph;
         color: var(--text-default-contrast);
         display: flex;
@@ -213,25 +275,32 @@ export default defineComponent({
         white-space: nowrap;
     }
 
+    &__right-container {
+        grid-area: c;
+    }
+
     &__withdrawal-status {
         @include text--paragraph-bold;
     }
 
-    &__left-content {
+    &__middle-content {
         display: flex;
         flex-direction: column;
     }
 
     &__balance-container {
         display: flex;
-        align-items: flex-end;
         justify-content: center;
+        align-items: flex-start;
         gap: 8px;
 
         flex-direction: column;
         flex-shrink: 1;
         text-align: right;
         min-width: 0;
+        @include sm-and-up {
+            align-items: flex-end;
+        }
     }
 
     &__primary-amount,
