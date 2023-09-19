@@ -66,23 +66,15 @@ const sidebarContent = computed(() => {
     const header = $t('evm_stake.unstake_sidebar_title', { symbol: systemTokenSymbol });
     const content = [{
         text: $t(
-            'evm_stake.stake_sidebar_content_fragment_1',
-            { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
+            'evm_stake.unstake_sidebar_content_fragment_1',
+            { systemSymbol: systemTokenSymbol },
         ),
     }, {
-        text: $t('evm_stake.stake_sidebar_content_fragment_2_bold'),
+        text: $t(`evm_stake.unstake_sidebar_content_fragment_2_bold_${chainSettings.isTestnet() ? 'testnet' : 'mainnet'}`),
         bold: true,
     }, {
         text: $t(
-            'evm_stake.stake_sidebar_content_fragment_3',
-            { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
-        ),
-    }, {
-        text: $t('evm_stake.stake_sidebar_content_fragment_4_bold'),
-        bold: true,
-    }, {
-        text: $t(
-            'evm_stake.stake_sidebar_content_fragment_5',
+            'evm_stake.unstake_sidebar_content_fragment_3',
             { systemSymbol: systemTokenSymbol, stakedSymbol: stakedTokenSymbol },
         ),
     }];
