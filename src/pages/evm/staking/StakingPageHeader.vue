@@ -114,7 +114,8 @@ const apyPrittyPrint = computed(() => {
 });
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
 
-const unlockPeriod = ref(rexStore.getUnstakingPeriodString(CURRENT_CONTEXT));
+const unlockPeriod = computed(() => rexStore.getUnstakingPeriodString(CURRENT_CONTEXT));
+const unlockPeriodLoading = computed(() => unlockPeriod.value === '--');
 
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;
@@ -171,6 +172,7 @@ const secondLineData = computed(() => [{
     tooltip: $t('evm_stake.unstaking_period_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol }),
     secondaryText: unlockPeriod.value,
     lowContrastSecondaryText: false,
+    isSecondaryLoading: unlockPeriodLoading.value,
     useSmallBox: true,
 }, {
     label: $t('evm_stake.tvl_card_label'),
@@ -195,7 +197,7 @@ const intervalTimer = setInterval(() => {
         }
     }
     // is unstaking still loading?
-    if (isUnstakingLoading.value || isWithdrawableLoading.value) {
+    if (isUnstakingLoading.value || isWithdrawableLoading.value || unlockPeriodLoading.value) {
         // we need to update rex data
         useRexStore().updateRexData(label);
     }
