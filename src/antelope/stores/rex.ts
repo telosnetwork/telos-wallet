@@ -20,12 +20,14 @@ import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMSt
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+import { formatUnstakePeriod } from 'src/antelope/stores/utils/date-utils';
 
 
 export interface RexModel {
     withdrawable: ethers.BigNumber;
     balance: ethers.BigNumber;
     totalStaking: ethers.BigNumber;
+    period: number; // unstake period in seconds
 }
 
 export interface NativeRexModel extends RexModel {
@@ -52,6 +54,14 @@ export const useRexStore = defineStore(store_name, {
         getRexData: state => (label: string) => state.__rexData[label] ?? null,
         getEvmRexData: state => (label: string) => state.__rexData[label] as EvmRexModel,
         getNativeRexData: state => (label: string) => state.__rexData[label] as NativeRexModel,
+        getUnstakingPeriodString: state => (label: string) =>
+            formatUnstakePeriod(
+                // period for the label network
+                state.__rexData[label]?.period ?? null,
+                // translation function only takes the key name, without the path and adds the prefix
+                (key:string) => getAntelope().config.localizationHandler(`antelope.words.${key}`),
+            ),
+
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -117,6 +127,18 @@ export const useRexStore = defineStore(store_name, {
             const totalStaking = await contract.totalAssets();
             this.setTotalStaking(label, totalStaking);
         },
+
+        /**
+         * This method queries the unstaking period for a given chain and maintains it in the store.
+         * @param label identifies the context (network on this case) for the data
+         */
+        async updateUnstakingPeriod(label: string) {
+            this.trace('updateUnstakingPeriod', label);
+            const contract = await this.getEscrowContractInstance(label);
+            const period = await contract.lockDuration();
+            this.setUnstakingPeriod(label, period.toNumber());
+        },
+
         /**
          * This method should be called to update the REX data for a given context.
          * @param label identifies the context (account and network) for the data
@@ -139,10 +161,11 @@ export const useRexStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateRexDataForAccount');
             try {
                 await Promise.all([
-                    this.updateWithdrawable(label),  // account's data
-                    this.updateDeposits(label),      // account's data
-                    this.updateBalance(label),       // account's data
-                    this.updateTotalStaking(label),  // system's data
+                    this.updateWithdrawable(label),    // account's data
+                    this.updateDeposits(label),        // account's data
+                    this.updateBalance(label),         // account's data
+                    this.updateTotalStaking(label),    // system's data
+                    this.updateUnstakingPeriod(label), // system's data
                 ]);
             } catch (error) {
                 console.error(error);
@@ -310,6 +333,11 @@ export const useRexStore = defineStore(store_name, {
             this.trace('setTotalStaking', label, num);
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).totalStaking = totalStaking;
+        },
+        setUnstakingPeriod(label: string, period: number) {
+            this.trace('setUnstakingPeriod', label, period);
+            this.__rexData[label] = this.__rexData[label] || {};
+            (this.__rexData[label] as EvmRexModel).period = period;
         },
     },
 });

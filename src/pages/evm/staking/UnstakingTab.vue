@@ -29,6 +29,7 @@ const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
 const userStore = useUserStore();
 const balanceStore = useBalancesStore();
 const accountStore = useAccountStore();
+const rexStore = useRexStore();
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -70,7 +71,9 @@ const sidebarContent = computed(() => {
             { systemSymbol: systemTokenSymbol },
         ),
     }, {
-        text: $t(`evm_stake.unstake_sidebar_content_fragment_2_bold_${chainSettings.isTestnet() ? 'testnet' : 'mainnet'}`),
+        text: $t('evm_stake.unstake_sidebar_content_fragment_2_bold', {
+            period: rexStore.getUnstakingPeriodString(CURRENT_CONTEXT),
+        }),
         bold: true,
     }, {
         text: $t(

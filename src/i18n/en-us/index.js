@@ -218,8 +218,6 @@ export default {
         tvl_card_label: 'TVL',
         tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
         'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
-        unstaking_period_testnet: '10 minutes',
-        unstaking_period_mainnet: '10 days',
         stake_input_label: 'Staking Amount',
         stake_output_label: 'Staked Amount',
         stake: 'Stake',
@@ -236,8 +234,7 @@ export default {
         unstake_sidebar_title: 'Unstaking {symbol}?',
         unstake_button_label: 'Unstake {stakedSymbol} to {systemSymbol}',
         unstake_sidebar_content_fragment_1: 'Unstaked TLOS will',
-        unstake_sidebar_content_fragment_2_bold_testnet: ' remain locked for a period of 10 minutes, ',
-        unstake_sidebar_content_fragment_2_bold_mainnet: ' remain locked for a period of 10 days, ',
+        unstake_sidebar_content_fragment_2_bold: ' remain locked for a period of {period}, ',
         unstake_sidebar_content_fragment_3: 'after which it can be withdrawn to your account from the Withdraw tab.',
         withdraw_button_disabled: 'Nothing to withdraw',
         withdraw_button_enabled: 'Withdraw {amount} {symbol}',

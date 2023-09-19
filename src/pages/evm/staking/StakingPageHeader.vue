@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber, ethers } from 'ethers';
 
-import { useUserStore, useBalancesStore, useChainStore, useRexStore } from 'src/antelope';
+import { useUserStore, useBalancesStore, useChainStore, useRexStore, CURRENT_CONTEXT } from 'src/antelope';
 import { convertCurrency, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
@@ -19,6 +19,7 @@ const userStore = useUserStore();
 const balancesStore = useBalancesStore();
 const chainStore = useChainStore();
 const chainSettings = (chainStore.loggedChain.settings as EVMChainSettings);
+const rexStore = useRexStore();
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -112,7 +113,8 @@ const apyPrittyPrint = computed(() => {
     }
 });
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
-const unlockPeriod = ref($t(`evm_stake.unstaking_period_${chainSettings.isTestnet() ? 'testnet' : 'mainnet'}`));
+
+const unlockPeriod = ref(rexStore.getUnstakingPeriodString(CURRENT_CONTEXT));
 
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;
