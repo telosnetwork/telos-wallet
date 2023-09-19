@@ -136,11 +136,9 @@ export default defineComponent({
             clearInterval(this.timer);
             this.timer = setInterval(() => {
                 this.updatePendingTime();
-                if (this.pendingTime === '') {
-                    // final case
+                if (this.isWithdrawable) {
                     this.$emit('update-rex-data');
                     clearInterval(this.timer);
-                    console.log('clear interval');
                 }
             }, 1000);
         },
@@ -192,7 +190,15 @@ export default defineComponent({
         <div class="c-stake-withdrawal-row__left-content">
             <div>
                 <span class="c-stake-withdrawal-row__withdrawal-status">
-                    {{ isWithdrawable ? $t('evm_stake.withdrawal_available') : $t('evm_stake.unstaking_pending_time', { time: pendingTime }) }}
+                    <template v-if="isWithdrawable">
+                        {{ $t('evm_stake.withdrawal_available') }}
+                    </template>
+                    <template v-else-if="pendingTime !== ''">
+                        {{ $t('evm_stake.unstaking_pending_time', { time: pendingTime }) }}
+                    </template>
+                    <template v-else>
+                        {{ $t('evm_stake.withdrawal_updatng') }}
+                    </template>
                 </span>
             </div>
             <div>

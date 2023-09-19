@@ -203,6 +203,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return false;
     }
 
+    // only testnet chains should override this
+    isTestnet() {
+        return false;
+    }
+
     getNetwork(): string {
         return this.network;
     }

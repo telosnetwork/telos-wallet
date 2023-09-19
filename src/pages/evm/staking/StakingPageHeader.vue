@@ -112,7 +112,7 @@ const apyPrittyPrint = computed(() => {
     }
 });
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
-const unlockPeriod = ref($t('evm_stake.unstaking_period'));
+const unlockPeriod = ref($t(`evm_stake.unstaking_period_${chainSettings.isTestnet() ? 'testnet' : 'mainnet'}`));
 
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;

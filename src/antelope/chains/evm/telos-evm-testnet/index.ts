@@ -62,6 +62,10 @@ const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.co
 declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
+    isTestnet() {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }

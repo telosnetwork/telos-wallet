@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
@@ -25,6 +25,7 @@ const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
 const accountStore = useAccountStore();
 const rexStore = useRexStore();
 const feed = useFeedbackStore();
+const waitingForResult = ref(false);
 
 const systemToken = chainSettings.getSystemToken();
 const systemTokenSymbol = systemToken.symbol;
@@ -37,7 +38,7 @@ const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.d
 const withdrawableBalanceBn = computed(() => useRexStore().getRexData(CURRENT_CONTEXT)?.withdrawable ?? ethers.constants.Zero);
 
 // enable only if withdrawableBalanceBn > 0 and not loading
-const withdrawEnabled = computed(() => withdrawableBalanceBn.value.gt(ethers.constants.Zero) && !loading.value);
+const withdrawEnabled = computed(() => !waitingForResult.value && withdrawableBalanceBn.value.gt(ethers.constants.Zero) && !loading.value);
 
 // hadle withdraw button click
 const handleWithdrawClick = async () => {
@@ -57,6 +58,7 @@ const handleWithdrawClick = async () => {
     }
 
     try {
+        waitingForResult.value = true;
         const tx = await useRexStore().withdrawEVMSystemTokens(CURRENT_CONTEXT, withdrawableBalanceBn.value);
         const formattedAmount = formatWei(withdrawableBalanceBn.value, systemTokenDecimals, 4);
 
@@ -68,6 +70,7 @@ const handleWithdrawClick = async () => {
             ant.config.notifySuccessfulTrxHandler(
                 `${chainSettings.getExplorerUrl()}/tx/${tx.hash}`,
             );
+            waitingForResult.value = false;
         }).catch((err) => {
             console.error(err);
         }).finally(() => {

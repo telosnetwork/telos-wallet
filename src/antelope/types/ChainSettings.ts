@@ -4,6 +4,7 @@ import { IndexerTransactionsFilter, NFTClass, PriceChartData, TokenClass } from 
 export interface ChainSettings {
     init(): Promise<void>;
     isNative(): boolean;
+    isTestnet(): boolean;
     getNetwork(): string;
     getSystemToken(): TokenClass;
     getTokenList(): Promise<TokenClass[]>;

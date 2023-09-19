@@ -229,7 +229,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.stakeSystemTokens(amount)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_stakes_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -253,7 +253,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.unstakeSystemTokens(amount)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_unstakes_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -277,7 +277,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.withdrawUnstakedTokens()
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_withdraw_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -293,7 +293,7 @@ export const useRexStore = defineStore(store_name, {
         },
         setDeposits(label: string, deposits: EvmRexDeposit[]) {
             // we need to clone the deposits parameter because it is read-only and we can't directly sort it.
-            const editable_clone = deposits.slice();
+            const editable_clone = (deposits || []).slice();
             editable_clone.sort((a, b) => a.until.toNumber() - b.until.toNumber());
             this.trace('setDeposits', label, ... editable_clone.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
             this.__rexData[label] = this.__rexData[label] || {};
