@@ -27,12 +27,12 @@ export interface NftPrecursorData {
     blockMinted?: number;
 }
 
-export type NftMediaType = 'image' | 'video' | 'audio' | 'none';
-export const NFTSourceTypes: Record<string, NftMediaType> = {
+export type NftSourceType = 'image' | 'video' | 'audio' | 'unknown';
+export const NFTSourceTypes: Record<string, NftSourceType> = {
     IMAGE: 'image',
     VIDEO: 'video',
     AUDIO: 'audio',
-    NONE: 'none',
+    UNKNOWN: 'unknown',
 };
 
 export type NftTokenInterface = 'ERC721' | 'ERC1155';
@@ -158,7 +158,7 @@ export class NFT {
     readonly contractAddress: string; // address
     readonly updated: number; // epoch
     readonly attributes: NftAttribute[];
-    readonly mediaType: NftMediaType;
+    readonly mediaType: NftSourceType;
     readonly owner: string; // ERC721 only
     readonly owners: { [address: string]: number }; // ERC1155 only
 
@@ -233,8 +233,8 @@ export class NFT {
 
 
     // methods
-    extractMetadata(): { preview: string, type: NftMediaType, source: string | undefined } {
-        let type: NftMediaType = NFTSourceTypes.IMAGE;
+    extractMetadata(): { preview: string, type: NftSourceType, source: string | undefined } {
+        let type: NftSourceType = NFTSourceTypes.IMAGE;
         let preview = '';
         let source: string | undefined = undefined;
 
