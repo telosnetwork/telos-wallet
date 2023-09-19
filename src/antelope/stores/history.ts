@@ -333,16 +333,6 @@ export const useHistoryStore = defineStore(store_name, {
 
                         nftDetailList.forEach((nftDetails, index) => {
                             if (nftDetails) {
-                                let nftMediaType: 'image' | 'video' | 'audio' | 'unknown' = 'unknown';
-
-                                if (nftDetails.audioSrc) {
-                                    nftMediaType = 'audio';
-                                } else if (nftDetails.videoSrc) {
-                                    nftMediaType = 'video';
-                                } else if (nftDetails.imageSrcFull) {
-                                    nftMediaType = 'image';
-                                }
-
                                 const transferInfo = nftTransfersInTx[index];
                                 const shapedNftTransfer = {
                                     quantity: +(transferInfo.amount || 1),
@@ -350,7 +340,7 @@ export const useHistoryStore = defineStore(store_name, {
                                     tokenName: nftDetails.name,
                                     collectionAddress: transferInfo.contract,
                                     collectionName: nftDetails.contractPrettyName,
-                                    type: nftMediaType,
+                                    type: nftDetails.item.type,
                                     nftInterface: transferInfo.type.toUpperCase() as NftTokenInterface,
                                     imgSrc: nftDetails.imageSrcFull,
                                     videoSrc: nftDetails.videoSrc,
@@ -489,21 +479,21 @@ export const useHistoryStore = defineStore(store_name, {
 
 const historyInitialState: HistoryState = {
     __evm_transactions: {
-        current: {
+        [CURRENT_CONTEXT]: {
             transactions: [],
         },
     },
     __total_evm_transaction_count: {
-        current: 0,
+        [CURRENT_CONTEXT]: 0,
     },
     __evm_filter: {
         address: '',
     },
     __shaped_evm_transaction_rows: {
-        current: [],
+        [CURRENT_CONTEXT]: [],
     },
     __evm_transactions_pagination_data: {},
     __evm_nft_transfers: {
-        current: new Map(),
+        [CURRENT_CONTEXT]: new Map(),
     },
 };
