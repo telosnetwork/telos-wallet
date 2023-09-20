@@ -129,7 +129,7 @@ export default defineComponent({
             <img
                 width="24"
                 class="c-evm-login-buttons__icon c-evm-login-buttons__icon--oreid"
-                src="~assets/logo--tlos.svg"
+                src="~assets/logo--telos-cloud-wallet.svg"
             >
             {{ $t('home.login_with_social_media') }}
         </template>

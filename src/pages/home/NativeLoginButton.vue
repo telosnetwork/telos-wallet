@@ -5,7 +5,7 @@ import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { OreIdAuthenticator } from 'ual-oreid';
 
-const telosLogo = require('src/assets/logo--tlos.svg');
+const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
 export default defineComponent({
     name: 'NativeLoginButton',
