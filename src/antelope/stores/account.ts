@@ -156,6 +156,7 @@ export const useAccountStore = defineStore(store_name, {
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 
@@ -205,6 +206,7 @@ export const useAccountStore = defineStore(store_name, {
         async logout() {
             this.trace('logout');
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 

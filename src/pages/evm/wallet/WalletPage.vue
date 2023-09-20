@@ -35,11 +35,13 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
 
 }, { deep: true, immediate: true });
 
-watch(accountStore.currentEvmAccount, (newAccount) => {
-    // if user is on the balances screen, prefetch transactions
-    if (accountStore.currentEvmAccount?.address && route.query.tab !== 'transactions') {
+watch(accountStore, (newAccountStoreState) => {
+    const newAccount = newAccountStoreState.loggedEvmAccount;
+
+    // if user is on the balances screen, prefetch transactions & transfers
+    if (newAccount?.address && route.query.tab !== 'transactions') {
         historyStore.setEVMTransactionsFilter({
-            address: accountStore.currentEvmAccount?.address,
+            address: newAccount.address,
             offset: 0,
             limit: 5,
             includeAbi: true,

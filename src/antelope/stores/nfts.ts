@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, ERC721_TYPE } from 'src/antelope/types';
+import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
@@ -180,8 +180,8 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async fetchNftDetails(label: Label, contract: string, tokenId: string): Promise<NFTClass | null> {
-            this.trace('fetchNftDetails', label, contract, tokenId);
+        async fetchNftDetails(label: Label, contract: string, tokenId: string, type: NftTokenInterface): Promise<NFTClass | null> {
+            this.trace('fetchNftDetails', label, contract, tokenId, type);
             let promise = Promise.resolve(null) as Promise<NFTClass | null>;
             try {
                 const chain = useChainStore().getChain(label);
@@ -190,7 +190,7 @@ export const useNftsStore = defineStore(store_name, {
                 // If we already have an inventory for that label, we search for the NFT in that list first
                 if (this.__inventory[label]) {
                     const nft = this.__inventory[label].list.find(
-                        nft => nft.item.contract.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
+                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;
@@ -206,7 +206,7 @@ export const useNftsStore = defineStore(store_name, {
                 this.__contracts[network] = this.__contracts[network] || {};
                 if (this.__contracts[network][contract]) {
                     const nft = this.__contracts[network][contract].list.find(
-                        nft => nft.item.contract.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
+                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;
@@ -236,7 +236,7 @@ export const useNftsStore = defineStore(store_name, {
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
-                            ERC721_TYPE,
+                            type.toUpperCase(),
                         ).then((nft) => {
                             this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {

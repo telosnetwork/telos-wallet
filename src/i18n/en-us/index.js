@@ -480,9 +480,11 @@ export default {
             error_unwrap_not_supported_on_native: 'Unwrap is not supported on native chain',
             error_wrap_failed: 'An unknown error occurred when wrapping tokens',
             error_unwrap_failed: 'An unknown error occurred when unwrapping tokens',
+            error_fetching_token_price: 'An unknown error occurred when fetching token price data',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
+            error_fetching_nft_transfers: 'Unexpected error fetching NFT transfers. Please refresh the page to try again.',
         },
         chain: {
             error_update_data: 'Error in updating data',

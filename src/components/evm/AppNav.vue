@@ -437,7 +437,7 @@ export default defineComponent({
         justify-content: space-between;
         color: var(--header-text-color);
         padding: 16px 24px;
-        background-color: var(--header-bg-color);
+        background-color: var(--accent-color-5);
         z-index: $z-index--header-toolbar;
 
         @include md-and-up {
