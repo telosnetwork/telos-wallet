@@ -22,8 +22,8 @@ export class AntelopeWallets {
         this.authenticators.set(authenticator.getName(), authenticator);
     }
 
-    getAutenticator(name: string) {
-        this.trace('getAutenticator', name);
+    getAuthenticator(name: string) {
+        this.trace('getAuthenticator', name);
         return this.authenticators.get(name);
     }
 }

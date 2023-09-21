@@ -5,6 +5,7 @@ import { mapGetters } from 'vuex';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import { getAntelope, useEVMStore, usePlatformStore } from 'src/antelope';
+import { Menu } from 'src/pages/home/MenuType';
 
 export default defineComponent({
     name: 'HomePage',
@@ -13,61 +14,23 @@ export default defineComponent({
         NativeLoginButton,
     },
     data: (): {
-        tab: 'left' | 'right'
-        showWalletOptions: boolean,
-        showOAuthOptions: boolean,
-        showWalletConnect: boolean,
-        useInjectedProvider: string,
+        tab: 'left' | 'right',
+        currentMenu: Menu,
     } => ({
         tab: 'left',
-        showWalletOptions: false,
-        showOAuthOptions: false,
-        showWalletConnect: false,
-        useInjectedProvider: '',
+        currentMenu: Menu.MAIN,
     }),
 
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
+        showLeftRightBtns(): boolean {
+            return this.currentMenu === Menu.MAIN;
+        },
     },
 
     methods: {
-        onUseInjectedProvider() {
-            // first check the integrity of the injected provider
-            const evm = useEVMStore();
-            const platform = usePlatformStore();
-            console.assert(platform.isMobile, 'onUseInjectedProvider should only be called on mobile');
-            console.assert(evm.injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-            const providerName = evm.injectedProviderNames[0];
-            const authenticator = evm.injectedProvider(providerName);
-            if (!authenticator) {
-                console.error(`${providerName} authenticator not found`);
-                getAntelope().config.notifyFailureMessage(
-                    this.$t(
-                        'home.no_injected_provider_found',
-                        { providerName },
-                    ),
-                );
-                return;
-            }
-            // Everything is fine, let's use the injected provider
-            this.useInjectedProvider = providerName;
-        },
-        onShowWalletConnect() {
-            this.showWalletConnect = true;
-            // put this variable back to false for an eventual re-open
-            setTimeout(() => {
-                this.showWalletConnect = false;
-            }, 200);
-        },
-        onShowWalletOptions(show: boolean) {
-            this.showWalletOptions = show;
-            if (!show) {
-                this.showOAuthOptions = false;
-            }
-        },
-        onShowOAuthOptions(show: boolean) {
-            this.showOAuthOptions = show;
-            this.showWalletOptions = show;
+        goBack(): void {
+            this.currentMenu = Menu.MAIN;
         },
     },
 });
@@ -83,8 +46,8 @@ export default defineComponent({
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
-                <div v-if="!showWalletOptions" class="c-home__button-container">
-                    <div class="c-home__network-toggle-container" role="tablist">
+                <div class="c-home__button-container">
+                    <div v-if="showLeftRightBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
@@ -112,15 +75,24 @@ export default defineComponent({
                             {{ $t('global.native') }}
                         </button>
                     </div>
+                    <div v-else>
+                        <q-btn
+                            class="c-home__menu-back-button"
+                            flat
+                            dense
+                            icon="arrow_back_ios"
+                            @click="goBack"
+                        >
+
+                            {{ $t('global.back') }}
+                        </q-btn>
+                    </div>
 
                     <NativeLoginButton v-if="tab === 'right'" />
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @show-wallet-connect="onShowWalletConnect()"
-                        @show-wallet-options="onShowWalletOptions(true)"
-                        @use-injected-provider="onUseInjectedProvider()"
-                        @show-oauth-options="onShowOAuthOptions(true)"
+                        v-model="currentMenu"
                     />
                 </div>
                 <div v-if="tab === 'left'" class="c-home__external-link">
@@ -138,7 +110,7 @@ export default defineComponent({
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.terms')}}
                         </a>
@@ -146,7 +118,7 @@ export default defineComponent({
                         <a
                             href="https://www.telos.net/privacy-policy"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.privacy')}}
                         </a>
@@ -231,6 +203,11 @@ export default defineComponent({
             background-color: white;
             color: var(--link-color);
         }
+    }
+
+    &__menu-back-button {
+        color: white;
+        margin-bottom: 24px;
     }
 
     &__external-link {

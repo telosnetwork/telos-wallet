@@ -258,7 +258,7 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     } else {
-                        const authenticator = getAntelope().wallets.getAutenticator(autoLogin)?.newInstance(label);
+                        const authenticator = getAntelope().wallets.getAuthenticator(autoLogin)?.newInstance(label);
                         if (!authenticator) {
                             console.error(getAntelope().wallets);
                             throw new Error('antelope.account.error_auto_login');

@@ -98,10 +98,12 @@ export const useHistoryStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+            const self = useHistoryStore();
+            self.clearEvmNftTransfers();
+            self.clearEvmTransactions();
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: ({ account }) => {
-                    const self = useHistoryStore();
                     if (account) {
                         self.setEVMTransactionsFilter({ address: account.account });
                     }
@@ -479,21 +481,15 @@ export const useHistoryStore = defineStore(store_name, {
 
 const historyInitialState: HistoryState = {
     __evm_transactions: {
-        [CURRENT_CONTEXT]: {
-            transactions: [],
-        },
     },
     __total_evm_transaction_count: {
-        [CURRENT_CONTEXT]: 0,
     },
     __evm_filter: {
         address: '',
     },
     __shaped_evm_transaction_rows: {
-        [CURRENT_CONTEXT]: [],
     },
     __evm_transactions_pagination_data: {},
     __evm_nft_transfers: {
-        [CURRENT_CONTEXT]: new Map(),
     },
 };
