@@ -79,7 +79,14 @@ body {
     background-color: var(--bg-color);
 }
 
-
+/** 
+ * This creates the ilusion of a gradient border using a background with 5 layers.
+ * The first four layers are the four borders, and the last layer is the background.
+ * To use this mixin, you must pass in:
+   - the radius of the border
+   - the width of the border
+   - the background-image value, and two or four colors (if using only two, the other two will repeat the pair as default)
+ */
 @mixin bordient($radius, $width, $bg, $color1, $color2, $color3: $color2, $color4: $color1) {
 
     background-image:
