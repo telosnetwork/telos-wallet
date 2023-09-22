@@ -18,12 +18,14 @@ export default defineComponent({
         showOAuthOptions: boolean,
         showWalletConnect: boolean,
         useInjectedProvider: string,
+        useHomeSmall: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
         showOAuthOptions: false,
         showWalletConnect: false,
         useInjectedProvider: '',
+        useHomeSmall: false,
     }),
 
     computed: {
@@ -70,13 +72,41 @@ export default defineComponent({
             this.showWalletOptions = show;
         },
     },
+
+    mounted() {
+        setTimeout(() => {
+            // We are going to check if the footer overlaps the external link
+            // If so, we will use a smaller version of the home page
+            const footer = document.querySelector('.c-home__footer');
+            const externalLink = document.querySelector('.c-home__external-link');
+            if (footer && externalLink) {
+                const footerRect = footer.getBoundingClientRect();
+                const externalLinkRect = externalLink.getBoundingClientRect();
+                const footerTop = footerRect.top;
+                const externalLinkBottom = externalLinkRect.bottom;
+                const overlap = footerTop < externalLinkBottom;
+                if (overlap) {
+                    this.useHomeSmall = true;
+                } else {
+                    console.error('Footer height is not greater than external link height');
+                }
+            } else {
+                console.error('Footer or external link not found');
+            }
+        }, 100);
+    },
 });
 </script>
 
 <template>
 <q-layout>
     <q-page-container class="c-home__page-container">
-        <div class="c-home">
+        <div
+            :class="{
+                'c-home': true,
+                'c-home--small': useHomeSmall,
+            }"
+        >
             <div class="c-home__container">
                 <img
                     src="~assets/logo--telos-wallet.svg"
@@ -134,17 +164,32 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
-                        <a class="c-home__footer-developr-link" href="https://docs.telos.net/evm/cloud-wallet/" target="_blank">
-                            <!-- TODO: https://github.com/telosnetwork/telos-wallet/issues/614 -->
-                            <!-- this DEVELOPER banner is an image as a work-arroun for texts with gradient -->
-                            <!-- div class="c-home__footer-developr-title">{{ $t('home.developers_banner_title') }}</div -->
-                            <img
-                                src="~assets/developer-banner.svg"
-                                class="c-home__footer-developr-title-svg"
-                            >
-                            <div class="c-home__footer-developr-text c-home__external-link-text">{{ $t('home.developers_banner_text') }}</div>
-                            <q-icon class="c-home__footer-developr-icon" size="16px" name="arrow_forward" />
+                    <q-toolbar
+                        :class="{
+                            'c-home__footer-first-line': true,
+                            'bg-dark': true,
+                            'flex-center': true,
+                            'c-home__footer-first-line--small': useHomeSmall,
+                        }"
+                    >
+                        <a
+                            href="https://docs.telos.net/evm/cloud-wallet/"
+                            target="_blank"
+                            :class="{
+                                'c-home__footer-developer-link': true,
+                                'c-home__footer-developer-link--small': useHomeSmall,
+                            }"
+                        >
+                            <div class="c-home__footer-developer-title">
+                                <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
+                            </div>
+                            <div
+                                :class="{
+                                    'c-home__footer-developer-text': true,
+                                    'c-home__footer-developer-text--small': useHomeSmall,
+                                }"
+                            >{{ $t('home.developers_banner_text') }}</div>
+                            <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
                         </a>
                     </q-toolbar>
                     <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
@@ -254,7 +299,7 @@ export default defineComponent({
         gap: 4px;
 
         margin-top: 24px;
-        color: white
+        color: white;
     }
 
     &__external-link-text {
@@ -286,9 +331,13 @@ export default defineComponent({
             height: 1px;
             background-color: #392468;
         }
+
+        &--small {
+            min-height: 38px;
+        }
     }
 
-    &__footer-developr {
+    &__footer-developer {
         &-link {
             text-decoration: none;
             max-width: 320px;
@@ -305,27 +354,29 @@ export default defineComponent({
                 grid-template: 'a b c' / auto auto max-content;
                 max-width: none;
             }
-        }
-        &-title-svg {
-            // TODO: https://github.com/telosnetwork/telos-wallet/issues/614
-            margin-top: 3px;
-            margin-bottom: 5px;
-            place-self: center;
+
+            &--small {
+                grid-template: 'a c' / auto auto;
+            }
         }
         &-title {
-            @include text--small-bold;
-            // font-size: 14px;
-            text-transform: uppercase;
             grid-area: a;
-            color: $gradientPurple;
             text-align: center;
-            // font-weight: 600;
+            &-text {
+                @include text--small-bold;
+                @include gradient_text;
+                text-transform: uppercase;
+                vertical-align: top;
+            }
         }
         &-text {
             font-size: 16px;
             grid-area: b;
             color: white;
             text-align: left;
+            &--small {
+                display: none;
+            }
         }
         &-icon {
             grid-area: c;
