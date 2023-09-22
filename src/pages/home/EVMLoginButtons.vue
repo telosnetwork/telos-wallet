@@ -49,7 +49,7 @@ export default defineComponent({
 
         const setOreIdAuthenticator = async (provider: string) => {
             const name = 'OreId';
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (auth) {
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
@@ -67,7 +67,7 @@ export default defineComponent({
         };
 
         const setAuthenticator = async(name: string, label: string) => {
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -129,7 +129,7 @@ export default defineComponent({
             <img
                 width="24"
                 class="c-evm-login-buttons__icon c-evm-login-buttons__icon--oreid"
-                src="~assets/logo--tlos.svg"
+                src="~assets/logo--telos-cloud-wallet.svg"
             >
             {{ $t('home.login_with_social_media') }}
         </template>

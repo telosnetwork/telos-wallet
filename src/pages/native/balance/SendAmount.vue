@@ -225,7 +225,7 @@ export default {
                     <div class="desktop-only flex flex-center">
                         <label
                             class="text-weight-regular q-mr-sm"
-                            :style="`font-size: ${amountFontSize}px; color: ${themeColor}`"
+                            :style="`font-size: ${amountFontSize}px;`"
                         >
                             {{ coinInput ? `` : "$ " }}
                         </label>
@@ -254,7 +254,7 @@ export default {
                     <div class="mobileAmountContainer full-width mobile-only">
                         <label
                             class="text-weight-regular"
-                            :style="`font-size: ${amountFontSizeMobile}px; color: ${themeColor}`"
+                            :style="`font-size: ${amountFontSizeMobile}px;`"
                         >
                             {{
                                 coinInput
