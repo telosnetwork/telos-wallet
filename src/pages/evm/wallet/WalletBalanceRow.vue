@@ -124,7 +124,6 @@ export default defineComponent({
                 return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
             } else {
                 const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
-
                 return `${formatted} ${this.token.symbol}`;
             }
         },

@@ -1,7 +1,7 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
+import { NativeCurrencyAddress, PriceChartData, addressString } from 'src/antelope/types';
 import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
@@ -62,6 +62,10 @@ const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.co
 declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
+    isTestnet() {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }
@@ -102,7 +106,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return W_TOKEN;
     }
 
-    getEscrowContractAddress(): string {
+    getEscrowContractAddress(): addressString {
         return ESCROW_CONTRACT_ADDRESS;
     }
 

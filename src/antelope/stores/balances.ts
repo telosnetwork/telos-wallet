@@ -35,7 +35,6 @@ import {
     useFeedbackStore,
     useChainStore,
     useEVMStore,
-    usePlatformStore,
     CURRENT_CONTEXT,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
@@ -52,6 +51,7 @@ import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -71,20 +71,23 @@ export const useBalancesStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+            const balanceStore = useBalancesStore();
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
                     if (label === CURRENT_CONTEXT) {
-                        await useBalancesStore().updateBalancesForAccount(label, toRaw(account));
+                        await balanceStore.updateBalancesForAccount(label, toRaw(account));
                     }
                 },
             });
 
             // update logged balances every 10 seconds
             setInterval(async () => {
-                await useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
+                if (balanceStore.__balances[CURRENT_CONTEXT]) {
+                    await balanceStore.updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
+                }
             }, 10000);
         },
         async updateBalances(label: string) {
@@ -225,14 +228,21 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         async updateSystemBalanceForAccount(label: string, address: addressString): Promise<void> {
-            this.trace('updateSystemBalanceForAccount', label, address);
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const sys_token = chain_settings.getSystemToken();
-            const price = (await chain_settings.getUsdPrice()).toString();
-            const marketInfo = { price } as MarketSourceInfo;
-            sys_token.market = new TokenMarketData(marketInfo);
-            const balanceBn = await useAccountStore().getEVMAuthenticator(label)?.getSystemTokenBalance(address);
-            this.processBalanceForToken(label, sys_token, balanceBn);
+            try {
+                this.trace('updateSystemBalanceForAccount', label, address);
+                const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
+                const sys_token = chain_settings.getSystemToken();
+                const price = (await chain_settings.getUsdPrice()).toString();
+                const marketInfo = { price } as MarketSourceInfo;
+                sys_token.market = new TokenMarketData(marketInfo);
+                const accountStore = useAccountStore();
+                const authenticator = accountStore.getEVMAuthenticator(label);
+                const balanceBn = await authenticator.getSystemTokenBalance(address);
+                this.processBalanceForToken(label, sys_token, balanceBn);
+            } catch (error) {
+                console.error(error);
+                throw getAntelope().config.wrapError('antelope.evm.error_update_system_balance_failed', error);
+            }
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
             const importantTokens = useChainStore().getChain(label).settings.getSystemTokens();
@@ -247,45 +257,26 @@ export const useBalancesStore = defineStore(store_name, {
             return result;
         },
         processBalanceForToken(label: string, token: TokenClass, balanceBn: BigNumber): void {
-            const tokenBalance = new TokenBalance(token, balanceBn);
-            if (this.shouldAddTokenBalance(label, balanceBn, token)) {
-                this.addNewBalance(label, tokenBalance);
-            } else {
-                this.removeBalance(label, tokenBalance);
+            try {
+                const tokenBalance = new TokenBalance(token, balanceBn);
+                if (this.shouldAddTokenBalance(label, balanceBn, token)) {
+                    this.addNewBalance(label, tokenBalance);
+                } else {
+                    this.removeBalance(label, tokenBalance);
+                }
+            } catch (error) {
+                console.error(error, [label, token, balanceBn]);
             }
         },
         async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
-            this.trace('subscribeForTransactionReceipt', response.hash);
-            if (account.isNative) {
-                throw new AntelopeError('Not implemented yet for native');
-            } else {
-                const authenticator = account.authenticator as EVMAuthenticator;
-                const provider = await authenticator.web3Provider();
-                if (provider) {
-                    // instead of await, we use then() to return the response immediately
-                    // and perform the balance update in the background
-                    const whenConfirmed = provider.waitForTransaction(response.hash).then((receipt: ethers.providers.TransactionReceipt) => {
-                        this.trace('subscribeForTransactionReceipt', response.hash, 'receipt:', receipt.status, receipt);
-                        if (receipt.status === 1) {
-                            const account = useAccountStore().loggedAccount;
-                            if (account?.account) {
-                                this.updateBalancesForAccount(CURRENT_CONTEXT, account);
-                            }
-                        }
-                        return receipt;
-                    });
-                    // we add the wait method to the response,
-                    // so that the caller can subscribe to the confirmation event
-                    response.wait = async () => whenConfirmed;
-                } else {
-                    if (usePlatformStore().isMobile) {
-                        response.wait = async () => Promise.resolve({} as ethers.providers.TransactionReceipt);
-                    } else {
-                        throw new AntelopeError('antelope.evm.error_no_provider');
-                    }
-                }
-            }
-            return response;
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
+                    this.updateBalancesForAccount(CURRENT_CONTEXT, account);
+                });
+                return newResponse;
+            });
         },
         async prepareWagmiSystemTokenTransferConfig(label: Label, to: string, amount: bigint): Promise<void> {
             const request = await prepareSendTransaction({
@@ -324,7 +315,7 @@ export const useBalancesStore = defineStore(store_name, {
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount as EvmAccountModel;
-                    return await this.transferEVMTokens(label, chain_settings, account, token, to, amount)
+                    return this.transferEVMTokens(label, chain_settings, account, token, to, amount)
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {

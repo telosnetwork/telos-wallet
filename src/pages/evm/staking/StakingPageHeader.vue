@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber, ethers } from 'ethers';
 
-import { useUserStore, useBalancesStore, useChainStore, useRexStore } from 'src/antelope';
+import { useUserStore, useBalancesStore, useChainStore, useRexStore, CURRENT_CONTEXT } from 'src/antelope';
 import { convertCurrency, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
@@ -19,6 +19,7 @@ const userStore = useUserStore();
 const balancesStore = useBalancesStore();
 const chainStore = useChainStore();
 const chainSettings = (chainStore.loggedChain.settings as EVMChainSettings);
+const rexStore = useRexStore();
 
 // computed
 const fiatLocale = computed(() => userStore.fiatLocale);
@@ -81,7 +82,7 @@ const unstakingBalanceBn = computed(() => {
     }
 });
 const unstakingFiatValueBn = computed(() => {
-    if (unstakingBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
+    if (unstakingBalanceBn.value && !unstakingBalanceBn.value.isZero() && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
         return convertCurrency(unstakingBalanceBn.value, stakedToken.decimals, systemToken.decimals, ratioNumber);
     } else {
@@ -112,7 +113,9 @@ const apyPrittyPrint = computed(() => {
     }
 });
 const apyisLoading = computed(() => apyPrittyPrint.value === '--');
-const unlockPeriod = ref($t('evm_stake.unstaking_period'));
+
+const unlockPeriod = computed(() => rexStore.getUnstakingPeriodString(CURRENT_CONTEXT));
+const unlockPeriodLoading = computed(() => unlockPeriod.value === '--');
 
 const tvlAmountBn = computed(() => {
     const totalStaking = useRexStore().getRexData(label)?.totalStaking;
@@ -169,6 +172,7 @@ const secondLineData = computed(() => [{
     tooltip: $t('evm_stake.unstaking_period_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol }),
     secondaryText: unlockPeriod.value,
     lowContrastSecondaryText: false,
+    isSecondaryLoading: unlockPeriodLoading.value,
     useSmallBox: true,
 }, {
     label: $t('evm_stake.tvl_card_label'),
@@ -178,10 +182,7 @@ const secondLineData = computed(() => [{
     useSmallBox: true,
 }]);
 
-// creatmos un interval que cada 5 segundos verifique si cada uno de los loadings es true o false.
-// por cada loading que encontremos en true, debemos llamar a actualizar las dependendicas de ese loading
-// si todos los loadings son false, entonces podemos parar el intervalo
-
+// is interval is mean to ensure all data is eventually loaded
 const intervalTimer = setInterval(() => {
 
     // is staking still loading?
@@ -196,7 +197,7 @@ const intervalTimer = setInterval(() => {
         }
     }
     // is unstaking still loading?
-    if (isUnstakingLoading.value || isWithdrawableLoading.value) {
+    if (isUnstakingLoading.value || isWithdrawableLoading.value || unlockPeriodLoading.value) {
         // we need to update rex data
         useRexStore().updateRexData(label);
     }
@@ -235,6 +236,10 @@ function prettyPrintToken(amount: BigNumber | undefined, symbol: string) {
 
 <template>
 <div class="c-staking-header">
+    <div class="text-center q-mb-xl">
+        <h5>{{ $t('evm_stake.total_of_staked_unstaking_and_withdrawable', { token: systemToken.name }) }}</h5>
+        <h1 class="u-text--high-contrast">{{ prettyPrintToken(totalFiatValueBn, fiatCurrency) }}</h1>
+    </div>
     <ScrollableInfoCards class="c-staking-header__cards-first-line" :cards="firstLineData" />
     <ScrollableInfoCards class="c-staking-header__cards-second-line" :cards="secondLineData" />
 </div>

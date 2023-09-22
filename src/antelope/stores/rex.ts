@@ -13,24 +13,21 @@ import {
     createTraceFunction,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
-import { AntelopeError, Label } from 'src/antelope/types';
+import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { getAntelope, useChainStore, useEVMStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+import { formatUnstakePeriod } from 'src/antelope/stores/utils/date-utils';
 
-
-
-export interface EvmRexDeposit {
-    amount: ethers.BigNumber;
-    until: ethers.BigNumber;
-}
 
 export interface RexModel {
     withdrawable: ethers.BigNumber;
     balance: ethers.BigNumber;
     totalStaking: ethers.BigNumber;
+    period: number; // unstake period in seconds
 }
 
 export interface NativeRexModel extends RexModel {
@@ -55,6 +52,16 @@ export const useRexStore = defineStore(store_name, {
     state: (): RexState => (rexInitialState),
     getters: {
         getRexData: state => (label: string) => state.__rexData[label] ?? null,
+        getEvmRexData: state => (label: string) => state.__rexData[label] as EvmRexModel,
+        getNativeRexData: state => (label: string) => state.__rexData[label] as NativeRexModel,
+        getUnstakingPeriodString: state => (label: string) =>
+            formatUnstakePeriod(
+                // period for the label network
+                state.__rexData[label]?.period ?? null,
+                // translation function only takes the key name, without the path and adds the prefix
+                (key:string) => getAntelope().config.localizationHandler(`antelope.words.${key}`),
+            ),
+
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -79,13 +86,13 @@ export const useRexStore = defineStore(store_name, {
         async getContractInstance(label: string, address: string) {
             const authenticator = useAccountStore().getEVMAuthenticator(label);
             if (!authenticator) {
-                this.trace('getStakedSystemContractInstance', label, '-> no authenticator');
+                this.trace('getContractInstance', label, '-> no authenticator');
                 throw new AntelopeError('antelope.chain.error_no_default_authenticator');
             }
             const contract = await useEVMStore().getContract(authenticator, address);
             if (!contract) {
-                this.trace('getStakedSystemContractInstance', label, '-> no contract');
-                throw new AntelopeError('antelope.chain.error_no_default_authenticator');
+                this.trace('getContractInstance', label, '-> no contract');
+                throw new AntelopeError('antelope.rex.error_contract_not_found', { address });
             }
             const contractInstance = await contract.getContractInstance();
             return contractInstance;
@@ -96,6 +103,7 @@ export const useRexStore = defineStore(store_name, {
          * @returns the contract instance
          */
         async getStakedSystemContractInstance(label: string) {
+            this.trace('getStakedSystemContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().address;
             return this.getContractInstance(label, address);
         },
@@ -105,6 +113,7 @@ export const useRexStore = defineStore(store_name, {
          * @returns the contract instance
          */
         async getEscrowContractInstance(label: string) {
+            this.trace('getEscrowContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getEscrowContractAddress();
             return this.getContractInstance(label, address);
         },
@@ -118,6 +127,18 @@ export const useRexStore = defineStore(store_name, {
             const totalStaking = await contract.totalAssets();
             this.setTotalStaking(label, totalStaking);
         },
+
+        /**
+         * This method queries the unstaking period for a given chain and maintains it in the store.
+         * @param label identifies the context (network on this case) for the data
+         */
+        async updateUnstakingPeriod(label: string) {
+            this.trace('updateUnstakingPeriod', label);
+            const contract = await this.getEscrowContractInstance(label);
+            const period = await contract.lockDuration();
+            this.setUnstakingPeriod(label, period.toNumber());
+        },
+
         /**
          * This method should be called to update the REX data for a given context.
          * @param label identifies the context (account and network) for the data
@@ -140,10 +161,11 @@ export const useRexStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateRexDataForAccount');
             try {
                 await Promise.all([
-                    this.updateWithdrawable(label),  // account's data
-                    this.updateDeposits(label),      // account's data
-                    this.updateBalance(label),       // account's data
-                    this.updateTotalStaking(label),  // system's data
+                    this.updateWithdrawable(label),    // account's data
+                    this.updateDeposits(label),        // account's data
+                    this.updateBalance(label),         // account's data
+                    this.updateTotalStaking(label),    // system's data
+                    this.updateUnstakingPeriod(label), // system's data
                 ]);
             } catch (error) {
                 console.error(error);
@@ -187,8 +209,103 @@ export const useRexStore = defineStore(store_name, {
             const balance = await contract.balanceOf(address);
             this.setBalance(label, balance);
         },
+        /**
+         * utility function to get the number of decimals for the staked system token
+         * @returns the number of decimals for the staked system token
+         */
         getStakingDecimals() {
             return useChainStore().currentEvmChain?.settings.getStakedSystemToken().decimals || WEI_PRECISION;
+        },
+        // transactions ----------
+        /**
+         * This method should be called by any transaction performed by this store. It subscribes to the transaction
+         * receipt and updates the balance and rex status for the account if the transaction is successful.
+         * @param account account performing the transaction
+         * @param response the transaction response holding the hash
+         * @returns the same transaction response but modified by the utility function subscribeForTransactionReceipt
+         */
+        async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
+                    this.updateRexDataForAccount(CURRENT_CONTEXT, account);
+                    useBalancesStore().updateBalancesForAccount(CURRENT_CONTEXT, account);
+                });
+                return newResponse;
+            });
+        },
+        /**
+         * Performs the staking of System Tokens for a given account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to stake
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async stakeEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'stakeEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.stakeSystemTokens(amount)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_stakes_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
+        /**
+         * Performs the unstaking of Staked System tokens for a given account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to unstake
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async unstakeEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'unstakeEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.unstakeSystemTokens(amount)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_unstakes_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
+        /**
+         * Performs the withdrawal of staked tokens for a given account on the REX system of a given network.
+         * @param label identifies the context (account-network) for the data
+         * @param amount the amount of tokens to withdraw
+         * @returns the transaction response holding the hash and a wait method to subscribe to the transaction receipt
+         */
+        async withdrawEVMSystemTokens(label: string, amount: ethers.BigNumber): Promise<TransactionResponse> {
+            const funcname = 'withdrawEVMSystemTokens';
+            this.trace(funcname, label, amount.toString());
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().getAccount(label);
+                const authenticator = useAccountStore().getEVMAuthenticator(label);
+                return await authenticator.withdrawUnstakedTokens()
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.wrapError('antelope.evm.error_withdraw_failed', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
         },
         // commits ---------------
         setWithdrawable(label: string, withdrawable: ethers.BigNumber) {
@@ -198,9 +315,12 @@ export const useRexStore = defineStore(store_name, {
             (this.__rexData[label] as EvmRexModel).withdrawable = withdrawable;
         },
         setDeposits(label: string, deposits: EvmRexDeposit[]) {
-            this.trace('setDeposits', label, ... deposits.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
+            // we need to clone the deposits parameter because it is read-only and we can't directly sort it.
+            const editable_clone = (deposits || []).slice();
+            editable_clone.sort((a, b) => a.until.toNumber() - b.until.toNumber());
+            this.trace('setDeposits', label, ... editable_clone.map(d => parseFloat(ethers.utils.formatUnits(d.amount, this.getStakingDecimals()))));
             this.__rexData[label] = this.__rexData[label] || {};
-            (this.__rexData[label] as EvmRexModel).deposits = deposits;
+            (this.__rexData[label] as EvmRexModel).deposits = editable_clone;
         },
         setBalance(label: string, balance: ethers.BigNumber) {
             const num = parseFloat(ethers.utils.formatUnits(balance, this.getStakingDecimals()));
@@ -213,6 +333,11 @@ export const useRexStore = defineStore(store_name, {
             this.trace('setTotalStaking', label, num);
             this.__rexData[label] = this.__rexData[label] || {};
             (this.__rexData[label] as EvmRexModel).totalStaking = totalStaking;
+        },
+        setUnstakingPeriod(label: string, period: number) {
+            this.trace('setUnstakingPeriod', label, period);
+            this.__rexData[label] = this.__rexData[label] || {};
+            (this.__rexData[label] as EvmRexModel).period = period;
         },
     },
 });
