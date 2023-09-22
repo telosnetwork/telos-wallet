@@ -71,29 +71,28 @@ export default defineComponent({
             this.showOAuthOptions = show;
             this.showWalletOptions = show;
         },
-    },
-
-    mounted() {
-        setTimeout(() => {
-            // We are going to check if the footer overlaps the external link
-            // If so, we will use a smaller version of the home page
-            const footer = document.querySelector('.c-home__footer');
-            const externalLink = document.querySelector('.c-home__external-link');
-            if (footer && externalLink) {
-                const footerRect = footer.getBoundingClientRect();
-                const externalLinkRect = externalLink.getBoundingClientRect();
-                const footerTop = footerRect.top;
-                const externalLinkBottom = externalLinkRect.bottom;
-                const overlap = footerTop < externalLinkBottom;
-                if (overlap) {
-                    this.useHomeSmall = true;
-                } else {
-                    console.error('Footer height is not greater than external link height');
+        checkOverlap() {
+            setTimeout(() => {
+                // We are going to check if the footer overlaps the external link
+                // If so, we will use a smaller version of the home page
+                const footer = document.querySelector('.c-home__footer');
+                const externalLink = document.querySelector('.c-home__external-link');
+                if (footer && externalLink) {
+                    const footerRect = footer.getBoundingClientRect();
+                    const externalLinkRect = externalLink.getBoundingClientRect();
+                    const footerTop = footerRect.top;
+                    const externalLinkBottom = externalLinkRect.bottom;
+                    this.useHomeSmall = footerTop < externalLinkBottom;
                 }
-            } else {
-                console.error('Footer or external link not found');
-            }
-        }, 100);
+            }, 100);
+        },
+    },
+    mounted() {
+        this.checkOverlap();
+        window.addEventListener('resize', this.checkOverlap);
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.checkOverlap);
     },
 });
 </script>
