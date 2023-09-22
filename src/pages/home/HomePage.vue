@@ -370,7 +370,7 @@ export default defineComponent({
             }
         }
         &-text {
-            font-size: 16px;
+            @include text--small;
             grid-area: b;
             color: white;
             text-align: left;
