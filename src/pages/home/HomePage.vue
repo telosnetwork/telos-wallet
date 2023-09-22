@@ -134,11 +134,24 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="bg-dark flex-center">
+                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
+                        <a class="c-home__footer-developr-link" href="https://docs.telos.net/evm/cloud-wallet/" target="_blank">
+                            <!-- TODO: https://github.com/telosnetwork/telos-wallet/issues/614 -->
+                            <!-- this DEVELOPER banner is an image as a work-arroun for texts with gradient -->
+                            <!-- div class="c-home__footer-developr-title">{{ $t('home.developers_banner_title') }}</div -->
+                            <img
+                                src="~assets/developer-banner.svg"
+                                class="c-home__footer-developr-title-svg"
+                            >
+                            <div class="c-home__footer-developr-text c-home__external-link-text">{{ $t('home.developers_banner_text') }}</div>
+                            <q-icon class="c-home__footer-developr-icon" size="16px" name="arrow_forward" />
+                        </a>
+                    </q-toolbar>
+                    <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.terms')}}
                         </a>
@@ -146,7 +159,7 @@ export default defineComponent({
                         <a
                             href="https://www.telos.net/privacy-policy"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.privacy')}}
                         </a>
@@ -260,6 +273,65 @@ export default defineComponent({
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
+    }
+
+    &__footer-first-line {
+        // bottom border for first line
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #392468;
+        }
+    }
+
+    &__footer-developr {
+        &-link {
+            text-decoration: none;
+            max-width: 320px;
+            padding: 10px;
+            display: grid;
+            gap: 5px;
+            grid-template:
+                "a a"
+                "b c";
+
+            @include sm-and-up {
+                padding: 0px;
+                gap: 14px;
+                grid-template: 'a b c' / auto auto max-content;
+                max-width: none;
+            }
+        }
+        &-title-svg {
+            // TODO: https://github.com/telosnetwork/telos-wallet/issues/614
+            margin-top: 3px;
+            margin-bottom: 5px;
+            place-self: center;
+        }
+        &-title {
+            @include text--small-bold;
+            // font-size: 14px;
+            text-transform: uppercase;
+            grid-area: a;
+            color: $gradientPurple;
+            text-align: center;
+            // font-weight: 600;
+        }
+        &-text {
+            font-size: 16px;
+            grid-area: b;
+            color: white;
+            text-align: left;
+        }
+        &-icon {
+            grid-area: c;
+            color: white;
+            text-align: right;
+        }
     }
 
     @media only screen and (max-height: 800px) {
