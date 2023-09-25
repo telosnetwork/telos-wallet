@@ -103,8 +103,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // Check indexer health state periodically
         this.initPromise = new Promise((resolve) => {
-            this.updateIndexerHealthState().then(() => {
-                // we resolve the promise that will be returned by init()
+            this.updateIndexerHealthState().finally(() => {
+                // we resolve the promise (in any case) that will be returned by init()
                 resolve();
             });
         });
@@ -123,8 +123,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // this setTimeout is a work arround because we can't call getAntelope() function before it initializes
         setTimeout(() => {
-            setInterval(() => {
-                this.updateIndexerHealthState();
+            const timer = setInterval(async () => {
+                try {
+                    await this.updateIndexerHealthState();
+                } catch (e) {
+                    clearInterval(timer);
+                    console.error('Indexer API not working for this chain:', this.getNetwork(), e);
+                }
             }, getAntelope().config.indexerHealthCheckInterval);
         }, 1000);
 
@@ -162,11 +167,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                         this.indexer.get('/v1/health') :
                         Promise.resolve({ data: this.deathHealthResponse } as AxiosResponse<IndexerHealthResponse>),
                 )
-                .then(response => response.data as unknown as IndexerHealthResponse)
-                .catch((error) => {
-                    console.error('Indexer API not working for this chain:', this.getNetwork(), error);
-                    return this.deathHealthResponse as IndexerHealthResponse;
-                });
+                .then(response => response.data as unknown as IndexerHealthResponse);
 
         // initial state
         this._indexerHealthState = {

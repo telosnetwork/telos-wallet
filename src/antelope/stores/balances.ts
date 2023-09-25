@@ -147,6 +147,7 @@ export const useBalancesStore = defineStore(store_name, {
                             this.trace('updateBalancesForAccount', 'Indexer is NOT healthy!', chain_settings.getNetwork(), toRaw(chain_settings.indexerHealthState));
                             // In case the chain does not support index, we need to fetch the balances using Web3
                             await this.updateSystemTokensPrices(label);
+                            this.trace('updateBalancesForAccount', 'chain_settings.getTokenList()');
                             const tokens = await chain_settings.getTokenList();
                             await this.updateSystemBalanceForAccount(label, account.account as addressString);
                             this.trace('updateBalancesForAccount', 'tokens:', toRaw(tokens));
@@ -183,7 +184,9 @@ export const useBalancesStore = defineStore(store_name, {
                 const wrpToken = chain_settings.getWrappedSystemToken();
 
                 // get the price for both system and wrapped tokens
+                this.trace('updateSystemTokensPrices', 'await chain_settings.getUsdPrice()');
                 const price = (await chain_settings.getUsdPrice()).toString();
+                this.trace('updateSystemTokensPrices', 'price:', price);
                 const marketInfo = { price } as MarketSourceInfo;
                 sysToken.market = new TokenMarketData(marketInfo);
                 wrpToken.market = new TokenMarketData(marketInfo);
