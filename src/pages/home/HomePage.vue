@@ -18,14 +18,12 @@ export default defineComponent({
         showOAuthOptions: boolean,
         showWalletConnect: boolean,
         useInjectedProvider: string,
-        useHomeSmall: boolean,
     } => ({
         tab: 'left',
         showWalletOptions: false,
         showOAuthOptions: false,
         showWalletConnect: false,
         useInjectedProvider: '',
-        useHomeSmall: false,
     }),
 
     computed: {
@@ -78,12 +76,7 @@ export default defineComponent({
 <template>
 <q-layout>
     <q-page-container class="c-home__page-container">
-        <div
-            :class="{
-                'c-home': true,
-                'c-home--small': useHomeSmall,
-            }"
-        >
+        <div class="c-home">
             <div class="c-home__container">
                 <img
                     src="~assets/logo--telos-wallet.svg"
@@ -141,31 +134,16 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar
-                        :class="{
-                            'c-home__footer-first-line': true,
-                            'bg-dark': true,
-                            'flex-center': true,
-                            'c-home__footer-first-line--small': useHomeSmall,
-                        }"
-                    >
+                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
                         <a
                             href="https://docs.telos.net/evm/cloud-wallet/"
                             target="_blank"
-                            :class="{
-                                'c-home__footer-developer-link': true,
-                                'c-home__footer-developer-link--small': useHomeSmall,
-                            }"
+                            class="c-home__footer-developer-link"
                         >
                             <div class="c-home__footer-developer-title">
                                 <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
                             </div>
-                            <div
-                                :class="{
-                                    'c-home__footer-developer-text': true,
-                                    'c-home__footer-developer-text--small': useHomeSmall,
-                                }"
-                            >{{ $t('home.developers_banner_text') }}</div>
+                            <div class="c-home__footer-developer-text">{{ $t('home.developers_banner_text') }}</div>
                             <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
                         </a>
                     </q-toolbar>
