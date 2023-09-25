@@ -71,28 +71,6 @@ export default defineComponent({
             this.showOAuthOptions = show;
             this.showWalletOptions = show;
         },
-        checkOverlap() {
-            setTimeout(() => {
-                // We are going to check if the footer overlaps the external link
-                // If so, we will use a smaller version of the home page
-                const footer = document.querySelector('.c-home__footer');
-                const externalLink = document.querySelector('.c-home__external-link');
-                if (footer && externalLink) {
-                    const footerRect = footer.getBoundingClientRect();
-                    const externalLinkRect = externalLink.getBoundingClientRect();
-                    const footerTop = footerRect.top;
-                    const externalLinkBottom = externalLinkRect.bottom;
-                    this.useHomeSmall = footerTop < externalLinkBottom;
-                }
-            }, 100);
-        },
-    },
-    mounted() {
-        this.checkOverlap();
-        window.addEventListener('resize', this.checkOverlap);
-    },
-    beforeUnmount() {
-        window.removeEventListener('resize', this.checkOverlap);
     },
 });
 </script>
@@ -222,43 +200,35 @@ export default defineComponent({
     position: relative;
     background: $site-gradient;
     min-height: 100vh;
+    display: flex;
 
     &__page-container {
-        // override inline style of unknown origin
+        // override inline style of unknown origin (do not delete)
         padding-bottom: 0 !important;
     }
 
     &__container {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
-        padding: 32px 24px 0;
-        min-height: 40rem;
+        padding-top: 32px;
+        align-items: stretch;
+        justify-content: space-between;
     }
 
     &__logo {
         width: 240px;
-        margin: 0 auto;
-
-        @include sm-and-up {
-            margin: 128px auto 88px;
-        }
-
-        @include mobile-landscape {
-            margin: 60px auto 88px;
-        }
+        align-self: center;
+        flex-grow: 1;
 
     }
 
     &__button-container {
+        align-self: center;
         border-radius: 4px;
         padding: 24px;
         background-color: rgba(white, 0.1);
         max-width: 320px;
-        margin: auto;
-        @include mobile-landscape {
-            // footer height + margin
-            margin: auto auto 90px;
-        }
     }
 
     &__network-toggle-container {
@@ -291,6 +261,7 @@ export default defineComponent({
     }
 
     &__external-link {
+        flex-grow: 1;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -313,7 +284,7 @@ export default defineComponent({
 
     // guarantees wallet connect on top of footer
     &__footer {
-        z-index: $z-index--footer;
+        position: relative;
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
