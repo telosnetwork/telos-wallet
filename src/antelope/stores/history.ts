@@ -110,7 +110,6 @@ export const useHistoryStore = defineStore(store_name, {
                 },
             });
         },
-
         // actions ---
 
         // fetch all transactions for the account defined in __evm_filter.address

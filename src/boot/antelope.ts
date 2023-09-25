@@ -82,7 +82,7 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
     const oreIdOptions: OreIdOptions = {
         appName: process.env.APP_NAME,
-        appId: process.env.APP_OREID_APP_ID as string,
+        appId: process.env.OREID_APP_ID as string,
     };
     ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
 

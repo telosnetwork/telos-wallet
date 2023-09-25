@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { initFuelUserWrapper } from 'src/api/fuel';
+import { OreUser } from 'ual-oreid';
 
 export const login = async function(
     { commit, dispatch },
@@ -20,9 +21,9 @@ export const login = async function(
         commit('setJustViewer', justViewer);
         const users = await authenticator.login(account);
         if (users.length) {
-            const account = await initFuelUserWrapper(users[0]);
-            const accountName = await account.getAccountName();
-            this.$ualUser = account;
+            // OreId has it's own authorization service, only init fuel service for other ual users
+            this.$ualUser = users[0] instanceof OreUser ? users[0] : await initFuelUserWrapper(users[0]);
+            const accountName = await this.$ualUser.getAccountName();
             this.$type = 'ual';
             this.$idx = idx;
             commit('setAccountName', accountName);
@@ -41,7 +42,7 @@ export const login = async function(
             e.message ||
             e.reason;
         commit('general/setErrorMsg', error, { root: true });
-        console.erorr('Login error: ', error);
+        console.error('Login error: ', error);
     } finally {
         commit('setLoadingWallet');
     }
@@ -157,13 +158,21 @@ export const accountExists = async function({ commit, dispatch }, accountName) {
 };
 
 export const setEvmState = async function({ commit, dispatch }) {
+    let evmAccount;
+
     if (!this.state.account.accountName) {
         return;
     }
 
-    const evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
-        this.state.account.accountName,
-    );
+    // If linked evm address does not exist, disregard error as this will always throw for newly created native accounts
+    try {
+        evmAccount = await this.$evmApi.telos.getEthAccountByTelosAccount(
+            this.state.account.accountName,
+        );
+    } catch(e) {
+        // `No address associated with ${account}`
+        return;
+    }
 
     if (evmAccount && evmAccount.address){
         commit('setEvmAddress', evmAccount.address);
