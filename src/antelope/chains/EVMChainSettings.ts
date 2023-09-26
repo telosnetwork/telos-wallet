@@ -23,6 +23,8 @@ import {
     IndexerNftItemResult,
     NFTItemClass,
     addressString,
+    IndexerTransfersFilter,
+    IndexerAccountTransfersResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -347,6 +349,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                     }
                     const contract_source = response.contracts[item_source.contract];
+
+                    if (!contract_source) {
+                        // this case only happens if the indexer fails to index contract data
+                        continue;
+                    }
                     const contract = new NFTContractClass(contract_source);
                     const item = new NFTItemClass(item_source, contract);
                     const nft = new NFTClass(item);
@@ -464,6 +471,51 @@ export default abstract class EVMChainSettings implements ChainSettings {
         // Notice that the promise is not awaited, but returned instead immediately.
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransactionsResponse);
+    }
+
+    async getEvmNftTransfers({
+        account,
+        type,
+        limit,
+        offset,
+        includePagination,
+        endBlock,
+        startBlock,
+        contract,
+        includeAbi,
+    }: IndexerTransfersFilter): Promise<IndexerAccountTransfersResponse> {
+        let aux = {};
+
+        if (limit !== undefined) {
+            aux = { limit, ...aux };
+        }
+        if (offset !== undefined) {
+            aux = { offset, ...aux };
+        }
+        if (includeAbi !== undefined) {
+            aux = { includeAbi, ...aux };
+        }
+        if (type !== undefined) {
+            aux = { type, ...aux };
+        }
+        if (includePagination !== undefined) {
+            aux = { includePagination, ...aux };
+        }
+        if (endBlock !== undefined) {
+            aux = { endBlock, ...aux };
+        }
+        if (startBlock !== undefined) {
+            aux = { startBlock, ...aux };
+        }
+        if (contract !== undefined) {
+            aux = { contract, ...aux };
+        }
+
+        const params = aux as AxiosRequestConfig;
+        const url = `v1/account/${account}/transfers`;
+
+        return this.indexer.get(url, { params })
+            .then(response => response.data as IndexerAccountTransfersResponse);
     }
 
     async getTokenList(): Promise<TokenClass[]> {

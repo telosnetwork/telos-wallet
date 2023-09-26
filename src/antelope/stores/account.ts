@@ -38,6 +38,8 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
+import { OreIdAuthenticator } from 'ual-oreid';
+
 
 export interface LoginNativeActionData {
     authenticator: Authenticator,
@@ -120,7 +122,8 @@ export const useAccountStore = defineStore(store_name, {
                 await authenticator.init();
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
-                    const ualUser = await initFuelUserWrapper(ualUsers[0]);
+                    // OreId has it's own authorization service, only init fuel service for other ual users
+                    const ualUser = ualUsers[0] instanceof OreIdAuthenticator ? ualUsers[0] : await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
                     const account = await ualUser.getAccountName();
@@ -156,6 +159,7 @@ export const useAccountStore = defineStore(store_name, {
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 
@@ -206,6 +210,7 @@ export const useAccountStore = defineStore(store_name, {
         async logout() {
             this.trace('logout');
             useHistoryStore().clearEvmTransactions();
+            useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
 
@@ -257,7 +262,7 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     } else {
-                        const authenticator = getAntelope().wallets.getAutenticator(autoLogin)?.newInstance(label);
+                        const authenticator = getAntelope().wallets.getAuthenticator(autoLogin)?.newInstance(label);
                         if (!authenticator) {
                             console.error(getAntelope().wallets);
                             throw new Error('antelope.account.error_auto_login');

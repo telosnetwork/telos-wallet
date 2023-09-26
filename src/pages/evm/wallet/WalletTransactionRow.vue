@@ -1,17 +1,19 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-
 import InlineSvg from 'vue-inline-svg';
 
-import { ShapedTransactionRow } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
+import { NFTClass, ShapedTransactionRow } from 'src/antelope/types';
+
 import { getLongDate } from 'src/antelope/stores/utils';
-import { useChainStore, useUserStore } from 'src/antelope';
+import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import { getShapedNftName, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 
 const userStore = useUserStore();
 
@@ -27,6 +29,7 @@ export default defineComponent({
         TimeStamp,
         ExternalLink,
         InlineSvg,
+        NftViewer,
     },
     props: {
         transaction: {
@@ -34,6 +37,10 @@ export default defineComponent({
             required: true,
         },
     },
+    data: () => ({
+        loading: true,
+        nftData: {} as Record<string, NFTClass>, // keyed like {contract address lowercase}-{tokenId}
+    }),
     computed: {
         fiatLocale(): string {
             return useUserStore().fiatLocale;
@@ -137,6 +144,27 @@ export default defineComponent({
             return this.formatAmount(this.transaction.gasFiatValue ?? 0, undefined, true);
         },
     },
+    async created() {
+        const nftTransfers = [...this.transaction.nftsIn, ...this.transaction.nftsOut];
+
+        if (nftTransfers.length) {
+            await Promise.all(nftTransfers.map(
+                async (nftTransfer) => {
+                    const nftDetails = await useNftsStore().fetchNftDetails(
+                        CURRENT_CONTEXT,
+                        nftTransfer.collectionAddress,
+                        nftTransfer.tokenId,
+                        nftTransfer.nftInterface,
+                    );
+                    if (nftDetails) {
+                        this.nftData[`${nftTransfer.collectionAddress.toLowerCase()}-${nftTransfer.tokenId}`] = nftDetails;
+                    }
+                },
+            ));
+        }
+
+        this.loading = false;
+    },
     methods: {
         formatAmount(amount: number, symbol: string = userStore.fiatCurrency, useSymbolCharacter: boolean = false) {
             const decimals = symbol === userStore.fiatCurrency ? 2 : 4;
@@ -149,6 +177,24 @@ export default defineComponent({
             );
 
             return `${formatted} ${symbol}`;
+        },
+        getShapedTokenName(name: string, id: string) {
+            return getShapedNftName(name, id);
+        },
+        getTruncatedAddress(address: string) {
+            return truncateAddress(address);
+        },
+        getCachedNftData(collectionAddress: string, tokenId: string): NFTClass {
+            return this.nftData[`${collectionAddress.toLowerCase()}-${tokenId}`];
+        },
+        goToNftDetailPage(collectionAddress: string, tokenId: string) {
+            this.$router.push({
+                name: 'evm-nft-details',
+                query: {
+                    contract: collectionAddress,
+                    id: tokenId,
+                },
+            });
         },
     },
 });
@@ -170,7 +216,7 @@ export default defineComponent({
             />
         </div>
 
-        <div>
+        <div class="c-transaction-row__interaction-text-container">
             <div class="c-transaction-row__primary-interaction-text">
                 <template v-if="actionHasDescriptiveText">
                     <span class="c-transaction-row__action-description">
@@ -242,6 +288,42 @@ export default defineComponent({
         </div>
 
         <div
+            v-for="(nftTransfer, index) in transaction.nftsOut"
+            :key="`nfts-out-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <div
+                v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                class="c-transaction-row__nft c-transaction-row__nft--out"
+                role="link"
+                tabindex="0"
+                :aria-label="$t('nft.link_to_nft_details', { name: nftTransfer.tokenName })"
+                @click="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                @keypress.space.enter="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+            >
+                <span>-{{ nftTransfer.quantity }}</span>
+                <NftViewer
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                    :previewMode="false"
+                    :tileMode="false"
+                />
+                <div class="c-transaction-row__nft-info-container">
+                    <div class="c-transaction-row__nft-name-container">
+                        <div class="c-transaction-row__nft-name">
+                            {{ getShapedTokenName(nftTransfer.tokenName, nftTransfer.tokenId) }}
+                        </div>
+                        <div class="c-transaction-row__nft-id">
+                            #{{ nftTransfer.tokenId }}
+                        </div>
+                    </div>
+                    <div class="c-transaction-row__nft-collection">
+                        {{ nftTransfer?.collectionName ?? getTruncatedAddress(nftTransfer.collectionAddress) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
             v-for="(values, index) in transaction.valuesIn"
             :key="`values-in-${index}`"
             class="c-transaction-row__value-container"
@@ -261,6 +343,45 @@ export default defineComponent({
                 +{{ formatAmount(values.fiatValue) }}
             </span>
         </div>
+
+        <div
+            v-for="(nftTransfer, index) in transaction.nftsIn"
+            :key="`nfts-in-${index}`"
+            class="c-transaction-row__value-container"
+        >
+            <div
+                v-if="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                class="c-transaction-row__nft c-transaction-row__nft--in"
+                role="link"
+                tabindex="0"
+                :aria-label="$t('nft.link_to_nft_details', { name: nftTransfer.tokenName })"
+                @click="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                @keypress.space.enter="goToNftDetailPage(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+            >
+                <span>+{{ nftTransfer.quantity }}</span>
+
+                <NftViewer
+                    :nft="getCachedNftData(nftTransfer.collectionAddress, nftTransfer.tokenId)"
+                    :previewMode="false"
+                    :tileMode="false"
+                />
+
+                <div class="c-transaction-row__nft-info-container">
+                    <div class="c-transaction-row__nft-name-container">
+                        <div class="c-transaction-row__nft-name">
+                            {{ getShapedTokenName(nftTransfer.tokenName, nftTransfer.tokenId) }}
+                        </div>
+                        <div class="c-transaction-row__nft-id">
+                            #{{ nftTransfer.tokenId }}
+                        </div>
+                    </div>
+                    <div class="c-transaction-row__nft-collection">
+                        {{ nftTransfer?.collectionName ?? getTruncatedAddress(nftTransfer.collectionAddress) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="c-transaction-row__info-container c-transaction-row__info-container--third">
@@ -291,7 +412,7 @@ export default defineComponent({
 .c-transaction-row {
     max-width: 1000px;
     padding: 16px 8px;
-    border-bottom: 2px solid $page-header;
+    border-bottom: 2px solid var(--accent-color-5);
     display: grid;
     gap: 16px;
     grid-template:
@@ -301,7 +422,7 @@ export default defineComponent({
 
     @include sm-and-up {
         gap: 32px;
-        grid-template: 'a b c' / auto auto max-content;
+        grid-template: 'a b c' / max-content auto max-content;
     }
 
     &__info-container {
@@ -310,13 +431,14 @@ export default defineComponent({
 
         &--first {
             display: grid;
+            grid-area: a;
             grid-template: 'a b c' auto / min-content auto max-content;
             gap: 8px;
 
             @include sm-and-up {
                 grid-template:
                     'a b' auto
-                    'c c' auto
+                    'c c' min-content
                     / 16px max-content;
             }
         }
@@ -332,6 +454,7 @@ export default defineComponent({
 
         &--second {
             display: flex;
+            grid-area: b;
             flex-direction: column;
             gap: 8px;
 
@@ -342,6 +465,7 @@ export default defineComponent({
 
         &--third {
             display: flex;
+            grid-area: c;
             align-items: center;
             gap: 4px;
 
@@ -359,12 +483,18 @@ export default defineComponent({
     }
 
     &__interaction-icon-container {
+        grid-area: a;
         height: 16px;
         width: 16px;
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        // align-self: center;
+    }
+
+    &__interaction-text-container {
+        grid-area: b;
+        max-width: 100%;
+        min-width: 0;
     }
 
     &__interaction-icon {
@@ -420,6 +550,7 @@ export default defineComponent({
     }
 
     &__timestamp {
+        grid-area: c;
         display: flex;
         align-items: flex-start;
         justify-content: flex-end;
@@ -478,6 +609,62 @@ export default defineComponent({
         &--small {
             @include text--small;
         }
+    }
+
+    &__nft {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        overflow: hidden;
+        cursor: pointer;
+
+        &--out {
+            color: var(--negative-color);
+        }
+
+        &--in {
+            color: var(--positive-color);
+        }
+    }
+
+    &__nft-thumbnail {
+        height: 40px;
+        width: 40px;
+        border-radius: 4px;
+    }
+
+    &__nft-info-container {
+        min-width: 0;
+        max-width: 150px;
+
+        @include sm-and-up {
+            max-width: 200px;
+        }
+    }
+
+    &__nft-name-container {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        align-items: center;
+    }
+
+    &__nft-name,
+    &__nft-id,
+    &__nft-collection {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__nft-name {
+        @include text--paragraph;
+    }
+
+    &__nft-id {
+        @include text--paragraph-bold;
+        flex-shrink: 0;
+        max-width: 70%;
     }
 
     &__gas-icon-container {

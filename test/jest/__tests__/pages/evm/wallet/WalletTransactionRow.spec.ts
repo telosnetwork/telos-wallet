@@ -50,6 +50,8 @@ describe('WalletTransactionRow.vue', () => {
         toPrettyName: '',
         valuesIn: [],
         valuesOut: [],
+        nftsIn: [],
+        nftsOut: [],
         gasUsed: 0.15,
         gasFiatValue: 0.03,
     };

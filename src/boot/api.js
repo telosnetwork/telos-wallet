@@ -21,6 +21,7 @@ const signTransaction = async function (actions, detail = null) {
                     actions,
                 },
                 {
+                    broadcast: true,
                     blocksBehind: 3,
                     expireSeconds: 30,
                 },

@@ -67,6 +67,8 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         ...props.pagination,
         page,
     });
+
+    window.scrollTo(0, 0);
 }
 </script>
 

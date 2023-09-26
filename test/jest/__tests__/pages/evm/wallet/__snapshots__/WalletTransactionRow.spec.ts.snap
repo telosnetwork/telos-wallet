@@ -19,7 +19,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -56,6 +58,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -118,7 +124,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -155,6 +163,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -217,7 +229,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -254,6 +268,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -316,7 +334,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -353,6 +373,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for addresses
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -415,7 +439,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -440,6 +466,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -502,7 +532,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -527,6 +559,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for failed tr
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -589,7 +625,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -622,6 +660,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -684,7 +726,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -717,6 +761,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -779,7 +827,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -812,6 +862,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -874,7 +928,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -907,6 +963,10 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transacti
   <div
     class="c-transaction-row__info-container c-transaction-row__info-container--second"
   >
+    
+    
+    
+    
     
     
     
@@ -969,7 +1029,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -1024,6 +1086,8 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     </div>
     
     
+    
+    
     <div
       class="c-transaction-row__value-container"
     >
@@ -1067,6 +1131,8 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
          +54.45 USD
       </span>
     </div>
+    
+    
     
   </div>
   <div
@@ -1126,7 +1192,9 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
         transformsource="[Function]"
       />
     </div>
-    <div>
+    <div
+      class="c-transaction-row__interaction-text-container"
+    >
       <div
         class="c-transaction-row__primary-interaction-text"
       >
@@ -1181,6 +1249,8 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
     </div>
     
     
+    
+    
     <div
       class="c-transaction-row__value-container"
     >
@@ -1224,6 +1294,8 @@ exports[`WalletTransactionRow.vue row should be rendered correctly for transfers
          +54.45 USD
       </span>
     </div>
+    
+    
     
   </div>
   <div

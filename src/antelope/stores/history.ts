@@ -26,19 +26,31 @@ import {
     IndexerTransactionsFilter,
     ShapedTransactionRow,
     ParsedIndexerAccountTransactionsContract,
-    EVMTransactionsPaginationData, TransactionValueData, EvmSwapFunctionNames,
+    EVMTransactionsPaginationData,
+    TransactionValueData,
+    EvmTransfer,
+    IndexerContractData,
+    NftTransactionData,
+    NftTokenInterface,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import { CURRENT_CONTEXT, getAntelope, useContractStore, useUserStore } from '..';
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useContractStore,
+    useNftsStore,
+    useTokensStore,
+    useUserStore,
+} from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { getFiatPriceFromIndexer } from 'src/api/price';
+import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 
-
+export const transfers_filter_limit = 10000;
 
 export interface HistoryState {
     __evm_filter: IndexerTransactionsFilter;
@@ -56,9 +68,22 @@ export interface HistoryState {
     __evm_transactions_pagination_data: {
         [label: Label]: EVMTransactionsPaginationData,
     },
+    __evm_nft_transfers: {
+        [label: Label]: Map<string, EvmTransfer[]>, // key is the transaction hash in lowercase
+    },
 }
 
 const store_name = 'history';
+
+// these are used to prevent multiple fetches from happening at the same time;
+// if a fetch is already running, the next fetch will be queued up and run after the current fetch is complete
+// without ending the loading state. This prevents the loading state from flickering on and off if
+// subsequent calls are made to the fetch method before it returns
+// (e.g. when loading the balances tab, which prefetches transactions, and quickly switching to the transactions tab)
+let fetchAccoutTransactionsIsRunning = false;
+let shouldRefetchAccoutTransactions = false;
+
+let nftTransfersUpdated : number | null = null; // the time in milliseconds since epoch when the NFT transfers were last updated
 
 export const useHistoryStore = defineStore(store_name, {
     state: (): HistoryState => (historyInitialState),
@@ -68,87 +93,175 @@ export const useHistoryStore = defineStore(store_name, {
         getShapedTransactionRows: state => (label: Label): ShapedTransactionRow[] => state.__shaped_evm_transaction_rows[label],
         getEVMTransactionsPagination: state => (label: Label): EVMTransactionsPaginationData => state.__evm_transactions_pagination_data[label],
         getEvmTransactionsRowCount: state => (label: Label): number => state.__total_evm_transaction_count[label],
+        getEvmNftTransfersForTransaction: state => (label: Label, transaction: string): EvmTransfer[] => state.__evm_nft_transfers[label].get(transaction.toLowerCase()) ?? [],
     },
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
+            const self = useHistoryStore();
+            self.clearEvmNftTransfers();
+            self.clearEvmTransactions();
             useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: ({ account }) => {
-                    const self = useHistoryStore();
                     if (account) {
                         self.setEVMTransactionsFilter({ address: account.account });
                     }
                 },
             });
         },
-
         // actions ---
+
+        // fetch all transactions for the account defined in __evm_filter.address
         async fetchEVMTransactionsForAccount(label: Label = CURRENT_CONTEXT) {
             this.trace('fetchEVMTransactionsForAccount', label);
             const feedbackStore = useFeedbackStore();
+
+            if (!fetchAccoutTransactionsIsRunning) {
+                feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
+                fetchAccoutTransactionsIsRunning = true;
+            } else {
+                shouldRefetchAccoutTransactions = true;
+                return;
+            }
+
             const chain = useChainStore().getChain(label);
             const chain_settings = chain.settings as EVMChainSettings;
             const contractStore = useContractStore();
 
-            feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
 
             try {
-                const response = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
-                const contracts = response.contracts;
-                const transactions = response.results;
+                shouldRefetchAccoutTransactions = false;
+                // for NFTs (ERC1155 and ERC721), we need to fetch information from the transfers endpoint,
+                // which returns data required for the UI
+                // so if the user has not fetched NFT transfers yet, or if the NFT transfers are stale (3 mins),
+                // fetch them now
+                if (
+                    this.__evm_nft_transfers[label].size === 0 ||
+                    (nftTransfersUpdated && !dateIsWithinXMinutes(nftTransfersUpdated, 3))
+                ) {
+                    await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
+                }
 
-                this.setEvmTransactionsRowCount(label, response.total_count);
+                const transactionsResponse = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
+                const contracts = transactionsResponse.contracts;
+                const transactions = transactionsResponse.results;
+
+                this.setEvmTransactionsRowCount(label, transactionsResponse.total_count);
 
                 const contractAddresses = Object.keys(contracts);
                 const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
                 contractAddresses.forEach((address: string) => {
-                    const extraInfo = JSON.parse(contracts[address].calldata);
+                    const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
                     parsedContracts[address] = {
                         ...contracts[address],
                         ...extraInfo,
                     };
                 });
 
+                // cache contracts
                 contractAddresses.forEach((address) => {
                     contractStore.addContractToCache(address, parsedContracts[address]);
                 });
 
                 this.setEVMTransactions(label, transactions);
-                // we do the shaping of transactions in background to speed up the UI
 
                 await this.shapeTransactions(label, transactions);
-
-                // there's an instant between this point and the appearance of the first transaction to show
-                // so we add a small delay to avoid flickering
-                setTimeout(() => {
-                    feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
-                }, 500);
             } catch (error) {
-                feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
+                console.error(error);
                 throw new AntelopeError('antelope.history.error_fetching_transactions');
+            } finally {
+                fetchAccoutTransactionsIsRunning = false;
+
+                if (shouldRefetchAccoutTransactions) {
+                    await this.fetchEVMTransactionsForAccount(label);
+                } else {
+                    feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
+                }
+            }
+        },
+
+        // fetch all NFT transfers for an account (erc721, erc155)
+        async fetchEvmNftTransfersForAccount(label: Label, account: string): Promise<void> {
+            const feedbackStore = useFeedbackStore();
+            const contractStore = useContractStore();
+
+            this.trace('fetchEvmNftTransfersForAccount', label);
+
+            feedbackStore.setLoading('history.fetchEvmNftTransfersForAccount');
+
+            const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
+
+            try {
+                // get all erc721 and erc1155 transfers for the given account
+                const [
+                    erc721TransferResponse,
+                    erc1155TransferResponse,
+                ] = await Promise.all(['erc721', 'erc1155'].map(
+                    type => chainSettings.getEvmNftTransfers({
+                        includePagination: true,
+                        account,
+                        limit: transfers_filter_limit,
+                        type: type as 'erc721' | 'erc1155',
+                    }),
+                ));
+
+                const erc721Contracts  = erc721TransferResponse.contracts;
+                const erc1155Contracts = erc1155TransferResponse.contracts;
+
+                // cache all contracts
+                [erc721Contracts, erc1155Contracts].forEach((contracts) => {
+                    const contractAddresses = Object.keys(contracts);
+                    const parsedContracts: Record<string, IndexerContractData> = {};
+                    contractAddresses.forEach((address: string) => {
+                        const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
+
+                        parsedContracts[address] = {
+                            ...contracts[address],
+                            ...extraInfo,
+                        };
+                    });
+                    contractAddresses.forEach((address) => {
+                        contractStore.addContractToCache(address, parsedContracts[address]);
+                    });
+                });
+
+                const transfers = [
+                    ...erc721TransferResponse.results,
+                    ...erc1155TransferResponse.results,
+                ].reduce(
+                    (acc, xfer) => {
+                        const hashLower = xfer.transaction.toLowerCase();
+                        const existingTransfers = acc.get(hashLower) ?? [];
+                        existingTransfers.push(xfer);
+                        acc.set(hashLower, existingTransfers);
+                        return acc;
+                    },
+                    new Map<string, EvmTransfer[]>(),
+                );
+
+                this.setEvmNftTransfers(label, transfers);
+            } catch (error) {
+                this.clearEvmNftTransfers();
+                throw new AntelopeError('antelope.history.error_fetching_nft_transfers');
+            } finally {
+                nftTransfersUpdated = (new Date()).getTime();
+                feedbackStore.unsetLoading('history.fetchEvmNftTransfersForAccount');
             }
         },
 
         async shapeTransactions(label: Label = CURRENT_CONTEXT, transactions: EvmTransaction[]) {
             this.trace('shapeTransactions', label);
-            const feedbackStore = useFeedbackStore();
             const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
+            const nftStore = useNftsStore();
             const chain_settings = chain.settings as EVMChainSettings;
-            const indexer = chain_settings.getIndexer();
             const contractStore = useContractStore();
             const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
 
-            transactions.forEach(async (tx) => {
-                const index = transactions.findIndex(t => t.hash === tx.hash);
-
-                // Each of these calls is a separate context, so we can do them in parallel
-                const loadingFlag = `history.shapeTransactions-${index}`;
-                feedbackStore.setLoading(loadingFlag);
-
-                const transfers = await contractStore.getTransfersFromTransaction(tx);
+            const transactionShapePromises = transactions.map(async (tx) => {
+                const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
                 const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -156,12 +269,17 @@ export const useHistoryStore = defineStore(store_name, {
                 const gasInUsdBn = convertCurrency(gasUsedInTlosBn, WEI_PRECISION, 2, tlosInUsd);
                 const gasInUsd = +(formatUnits(gasInUsdBn, 2));
 
-                // all contracts in transactions are cached, no need to use getContract
+                const systemTokenDecimals = chainSettings.getSystemToken().decimals;
+
+                // all contracts in transactions are already cached, no need to use getContract
                 const toPrettyName = contractStore.__cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
                 const fromPrettyName = contractStore.__cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
 
                 const valuesIn: TransactionValueData[] = [];
                 const valuesOut: TransactionValueData[] = [];
+
+                const nftsIn: NftTransactionData[] = [];
+                const nftsOut: NftTransactionData[] = [];
 
                 const isFailed = tx.status !== '0x1';
                 const isContractCreation = !tx.to && !!tx.contractAddress;
@@ -179,42 +297,83 @@ export const useHistoryStore = defineStore(store_name, {
 
                 if (!isFailed) {
                     if (+tx.value) {
-                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), WEI_PRECISION, 2, tlosInUsd);
+                        const valueInFiatBn = convertCurrency(BigNumber.from(tx.value), systemTokenDecimals, 2, tlosInUsd);
                         const valueInFiat = +formatUnits(valueInFiatBn, 2);
 
                         if (tx.from?.toLowerCase() === userAddressLower) {
                             valuesOut.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                amount: +formatUnits(tx.value, systemTokenDecimals),
                                 symbol: chainSettings.getSystemToken().symbol,
                                 fiatValue: valueInFiat,
                             });
                         }
                         if (tx.to?.toLowerCase() === userAddressLower) {
                             valuesIn.push({
-                                amount: +formatUnits(tx.value, WEI_PRECISION),
+                                amount: +formatUnits(tx.value, systemTokenDecimals),
                                 symbol: chainSettings.getSystemToken().symbol,
                                 fiatValue: valueInFiat,
                             });
                         }
                     }
 
-                    for (const tokenXfer of transfers) {
+                    const nftTransfersInTx = this.getEvmNftTransfersForTransaction(label, tx.hash);
+
+                    if (nftTransfersInTx.length > 0) {
+                        // there is at least 1 NFT transfer in this transaction,
+                        // so we need to fetch the NFT details for each transfer in this transaction
+                        const nftDetailList = await Promise.all(
+                            nftTransfersInTx.map(
+                                transfer => nftStore.fetchNftDetails(
+                                    label,
+                                    transfer.contract,
+                                    transfer.id ?? '',
+                                    transfer.type.toUpperCase() as NftTokenInterface,
+                                ),
+                            ),
+                        );
+
+                        nftDetailList.forEach((nftDetails, index) => {
+                            if (nftDetails) {
+                                const transferInfo = nftTransfersInTx[index];
+                                const shapedNftTransfer = {
+                                    quantity: +(transferInfo.amount || 1),
+                                    tokenId: transferInfo.id ?? '',
+                                    tokenName: nftDetails.name,
+                                    collectionAddress: transferInfo.contract,
+                                    collectionName: nftDetails.contractPrettyName,
+                                    type: nftDetails.item.type,
+                                    nftInterface: transferInfo.type.toUpperCase() as NftTokenInterface,
+                                    imgSrc: nftDetails.imageSrcFull,
+                                    videoSrc: nftDetails.videoSrc,
+                                    audioSrc: nftDetails.audioSrc,
+                                };
+
+                                if (transferInfo.from.toLowerCase() === userAddressLower) {
+                                    nftsOut.push(shapedNftTransfer);
+                                } else if (transferInfo.to.toLowerCase() === userAddressLower) {
+                                    nftsIn.push(shapedNftTransfer);
+                                }
+                            }
+                        });
+                    }
+
+                    for (const tokenXfer of erc20Transfers) {
                         if (tokenXfer.symbol && tokenXfer.decimals) {
                             let transferAmountInFiat: number | undefined;
 
                             if (tokenXfer.symbol) {
-                                const tokenFiatPrice = await getFiatPriceFromIndexer(
-                                    tokenXfer.symbol,
-                                    tokenXfer.address,
+                                const tokenFiatPriceData = await useTokensStore().fetchTokenPriceData(
                                     userStore.fiatCurrency,
-                                    indexer,
-                                    chain_settings,
+                                    tokenXfer.address,
+                                    tokenXfer.symbol,
+                                    chain_settings.getNetwork(),
                                 );
 
-                                transferAmountInFiat = tokenFiatPrice ?
-                                    tokenFiatPrice * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
-                                    undefined;
+                                const tokenFiatPriceStr = tokenFiatPriceData?.str;
 
+                                transferAmountInFiat = tokenFiatPriceStr ?
+                                    +tokenFiatPriceStr * +formatUnits(tokenXfer.value, tokenXfer.decimals) :
+                                    undefined;
                             }
 
                             if (tokenXfer.from?.toLowerCase() === userAddressLower) {
@@ -235,22 +394,24 @@ export const useHistoryStore = defineStore(store_name, {
                         }
                     }
 
+                    const txIsASwap    = (valuesIn.length  > 0 || nftsIn.length  > 0) && (valuesOut.length > 0 || nftsOut.length > 0);
+                    const txIsASend    = (valuesOut.length > 0 || nftsOut.length > 0) && (valuesIn.length  === 0 && nftsIn.length  === 0);
+                    const txIsAReceive = (valuesIn.length  > 0 || nftsIn.length  > 0) && (valuesOut.length === 0 && nftsOut.length === 0);
+
                     if (isContractCreation) {
                         actionName = 'contractCreation';
-                    } else if (+tx.value && transfers.length === 0 && !functionName) {
-                        if (tx.from?.toLowerCase() === userAddressLower) {
-                            actionName = 'send';
-                        } else if (tx.to?.toLowerCase() === userAddressLower) {
-                            actionName = 'receive';
-                        }
-                    } else if (EvmSwapFunctionNames.includes(functionName)) {
+                    } else if (txIsASend) {
+                        actionName = 'send';
+                    } else if (txIsAReceive) {
+                        actionName = 'receive';
+                    } else if (txIsASwap) {
                         actionName = 'swap';
                     } else if (functionName) {
                         actionName = functionName;
                     }
                 }
 
-                const shapedTx = {
+                return {
                     id: tx.hash,
                     epoch: tx.timestamp / 1000,
                     actionName,
@@ -260,16 +421,16 @@ export const useHistoryStore = defineStore(store_name, {
                     toPrettyName,
                     valuesIn,
                     valuesOut,
+                    nftsIn,
+                    nftsOut,
                     gasUsed: +gasUsedInTlos,
                     gasFiatValue: gasInUsd,
                     failed: isFailed,
                 } as ShapedTransactionRow;
-
-                // The shapedTxs may not be in the same order as the transactions
-                this.__shaped_evm_transaction_rows[label][index] = shapedTx;
-
-                feedbackStore.unsetLoading(loadingFlag);
             });
+
+            const shapedTransactions = await Promise.all(transactionShapePromises);
+            this.setShapedTransactionRows(label, shapedTransactions);
         },
 
 
@@ -292,28 +453,42 @@ export const useHistoryStore = defineStore(store_name, {
         },
         clearEvmTransactions() {
             this.trace('clearEvmTransactions');
+
             this.setEVMTransactionsFilter({ address: '' });
-            this.setEVMTransactions(CURRENT_CONTEXT, []);
-            this.setShapedTransactionRows(CURRENT_CONTEXT, []);
-            this.setEvmTransactionsRowCount(CURRENT_CONTEXT, 0);
+            this.__evm_transactions = {
+                [CURRENT_CONTEXT]: {
+                    transactions: [],
+                },
+            };
+            this.__shaped_evm_transaction_rows = {
+                [CURRENT_CONTEXT]: [],
+            };
+            this.__total_evm_transaction_count = {
+                [CURRENT_CONTEXT]: 0,
+            };
+        },
+        setEvmNftTransfers(label: Label, transfers: Map<string, EvmTransfer[]>): void {
+            this.trace('setEvmNftTransfers', transfers);
+            this.__evm_nft_transfers[label] = transfers;
+        },
+        clearEvmNftTransfers(): void {
+            this.trace('clearEvmNftTransfers');
+            this.__evm_nft_transfers = { [CURRENT_CONTEXT]: new Map() };
         },
     },
 });
 
 const historyInitialState: HistoryState = {
     __evm_transactions: {
-        current: {
-            transactions: [],
-        },
     },
     __total_evm_transaction_count: {
-        current: 0,
     },
     __evm_filter: {
         address: '',
     },
     __shaped_evm_transaction_rows: {
-        current: [],
     },
     __evm_transactions_pagination_data: {},
+    __evm_nft_transfers: {
+    },
 };

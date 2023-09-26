@@ -27,12 +27,15 @@ export interface ShapedNFT {
     videoSrc?: string;
 }
 
-export const NFTSourceTypes = {
+export type NftSourceType = 'image' | 'video' | 'audio' | 'unknown';
+export const NFTSourceTypes: Record<string, NftSourceType> = {
     IMAGE: 'image',
     VIDEO: 'video',
     AUDIO: 'audio',
-    NONE: 'none',
+    UNKNOWN: 'unknown',
 };
+
+export type NftTokenInterface = 'ERC721' | 'ERC1155';
 
 // NFT classes ------------------
 
@@ -57,7 +60,7 @@ export class NFTItemClass {
     indexer: IndexerNftItemResult;
     ready = true;
     preview: string;
-    type: string;
+    type: NftSourceType;
     source: string | undefined;
 
     constructor(
@@ -67,7 +70,7 @@ export class NFTItemClass {
         this.indexer = item;
         const { preview, type, source } = this.extractMetadata();
         this.preview = preview;
-        this.type = type;
+        this.type = type as NftSourceType;
         this.source = source;
     }
 

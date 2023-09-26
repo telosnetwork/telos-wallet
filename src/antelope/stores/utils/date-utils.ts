@@ -16,6 +16,10 @@ export function dateIsWithinXMinutes(epochMs: number, minutes: number) {
         throw new Error('epochMs must be greater than 0');
     }
 
+    if (epochMs % 1 !== 0) {
+        throw new Error('epochMs must be an integer');
+    }
+
     // make a date object which represents the time X minutes ago
     const xMinsAgo = new Date();
     xMinsAgo.setMinutes(xMinsAgo.getMinutes() - minutes);

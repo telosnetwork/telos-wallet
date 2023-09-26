@@ -28,7 +28,7 @@ const formattedText = computed(() => {
     rel="noopener noreferrer"
     class="c-external-link__link"
 >
-    {{ formattedText }}
+    <div class="c-external-link__text">{{ formattedText }}</div>
     <q-icon size="xs" name="o_launch" class="c-external-link__icon"/>
 </a>
 </template>
@@ -42,11 +42,20 @@ const formattedText = computed(() => {
         color: var(--link-color);
         display: inline-flex;
         align-items: center;
+        gap: 4px;
+        max-width: 100%;
+    }
+
+    &__text {
+        display: inline-block;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     &__icon {
         color: var(--link-color);
-        margin-left: 4px;
         transform: scale(0.67);
     }
 }

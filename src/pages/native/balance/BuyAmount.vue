@@ -268,7 +268,7 @@ export default {
                                 <label
                                     class="text-weight-regular q-ml-sm"
                                     :style="
-                                        `font-size: ${amountFontSize}px; color: ${themeColor}`
+                                        `font-size: ${amountFontSize}px;`
                                     "
                                 >
                                     {{ coinInput ? selectedCoin.symbol : "" }}
@@ -277,7 +277,7 @@ export default {
                             <label
                                 class="text-weight-regular full-width mobile-only"
                                 :style="
-                                    `font-size: ${amountFontSize}px; color: ${themeColor}`
+                                    `font-size: ${amountFontSize}px;`
                                 "
                             >
                                 {{
