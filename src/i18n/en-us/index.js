@@ -27,6 +27,8 @@ export default {
     home: {
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
+        developers_banner_title: 'Developers',
+        developers_banner_text: 'Find out how to integrate Telos Cloud Wallet into your app here',
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',

@@ -77,3 +77,23 @@ $saveBtn: #2e1f4f;
 body {
     background-color: var(--bg-color);
 }
+
+@mixin gradient_inline_text($gradient) {
+    background-image: $gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline;
+}
+
+@mixin gradient_inline_block($gradient) {
+    background-image: $gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline-block;
+}
+
+@mixin gradient_text() {
+    @include gradient_inline_text(linear-gradient(0.4turn, $gradientblue, $gradientPurple));
+}
