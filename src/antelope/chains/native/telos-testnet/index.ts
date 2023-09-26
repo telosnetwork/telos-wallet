@@ -46,6 +46,10 @@ const THEME = {
 };
 
 export default class TelosTestnet extends NativeChainSettings {
+    isTestnet() {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }

@@ -1,7 +1,7 @@
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
-import { NativeCurrencyAddress, PriceChartData } from 'src/antelope/types';
+import { NativeCurrencyAddress, PriceChartData, addressString } from 'src/antelope/types';
 import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
@@ -50,7 +50,8 @@ const RPC_ENDPOINT = {
     port: 443,
     path: '/evm',
 };
-
+const ESCROW_CONTRACT_ADDRESS = '0x7E9cF9fBc881652B05BB8F26298fFAB538163b6f';
+const API_ENDPOINT = 'https://api-dev.telos.net/v1';
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
 const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
@@ -61,6 +62,10 @@ const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.co
 declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
+    isTestnet() {
+        return true;
+    }
+
     getNetwork(): string {
         return NETWORK;
     }
@@ -81,6 +86,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return RPC_ENDPOINT;
     }
 
+    getApiEndpoint(): string {
+        return API_ENDPOINT;
+    }
+
     getPriceData(): Promise<PriceChartData> {
         return api.getCoingeckoPriceChartData('telos');
     }
@@ -95,6 +104,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getWrappedSystemToken(): TokenClass {
         return W_TOKEN;
+    }
+
+    getEscrowContractAddress(): addressString {
+        return ESCROW_CONTRACT_ADDRESS;
     }
 
     async getUsdPrice(): Promise<number> {

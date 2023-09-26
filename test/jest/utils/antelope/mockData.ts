@@ -96,6 +96,8 @@ const MockData = {
         id: CHAIN_ID,
         display: TEST_NETWORK_NAME,
         hyperionEndpoint: ENDPOINT_URL,
+        stakedRatio: ethers.BigNumber.from('0600000000000000000'),
+        unstakedRatio: ethers.BigNumber.from('1200000000000000000'),
     },
     Network: TEST_NETWORK,
     ExplorerUrl: EXPLORER_URL,
