@@ -39,6 +39,8 @@ const getTokens = jest.fn().mockImplementation(() => Chain.tokens);
 const getExplorerUrl = jest.fn().mockImplementation(() => MockData.ExplorerUrl);
 const getEcosystemUrl = jest.fn().mockImplementation(() => MockData.EcosystemUrl);
 const getNetworkSettings = jest.fn().mockImplementation(() => ChainSettings);
+const getStakedRatio = jest.fn().mockImplementation(() => MockData.Chain.stakedRatio);
+const getUnstakedRatio = jest.fn().mockImplementation(() => MockData.Chain.unstakedRatio);
 
 // actions -
 const updateChainData = jest.fn().mockImplementation(() => ({
@@ -72,6 +74,8 @@ const ChainGetters = {
     getExplorerUrl,
     getEcosystemUrl,
     getNetworkSettings,
+    getStakedRatio,
+    getUnstakedRatio,
 };
 
 const ChainActions = {

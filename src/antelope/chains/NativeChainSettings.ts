@@ -117,6 +117,11 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return true;
     }
 
+    // only testnet chains should override this
+    isTestnet() {
+        return false;
+    }
+
     getNetwork(): string {
         return this.network;
     }
