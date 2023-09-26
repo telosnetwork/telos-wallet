@@ -83,7 +83,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
             const wethContract = new ethers.Contract(wrappedSystemTokenContractAddress, wtlosAbiDeposit, signer);
 
             if (!wethContract) {
-                console.debug('wrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
+                this.trace('wrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
                 throw 'Unable to get wrapped system contract instance';
             }
             wrappedSystemTokenContractInstance = wethContract;
@@ -114,7 +114,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
             const wrappedSystemTokenContract = new ethers.Contract(wrappedSystemTokenContractAddress, wtlosAbiWithdraw, signer);
 
             if (!wrappedSystemTokenContract) {
-                console.debug('unwrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
+                this.trace('unwrapSystemToken', 'address:', wrappedSystemTokenContractAddress, 'signer:', signer);
                 throw 'Unable to get wrapped system contract instance';
             }
             wrappedSystemTokenContractInstance = wrappedSystemTokenContract;
