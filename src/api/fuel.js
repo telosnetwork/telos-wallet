@@ -42,7 +42,7 @@ const resourceProviderEndpoint = `${fuelrpc}/v1/resource_provider/request_transa
 // Use initFuelUserWrapper() method to initialize an instance of the class
 class FuelUserWrapper extends User {
   user = null;
-  available = false;
+  fuelServiceEnabled = false;
 
   constructor(user/*: User*/) {
       super();
@@ -55,7 +55,8 @@ class FuelUserWrapper extends User {
           return;
       };
       try {
-          this.available = (await fetch(fuelrpc)).status === 200;
+          // verify fuel service is available
+          this.fuelServiceEnabled = (await fetch(fuelrpc)).status === 200;
       } catch(e) {
           console.error(e);
       }
@@ -66,8 +67,8 @@ class FuelUserWrapper extends User {
       originalconfig, /*: SignTransactionConfig*/
   )/*: Promise<SignTransactionResponse>*/ {
       try {
-      // if fuel is not supported, just let the normal implementation to perform
-          if (!this.available) {
+          // if fuel service disabled, send tx using generic ual user method
+          if (!this.fuelServiceEnabled) {
               return this.user.signTransaction(originalTransaction, originalconfig);
           }
 

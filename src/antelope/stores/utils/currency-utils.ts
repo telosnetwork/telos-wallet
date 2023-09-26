@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatUnits } from '@ethersproject/units';
 import Decimal from 'decimal.js';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 /**
  * Given a number or string, returns a string representation of the number with up to 18 decimal places
@@ -14,7 +15,7 @@ export function toStringNumber(value: number | string): string {
         return value;
     } else if (typeof value === 'number') {
         const num = new Decimal(value);
-        return num.toFixed(18);
+        return num.toFixed(WEI_PRECISION);
     } else {
         throw new Error('Invalid value type: ' + typeof value);
     }
@@ -309,7 +310,7 @@ export function getFloatReciprocal(float: number | string) {
 
     return new Decimal(1)
         .dividedBy(float)
-        .toFixed(18)
+        .toFixed(WEI_PRECISION)
         .replace(trailingZeroesRegex, '')
         .replace(trailingDotRegex, '');
 }

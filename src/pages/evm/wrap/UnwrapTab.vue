@@ -124,6 +124,7 @@ async function handleUnwrapClick() {
                     :token-two-symbol="systemTokenSymbol"
                     :token-two-decimals="systemTokenDecimals"
                     :token-two-amount="oneEth"
+                    :decimals="0"
                 />
             </div>
         </div>

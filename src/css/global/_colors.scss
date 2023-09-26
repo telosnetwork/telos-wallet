@@ -4,6 +4,7 @@ $tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.
 /*********************
  *** Legacy Colors ***
  *********************/
+$gradientTransparent: linear-gradient(0deg, transparent 0%, transparent 0%);
 $gradientblue: #1AD6FF;
 $gradientPurple: #8946DF;
 $lightBlue: #31C1EE;
@@ -53,6 +54,7 @@ $saveBtn: #2e1f4f;
     --positive-muted: #{rgba($positive, 0.5)};
 
     --bg-color: #{$canvas};
+
 }
 
 // Dark Mode
@@ -78,22 +80,55 @@ body {
     background-color: var(--bg-color);
 }
 
-@mixin gradient_inline_text($gradient) {
-    background-image: $gradient;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    display: inline;
+/** 
+ * This creates the ilusion of a gradient border using a background with 5 layers.
+ * The first four layers are the four borders, and the last layer is the background.
+ * To use this mixin, you must pass in:
+   - the radius of the border
+   - the width of the border
+   - the background-image value, and two or four colors (if using only two, the other two will repeat the pair as default)
+ */
+@mixin bordient($radius, $width, $bg, $color1, $color2, $color3: $color2, $color4: $color1) {
+
+    background-image:
+        radial-gradient(circle at 100% 100%, transparent #{$radius - $width}, $color1 #{$radius - $width}, $color1 #{$radius}, transparent #{$radius}),
+        linear-gradient(to right, $color1, $color2),
+        radial-gradient(circle at 0% 100%, transparent #{$radius - $width}, $color2 #{$radius - $width}, $color2 #{$radius}, transparent #{$radius}),
+        linear-gradient(to bottom, $color2, $color3),
+        radial-gradient(circle at 0% 0%, transparent #{$radius - $width}, $color3 #{$radius - $width}, $color3 #{$radius}, transparent #{$radius}),
+        linear-gradient(to left, $color3, $color4),
+        radial-gradient(circle at 100% 0%, transparent #{$radius - $width}, $color4 #{$radius - $width}, $color4 #{$radius}, transparent #{$radius}),
+        linear-gradient(to top, $color4, $color1),
+        $bg
+        ;
+
+    background-position:
+        top left,
+        top center,
+        top right,
+        center right,
+        bottom right,
+        bottom center,
+        bottom left,
+        center left,
+        center center;
+
+    background-size:
+        #{$radius} #{$radius},
+        calc(100% - (2 * #{$radius})) #{$width},
+        #{$radius} #{$radius},
+        #{$width} calc(100% - (2 * #{$radius})),
+        #{$radius} #{$radius},
+        calc(100% - (2 * #{$radius})) #{$width},
+        #{$radius} #{$radius},
+        #{$width} calc(100% - (2 * #{$radius})),
+        calc(100% - #{$width} / 2) calc(100% - #{$width} / 2);
+
+    background-repeat: no-repeat;
+
+    border-radius: #{$radius};
 }
 
-@mixin gradient_inline_block($gradient) {
-    background-image: $gradient;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    display: inline-block;
-}
-
-@mixin gradient_text() {
-    @include gradient_inline_text(linear-gradient(0.4turn, $gradientblue, $gradientPurple));
+@mixin gradient_border() {
+    @include bordient(4px, 1px, $gradientTransparent, $gradientblue, $gradientPurple, $gradientPurple, $gradientblue);
 }

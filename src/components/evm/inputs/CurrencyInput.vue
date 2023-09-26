@@ -328,12 +328,12 @@ export default defineComponent({
         },
 
         primaryCurrencyDisplayPrecision() {
-            // if the value represents fiat, show 2 decimals; else show 4
-            return this.decimals === 2 ? 2 : 4;
+            // if the value represents fiat, show 2 decimals; else show this.decimalsToDisplay
+            return this.decimals === 2 ? 2 : this.decimalsToDisplay;
         },
         secondaryCurrencyDisplayPrecision() {
-            // if the value represents fiat, show 2 decimals; else show 4
-            return this.secondaryCurrencyDecimals === 2 ? 2 : 4;
+            // if the value represents fiat, show 2 decimals; else show this.decimalsToDisplay
+            return this.secondaryCurrencyDecimals === 2 ? 2 : this.decimalsToDisplay;
         },
         leadingZeroesRegex(): RegExp {
             const leadingZeroesPattern = `^0+(?!$|\\${this.decimalSeparator})`;
@@ -427,7 +427,7 @@ export default defineComponent({
                             true,
                         );
                     } else {
-                        const decimalsToShow = formatUnits(newValue, this.decimals).split('.')[1].length;
+                        const decimalsToShow = this.decimalsToDisplay;
                         newInputValue = prettyPrintCurrency(
                             newValue,
                             decimalsToShow,
@@ -931,15 +931,20 @@ export default defineComponent({
                 this.inputIsDirty = false;
             });
         },
+
+        // utility to convert to string properties attrs typed as never
+        asString(val: unknown): string {
+            return val as string;
+        },
     },
 });
 </script>
 
 <template>
 <div
-    :id="$attrs.id"
+    :id="asString($attrs.id)"
     :class="{
-        [$attrs.class]: !!$attrs.class,
+        [asString($attrs.class)]: !!$attrs.class,
         'c-currency-input': true,
         'c-currency-input--error': !!visibleErrorText,
         'c-currency-input--readonly': !!inputElementAttrs.readonly,
