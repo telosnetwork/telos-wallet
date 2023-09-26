@@ -98,7 +98,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     async getUsdPrice(): Promise<number> {
-        if (this.hasIndexerSupport()) {
+        if (this.hasIndexerSupport() && this.isIndexerHealthy()) {
             const nativeTokenSymbol = this.getSystemToken().symbol;
             const fiatCode = useUserStore().fiatCurrency;
             const fiatPrice = await getFiatPriceFromIndexer(nativeTokenSymbol, NativeCurrencyAddress, fiatCode, this.indexer, this);
