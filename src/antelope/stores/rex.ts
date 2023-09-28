@@ -16,7 +16,7 @@ import {
 import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useContractStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
@@ -84,12 +84,8 @@ export const useRexStore = defineStore(store_name, {
          * @returns the contract instance
          */
         async getContractInstance(label: string, address: string) {
-            const authenticator = useAccountStore().getEVMAuthenticator(label);
-            if (!authenticator) {
-                this.trace('getContractInstance', label, '-> no authenticator');
-                throw new AntelopeError('antelope.chain.error_no_default_authenticator');
-            }
-            const contract = await useEVMStore().getContract(authenticator, address);
+            this.trace('getContractInstance', label);
+            const contract = await useContractStore().getContract(label, address);
             if (!contract) {
                 this.trace('getContractInstance', label, '-> no contract');
                 throw new AntelopeError('antelope.rex.error_contract_not_found', { address });

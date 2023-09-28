@@ -26,37 +26,10 @@ const getFunctionIface = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => cb()),
 }));
 
-const getTokenTypeFromLog = jest.fn().mockImplementation(() => '');
-
 const getEventIface = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => cb()),
 }));
 
-const getContractCreation = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
-
-const getContract = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb1: any) => {
-        cb1({
-            getContractInstance: jest.fn().mockImplementation(() => ({
-                previewDeposit: jest.fn(),
-            })),
-        });
-    }),
-}));
-
-const checkBucket = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
-
-const getVerifiedContract = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
-
-const getEmptyContract = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
 
 const supportsInterface = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => {
@@ -70,23 +43,9 @@ const isTokenType = jest.fn().mockImplementation(() => ({
     }),
 }));
 
-const getTokenABI = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
 
-const getContractFromAbi = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
-
-const getToken = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
 
 const getNFT = jest.fn().mockImplementation(() => ({
-    then: jest.fn().mockImplementation((cb: any) => cb()),
-}));
-
-const getContractFromTokenLis = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => cb()),
 }));
 
@@ -95,7 +54,6 @@ const addInjectedProvider = jest.fn().mockImplementation(() => ({
 }));
 
 const EVMGetters = {
-    isMetamaskSupported: true,
 };
 
 const EVMActions = {
@@ -104,20 +62,10 @@ const EVMActions = {
     ensureCorrectChain,
     switchChainInjected,
     getFunctionIface,
-    getTokenTypeFromLog,
     getEventIface,
-    getContractCreation,
-    getContract,
-    checkBucket,
-    getVerifiedContract,
-    getEmptyContract,
     supportsInterface,
     isTokenType,
-    getTokenABI,
-    getContractFromAbi,
-    getToken,
     getNFT,
-    getContractFromTokenLis,
     addInjectedProvider,
 };
 
