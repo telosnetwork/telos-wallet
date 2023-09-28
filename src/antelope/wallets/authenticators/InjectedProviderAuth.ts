@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
+import { useContractStore, useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
 import {
     AntelopeError,
     ERC20_TYPE,
@@ -215,7 +215,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
 
     async getERC20TokenBalance(account: addressString | string, tokenAddress: addressString | string): Promise<ethers.BigNumber> {
         this.trace('getERC20TokenBalance', [account], tokenAddress);
-        const erc20ABI = useEVMStore().getTokenABI(ERC20_TYPE) as AbiItem[];
+        const erc20ABI = useContractStore().getTokenABI(ERC20_TYPE) as AbiItem[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const web3 = new Web3(this.getProvider() as any);
         const contract = new web3.eth.Contract(erc20ABI, tokenAddress);
@@ -230,8 +230,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         if (token.isSystem) {
             return this.sendSystemToken(to, amount);
         } else {
-            const evm = useEVMStore();
-            const contract = await evm.getContract(this, token.address, token.type);
+            const contract = await useContractStore().getContract(this.label, token.address, token.type);
             if (contract) {
                 const contractInstance = await contract.getContractInstance();
                 const amountInWei = amount.toString();
@@ -257,8 +256,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('stakeSystemTokens', amount.toString());
         const stakedToken = this.getChainSettings().getStakedSystemToken();
-        const evm = useEVMStore();
-        const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
+        const contract = await useContractStore().getContract(this.label, stakedToken.address, stakedToken.type);
         if (contract) {
             const contractInstance = await contract.getContractInstance();
             const transaction = (await contractInstance.depositTLOS({ value: amount })) as EvmTransactionResponse;
@@ -276,8 +274,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('unstakeSystemTokens', amount.toString());
         const stakedToken = this.getChainSettings().getStakedSystemToken();
-        const evm = useEVMStore();
-        const contract = await evm.getContract(this, stakedToken.address, stakedToken.type);
+        const contract = await useContractStore().getContract(this.label, stakedToken.address, stakedToken.type);
         if (contract) {
             const contractInstance = await contract.getContractInstance();
             const amountInWei = amount.toString();

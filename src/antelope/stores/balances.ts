@@ -34,8 +34,8 @@ import {
     useAccountStore,
     useFeedbackStore,
     useChainStore,
-    useEVMStore,
     CURRENT_CONTEXT,
+    useContractStore,
 } from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -294,7 +294,7 @@ export const useBalancesStore = defineStore(store_name, {
         async prepareWagmiTokenTransferConfig(label: Label, token: TokenClass, to: string, amount: BigNumber): Promise<void> {
             const config = (await prepareWriteContract({
                 address: token.address as addressString,
-                abi: useEVMStore().getTokenABI(token.type),
+                abi: useContractStore().getTokenABI(token.type),
                 functionName: 'transfer',
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 args: [to, amount] as any[],
