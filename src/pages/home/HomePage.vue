@@ -105,6 +105,7 @@ export default defineComponent({
                     </a>
                     <q-icon size="16px" name="launch" />
                 </div>
+                <div v-else class="c-home__external-link"></div> /** placeholder to maintain styling for native */
                 <q-footer bordered class="c-home__footer">
                     <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
                         <a
