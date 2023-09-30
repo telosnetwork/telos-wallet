@@ -106,7 +106,20 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="bg-dark flex-center">
+                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
+                        <a
+                            href="https://docs.telos.net/evm/cloud-wallet/"
+                            target="_blank"
+                            class="c-home__footer-developer-link"
+                        >
+                            <div class="c-home__footer-developer-title">
+                                <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
+                            </div>
+                            <div class="c-home__footer-developer-text">{{ $t('home.developers_banner_text') }}</div>
+                            <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
+                        </a>
+                    </q-toolbar>
+                    <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
@@ -137,43 +150,35 @@ export default defineComponent({
     position: relative;
     background: $site-gradient;
     min-height: 100vh;
+    display: flex;
 
     &__page-container {
-        // override inline style of unknown origin
+        // override inline style of unknown origin (do not delete)
         padding-bottom: 0 !important;
     }
 
     &__container {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
-        padding: 32px 24px 0;
-        min-height: 40rem;
+        padding-top: 32px;
+        align-items: stretch;
+        justify-content: space-between;
     }
 
     &__logo {
         width: 240px;
-        margin: 0 auto;
-
-        @include sm-and-up {
-            margin: 128px auto 88px;
-        }
-
-        @include mobile-landscape {
-            margin: 60px auto 88px;
-        }
+        align-self: center;
+        flex-grow: 1;
 
     }
 
     &__button-container {
+        align-self: center;
         border-radius: 4px;
         padding: 24px;
         background-color: rgba(white, 0.1);
         max-width: 320px;
-        margin: auto;
-        @include mobile-landscape {
-            // footer height + margin
-            margin: auto auto 90px;
-        }
     }
 
     &__network-toggle-container {
@@ -211,6 +216,7 @@ export default defineComponent({
     }
 
     &__external-link {
+        flex-grow: 1;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -218,7 +224,7 @@ export default defineComponent({
         gap: 4px;
 
         margin-top: 24px;
-        color: white
+        color: white;
     }
 
     &__external-link-text {
@@ -233,10 +239,75 @@ export default defineComponent({
 
     // guarantees wallet connect on top of footer
     &__footer {
-        z-index: $z-index--footer;
+        position: relative;
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
+    }
+
+    &__footer-first-line {
+        // bottom border for first line
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #392468;
+        }
+
+        &--small {
+            min-height: 38px;
+        }
+    }
+
+    &__footer-developer {
+        &-link {
+            text-decoration: none;
+            max-width: 320px;
+            padding: 10px;
+            display: grid;
+            gap: 5px;
+            grid-template:
+                "a a"
+                "b c";
+
+            @include sm-and-up {
+                padding: 0px;
+                gap: 14px;
+                grid-template: 'a b c' / auto auto max-content;
+                max-width: none;
+            }
+
+            &--small {
+                grid-template: 'a c' / auto auto;
+            }
+        }
+        &-title {
+            grid-area: a;
+            text-align: center;
+            &-text {
+                @include text--small-bold;
+                @include gradient_text;
+                text-transform: uppercase;
+                vertical-align: top;
+            }
+        }
+        &-text {
+            @include text--small;
+            grid-area: b;
+            color: white;
+            text-align: left;
+            &--small {
+                display: none;
+            }
+        }
+        &-icon {
+            grid-area: c;
+            color: white;
+            text-align: right;
+        }
     }
 
     @media only screen and (max-height: 800px) {
