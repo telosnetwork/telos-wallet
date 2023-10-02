@@ -18,15 +18,16 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
         errorToStringHandler: jest.fn(),
     },
     wallets: {
-        getAutenticator: () => ({
+        getAuthenticator: () => ({
             newInstance: (label: string) => ({
                 label,
-                isConnectedTo: () => Promise.resolve(label === 'logged'),
+                isConnectedTo: () => Promise.resolve(true),
             }),
         }),
     },
 }));
 
+const CURRENT_CONTEXT = 'current';
 
 jest.mock('src/antelope', () => ({
     useChainStore,
@@ -35,6 +36,7 @@ jest.mock('src/antelope', () => ({
     useFeedbackStore,
     usePlatformStore,
     getAntelope,
+    CURRENT_CONTEXT,
 }));
 
 
@@ -51,4 +53,5 @@ export * from 'test/jest/utils/antelope/store-feedback';
 export * from 'test/jest/utils/antelope/store-platform';
 export * from 'test/jest/utils/antelope/wagmi-web3';
 export * from 'test/jest/utils/antelope/globalProps';
+
 

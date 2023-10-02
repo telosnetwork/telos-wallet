@@ -172,7 +172,7 @@ export default defineComponent({
         transition-property: background-color, color;
 
         &:hover {
-            background-color: var(--bg-color-hover);
+            background-color: var(--accent-color-5);
             color: var(--accent-color);
 
             #{$this}__icon {

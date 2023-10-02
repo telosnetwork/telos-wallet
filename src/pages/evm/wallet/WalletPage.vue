@@ -5,7 +5,7 @@ import { TokenBalance } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 
 const route = useRoute();
@@ -35,16 +35,18 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
 
 }, { deep: true, immediate: true });
 
-watch(accountStore.currentEvmAccount, (newAccount) => {
-    // if user is on the balances screen, prefetch transactions
-    if (accountStore.currentEvmAccount?.address && route.query.tab !== 'transactions') {
+watch(accountStore, (newAccountStoreState) => {
+    const newAccount = newAccountStoreState.loggedEvmAccount;
+
+    // if user is on the balances screen, prefetch transactions & transfers
+    if (newAccount?.address && route.query.tab !== 'transactions') {
         historyStore.setEVMTransactionsFilter({
-            address: accountStore.currentEvmAccount?.address,
+            address: newAccount.address,
             offset: 0,
             limit: 5,
             includeAbi: true,
         });
-        historyStore.fetchEVMTransactionsForAccount('current');
+        historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
     }
 }, { immediate: true });
 

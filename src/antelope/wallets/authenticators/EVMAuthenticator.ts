@@ -2,7 +2,8 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
-import { getAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -10,6 +11,7 @@ import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
+
     readonly label: string;
     readonly trace: (message: string, ...args: unknown[]) => void;
 
@@ -27,6 +29,9 @@ export abstract class EVMAuthenticator {
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
     abstract wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
+    abstract withdrawUnstakedTokens(): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract isConnectedTo(chainId: string): Promise<boolean>;
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
@@ -40,12 +45,21 @@ export abstract class EVMAuthenticator {
         return true;
     }
 
+    // returns the associated account address acording to the label
+    getAccountAddress(): addressString {
+        return useAccountStore().getAccount(this.label).account as addressString;
+    }
+
+    // returns the associated chain settings acording to the label
+    getChainSettings(): EVMChainSettings {
+        return (useChainStore().getChain(this.label).settings as EVMChainSettings);
+    }
+
     async login(network: string): Promise<addressString | null> {
         this.trace('login', network);
         const chain = useChainStore();
         try {
-            chain.setLoggedChain(network);
-            chain.setCurrentChain(network);
+            chain.setChain(CURRENT_CONTEXT, network);
 
             const checkProvider = await this.ensureCorrectChain() as ethers.providers.Web3Provider;
 

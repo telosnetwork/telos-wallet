@@ -17,7 +17,7 @@ const qrInstance = ref<QRious>();
 
 onMounted(() => {
     qrInstance.value = new QRious({
-        background: getComputedStyle(document.body).getPropertyValue('--header-bg-color'),
+        background: getComputedStyle(document.body).getPropertyValue('--accent-color-5'),
         level: 'H',
         size: props.size,
         element: document.getElementById('qr-code'),

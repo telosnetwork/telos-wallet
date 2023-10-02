@@ -24,7 +24,7 @@ describe('AddressQR.vue', () => {
         global: {
             mocks: {
                 $style: {
-                    '--header-bg-color': BACKGROUND_COLOR,
+                    '--accent-color-5': BACKGROUND_COLOR,
                 },
             },
         },

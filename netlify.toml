@@ -3,6 +3,9 @@
   to = "/"
   status = 200
 
+[context.environment]
+  NETWORK = "testnet"
+
 [build]
   publish = "dist/spa"
   command = "quasar build"

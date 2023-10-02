@@ -3,6 +3,8 @@ import { UAL } from 'universal-authenticator-library';
 import { Anchor } from 'ual-anchor';
 import { Wombat } from 'ual-wombat';
 import { CleosAuthenticator } from '@telosnetwork/ual-cleos';
+import { WebPopup } from 'oreid-webpopup';
+import { OreIdAuthenticator, AuthProvider } from 'ual-oreid';
 import { Dialog, Notify, copyToClipboard } from 'quasar';
 
 
@@ -147,6 +149,11 @@ export default boot(async ({ app, store }) => {
             loginHandler,
             signHandler,
         }),
+        new OreIdAuthenticator([chain], {
+            appId: process.env.OREID_APP_ID_NATIVE,
+            plugins: { popup: WebPopup() },
+        },
+        AuthProvider.Google),
     ];
 
     const ual = new UAL([chain], 'ual', authenticators);

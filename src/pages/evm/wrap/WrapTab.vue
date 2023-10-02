@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { ethers } from 'ethers';
 
 import {
+    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useBalancesStore,
@@ -91,7 +92,7 @@ onBeforeMount(() => {
 });
 
 async function handleCtaClick() {
-    const label = 'logged';
+    const label = CURRENT_CONTEXT;
     if (!await accountStore.isConnectedToCorrectNetwork(label)) {
         const networkName = useChainStore().loggedChain.settings.getDisplay();
         const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
@@ -123,12 +124,6 @@ async function handleCtaClick() {
             });
         } catch (err) {
             console.error(err);
-            if (err instanceof AntelopeError) {
-                const evmErr = err as AntelopeError;
-                ant.config.notifyFailureMessage($t(evmErr.message), evmErr.payload);
-            } else {
-                ant.config.notifyFailureMessage($t('evm_wallet.general_error'));
-            }
         }
     }
 }
@@ -146,6 +141,7 @@ async function handleCtaClick() {
                     :token-two-symbol="systemTokenSymbol"
                     :token-two-decimals="systemTokenDecimals"
                     :token-two-amount="oneEth"
+                    :decimals="0"
                 />
             </div>
         </div>

@@ -2,9 +2,9 @@
 import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
-import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
-import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
+import { WEI_PRECISION, formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
@@ -103,18 +103,20 @@ export default defineComponent({
         },
         gasFeeInSystemSym() {
             const symbol = chainStore.loggedChain.settings.getSystemToken().symbol;
-            const gas = `${formatWei(this.estimatedGas.system, 18, 18)}`;
+            const decimals = chainStore.loggedChain.settings.getSystemToken().decimals;
+            const gas = `${formatWei(this.estimatedGas.system, decimals, WEI_PRECISION)}`;
             return prettyPrintBalance(gas, userStore.fiatLocale, this.isMobile, symbol);
         },
         gasFeeInFiat() {
-            const gasFiat = `${formatWei(this.estimatedGas.fiat, 18, 18)}`;
+            const decimals = chainStore.loggedChain.settings.getSystemToken().decimals;
+            const gasFiat = `${formatWei(this.estimatedGas.fiat, decimals, WEI_PRECISION)}`;
             return prettyPrintFiatBalance(gasFiat, userStore.fiatLocale, this.isMobile, userStore.fiatCurrency);
         },
         isMobile(): boolean {
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances(CURRENT_CONTEXT);
         },
         showContractLink(): boolean {
             return this.token?.address !== NativeCurrencyAddress;
@@ -167,7 +169,7 @@ export default defineComponent({
             return ant.stores.feedback.isLoading('transferEVMTokens') || (this.isFormValid && !this.authIsReadyForTransfer);
         },
         authIsReadyForTransfer(): boolean {
-            return accountStore.getEVMAuthenticator('logged')?.readyForTransfer() ?? false;
+            return accountStore.getEVMAuthenticator(CURRENT_CONTEXT)?.readyForTransfer() ?? false;
         },
         currencyInputIsLoading() {
             return !(this.token?.decimals && this.token?.symbol);
@@ -222,7 +224,7 @@ export default defineComponent({
         async startTransfer() {
 
             // before sending the transaction, we check if the user is connected to the correct network
-            const label = 'logged';
+            const label = CURRENT_CONTEXT;
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
                 const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
                 const networkName = useChainStore().loggedChain.settings.getDisplay();
@@ -247,7 +249,7 @@ export default defineComponent({
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
                         // we send the notification before the transaction is mined
-                        const quantity = `${formatWei(amount, token.decimals, 18)} ${token.symbol}`;
+                        const quantity = `${formatWei(amount, token.decimals, WEI_PRECISION)} ${token.symbol}`;
                         const address = to.substring(0, 6) + '...' + to.substring(to.length - 4, to.length);
                         const dismiss = ant.config.notifyNeutralMessageHandler(
                             this.$t('notification.neutral_message_sending', { quantity, address }),
@@ -267,12 +269,6 @@ export default defineComponent({
                     }
                 }).catch((err) => {
                     console.error(err);
-                    if (err instanceof AntelopeError) {
-                        const evmErr = err as AntelopeError;
-                        ant.config.notifyFailureMessage(this.$t(evmErr.message), evmErr.payload);
-                    } else {
-                        ant.config.notifyFailureMessage(this.$t('evm_wallet.general_error'));
-                    }
                 });
             } else {
                 ant.config.notifyFailureMessage(this.$t('evm_wallet.invalid_form'));

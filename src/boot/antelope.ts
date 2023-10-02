@@ -2,7 +2,8 @@ import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
-import { installAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
+import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
     WalletConnectAuth,
@@ -59,6 +60,20 @@ export default boot(({ app }) => {
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string, payload?: Record<string, unknown>) => app.config.globalProperties.$t(key, payload ? payload : {}));
 
+    // setting transaction error handler --
+    ant.config.setTransactionErrorHandler((err: object) => {
+        if (err instanceof AntelopeError) {
+            const evmErr = err as AntelopeError;
+            if (evmErr.message === 'antelope.evm.error_transaction_canceled') {
+                ant.config.notifyNeutralMessageHandler(ant.config.localizationHandler(evmErr.message));
+            } else {
+                ant.config.notifyFailureMessage(ant.config.localizationHandler(evmErr.message), evmErr.payload);
+            }
+        } else {
+            ant.config.notifyFailureMessage(ant.config.localizationHandler('evm_wallet.general_error'));
+        }
+    });
+
     // set evm authenticators --
     const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;
     const wagmiClient = app.config.globalProperties.$wagmi as EthereumClient;
@@ -67,7 +82,7 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
     const oreIdOptions: OreIdOptions = {
         appName: process.env.APP_NAME,
-        appId: process.env.APP_OREID_APP_ID as string,
+        appId: process.env.OREID_APP_ID as string,
     };
     ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
 
@@ -82,7 +97,7 @@ export default boot(({ app }) => {
     // Otherwise we just let the store decide which network to connect to
     const network = new URLSearchParams(window.location.search).get('network');
     if (network) {
-        ant.stores.chain.setCurrentChain(network);
+        ant.stores.chain.setChain(CURRENT_CONTEXT, network);
     }
 
 });
