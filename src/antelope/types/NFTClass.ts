@@ -199,6 +199,14 @@ export class NFT {
         this.preview = preview;
         this.mediaType = type;
         this.source = source;
+
+        if (precursorData?.tokenUri?.match(/\.(mp4|webm|ogg)$/)) {
+            this.videoSrc = precursorData.tokenUri;
+        }
+
+        if (precursorData?.tokenUri?.match(/\.(mp3|wav|aac|webm)$/)) {
+            this.audioSrc = precursorData.tokenUri;
+        }
     }
 
     // getters
