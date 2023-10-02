@@ -22,16 +22,16 @@ export class AntelopeWallets {
         this.authenticators.set(authenticator.getName(), authenticator);
     }
 
-    getAutenticator(name: string) {
-        this.trace('getAutenticator', name);
+    getAuthenticator(name: string) {
+        this.trace('getAuthenticator', name);
         return this.authenticators.get(name);
     }
+
 }
 
 export * from 'src/antelope/wallets/authenticators/EVMAuthenticator';
 export * from 'src/antelope/wallets/authenticators/InjectedProviderAuth';
 export * from 'src/antelope/wallets/authenticators/MetamaskAuth';
 export * from 'src/antelope/wallets/authenticators/OreIdAuth';
-export * from 'src/antelope/wallets/authenticators/SafePalAuth';
 export * from 'src/antelope/wallets/authenticators/WalletConnectAuth';
 export * from 'src/antelope/wallets/authenticators/SafePalAuth';

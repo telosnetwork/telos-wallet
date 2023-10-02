@@ -141,6 +141,7 @@ async function handleCtaClick() {
                     :token-two-symbol="systemTokenSymbol"
                     :token-two-decimals="systemTokenDecimals"
                     :token-two-amount="oneEth"
+                    :decimals="0"
                 />
             </div>
         </div>

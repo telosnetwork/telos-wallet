@@ -5,6 +5,7 @@ import { mapGetters } from 'vuex';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import { getAntelope, useEVMStore, usePlatformStore } from 'src/antelope';
+import { Menu } from 'src/pages/home/MenuType';
 
 export default defineComponent({
     name: 'HomePage',
@@ -13,61 +14,23 @@ export default defineComponent({
         NativeLoginButton,
     },
     data: (): {
-        tab: 'left' | 'right'
-        showWalletOptions: boolean,
-        showOAuthOptions: boolean,
-        showWalletConnect: boolean,
-        useInjectedProvider: string,
+        tab: 'left' | 'right',
+        currentMenu: Menu,
     } => ({
         tab: 'left',
-        showWalletOptions: false,
-        showOAuthOptions: false,
-        showWalletConnect: false,
-        useInjectedProvider: '',
+        currentMenu: Menu.MAIN,
     }),
 
     computed: {
         ...mapGetters('account', ['isAuthenticated']),
+        showLeftRightBtns(): boolean {
+            return this.currentMenu === Menu.MAIN;
+        },
     },
 
     methods: {
-        onUseInjectedProvider() {
-            // first check the integrity of the injected provider
-            const evm = useEVMStore();
-            const platform = usePlatformStore();
-            console.assert(platform.isMobile, 'onUseInjectedProvider should only be called on mobile');
-            console.assert(evm.injectedProviderNames.length === 1, 'only one injected provider is supported for mobile');
-            const providerName = evm.injectedProviderNames[0];
-            const authenticator = evm.injectedProvider(providerName);
-            if (!authenticator) {
-                console.error(`${providerName} authenticator not found`);
-                getAntelope().config.notifyFailureMessage(
-                    this.$t(
-                        'home.no_injected_provider_found',
-                        { providerName },
-                    ),
-                );
-                return;
-            }
-            // Everything is fine, let's use the injected provider
-            this.useInjectedProvider = providerName;
-        },
-        onShowWalletConnect() {
-            this.showWalletConnect = true;
-            // put this variable back to false for an eventual re-open
-            setTimeout(() => {
-                this.showWalletConnect = false;
-            }, 200);
-        },
-        onShowWalletOptions(show: boolean) {
-            this.showWalletOptions = show;
-            if (!show) {
-                this.showOAuthOptions = false;
-            }
-        },
-        onShowOAuthOptions(show: boolean) {
-            this.showOAuthOptions = show;
-            this.showWalletOptions = show;
+        goBack(): void {
+            this.currentMenu = Menu.MAIN;
         },
     },
 });
@@ -83,8 +46,8 @@ export default defineComponent({
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
-                <div v-if="!showWalletOptions" class="c-home__button-container">
-                    <div class="c-home__network-toggle-container" role="tablist">
+                <div class="c-home__button-container">
+                    <div v-if="showLeftRightBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
@@ -112,18 +75,27 @@ export default defineComponent({
                             {{ $t('global.native') }}
                         </button>
                     </div>
+                    <div v-else>
+                        <q-btn
+                            class="c-home__menu-back-button"
+                            flat
+                            dense
+                            icon="arrow_back_ios"
+                            @click="goBack"
+                        >
+
+                            {{ $t('global.back') }}
+                        </q-btn>
+                    </div>
 
                     <NativeLoginButton v-if="tab === 'right'" />
 
                     <EVMLoginButtons
                         v-else-if="tab === 'left'"
-                        @show-wallet-connect="onShowWalletConnect()"
-                        @show-wallet-options="onShowWalletOptions(true)"
-                        @use-injected-provider="onUseInjectedProvider()"
-                        @show-oauth-options="onShowOAuthOptions(true)"
+                        v-model="currentMenu"
                     />
                 </div>
-                <div v-if="tab === 'left'" class="c-home__external-link">
+                <div class="c-home__external-link">
                     <a
                         href="https://docs.telos.net/evm/about/setup-a-wallet"
                         target="_blank"
@@ -134,11 +106,24 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="bg-dark flex-center">
+                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
+                        <a
+                            href="https://docs.telos.net/evm/cloud-wallet/"
+                            target="_blank"
+                            class="c-home__footer-developer-link"
+                        >
+                            <div class="c-home__footer-developer-title">
+                                <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
+                            </div>
+                            <div class="c-home__footer-developer-text">{{ $t('home.developers_banner_text') }}</div>
+                            <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
+                        </a>
+                    </q-toolbar>
+                    <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.terms')}}
                         </a>
@@ -146,7 +131,7 @@ export default defineComponent({
                         <a
                             href="https://www.telos.net/privacy-policy"
                             target="_blank"
-                            class="text-white"
+                            class="c-home__external-link-text"
                         >
                             {{$t('home.privacy')}}
                         </a>
@@ -165,43 +150,35 @@ export default defineComponent({
     position: relative;
     background: var(--site-gradient);
     min-height: 100vh;
+    display: flex;
 
     &__page-container {
-        // override inline style of unknown origin
+        // override inline style of unknown origin (do not delete)
         padding-bottom: 0 !important;
     }
 
     &__container {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
-        padding: 32px 24px 0;
-        min-height: 40rem;
+        padding-top: 32px;
+        align-items: stretch;
+        justify-content: space-between;
     }
 
     &__logo {
         width: 240px;
-        margin: 0 auto;
-
-        @include sm-and-up {
-            margin: 128px auto 88px;
-        }
-
-        @include mobile-landscape {
-            margin: 60px auto 88px;
-        }
+        align-self: center;
+        flex-grow: 1;
 
     }
 
     &__button-container {
+        align-self: center;
         border-radius: 4px;
         padding: 24px;
         background-color: rgba(white, 0.1);
         max-width: 320px;
-        margin: auto;
-        @include mobile-landscape {
-            // footer height + margin
-            margin: auto auto 90px;
-        }
     }
 
     &__network-toggle-container {
@@ -233,7 +210,13 @@ export default defineComponent({
         }
     }
 
+    &__menu-back-button {
+        color: white;
+        margin-bottom: 24px;
+    }
+
     &__external-link {
+        flex-grow: 1;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -241,7 +224,7 @@ export default defineComponent({
         gap: 4px;
 
         margin-top: 24px;
-        color: white
+        color: white;
     }
 
     &__external-link-text {
@@ -256,10 +239,75 @@ export default defineComponent({
 
     // guarantees wallet connect on top of footer
     &__footer {
-        z-index: $z-index--footer;
+        position: relative;
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
+    }
+
+    &__footer-first-line {
+        // bottom border for first line
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #392468;
+        }
+
+        &--small {
+            min-height: 38px;
+        }
+    }
+
+    &__footer-developer {
+        &-link {
+            text-decoration: none;
+            max-width: 320px;
+            padding: 10px;
+            display: grid;
+            gap: 5px;
+            grid-template:
+                "a a"
+                "b c";
+
+            @include sm-and-up {
+                padding: 0px;
+                gap: 14px;
+                grid-template: 'a b c' / auto auto max-content;
+                max-width: none;
+            }
+
+            &--small {
+                grid-template: 'a c' / auto auto;
+            }
+        }
+        &-title {
+            grid-area: a;
+            text-align: center;
+            &-text {
+                @include text--small-bold;
+                @include gradient_text;
+                text-transform: uppercase;
+                vertical-align: top;
+            }
+        }
+        &-text {
+            @include text--small;
+            grid-area: b;
+            color: white;
+            text-align: left;
+            &--small {
+                display: none;
+            }
+        }
+        &-icon {
+            grid-area: c;
+            color: white;
+            text-align: right;
+        }
     }
 
     @media only screen and (max-height: 800px) {
