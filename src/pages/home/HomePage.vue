@@ -95,7 +95,7 @@ export default defineComponent({
                         v-model="currentMenu"
                     />
                 </div>
-                <div v-if="tab === 'left'" class="c-home__external-link">
+                <div class="c-home__external-link">
                     <a
                         href="https://docs.telos.net/evm/about/setup-a-wallet"
                         target="_blank"
@@ -105,7 +105,6 @@ export default defineComponent({
                     </a>
                     <q-icon size="16px" name="launch" />
                 </div>
-                <div v-else class="c-home__external-link"></div> /** placeholder to maintain styling for native */
                 <q-footer bordered class="c-home__footer">
                     <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
                         <a
