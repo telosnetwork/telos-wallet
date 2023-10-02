@@ -494,7 +494,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
-        const address = filter.address;
+        // const address = filter.address;
+        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;
@@ -528,7 +529,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
-        const url = `v1/address/${address}/transactions`;
+        // const url = `v1/address/${address}/transactions`;
+        const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers';
 
         // The following performs a GET request to the indexer endpoint.
         // Then it pipes the response to the IndexerAccountTransactionsResponse type.

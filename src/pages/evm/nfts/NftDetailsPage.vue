@@ -30,7 +30,8 @@ const loading = ref(true);
 
 
 // computed
-const userAddress = computed(() => useAccountStore().currentEvmAccount?.address);
+// const userAddress = computed(() => useAccountStore().currentEvmAccount?.address);
+const userAddress = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
