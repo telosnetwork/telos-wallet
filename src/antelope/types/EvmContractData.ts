@@ -100,3 +100,5 @@ export interface EvmContractFactoryData {
     timestamp?: string;
     manager?: EvmContractManagerI;
 }
+
+export type EvmFunctionParam = string | number | boolean;

@@ -2,6 +2,8 @@ import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject, UserChainA
 import { BigNumber, ethers } from 'ethers';
 import { WebPopup } from 'oreid-webpopup';
 import {
+    EvmABI,
+    EvmFunctionParam,
     erc20Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
@@ -291,6 +293,40 @@ export class OreIdAuth extends EVMAuthenticator {
         } as EvmTransactionResponse;
     }
 
+    async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<EvmTransactionResponse> {
+        this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
+        this.checkIntegrity();
+
+        const from = this.getAccountAddress();
+        const method = abi[0].name;
+
+        // if the developer is passing more than one function in the abi
+        // we must warn we asume the first one is the one to be called
+        if (abi.length > 1) {
+            console.warn(
+                `signCustomTransaction: abi contains more than one function,
+                we asume the first one (${method}) is the one to be called`,
+            );
+        }
+
+        // transaction body: wrap system token
+        const transactionBody = {
+            from,
+            to: contract,
+            'contract': {
+                abi,
+                parameters,
+                'method': abi[0].name,
+            },
+        } as unknown as JSONObject;
+
+        if (value) {
+            transactionBody.value = value.toHexString();
+        }
+
+        return this.performOreIdTransaction(from, transactionBody);
+    }
+
     async wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('wrapSystemToken', amount);
         this.checkIntegrity();
@@ -298,23 +334,13 @@ export class OreIdAuth extends EVMAuthenticator {
         // prepare variables
         const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
-        const from = this.getAccountAddress();
-        const value = amount.toHexString();
-        const abi = wtlosAbiDeposit;
 
-        // transaction body: wrap system token
-        const wrapTransaction = {
-            from,
-            to: wrappedSystemTokenContractAddress,
-            value,
-            'contract': {
-                abi,
-                'parameters': [],
-                'method': 'deposit',
-            },
-        } as unknown as JSONObject;
-
-        return this.performOreIdTransaction(from, wrapTransaction);
+        return this.signCustomTransaction(
+            wrappedSystemTokenContractAddress,
+            wtlosAbiDeposit,
+            [],
+            amount,
+        );
     }
 
     async unwrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse> {
@@ -324,22 +350,13 @@ export class OreIdAuth extends EVMAuthenticator {
         // prepare variables
         const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
-        const from = this.getAccountAddress();
         const value = amount.toHexString();
-        const abi = wtlosAbiWithdraw;
 
-        // transaction body: unwrap system token
-        const unwrapTransaction = {
-            from,
-            to: wrappedSystemTokenContractAddress,
-            'contract': {
-                abi,
-                'parameters': [value],
-                'method': 'withdraw',
-            },
-        } as unknown as JSONObject;
-
-        return this.performOreIdTransaction(from, unwrapTransaction);
+        return this.signCustomTransaction(
+            wrappedSystemTokenContractAddress,
+            wtlosAbiWithdraw,
+            [value],
+        );
     }
 
     async stakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
@@ -349,23 +366,13 @@ export class OreIdAuth extends EVMAuthenticator {
         // prepare variables
         const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
-        const from = this.getAccountAddress();
-        const value = amount.toHexString();
-        const abi = stlosAbiDeposit;
 
-        // transaction body: stake system token
-        const stakeTransaction = {
-            from,
-            to: stakedSystemTokenContractAddress,
-            value,
-            'contract': {
-                abi,
-                'parameters': [],
-                'method': stlosAbiDeposit[0].name,
-            },
-        } as unknown as JSONObject;
-
-        return this.performOreIdTransaction(from, stakeTransaction);
+        return this.signCustomTransaction(
+            stakedSystemTokenContractAddress,
+            stlosAbiDeposit,
+            [],
+            amount,
+        );
     }
 
     async unstakeSystemTokens(amount: BigNumber): Promise<EvmTransactionResponse> {
@@ -375,22 +382,14 @@ export class OreIdAuth extends EVMAuthenticator {
         // prepare variables
         const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
-        const from = this.getAccountAddress();
         const value = amount.toHexString();
-        const abi = stlosAbiWithdraw;
+        const from = this.getAccountAddress();
 
-        // transaction body: unstake system token
-        const unstakeTransaction = {
-            from,
-            to: stakedSystemTokenContractAddress,
-            'contract': {
-                abi,
-                'parameters': [value, from, from],
-                'method': 'withdraw',
-            },
-        } as unknown as JSONObject;
-
-        return this.performOreIdTransaction(from, unstakeTransaction);
+        return this.signCustomTransaction(
+            stakedSystemTokenContractAddress,
+            stlosAbiWithdraw,
+            [value, from, from],
+        );
     }
 
     async withdrawUnstakedTokens() : Promise<EvmTransactionResponse> {
@@ -400,21 +399,12 @@ export class OreIdAuth extends EVMAuthenticator {
         // prepare variables
         const chainSettings = this.getChainSettings();
         const escrowContractAddress = chainSettings.getEscrowContractAddress();
-        const from = this.getAccountAddress();
-        const abi = escrowAbiWithdraw;
 
-        // transaction body: withdraw staked tokens
-        const withdrawTransaction = {
-            from,
-            to: escrowContractAddress,
-            'contract': {
-                abi,
-                'parameters': [],
-                'method': 'withdraw',
-            },
-        } as unknown as JSONObject;
-
-        return this.performOreIdTransaction(from, withdrawTransaction);
+        return this.signCustomTransaction(
+            escrowContractAddress,
+            escrowAbiWithdraw,
+            [],
+        );
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
