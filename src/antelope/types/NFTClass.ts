@@ -200,18 +200,18 @@ export class NFT {
         this.mediaType = type;
         this.source = source;
 
-        if (precursorData?.tokenUri?.match(/\.(mp4|webm|ogg)$/)) {
+        if (this.urlIsVideo(precursorData?.tokenUri ?? '')) {
             this.videoSrc = precursorData.tokenUri;
         }
 
-        if (precursorData?.tokenUri?.match(/\.(mp3|wav|aac|webm)$/)) {
+        if (this.urlIsAudio(precursorData?.tokenUri ?? '')) {
             this.audioSrc = precursorData.tokenUri;
         }
     }
 
     // getters
     get imageSrc(): string {
-        return this.preview;
+        return this.urlIsPicture(this.preview) ? this.preview : '';
     }
 
     get isErc1155(): boolean {
@@ -237,6 +237,18 @@ export class NFT {
 
     get isReady(): boolean {
         return this.ready;
+    }
+
+    private urlIsPicture(url: string): boolean {
+        return Boolean(url.match(/\.(gif|avif|apng|jpe?g|jfif|p?jpe?g|png|svg|webp)$/));
+    }
+
+    private urlIsVideo(url: string): boolean {
+        return Boolean(url.match(/\.(mp4|webm|ogg)$/));
+    }
+
+    private urlIsAudio(url: string): boolean {
+        return Boolean(url.match(/\.(mp3|wav|aac|webm)$/));
     }
 
 
@@ -282,7 +294,7 @@ export class NFT {
                 if (
                     !preview &&  // if we already have a preview, we don't need to keep looking
                     typeof value === 'string' &&
-                    value.match(/\.(gif|avif|apng|jpe?g|jfif|p?jpe?g|png|svg|webp)$/)
+                    this.urlIsPicture(value)
                 ) {
                     preview = value;
                 }
@@ -290,7 +302,7 @@ export class NFT {
                 if (
                     !source &&  // if we already have a source, we don't need to keep looking
                     typeof value === 'string' &&
-                    value.match(/\.(mp3|wav|aac|webm)$/)
+                    this.urlIsAudio(value)
                 ) {
                     type = NFTSourceTypes.AUDIO;
                     source = value;
@@ -299,7 +311,7 @@ export class NFT {
                 if (
                     !source &&  // if we already have a source, we don't need to keep looking
                     typeof value === 'string' &&
-                    value.match(/\.(mp4|webm|ogg)$/)
+                    this.urlIsVideo(value)
                 ) {
                     type = NFTSourceTypes.VIDEO;
                     source = value;
@@ -349,6 +361,15 @@ export class NFT {
                         this.notifyWatchers();
                     });
                 }
+            }
+        }
+
+        if (!preview && this.tokenUri && (!this.metadata || Object.keys(this.metadata).length === 0)) {
+            // if there is no metadata, attempt to use the tokenUri
+            if (this.urlIsVideo(this.tokenUri)) {
+                type = NFTSourceTypes.VIDEO;
+            } else if (this.urlIsAudio(this.tokenUri)) {
+                type = NFTSourceTypes.AUDIO;
             }
         }
 

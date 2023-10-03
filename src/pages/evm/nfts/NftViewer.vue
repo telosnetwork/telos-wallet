@@ -52,7 +52,7 @@ const nftType = computed(() => {
 });
 
 const showCoverImage = computed(
-    () => [nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode,
+    () => ([nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode) && props.nft.imageSrc,
 );
 const showPlaceholderCoverImage = computed(() => !props.nft.imageSrc);
 
