@@ -211,43 +211,6 @@ export class OreIdAuth extends EVMAuthenticator {
         }
     }
 
-    async transferTokens(token: TokenClass, amount: ethers.BigNumber, to: addressString): Promise<EvmTransactionResponse> {
-        this.trace('transferTokens', token, amount, to);
-        this.checkIntegrity();
-
-        // prepare variables
-        const from = this.getAccountAddress();
-        const value = amount.toHexString();
-        const abi = erc20Abi;
-
-        // transaction body: transfer system tokens
-        const systemTransfer = {
-            from,
-            to,
-            value,
-        };
-
-        // transaction body: transfer erc20 tokens
-        const erc20Transfer = {
-            from,
-            to: token.address,
-            'contract': {
-                abi,
-                'parameters': [to, value],
-                'method': 'transfer',
-            },
-        } as unknown as JSONObject;
-
-        let transactionBody = null as unknown as JSONObject;
-        if (token.isSystem) {
-            transactionBody = systemTransfer;
-        } else {
-            transactionBody = erc20Transfer;
-        }
-
-        return this.performOreIdTransaction(from, transactionBody);
-    }
-
     async prepareTokenForTransfer(token: TokenClass | null, amount: ethers.BigNumber, to: string): Promise<void> {
         this.trace('prepareTokenForTransfer', [token], amount, to);
     }
@@ -405,6 +368,30 @@ export class OreIdAuth extends EVMAuthenticator {
             escrowAbiWithdraw,
             [],
         );
+    }
+
+    async transferTokens(token: TokenClass, amount: ethers.BigNumber, to: addressString): Promise<EvmTransactionResponse> {
+        this.trace('transferTokens', token, amount, to);
+        this.checkIntegrity();
+
+        // prepare variables
+        const from = this.getAccountAddress();
+        const value = amount.toHexString();
+        const transferAbi = erc20Abi.filter(abi => abi.name === 'transfer');
+
+        if (token.isSystem) {
+            return this.performOreIdTransaction(from, {
+                from,
+                to,
+                value,
+            });
+        } else {
+            return this.signCustomTransaction(
+                token.address,
+                transferAbi,
+                [to, value],
+            );
+        }
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
