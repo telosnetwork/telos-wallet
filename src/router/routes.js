@@ -85,6 +85,14 @@ const routes = [
                 },
                 component: () => import('pages/evm/wrap/WrapPage.vue'),
             },
+            {
+                path: 'allowances',
+                name: 'evm-allowances',
+                meta: {
+                    requiresAuth: true,
+                },
+                component: () => import('pages/evm/allowances/AllowancesPage.vue'),
+            },
         ],
     },
 
