@@ -321,6 +321,26 @@ export default defineComponent({
             </li>
 
             <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-allowances')"
+                @keypress.space.enter="goTo('evm-allowances')"
+            >
+                <InlineSvg
+                    :src="require('src/assets/icon--allowances.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-allowances',
+                    }"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ $t('nav.allowances') }}
+            </li>
+
+            <li
                 ref="last-link"
                 class="c-app-nav__menu-item"
                 role="menuitem"
