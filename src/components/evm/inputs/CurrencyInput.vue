@@ -554,18 +554,17 @@ export default defineComponent({
 
         // this method sets the caret position in the input element
         setInputCaretPosition(val: number) {
-            this.inputElement.selectionStart = val;
-            this.inputElement.selectionEnd = val;
+            // prevent the input from taking focus when two or more CurrencyInputs use the same v-model (such as on the Staking page)
+            // and this one is only used for displaying the value, rather than for user input
+            if (!this.isReadonly) {
+                this.inputElement.selectionStart = val;
+                this.inputElement.selectionEnd = val;
+            }
         },
 
         // this method is responsible for emitting a new modelValue, as well as performing certain formatting tasks
         // such as ensuring the user cannot paste invalid characters
         handleInput() {
-            if (this.isReadonly || this.isDisabled) {
-                // this prevents an issue on iOS safari where, when there are two inputs on the page and the second is readonly and depends on the first
-                // such as on the staking and wrapping pages, focus is lost when the user enters a value in to the first input
-                return;
-            }
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
             const emit = (val: BigNumber) => {
