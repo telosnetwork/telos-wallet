@@ -271,8 +271,8 @@ export const useHistoryStore = defineStore(store_name, {
                 const systemTokenDecimals = chainSettings.getSystemToken().decimals;
 
                 // all contracts in transactions are already cached, no need to use getContract
-                const toPrettyName = contractStore.getContractIfStored(label, tx.to?.toLowerCase())?.name ?? '';
-                const fromPrettyName = contractStore.getContractIfStored(label, tx.from?.toLowerCase())?.name ?? '';
+                const toPrettyName = contractStore.getContractIfStored(label, tx.to?.toLowerCase() ?? '')?.name ?? '';
+                const fromPrettyName = contractStore.getContractIfStored(label, tx.from?.toLowerCase() ?? '')?.name ?? '';
 
                 const valuesIn: TransactionValueData[] = [];
                 const valuesOut: TransactionValueData[] = [];
