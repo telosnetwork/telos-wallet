@@ -10,7 +10,6 @@ import EVMSidebarPage from 'src/layouts/EVMSidebarPage.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { ethers } from 'ethers';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
-import { AntelopeError } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
 const ant = getAntelope();
