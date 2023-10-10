@@ -73,6 +73,7 @@ export default {
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
         nfts: 'Digital Collectibles',
+        allowances: 'Approvals',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',
@@ -149,6 +150,7 @@ export default {
         toggle: 'Toggle "{text}"',
         arrow_icon_alt: 'Arrow icon',
         new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
+        revoke: 'Revoke',
     },
     nft : {
         collectible: 'Collectible',
@@ -250,6 +252,18 @@ export default {
         unstaking_pending_time: 'Unstaking for {time}',
         withdrawal_updatng: 'updating...',
         withdrawal_date: 'Withdrawal it on {date}',
+    },
+    evm_allowances: {
+        aside_header: 'What are approvals?',
+        aside_content_fragment_1: 'Engaging with decentralized apps (for swapping or trading collectibles) requires authorizing them to manage your tokens and digital collectibles, known as ',
+        aside_content_fragment_2_bold: 'token approval',
+        aside_content_fragment_3: '. These ',
+        aside_content_fragment_4_bold: 'approvals ',
+        aside_content_fragment_5: 'enable app functionality and enhance your user experience. However, it\'s prudent to review and manage these permissions to deter unauthorized transactions, adding a layer of security to your wallet.',
+        revoke_selected: 'Revoke selected',
+        search_label: 'Filter by token, allowance, spender, or contract address',
+        includes_cancelled_allowances: 'Includes cancelled allowances',
+        excludes_cancelled_allowances: 'Does not include cancelled allowances',
     },
     notification:{
         success_title_trx: 'Success',
