@@ -28,13 +28,14 @@ export interface ShapedAllowanceRowERC20 extends AllowanceRow {
     tokenLogo?: string; // path or URI for the token logo (optional)
 }
 
-export interface ShapedAllowanceRowERC1155 extends AllowanceRow {
+export interface ShapedAllowanceRowNftCollection extends AllowanceRow {
     collectionAddress: string; // address of the collection/contract
     collectionName?: string; // name of the collection
     allowed: boolean; // whether the user has approved the spender for the entire collection
 
     // represents the total number of tokens the user owns in the entire collection
-    // (the sum of each owned tokenId's amount)
+    // for ERC1155: the sum of each owned tokenId's amount
+    // for ERC721: the number of owned tokens
     balance: BigNumber;
 }
 
@@ -46,13 +47,19 @@ export interface ShapedAllowanceRowSingleERC721 extends AllowanceRow {
     collectionName?: string; // name of the collection
 }
 
-export interface ShapedAllowanceRowERC721Collection extends AllowanceRow {
-    // represents the total number of tokens the user owns in the entire collection
-    // (the sum of each owned tokenId in the collection)
-    balance: BigNumber;
-    allowed: boolean; // whether the user has approved the spender for the entire collection
-    collectionAddress: string; // address of the collection/contract
-    collectionName?: string; // name of the collection
+export type ShapedAllowanceRow = ShapedAllowanceRowERC20 | ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721;
+
+// type guards for shaped allowance rows
+export function isErc20AllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowERC20 {
+    return (row as ShapedAllowanceRowERC20).tokenDecimals !== undefined;
 }
 
-export type ShapedAllowanceRow = ShapedAllowanceRowERC20 | ShapedAllowanceRowERC1155 | ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowERC721Collection;
+export function isErc721SingleAllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowSingleERC721 {
+    const { tokenId, tokenName } = row as ShapedAllowanceRowSingleERC721;
+
+    return Boolean(tokenId && tokenName);
+}
+
+export function isNftCollectionAllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowNftCollection {
+    return !(isErc20AllowanceRow(row) || isErc721SingleAllowanceRow(row));
+}
