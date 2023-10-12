@@ -17,7 +17,7 @@ const props = defineProps<{
 
 .c-nft-details-card {
     border-radius: 4px;
-    border: 1px solid var(--header-item-outline-color);
+    border: 1px solid var(--accent-color-3);
     background-color: var(--bg-color);
     padding: 16px;
     word-break: break-word;

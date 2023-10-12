@@ -72,11 +72,11 @@ const routes = [
                 },
                 component: () => import('pages/evm/nfts/NftDetailsPage.vue'),
             },
-            // {
-            //     path: 'staking',
-            //     name: 'evm-staking',
-            //     component: () => import('pages/evm/staking/StakingPage.vue'),
-            // },
+            {
+                path: 'staking',
+                name: 'evm-staking',
+                component: () => import('pages/evm/staking/StakingPage.vue'),
+            },
             {
                 path: 'wrap',
                 name: 'evm-wrap',

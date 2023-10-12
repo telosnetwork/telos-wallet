@@ -27,10 +27,17 @@ export default {
     home: {
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
+        developers_banner_title: 'Developers',
+        developers_banner_text: 'Find out how to integrate Telos Cloud Wallet into your app here',
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
         login_with_social_media: 'Telos Cloud Wallet',
+        sign_with_google: 'Sign with Google',
+        sign_with_facebook: 'Sign with Facebook',
+        sign_with_x: 'Sign with X',
+        sign_with_email: 'Sign in with Email',
+        coming_soon: 'Coming soon',
         create_new_account: 'Create a New Account',
         logged_as: 'Logged in as {account}',
         view_wallet: 'View Wallet',
@@ -143,6 +150,7 @@ export default {
         dark_mode: 'Dark Mode',
         light_mode: 'Light Mode',
         contract: 'Contract',
+        back: 'Back',
         to: 'to',
         from: 'from',
         with: 'with',
@@ -209,6 +217,60 @@ export default {
         wrap_input_label: 'Wrapping Amount',
         unwrap_input_label: 'Unwrapping Amount',
     },
+    evm_stake: {
+        total_of_staked_unstaking_and_withdrawable: 'Total of staked, unstaking, and withdrawable {token}',
+        staked_card_label: 'Staked {symbol}',
+        staked_card_tooltip: 'Staked tokens:\n\n' +
+        'This reflects the total amount of staked {systemSymbol} tokens associated with the current account.\n' +
+        'This includes your {stakedSymbol} token balance multiplied by the current exchange rate.',
+        unstaking_card_label: 'Unstaking',
+        unstaking_card_tooltip: 'Unstaking tokens:\n\n' +
+        'This reflects the total value of locked {systemSymbol} in the process of unstaking.\n' +
+        'When you unstake\u2014i.e. redeem\u2014some {stakedSymbol} tokens, the equivalent \n' +
+        'amount of {systemSymbol} is sent into escrow ("locked") for {unlockPeriod}.\n\n' +
+        'During this time you cannot interact with this {systemSymbol}.',
+        withdrawable_card_label: 'withdrawable',
+        withdrawable_card_tooltip: 'Withdrawable Tokens:\n\n' +
+        'This reflects the total amount of {systemSymbol} that were previously unstaked\n' +
+        'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
+        'you can withdraw your {systemSymbol} from escrow.',
+        apy_card_label: 'APY',
+        apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
+        'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
+        'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
+        'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
+        unstaking_period_card_label: 'Unstaking Period',
+        unstaking_period_card_tooltip: 'Unstaking Period:\n\n' +
+        'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
+        'which is the amount of time that must pass before you can withdraw your {systemSymbol} from escrow.\n',
+        tvl_card_label: 'TVL',
+        tvl_card_tooltip: 'Total Value Locked (TVL) is the current value, in {systemSymbol}, of all assets held in the {stakedSymbol} (Staked {systemSymbol})\n' +
+        'smart contract, i.e. the sum of all {systemSymbol} staked on the {evmNetworkName} at this moment.',
+        stake_input_label: 'Staking Amount',
+        stake_output_label: 'Staked Amount',
+        stake: 'Stake',
+        stake_button_label: 'Stake {systemSymbol} to {stakedSymbol}',
+        stake_sidebar_title: 'Why stake {symbol}?',
+        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS grants you access to',
+        stake_sidebar_content_fragment_2_bold: ' continuous rewards ',
+        stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
+        stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
+        stake_sidebar_content_fragment_5: 'No further action is required.',
+        unstake_input_label: 'Unstaking Amount',
+        unstake_output_label: 'Unstaked Amount',
+        unstake: 'Unstake',
+        unstake_sidebar_title: 'Unstaking {symbol}?',
+        unstake_button_label: 'Unstake {stakedSymbol} to {systemSymbol}',
+        unstake_sidebar_content_fragment_1: 'Unstaked TLOS will',
+        unstake_sidebar_content_fragment_2_bold: ' remain locked for a period of {period}, ',
+        unstake_sidebar_content_fragment_3: 'after which it can be withdrawn to your account from the Withdraw tab.',
+        withdraw_button_disabled: 'Nothing to withdraw',
+        withdraw_button_enabled: 'Withdraw {amount} {symbol}',
+        withdrawal_available: 'Available for withdrawal',
+        unstaking_pending_time: 'Unstaking for {time}',
+        withdrawal_updatng: 'updating...',
+        withdrawal_date: 'Withdrawal it on {date}',
+    },
     notification:{
         success_title_trx: 'Success',
         success_title_copied: 'Copied',
@@ -224,11 +286,12 @@ export default {
         error_details_title: 'Error Details',
         error_redirecting: 'There was an error redirecting, please try again later',
         neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
-        neutral_message_staking: 'Staking <b>{quantity}</b>',
-        neutral_message_unstaking: 'Unstaking <b>{quantity}</b>',
+        neutral_message_staking: 'Staking <b>{quantity} {symbol}</b>',
+        neutral_message_unstaking: 'Unstaking <b>{quantity} {symbol}</b>',
         neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
+        neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
     },
     resources: {
         title: 'Network Resources',
@@ -501,14 +564,21 @@ export default {
             error_unwrap_not_supported_on_native: 'Unwrap is not supported on native chain',
             error_wrap_failed: 'An unknown error occurred when wrapping tokens',
             error_unwrap_failed: 'An unknown error occurred when unwrapping tokens',
+            error_stake_failed: 'An unknown error occurred when staking tokens',
+            error_unstakes_failed: 'An unknown error occurred when unstaking tokens',
+            error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
+            error_fetching_token_price: 'An unknown error occurred when fetching token price data',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
+            error_fetching_nft_transfers: 'Unexpected error fetching NFT transfers. Please refresh the page to try again.',
         },
         chain: {
             error_update_data: 'Error in updating data',
             error_apy: 'Error in getting APY',
             error_invalid_network: 'Invalid network',
+            error_no_default_authenticator: 'No default authenticator found',
+            error_no_default_authenticator: 'No default authenticator found',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
@@ -524,6 +594,9 @@ export default {
             error_at_transfer_tokens: 'An error has occurred trying to transfer tokens',
             error_token_contract_not_found: 'Token contract not found for address {address}',
         },
+        rex: {
+            error_contract_not_found: 'Contract not found for address {address}',
+        },
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
@@ -533,6 +606,12 @@ export default {
         wrap: {
             error_getting_wrapped_contract: 'An error occurred while getting the wrapped system token contract',
             error_wrap: 'An unknown error occurred while wrapping system token',
+        },
+        words: {
+            days: 'days',
+            hours: 'hours',
+            minutes: 'minutes',
+            seconds: 'seconds',
         },
     },
 };

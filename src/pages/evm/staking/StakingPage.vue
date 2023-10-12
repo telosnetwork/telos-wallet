@@ -1,36 +1,29 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import AppPage from 'components/evm/AppPage.vue';
+import StakingPageHeader from 'pages/evm/staking/StakingPageHeader.vue';
+import StakingTab from 'pages/evm/staking/StakingTab.vue';
+import UnstakingTab from 'pages/evm/staking/UnstakingTab.vue';
+import WithdrawTab from 'pages/evm/staking/WithdrawTab.vue';
 
-export default defineComponent({
-    name: 'StakingPage',
-    components: {
-        AppPage,
-    },
-    data: () => ({
-        tabs: ['stake', 'unstake', 'withdraw'],
-    }),
-
-});
+const tabs = ['stake', 'unstake', 'withdraw'];
 </script>
 
 <template>
 <AppPage :tabs="tabs">
     <template v-slot:header>
-        <p>stake page header stuff</p>
+        <StakingPageHeader />
     </template>
 
     <template v-slot:stake>
-        <p>stake tab</p>
+        <StakingTab />
     </template>
 
     <template v-slot:unstake>
-        <p>unstake tab</p>
+        <UnstakingTab />
     </template>
 
     <template v-slot:withdraw>
-        <p>withdraw tab</p>
+        <WithdrawTab />
     </template>
 </AppPage>
 </template>
@@ -38,3 +31,7 @@ export default defineComponent({
 <style lang="scss">
 
 </style>
+
+
+
+

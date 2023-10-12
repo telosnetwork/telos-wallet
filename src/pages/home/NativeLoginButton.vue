@@ -1,8 +1,11 @@
 
 <script>
-import { useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { OreIdAuthenticator } from 'ual-oreid';
+
+const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
 export default defineComponent({
     name: 'NativeLoginButton',
@@ -51,7 +54,7 @@ export default defineComponent({
         setDefaultNativeChain() {
             const network = process.env.CHAIN_NAME || 'telos';
             const chainStore = useChainStore();
-            chainStore.setCurrentChain(network);
+            chainStore.setChain(CURRENT_CONTEXT, network);
         },
         // end of antelope methods
         ...mapActions('account', [
@@ -179,7 +182,7 @@ export default defineComponent({
         },
 
         async checkResources() {
-            if (!accountName) {
+            if (!this.accountName) {
                 return;
             }
             await this.getRamPrice();
@@ -197,6 +200,20 @@ export default defineComponent({
                 this.cpuLow = true;
             }
             this.resLow = this.ramLow || this.cpuLow || this.netLow;
+        },
+        getWalletIcon(wallet) {
+            if (wallet instanceof OreIdAuthenticator) {
+                return telosLogo;
+            }
+
+            return wallet.getStyle().icon;
+        },
+        getWalletName(wallet) {
+            if (wallet instanceof OreIdAuthenticator) {
+                return this.$t('home.login_with_social_media');
+            }
+
+            return wallet.getStyle().text;
         },
     },
     watch: {
@@ -277,10 +294,10 @@ export default defineComponent({
                     class="q-my-sm"
                 >
                     <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
-                        <img :src="wallet.getStyle().icon" width="30" >
+                        <img :src="getWalletIcon(wallet)" width="30" >
                     </q-item-section>
                     <q-item-section class="cursor-pointer" @click="onLogin(idx)">
-                        {{ wallet.getStyle().text }}
+                        {{ getWalletName(wallet) }}
                     </q-item-section>
                     <q-item-section class="flex" avatar>
                         <q-spinner

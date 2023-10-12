@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
 import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
@@ -93,7 +93,7 @@ export default defineComponent({
             return this.$q.screen.lt.sm;
         },
         balances(): TokenBalance[] {
-            return ant.stores.balances.getBalances('logged');
+            return ant.stores.balances.getBalances(CURRENT_CONTEXT);
         },
         showContractLink(): boolean {
             return !!this.token?.address;

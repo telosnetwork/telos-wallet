@@ -4,6 +4,7 @@ import { IndexerTransactionsFilter, NFTClass, PriceChartData, TokenClass } from 
 export interface ChainSettings {
     init(): Promise<void>;
     isNative(): boolean;
+    isTestnet(): boolean;
     getNetwork(): string;
     getSystemToken(): TokenClass;
     getTokenList(): Promise<TokenClass[]>;
@@ -11,11 +12,14 @@ export interface ChainSettings {
     getSmallLogoPath(): string;
     getLargeLogoPath(): string;
     getChainId(): string;
+    getHyperionEndpoint(): string;
     getRPCEndpoint(): RpcEndpoint;
+    getApiEndpoint(): string;
     getPriceData(): Promise<PriceChartData>;
     getUsdPrice(): Promise<number>;
     getSystemTokens(): TokenClass[];
     getNFTsInventory(address: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
     getNFTsCollection(contract: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]>;
     trackAnalyticsEvent(params: Record<string, unknown>): void;
+    getApy(): Promise<string>;
 }

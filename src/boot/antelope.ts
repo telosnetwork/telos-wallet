@@ -2,7 +2,7 @@ import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
-import { installAntelope } from 'src/antelope';
+import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
 import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
@@ -82,7 +82,7 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
     const oreIdOptions: OreIdOptions = {
         appName: process.env.APP_NAME,
-        appId: process.env.APP_OREID_APP_ID as string,
+        appId: process.env.OREID_APP_ID as string,
     };
     ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
 
@@ -97,7 +97,7 @@ export default boot(({ app }) => {
     // Otherwise we just let the store decide which network to connect to
     const network = new URLSearchParams(window.location.search).get('network');
     if (network) {
-        ant.stores.chain.setCurrentChain(network);
+        ant.stores.chain.setChain(CURRENT_CONTEXT, network);
     }
 
 });

@@ -1,8 +1,9 @@
 <script lang="ts">
-import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
-import { ComponentInternalInstance, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
+import { ComponentInternalInstance, PropType, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
+import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 
 export default defineComponent({
@@ -10,6 +11,15 @@ export default defineComponent({
     components: {
         QSpinnerFacebook,
         InlineSvg,
+    },
+    emits: [
+        'update:modelValue',
+    ],
+    props: {
+        modelValue: {
+            type: String as PropType<Menu>,
+            default: Menu.MAIN,
+        },
     },
     setup(props, { emit }) {
         const ant = getAntelope();
@@ -49,25 +59,25 @@ export default defineComponent({
 
         const setOreIdAuthenticator = async (provider: string) => {
             const name = 'OreId';
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (auth) {
                 (auth as OreIdAuth).setProvider(provider);
                 selectedOAuthProvider.value = provider;
             }
-            setAuthenticator(name, 'logged');
+            setAuthenticator(name, CURRENT_CONTEXT);
         };
         const setMetamaskAuthenticator = async () => {
-            setAuthenticator('Metamask', 'logged');
+            setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
         const setSafepalAuthenticator = async () => {
-            setAuthenticator('SafePal', 'logged');
+            setAuthenticator('SafePal', CURRENT_CONTEXT);
         };
         const setWalletConnectAuthenticator = async () => {
-            setAuthenticator('WalletConnect', 'logged');
+            setAuthenticator('WalletConnect', CURRENT_CONTEXT);
         };
 
         const setAuthenticator = async(name: string, label: string) => {
-            const auth = ant.wallets.getAutenticator(name);
+            const auth = ant.wallets.getAuthenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -97,6 +107,14 @@ export default defineComponent({
             selectedOAuthProvider.value === provider &&
             useFeedbackStore().isLoading('OreId.login');
 
+        // menu navitgaion
+        const showMainMenu = computed(() => props.modelValue === Menu.MAIN);
+        const showTelosCloudMenu = computed(() => props.modelValue === Menu.CLOUD);
+
+        const setCloudMenu = () => {
+            emit('update:modelValue', Menu.CLOUD);
+        };
+
         return {
             isLoading,
             isLoadingOreId,
@@ -112,6 +130,10 @@ export default defineComponent({
             notifyNoProvider,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
+            // menu navigation
+            showMainMenu,
+            showTelosCloudMenu,
+            setCloudMenu,
         };
     },
 });
@@ -119,84 +141,157 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
+    <!-- main menu -->
+    <template v-if="showMainMenu">
 
-    <!-- Google OAuth Provider -->
-    <div class="c-evm-login-buttons__option" @click="setOreIdAuthenticator('google')">
-        <template v-if="isLoadingOreId('google')">
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-        </template>
-        <template v-else>
-            <img
-                width="24"
-                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--oreid"
-                src="~assets/logo--tlos.svg"
-            >
-            {{ $t('home.login_with_social_media') }}
-        </template>
-    </div>
+        <!-- Google OAuth Provider -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+            <div class="c-evm-login-buttons__cloud-btn-container">
+                <div class="c-evm-login-buttons__cloud-btn-line-title">
+                    <img
+                        width="24"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--cloud"
+                        src="~assets/icon--telos-cloud.svg"
+                    >
+                    <span>{{ $t('home.login_with_social_media') }}</span>
+                </div>
+                <div class="c-evm-login-buttons__cloud-btn-line-icons">
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--google.svg"
+                    >
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--facebook.svg"
+                    >
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--twitter.svg"
+                    >
+                </div>
+            </div>
+        </div>
 
-    <!-- Metamask Authenticator button -->
-    <div
-        v-if="showMetamaskButton"
-        class="c-evm-login-buttons__option"
-        @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()"
-    >
-        <template v-if="isLoading('Metamask.login')">
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-        </template>
-        <template v-else>
-            <InlineSvg
-                :src="require('src/assets/evm/metamask_fox.svg')"
-                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--metamask"
-                height="24"
-                width="24"
-                aria-hidden="true"
-            />
-            {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
-        </template>
-    </div>
+        <!-- Metamask Authenticator button -->
+        <div
+            v-if="showMetamaskButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()"
+        >
+            <template v-if="isLoading('Metamask.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/metamask_fox.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--metamask"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
+            </template>
+        </div>
 
-    <!-- Safepal Authenticator button -->
-    <div
-        v-if="showSafePalButton"
-        class="c-evm-login-buttons__option"
-        @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()"
-    >
-        <template v-if="isLoading('SafePal.login')">
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-        </template>
-        <template v-else>
-            <InlineSvg
-                :src="require('src/assets/evm/safepal.svg')"
-                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
-                height="24"
-                width="24"
-                aria-hidden="true"
-            />
-            {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
-        </template>
-    </div>
+        <!-- Safepal Authenticator button -->
+        <div
+            v-if="showSafePalButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()"
+        >
+            <template v-if="isLoading('SafePal.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/safepal.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+            </template>
+        </div>
 
-    <!-- WalletConnect Authenticator button -->
-    <div
-        v-if="showWalletConnectButton"
-        class="c-evm-login-buttons__option"
-        @click="setWalletConnectAuthenticator()"
-    >
-        <template v-if="isLoading('WalletConnect.login')">
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-        </template>
-        <template v-else>
-            <InlineSvg
-                :src="require('src/assets/evm/wallet_connect.svg')"
-                class="c-evm-login-buttons__icon c-evm-login-buttons__icon--wallet-connect"
-                height="24"
-                width="24"
-                aria-hidden="true"
-            />
-            {{ $t('home.walletconnect') }}
-        </template>
-    </div>
+        <!-- WalletConnect Authenticator button -->
+        <div
+            v-if="showWalletConnectButton"
+            class="c-evm-login-buttons__option"
+            @click="setWalletConnectAuthenticator()"
+        >
+            <template v-if="isLoading('WalletConnect.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/wallet_connect.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--wallet-connect"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ $t('home.walletconnect') }}
+            </template>
+        </div>
+
+    </template>
+
+    <!-- telos cloud menu -->
+    <template v-if="showTelosCloudMenu">
+
+        <!-- Google OAuth Provider -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
+            <template v-if="isLoadingOreId('google')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="c-evm-login-buttons__icon"
+                    src="~assets/icon--google.svg"
+                >
+                {{ $t('home.sign_with_google') }}
+            </template>
+        </div>
+
+        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
+
+        <!-- Facebook OAuth Provider -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
+            <template v-if="isLoadingOreId('facebook')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
+                    src="~assets/icon--facebook.svg"
+                >
+                {{ $t('home.sign_with_facebook') }}
+            </template>
+        </div>
+
+        <!-- X OAuth Provider -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
+            <template v-if="isLoadingOreId('facebook')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
+                    src="~assets/icon--twitter.svg"
+                >
+                {{ $t('home.sign_with_x') }}
+            </template>
+        </div>
+
+    </template>
+
 
 </div>
 </template>
@@ -224,6 +319,40 @@ export default defineComponent({
     &__icon {
         margin-top: -1px;
         transition: all 0.3s;
+        &--disabled {
+            opacity: 0.5;
+        }
+    }
+
+    &__cloud-btn-container {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__cloud-btn-line-icons {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__cloud-btn-line-title {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__sub-title {
+        color: $white;
     }
 
     &__option {
@@ -242,7 +371,7 @@ export default defineComponent({
         padding: 14px;
         cursor: pointer;
 
-        &:hover {
+        &:hover:not(&--disabled) {
             color: $white;
             outline-color: $white;
             outline-width: 2px;
@@ -256,6 +385,20 @@ export default defineComponent({
                     opacity: 1;
                 }
             }
+        }
+
+        &--telos-cloud {
+            height: max-content;
+            &:not(:hover) {
+                outline-width: 0;
+                @include gradient_border();
+            }
+        }
+
+        &--disabled {
+            color: #9289b1;
+            outline-color: #9289b1;
+            cursor: not-allowed;
         }
     }
 }

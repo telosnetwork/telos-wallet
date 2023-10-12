@@ -3,7 +3,9 @@ export * from 'src/antelope/stores/utils/abi/erc721Metadata';
 export * from 'src/antelope/stores/utils/abi/erc1155';
 export * from 'src/antelope/stores/utils/abi/erc20';
 export * from 'src/antelope/stores/utils/abi/supportsInterface';
-export * from 'src/antelope/stores/utils/abi/wrapTlos';
+export * from 'src/antelope/stores/utils/abi/wrapAbi';
+export * from 'src/antelope/stores/utils/abi/stlosAbi';
+export * from 'src/antelope/stores/utils/abi/escrowAbi';
 export * from 'src/antelope/stores/utils/abi/signature/transfer_signatures';
 
 export type StateMutabilityType = 'pure' | 'view' | 'nonpayable' | 'payable';

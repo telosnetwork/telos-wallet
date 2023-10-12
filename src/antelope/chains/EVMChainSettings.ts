@@ -22,12 +22,16 @@ import {
     NFTContractClass,
     IndexerNftItemResult,
     NFTItemClass,
+    addressString,
+    IndexerTransfersFilter,
+    IndexerAccountTransfersResponse,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getAntelope } from 'src/antelope';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -41,6 +45,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External query API support
     protected hyperion: AxiosInstance = axios.create({ baseURL: this.getHyperionEndpoint() });
+
+    // External query API support
+    protected api: AxiosInstance = axios.create({ baseURL: this.getApiEndpoint() });
 
     // External trusted metadata bucket for EVM contracts
     protected contractsBucket: AxiosInstance = axios.create({ baseURL: this.getTrustedContractsBucket() });
@@ -61,7 +68,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     tokenListPromise: Promise<TokenClass[]> | null = null;
 
     // EvmContracts cache mapped by address
-    protected contracts: Record<string, EvmContract | false> = {};
+    protected contracts: Record<string, {
+        promise: Promise<EvmContract | false>;
+        resolve?: (value: EvmContract | false) => void;
+    }> = {};
 
     constructor(network: string) {
         this.network = network;
@@ -101,8 +111,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // Check indexer health state periodically
         this.initPromise = new Promise((resolve) => {
-            this.updateIndexerHealthState().then(() => {
-                // we resolve the promise that will be returned by init()
+            this.updateIndexerHealthState().finally(() => {
+                // we resolve the promise (in any case) that will be returned by init()
                 resolve();
             });
         });
@@ -121,8 +131,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // this setTimeout is a work arround because we can't call getAntelope() function before it initializes
         setTimeout(() => {
-            setInterval(() => {
-                this.updateIndexerHealthState();
+            const timer = setInterval(async () => {
+                try {
+                    await this.updateIndexerHealthState();
+                } catch (e) {
+                    clearInterval(timer);
+                    console.error('Indexer API not working for this chain:', this.getNetwork(), e);
+                }
             }, getAntelope().config.indexerHealthCheckInterval);
         }, 1000);
 
@@ -160,11 +175,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                         this.indexer.get('/v1/health') :
                         Promise.resolve({ data: this.deathHealthResponse } as AxiosResponse<IndexerHealthResponse>),
                 )
-                .then(response => response.data as unknown as IndexerHealthResponse)
-                .catch((error) => {
-                    console.error('Indexer API not working for this chain:', this.getNetwork(), error);
-                    return this.deathHealthResponse as IndexerHealthResponse;
-                });
+                .then(response => response.data as unknown as IndexerHealthResponse);
 
         // initial state
         this._indexerHealthState = {
@@ -195,6 +206,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return false;
     }
 
+    // only testnet chains should override this
+    isTestnet() {
+        return false;
+    }
+
     getNetwork(): string {
         return this.network;
     }
@@ -210,10 +226,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemToken(): TokenClass;
     abstract getStakedSystemToken(): TokenClass;
     abstract getWrappedSystemToken(): TokenClass;
+    abstract getEscrowContractAddress(): addressString;
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
     abstract getRPCEndpoint(): RpcEndpoint;
+    abstract getApiEndpoint(): string;
     abstract getPriceData(): Promise<PriceChartData>;
     abstract getUsdPrice(): Promise<number>;
     abstract getBuyMoreOfTokenLink(): string;
@@ -225,6 +243,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
     abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
+
+    async getApy(): Promise<string> {
+        const response = await this.api.get('apy/evm');
+        return response.data as string;
+    }
 
     async getBalances(account: string): Promise<TokenBalance[]> {
         if (!this.hasIndexerSupport()) {
@@ -327,6 +350,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                     }
                     const contract_source = response.contracts[item_source.contract];
+
+                    if (!contract_source) {
+                        // this case only happens if the indexer fails to index contract data
+                        continue;
+                    }
                     const contract = new NFTContractClass(contract_source);
                     const item = new NFTItemClass(item_source, contract);
                     const nft = new NFTClass(item);
@@ -351,23 +379,55 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return `${token.symbol}-${token.address}-${this.getNetwork()}`;
     }
 
-    getContract(address: string): EvmContract | false | null {
+    /**
+     * This method returns the cached value for the requested contract which can be one of three values:
+     * - Promise<EvmContract> if the contract is already cached
+     * - Promise<null> if the contract was never requested before
+     * - Promise<false> if the contract was requested, not found and set as not existing (to avoid requesting it again)
+     * @param address contract requested
+     * @returns Promise for the requested contract or false if it doesn't exist
+     */
+    async getContract(address: string): Promise<EvmContract | false | null> {
         const key = address.toLowerCase();
-        return this.contracts[key] ?? null;
+        const returnValue = this.contracts[key]?.promise ?? null;
+        if (!this.contracts[key]) {
+            this.contracts[key] = {
+                promise: Promise.resolve(false),
+            };
+            this.contracts[key].promise = new Promise((resolve) => {
+                this.contracts[key].resolve = resolve;
+            });
+        }
+        return returnValue;
     }
 
-    addContract(address: string, contract: EvmContract) {
+    /**
+     * This method adds a contract to the cache and resolves the promise for it
+     * @param address address of the contract
+     * @param contract contract instance to be cached
+     */
+    addContract(address: string, contract: EvmContract | false) {
         const key = address.toLowerCase();
         if (!this.contracts[key]) {
-            this.contracts[key] = contract;
+            this.contracts[key] = {
+                promise: Promise.resolve(contract),
+            };
+        } else {
+            if (this.contracts[key].resolve) {
+                this.contracts[key].resolve?.(contract);
+            } else {
+                console.error('Error: Contract already exists', address);
+            }
         }
     }
 
+    /**
+     * This method sets a contract as not existing and resolves the promise to false for it.
+     * This is done to distinguish between a contract that was never requested before and one that was requested and not found.
+     * @param address address of the contract
+     */
     setContractAsNotExisting(address: string) {
-        const key = address.toLowerCase();
-        if (!this.contracts[key]) {
-            this.contracts[key] = false;
-        }
+        return this.addContract(address, false);
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
@@ -412,6 +472,51 @@ export default abstract class EVMChainSettings implements ChainSettings {
         // Notice that the promise is not awaited, but returned instead immediately.
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransactionsResponse);
+    }
+
+    async getEvmNftTransfers({
+        account,
+        type,
+        limit,
+        offset,
+        includePagination,
+        endBlock,
+        startBlock,
+        contract,
+        includeAbi,
+    }: IndexerTransfersFilter): Promise<IndexerAccountTransfersResponse> {
+        let aux = {};
+
+        if (limit !== undefined) {
+            aux = { limit, ...aux };
+        }
+        if (offset !== undefined) {
+            aux = { offset, ...aux };
+        }
+        if (includeAbi !== undefined) {
+            aux = { includeAbi, ...aux };
+        }
+        if (type !== undefined) {
+            aux = { type, ...aux };
+        }
+        if (includePagination !== undefined) {
+            aux = { includePagination, ...aux };
+        }
+        if (endBlock !== undefined) {
+            aux = { endBlock, ...aux };
+        }
+        if (startBlock !== undefined) {
+            aux = { startBlock, ...aux };
+        }
+        if (contract !== undefined) {
+            aux = { contract, ...aux };
+        }
+
+        const params = aux as AxiosRequestConfig;
+        const url = `v1/account/${account}/transfers`;
+
+        return this.indexer.get(url, { params })
+            .then(response => response.data as IndexerAccountTransfersResponse);
     }
 
     async getTokenList(): Promise<TokenClass[]> {
@@ -480,10 +585,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
     async getEstimatedGas(limit: number): Promise<{ system:ethers.BigNumber, fiat:ethers.BigNumber }> {
         const gasPrice: ethers.BigNumber = await this.getGasPrice();
         const tokenPrice: number = await this.getUsdPrice();
-        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), 18);
+        const price = ethers.utils.parseUnits(toStringNumber(tokenPrice), WEI_PRECISION);
         const system = gasPrice.mul(limit);
         const fiatDouble = system.mul(price);
-        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', 18));
+        const fiat = fiatDouble.div(ethers.utils.parseUnits('1', WEI_PRECISION));
         return { system, fiat };
     }
     async getLatestBlock(): Promise<ethers.BigNumber> {

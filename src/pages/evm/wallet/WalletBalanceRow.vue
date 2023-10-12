@@ -124,7 +124,6 @@ export default defineComponent({
                 return prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale, true).concat(` ${this.token.symbol}`);
             } else {
                 const formatted = prettyPrintCurrency(+this.secondaryAmount, 4, fiatLocale);
-
                 return `${formatted} ${this.token.symbol}`;
             }
         },
@@ -342,7 +341,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     border-radius: 4px;
-    border-bottom: 2px solid var(--header-bg-color);
+    border-bottom: 2px solid var(--accent-color-5);
     padding: 24px 4px;
     overflow-x: hidden;
     max-width: 100%;
@@ -444,7 +443,7 @@ export default defineComponent({
         transition-property: background-color, color;
 
         &:hover {
-            background-color: var(--bg-color-hover);
+            background-color: var(--accent-color-5);
 
             #{$this}__overflow-icon {
                 &:not(#{$this}__overflow-icon--stroke) path {

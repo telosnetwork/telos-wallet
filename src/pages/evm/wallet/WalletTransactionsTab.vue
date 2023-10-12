@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
-import { getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
 import { AntelopeError } from 'src/antelope/types';
 
 
@@ -25,8 +25,9 @@ export default defineComponent({
             rowsNumber: 0,
         },
         errorsFound: false,
-        hideLoadingState: false,
-        fetchTransactionsInterval: null as null | NodeJS.Timer,
+        fetchTransactionsInterval: null as null | ReturnType<typeof setInterval>,
+        initialLoadComplete: false,
+        rowsPerPageUpdating: false, // used to ensure loading state is shown when rows per page is updated
     }),
     computed: {
         doLiveUpdate() {
@@ -36,13 +37,24 @@ export default defineComponent({
             return this.shapedTransactions.map(tx => tx.id);
         },
         loading() {
-            return feedbackStore.isLoading('history.fetchEVMTransactionsForAccount') && !this.hideLoadingState;
+            const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
+            const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
+            const actionsInProgress = txLoading || transfersLoading;
+            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete && !this.rowsPerPageUpdating;
+
+            // don't show the loading state if we're on the first page and transactions are already present
+            // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
+            // or 2. the user is on the first page and we are re-fetching transactions on an interval
+            return actionsInProgress && !hideLoadingState;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
         },
         shapedTransactions() {
-            return historyStore.getShapedTransactionRows('current') ?? [];
+            return historyStore.getShapedTransactionRows(CURRENT_CONTEXT) ?? [];
+        },
+        totalRows() {
+            return historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
         },
         totalRowsText() {
             if (this.loading) {
@@ -53,42 +65,42 @@ export default defineComponent({
                 'evm_wallet.viewing_n_transactions',
                 {
                     rowsPerPage,
-                    totalRows: this.pagination.rowsNumber,
+                    totalRows: this.totalRows,
                 },
             );
         },
     },
     watch: {
-        shapedTransactions(newValue) {
-            this.pagination.rowsNumber = newValue.length;
-        },
         address() {
             // address can be initially undefined; wait to load txs until it's defined
             // also reload txs if the user switches accounts
             this.getTransactions();
         },
-        pagination() {
-            this.getTransactions();
+        pagination(newPagination, oldPagination) {
+            if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
+                this.rowsPerPageUpdating = true;
+            }
+            this.getTransactions().finally(() => {
+                this.rowsPerPageUpdating = false;
+            });
+        },
+        totalRows: {
+            immediate: true,
+            handler(newValue) {
+                this.pagination.rowsNumber = newValue;
+            },
         },
     },
     created() {
-        if (this.shapedTransactions.length > 0) {
-            this.hideLoadingState = true;
+        if (this.shapedTransactions.length) {
+            this.initialLoadComplete = true;
         }
 
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
-                this.hideLoadingState = true;
-
-                this.getTransactions().finally(() => {
-                    this.enableLoadingState();
-                });
+                this.getTransactions();
             }
         }, 13000);
-
-        this.getTransactions().finally(() => {
-            this.enableLoadingState();
-        });
     },
     unmounted() {
         if (this.fetchTransactionsInterval) {
@@ -96,16 +108,6 @@ export default defineComponent({
         }
     },
     methods: {
-        enableLoadingState() {
-            // a timeout of 500ms is used in the history store to prevent the loading state from flashing; account for that here
-            setTimeout(() => {
-                this.hideLoadingState = false;
-            }, 550);
-        },
-        isLoadingTransaction(i: number) {
-            const loadingFlag = `history.shapeTransactions-${i}`;
-            return feedbackStore.isLoading(loadingFlag);
-        },
         async getTransactions() {
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
@@ -127,8 +129,9 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
-                    await historyStore.fetchEVMTransactionsForAccount('current');
-                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount('current');
+                    await historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
+                    this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
+                    this.initialLoadComplete = true;
                 } catch (e) {
                     if (e instanceof AntelopeError) {
                         getAntelope().config.notifyFailureMessage(e.message, e.payload);
@@ -147,6 +150,7 @@ export default defineComponent({
         <h2>{{ $t('global.transactions') }}</h2>
         <span v-if="totalRowsText">{{ totalRowsText }}</span>
     </div>
+
     <template v-if="loading">
         <q-skeleton
             v-for="i of pagination.rowsCurrentPage"
@@ -163,21 +167,11 @@ export default defineComponent({
         {{ $t('evm_wallet.no_transactions_found') }}
     </h5>
 
-    <template
-        v-for="i of pagination.rowsCurrentPage"
-        v-else
-        :key="`tx-${i}`"
-    >
-        <template v-if="!shapedTransactions[i-1]">
-            <q-skeleton
-                type="QToolbar"
-                class="q-mb-lg"
-            />
-        </template>
-
+    <template v-else>
         <WalletTransactionRow
-            v-else
-            :transaction="shapedTransactions[i-1]"
+            v-for="(tx, index) of shapedTransactions"
+            :key="`tx-${index}`"
+            :transaction="tx"
             class="q-mb-lg"
         />
     </template>

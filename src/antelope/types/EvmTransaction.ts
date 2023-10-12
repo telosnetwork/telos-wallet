@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { NftTokenInterface } from 'src/antelope/types';
 
 export type EvmTransactionTopic = string[];
 
@@ -42,34 +43,42 @@ export interface TransactionValueData {
     fiatValue?: number;
 }
 
-export const EvmSwapFunctionNames = [
-    'swapExactTokensForTokens',
-    'swapTokensForExactTokens',
-    'swapExactETHForTokens',
-    'swapTokensForExactETH',
-    'swapExactTokensForETH',
-    'swapETHForExactTokens',
-    'swapETHToTokens',
-];
+export interface NftTransactionData {
+    quantity: number;
+    tokenId: string;
+    tokenName: string;
+    collectionAddress: string;
+    collectionName?: string;
+    imgSrc?: string;
+    videoSrc?: string;
+    audioSrc?: string;
+    type: 'image' | 'video' | 'audio' | 'unknown';
+    nftInterface: NftTokenInterface;
+}
 
 export interface ShapedTransactionRow {
-    id: string;
-    epoch: number;
+    id: string; // transaction ID
+    epoch: number; // epoch in milliseconds
     // action should be 'send', 'receive', 'swap', 'contractCreation', or some other action like 'approve'
-    // a swap is any function in EvmSwapFunctionNames
     actionName: string;
     from: string; // address
     fromPrettyName?: string;
     to: string; // address
     toPrettyName?: string;
-    valuesIn: TransactionValueData[];
-    valuesOut: TransactionValueData[];
     gasUsed?: number; // gas used in TLOS
     gasFiatValue?: number; // gas used in Fiat
     failed?: boolean;
+
+    // ERC20 data
+    valuesIn: TransactionValueData[];
+    valuesOut: TransactionValueData[];
+
+    // ERC721 & ERC1155 data
+    nftsIn: NftTransactionData[];
+    nftsOut: NftTransactionData[];
 }
 
-export interface IndexerAccountTransactionsContractData {
+export interface IndexerContractData {
     symbol: string;
     creator: string;
     address: string;
@@ -85,7 +94,7 @@ export interface IndexerAccountTransactionsContractData {
     transaction: string; // creation tx for contract
 }
 
-export interface ParsedIndexerAccountTransactionsContract extends IndexerAccountTransactionsContractData {
+export interface ParsedIndexerAccountTransactionsContract extends IndexerContractData {
     price?: string; // string representation of number
     holders?: number;
     marketdata_updated?: string; // epoch
@@ -98,7 +107,7 @@ export interface EVMTransactionsPaginationData {
 
 export interface IndexerAccountTransactionsResponse {
     contracts: {
-        [contractHash: string]: IndexerAccountTransactionsContractData
+        [contractHash: string]: IndexerContractData
     };
     results: EvmTransaction[]
     total_count: number;
@@ -112,4 +121,25 @@ export interface TransactionResponse {
 }
 export interface NativeTransactionResponse extends TransactionResponse {
     __?: string;
+}
+
+export interface IndexerAccountTransfersResponse {
+    contracts: {
+        [contractHash: string]: IndexerContractData
+    };
+    results: EvmTransfer[]
+    total_count?: number; // included if includePagination is true in the request
+    more?: boolean; // included if includePagination is true in the request
+}
+
+export interface EvmTransfer {
+    amount: string, // a string representing an integer
+    contract: string, // contract address of the token being transferred
+    blockNumber: number, // an integer representing the block number of the transfer
+    from: string, // address of the sender
+    to: string; // address of the receiver
+    type: 'erc20' | 'erc721' | 'erc1155', // type of token being transferred
+    transaction: string; // transaction hash
+    timestamp: number; // integer representing ms from epoch
+    id?: string; // id of the NFT transferred (ERC721 or ERC1155 only)
 }
