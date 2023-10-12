@@ -4,9 +4,9 @@ import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { NativeCurrencyAddress } from 'src/antelope/types';
 import {
     ShapedAllowanceRow,
-    ShapedAllowanceRowERC1155,
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowSingleERC721,
+    ShapedAllowanceRowNftCollection,
 } from 'src/antelope/types/Allowances';
 
 const erc20AllowanceRow: ShapedAllowanceRowERC20 = {
@@ -31,7 +31,7 @@ const erc20AllowanceRowUnlimited: ShapedAllowanceRowERC20 = {
     spenderAddress: '0x'.concat('2'.repeat(40)),
     lastUpdated: (new Date('November 7, 2018 10:24')).getTime(),
     tokenSymbol: 'USDT',
-    tokenLogo: 'https://raw.githubusercontent.com/elkfinance/tokens/main/logos/avax/0xc7198437980c041c805A1EDcbA50c1Ce5db95118/logo.png',
+    // tokenLogo: 'https://raw.githubusercontent.com/elkfinance/tokens/main/logos/avax/0xc7198437980c041c805A1EDcbA50c1Ce5db95118/logo.png',
 };
 
 const erc721AllowanceRowSingle: ShapedAllowanceRowSingleERC721 = {
@@ -45,18 +45,17 @@ const erc721AllowanceRowSingle: ShapedAllowanceRowSingleERC721 = {
     allowed: true,
 };
 
-const erc721AllowanceRowCollection: ShapedAllowanceRowSingleERC721 = {
-    tokenName: 'Quantum Lotus #2',
+const erc721AllowanceRowCollection: ShapedAllowanceRowNftCollection = {
     collectionAddress: '0x9718F90603bCA6d6C28C9f9319b25518Bc45EB73',
     collectionName: 'Quantum Lotus',
     lastUpdated: (new Date('July 7, 2023 21:46')).getTime(),
     spenderAddress: '0x'.concat('3'.repeat(40)),
     spenderName: 'Big Spenderz',
-    tokenId: '2',
+    balance: BigNumber.from('5'),
     allowed: true,
 };
 
-const erc1155AllowanceRow: ShapedAllowanceRowERC1155 = {
+const erc1155AllowanceRow: ShapedAllowanceRowNftCollection = {
     lastUpdated: (new Date('February 13, 2021 09:33')).getTime(),
     spenderAddress: '0x'.concat('4'.repeat(40)),
     spenderName: 'Mega Spenderz',

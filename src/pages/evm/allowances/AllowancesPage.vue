@@ -6,6 +6,8 @@ import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.
 import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
+import { shapedAllowanceRows } from 'src/pages/evm/allowances/temp-allowances-fixtures';
+
 const { t: $t } = useI18n();
 
 const asideHeader = $t('evm_allowances.aside_header');
@@ -58,7 +60,7 @@ function handleIncludeCancelledUpdated(includeCancelled: boolean) {
             @include-cancelled-updated="handleIncludeCancelledUpdated"
         />
 
-        <AllowancesTable />
+        <AllowancesTable :rows="shapedAllowanceRows" />
     </div>
 </AppPage>
 </template>
