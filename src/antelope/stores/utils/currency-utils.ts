@@ -183,9 +183,9 @@ export function prettyPrintCurrency(
         // and also decimals may be more places than maximum JS precision.
         // As such, decimals must be handled specially for BigNumber amounts.
 
-        const amountAsString = formatUnits(amount, tokenDecimals); // amount string, like "1.0"
+        const amountAsString = tokenDecimals === 0 ? amount.toNumber().toString() : formatUnits(amount, tokenDecimals); // amount string, like "1.0"
 
-        const [integerString, decimalString] = amountAsString.split('.');
+        const [integerString, decimalString = '0'] = amountAsString.split('.');
 
         const formattedInteger = Intl.NumberFormat(
             locale,

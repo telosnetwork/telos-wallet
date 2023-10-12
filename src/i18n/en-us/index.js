@@ -151,6 +151,11 @@ export default {
         arrow_icon_alt: 'Arrow icon',
         new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
         revoke: 'Revoke',
+        balance: 'Balance',
+        type: 'Type',
+        last_updated: 'Last updated',
+        asset: 'Asset',
+        logo: 'Logo',
     },
     nft : {
         collectible: 'Collectible',
@@ -254,6 +259,8 @@ export default {
         withdrawal_date: 'Withdrawal it on {date}',
     },
     evm_allowances: {
+        allowance: 'Allowance',
+        authorized_spender: 'Authorized Spender',
         aside_header: 'What are approvals?',
         aside_content_fragment_1: 'Engaging with decentralized apps (for swapping or trading collectibles) requires authorizing them to manage your tokens and digital collectibles, known as ',
         aside_content_fragment_2_bold: 'token approval',
