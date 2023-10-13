@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { ShapedNFT } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore } from 'src/antelope';
@@ -8,9 +8,10 @@ const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
 
 const props = defineProps<{
-    nft: ShapedNFT,
-    previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
-    tileMode: boolean,
+    nft: ShapedNFT;
+    previewMode: boolean; // controls whether video/audio can be played, and how those types are displayed
+    tileMode: boolean;
+    iconSize?: number; // only used in icon mode
 }>();
 
 // data
@@ -96,13 +97,26 @@ const iconOverlayName = computed(() => {
     return 'o_image_not_supported';
 });
 
+// watchers
+watch(props, () => {
+    setIconSizeVariable();
+}, {
+    immediate: true,
+});
+
 onMounted(() => {
+    setIconSizeVariable();
+
     setTimeout(() => {
         passedMaxLoadingTime.value = true;
     }, 5000);
 });
 
 // methods
+function setIconSizeVariable() {
+    rootElement.value?.style.setProperty('--list-icon-size', `${props.iconSize ?? 40}px`);
+}
+
 function playVideo() {
     if (!isIos.value) {
         // prevent weird iOS behavior where video pauses and unpauses quickly
@@ -193,6 +207,14 @@ function setHoverPreviewVisibility(visible: boolean) {
     calculateHoverPreviewPosition();
     isHovering.value = visible;
 }
+
+function getIconSize(defaultSize: string) {
+    if (props.iconSize) {
+        return `${props.iconSize}px`;
+    }
+
+    return defaultSize;
+}
 </script>
 
 <template>
@@ -241,7 +263,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                     v-if="passedMaxLoadingTime && isMediaLoading"
                     :alt="`${$t('nft.broken_image')} ${imageAlt}`"
                     name="o_broken_image"
-                    size="md"
+                    :size="getIconSize('md')"
                     color="grey-7"
                     class="c-nft-viewer__image"
                 />
@@ -285,7 +307,7 @@ function setHoverPreviewVisibility(visible: boolean) {
 
                 <q-icon
                     :name="iconOverlayName"
-                    size="lg"
+                    :size="getIconSize('lg')"
                     color="primary"
                     class="c-nft-viewer__overlay-icon"
                 />
@@ -311,7 +333,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             v-else-if="nft.videoSrc"
             name="o_movie"
             :alt="imageAlt"
-            size="md"
+            :size="getIconSize('md')"
             color="grey-7"
             class="c-nft-viewer__list-image"
         />
@@ -319,7 +341,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imageSrcFull)"
             name="o_broken_image"
             :alt="`${$t('nft.broken_image')} ${imageAlt}`"
-            size="md"
+            :size="getIconSize('md')"
             color="grey-7"
             class="c-nft-viewer__list-image"
         />
@@ -328,8 +350,8 @@ function setHoverPreviewVisibility(visible: boolean) {
             :src="nft.imageSrcFull"
             :alt="`${$t('nft.collectible')} ${imageAlt}`"
             class="c-nft-viewer__list-image"
-            height="40"
-            width="40"
+            :height="iconSize ?? 40"
+            :width="iconSize ?? 40"
             @load="isMediaLoading = false"
         >
     </div>
@@ -365,7 +387,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                 v-if="passedMaxLoadingTime && isMediaLoading"
                 :alt="`${$t('nft.broken_image')} ${imageAlt}`"
                 name="o_broken_image"
-                size="md"
+                :size="getIconSize('md')"
                 color="grey-7"
                 class="c-nft-viewer__image"
             />
@@ -377,12 +399,11 @@ function setHoverPreviewVisibility(visible: boolean) {
 <style lang="scss">
 .c-nft-viewer {
     $this: &;
-    $list-icon-size: 40px;
     height: 100%;
 
     &--icon-mode {
-        height: $list-icon-size;
-        width: $list-icon-size;
+        height: var(--list-icon-size);
+        width: var(--list-icon-size);
     }
 
     &__nft-container {
