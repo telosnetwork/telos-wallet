@@ -4,7 +4,7 @@ import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
 import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';

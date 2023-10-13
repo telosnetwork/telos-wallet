@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import {
     ShapedAllowanceRow,
@@ -11,12 +11,13 @@ import {
     isNftCollectionAllowanceRow,
 } from 'src/antelope/types/Allowances';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { CURRENT_CONTEXT, useAccountStore, useNftsStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useNftsStore, useUserStore } from 'src/antelope';
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
+import { NFTClass } from 'src/antelope/types';
 
 import ToolTip from 'src/components/ToolTip.vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
-import { NFTClass } from 'src/antelope/types';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
+import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -24,7 +25,6 @@ const props = defineProps<{
     row: ShapedAllowanceRow;
 }>();
 
-const accountStore = useAccountStore();
 const nftStore = useNftsStore();
 const fiatLocale = useUserStore().fiatLocale;
 
@@ -104,6 +104,11 @@ onMounted(async () => {
             :tile-mode="false"
             :icon-size="24"
         />
+        <NftCollectionStack
+            v-else
+            :collection="rowAsCollectionRow.collectionAddress"
+        />
+
         <ToolTip :text="assetTextFull" :hide-icon="true">
             <span class="o-text--paragraph-bold u-text--default-contrast">
                 {{ assetTextShort }}
