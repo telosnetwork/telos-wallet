@@ -13,7 +13,7 @@ import { getShapedNftName, truncateAddress } from 'src/antelope/stores/utils/tex
 import ExternalLink from 'components/ExternalLink.vue';
 import TimeStamp from 'components/TimeStamp.vue';
 import ToolTip from 'components/ToolTip.vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 
 const userStore = useUserStore();
 

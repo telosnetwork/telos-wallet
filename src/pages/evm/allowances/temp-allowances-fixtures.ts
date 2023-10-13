@@ -46,8 +46,8 @@ const erc721AllowanceRowSingle: ShapedAllowanceRowSingleERC721 = {
 };
 
 const erc721AllowanceRowCollection: ShapedAllowanceRowNftCollection = {
-    collectionAddress: '0x9718F90603bCA6d6C28C9f9319b25518Bc45EB73',
-    collectionName: 'Quantum Lotus',
+    collectionAddress: '0x27f4e87Fc4e5Ec6f1102a48B13B62877Ff306bDE',
+    collectionName: 'Down Bad Kongz',
     lastUpdated: (new Date('July 7, 2023 21:46')).getTime(),
     spenderAddress: '0x'.concat('3'.repeat(40)),
     spenderName: 'Big Spenderz',
@@ -59,7 +59,7 @@ const erc1155AllowanceRow: ShapedAllowanceRowNftCollection = {
     lastUpdated: (new Date('February 13, 2021 09:33')).getTime(),
     spenderAddress: '0x'.concat('4'.repeat(40)),
     spenderName: 'Mega Spenderz',
-    collectionAddress: '0xa46205F220dF8eE5Bfe11b2b672e729893f59f68',
+    collectionAddress: '0x24E72C50E4a4f9745A04568922e936365Bf32675',
     allowed: true,
     balance: BigNumber.from('27'),
 };

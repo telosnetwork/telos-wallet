@@ -197,11 +197,6 @@ export const useNftsStore = defineStore(store_name, {
                     }
                 }
 
-                const new_filter = {
-                    ...toRaw(this.__indexer_filter),
-                    tokenId,
-                };
-
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
                 if (this.__contracts[network][contract]) {
@@ -222,12 +217,9 @@ export const useNftsStore = defineStore(store_name, {
                 // we don't have the NFT on any cache, we fetch it from the indexer
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
-                    promise = chain.settings.getNFTsCollection(contract, new_filter).then((nfts) => {
-                        this.trace('fetchNftDetails', 'indexer returned:', nfts);
-                        this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(nfts);
-                        this.__contracts[network][contract].loading = false;
+                    promise = this.fetchNftsFromCollection(label, contract).then((nfts) => {
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                        return nfts.find(nft => nft.id === tokenId) || null;
+                        return nfts?.find(nft => nft.id === tokenId) || null;
                     });
                 } else {
                     if (!chain.settings.isNative()) {
@@ -254,6 +246,47 @@ export const useNftsStore = defineStore(store_name, {
             }
 
             return promise;
+        },
+
+        async fetchNftsFromCollection(label: Label, contract: string): Promise<NFTClass[] | null> {
+            this.trace('fetchNftsFromCollection', label, contract);
+            const feedbackStore = useFeedbackStore();
+            const chain = useChainStore().getChain(label);
+            const network = chain.settings.getNetwork();
+
+            if (this.__contracts[network] && this.__contracts[network][contract.toLowerCase()]) {
+                return Promise.resolve(this.__contracts[network][contract].list);
+            }
+
+            if (!this.__contracts[network]) {
+                this.__contracts[network] = {};
+            }
+
+            if (!this.__contracts[network][contract]) {
+                this.__contracts[network][contract] = {
+                    contract,
+                    list: [],
+                    loading: true,
+                };
+            }
+
+            this.__contracts[network][contract].loading = true;
+
+            feedbackStore.setLoading('fetchNftsFromCollection');
+            try {
+                const nfts = await chain.settings.getNFTsCollection(contract, { limit: 10000, address: '' });
+                this.__contracts[network][contract].list = nfts;
+
+                return nfts;
+            } catch {
+                this.__contracts[network][contract].list = [];
+                // eztodo error
+            } finally {
+                feedbackStore.unsetLoading('fetchNftsFromCollection');
+                this.__contracts[network][contract].loading = false;
+            }
+
+            return null;
         },
 
         clearUserFilter() {

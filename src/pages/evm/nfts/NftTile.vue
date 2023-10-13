@@ -7,7 +7,7 @@ import { ShapedNFT } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
