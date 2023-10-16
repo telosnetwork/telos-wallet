@@ -166,11 +166,8 @@ export class NFTItemClass {
                 this.determineWebmType(source).then((_type) => {
                     if (_type === NFTSourceTypes.VIDEO) {
                         this.type = NFTSourceTypes.VIDEO;
-                        this.extractFirstFrameFromVideo(source as string).then((_preview) => {
-                            this.preview = _preview;
-                            this.ready = true;
-                            this.notifyWatchers();
-                        });
+                        this.ready = true;
+                        this.notifyWatchers();
                     } else {
                         this.notifyWatchers();
                     }
@@ -179,11 +176,8 @@ export class NFTItemClass {
                 if (type === NFTSourceTypes.VIDEO) {
                     this.ready = false;
                     this.type = NFTSourceTypes.VIDEO;
-                    this.extractFirstFrameFromVideo(source as string).then((_preview) => {
-                        this.preview = _preview;
-                        this.ready = true;
-                        this.notifyWatchers();
-                    });
+                    this.ready = true;
+                    this.notifyWatchers();
                 }
             }
         }

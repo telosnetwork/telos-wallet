@@ -62,13 +62,13 @@ onMounted(async () => {
         background-color: var(--bg-color);
 
         &:nth-child(2) {
-            left: 8px;
+            left: 6px;
             z-index: 2;
             transform: scale(0.9);
         }
 
         &:nth-child(3) {
-            left: 16px;
+            left: 12px;
             z-index: 1;
             transform: scale(0.8);
         }
