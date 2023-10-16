@@ -1,6 +1,6 @@
 {
   "name": "telos-web-wallet",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "A Web Wallet for Telos",
   "productName": "Telos Web Wallet",
   "private": true,
