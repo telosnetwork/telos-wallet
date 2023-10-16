@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { ShapedAllowanceRow } from 'src/antelope/types/Allowances';
@@ -55,17 +54,6 @@ const tableColumns = [
         sortable: true,
     },
 ];
-
-// data
-const loading = ref(true);
-
-// methods
-onMounted(() => {
-    // TODO remove simulated loading
-    setTimeout(() => {
-        loading.value = false;
-    }, 2000);
-});
 </script>
 
 <template>
