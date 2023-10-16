@@ -158,6 +158,10 @@ export default {
         asset: 'Asset',
         logo: 'Logo',
         not_applicable_short: 'N/A',
+        not_allowed: 'Not allowed',
+        allowed: 'Allowed',
+        huge: 'Huge',
+        none: 'None',
     },
     nft : {
         collectible: 'Collectible',
