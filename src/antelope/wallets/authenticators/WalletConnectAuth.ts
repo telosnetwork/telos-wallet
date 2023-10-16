@@ -92,10 +92,6 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 const sameAddress = providerAddress.toLocaleLowerCase() === address.toLocaleLowerCase();
                 this.usingQR = !sameAddress;
                 this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
-
-                // FIXME: remove the following logs
-                console.log('walletConnectLogin', 'using QR:', this.usingQR);
-                console.log('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
             }
             this.trace('walletConnectLogin', 'using QR:', this.usingQR);
 
