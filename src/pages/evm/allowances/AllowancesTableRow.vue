@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { formatUnits } from 'ethers/lib/utils';
 
 import {
     ShapedAllowanceRow,
@@ -25,8 +27,9 @@ const props = defineProps<{
     row: ShapedAllowanceRow;
 }>();
 
+const { t: $t } = useI18n();
 const nftStore = useNftsStore();
-const fiatLocale = useUserStore().fiatLocale;
+const { fiatLocale, fiatCurrency } = useUserStore();
 
 const isErc20Row = isErc20AllowanceRow(props.row);
 const isSingleErc721Row = isErc721SingleAllowanceRow(props.row);
@@ -74,6 +77,28 @@ const assetTextFull = computed(() => {
     return prettyAmount;
 });
 
+const fiatValueTextShort = computed(() => {
+    if (!isErc20Row || !props.row.tokenPrice) {
+        return '';
+    }
+
+    const balance = Number(formatUnits(props.row.balance, props.row.tokenDecimals));
+    const fiatValue = balance * props.row.tokenPrice;
+
+    return prettyPrintCurrency(fiatValue, 2, fiatLocale, true, fiatCurrency);
+});
+
+const fiatValueTextFull = computed(() => {
+    if (!isErc20Row || !props.row.tokenPrice) {
+        return '';
+    }
+
+    const balance = Number(formatUnits(props.row.balance, props.row.tokenDecimals));
+    const fiatValue = balance * props.row.tokenPrice;
+
+    return prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency);
+});
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -115,8 +140,13 @@ onMounted(async () => {
             </span>
         </ToolTip>
     </q-td>
-    <q-td key="balance">
-        {{ row.lastUpdated }}
+    <q-td key="value">
+        <ToolTip v-if="fiatValueTextShort" :text="fiatValueTextFull" :hide-icon="true">
+            {{ fiatValueTextShort }}
+        </ToolTip>
+        <ToolTip v-else :warnings="[$t('evm_wallet.no_fiat_value')]">
+            {{ $t('global.not_applicable_short') }}
+        </ToolTip>
     </q-td>
     <q-td key="allowance">
         {{ row.lastUpdated }}
