@@ -86,9 +86,9 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<EvmTransactionResponse> {
         this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
 
-      const method = abi[0].name;
+        const method = abi[0].name;
         if (abi.length > 1) {
-            console.warn(sssssssssssssssssssssssssssssssssssssssssssssss
+            console.warn(
                 `signCustomTransaction: abi contains more than one function,
                 we asume the first one (${method}) is the one to be called`,
             );
