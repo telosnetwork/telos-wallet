@@ -23,16 +23,28 @@ const erc20AllowanceRow: ShapedAllowanceRowERC20 = {
     spenderName: 'Super Spenderz',
 };
 
-const erc20AllowanceRowUnlimited: ShapedAllowanceRowERC20 = {
+const erc20AllowanceRowNoAllowance: ShapedAllowanceRowERC20 = {
+    tokenName: 'Staked Telos',
+    tokenAddress: '0xB4B01216a5Bc8F1C8A33CD990A1239030E60C905',
+    tokenDecimals: WEI_PRECISION,
+    balance: BigNumber.from('12'.concat('0'.repeat(WEI_PRECISION))), // 12 STLOS
+    allowance: BigNumber.from(0), // 0 STLOS
+    spenderAddress: '0x'.concat('1'.repeat(40)),
+    lastUpdated: (new Date('August 19, 2021 17:01')).getTime(),
+    tokenSymbol: 'STLOS',
+    tokenLogo: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+    spenderName: 'Ultra Spenderz',
+};
+
+const erc20AllowanceRowHuge: ShapedAllowanceRowERC20 = {
     tokenName: 'Tether (Multichain)',
     tokenAddress: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73',
     tokenDecimals: 6,
     balance: BigNumber.from('654'.concat('0'.repeat(6))), // 654 USDT
-    allowance: BigNumber.from('1000000000000000'.concat('0'.repeat(6))), // unlimited (1Q USDT)
+    allowance: BigNumber.from('1000000000000000'.concat('0'.repeat(6))), // huge (1Q USDT)
     spenderAddress: '0x'.concat('2'.repeat(40)),
     lastUpdated: (new Date('November 7, 2018 10:24')).getTime(),
     tokenSymbol: 'USDT',
-    // tokenLogo: 'https://raw.githubusercontent.com/elkfinance/tokens/main/logos/avax/0xc7198437980c041c805A1EDcbA50c1Ce5db95118/logo.png',
 };
 
 const erc721AllowanceRowSingle: ShapedAllowanceRowSingleERC721 = {
@@ -67,7 +79,8 @@ const erc1155AllowanceRow: ShapedAllowanceRowNftCollection = {
 
 export const shapedAllowanceRows: ShapedAllowanceRow[] = [
     erc20AllowanceRow,
-    erc20AllowanceRowUnlimited,
+    erc20AllowanceRowNoAllowance,
+    erc20AllowanceRowHuge,
     erc721AllowanceRowSingle,
     erc721AllowanceRowCollection,
     erc1155AllowanceRow,

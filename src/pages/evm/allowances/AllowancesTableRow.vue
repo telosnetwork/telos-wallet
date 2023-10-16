@@ -2,8 +2,10 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatUnits } from 'ethers/lib/utils';
+import { BigNumber } from 'ethers';
 
 import {
+    HUGE_ALLOWANCE_THRESHOLD,
     ShapedAllowanceRow,
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
@@ -99,6 +101,38 @@ const fiatValueTextFull = computed(() => {
     return prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency);
 });
 
+const allowanceTextShort = computed(() => {
+    if (isErc20Row) {
+        if (props.row.allowance instanceof BigNumber) {
+            const allowance = props.row.allowance.div(BigNumber.from(10).pow(props.row.tokenDecimals));
+
+            if (allowance.gte(HUGE_ALLOWANCE_THRESHOLD)) {
+                return $t('global.huge');
+            }
+
+            if (allowance.eq(0)) {
+                return $t('global.none');
+            }
+            const numberAllowed = Number(formatUnits(props.row.allowance, props.row.tokenDecimals));
+
+            return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
+        }
+
+        return $t('global.none');
+    }
+
+    return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
+});
+
+const allowanceTextFull = computed(() => {
+    if (isErc20Row) {
+        const allowance = props.row.allowance ?? BigNumber.from(0);
+        return prettyPrintCurrency(allowance, 4, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
+    }
+
+    return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
+});
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -149,7 +183,9 @@ onMounted(async () => {
         </ToolTip>
     </q-td>
     <q-td key="allowance">
-        {{ row.lastUpdated }}
+        <ToolTip :text="allowanceTextFull" :hide-icon="true">
+            {{ allowanceTextShort }}
+        </ToolTip>
     </q-td>
     <q-td key="spender">
         {{ row.lastUpdated }}
