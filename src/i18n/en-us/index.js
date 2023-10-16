@@ -152,10 +152,12 @@ export default {
         new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
         revoke: 'Revoke',
         balance: 'Balance',
+        value: 'Value',
         type: 'Type',
         last_updated: 'Last updated',
         asset: 'Asset',
         logo: 'Logo',
+        not_applicable_short: 'N/A',
     },
     nft : {
         collectible: 'Collectible',

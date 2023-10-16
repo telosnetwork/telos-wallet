@@ -3,12 +3,17 @@ import { useI18n } from 'vue-i18n';
 
 import { ShapedAllowanceRow } from 'src/antelope/types/Allowances';
 import AllowancesTableRow from 'pages/evm/allowances/AllowancesTableRow.vue';
+import { useUserStore } from 'src/antelope';
+import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 
 const props = defineProps<{
     rows: ShapedAllowanceRow[];
 }>();
 
 const { t: $t } = useI18n();
+const { fiatLocale, fiatCurrency } = useUserStore();
+
+const fiatSymbol = getCurrencySymbol(fiatLocale, fiatCurrency);
 
 const tableColumns = [
     {
@@ -19,9 +24,9 @@ const tableColumns = [
         sortable: true,
     },
     {
-        name: 'balance',
-        field: 'balance',
-        label: $t('global.balance'),
+        name: 'value',
+        field: 'value',
+        label: `${$t('global.value')} (${fiatSymbol})`,
         align: 'left' as 'left',
         sortable: true,
     },

@@ -18,6 +18,7 @@ const erc20AllowanceRow: ShapedAllowanceRowERC20 = {
     spenderAddress: '0x'.concat('1'.repeat(40)),
     lastUpdated: (new Date('June 1, 2021 13:05')).getTime(),
     tokenSymbol: 'TLOS',
+    tokenPrice: 0.06,
     tokenLogo: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
     spenderName: 'Super Spenderz',
 };

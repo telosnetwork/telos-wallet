@@ -25,6 +25,7 @@ export interface ShapedAllowanceRowERC20 extends AllowanceRow {
 
     tokenDecimals: number; // decimals for the token (e.g. 6 for USDT, 18 for TLOS/ETH)
     tokenSymbol: string; // e.g. TLOS, USDT, etc.
+    tokenPrice?: number; // price of the token in USD (optional)
     tokenLogo?: string; // path or URI for the token logo (optional)
 }
 
