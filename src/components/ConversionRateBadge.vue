@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { BigNumber } from 'ethers';
+
 import { useUserStore } from 'src/antelope';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { computed } from 'vue';
+
+import TextBadge from 'src/components/TextBadge.vue';
 
 const userStore = useUserStore();
 
@@ -35,18 +38,6 @@ const label = computed(() => {
 </script>
 
 <template>
-<div class="c-conversion-rate-badge">
-    <q-badge outline :label="label" />
-</div>
+<TextBadge :label="label" />
 </template>
 
-<style lang="scss">
-.c-conversion-rate-badge {
-    // quasar overrides
-    .q-badge {
-        padding: 4px 6px;
-        border-color: var(--accent-color-3);
-        color: var(--text-default-contrast)
-    }
-}
-</style>
