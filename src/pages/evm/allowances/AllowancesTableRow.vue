@@ -15,13 +15,15 @@ import {
     isNftCollectionAllowanceRow,
 } from 'src/antelope/types/Allowances';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { CURRENT_CONTEXT, useNftsStore, useUserStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
 import { NFTClass } from 'src/antelope/types';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import ToolTip from 'src/components/ToolTip.vue';
 import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
+import ExternalLink from 'src/components/ExternalLink.vue';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -31,6 +33,7 @@ const props = defineProps<{
 
 const { t: $t } = useI18n();
 const nftStore = useNftsStore();
+const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 const { fiatLocale, fiatCurrency } = useUserStore();
 
 const isErc20Row = isErc20AllowanceRow(props.row);
@@ -133,6 +136,8 @@ const allowanceTextFull = computed(() => {
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
 });
 
+const spenderUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.row.spenderAddress}`);
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -188,7 +193,11 @@ onMounted(async () => {
         </ToolTip>
     </q-td>
     <q-td key="spender">
-        {{ row.lastUpdated }}
+        <ExternalLink
+            :text="row.spenderName ?? row.spenderAddress"
+            :url="spenderUrl"
+            :purpose="$t('evm_allowances.spender_link_label')"
+        />
     </q-td>
     <q-td key="type">
         {{ row.lastUpdated }}

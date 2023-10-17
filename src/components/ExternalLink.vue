@@ -24,6 +24,7 @@ const formattedText = computed(() => {
 <a
     :href="url"
     :aria-label="purpose"
+    :title="purpose"
     target="_blank"
     rel="noopener noreferrer"
     class="c-external-link__link"
