@@ -75,6 +75,7 @@ const tableColumns = [
     :columns="tableColumns"
     :rows="rows"
     :binary-state-sort="true"
+    :pagination="{ rowsPerPage: 0 }"
     hide-pagination
     flat
     class="q-mb-md"
