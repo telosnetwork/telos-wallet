@@ -162,6 +162,7 @@ export default {
         allowed: 'Allowed',
         huge: 'Huge',
         none: 'None',
+        token: 'Token',
     },
     nft : {
         collectible: 'Collectible',

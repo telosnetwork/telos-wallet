@@ -24,6 +24,7 @@ import ToolTip from 'src/components/ToolTip.vue';
 import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
+import TextBadge from 'src/components/TextBadge.vue';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -138,6 +139,8 @@ const allowanceTextFull = computed(() => {
 
 const spenderUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.row.spenderAddress}`);
 
+const badgeText = computed(() => isErc20Row ? $t('global.token') : $t('nft.collectible'));
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -200,7 +203,7 @@ onMounted(async () => {
         />
     </q-td>
     <q-td key="type">
-        {{ row.lastUpdated }}
+        <TextBadge :label="badgeText" />
     </q-td>
     <q-td key="updated">
         {{ row.lastUpdated }}
