@@ -178,6 +178,11 @@ export default {
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
         collectibles_per_page: 'Collectibles per page',
+        // transfer
+        transfer: 'Transfer',
+        transfer_collectible: 'transfer collectible',
+        transfer_from: 'from',
+        transfer_on_telos: 'on Telos',
     },
     evm_wrap: {
         wrap: 'Wrap',

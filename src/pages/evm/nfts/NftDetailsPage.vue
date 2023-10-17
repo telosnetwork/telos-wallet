@@ -7,7 +7,9 @@ import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import UserInfo from 'components/evm/UserInfo.vue';
+import { CURRENT_CONTEXT, useChainStore, useAccountStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
@@ -18,12 +20,13 @@ const { t: $t } = useI18n();
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
+const accountStore = useAccountStore();
 
 const tabs = ['attributes', 'transfer'];
+const address = '';
 
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
-
 
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
@@ -44,12 +47,13 @@ onBeforeMount(async () => {
 
 // data
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
-
+const addressIsValid = false;
 
 // computed
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
+
 const contractLink = computed(() => {
     if (!contractAddressIsValid.value) {
         return '';
@@ -69,6 +73,12 @@ const ownerLink = computed(() => {
 const filteredAttributes = computed(() =>
     nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
+
+const loggedAccount = computed(() =>
+    accountStore.loggedEvmAccount,
+);
+
+const startTransfer = () => console.log('test');
 
 </script>
 
@@ -211,6 +221,62 @@ const filteredAttributes = computed(() =>
         </div>
     </template>
     <template v-slot:transfer>
+        <div class="c-nft-transfer__form-container">
+
+            <q-form
+                class="c-nft-transfer__form"
+            >
+
+                <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
+                    <div class="col">
+                        <div class="c-nft-transfer__transfer-text">
+                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft.contractPrettyName || nft.contractAddress }} #{{ nft.id }} </span>
+                        </div>
+                        <div class="c-nft-transfer__transfer-from c-nft-transfer__transfer-text--small">
+                            {{ $t('nft.transfer_from') }}
+                            &nbsp;
+                            <UserInfo
+                                class="c-nft-transfer__transfer-text--small c-nft-transfer__transfer-text--bold"
+                                :displayFullAddress="false"
+                                :showAddress="true"
+                                :showCopyBtn="false"
+                                :showUserMenu="false"
+                                :lightweight="true"
+                                :account="loggedAccount"
+                            />
+                            &nbsp;
+                            {{ $t('nft.transfer_on_telos') }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-nft-transfer__row c-nft-transfer__row--2 row">
+                    <div class="col">
+                        <AddressInput
+                            v-model="address"
+                            name="nft-transfer-address-input"
+                            :label="$t('evm_wallet.receiving_account')"
+                            @update:isValid="addressIsValid = $event"
+                        />
+                    </div>
+                </div>
+
+                <div class="c-nft-transfer__row c-nft-transfer__row--3 row">
+                    <div class="col">
+                        <div class="justify-end row">
+                            <q-btn
+                                color="primary"
+                                class="wallet-btn"
+                                :label="$t('nft.transfer_collectible')"
+                                :loading="false"
+                                :disable="!addressIsValid"
+                                @click="startTransfer"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </q-form>
+        </div>
     </template>
 </AppPage>
 </template>
@@ -333,5 +399,67 @@ const filteredAttributes = computed(() =>
     &__attribute-skeleton {
         height: 100px;
     }
+}
+
+.c-nft-transfer {
+    &__form-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    &__form {
+        width: 100%;
+        max-width: 530px;
+    }
+
+    &__row {
+        gap: 16px;
+        &--1 {
+            margin-bottom: 24px;
+        }
+
+        &--2 {
+            margin-bottom: 24px;
+        }
+
+        &--3 {
+            margin-bottom: 24px;
+        }
+    }
+
+    &__transfer-from{
+        display: flex;
+    }
+
+    &__transfer-text{
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 400;
+
+        &--small{
+            font-size: 16px;
+        }
+
+        &--bold{
+            font-weight: 600;
+        }
+    }
+}
+
+// refactor as global
+.q-btn.wallet-btn {
+    @include text--header-5;
+    &+& {
+        margin-left: 16px;
+    }
+}
+
+// override UserInfo component styling
+.o-text--header-4{
+    font-size: 16px !important;
 }
 </style>
