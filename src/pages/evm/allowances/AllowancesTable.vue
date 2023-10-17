@@ -2,9 +2,12 @@
 import { useI18n } from 'vue-i18n';
 
 import { ShapedAllowanceRow } from 'src/antelope/types/Allowances';
-import AllowancesTableRow from 'pages/evm/allowances/AllowancesTableRow.vue';
 import { useUserStore } from 'src/antelope';
 import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
+
+import AllowancesTableRow from 'pages/evm/allowances/AllowancesTableRow.vue';
+import TableControls from 'components/evm/TableControls.vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     rows: ShapedAllowanceRow[];
@@ -14,6 +17,12 @@ const { t: $t } = useI18n();
 const { fiatLocale, fiatCurrency } = useUserStore();
 
 const fiatSymbol = getCurrencySymbol(fiatLocale, fiatCurrency);
+
+const pagination = ref({
+    page: 1,
+    rowsPerPage: 10,
+    rowsNumber: props.rows.length,
+});
 
 const tableColumns = [
     {
@@ -68,6 +77,7 @@ const tableColumns = [
     :binary-state-sort="true"
     hide-pagination
     flat
+    class="q-mb-md"
 >
     <template v-slot:header="props">
         <q-tr :props="props">
@@ -86,6 +96,8 @@ const tableColumns = [
         <AllowancesTableRow :row="props.row" />
     </template>
 </q-table>
+
+<TableControls :pagination="pagination" />
 </template>
 
 <style lang="scss">

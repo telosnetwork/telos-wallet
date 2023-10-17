@@ -123,6 +123,8 @@ export default {
         rejected_metamask_prompt: 'The MetaMask prompt was rejected',
         error_adding_token_to_metamask: 'Error adding token to MetaMask',
         inventory: 'Collectibles',
+        table_controls_rows_per_page_label: 'Open rows per page selector',
+        table_controls_change_rows_per_page_label: 'Change rows per page to {num}',
     },
     global: {
         native: 'Native',
