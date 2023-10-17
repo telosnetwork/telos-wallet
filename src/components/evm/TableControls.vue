@@ -73,20 +73,28 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
 </script>
 
 <template>
-<div class="c-table-controls">
+<div class="c-table-controls o-text--small">
     <div class="c-table-controls__left-container">
         {{ $t(rowLabel) }}:&nbsp;{{ pagination.rowsPerPage }}
 
         <q-icon
             :name="showRowsPerPageDropdown ? 'expand_more' : 'expand_less'"
+            :aria-label="$t('evm_wallet.table_controls_rows_per_page_label')"
             class="cursor-pointer"
             size="sm"
+            tabindex="0"
             @click="showRowsPerPageDropdown = !showRowsPerPageDropdown"
+            @keypress.space.enter.prevent="showRowsPerPageDropdown = !showRowsPerPageDropdown"
         >
             <q-popup-proxy ref="rowsPerPagePopup" transition-show="scale" transition-hide="scale">
                 <q-list>
                     <q-item v-for="size in rowsPerPageOptions" :key="size" class="cursor-pointer">
-                        <q-item-section @click="changeRowsPerPage(size)">
+                        <q-item-section
+                            tabindex="0"
+                            :aria-label="$t('evm_wallet.table_controls_rows_per_page_label', { num: size })"
+                            @click="changeRowsPerPage(size)"
+                            @keypress.space.enter.prevent="changeRowsPerPage(size)"
+                        >
                             {{ size }}
                         </q-item-section>
                     </q-item>
