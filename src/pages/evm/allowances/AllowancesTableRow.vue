@@ -25,6 +25,7 @@ import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
 import TextBadge from 'src/components/TextBadge.vue';
+import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -141,6 +142,20 @@ const spenderUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${p
 
 const badgeText = computed(() => isErc20Row ? $t('global.token') : $t('nft.collectible'));
 
+const updatedTextPretty = computed(() => {
+    const todaySeconds = (Date.now() / 1000);
+    const updatedSeconds = props.row.lastUpdated / 1000;
+    const secondsSinceUpdate = todaySeconds - updatedSeconds;
+    const timePeriod = prettyTimePeriod(
+        secondsSinceUpdate,
+        (key: string) => $t(`antelope.words.${key}`),
+        true,
+    );
+
+    return $t('global.time_ago', { time: timePeriod });
+});
+const updatedTextFull = computed(() => getFormattedDate(props.row.lastUpdated / 1000, DEFAULT_DATE_FORMAT, true));
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -206,7 +221,9 @@ onMounted(async () => {
         <TextBadge :label="badgeText" />
     </q-td>
     <q-td key="updated">
-        {{ row.lastUpdated }}
+        <ToolTip :text="updatedTextFull" :hide-icon="true">
+            {{ updatedTextPretty }}
+        </ToolTip>
     </q-td>
 </q-tr>
 </template>

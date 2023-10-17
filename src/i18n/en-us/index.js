@@ -163,6 +163,7 @@ export default {
         huge: 'Huge',
         none: 'None',
         token: 'Token',
+        time_ago: '{time} ago',
     },
     nft : {
         collectible: 'Collectible',
@@ -619,10 +620,13 @@ export default {
             error_wrap: 'An unknown error occurred while wrapping system token',
         },
         words: {
-            days: 'days',
-            hours: 'hours',
-            minutes: 'minutes',
             seconds: 'seconds',
+            minutes: 'minutes',
+            hours: 'hours',
+            days: 'days',
+            weeks: 'weeks',
+            months: 'months',
+            years: 'years',
         },
     },
 };
