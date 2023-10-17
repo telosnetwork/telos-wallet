@@ -19,6 +19,8 @@ const { t: $t } = useI18n();
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 
+const tabs = ['attributes', 'transfer'];
+
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 
@@ -71,7 +73,7 @@ const filteredAttributes = computed(() =>
 </script>
 
 <template>
-<AppPage>
+<AppPage :tabs="tabs">
     <template v-slot:header>
         <div
             :class="{
@@ -125,87 +127,91 @@ const filteredAttributes = computed(() =>
         </div>
     </template>
 
-    <div class="c-nft-details__body-container">
-        <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
-        <h4
-            v-else
-            :class="{
-                'q-mb-lg': true,
-                'u-text--center': nft === null,
-            }"
-        >
-            <template v-if="nft === null">
-                {{ $t('nft.collectible_not_found_recommendation') }}
-            </template>
-            <template v-else>
-                {{ $t('global.attributes') }}
-            </template>
-        </h4>
+    <template v-slot:attributes>
+        <div class="c-nft-details__body-container">
+            <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
+            <h4
+                v-else
+                :class="{
+                    'q-mb-lg': true,
+                    'u-text--center': nft === null,
+                }"
+            >
+                <template v-if="nft === null">
+                    {{ $t('nft.collectible_not_found_recommendation') }}
+                </template>
+                <template v-else>
+                    {{ $t('global.attributes') }}
+                </template>
+            </h4>
 
-        <div
-            :class="{
-                'c-nft-details__attributes-container': true,
-                'c-nft-details__attributes-container--not-found': nft === null && !loading,
-            }"
-        >
-            <template v-if="loading">
-                <q-skeleton
-                    v-for="index in 9"
-                    :key="`nft-detail-body-skeleton-${index}`"
-                    class="c-nft-details__attribute-skeleton"
-                />
-            </template>
+            <div
+                :class="{
+                    'c-nft-details__attributes-container': true,
+                    'c-nft-details__attributes-container--not-found': nft === null && !loading,
+                }"
+            >
+                <template v-if="loading">
+                    <q-skeleton
+                        v-for="index in 9"
+                        :key="`nft-detail-body-skeleton-${index}`"
+                        class="c-nft-details__attribute-skeleton"
+                    />
+                </template>
 
-            <template v-else-if="nft === null">
-                <NumberedList>
-                    <template v-slot:1>
-                        <p>
-                            {{ $t('nft.collectible_not_found_contract_part_1') }}
-                            <span class="o-text--paragraph-bold">
-                                {{ $t('nft.collectible_not_found_contract_part_2_bold') }}
-                            </span>
-                            {{ $t('nft.collectible_not_found_contract_part_3') }}
+                <template v-else-if="nft === null">
+                    <NumberedList>
+                        <template v-slot:1>
+                            <p>
+                                {{ $t('nft.collectible_not_found_contract_part_1') }}
+                                <span class="o-text--paragraph-bold">
+                                    {{ $t('nft.collectible_not_found_contract_part_2_bold') }}
+                                </span>
+                                {{ $t('nft.collectible_not_found_contract_part_3') }}
 
-                            <template v-if="contractAddressIsValid">
-                                {{ $t('nft.collectible_not_found_contract_part_4') }}
-                                <br>
-                                <ExternalLink :text="contractAddress" :url="contractLink" />
-                            </template>
+                                <template v-if="contractAddressIsValid">
+                                    {{ $t('nft.collectible_not_found_contract_part_4') }}
+                                    <br>
+                                    <ExternalLink :text="contractAddress" :url="contractLink" />
+                                </template>
 
-                            <template v-else>
-                                {{ $t('nft.collectible_not_found_contract_invalid') }}
-                            </template>
-                        </p>
-                    </template>
+                                <template v-else>
+                                    {{ $t('nft.collectible_not_found_contract_invalid') }}
+                                </template>
+                            </p>
+                        </template>
 
-                    <template v-slot:2>
-                        <p>
-                            {{ $t('nft.collectible_not_found_nft_id_part_1') }}
-                            <span class="o-text--paragraph-bold">
-                                {{ $t('global.id') }}
-                            </span>
-                            {{ $t('nft.collectible_not_found_nft_id_part_3') }}
-                        </p>
-                    </template>
-                </NumberedList>
-            </template>
+                        <template v-slot:2>
+                            <p>
+                                {{ $t('nft.collectible_not_found_nft_id_part_1') }}
+                                <span class="o-text--paragraph-bold">
+                                    {{ $t('global.id') }}
+                                </span>
+                                {{ $t('nft.collectible_not_found_nft_id_part_3') }}
+                            </p>
+                        </template>
+                    </NumberedList>
+                </template>
 
-            <template v-else>
-                <p v-if="!nft.attributes?.length">
-                    {{ $t('nft.no_attributes') }}
-                </p>
+                <template v-else>
+                    <p v-if="!nft.attributes?.length">
+                        {{ $t('nft.no_attributes') }}
+                    </p>
 
-                <NftDetailsCard
-                    v-for="(attribute, index) in filteredAttributes"
-                    :key="`nft-attr-${index}`"
-                    :title="attribute.label"
-                    class="q-mb-sm"
-                >
-                    {{ attribute.text }}
-                </NftDetailsCard>
-            </template>
+                    <NftDetailsCard
+                        v-for="(attribute, index) in filteredAttributes"
+                        :key="`nft-attr-${index}`"
+                        :title="attribute.label"
+                        class="q-mb-sm"
+                    >
+                        {{ attribute.text }}
+                    </NftDetailsCard>
+                </template>
+            </div>
         </div>
-    </div>
+    </template>
+    <template v-slot:transfer>
+    </template>
 </AppPage>
 </template>
 
