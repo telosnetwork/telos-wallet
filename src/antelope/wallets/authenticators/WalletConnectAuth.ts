@@ -28,6 +28,7 @@ import {
     EvmFunctionParam,
     TokenClass,
     addressString,
+    erc20Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
     stlosAbiWithdraw,
@@ -90,7 +91,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.usingQR = true;
             } else {
                 const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
-                const sameAddress = providerAddress === address;
+                const sameAddress = providerAddress.toLocaleLowerCase() === address.toLocaleLowerCase();
                 this.usingQR = !sameAddress;
                 this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
             }
@@ -309,7 +310,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
             if (token.isSystem) {
                 return await sendTransaction(this.sendConfig as PrepareSendTransactionResult);
             } else {
-                return await writeContract(this.sendConfig as PrepareWriteContractResult<EvmABI, 'transfer', number>);
+                // prepare variables
+                const value = amount.toHexString();
+                const transferAbi = erc20Abi.filter(abi => abi.name === 'transfer');
+
+                return this.signCustomTransaction(
+                    token.address,
+                    transferAbi,
+                    [to, value],
+                );
             }
         }
     }
