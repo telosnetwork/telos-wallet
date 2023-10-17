@@ -20,7 +20,7 @@ import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useEVMSt
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
-import { formatUnstakePeriod } from 'src/antelope/stores/utils/date-utils';
+import { prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
 
 export interface RexModel {
@@ -55,7 +55,7 @@ export const useRexStore = defineStore(store_name, {
         getEvmRexData: state => (label: string) => state.__rexData[label] as EvmRexModel,
         getNativeRexData: state => (label: string) => state.__rexData[label] as NativeRexModel,
         getUnstakingPeriodString: state => (label: string) =>
-            formatUnstakePeriod(
+            prettyTimePeriod(
                 // period for the label network
                 state.__rexData[label]?.period ?? null,
                 // translation function only takes the key name, without the path and adds the prefix

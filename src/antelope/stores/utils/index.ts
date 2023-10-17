@@ -2,7 +2,6 @@ export * from 'src/antelope/stores/utils/abi/signature';
 import { BigNumber, ethers } from 'ethers';
 import { formatUnits } from '@ethersproject/units';
 import { EvmABIEntry } from 'src/antelope/types';
-import { fromUnixTime, format } from 'date-fns';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { keccak256, toUtf8Bytes } from 'ethers/lib/utils';
@@ -187,46 +186,6 @@ export function getClientIsApple() {
         || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
 }
 
-/**
- *  Given a Date object, return the pretty-printed timezone offset, e.g. "+05:00"
- *
- * @param {Date} date
- * @return {string}
- */
-export function getFormattedUtcOffset(date: Date): string {
-    const pad = (value: number) => value < 10 ? '0' + value : value;
-    const sign = (date.getTimezoneOffset() > 0) ? '-' : '+';
-    const offset = Math.abs(date.getTimezoneOffset());
-    const hours = pad(Math.floor(offset / 60));
-    const minutes = pad(offset % 60);
-    return sign + hours + ':' + minutes;
-}
-
-/**
- * Given a unix timestamp, returns a date in the form of Jan 1, 2023 07:45:22 AM
- *
- * @param epoch
- *
- * @return string
- */
-export function getLongDate(epoch: number): string {
-    const offset = getFormattedUtcOffset(new Date(epoch));
-    return `${format(fromUnixTime(epoch), 'MMM d, yyyy hh:mm:ss a')} (UTC ${offset})`;
-}
-
-
-/**
- * Given a unix timestamp, returns string with the date in a given format showing UTC offset optionally.
- * @param epoch seconds since epoch
- * @param timeFormat a string containing the format of the date to be returned (based on date-fns format)
- * @param showUtc whether to show the UTC offset
- * @returns {string} the formatted date
- */
-export function getFormatedDate(epoch: number, timeFormat = 'MMM d, yyyy hh:mm:ss a', showUtc = false): string {
-    const offset = getFormattedUtcOffset(new Date(epoch));
-    const utc = showUtc ? ` (UTC ${offset})` : '';
-    return `${format(fromUnixTime(epoch), timeFormat)}${utc}`;
-}
 
 /*
 * Determines whether the amount is too large (more than six characters long) to be displayed in full on mobile devices
