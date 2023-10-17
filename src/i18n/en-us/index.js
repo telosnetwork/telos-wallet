@@ -277,6 +277,7 @@ export default {
         search_label: 'Filter by token, allowance, spender, or contract address',
         includes_cancelled_allowances: 'Includes cancelled allowances',
         excludes_cancelled_allowances: 'Does not include cancelled allowances',
+        spender_link_label: 'Go to the block explorer page for the spender contract',
     },
     notification:{
         success_title_trx: 'Success',

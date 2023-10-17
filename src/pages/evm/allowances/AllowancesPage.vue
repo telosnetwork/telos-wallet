@@ -90,7 +90,7 @@ function handleIncludeCancelledUpdated(includeCancelled: boolean) {
     }
 
     &__skeleton-row {
-        height: 32px;
+        height: 48px;
         margin-bottom: 8px;
     }
 }
