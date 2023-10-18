@@ -1,5 +1,8 @@
 <script setup lang="ts">
+<<<<<<< HEAD
 import { ref, onMounted } from 'vue';
+=======
+>>>>>>> 40628579b7025e0294fb7fd180ab0e23202582f7
 import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
@@ -7,8 +10,11 @@ import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.
 import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
+<<<<<<< HEAD
 import { shapedAllowanceRows } from 'src/pages/evm/allowances/temp-allowances-fixtures';
 
+=======
+>>>>>>> 40628579b7025e0294fb7fd180ab0e23202582f7
 const { t: $t } = useI18n();
 
 const asideHeader = $t('evm_allowances.aside_header');
@@ -28,6 +34,7 @@ const asideContent = [{
     bold: false,
 }];
 
+<<<<<<< HEAD
 // data
 const loading = ref(true);
 
@@ -39,6 +46,10 @@ onMounted(() => {
     }, 2000);
 });
 
+=======
+
+// methods
+>>>>>>> 40628579b7025e0294fb7fd180ab0e23202582f7
 function handleSearchUpdated(searchText: string) {
     console.log('Search updated', searchText);
 }
