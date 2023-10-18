@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface } from 'src/antelope/types';
+import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface, AntelopeError } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
@@ -280,7 +280,7 @@ export const useNftsStore = defineStore(store_name, {
                 return nfts;
             } catch {
                 this.__contracts[network][contract].list = [];
-                // eztodo error
+                throw new AntelopeError('antelope.nfts.error_fetching_collection_nfts');
             } finally {
                 feedbackStore.unsetLoading('fetchNftsFromCollection');
                 this.__contracts[network][contract].loading = false;

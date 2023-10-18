@@ -282,6 +282,7 @@ export default {
         includes_cancelled_allowances: 'Includes cancelled allowances',
         excludes_cancelled_allowances: 'Does not include cancelled allowances',
         spender_link_label: 'Go to the block explorer page for the spender contract',
+        asset_logo_alt: 'Logo for {symbol}',
     },
     notification:{
         success_title_trx: 'Success',
@@ -620,6 +621,9 @@ export default {
         wrap: {
             error_getting_wrapped_contract: 'An error occurred while getting the wrapped system token contract',
             error_wrap: 'An unknown error occurred while wrapping system token',
+        },
+        nfts: {
+            error_fetching_collection_nfts: 'An unknown error occurred while fetching collection NFTs',
         },
         words: {
             seconds: 'seconds',
