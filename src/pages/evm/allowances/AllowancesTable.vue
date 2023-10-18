@@ -7,7 +7,7 @@ import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 
 import AllowancesTableRow from 'pages/evm/allowances/AllowancesTableRow.vue';
 import TableControls from 'components/evm/TableControls.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     rows: ShapedAllowanceRow[];
@@ -68,12 +68,20 @@ const tableColumns = [
         sortable: true,
     },
 ];
+
+const tableRows = computed(() => {
+    const { page, rowsPerPage } = pagination.value;
+    const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return props.rows.slice(start, end);
+});
 </script>
 
 <template>
 <q-table
     :columns="tableColumns"
-    :rows="rows"
+    :rows="tableRows"
     :binary-state-sort="true"
     :pagination="{ rowsPerPage: 0 }"
     hide-pagination
@@ -94,15 +102,9 @@ const tableColumns = [
     </template>
 
     <template v-slot:body="props">
-        <AllowancesTableRow :row="props.row" />
+        <AllowancesTableRow :key="props.row.collectionAddress" :row="props.row" />
     </template>
 </q-table>
 
-<TableControls :pagination="pagination" />
+<TableControls :pagination="pagination" @pagination-updated="pagination = $event"/>
 </template>
-
-<style lang="scss">
-.c-allowances-table {
-
-}
-</style>
