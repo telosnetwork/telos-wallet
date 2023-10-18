@@ -379,57 +379,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return `${token.symbol}-${token.address}-${this.getNetwork()}`;
     }
 
-    /**
-     * This method returns the cached value for the requested contract which can be one of three values:
-     * - Promise<EvmContract> if the contract is already cached
-     * - Promise<null> if the contract was never requested before
-     * - Promise<false> if the contract was requested, not found and set as not existing (to avoid requesting it again)
-     * @param address contract requested
-     * @returns Promise for the requested contract or false if it doesn't exist
-     */
-    async getContract(address: string): Promise<EvmContract | false | null> {
-        const key = address.toLowerCase();
-        const returnValue = this.contracts[key]?.promise ?? null;
-        if (!this.contracts[key]) {
-            this.contracts[key] = {
-                promise: Promise.resolve(false),
-            };
-            this.contracts[key].promise = new Promise((resolve) => {
-                this.contracts[key].resolve = resolve;
-            });
-        }
-        return returnValue;
-    }
-
-    /**
-     * This method adds a contract to the cache and resolves the promise for it
-     * @param address address of the contract
-     * @param contract contract instance to be cached
-     */
-    addContract(address: string, contract: EvmContract | false) {
-        const key = address.toLowerCase();
-        if (!this.contracts[key]) {
-            this.contracts[key] = {
-                promise: Promise.resolve(contract),
-            };
-        } else {
-            if (this.contracts[key].resolve) {
-                this.contracts[key].resolve?.(contract);
-            } else {
-                console.error('Error: Contract already exists', address);
-            }
-        }
-    }
-
-    /**
-     * This method sets a contract as not existing and resolves the promise to false for it.
-     * This is done to distinguish between a contract that was never requested before and one that was requested and not found.
-     * @param address address of the contract
-     */
-    setContractAsNotExisting(address: string) {
-        return this.addContract(address, false);
-    }
-
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
         const address = filter.address;
         const limit = filter.limit;
@@ -545,7 +494,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(response => response.data as AbiSignature);
     }
 
-    async getContractCreation(address: string): Promise<EvmContractCreationInfo> {
+    async fetchContractCreationInfo(address: string): Promise<EvmContractCreationInfo> {
         return this.hyperion.get(`/v2/evm/get_contract?contract=${address}`)
             .then(response => response.data as EvmContractCreationInfo);
     }
