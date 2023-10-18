@@ -25,6 +25,8 @@ import { usePlatformStore } from 'src/antelope/stores/platform';
 import {
     AntelopeError,
     EvmABI,
+    EvmTransactionResponse,
+    NftTokenInterface,
     TokenClass,
     addressString,
     escrowAbiWithdraw,
@@ -256,6 +258,12 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 return await writeContract(this.sendConfig as PrepareWriteContractResult<EvmABI, 'transfer', number>);
             }
         }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | undefined> {
+        // @TODO
+        return;
     }
 
     readyForTransfer(): boolean {

@@ -8,7 +8,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
+import { AntelopeError, EvmTransactionResponse, ExceptionError, NftTokenInterface, TokenClass, addressString } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
@@ -36,6 +36,7 @@ export abstract class EVMAuthenticator {
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
     abstract getSigner(): Promise<ethers.Signer>;
+    abstract transferNft(contract: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | WriteContractResult | undefined>;
 
     // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;

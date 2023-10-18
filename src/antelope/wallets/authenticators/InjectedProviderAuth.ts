@@ -5,9 +5,11 @@ import { BehaviorSubject, filter, map } from 'rxjs';
 import { useContractStore, useEVMStore, useFeedbackStore, useRexStore } from 'src/antelope';
 import {
     AntelopeError,
+    ERC1155_TYPE,
     ERC20_TYPE,
     EthereumProvider,
     EvmTransactionResponse,
+    NftTokenInterface,
     TokenClass,
     addressString,
     wtlosAbiDeposit,
@@ -237,6 +239,21 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
                 return contractInstance.transfer(to, amountInWei);
             } else {
                 throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: token.address });
+            }
+        }
+    }
+
+    async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | undefined> {
+        this.trace('transferNft', contractAddress, tokenId, type, to);
+        if (type === ERC1155_TYPE) {
+            console.log(ERC1155_TYPE);
+        } else {
+            const contract = await useContractStore().getContract(this.label, contractAddress);
+            if (contract) {
+                const contractInstance = await contract.getContractInstance();
+                return contractInstance['safeTransferFrom(address,address,uint256)'](from, to, tokenId);
+            } else {
+                throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
             }
         }
     }

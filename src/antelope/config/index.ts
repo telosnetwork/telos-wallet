@@ -4,6 +4,7 @@ import { getAntelope } from 'src/antelope';
 import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
+    // @TODO rename this method, it's used for token and NFT transfers as well
     wrapError(description: string, error: unknown): AntelopeError {
         if (error instanceof AntelopeError) {
             return error as AntelopeError;

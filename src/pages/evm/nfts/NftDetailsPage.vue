@@ -23,13 +23,16 @@ const chainStore = useChainStore();
 const accountStore = useAccountStore();
 
 const tabs = ['attributes', 'transfer'];
-const address = '';
+const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+let addressIsValid = false;
 
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
+const address = ref('');
 
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
+let nftType: ERC1155_TYPE | ERC721_TYPE | null = null;
 
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
@@ -38,18 +41,15 @@ onBeforeMount(async () => {
 
         if (erc721Details) {
             nft.value = erc721Details;
+            nftType = ERC721_TYPE;
         } else if (erc1155Details) {
             nft.value = erc1155Details;
+            nftType = ERC1155_TYPE;
         }
         loading.value = false;
     }
 });
 
-// data
-const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
-const addressIsValid = false;
-
-// computed
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
@@ -78,7 +78,9 @@ const loggedAccount = computed(() =>
     accountStore.loggedEvmAccount,
 );
 
-const startTransfer = () => console.log('test');
+async function startTransfer(){
+    await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value);
+}
 
 </script>
 
@@ -442,6 +444,10 @@ const startTransfer = () => console.log('test');
 
         &--small{
             font-size: 16px;
+                // override UserInfo component styling
+            .o-text--header-4{
+                font-size: 16px !important;
+            }
         }
 
         &--bold{
@@ -450,7 +456,7 @@ const startTransfer = () => console.log('test');
     }
 }
 
-// refactor as global
+// refactor as global used in several places
 .q-btn.wallet-btn {
     @include text--header-5;
     &+& {
@@ -458,8 +464,4 @@ const startTransfer = () => console.log('test');
     }
 }
 
-// override UserInfo component styling
-.o-text--header-4{
-    font-size: 16px !important;
-}
 </style>

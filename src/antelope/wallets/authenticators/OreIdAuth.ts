@@ -2,6 +2,7 @@ import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject, UserChainA
 import { BigNumber, ethers } from 'ethers';
 import { WebPopup } from 'oreid-webpopup';
 import {
+    NftTokenInterface,
     erc20Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
@@ -244,6 +245,12 @@ export class OreIdAuth extends EVMAuthenticator {
         }
 
         return this.performOreIdTransaction(from, transactionBody);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | undefined> {
+        // @TODO
+        return;
     }
 
     async prepareTokenForTransfer(token: TokenClass | null, amount: ethers.BigNumber, to: string): Promise<void> {
