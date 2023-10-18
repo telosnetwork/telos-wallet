@@ -7,6 +7,7 @@ import {
     AntelopeError,
     ERC1155_TYPE,
     ERC20_TYPE,
+    ERC721_TYPE,
     EthereumProvider,
     EvmTransactionResponse,
     NftTokenInterface,
@@ -244,17 +245,17 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     }
 
     async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | undefined> {
-        this.trace('transferNft', contractAddress, tokenId, type, to);
-        if (type === ERC1155_TYPE) {
-            console.log(ERC1155_TYPE);
-        } else {
-            const contract = await useContractStore().getContract(this.label, contractAddress);
-            if (contract) {
-                const contractInstance = await contract.getContractInstance();
+        this.trace('transferNft', contractAddress, tokenId, type, from, to);
+        const contract = await useContractStore().getContract(this.label, contractAddress);
+        if (contract) {
+            const contractInstance = await contract.getContractInstance();
+            if (type === ERC721_TYPE){
                 return contractInstance['safeTransferFrom(address,address,uint256)'](from, to, tokenId);
-            } else {
-                throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
+            }else if (type === ERC1155_TYPE){
+                return contractInstance['safeTransferFrom(address,address,uint256,bytes)'](from, to, tokenId, 1);
             }
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
         }
     }
 
