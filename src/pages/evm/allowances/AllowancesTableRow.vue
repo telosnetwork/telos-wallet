@@ -171,7 +171,7 @@ onMounted(async () => {
         <img
             v-if="isErc20Row"
             :src="rowAsErc20Row.tokenLogo ?? tlosLogo"
-            alt="eztodo"
+            :alt="$t('evm_allowances.asset_logo_alt', { symbol: rowAsErc20Row.tokenSymbol })"
             height="24"
             width="24"
             :class="{
