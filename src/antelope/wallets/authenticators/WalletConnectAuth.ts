@@ -19,7 +19,7 @@ import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { useEVMStore } from 'src/antelope/stores/evm';
+import { useContractStore } from 'src/antelope/stores/contract';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import {
@@ -298,7 +298,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                     chainId: +useChainStore().getChain(this.label).settings.getChainId(),
                 });
             } else {
-                const abi = useEVMStore().getTokenABI(token.type);
+                const abi = useContractStore().getTokenABI(token.type);
                 const functionName = 'transfer';
                 this.sendConfig = await prepareWriteContract({
                     chainId: +useChainStore().getChain(this.label).settings.getChainId(),

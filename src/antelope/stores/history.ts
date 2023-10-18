@@ -126,7 +126,7 @@ export const useHistoryStore = defineStore(store_name, {
             }
 
             const chain = useChainStore().getChain(label);
-            const chain_settings = chain.settings as EVMChainSettings;
+            const chainSettings = chain.settings as EVMChainSettings;
             const contractStore = useContractStore();
 
 
@@ -143,7 +143,7 @@ export const useHistoryStore = defineStore(store_name, {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
 
-                const transactionsResponse = await chain_settings.getEVMTransactions(toRaw(this.__evm_filter));
+                const transactionsResponse = await chainSettings.getEVMTransactions(toRaw(this.__evm_filter));
                 const contracts = transactionsResponse.contracts;
                 const transactions = transactionsResponse.results;
 
@@ -161,7 +161,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                 // cache contracts
                 contractAddresses.forEach((address) => {
-                    contractStore.addContractToCache(address, parsedContracts[address]);
+                    contractStore.createAndStoreContract(label, address, parsedContracts[address]);
                 });
 
                 this.setEVMTransactions(label, transactions);
@@ -222,7 +222,7 @@ export const useHistoryStore = defineStore(store_name, {
                         };
                     });
                     contractAddresses.forEach((address) => {
-                        contractStore.addContractToCache(address, parsedContracts[address]);
+                        contractStore.createAndStoreContract(label, address, parsedContracts[address]);
                     });
                 });
 
@@ -255,13 +255,12 @@ export const useHistoryStore = defineStore(store_name, {
             const userStore = useUserStore();
             const chain = useChainStore().getChain(label);
             const nftStore = useNftsStore();
-            const chain_settings = chain.settings as EVMChainSettings;
+            const chainSettings = chain.settings as EVMChainSettings;
             const contractStore = useContractStore();
-            const chainSettings = (chain.settings as EVMChainSettings);
             const tlosInUsd = await chainSettings.getUsdPrice();
 
             const transactionShapePromises = transactions.map(async (tx) => {
-                const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(tx);
+                const erc20Transfers = await contractStore.getErc20TransfersFromTransaction(label, tx);
                 const userAddressLower = this.__evm_filter.address.toLowerCase();
 
                 const gasUsedInTlosBn = BigNumber.from(tx.gasPrice).mul(tx.gasused);
@@ -272,8 +271,8 @@ export const useHistoryStore = defineStore(store_name, {
                 const systemTokenDecimals = chainSettings.getSystemToken().decimals;
 
                 // all contracts in transactions are already cached, no need to use getContract
-                const toPrettyName = contractStore.__cachedContracts[tx.to?.toLowerCase()]?.name ?? '';
-                const fromPrettyName = contractStore.__cachedContracts[tx.from?.toLowerCase()]?.name ?? '';
+                const toPrettyName = contractStore.getContractIfStored(label, tx.to?.toLowerCase() ?? '')?.name ?? '';
+                const fromPrettyName = contractStore.getContractIfStored(label, tx.from?.toLowerCase() ?? '')?.name ?? '';
 
                 const valuesIn: TransactionValueData[] = [];
                 const valuesOut: TransactionValueData[] = [];
@@ -287,7 +286,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                 if (!isContractCreation && tx.to && tx.to.toLowerCase() !== userAddressLower) {
                     // if the user interacted with a contract, the 'to' field is that contract's address
-                    const contract = await contractStore.getContract(tx.to);
+                    const contract = await contractStore.getContract(label, tx.to);
                     if (contract && contract.abi) {
                         functionName = await contractStore.getFunctionNameFromTransaction(tx, contract);
                     }
@@ -366,7 +365,7 @@ export const useHistoryStore = defineStore(store_name, {
                                     userStore.fiatCurrency,
                                     tokenXfer.address,
                                     tokenXfer.symbol,
-                                    chain_settings.getNetwork(),
+                                    chainSettings.getNetwork(),
                                 );
 
                                 const tokenFiatPriceStr = tokenFiatPriceData?.str;
