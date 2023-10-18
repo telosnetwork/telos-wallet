@@ -18,7 +18,7 @@ const loading = ref(true);
 const collectionNfts = ref<NFTClass[]>([]);
 
 // computed
-const nfts = computed(() => [...collectionNfts.value].splice(0, 3));
+const nfts = computed(() => collectionNfts.value.slice(0, 3));
 
 // watch
 watch(nfts, () => {
