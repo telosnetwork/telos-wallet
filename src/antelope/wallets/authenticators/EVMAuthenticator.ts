@@ -8,7 +8,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
+import { AntelopeError, EvmABI, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
@@ -25,6 +25,7 @@ export abstract class EVMAuthenticator {
     abstract logout(): Promise<void>;
     abstract getSystemTokenBalance(address: addressString | string): Promise<BigNumber>;
     abstract getERC20TokenBalance(address: addressString | string, tokenAddress: addressString | string): Promise<BigNumber>;
+    abstract signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;
     abstract transferTokens(token: TokenClass, amount: BigNumber, to: addressString | string): Promise<EvmTransactionResponse | SendTransactionResult | WriteContractResult>;
     abstract prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string): Promise<void>;
     abstract wrapSystemToken(amount: BigNumber): Promise<EvmTransactionResponse | WriteContractResult>;

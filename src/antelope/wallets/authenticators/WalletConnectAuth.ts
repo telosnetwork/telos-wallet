@@ -25,6 +25,7 @@ import { usePlatformStore } from 'src/antelope/stores/platform';
 import {
     AntelopeError,
     EvmABI,
+    EvmFunctionParam,
     TokenClass,
     addressString,
     escrowAbiWithdraw,
@@ -240,6 +241,22 @@ export class WalletConnectAuth extends EVMAuthenticator {
         const chainId = +useChainStore().getChain(this.label).settings.getChainId();
         const balance = await fetchBalance({ address, chainId, token }).then(balanceBn => balanceBn.value);
         return BigNumber.from(balance);
+    }
+
+    async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<SendTransactionResult | WriteContractResult> {
+        this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
+        // TODO: implement this method and remove this comment
+        // https://github.com/telosnetwork/telos-wallet/issues/626
+
+        const method = abi[0].name;
+        if (abi.length > 1) {
+            console.warn(
+                `signCustomTransaction: abi contains more than one function,
+                we asume the first one (${method}) is the one to be called`,
+            );
+        }
+
+        return Promise.resolve({} as SendTransactionResult);
     }
 
     async transferTokens(token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult | WriteContractResult> {
