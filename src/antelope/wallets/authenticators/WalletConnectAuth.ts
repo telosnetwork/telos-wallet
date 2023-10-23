@@ -19,7 +19,7 @@ import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { useEVMStore } from 'src/antelope/stores/evm';
+import { useContractStore } from 'src/antelope/stores/contract';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import {
@@ -28,6 +28,7 @@ import {
     EvmFunctionParam,
     TokenClass,
     addressString,
+    erc20Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
     stlosAbiWithdraw,
@@ -90,7 +91,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 this.usingQR = true;
             } else {
                 const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
-                const sameAddress = providerAddress === address;
+                const sameAddress = providerAddress.toLocaleLowerCase() === address.toLocaleLowerCase();
                 this.usingQR = !sameAddress;
                 this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
             }
@@ -214,7 +215,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     // having this two properties attached to the authenticator instance may bring some problems
-    // so after we use them we nned to clear them to avoid that problems
+    // so after we use them we need to clear them to avoid that problems
     clearAuthenticator(): void {
         this.trace('clearAuthenticator');
         this.usingQR = false;
@@ -243,21 +244,46 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return BigNumber.from(balance);
     }
 
-    async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<SendTransactionResult | WriteContractResult> {
+    async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<WriteContractResult> {
         this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
-        // TODO: implement this method and remove this comment
-        // https://github.com/telosnetwork/telos-wallet/issues/626
 
         const method = abi[0].name;
         if (abi.length > 1) {
             console.warn(
                 `signCustomTransaction: abi contains more than one function,
-                we asume the first one (${method}) is the one to be called`,
+                we assume the first one (${method}) is the one to be called`,
             );
         }
 
-        return Promise.resolve({} as SendTransactionResult);
+        const chainSettings = this.getChainSettings();
+
+        const config = {
+            chainId: +chainSettings.getChainId(),
+            address: contract,
+            abi: abi,
+            functionName: method,
+            args: parameters,
+        } as {
+            chainId: number;
+            address: addressString;
+            abi: EvmABI;
+            functionName: string;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            args: any[];
+            value?: bigint;
+        };
+
+        if (value) {
+            config.value = BigInt(value.toString());
+        }
+
+        this.trace('signCustomTransaction', 'prepareWriteContract ->', config);
+        const sendConfig = await prepareWriteContract(config);
+
+        this.trace('signCustomTransaction', 'writeContract ->', sendConfig);
+        return await writeContract(sendConfig);
     }
+
 
     async transferTokens(token: TokenClass, amount: BigNumber, to: addressString): Promise<SendTransactionResult | WriteContractResult> {
         this.trace('transferTokens', token, amount, to);
@@ -270,7 +296,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
             if (token.isSystem) {
                 return await sendTransaction(this.sendConfig as PrepareSendTransactionResult);
             } else {
-                return await writeContract(this.sendConfig as PrepareWriteContractResult<EvmABI, 'transfer', number>);
+                // prepare variables
+                const value = amount.toHexString();
+                const transferAbi = erc20Abi.filter(abi => abi.name === 'transfer');
+
+                return this.signCustomTransaction(
+                    token.address,
+                    transferAbi,
+                    [to, value],
+                );
             }
         }
     }
@@ -315,7 +349,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
                     chainId: +useChainStore().getChain(this.label).settings.getChainId(),
                 });
             } else {
-                const abi = useEVMStore().getTokenABI(token.type);
+                const abi = useContractStore().getTokenABI(token.type);
                 const functionName = 'transfer';
                 this.sendConfig = await prepareWriteContract({
                     chainId: +useChainStore().getChain(this.label).settings.getChainId(),
@@ -337,96 +371,76 @@ export class WalletConnectAuth extends EVMAuthenticator {
     }
 
     async wrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
-        this.trace('wrapSystemToken', amount.toString());
+        this.trace('wrapSystemToken', amount);
+
+        // prepare variables
         const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
 
-        const config = {
-            chainId: +chainSettings.getChainId(),
-            address: wrappedSystemTokenContractAddress,
-            abi: wtlosAbiDeposit,
-            functionName: 'deposit',
-            args: [],
-            value: BigInt(amount.toString()),
-        };
-        this.trace('wrapSystemToken', 'prepareWriteContract ->', config);
-        const sendConfig = await prepareWriteContract(config);
-
-        this.trace('wrapSystemToken', 'writeContract ->', sendConfig);
-        return await writeContract(sendConfig);
+        return this.signCustomTransaction(
+            wrappedSystemTokenContractAddress,
+            wtlosAbiDeposit,
+            [],
+            amount,
+        );
     }
 
     async unwrapSystemToken(amount: BigNumber): Promise<WriteContractResult> {
-        this.trace('unwrapSystemToken', amount.toString());
+        this.trace('unwrapSystemToken', amount);
+
+        // prepare variables
         const chainSettings = this.getChainSettings();
         const wrappedSystemTokenContractAddress = chainSettings.getWrappedSystemToken().address as addressString;
 
-        const sendConfig = await prepareWriteContract({
-            chainId: +chainSettings.getChainId(),
-            address: wrappedSystemTokenContractAddress,
-            abi: wtlosAbiWithdraw,
-            functionName: 'withdraw',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            args: [amount] as any[],
-        });
-
-        return await writeContract(sendConfig);
+        return this.signCustomTransaction(
+            wrappedSystemTokenContractAddress,
+            wtlosAbiWithdraw,
+            [amount.toString()],
+        );
     }
 
     async stakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
-        this.trace('stakeSystemTokens', amount.toString());
+        this.trace('stakeSystemTokens', amount);
+
+        // prepare variables
         const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
 
-        console.assert(stlosAbiDeposit.length === 1, 'warning: we are assuming stlosAbiDeposit has only one method');
-        const sendConfig = await prepareWriteContract({
-            chainId: +useChainStore().getChain(this.label).settings.getChainId(),
-            address: stakedSystemTokenContractAddress,
-            abi: stlosAbiDeposit,
-            functionName: stlosAbiDeposit[0].name,
-            args: [],
-            value: BigInt(amount.toString()),
-        });
-
-        return await writeContract(sendConfig);
+        return this.signCustomTransaction(
+            stakedSystemTokenContractAddress,
+            stlosAbiDeposit,
+            [],
+            amount,
+        );
     }
 
     async unstakeSystemTokens(amount: BigNumber): Promise<WriteContractResult> {
-        this.trace('unstakeSystemTokens', amount.toString());
+        this.trace('unstakeSystemTokens', amount);
+
+        // prepare variables
         const chainSettings = this.getChainSettings();
         const stakedSystemTokenContractAddress = chainSettings.getStakedSystemToken().address as addressString;
         const address = this.getAccountAddress();
 
-        const sendConfig = await prepareWriteContract({
-            chainId: +chainSettings.getChainId(),
-            address: stakedSystemTokenContractAddress,
-            abi: stlosAbiWithdraw,
-            functionName: 'withdraw',
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            args: [amount, address, address] as any[],
-        });
-
-        const trx = await writeContract(sendConfig);
-
-        this.trace('unstakeSystemTokens', '--> trx:', trx);
-        return trx;
+        return this.signCustomTransaction(
+            stakedSystemTokenContractAddress,
+            stlosAbiWithdraw,
+            [amount.toString(), address, address],
+        );
     }
 
-    async withdrawUnstakedTokens() : Promise<WriteContractResult> {
+    async withdrawUnstakedTokens(): Promise<WriteContractResult> {
         this.trace('withdrawUnstakedTokens');
 
+        // prepare variables
         const chainSettings = this.getChainSettings();
         const escrowContractAddress = chainSettings.getEscrowContractAddress();
 
-        const sendConfig = await prepareWriteContract({
-            chainId: +chainSettings.getChainId(),
-            address: escrowContractAddress,
-            abi: escrowAbiWithdraw,
-            functionName: 'withdraw',
-            args: [],
-        });
-
-        return await writeContract(sendConfig);
+        return this.signCustomTransaction(
+            escrowContractAddress,
+            escrowAbiWithdraw,
+            [],
+        );
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
