@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
@@ -16,6 +16,7 @@ import { isValidAddressFormat } from 'src/antelope/stores/utils';
 import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
+const router = useRouter();
 const { t: $t } = useI18n();
 
 const ant = getAntelope();
@@ -23,10 +24,10 @@ const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
 
-const tabs = ['attributes', 'transfer'];
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 let addressIsValid = false;
 
+const tabs = ref<String[]>(['attributes', 'transfer']);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 const address = ref('');
@@ -80,17 +81,18 @@ const loggedAccount = computed(() =>
 );
 
 async function startTransfer(){
+
     const nameString = `${nft.value.contractPrettyName || nft.value.contractAddress} #${nft.value.id}`;
     const dismiss = ant.config.notifyNeutralMessageHandler(
         $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
     );
     try{
         const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value);
-        const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
         dismiss();
         ant.config.notifySuccessfulTrxHandler(
-            `${chain_settings.getExplorerUrl()}/tx/${trx.hash}`,
+            `${explorerUrl}/tx/${trx.hash}`,
         );
+        router.push({ query: { tab: 'attributes' } });
     }catch(e){
         console.error(e); // tx error notification handled in store
     }
