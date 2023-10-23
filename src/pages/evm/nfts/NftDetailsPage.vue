@@ -81,7 +81,6 @@ const loggedAccount = computed(() =>
 );
 
 async function startTransfer(){
-
     const nameString = `${nft.value.contractPrettyName || nft.value.contractAddress} #${nft.value.id}`;
     const dismiss = ant.config.notifyNeutralMessageHandler(
         $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
@@ -93,6 +92,7 @@ async function startTransfer(){
             `${explorerUrl}/tx/${trx.hash}`,
         );
         router.push({ query: { tab: 'attributes' } });
+        tabs.value.pop(); // remove 'transfer' tab option
     }catch(e){
         console.error(e); // tx error notification handled in store
     }
