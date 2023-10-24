@@ -27,7 +27,10 @@ const accountStore = useAccountStore();
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 let addressIsValid = false;
 
-const tabs = ref<String[]>(['attributes', 'transfer']);
+const ATTRIBUTES = 'attributes';
+const TRANSFER = 'transfer';
+
+const tabs = ref<String[]>([ATTRIBUTES, TRANSFER]);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 const address = ref('');
@@ -108,7 +111,7 @@ async function startTransfer(){
 }
 
 function removeTransferTab(){
-    tabs.value.splice(tabs.value.findIndex(item => item === 'transfer'), 1);
+    tabs.value.splice(tabs.value.findIndex(item => item === TRANSFER), 1);
 }
 
 </script>
