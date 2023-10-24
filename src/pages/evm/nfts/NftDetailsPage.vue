@@ -82,15 +82,20 @@ const loggedAccount = computed(() =>
 
 async function startTransfer(){
     const nameString = `${nft.value.contractPrettyName || nft.value.contractAddress} #${nft.value.id}`;
-    const dismiss = ant.config.notifyNeutralMessageHandler(
-        $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
-    );
     try{
         const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value);
-        dismiss();
-        ant.config.notifySuccessfulTrxHandler(
-            `${explorerUrl}/tx/${trx.hash}`,
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
         );
+        trx.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${explorerUrl}/tx/${trx.hash}`,
+            );
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            dismiss();
+        });
         router.push({ query: { tab: 'attributes' } });
         tabs.value.pop(); // remove 'transfer' tab option
     }catch(e){

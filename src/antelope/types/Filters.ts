@@ -40,4 +40,5 @@ export interface IndexerTransfersFilter {
     startBlock?: number; // first block to include in the query
     contract?: string; // filter by contract address
     includeAbi?: boolean; // indicate whether to include abi
+    tokenId?: number; // optional id for an NFT in a given collection
 }
