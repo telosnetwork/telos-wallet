@@ -6,7 +6,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
 import { NFTClass, ShapedTransactionRow } from 'src/antelope/types';
 
-import { getFormattedDate } from 'src/antelope/stores/utils/date-utils';
+import { DEFAULT_DATE_FORMAT, getFormattedDate } from 'src/antelope/stores/utils/date-utils';
 import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { getShapedNftName, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
@@ -129,7 +129,7 @@ export default defineComponent({
             return `${this.chainSettings.getExplorerUrl()}/tx/${this.transaction.id}`;
         },
         longDate(): string {
-            return getFormattedDate(this.transaction.epoch, 'MMM d, yyyy hh:mm:ss a', true);
+            return getFormattedDate(this.transaction.epoch, DEFAULT_DATE_FORMAT, true);
         },
         chainTokenSymbol(): string {
             return this.chainSettings.getSystemToken().symbol;
