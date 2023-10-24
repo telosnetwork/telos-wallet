@@ -48,6 +48,10 @@ onBeforeMount(async () => {
             nft.value = erc1155Details;
             nftType = ERC1155_TYPE;
         }
+
+        if (nft.value.ownerAddress !== loggedAccount.value.address){
+            removeTransferTab();
+        }
         loading.value = false;
     }
 });
@@ -97,10 +101,14 @@ async function startTransfer(){
             dismiss();
         });
         router.push({ query: { tab: 'attributes' } });
-        tabs.value.pop(); // remove 'transfer' tab option
+        removeTransferTab();
     }catch(e){
         console.error(e); // tx error notification handled in store
     }
+}
+
+function removeTransferTab(){
+    tabs.value.splice(tabs.value.findIndex(item => item === 'transfer'), 1);
 }
 
 </script>
