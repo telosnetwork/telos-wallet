@@ -490,13 +490,4 @@ function removeTab(tab: string){
         }
     }
 }
-
-// refactor as global used in several places
-.q-btn.wallet-btn {
-    @include text--header-5;
-    &+& {
-        margin-left: 16px;
-    }
-}
-
 </style>

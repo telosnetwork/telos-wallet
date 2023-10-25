@@ -402,14 +402,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.q-btn.wallet-btn {
-    @include text--header-5;
-    &+& {
-        margin-left: 16px;
-    }
-}
-
-
 .c-send-page {
     &__title-container {
         flex-direction: column;
