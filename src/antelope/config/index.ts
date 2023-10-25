@@ -210,7 +210,7 @@ export class AntelopeConfig {
         this.__notify_success_copy_handler = handler;
     }
 
-    public setnotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+    public setNotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
         this.__notify_failure_message_handler = handler;
     }
 
