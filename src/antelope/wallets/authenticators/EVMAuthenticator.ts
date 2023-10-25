@@ -37,7 +37,7 @@ export abstract class EVMAuthenticator {
     abstract externalProvider(): Promise<ethers.providers.ExternalProvider>;
     abstract web3Provider(): Promise<ethers.providers.Web3Provider>;
     abstract getSigner(): Promise<ethers.Signer>;
-    abstract transferNft(contract: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | WriteContractResult | undefined>;
+    abstract transferNft(contract: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString, quantity?: number): Promise<EvmTransactionResponse | WriteContractResult | undefined>;
 
     // to easily clone the authenticator
     abstract newInstance(label: string): EVMAuthenticator;
