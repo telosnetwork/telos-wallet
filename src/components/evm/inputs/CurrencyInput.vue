@@ -523,19 +523,7 @@ export default defineComponent({
                 this.inputIsDirty = true;
             }
 
-            // save caret position and number of large number separators (e.g. comma or dot) for later
-            let caretPosition = this.inputElement.selectionStart || 0;
-            const savedLargeNumberSeparatorCount = (this.inputElement.value.match(this.largeNumberSeparatorRegex) || []).length;
-
             this.inputElement.value = val;
-
-            // get information needed to preserve user caret position in case commas/dots are added/removed
-            const newLargeNumberSeparatorCount = (
-                this.inputElement.value.match(this.notIntegerOrDecimalSeparatorRegex) ?? []
-            ).length;
-            const deltaLargeNumberSeparatorCount = newLargeNumberSeparatorCount - savedLargeNumberSeparatorCount;
-
-            this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
 
             // set the indent amount for the symbol label inside the input
             // 1's are 7px, other numbers are 8px, separators like commas are 2px
@@ -554,18 +542,17 @@ export default defineComponent({
 
         // this method sets the caret position in the input element
         setInputCaretPosition(val: number) {
-            this.inputElement.selectionStart = val;
-            this.inputElement.selectionEnd = val;
+            // prevent the input from taking focus when two or more CurrencyInputs use the same v-model (such as on the Staking page)
+            // and this one is only used for displaying the value, rather than for user input
+            if (!this.isReadonly) {
+                this.inputElement.selectionStart = val;
+                this.inputElement.selectionEnd = val;
+            }
         },
 
         // this method is responsible for emitting a new modelValue, as well as performing certain formatting tasks
         // such as ensuring the user cannot paste invalid characters
         handleInput() {
-            if (this.isReadonly || this.isDisabled) {
-                // this prevents an issue on iOS safari where, when there are two inputs on the page and the second is readonly and depends on the first
-                // such as on the staking and wrapping pages, focus is lost when the user enters a value in to the first input
-                return;
-            }
             const zeroWithDecimalSeparator = `0${this.decimalSeparator}`;
 
             const emit = (val: BigNumber) => {
@@ -636,6 +623,10 @@ export default defineComponent({
                     .replace(this.notIntegerOrSeparatorRegex, ''),
             );
 
+            // save caret position and number of large number separators (e.g. comma or dot) for later
+            let caretPosition = this.inputElement.selectionStart || 0;
+            const savedLargeNumberSeparatorCount = (this.inputElement.value.match(this.largeNumberSeparatorRegex) || []).length;
+
             // if input element value is zero-ish, emit 0
             if (['', null, undefined, '0', zeroWithDecimalSeparator, this.decimalSeparator].includes(this.inputElement.value)) {
                 // if the user types a decimal separator in a blank input, add a zero before the separator
@@ -646,8 +637,6 @@ export default defineComponent({
                 emit(BigNumber.from(0));
                 return;
             }
-
-            let caretPosition = this.inputElement.selectionStart || 0;
 
             // don't format or emit if the user is about to type a decimal
             if (
@@ -687,6 +676,14 @@ export default defineComponent({
             } else {
                 newValue = getBigNumberFromLocalizedNumberString(this.inputElement.value, this.decimals, this.locale);
             }
+
+            // get information needed to preserve user caret position in case commas/dots are added/removed
+            const newLargeNumberSeparatorCount = (
+                this.inputElement.value.match(this.notIntegerOrDecimalSeparatorRegex) ?? []
+            ).length;
+            const deltaLargeNumberSeparatorCount = newLargeNumberSeparatorCount - savedLargeNumberSeparatorCount;
+
+            this.setInputCaretPosition(caretPosition + deltaLargeNumberSeparatorCount);
 
             emit(newValue);
         },

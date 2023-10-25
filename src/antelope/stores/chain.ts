@@ -19,7 +19,7 @@ import { defineStore } from 'pinia';
 import {
     CURRENT_CONTEXT,
     useAccountStore,
-    useEVMStore,
+    useContractStore,
     useFeedbackStore,
 } from 'src/antelope';
 
@@ -149,14 +149,19 @@ export const useChainStore = defineStore(store_name, {
         },
         async updateSettings(label: string): Promise<void> {
             this.trace('updateSettings', label);
-            const settings = this.getChain(label).settings as EVMChainSettings;
-            settings.init().then(() => {
-                this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
-                getAntelope().events.onChainIndexerReady.next({ label, ready: true });
-            }).catch((error) => {
+            try {
+                const settings = this.getChain(label).settings as EVMChainSettings;
+                settings.init().then(() => {
+                    this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
+                    getAntelope().events.onChainIndexerReady.next({ label, ready: true });
+                }).catch((error) => {
+                    console.error(error);
+                    throw new Error('antelope.chain.error_settings_not_found');
+                });
+            } catch (error) {
                 console.error(error);
-                throw new Error('antelope.chain.error_settings');
-            });
+                throw new Error('antelope.chain.error_settings_not_found');
+            }
         },
         async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
@@ -175,7 +180,6 @@ export const useChainStore = defineStore(store_name, {
             // first we need the contract instance to be able to execute queries
             this.trace('actualUpdateStakedRatio', label);
             useFeedbackStore().setLoading('actualUpdateStakedRatio');
-            const evm = useEVMStore();
             const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
             const sysToken = chain_settings.getSystemToken();
             const stkToken = chain_settings.getStakedSystemToken();
@@ -185,7 +189,7 @@ export const useChainStore = defineStore(store_name, {
                 this.trace('actualUpdateStakedRatio', label, '-> no authenticator');
                 throw new AntelopeError('antelope.chain.error_no_default_authenticator');
             }
-            const contract = await evm.getContract(authenticator, stkToken.address, stkToken.type);
+            const contract = await useContractStore().getContract(label, stkToken.address, stkToken.type);
             if (!contract) {
                 useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
                 this.trace('actualUpdateStakedRatio', label, '-> no contract');
@@ -194,33 +198,38 @@ export const useChainStore = defineStore(store_name, {
             const contractInstance = await contract.getContractInstance();
             // Now we preview a deposit of 1 SYS to get the ratio
             const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
-            const stakedRatio:ethers.BigNumber = await contractInstance.previewDeposit(oneSys);
+            const stakedRatio = await contractInstance.previewDeposit(oneSys);
             const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
-
             // Finally we update the store
             this.setStakedRatio(label, stakedRatio);
             this.setUnstakedRatio(label, unstakedRatio);
             useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
         },
         async updateStakedRatio(label: string): Promise<void> {
+            this.trace('updateStakedRatio', label);
             const accountModel = useAccountStore().getAccount(label);
-            if (accountModel && accountModel.account) {
-                // if the account is already logged, we can update the staked ratio
-                return this.actualUpdateStakedRatio(label);
-            } else {
-                // if the account is not logged, we need to wait for the login and then update the staked ratio
-                return new Promise((resolve) => {
-                    const sub = getAntelope().events.onAccountChanged.subscribe((result) => {
-                        if (result.label === label) {
-                            sub.unsubscribe();
-                            if (result.account) {
-                                // we need the user to be logged because the way of getting the staked ratio is by
-                                // executing an action from contract and that internally attempts retrieve the account from the provided signer
-                                resolve(this.actualUpdateStakedRatio(label));
+            try {
+                if (accountModel && accountModel.account) {
+                    // if the account is already logged, we can update the staked ratio
+                    return this.actualUpdateStakedRatio(label);
+                } else {
+                    // if the account is not logged, we need to wait for the login and then update the staked ratio
+                    return new Promise((resolve) => {
+                        const sub = getAntelope().events.onAccountChanged.subscribe((result) => {
+                            if (result.label === label) {
+                                sub.unsubscribe();
+                                if (result.account) {
+                                    // we need the user to be logged because the way of getting the staked ratio is by
+                                    // executing an action from contract and that internally attempts retrieve the account from the provided signer
+                                    resolve(this.actualUpdateStakedRatio(label));
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_staked_ratio');
             }
         },
         async updateGasPrice(label: string): Promise<void> {

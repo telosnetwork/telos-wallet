@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useEVMStore, useFeedbackStore } from 'src/antelope';
+import { useContractStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import {
     AntelopeError,
     ERC20_TYPE,
@@ -213,7 +213,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
 
     async getERC20TokenBalance(account: addressString | string, tokenAddress: addressString | string): Promise<ethers.BigNumber> {
         this.trace('getERC20TokenBalance', [account], tokenAddress);
-        const erc20ABI = useEVMStore().getTokenABI(ERC20_TYPE) as AbiItem[];
+        const erc20ABI = useContractStore().getTokenABI(ERC20_TYPE) as AbiItem[];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const web3 = new Web3(this.getProvider() as any);
         const contract = new web3.eth.Contract(erc20ABI, tokenAddress);
