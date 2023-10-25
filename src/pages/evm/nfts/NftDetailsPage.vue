@@ -29,8 +29,9 @@ let addressIsValid = false;
 
 const ATTRIBUTES = 'attributes';
 const TRANSFER = 'transfer';
+const OWNERS = 'owners'; // for 1155 only
 
-const tabs = ref<String[]>([ATTRIBUTES, TRANSFER]);
+const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 const address = ref('');
@@ -47,14 +48,14 @@ onBeforeMount(async () => {
         if (erc721Details) {
             nft.value = erc721Details;
             nftType = ERC721_TYPE;
+            removeTab(OWNERS);
         } else if (erc1155Details) {
             nft.value = erc1155Details;
             nftType = ERC1155_TYPE;
         }
 
         if (nft.value.ownerAddress !== loggedAccount.value.address){
-            removeTransferTab();
-        }
+            removeTab(TRANSFER);
         loading.value = false;
     }
 });
@@ -104,14 +105,14 @@ async function startTransfer(){
             dismiss();
         });
         router.push({ query: { tab: 'attributes' } });
-        removeTransferTab();
+        removeTab(TRANSFER);
     }catch(e){
         console.error(e); // tx error notification handled in store
     }
 }
 
-function removeTransferTab(){
-    tabs.value.splice(tabs.value.findIndex(item => item === TRANSFER), 1);
+function removeTab(tab: string){
+    tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
 }
 
 </script>
