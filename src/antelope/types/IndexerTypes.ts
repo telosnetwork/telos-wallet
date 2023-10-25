@@ -66,7 +66,6 @@ export interface GenericIndexerNft {
     updated: number;
     imageCache?: string;
     tokenUri?: string;
-    owner: string;
     quantity?: number; // present only for ERC1155
     minter?: string;
     blockMinted?: number;
@@ -147,4 +146,16 @@ export interface IndexerHealthResponse {
     blockNumber: number;
     blockTimestamp: string;
     secondsBehind: number;
+}
+
+export interface IndexerTokenHoldersResponse {
+    contracts: {
+        [address: string]: IndexerNftContract;
+    };
+    results: {
+        address: string; // holder address
+        balance: number;
+        tokenid: number;
+        updated: number; // ms since epoch
+    }[];
 }

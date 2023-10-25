@@ -6,25 +6,41 @@ import {
     IndexerNftContract,
     IndexerNftItemAttribute,
     IndexerNftMetadata,
+    IndexerTokenHoldersResponse,
 } from 'src/antelope/types/IndexerTypes';
+import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
+import { useContractStore } from '../stores/contract';
+import { useChainStore } from '../stores/chain';
+import EVMChainSettings from '../chains/EVMChainSettings';
 
 export interface NftAttribute {
     label: string;
     text: string;
 }
 
-export interface NftPrecursorData {
+interface NftPrecursorData {
     name: string;
     id: string;
     metadata: IndexerNftMetadata;
     updated: number; // epoch
 
-    owner?: string; // undefined for ERC1155, as ERC1155 tokens can be owned by multiple addresses; use owners for ERC1155
-    owners?: { [address: string]: number }; // only used for ERC1155; maps owner address to quantity owned
     tokenUri?: string;
     imageCache?: string; // url
     minter?: string; // address
     blockMinted?: number;
+
+    mediaType: NftSourceType;
+    imgSrc?: string;
+    videoSrc?: string;
+    audioSrc?: string;
+}
+
+export interface Erc721NftPrecursorData extends NftPrecursorData {
+    owner: string;
+}
+
+export interface Erc1155NftPrecursorData extends NftPrecursorData {
+    owners: { [address: string]: number };
 }
 
 export type NftSourceType = 'image' | 'video' | 'audio' | 'unknown';
@@ -44,61 +60,34 @@ export type NftRawData = { data: GenericIndexerNft, contract: NFTContractClass }
 /**
  * Construct an NFT from indexer data
  * @param contract The contract this NFT belongs to
- * @param indexerData The indexer data for this NFT; if the token is an ERC1155, this should be an array, as ERC1155 tokens can be owned by multiple addresses, represented by multiple IndexerNftItemResult objects
+ * @param indexerData The indexer data for this NFT
  * @returns The constructed NFT
  */
-export function constructNft(
+export async function constructNft(
     contract: NFTContractClass,
-    indexerData: GenericIndexerNft | GenericIndexerNft[],
-) {
-    const dataIsArray = Array.isArray(indexerData);
+    indexerData: GenericIndexerNft,
+): Promise<Erc721Nft | Erc1155Nft> {
+    const isErc721 = contract.supportedInterfaces.includes('erc721');
+    const isErc1155 = contract.supportedInterfaces.includes('erc1155');
 
-    if (dataIsArray && indexerData.length === 0) {
-        throw new Error('Error constructing NFT: indexerData must not be empty');
-    }
-
-    const data = Array.isArray(indexerData) ? indexerData[0] : indexerData;
-
-    let owner: string | undefined;
-    let owners: { [address: string]: number } | undefined;
-
-    if (dataIsArray) {
-        const allNftsAreTheSame = indexerData.every((item, index, array) => {
-            if (index === 0) {
-                return true;
-            }
-            return item.contract === array[index - 1].contract && item.tokenId === array[index - 1].tokenId;
-        });
-        if (!allNftsAreTheSame) {
-            throw new Error('Error constructing NFT: all input NFTs must have the same contract and tokenId');
-        }
-
-        owners = indexerData.reduce((acc, item) => {
-            const ownerLower = item.owner.toLowerCase();
-            if (!acc[ownerLower]) {
-                acc[ownerLower] = 0;
-            }
-            acc[ownerLower] += item.quantity ?? 0;
-            return acc;
-        }, {} as { [address: string]: number });
-    } else {
-        owner = indexerData.owner;
+    if (!isErc721 && !isErc1155) {
+        throw new Error('Invalid NFT contract type');
     }
 
     try {
-        if (data.metadata !== INVALID_METADATA) {
-            data.metadata = typeof data.metadata === 'string' ? JSON.parse(data.metadata) : data.metadata;
+        if (indexerData.metadata !== INVALID_METADATA) {
+            indexerData.metadata = typeof indexerData.metadata === 'string' ? JSON.parse(indexerData.metadata) : indexerData.metadata;
         } else {
-            data.metadata = {};
+            indexerData.metadata = {};
         }
     } catch (e) {
-        console.error('Error parsing metadata', `"${data.metadata}"`, e);
+        console.error('Error parsing metadata', `"${indexerData.metadata}"`, e);
     }
-    if (!data.metadata || typeof data.metadata !== 'object') {
+    if (!indexerData.metadata || typeof indexerData.metadata !== 'object') {
         // we create a new metadata object with the actual string atributes of the item
-        const list = data as unknown as { [key: string]: unknown };
-        data.metadata =
-            Object.keys(data)
+        const list = indexerData as unknown as { [key: string]: unknown };
+        indexerData.metadata =
+            Object.keys(indexerData)
                 .filter(k => typeof list[k] === 'string')
                 .reduce((obj, key) => {
                     obj[key] = list[key] as string;
@@ -106,21 +95,47 @@ export function constructNft(
                 }, {} as { [key: string]: string });
     }
 
-    return new NFT(
-        {
-            name: (data.metadata?.name ?? '') as string,
-            id: data.tokenId,
-            metadata: data.metadata,
+    const { image, mediaType, mediaSource } = await extractNftMetadata(indexerData.imageCache ?? '', indexerData.tokenUri ?? '', indexerData.metadata ?? {});
+    const commonData: NftPrecursorData = {
+        name: (indexerData.metadata?.name ?? '') as string,
+        id: indexerData.tokenId,
+        metadata: indexerData.metadata,
+        minter: indexerData.minter,
+        tokenUri: indexerData.tokenUri,
+        imageCache: indexerData.imageCache,
+        blockMinted: indexerData.blockMinted,
+        updated: indexerData.updated,
+        mediaType,
+        imgSrc: image,
+        videoSrc: mediaType === NFTSourceTypes.VIDEO ? mediaSource : undefined,
+        audioSrc: mediaType === NFTSourceTypes.AUDIO ? mediaSource : undefined,
+    };
+
+
+    if (isErc721) {
+        const contractStore = useContractStore();
+        const contractInstance = await (await contractStore.getContract(contract.address))?.getContractInstance();
+        const owner = contractInstance?.owner();
+
+        return new Erc721Nft({
+            ...commonData,
             owner,
-            owners,
-            minter: data.minter,
-            tokenUri: data.tokenUri,
-            imageCache: data.imageCache,
-            blockMinted: data.blockMinted,
-            updated: data.updated,
-        },
-        contract,
-    );
+        }, contract);
+    }
+
+    const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+    const indexer = chainSettings.getIndexer();
+    const holdersResponse = (await indexer.get(`/v1/token/${contract}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
+    const holders = holdersResponse.results;
+    const owners = holders.reduce((acc, current) => {
+        acc[current.address] = current.balance;
+        return acc;
+    }, {} as { [address: string]: number });
+
+    return new Erc1155Nft({
+        ...commonData,
+        owners,
+    }, contract);
 }
 
 // NFT classes ------------------
@@ -145,12 +160,8 @@ export class NFTContractClass {
 }
 
 // use constructNft method to build an NFT from indexer data
-export class NFT {
-    private preview: string;
-    private source: string | undefined;
-    private ready = true; // whether the NFT is ready to be displayed in the UI (i.e. it does not have data loading or being processed)
+class NFT {
     private contract: NFTContractClass;
-    private imageCache?: string; // url
 
     readonly name: string;
     readonly id: string;
@@ -159,14 +170,13 @@ export class NFT {
     readonly updated: number; // epoch
     readonly attributes: NftAttribute[];
     readonly mediaType: NftSourceType;
-    readonly owner: string; // ERC721 only
-    readonly owners: { [address: string]: number }; // ERC1155 only
 
     readonly contractPrettyName?: string;
     readonly description?: string;
     readonly tokenUri?: string;
     readonly minter?: string; // address
     readonly blockMinted?: number; // the block number when this NFT was minted
+    readonly imgSrc?: string;
     readonly audioSrc?: string;
     readonly videoSrc?: string;
 
@@ -181,286 +191,49 @@ export class NFT {
         this.name = precursorData.name;
         this.id = precursorData.id;
         this.metadata = precursorData.metadata;
-        this.owner = precursorData.owner ?? '';
-        this.owners = precursorData.owners ?? {};
         this.minter = precursorData.minter;
         this.tokenUri = precursorData.tokenUri;
-        this.imageCache = precursorData.imageCache;
         this.blockMinted = precursorData.blockMinted;
         this.updated = precursorData.updated;
         this.description = precursorData.metadata?.description;
+        this.mediaType = precursorData.mediaType;
 
         this.attributes = ((precursorData.metadata?.attributes || []) as IndexerNftItemAttribute[]).map(attr => ({
             label: attr.trait_type,
             text: attr.value,
         }));
-
-        const { preview, type, source } = this.extractMetadata();
-        this.preview = preview;
-        this.mediaType = type;
-        this.source = source;
-
-        if (this.urlIsVideo(precursorData?.tokenUri ?? '')) {
-            this.videoSrc = precursorData.tokenUri;
-        }
-
-        if (this.urlIsAudio(precursorData?.tokenUri ?? '')) {
-            this.audioSrc = precursorData.tokenUri;
-        }
-    }
-
-    // getters
-    get imageSrc(): string {
-        return this.urlIsPicture(this.preview) ? this.preview : '';
-    }
-
-    get isErc1155(): boolean {
-        return this.contract.supportedInterfaces.includes('erc1155');
-    }
-
-    get isErc721(): boolean {
-        return this.contract.supportedInterfaces.includes('erc721');
-    }
-
-    get numberOfOwners(): number {
-        if (this.isErc721) {
-            return 1;
-        }
-
-        return Object.keys(this.owners).length;
     }
 
     // this key property is useful when used as a key for the v-for directive
     get key(): string {
         return `nft-${this.contractAddress}-${this.id}`;
     }
+}
 
-    get isReady(): boolean {
-        return this.ready;
+export class Erc721Nft extends NFT {
+    readonly owner: string;
+    readonly ownerUpdated: number; // ms since epoch since the owner was last updated
+
+    constructor(
+        precursorData: Erc721NftPrecursorData,
+        contract: NFTContractClass,
+    ) {
+        super(precursorData, contract);
+        this.owner = precursorData.owner;
+        this.ownerUpdated = Date.now();
     }
+}
 
-    private urlIsPicture(url: string): boolean {
-        return Boolean(url.match(/\.(gif|avif|apng|jpe?g|jfif|p?jpe?g|png|svg|webp)$/));
-    }
+export class Erc1155Nft extends NFT {
+    readonly owners: { [address: string]: number };
+    readonly ownersUpdated: number; // ms since epoch since the owner was last updated
 
-    private urlIsVideo(url: string): boolean {
-        return Boolean(url.match(/\.(mp4|webm|ogg)$/));
-    }
-
-    private urlIsAudio(url: string): boolean {
-        return Boolean(url.match(/\.(mp3|wav|aac|webm)$/));
-    }
-
-
-    // methods
-    extractMetadata(): { preview: string, type: NftSourceType, source: string | undefined } {
-        let type: NftSourceType = NFTSourceTypes.IMAGE;
-        let preview = '';
-        let source: string | undefined = undefined;
-
-        // We are going to test the imageCache URL to see if it is a valid URL
-        if (this.imageCache) {
-            // first we create a regExp for the valid URL. e.g: "https://nfts.telos.net/40/0x552fd5743432eC2dAe222531e8b88bf7d2410FBc/344"
-            const regExp = new RegExp('^(https?:\\/\\/)?' + // protocol
-                '(nfts.telos.net\\/)' + // domain name
-                '(\\d+\\/)' + // chain id
-                '(0x[0-9a-fA-F]+\\/)' + // contract address
-                '(\\d+)$'); // token id
-
-            // then we test the imageCache URL against the regExp
-            const match = regExp.test(this.imageCache);
-            if (match) {
-                // we return the 1440.webp version of it
-                preview = this.imageCache.concat('/1440.webp');
-            }
-        }
-        // if there's an image in the metadata, we return that
-        if (!preview && this.metadata?.image) {
-            preview = this.metadata.image as string;
-        }
-
-        if (!preview && this.metadata) {
-            // this NFT is not a simple image and could be anything (including an image).
-            // We need to look at the metadata
-            const metadata = this.metadata as { [key: string]: string };
-            // we iterate over the metadata properties
-            for (const property in metadata) {
-                const value = metadata[property];
-                if (!value) {
-                    continue;
-                }
-                // if the value is a string and contains a valid url of a known media format, use it.
-                // image formats: .gif, .avif, .apng, .jpeg, .jpg, .jfif, .pjpeg, .pjp, .png, .svg, .webp
-                if (
-                    !preview &&  // if we already have a preview, we don't need to keep looking
-                    typeof value === 'string' &&
-                    this.urlIsPicture(value)
-                ) {
-                    preview = value;
-                }
-                // audio formats: .mp3, .wav, .aac, .webm
-                if (
-                    !source &&  // if we already have a source, we don't need to keep looking
-                    typeof value === 'string' &&
-                    this.urlIsAudio(value)
-                ) {
-                    type = NFTSourceTypes.AUDIO;
-                    source = value;
-                }
-                // video formats: .mp4, .webm, .ogg
-                if (
-                    !source &&  // if we already have a source, we don't need to keep looking
-                    typeof value === 'string' &&
-                    this.urlIsVideo(value)
-                ) {
-                    type = NFTSourceTypes.VIDEO;
-                    source = value;
-                }
-
-                const regex = /^data:(image|audio|video)\/\w+;base64,[\w+/=]+$/;
-
-                const match = value.match(regex);
-
-                if (match) {
-                    const contentType = match[1];
-
-                    if (contentType === 'image' && !preview) {
-                        preview = value;
-                    } else if (contentType === 'audio' && !source) {
-                        type = NFTSourceTypes.AUDIO;
-                        source = value;
-                    } else if (contentType === 'video' && !source) {
-                        type = NFTSourceTypes.VIDEO;
-                        source = value;
-                    }
-                }
-
-            }
-
-            // particular case of media format webm. We need to determine if it is a video or audio
-            if (source && source.match(/\.webm$/)) {
-                this.ready = false;
-
-                this.determineWebmType(source).then((_type) => {
-                    if (_type === NFTSourceTypes.VIDEO) {
-                        this.extractFirstFrameFromVideo(source as string).then((_preview) => {
-                            this.preview = _preview;
-                            this.ready = true;
-                            this.notifyWatchers();
-                        });
-                    } else {
-                        this.notifyWatchers();
-                    }
-                });
-            } else {
-                if (type === NFTSourceTypes.VIDEO) {
-                    this.ready = false;
-                    this.extractFirstFrameFromVideo(source as string).then((_preview) => {
-                        this.preview = _preview;
-                        this.ready = true;
-                        this.notifyWatchers();
-                    });
-                }
-            }
-        }
-
-        if (!preview && this.tokenUri && (!this.metadata || Object.keys(this.metadata).length === 0)) {
-            // if there is no metadata, attempt to use the tokenUri
-            if (this.urlIsVideo(this.tokenUri)) {
-                type = NFTSourceTypes.VIDEO;
-            } else if (this.urlIsAudio(this.tokenUri)) {
-                type = NFTSourceTypes.AUDIO;
-            }
-        }
-
-        return { preview, type, source };
-    }
-
-    async determineWebmType(source: string): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            const video = document.createElement('video');
-
-            video.onloadedmetadata = function () {
-                if (video.videoWidth > 0 && video.videoHeight > 0) {
-                    resolve(NFTSourceTypes.VIDEO);
-                } else {
-                    resolve(NFTSourceTypes.AUDIO);
-                }
-            };
-
-            video.onerror = function (e) {
-                reject({ error: e, source });
-            };
-
-            video.src = source;
-        });
-    }
-
-    async extractFirstFrameFromVideo(source: string): Promise<string> {
-        return this.extractFrameFromVideo(source, 0);
-    }
-
-    async extractFrameFromVideo(source: string, time: number): Promise<string> {
-        // this function seams not to wer in most of the cases. It returns a transparent image
-        return new Promise<string>((resolve, reject) => {
-            const video = document.createElement('video');
-
-            video.onloadedmetadata = function () {
-                video.currentTime = time;
-
-                const canvas = document.createElement('canvas');
-
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    // let's draw the video in the canvas
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    // now we test the color of the pixel in the middle of the canvas
-                    const pixelData = ctx.getImageData((canvas.width / 2), (canvas.height / 2), 1, 1).data;
-                    if (pixelData[3] === 0) {
-                        // if it is transparent, it means that we don't have a preview for this video
-                        resolve('');
-                    } else {
-                        // if the pixel is not transparent, we return the canvas as a dataURL
-                        resolve(canvas.toDataURL());
-                    }
-                } else {
-                    reject({ error: 'no context', source });
-                }
-            };
-
-            video.onerror = function (e) {
-                reject({ error: e, source });
-            };
-
-            video.src = source;
-            video.setAttribute('crossOrigin', 'anonymous');
-            video.preload = 'metadata';
-            video.load();
-        });
-    }
-
-    getQuantity(address?: string): number {
-        if (this.isErc721) {
-            return 1;
-        }
-
-        if (!address || typeof address !== 'string') {
-            throw new Error('Error getting quantity: address must be provided for ERC1155 tokens');
-        }
-
-        return this.owners?.[address.toLowerCase()] || 0;
-    }
-
-    watchers: (() => void)[] = [];
-    watch(cb: () => void): void {
-        this.watchers.push(cb);
-    }
-
-    notifyWatchers(): void {
-        this.watchers.forEach(w => w());
+    constructor(
+        precursorData: Erc1155NftPrecursorData,
+        contract: NFTContractClass,
+    ) {
+        super(precursorData, contract);
+        this.owners = precursorData.owners;
+        this.ownersUpdated = Date.now();
     }
 }
