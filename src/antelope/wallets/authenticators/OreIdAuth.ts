@@ -167,6 +167,11 @@ export class OreIdAuth extends EVMAuthenticator {
         this.trace('login', 'userChainAccount', this.userChainAccount);
         trackSuccessfulLogin();
 
+        // now we set autoLogin to this.getName() and rawAddress to the address
+        // to avoid the auto-login to be triggered again
+        localStorage.setItem('autoLogin', this.getName());
+        localStorage.setItem('rawAddress', address);
+
         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
         return address;
     }
@@ -416,7 +421,7 @@ export class OreIdAuth extends EVMAuthenticator {
 
     async externalProvider(): Promise<ethers.providers.ExternalProvider> {
         this.trace('externalProvider');
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             resolve(null as unknown as ethers.providers.ExternalProvider);
         });
     }
