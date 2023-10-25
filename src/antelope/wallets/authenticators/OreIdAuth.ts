@@ -2,10 +2,14 @@ import { AuthProvider, ChainNetwork, OreId, OreIdOptions, JSONObject, UserChainA
 import { BigNumber, ethers } from 'ethers';
 import { WebPopup } from 'oreid-webpopup';
 import {
+    ERC1155_TYPE,
+    ERC721_TYPE,
     EvmABI,
+    EvmABIEntry,
     EvmFunctionParam,
     NftTokenInterface,
     erc20Abi,
+    erc721Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
     stlosAbiWithdraw,
@@ -23,6 +27,7 @@ import { useFeedbackStore } from 'src/antelope/stores/feedback';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
+import { useContractStore } from 'src/antelope/stores/contract';
 
 
 const name = 'OreId';
@@ -400,10 +405,19 @@ export class OreIdAuth extends EVMAuthenticator {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<EvmTransactionResponse | undefined> {
-        // @TODO
-        return;
+        this.trace('transferNft', contractAddress, tokenId, type, from, to);
+        const contract = await useContractStore().getContract(this.label, contractAddress);
+        if (contract) {
+            const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
+            if (type === ERC721_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
+            }else if (type === ERC1155_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[1]], [from, to, tokenId, 1]);
+            }
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
+        }
     }
 
     async isConnectedTo(chainId: string): Promise<boolean> {
