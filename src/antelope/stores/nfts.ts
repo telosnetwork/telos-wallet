@@ -305,7 +305,7 @@ export const useNftsStore = defineStore(store_name, {
                 return await authenticator.transferNft(contractAddress, tokenId, type, from, to)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_transfer_nft', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
