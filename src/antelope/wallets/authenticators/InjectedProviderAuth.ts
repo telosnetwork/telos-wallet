@@ -89,7 +89,6 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     // EVMAuthenticator API ----------------------------------------------------------
 
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<EvmTransactionResponse> {
-        debugger;
         this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
 
         const method = abi[0].name;
