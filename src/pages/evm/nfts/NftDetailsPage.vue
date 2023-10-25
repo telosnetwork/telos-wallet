@@ -56,6 +56,8 @@ onBeforeMount(async () => {
 
         if (nft.value.ownerAddress !== loggedAccount.value.address){
             removeTab(TRANSFER);
+        }
+
         loading.value = false;
     }
 });

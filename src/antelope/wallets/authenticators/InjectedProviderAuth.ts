@@ -10,12 +10,14 @@ import {
     ERC721_TYPE,
     EthereumProvider,
     EvmABI,
+    EvmABIEntry,
     EvmFunctionParam,
     EvmTransactionResponse,
     NftTokenInterface,
     TokenClass,
     addressString,
     erc20Abi,
+    erc721Abi,
     escrowAbiWithdraw,
     stlosAbiDeposit,
     stlosAbiWithdraw,
@@ -87,6 +89,7 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     // EVMAuthenticator API ----------------------------------------------------------
 
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<EvmTransactionResponse> {
+        debugger;
         this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
 
         const method = abi[0].name;
@@ -245,11 +248,17 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         this.trace('transferNft', contractAddress, tokenId, type, from, to);
         const contract = await useContractStore().getContract(this.label, contractAddress);
         if (contract) {
-            const contractInstance = await contract.getContractInstance();
+            // const contractInstance = await contract.getContractInstance();
+            debugger;
+            const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
+            debugger;
             if (type === ERC721_TYPE){
-                return contractInstance['safeTransferFrom(address,address,uint256)'](from, to, tokenId);
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
+                // return contractInstance['safeTransferFrom(address,address,uint256)'](from, to, tokenId);
             }else if (type === ERC1155_TYPE){
-                return contractInstance['safeTransferFrom(address,address,uint256,bytes)'](from, to, tokenId, 1);
+                return this.signCustomTransaction(contractAddress, [transferAbi[1]], [from, to, tokenId, 1]);
+
+                // return contractInstance['safeTransferFrom(address,address,uint256,bytes)'](from, to, tokenId, 1);
             }
         } else {
             throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
