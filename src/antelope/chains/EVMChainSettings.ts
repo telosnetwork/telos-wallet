@@ -409,7 +409,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // process the shaped raw data into NFTs
-    processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
+    async processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
         const contractStore = useContractStore();
 
         // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
@@ -435,8 +435,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
         const erc721Nfts = erc721RawData.map(({ data, contract }) => constructNft(contract, data, this, contractStore));
 
-        // eztodo use allsettled?
-        return Promise.all([...erc1155Nfts, ...erc721Nfts]);
+        // eztodo handle errors
+        return (await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]))
+            .filter(result => result.status === 'fulfilled')
+            .map(result => (result as PromiseFulfilledResult<Collectible>).value);
     }
 
     constructTokenId(token: TokenSourceInfo): string {

@@ -132,13 +132,10 @@ export const useNftsStore = defineStore(store_name, {
                 },
             });
         },
-        async updateNFTsForAccount(label: string, account: AccountModel | null) {
+        async updateNFTsForAccount(label: string, account: string) {
             this.trace('updateNFTsForAccount', label, account);
-            if (!account?.account) {
-                return;
-            }
 
-            // const owner = account.account; eztodo
+            // const owner = account; eztodo
             const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
 
             // we initialize the inventory for this label or take the existing one

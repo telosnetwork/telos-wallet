@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
-import { NFT } from 'src/antelope/types';
+import { Collectible } from 'src/antelope/types';
 import { useI18n } from 'vue-i18n';
 import { usePlatformStore } from 'src/antelope';
 
@@ -8,7 +8,7 @@ const platformStore = usePlatformStore();
 const { t: $t } = useI18n();
 
 const props = defineProps<{
-    nft: NFT,
+    nft: Collectible,
     previewMode: boolean, // controls whether video/audio can be played, and how those types are displayed
     tileMode: boolean,
 }>();
@@ -40,7 +40,7 @@ const isIconMode = computed(() => !props.tileMode && !props.previewMode);
 const showHoverContainer = computed(() => isIconMode.value && isHovering.value);
 
 const nftType = computed(() => {
-    if (props.nft.imageSrc && !props.nft.audioSrc && !props.nft.videoSrc) {
+    if (props.nft.imgSrc && !props.nft.audioSrc && !props.nft.videoSrc) {
         return nftTypes.image;
     } else if (props.nft.videoSrc) {
         return nftTypes.video;
@@ -52,9 +52,9 @@ const nftType = computed(() => {
 });
 
 const showCoverImage = computed(
-    () => ([nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode) && props.nft.imageSrc,
+    () => ([nftTypes.image, nftTypes.audio, nftTypes.none].includes(nftType.value) || props.previewMode) && props.nft.imgSrc,
 );
-const showPlaceholderCoverImage = computed(() => !props.nft.imageSrc);
+const showPlaceholderCoverImage = computed(() => !props.nft.imgSrc);
 
 const imageAlt = computed(() => {
     const details = `${props.nft.name} ${props.nft.id}`;
@@ -71,7 +71,7 @@ const iconOverlayName = computed(() => {
     const showIconOverlay =
         (props.previewMode && nftType.value !== nftTypes.image) ||
         (nftType.value === nftTypes.video && !videoIsPlaying.value && !isIos.value) ||
-        (nftType.value === nftTypes.audio && !props.nft.imageSrc) ||
+        (nftType.value === nftTypes.audio && !props.nft.imgSrc) ||
         nftType.value === nftTypes.none;
 
     if (!showIconOverlay) {
@@ -217,7 +217,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                 <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
                 <img
                     v-show="!showPlaceholderCoverImage && !isMediaLoading && !imageError"
-                    :src="nft.imageSrc"
+                    :src="nft.imgSrc"
                     :alt="imageAlt"
                     class="c-nft-viewer__image"
                     @load="isMediaLoading = false"
@@ -233,7 +233,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                         ref="videoElement"
                         :controls="false"
                         :src="nft.videoSrc"
-                        :poster="nft.imageSrc"
+                        :poster="nft.imgSrc"
                         playsinline
                         class="c-nft-viewer__video"
                         @loadeddata="isMediaLoading = false"
@@ -263,7 +263,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                     ref="videoElement"
                     :src="nft.videoSrc"
                     :controls="videoIsPlaying || isIos"
-                    :poster="nft.imageSrc"
+                    :poster="nft.imgSrc"
                     playsinline
                     class="c-nft-viewer__video"
                     @loadeddata="isMediaLoading = false"
@@ -318,7 +318,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             class="c-nft-viewer__list-image"
         />
         <q-icon
-            v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imageSrc) || imageError"
+            v-else-if="(isMediaLoading && passedMaxLoadingTime) || (!nft.imgSrc) || imageError"
             name="o_broken_image"
             :alt="`${$t('nft.broken_image')} ${imageAlt}`"
             size="md"
@@ -326,8 +326,8 @@ function setHoverPreviewVisibility(visible: boolean) {
             class="c-nft-viewer__list-image"
         />
         <img
-            v-show="!isMediaLoading && nft.imageSrc && !imageError"
-            :src="nft.imageSrc"
+            v-show="!isMediaLoading && nft.imgSrc && !imageError"
+            :src="nft.imgSrc"
             :alt="`${$t('nft.collectible')} ${imageAlt}`"
             class="c-nft-viewer__list-image"
             height="40"
@@ -340,7 +340,7 @@ function setHoverPreviewVisibility(visible: boolean) {
             <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
             <img
                 v-show="!showPlaceholderCoverImage && !isMediaLoading"
-                :src="nft.imageSrc"
+                :src="nft.imgSrc"
                 :alt="imageAlt"
                 class="c-nft-viewer__image"
                 @load="isMediaLoading = false"
@@ -355,7 +355,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                     ref="videoElement"
                     :controls="false"
                     :src="nft.videoSrc"
-                    :poster="nft.imageSrc"
+                    :poster="nft.imgSrc"
                     playsinline
                     autoplay
                     muted

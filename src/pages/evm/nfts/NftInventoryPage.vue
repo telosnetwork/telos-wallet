@@ -19,6 +19,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { storeToRefs } from 'pinia';
+import { first } from 'rxjs';
 
 
 const nftStore = useNftsStore();
@@ -69,6 +70,8 @@ const tableColumns = [
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
+const firstLoadInProgress = ref(false);
+const firstLoadInitiated = ref(false);
 const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
 const initialQueryParamsApplied = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
@@ -169,11 +172,19 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
     }
 });
 
-watch(accountStore, (store) => {
+watch(accountStore, (store, oldStore) => {
+    const accountChanged = store.loggedAccount?.account !== oldStore?.loggedAccount?.account;
+    const isFirstLoad = !firstLoadInProgress.value && !firstLoadInitiated.value;
+
     // fetch initial data
-    if (store.loggedAccount) {
-        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, toRaw(store.loggedAccount)).finally(() => {
+    if (store?.loggedAccount?.account && (accountChanged || isFirstLoad)) {
+        console.log('getting nfts');
+        firstLoadInProgress.value = true;
+        firstLoadInitiated.value = true;
+
+        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, store.loggedAccount.account).finally(() => {
             nftsLoaded.value = true;
+            firstLoadInProgress.value = false;
         });
     }
 },
@@ -303,7 +314,7 @@ let timer: string | number | NodeJS.Timer | undefined;
 onMounted(async () => {
     timer = setInterval(async () => {
         if (accountStore.loggedAccount) {
-            await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount);
+            await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount.account);
         }
     }, 13000);
 });

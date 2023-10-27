@@ -131,7 +131,7 @@ export async function constructNft(
     const holdersResponse = (await indexer.get(`/v1/token/${contract.address}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
     const holders = holdersResponse.results;
     const owners = holders.reduce((acc, current) => {
-        acc[current.address] = current.balance;
+        acc[current.address] = +current.balance;
         return acc;
     }, {} as { [address: string]: number });
 
@@ -200,6 +200,9 @@ class NFT {
         this.updated = precursorData.updated;
         this.description = precursorData.metadata?.description;
         this.mediaType = precursorData.mediaType;
+        this.imgSrc = precursorData.imgSrc;
+        this.audioSrc = precursorData.audioSrc;
+        this.videoSrc = precursorData.videoSrc;
 
         this.attributes = ((precursorData.metadata?.attributes || []) as IndexerNftItemAttribute[]).map(attr => ({
             label: attr.trait_type,
