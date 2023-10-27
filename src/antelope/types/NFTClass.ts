@@ -9,9 +9,8 @@ import {
     IndexerTokenHoldersResponse,
 } from 'src/antelope/types/IndexerTypes';
 import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
-import { useContractStore } from '../stores/contract';
-import { useChainStore } from '../stores/chain';
-import EVMChainSettings from '../chains/EVMChainSettings';
+import { useContractStore } from 'src/antelope/stores/contract';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 export interface NftAttribute {
     label: string;
@@ -34,6 +33,8 @@ interface NftPrecursorData {
     videoSrc?: string;
     audioSrc?: string;
 }
+
+export type Collectible = Erc721Nft | Erc1155Nft;
 
 export interface Erc721NftPrecursorData extends NftPrecursorData {
     owner: string;
@@ -66,6 +67,8 @@ export type NftRawData = { data: GenericIndexerNft, contract: NFTContractClass }
 export async function constructNft(
     contract: NFTContractClass,
     indexerData: GenericIndexerNft,
+    chainSettings: EVMChainSettings,
+    contractStore: ReturnType<typeof useContractStore>,
 ): Promise<Erc721Nft | Erc1155Nft> {
     const isErc721 = contract.supportedInterfaces.includes('erc721');
     const isErc1155 = contract.supportedInterfaces.includes('erc1155');
@@ -113,7 +116,6 @@ export async function constructNft(
 
 
     if (isErc721) {
-        const contractStore = useContractStore();
         const contractInstance = await (await contractStore.getContract(contract.address))?.getContractInstance();
         const owner = contractInstance?.owner();
 
@@ -123,7 +125,6 @@ export async function constructNft(
         }, contract);
     }
 
-    const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
     const indexer = chainSettings.getIndexer();
     const holdersResponse = (await indexer.get(`/v1/token/${contract}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
     const holders = holdersResponse.results;

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 import NftTile from 'pages/evm/nfts/NftTile.vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
-import { NFT, NFTContractClass } from 'src/antelope/types';
+import { Collectible, Erc1155Nft, Erc721Nft, NFTContractClass } from 'src/antelope/types';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 // NFT Contracts
@@ -46,7 +46,7 @@ const fakeErc1155NftContract = new NFTContractClass({
 });
 
 // NFTs
-const fakeErc721Nft = new NFT({
+const fakeErc721Nft = new Erc721Nft({
     name: 'Fake ERC721',
     id: '1',
     metadata: {
@@ -54,9 +54,10 @@ const fakeErc721Nft = new NFT({
     },
     updated: (new Date('Jan 1 2021')).getTime(),
     owner: '0x'.concat('5'.repeat(40)),
+    mediaType: 'image',
 }, fakeErc721NftContract);
 
-const fakeErc1155Nft = new NFT({
+const fakeErc1155Nft = new Erc1155Nft({
     name: 'Fake ERC1155',
     id: '2',
     metadata: {
@@ -67,6 +68,7 @@ const fakeErc1155Nft = new NFT({
         ['0x'.concat('6'.repeat(40))]: 3,
         ['0x'.concat('7'.repeat(40))]: 12,
     },
+    mediaType: 'image',
 }, fakeErc1155NftContract);
 
 const nfts = [

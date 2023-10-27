@@ -17,7 +17,7 @@ import {
     MarketSourceInfo,
     TokenMarketData,
     IndexerHealthResponse,
-    NFT,
+    Collectible,
     NFTContractClass,
     addressString,
     IndexerTransfersFilter,
@@ -35,7 +35,7 @@ import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
-import { getAntelope } from 'src/antelope';
+import { getAntelope, useContractStore } from 'src/antelope';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
@@ -316,7 +316,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // get the NFTs belonging to a particular contract (collection)
-    async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<NFT[]> {
+    async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<Collectible[]> {
         if (!this.hasIndexerSupport()) {
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
@@ -345,7 +345,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // get the NFTs belonging to a particular account
-    async getNftsForAccount(account: string, params: IndexerAccountNftsFilter): Promise<NFT[]> {
+    async getNftsForAccount(account: string, params: IndexerAccountNftsFilter): Promise<Collectible[]> {
         if (!this.hasIndexerSupport()) {
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
@@ -409,33 +409,34 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // process the shaped raw data into NFTs
-    processNftRawData(shapedRawNfts: NftRawData[]): NFT[] {
-        // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
-        // so we need to group these together and construct a single NFT for each unique NFT.
-        // in the constructNft factory function, we will aggregate all of the data for each unique ERC1155 NFT
-        const erc1155RawData = shapedRawNfts
-            .filter(({ contract }) => contract.supportedInterfaces.includes('erc1155'))
-            .reduce((acc, nftSource) => {
-                const { data, contract } = nftSource;
-                const key = `${contract.address}-${data.tokenId}`;
+    processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
+        const contractStore = useContractStore();
 
-                if (!acc[key]) {
-                    acc[key] = {
-                        data: [],
-                        contract,
-                    };
+        // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
+        // so we need to filter out duplicates
+        const erc1155RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc1155'));
+        const dedupedErc1155RawData = (() => {
+            // filter out NFTs with the same contract address and tokenId
+            const seen = new Set<string>();
+            return erc1155RawData.filter(({ data }) => {
+                const id = `${data.contract}-${data.tokenId}`;
+                if (seen.has(id)) {
+                    return false;
                 }
-                acc[key].data.push(data);
-                return acc;
-            }, {} as Record<string, { data: GenericIndexerNft[], contract: NFTContractClass }>);
+                seen.add(id);
+                return true;
+            });
+        })();
+
         // note that the 'data' object sent to the constructNft factory function is an array for the ERC1155 case;
         // each item contains the same information, but with a different 'owner' and 'quantity' field
-        const erc1155Nfts = Object.values(erc1155RawData).map(({ data, contract }) => constructNft(contract, data));
+        const erc1155Nfts = Object.values(dedupedErc1155RawData).map(({ data, contract }) => constructNft(contract, data, this, contractStore));
 
         const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
-        const erc721Nfts = erc721RawData.map(({ data, contract }) => constructNft(contract, data));
+        const erc721Nfts = erc721RawData.map(({ data, contract }) => constructNft(contract, data, this, contractStore));
 
-        return [...erc1155Nfts, ...erc721Nfts];
+        // eztodo use allsettled?
+        return Promise.all([...erc1155Nfts, ...erc721Nfts]);
     }
 
     constructTokenId(token: TokenSourceInfo): string {
@@ -494,8 +495,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getEVMTransactions(filter: IndexerTransactionsFilter): Promise<IndexerAccountTransactionsResponse> {
-        // const address = filter.address;
-        const address = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
+        // const address = filter.address; eztodo
         const limit = filter.limit;
         const offset = filter.offset;
         const includeAbi = filter.includeAbi;

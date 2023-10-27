@@ -4,7 +4,7 @@ import InlineSvg from 'vue-inline-svg';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
-import { NFT, ShapedTransactionRow } from 'src/antelope/types';
+import { Collectible, ShapedTransactionRow } from 'src/antelope/types';
 
 import { getLongDate } from 'src/antelope/stores/utils';
 import { getCurrencySymbol, prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
@@ -39,7 +39,7 @@ export default defineComponent({
     },
     data: () => ({
         loading: true,
-        nftData: {} as Record<string, NFT>, // keyed like {contract address lowercase}-{tokenId}
+        nftData: {} as Record<string, Collectible>, // keyed like {contract address lowercase}-{tokenId}
     }),
     computed: {
         fiatLocale(): string {
@@ -184,7 +184,7 @@ export default defineComponent({
         getTruncatedAddress(address: string) {
             return truncateAddress(address);
         },
-        getCachedNftData(collectionAddress: string, tokenId: string): NFT {
+        getCachedNftData(collectionAddress: string, tokenId: string): Collectible {
             return this.nftData[`${collectionAddress.toLowerCase()}-${tokenId}`];
         },
         goToNftDetailPage(collectionAddress: string, tokenId: string) {

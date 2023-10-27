@@ -35,7 +35,7 @@ import {
     ERC20_TYPE,
     ERC721_TYPE,
     ERC1155_TYPE,
-    NFT,
+    Collectible,
     EthereumProvider,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
@@ -489,7 +489,7 @@ export const useEVMStore = defineStore(store_name, {
             return null;
         },
 
-        async getNFT(address:string, tokenId: string, suspectedType:string): Promise<NFT | null> {
+        async getNFT(address: string, tokenId: string, suspectedType: string): Promise<Collectible | null> {
             this.trace('getNFT', address, suspectedType, tokenId);
             if (suspectedType.toUpperCase() === ERC721_TYPE) {
                 // TODO: here we try to get NFT data from the chain directly as a fallback for indexer, see https://github.com/telosnetwork/telos-wallet/issues/446

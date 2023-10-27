@@ -9,7 +9,7 @@ import {
     Label,
     Network,
     Address,
-    NFT,
+    Collectible,
     NftTokenInterface,
     IndexerPaginationFilter,
 } from 'src/antelope/types';
@@ -24,13 +24,13 @@ import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 export interface NFTsInventory {
     owner: Address;
-    list: NFT[];
+    list: Collectible[];
     loading: boolean;
 }
 
 export interface NFTsCollection {
     contract: Address;
-    list: NFT[];
+    list: Collectible[];
     loading: boolean;
 }
 
@@ -166,12 +166,6 @@ export const useNftsStore = defineStore(store_name, {
                         this.__inventory[label].loading = false;
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                        nfts.forEach((nft) => {
-                            nft.watch(() => {
-                                // this forces an update for watchers to be called
-                                this.__inventory[label].list = [...nfts];
-                            });
-                        });
                     } else {
                         // In case the chain does not support index, we don't have any solution yet
                         this.trace('updateNFTsForAccount', 'No alternative for indexer, returning []');
@@ -190,9 +184,9 @@ export const useNftsStore = defineStore(store_name, {
             contract: string,
             tokenId: string,
             type?: NftTokenInterface,
-        ): Promise<NFT | null> {
+        ): Promise<Collectible | null> {
             this.trace('fetchNftDetails', label, contract, tokenId, type);
-            let promise = Promise.resolve(null) as Promise<NFT | null>;
+            let promise = Promise.resolve(null) as Promise<Collectible | null>;
             try {
                 const contractLower = contract.toLowerCase();
                 const chain = useChainStore().getChain(label);

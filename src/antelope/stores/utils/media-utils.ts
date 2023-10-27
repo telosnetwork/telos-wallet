@@ -1,4 +1,4 @@
-import { IndexerNftMetadata, NFTSourceTypes, NftSourceType } from 'src/antelope/types';
+import { NFTSourceTypes, NftSourceType } from 'src/antelope/types';
 
 // eztodo docs
 export async function determineWebmType(source: string): Promise<NftSourceType> {

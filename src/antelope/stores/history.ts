@@ -344,7 +344,7 @@ export const useHistoryStore = defineStore(store_name, {
                                     collectionName: nftDetails.contractPrettyName,
                                     type: nftDetails.mediaType,
                                     nftInterface: transferInfo.type.toUpperCase() as NftTokenInterface,
-                                    imgSrc: nftDetails.imageSrc,
+                                    imgSrc: nftDetails.imgSrc,
                                     videoSrc: nftDetails.videoSrc,
                                     audioSrc: nftDetails.audioSrc,
                                 };
