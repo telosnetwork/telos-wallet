@@ -47,6 +47,7 @@ export default {
             const script = document.createElement('script');
             script.src = 'https://cdn.usefathom.com/script.js';
             script.dataset.site = 'ISPYEAKT';
+            script.dataset.spa = 'auto';
             script.defer = true;
             document.body.appendChild(script);
         }

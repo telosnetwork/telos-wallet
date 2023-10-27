@@ -518,6 +518,7 @@ export default {
         contracts: {
             invalid_contract: 'Contract or contract ABI missing',
             contract_data_required: 'Contract data missing',
+            error_retrieving_contract: 'Error retrieving contract for address {address}',
         },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
@@ -564,6 +565,8 @@ export default {
             error_invalid_network: 'Invalid network',
             error_no_default_authenticator: 'No default authenticator found',
             error_no_default_authenticator: 'No default authenticator found',
+            error_settings_not_found: 'Settings not found',
+            error_staked_ratio: 'Error in getting staked ratio',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',

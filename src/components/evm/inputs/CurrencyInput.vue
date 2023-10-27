@@ -542,8 +542,12 @@ export default defineComponent({
 
         // this method sets the caret position in the input element
         setInputCaretPosition(val: number) {
-            this.inputElement.selectionStart = val;
-            this.inputElement.selectionEnd = val;
+            // prevent the input from taking focus when two or more CurrencyInputs use the same v-model (such as on the Staking page)
+            // and this one is only used for displaying the value, rather than for user input
+            if (!this.isReadonly) {
+                this.inputElement.selectionStart = val;
+                this.inputElement.selectionEnd = val;
+            }
         },
 
         // this method is responsible for emitting a new modelValue, as well as performing certain formatting tasks

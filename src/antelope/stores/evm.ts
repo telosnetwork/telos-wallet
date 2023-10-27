@@ -16,31 +16,17 @@ import { BehaviorSubject, filter } from 'rxjs';
 import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { events_signatures, functions_overrides, toChecksumAddress } from 'src/antelope/stores/utils';
-import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
+import { events_signatures, functions_overrides } from 'src/antelope/stores/utils';
 import {
     AntelopeError,
-    erc1155Abi,
-    ERC1155_TRANSFER_SIGNATURE,
-    erc20Abi,
-    erc721Abi,
-    EvmABI,
-    EvmContractManagerI,
-    EvmLog,
     ExceptionError,
     supportsInterfaceAbi,
-    EvmContractCreationInfo,
-    EvmContractMetadata,
-    TokenClass,
-    ERC20_TYPE,
     ERC721_TYPE,
-    ERC1155_TYPE,
     Collectible,
     EthereumProvider,
 } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import {
-    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useChainStore,
@@ -62,12 +48,7 @@ export interface EVMState {
 
 const store_name = 'evm';
 
-const createManager = (authenticator: EVMAuthenticator):EvmContractManagerI => ({
-    getSigner: async () => toRaw((await authenticator.web3Provider()).getSigner(useAccountStore().getAccount(authenticator.label).account)),
-    getWeb3Provider: () => authenticator.web3Provider(),
-    getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
-    getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
-});
+
 
 export const useEVMStore = defineStore(store_name, {
     state: (): EVMState => (evmInitialState),
@@ -277,13 +258,7 @@ export const useEVMStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.evm.error_getting_function_interface', { prefix });
             }
         },
-
-        getTokenTypeFromLog(log:EvmLog): string {
-            const sig = log.topics[0].substring(0, 10);
-            const type = (log.topics.length === 4) ? ERC721_TYPE : ERC20_TYPE;
-            return (sig === ERC1155_TRANSFER_SIGNATURE) ? ERC1155_TYPE: type;
-        },
-
+        // Evm Contract Managment
         async getEventIface(hex:string): Promise<ethers.utils.Interface | null> {
             const prefix = hex.toLowerCase().slice(0, 10);
             if (Object.prototype.hasOwnProperty.call(this.eventInterfaces, prefix)) {
@@ -301,133 +276,6 @@ export const useEVMStore = defineStore(store_name, {
             } catch (e) {
                 throw new AntelopeError('antelope.evm.error_getting_event_interface', { hex });
             }
-        },
-
-        async getContractCreation(authenticator: EVMAuthenticator, address:string): Promise<EvmContractCreationInfo | null> {
-            this.trace('getContractCreation', address);
-            if (!address) {
-                console.error('address is null', address);
-                throw new AntelopeError('antelope.evm.error_invalid_address', { address });
-            }
-            try {
-                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
-                return await chain_settings.getContractCreation(address);
-            } catch (e) {
-                console.error(new AntelopeError('antelope.evm.error_getting_contract_creation', { address }));
-                return null;
-            }
-        },
-
-        // suspectedToken is so we don't try to check for ERC20 info via eth_call unless we think this is a token...
-        // this is coming from the token transfer, transactions table & transaction (general + logs tabs) pages where we're
-        // looking for a contract based on a token transfer event
-        // handles erc721 & erc20 (w/ stubs for erc1155)
-        async getContract(authenticator: EVMAuthenticator, address:string, suspectedToken = ''): Promise<EvmContract | null> {
-            this.trace('getContract', [authenticator], address, suspectedToken);
-            if (!address) {
-                this.trace('getContract', 'address is null', address);
-                return null;
-            }
-            const addressLower = address.toLowerCase();
-
-            // Get from already queried contracts, add token data if needed & not present
-            // (ie: queried beforehand w/o suspectedToken or a wrong suspectedToken)
-            const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
-            const cached = await chain_settings.getContract(addressLower);
-            this.trace('getContract', address, 'cached:', cached);
-            // If cached is null, it means this is the first time this address is queried
-            if (cached !== null) {
-                if (
-                    !suspectedToken ||
-                    // cached === false means we already tried to get the contract creation info and it failed
-                    !cached ||
-                    cached.token && cached.token?.type === suspectedToken
-                ) {
-                    // this never return false
-                    this.trace('getContract', 'returning cached', addressLower, cached);
-                    return cached || null;
-                }
-            }
-
-            // Then we try to get the contract creation info. If it fails, we never overwrite the previous call to set contract as not existing
-            const creationInfo = await this.getContractCreation(authenticator, addressLower);
-            // The the contract passes the creation info check,
-            // we overwrite the previous call to set contract as not existing with the actual EvmContract
-
-            const metadata = await this.checkBucket(authenticator, address);
-
-            if (metadata && creationInfo) {
-                this.trace('getContract', 'returning verified contract', address, metadata, creationInfo);
-                return await this.getVerifiedContract(authenticator, addressLower, metadata, creationInfo, suspectedToken);
-            }
-
-            const contract = await this.getContractFromTokenList(authenticator, address, suspectedToken, creationInfo);
-            if (contract) {
-                this.trace('getContract', 'returning contract from token list', address, contract);
-                return contract;
-            }
-
-            if (creationInfo) {
-                this.trace('getContract', 'returning empty contract', address, creationInfo);
-                return await this.getEmptyContract(authenticator, addressLower, creationInfo);
-            } else {
-                // We mark this address as not existing so we don't query it again
-                this.trace('getContract', 'returning null', address);
-                chain_settings.setContractAsNotExisting(addressLower);
-                return null;
-            }
-        },
-
-        async checkBucket(authenticator: EVMAuthenticator, address:string): Promise<EvmContractMetadata | null> {
-            const checksumAddress = toChecksumAddress(address);
-            this.trace('checkBucket', [authenticator], address, ' -> ', checksumAddress);
-            try {
-                const chain_settings = useChainStore().getChain(authenticator.label).settings as EVMChainSettings;
-                const metadataStr = await chain_settings.getContractMetadata(checksumAddress);
-                return JSON.parse(metadataStr);
-            } catch (e) {
-                return null;
-            }
-        },
-
-        async getVerifiedContract(
-            authenticator: EVMAuthenticator,
-            address:string,
-            metadata: EvmContractMetadata,
-            creationInfo: EvmContractCreationInfo,
-            suspectedType: string,
-        ): Promise<EvmContract> {
-            const token = await this.getToken(authenticator, address, suspectedType) ?? undefined;
-            const contract = new EvmContract({
-                name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
-                address,
-                abi: metadata.output?.abi,
-                manager: createManager(authenticator),
-                token: token,
-                creationInfo,
-                verified: true,
-                supportedInterfaces: [token?.type ?? 'none'],
-            });
-            const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-            chain_settings.addContract(address, contract);
-            return contract;
-        },
-
-        async getEmptyContract(
-            authenticator: EVMAuthenticator,
-            address:string,
-            creationInfo: EvmContractCreationInfo | null,
-        ): Promise<EvmContract> {
-            const contract = new EvmContract({
-                name: `0x${address.slice(0, 16)}...`,
-                address,
-                creationInfo,
-                manager: createManager(authenticator),
-                supportedInterfaces: [],
-            });
-            const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-            chain_settings.addContract(address, contract);
-            return contract;
         },
 
         async supportsInterface(authenticator: InjectedProviderAuth, address:string, iface:string): Promise<boolean> {
@@ -459,68 +307,12 @@ export const useEVMStore = defineStore(store_name, {
             return address;
         },
 
-        getTokenABI(type:string): EvmABI {
-            if(type === 'erc721'){
-                return erc721Abi;
-            } else if(type === 'erc1155'){
-                return erc1155Abi;
-            }
-            return erc20Abi;
-        },
-
-        async getContractFromAbi(authenticator: InjectedProviderAuth, address:string, abi:EvmABI): Promise<ethers.Contract> {
-            this.trace('getContractFromAbi', address, abi);
-            const provider = await authenticator.web3Provider();
-            if (!provider) {
-                throw new AntelopeError('antelope.evm.error_no_provider');
-            }
-            return  new ethers.Contract(address, abi, provider);
-        },
-
-        async getToken(authenticator: EVMAuthenticator, address:string, suspectedType:string): Promise<TokenClass | null> {
-            if (suspectedType.toUpperCase() === ERC20_TYPE) {
-                const chain = useChainStore().getChain(CURRENT_CONTEXT);
-                const list = await chain.settings.getTokenList();
-                const token = list.find(t => t.address.toUpperCase() === address.toUpperCase());
-                if (token) {
-                    return token;
-                }
-            }
-            return null;
-        },
-
-        async getNFT(address: string, tokenId: string, suspectedType: string): Promise<Collectible | null> {
+        async getNFT(address:string, tokenId: string, suspectedType:string): Promise<Collectible | null> {
             this.trace('getNFT', address, suspectedType, tokenId);
             if (suspectedType.toUpperCase() === ERC721_TYPE) {
                 // TODO: here we try to get NFT data from the chain directly as a fallback for indexer, see https://github.com/telosnetwork/telos-wallet/issues/446
             }
             return null;
-        },
-
-        async getContractFromTokenList(
-            authenticator: EVMAuthenticator,
-            address:string,
-            suspectedType:string,
-            creationInfo:EvmContractCreationInfo | null,
-        ): Promise<EvmContract | null> {
-            const token = await this.getToken(authenticator, address, suspectedType);
-            if (token) {
-                const abi = this.getTokenABI(ERC20_TYPE);
-                const token_contract = new EvmContract({
-                    name: `${token.name} (${token.symbol})`,
-                    address,
-                    creationInfo,
-                    abi,
-                    manager: createManager(authenticator),
-                    token,
-                    supportedInterfaces: [token.type],
-                });
-                const chain_settings = useChainStore().currentChain.settings as EVMChainSettings;
-                chain_settings.addContract(address, token_contract);
-                return token_contract;
-            } else {
-                return null;
-            }
         },
 
         // Commits --------------------
