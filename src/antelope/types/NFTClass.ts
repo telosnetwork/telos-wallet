@@ -117,7 +117,8 @@ export async function constructNft(
 
     if (isErc721) {
         const contractInstance = await (await contractStore.getContract(contract.address))?.getContractInstance();
-        const owner = contractInstance?.owner();
+
+        const owner = await contractInstance?.owner();
 
         return new Erc721Nft({
             ...commonData,
@@ -126,7 +127,7 @@ export async function constructNft(
     }
 
     const indexer = chainSettings.getIndexer();
-    const holdersResponse = (await indexer.get(`/v1/token/${contract}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
+    const holdersResponse = (await indexer.get(`/v1/token/${contract.address}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
     const holders = holdersResponse.results;
     const owners = holders.reduce((acc, current) => {
         acc[current.address] = current.balance;

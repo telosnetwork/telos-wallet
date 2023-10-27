@@ -529,7 +529,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
-        // const url = `v1/address/${address}/transactions`;
+        // const url = `v1/address/${address}/transactions`; eztodo
         const url = 'v1/account/0x13B745FC35b0BAC9bab9fD20B7C9f46668232607/transfers';
 
         // The following performs a GET request to the indexer endpoint.

@@ -10,7 +10,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
-import { NFT } from 'src/antelope/types';
+import { Collectible, Erc1155Nft } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
@@ -87,11 +87,11 @@ const pagination = ref<{
 const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
-// const userAccount = computed(() => accountStore.loggedAccount?.account);
+// const userAccount = computed(() => accountStore.loggedAccount?.account); eztodo
 const userAccount = computed(() => '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
 const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
-const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFT[]) : []);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as Collectible[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -106,15 +106,15 @@ const tableRows = computed(() => {
         return [];
     }
 
-    return nftsToShow.value.map((nft: NFT) => ({
-        image: nft.imageSrc,
+    return nftsToShow.value.map((nft: Collectible) => ({
+        image: nft.imgSrc,
         name: truncateText(nft.name, 35),
         isAudio: !!nft.audioSrc,
         isVideo: !!nft.videoSrc,
         id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
-        quantity: nft.getQuantity(userAccount.value),
+        quantity: nft instanceof Erc1155Nft ? (nft.owners[userAccount.value] ?? 0) : 1,
     }));
 });
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
@@ -295,7 +295,7 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 
 function getNftForViewer(row: { id: string, collectionAddress: string }) {
     // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
-    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as NFT;
+    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as Collectible;
 }
 
 // we update the inventory while the user is on the page
@@ -409,7 +409,7 @@ onUnmounted(() => {
                     v-for="nft in nftsToShow"
                     :key="nft.key"
                     :nft="nft"
-                    :quantity="nft.getQuantity(userAccount)"
+                    :quantity="nft instanceof Erc1155Nft ? (nft.owners[userAccount] ?? 0) : 1"
                 />
             </div>
 

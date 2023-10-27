@@ -2,7 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { NFT } from 'src/antelope/types';
+import { Collectible, Erc1155Nft, Erc721Nft } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
@@ -25,13 +25,17 @@ const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
 // data
-const nft = ref<NFT | null>(null);
+const nft = ref<Collectible | null>(null);
 const loading = ref(true);
 
 
 // computed
-// const userAddress = computed(() => useAccountStore().currentEvmAccount?.address);
-const userAddress = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
+// const userAddress = computed(() => useAccountStore().currentEvmAccount?.address); eztodo
+const userAddress = computed(() => '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
+const isErc721 = computed(() => nft.value instanceof Erc721Nft);
+const isErc1155 = computed(() => nft.value instanceof Erc1155Nft);
+const nftAsErc721 = computed(() => nft.value as Erc721Nft);
+const nftAsErc1155 = computed(() => nft.value as Erc1155Nft);
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
@@ -43,21 +47,21 @@ const contractLink = computed(() => {
     return `${explorerUrl}/address/${contractAddress}`;
 });
 const ownerLink = computed(() => {
-    if (!nft.value || nft.value.isErc1155) {
+    if (!nft.value || isErc1155.value) {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.owner}`;
+    return `${explorerUrl}/address/${(nft.value as Erc721Nft).owner}`;
 });
 const filteredAttributes = computed(() =>
     nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
 const nftOwnersText = computed(() => {
-    if (!nft.value) {
+    if (!nft.value || isErc721.value) {
         return '';
     }
 
-    const owners = nft.value.numberOfOwners;
+    const owners = Object.keys((nft.value as Erc1155Nft).owners).length;
     if (owners.toString().length > 6) {
         return abbreviateNumber(navigator.language, owners);
     }
@@ -65,11 +69,11 @@ const nftOwnersText = computed(() => {
     return owners.toString();
 });
 const nftQuantityText = computed(() => {
-    if (!nft.value) {
+    if (!nft.value || isErc721.value) {
         return '';
     }
 
-    const quantity = nft.value.getQuantity(userAddress.value);
+    const quantity = (nft.value as Erc1155Nft).owners[userAddress.value] ?? 0;
     if (quantity.toString().length > 6) {
         return abbreviateNumber(navigator.language, quantity);
     }
@@ -130,11 +134,11 @@ onBeforeMount(async () => {
                 </NftDetailsCard>
 
                 <NftDetailsCard
-                    v-if="nft.isErc721"
+                    v-if="isErc721"
                     :title="$t('global.owner')"
                     class="c-nft-details__header-card"
                 >
-                    <ExternalLink :text="nft.owner" :url="ownerLink" />
+                    <ExternalLink :text="nftAsErc721.owner" :url="ownerLink" />
                 </NftDetailsCard>
 
                 <NftDetailsCard
@@ -143,7 +147,7 @@ onBeforeMount(async () => {
                     class="c-nft-details__header-card"
                 >
                     <ToolTip
-                        :text="nft.numberOfOwners.toString()"
+                        :text="Object.keys(nftAsErc1155).length.toString()"
                         :hideIcon="true"
                     >
                         {{ nftOwnersText }}
@@ -159,12 +163,12 @@ onBeforeMount(async () => {
                 </NftDetailsCard>
 
                 <NftDetailsCard
-                    v-if="nft.isErc1155 && userAddress"
+                    v-if="isErc1155 && userAddress"
                     :title="$t('global.owned_by_you')"
                     class="c-nft-details__header-card"
                 >
                     <ToolTip
-                        :text="nft.getQuantity(userAddress).toString()"
+                        :text="(nftAsErc1155.owners[userAddress] ?? 0).toString()"
                         :hideIcon="true"
                     >
                         {{ nftQuantityText }}
