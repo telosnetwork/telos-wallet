@@ -11,6 +11,7 @@ import {
 import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { CURRENT_CONTEXT } from '..';
 
 export interface NftAttribute {
     label: string;
@@ -116,7 +117,7 @@ export async function constructNft(
 
 
     if (isErc721) {
-        const contractInstance = await (await contractStore.getContract(contract.address))?.getContractInstance();
+        const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address))?.getContractInstance();
 
         const owner = await contractInstance?.owner();
 
