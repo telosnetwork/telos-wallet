@@ -31,7 +31,7 @@ export default defineComponent({
                     }
 
                     if (!this.tabs.includes(newValue.query.tab)) {
-                        this.$router.replace({ query: { tab: this.tabs[0] } });
+                        this.$router.push({ path: this.$route.path, query: { ...this.$route.query, tab: this.tabs[0] } });
                     }
                 }
             },

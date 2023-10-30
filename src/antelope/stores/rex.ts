@@ -248,7 +248,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.stakeSystemTokens(amount)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_stakes_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_stakes_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -272,7 +272,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.unstakeSystemTokens(amount)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_unstakes_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_unstakes_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -296,7 +296,7 @@ export const useRexStore = defineStore(store_name, {
                 return await authenticator.withdrawUnstakedTokens()
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_withdraw_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_withdraw_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {

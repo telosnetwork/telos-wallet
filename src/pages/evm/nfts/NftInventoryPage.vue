@@ -254,7 +254,6 @@ watch(searchFilter, (filter) => {
     }
 });
 
-
 // methods
 function getCollectionUrl(address: string) {
     const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();

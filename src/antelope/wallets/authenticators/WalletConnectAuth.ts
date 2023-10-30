@@ -25,6 +25,8 @@ import { usePlatformStore } from 'src/antelope/stores/platform';
 import {
     AntelopeError,
     EvmABI,
+    EvmTransactionResponse,
+    NftTokenInterface,
     EvmFunctionParam,
     TokenClass,
     addressString,
@@ -34,6 +36,10 @@ import {
     stlosAbiWithdraw,
     wtlosAbiDeposit,
     wtlosAbiWithdraw,
+    ERC1155_TYPE,
+    ERC721_TYPE,
+    EvmABIEntry,
+    erc721Abi,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { RpcEndpoint } from 'universal-authenticator-library';
@@ -306,6 +312,21 @@ export class WalletConnectAuth extends EVMAuthenticator {
                     [to, value],
                 );
             }
+        }
+    }
+
+    async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString, quantity = 1): Promise<EvmTransactionResponse | WriteContractResult | undefined> {
+        this.trace('transferNft', contractAddress, tokenId, type, from, to);
+        const contract = await useContractStore().getContract(this.label, contractAddress);
+        if (contract) {
+            const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
+            if (type === ERC721_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
+            }else if (type === ERC1155_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[1]], [from, to, tokenId, quantity]);
+            }
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
         }
     }
 

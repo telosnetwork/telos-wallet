@@ -158,10 +158,6 @@ export default defineComponent({
                 return ethers.constants.Zero;
             }
         },
-        isAddressValid(): boolean {
-            const regex = /^0x[a-fA-F0-9]{40}$/;
-            return regex.test(this.address);
-        },
         isFormValid(): boolean {
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
@@ -406,14 +402,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.q-btn.wallet-btn {
-    @include text--header-5;
-    &+& {
-        margin-left: 16px;
-    }
-}
-
-
 .c-send-page {
     &__title-container {
         flex-direction: column;
