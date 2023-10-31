@@ -17,7 +17,6 @@ import {
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
-import { AccountModel } from 'src/antelope/stores/account';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
@@ -134,6 +133,7 @@ export const useNftsStore = defineStore(store_name, {
         },
         async updateNFTsForAccount(label: string, account: string) {
             this.trace('updateNFTsForAccount', label, account);
+            const network = useChainStore().getChain(label).settings.getNetwork();
 
             // const owner = account; eztodo
             const owner = '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607';
@@ -162,6 +162,17 @@ export const useNftsStore = defineStore(store_name, {
                         this.__inventory[label].list = sortedNfts;
                         this.__inventory[label].loading = false;
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
+
+                        this.__contracts[network] = this.__contracts[network] || {};
+                        sortedNfts.forEach((nft) => {
+                            const contractLower = nft.contractAddress.toLowerCase();
+                            this.__contracts[network][contractLower] = {
+                                contract: contractLower,
+                                list: [],
+                                loading: false,
+                            };
+                            this.__contracts[network][contractLower].list.push(nft);
+                        });
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
                     } else {
                         // In case the chain does not support index, we don't have any solution yet

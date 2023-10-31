@@ -30,12 +30,16 @@ import {
     IndexerNftContract,
     NftRawData,
     IndexerCollectionNftsResponse,
+    Erc721Nft,
+    getErc721Owner,
+    getErc1155Owners,
+    Erc1155Nft,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
-import { getAntelope, useContractStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 
@@ -411,6 +415,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     // process the shaped raw data into NFTs
     async processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
         const contractStore = useContractStore();
+        const nftsStore = useNftsStore();
 
         // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
         // so we need to filter out duplicates
@@ -427,13 +432,37 @@ export default abstract class EVMChainSettings implements ChainSettings {
                 return true;
             });
         })();
+        const erc1155Nfts = Object.values(dedupedErc1155RawData)
+            .map(async ({ data, contract }) => {
+                const nft = (await constructNft(contract, data, this, contractStore, nftsStore)) as Erc1155Nft;
+                const ownersUpdatedWithinThreeMins = dateIsWithinXMinutes(nft.ownerDataLastFetched, 3);
 
-        // note that the 'data' object sent to the constructNft factory function is an array for the ERC1155 case;
-        // each item contains the same information, but with a different 'owner' and 'quantity' field
-        const erc1155Nfts = Object.values(dedupedErc1155RawData).map(({ data, contract }) => constructNft(contract, data, this, contractStore));
+                if (!ownersUpdatedWithinThreeMins) {
+                    const indexer = this.getIndexer();
+                    const owners = await getErc1155Owners(nft.contractAddress, nft.id, indexer);
+                    nft.owners = owners;
+                }
+
+                return nft;
+            });
 
         const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
-        const erc721Nfts = erc721RawData.map(({ data, contract }) => constructNft(contract, data, this, contractStore));
+        const erc721Nfts = erc721RawData.map(async ({ data, contract }) => {
+            const nft = (await constructNft(contract, data, this, contractStore, nftsStore)) as Erc721Nft;
+            const ownersUpdatedWithinThreeMins = dateIsWithinXMinutes(nft.ownerDataLastFetched, 3);
+
+            if (!ownersUpdatedWithinThreeMins) {
+                const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, nft.contractAddress))?.getContractInstance();
+                if (!contractInstance) {
+                    // eztodo make this antelopeerror
+                    throw new Error('Could not get contract instance');
+                }
+                const owner = await getErc721Owner(contractInstance, nft.id);
+                nft.owner = owner;
+            }
+
+            return nft;
+        });
 
         // eztodo handle errors
         return (await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]))

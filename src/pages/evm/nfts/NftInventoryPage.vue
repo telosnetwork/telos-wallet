@@ -176,9 +176,8 @@ watch(accountStore, (store, oldStore) => {
     const accountChanged = store.loggedAccount?.account !== oldStore?.loggedAccount?.account;
     const isFirstLoad = !firstLoadInProgress.value && !firstLoadInitiated.value;
 
-    // fetch initial data
+    // fetch initial data / fetchdata when account changes
     if (store?.loggedAccount?.account && (accountChanged || isFirstLoad)) {
-        console.log('getting nfts');
         firstLoadInProgress.value = true;
         firstLoadInitiated.value = true;
 
@@ -311,12 +310,13 @@ function getNftForViewer(row: { id: string, collectionAddress: string }) {
 
 // we update the inventory while the user is on the page
 let timer: string | number | NodeJS.Timer | undefined;
+const minuteMilliseconds = 1000 * 60;
 onMounted(async () => {
     timer = setInterval(async () => {
         if (accountStore.loggedAccount) {
             await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount.account);
         }
-    }, 13000);
+    }, minuteMilliseconds);
 });
 
 onUnmounted(() => {

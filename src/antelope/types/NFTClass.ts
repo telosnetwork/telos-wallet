@@ -10,8 +10,11 @@ import {
 } from 'src/antelope/types/IndexerTypes';
 import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
+import { useNftsStore } from 'src/antelope/stores/nfts';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { CURRENT_CONTEXT } from '..';
+import { AxiosInstance } from 'axios';
+import { Contract } from 'ethers';
 
 export interface NftAttribute {
     label: string;
@@ -59,6 +62,22 @@ export type NftTokenInterface = 'ERC721' | 'ERC1155';
 export type NftRawData = { data: GenericIndexerNft, contract: NFTContractClass };
 
 
+export async function getErc721Owner(contract: Contract, tokenId: string): Promise<string> {
+    const contractInstance = await contract.getContractInstance();
+
+    return await contractInstance.ownerOf(tokenId);
+}
+
+export async function getErc1155Owners(contractAddress: string, tokenId: string, indexer: AxiosInstance): Promise<{ [address: string]: number }> {
+    const holdersResponse = (await indexer.get(`/v1/token/${contractAddress}/holders?limit=10000&token_id=${tokenId}`)).data as IndexerTokenHoldersResponse;
+    const holders = holdersResponse.results;
+
+    return holders.reduce((acc, current) => {
+        acc[current.address] = +current.balance;
+        return acc;
+    }, {} as { [address: string]: number });
+}
+
 /**
  * Construct an NFT from indexer data
  * @param contract The contract this NFT belongs to
@@ -70,12 +89,22 @@ export async function constructNft(
     indexerData: GenericIndexerNft,
     chainSettings: EVMChainSettings,
     contractStore: ReturnType<typeof useContractStore>,
+    nftStore: ReturnType<typeof useNftsStore>,
 ): Promise<Erc721Nft | Erc1155Nft> {
+    const network = chainSettings.getNetwork();
+
     const isErc721 = contract.supportedInterfaces.includes('erc721');
     const isErc1155 = contract.supportedInterfaces.includes('erc1155');
 
     if (!isErc721 && !isErc1155) {
+        // eztodo antelopeerror
         throw new Error('Invalid NFT contract type');
+    }
+
+    const cachedNft = nftStore.__contracts[network]?.[contract.address]?.list.find(nft => nft.id === indexerData.tokenId);
+
+    if (cachedNft) {
+        return cachedNft;
     }
 
     try {
@@ -115,11 +144,15 @@ export async function constructNft(
         audioSrc: mediaType === NFTSourceTypes.AUDIO ? mediaSource : undefined,
     };
 
-
     if (isErc721) {
         const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address))?.getContractInstance();
 
-        const owner = await contractInstance?.owner();
+        if (!contractInstance) {
+            // eztodo make this antelopeerror
+            throw new Error('Could not get contract instance');
+        }
+
+        const owner = await getErc721Owner(contractInstance, indexerData.tokenId);
 
         return new Erc721Nft({
             ...commonData,
@@ -128,12 +161,7 @@ export async function constructNft(
     }
 
     const indexer = chainSettings.getIndexer();
-    const holdersResponse = (await indexer.get(`/v1/token/${contract.address}/holders?limit=10000&token_id=${indexerData.tokenId}`)).data as IndexerTokenHoldersResponse;
-    const holders = holdersResponse.results;
-    const owners = holders.reduce((acc, current) => {
-        acc[current.address] = +current.balance;
-        return acc;
-    }, {} as { [address: string]: number });
+    const owners = await getErc1155Owners(contract.address, indexerData.tokenId, indexer);
 
     return new Erc1155Nft({
         ...commonData,
@@ -164,7 +192,7 @@ export class NFTContractClass {
 
 // use constructNft method to build an NFT from indexer data
 class NFT {
-    private contract: NFTContractClass;
+    protected contract: NFTContractClass;
 
     readonly name: string;
     readonly id: string;
@@ -182,6 +210,8 @@ class NFT {
     readonly imgSrc?: string;
     readonly audioSrc?: string;
     readonly videoSrc?: string;
+
+    readonly ownerDataLastFetched: number; // ms since epoch since the owner(s) was last updated
 
     constructor(
         precursorData: NftPrecursorData,
@@ -204,6 +234,8 @@ class NFT {
         this.audioSrc = precursorData.audioSrc;
         this.videoSrc = precursorData.videoSrc;
 
+        this.ownerDataLastFetched = Date.now();
+
         this.attributes = ((precursorData.metadata?.attributes || []) as IndexerNftItemAttribute[]).map(attr => ({
             label: attr.trait_type,
             text: attr.value,
@@ -217,29 +249,41 @@ class NFT {
 }
 
 export class Erc721Nft extends NFT {
-    readonly owner: string;
-    readonly ownerUpdated: number; // ms since epoch since the owner was last updated
+    private _owner: string;
 
     constructor(
         precursorData: Erc721NftPrecursorData,
         contract: NFTContractClass,
     ) {
         super(precursorData, contract);
-        this.owner = precursorData.owner;
-        this.ownerUpdated = Date.now();
+        this._owner = precursorData.owner;
+    }
+
+    set owner(owner: string) {
+        this._owner = owner;
+    }
+
+    get owner(): string {
+        return this._owner;
     }
 }
 
 export class Erc1155Nft extends NFT {
-    readonly owners: { [address: string]: number };
-    readonly ownersUpdated: number; // ms since epoch since the owner was last updated
+    private _owners: { [address: string]: number };
 
     constructor(
         precursorData: Erc1155NftPrecursorData,
         contract: NFTContractClass,
     ) {
         super(precursorData, contract);
-        this.owners = precursorData.owners;
-        this.ownersUpdated = Date.now();
+        this._owners = precursorData.owners;
+    }
+
+    set owners(owners: { [address: string]: number }) {
+        this._owners = owners;
+    }
+
+    get owners(): { [address: string]: number } {
+        return this._owners;
     }
 }
