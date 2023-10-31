@@ -123,7 +123,7 @@ export default defineComponent({
             // if the user has come from an external source, pressing back should go to the parent route
             const navigatedFromApp = sessionStorage.getItem('navigatedFromApp');
 
-            if (navigatedFromApp) {
+            if (navigatedFromApp && this.$route.query.tab !== 'attributes') { // @TODO refactor to avoid explicit conditionals, required to nav back from details page but retain tab navigation history
                 this.$router.go(-1);
             } else {
                 const parent = this.$route.meta.parent as string;

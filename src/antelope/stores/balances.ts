@@ -244,7 +244,7 @@ export const useBalancesStore = defineStore(store_name, {
                 this.processBalanceForToken(label, sys_token, balanceBn);
             } catch (error) {
                 console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_update_system_balance_failed', error);
+                throw getAntelope().config.transactionError('antelope.evm.error_update_system_balance_failed', error);
             }
         },
         shouldAddTokenBalance(label: string, balanceBn: BigNumber, token: TokenClass): boolean {
@@ -322,7 +322,7 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -347,7 +347,7 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_wrap_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_wrap_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -371,7 +371,7 @@ export const useBalancesStore = defineStore(store_name, {
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
             } catch (error) {
-                const trxError = getAntelope().config.wrapError('antelope.evm.error_unwrap_failed', error);
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_unwrap_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
                 throw trxError;
             } finally {
@@ -403,7 +403,7 @@ export const useBalancesStore = defineStore(store_name, {
                 });
             } catch (error) {
                 console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                throw getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferNativeTokens');
             }
@@ -423,7 +423,7 @@ export const useBalancesStore = defineStore(store_name, {
                 return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
                 console.error(error);
-                throw getAntelope().config.wrapError('antelope.evm.error_transfer_failed', error);
+                throw getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
             }

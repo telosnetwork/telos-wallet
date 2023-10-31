@@ -2,13 +2,13 @@
 
 import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
-import { CURRENT_CONTEXT, getAntelope, useAccountStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useContractStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, EvmABI, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw } from 'src/antelope/types';
+import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
@@ -232,6 +232,31 @@ export abstract class EVMAuthenticator {
                 transferAbi,
                 [to, value],
             );
+        }
+    }
+
+    /**
+     * This method transfers NFTs between accounts
+     * @param contractAddress collection address
+     * @param tokenId id of the nft in collection
+     * @param type type of token, 721 or 1155
+     * @param from address of sender
+     * @param to address of receiving account
+     * @param quantity optional value for 1155, default 1 for 721
+     * @returns transaction response with the hash and a wait() method to wait confirmation
+     */
+    async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString, quantity = 1): Promise<EvmTransactionResponse | WriteContractResult | undefined> {
+        this.trace('transferNft', contractAddress, tokenId, type, from, to);
+        const contract = await useContractStore().getContract(this.label, contractAddress);
+        if (contract) {
+            const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
+            if (type === ERC721_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
+            }else if (type === ERC1155_TYPE){
+                return this.signCustomTransaction(contractAddress, [transferAbi[1]], [from, to, tokenId, quantity]);
+            }
+        } else {
+            throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
         }
     }
 

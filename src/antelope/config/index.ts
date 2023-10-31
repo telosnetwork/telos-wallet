@@ -4,7 +4,7 @@ import { getAntelope } from 'src/antelope';
 import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
-    wrapError(description: string, error: unknown): AntelopeError {
+    transactionError(description: string, error: unknown): AntelopeError {
         if (error instanceof AntelopeError) {
             return error as AntelopeError;
         }

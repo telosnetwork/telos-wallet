@@ -16,7 +16,6 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
 
-
 const name = 'OreId';
 export const OreIdAuthName = name;
 
@@ -294,5 +293,4 @@ export class OreIdAuth extends EVMAuthenticator {
 
         return this.performOreIdTransaction(from, transactionBody);
     }
-
 }
