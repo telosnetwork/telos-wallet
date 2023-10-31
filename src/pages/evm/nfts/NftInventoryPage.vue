@@ -19,7 +19,6 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { storeToRefs } from 'pinia';
-import { first } from 'rxjs';
 
 
 const nftStore = useNftsStore();
@@ -309,7 +308,7 @@ function getNftForViewer(row: { id: string, collectionAddress: string }) {
 }
 
 // we update the inventory while the user is on the page
-let timer: string | number | NodeJS.Timer | undefined;
+let timer: ReturnType<typeof setInterval> | undefined;
 const minuteMilliseconds = 1000 * 60;
 onMounted(async () => {
     timer = setInterval(async () => {

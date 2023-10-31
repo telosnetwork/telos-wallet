@@ -45,10 +45,11 @@ interface IndexerNftResult {
     tokenUri?: string;
 }
 
+// eztodo review these types
+
 // results from the /contract/{address}/nfts endpoint
 export interface IndexerCollectionNftResult extends IndexerNftResult {
-    owner: string;
-    quantity?: number; // present only for ERC1155
+    supply?: number; // present only for ERC1155
 }
 
 // results from the /account/{address}/nfts endpoint
@@ -56,6 +57,7 @@ export interface IndexerAccountNftResponse extends IndexerNftResult {
     amount?: number; // present only for ERC1155
     minter: string;
     blockMinted: number;
+    tokenIdSupply?: number; // present only for ERC1155
 }
 
 // used as an intermediate type for constructing NFTs from IndexerAccountNftResponse/IndexerCollectionNftResult
@@ -66,7 +68,7 @@ export interface GenericIndexerNft {
     updated: number;
     imageCache?: string;
     tokenUri?: string;
-    quantity?: number; // present only for ERC1155
+    supply?: number; // present only for ERC1155
     minter?: string;
     blockMinted?: number;
 }

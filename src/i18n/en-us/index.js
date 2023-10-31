@@ -155,6 +155,7 @@ export default {
         owned: 'Owned',
         owned_by_you: 'Owned by you',
         owners: 'Owners',
+        total: 'Total',
     },
     nft : {
         collectible: 'Collectible',

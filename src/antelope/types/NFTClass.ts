@@ -46,6 +46,7 @@ export interface Erc721NftPrecursorData extends NftPrecursorData {
 
 export interface Erc1155NftPrecursorData extends NftPrecursorData {
     owners: { [address: string]: number };
+    supply: number;
 }
 
 export type NftSourceType = 'image' | 'video' | 'audio' | 'unknown';
@@ -166,6 +167,7 @@ export async function constructNft(
     return new Erc1155Nft({
         ...commonData,
         owners,
+        supply: indexerData.supply as number, // eztodo better way?
     }, contract);
 }
 
@@ -271,12 +273,15 @@ export class Erc721Nft extends NFT {
 export class Erc1155Nft extends NFT {
     private _owners: { [address: string]: number };
 
+    readonly supply: number;
+
     constructor(
         precursorData: Erc1155NftPrecursorData,
         contract: NFTContractClass,
     ) {
         super(precursorData, contract);
         this._owners = precursorData.owners;
+        this.supply = precursorData.supply;
     }
 
     set owners(owners: { [address: string]: number }) {

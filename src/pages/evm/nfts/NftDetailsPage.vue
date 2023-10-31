@@ -2,13 +2,18 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { Collectible, Erc1155Nft, Erc721Nft } from 'src/antelope/types';
-import { computed, onBeforeMount, ref } from 'vue';
+import { Collectible, Erc1155Nft, Erc721Nft, getErc1155Owners, getErc721Owner } from 'src/antelope/types';
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import ToolTip from 'components/ToolTip.vue';
-import { CURRENT_CONTEXT, useAccountStore, useChainStore } from 'src/antelope';
+import {
+    CURRENT_CONTEXT,
+    useAccountStore,
+    useChainStore,
+    useContractStore,
+} from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
@@ -20,6 +25,7 @@ const { t: $t } = useI18n();
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
+const contractStore = useContractStore();
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
@@ -66,7 +72,7 @@ const nftOwnersText = computed(() => {
         return abbreviateNumber(navigator.language, owners);
     }
 
-    return owners.toString();
+    return owners.toLocaleString();
 });
 const nftQuantityText = computed(() => {
     if (!nft.value || isErc721.value) {
@@ -78,7 +84,25 @@ const nftQuantityText = computed(() => {
         return abbreviateNumber(navigator.language, quantity);
     }
 
-    return quantity.toString();
+    return quantity.toLocaleString();
+});
+
+const nftSupplyText = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
+    return (nft.value as Erc1155Nft).supply.toLocaleString();
+});
+const nftSupplyTextAbbreviated = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
+    const supply = (nft.value as Erc1155Nft).supply;
+    if (supply.toString().length > 6) {
+        return abbreviateNumber(navigator.language, supply);
+    }
+
+    return supply.toLocaleString();
 });
 
 // methods
@@ -86,6 +110,36 @@ onBeforeMount(async () => {
     if (contractAddress && nftId) {
         nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId);
         loading.value = false;
+    }
+});
+
+let timer: ReturnType<typeof setInterval> | undefined;
+const minuteMilliseconds = 60 * 1000;
+onMounted(() => {
+    // update owner info once per minute
+    timer = setInterval(async () => {
+        if (nft.value instanceof Erc721Nft) {
+            const contract = await contractStore.getContract(CURRENT_CONTEXT, nft.value.contractAddress);
+            const contractInstance = await contract?.getContractInstance();
+
+            if (!contractInstance) {
+                // eztodo make this antelopeerror
+                throw new Error('Could not get contract instance');
+            }
+
+            const owner = await getErc721Owner(contractInstance, nft.value.id);
+            nft.value.owner = owner;
+        } else if (nft.value instanceof Erc1155Nft) {
+            const indexer = (chainStore.currentChain.settings as EVMChainSettings).getIndexer();
+            const owners = await getErc1155Owners(nft.value.contractAddress, nft.value.id, indexer);
+            nft.value.owners = owners;
+        }
+    }, minuteMilliseconds);
+});
+
+onUnmounted(() => {
+    if (timer) {
+        clearInterval(timer);
     }
 });
 </script>
@@ -147,7 +201,7 @@ onBeforeMount(async () => {
                     class="c-nft-details__header-card"
                 >
                     <ToolTip
-                        :text="Object.keys(nftAsErc1155).length.toString()"
+                        :text="Object.keys(nftAsErc1155.owners).length.toLocaleString()"
                         :hideIcon="true"
                     >
                         {{ nftOwnersText }}
@@ -168,10 +222,23 @@ onBeforeMount(async () => {
                     class="c-nft-details__header-card"
                 >
                     <ToolTip
-                        :text="(nftAsErc1155.owners[userAddress] ?? 0).toString()"
+                        :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
                         :hideIcon="true"
                     >
                         {{ nftQuantityText }}
+                    </ToolTip>
+                </NftDetailsCard>
+
+                <NftDetailsCard
+                    v-if="isErc1155 && userAddress"
+                    :title="$t('global.total')"
+                    class="c-nft-details__header-card"
+                >
+                    <ToolTip
+                        :text="nftSupplyText"
+                        :hideIcon="true"
+                    >
+                        {{ nftSupplyTextAbbreviated }}
                     </ToolTip>
                 </NftDetailsCard>
             </template>

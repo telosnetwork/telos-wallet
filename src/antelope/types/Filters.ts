@@ -53,7 +53,7 @@ export interface IndexerAccountNftsFilter extends IndexerPaginationFilter {
     includeAbi?: boolean; // indicate whether to include abi
     contract?: string; // only query results for a specific contract address
     forceMetadata?: boolean; // whether to include NFT metadata or not
-    includeTokenIdSupply?: boolean; // whether to include NFT token ID and supply or not, only valid for erc1155
+    includeTokenIdSupply?: true; // whether to include NFT token ID and supply or not, only valid for erc1155
 }
 
 export interface IndexerCollectionNftsFilter extends IndexerPaginationFilter {
@@ -62,4 +62,5 @@ export interface IndexerCollectionNftsFilter extends IndexerPaginationFilter {
     forceMetadata?: boolean; // whether to include NFT metadata or not
     includeAbi?: boolean; // indicate whether to include abi
     tokenId?: string; // only query results for a specific token ID
+    includeTokenIdSupply?: boolean;
 }

@@ -330,18 +330,14 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
-            owner: nftResponse.owner,
             metadata: JSON.parse(nftResponse.metadata),
             tokenId: nftResponse.tokenId,
             contract: nftResponse.contract,
             updated: nftResponse.updated,
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
-            quantity: nftResponse.quantity,
-        })).filter(
-            // filter out NFTs with 0 balance; undefined means ERC721
-            ({ quantity }) => quantity === undefined || quantity > 0,
-        );
+            supply: nftResponse.supply,
+        }));
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
@@ -355,22 +351,22 @@ export default abstract class EVMChainSettings implements ChainSettings {
             return [];
         }
         const url = `v1/account/${account}/nfts`;
-        const response = (await this.indexer.get(url, { params })).data as IndexerAccountNftsResponse;
+        const paramsWithSupply = {
+            ...params,
+            includeTokenIdSupply: params.type === 'ERC1155', // only ERC1155 supports supply
+        };
+        const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
 
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
-            owner: account,
             metadata: JSON.parse(nftResponse.metadata),
             tokenId: nftResponse.tokenId,
             contract: nftResponse.contract,
             updated: nftResponse.updated,
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
-            quantity: nftResponse.amount,
-        })).filter(
-            // filter out NFTs with 0 balance; undefined means ERC721
-            ({ quantity }) => quantity === undefined || quantity > 0,
-        );
+            supply: nftResponse.tokenIdSupply,
+        }));
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
