@@ -106,7 +106,7 @@ async function startTransfer(){
         }).finally(() => {
             dismiss();
         });
-        router.push({ query: { tab: 'attributes' } });
+        router.push({ query: { ...route.query, tab: 'attributes' } });
         removeTab(TRANSFER);
     }catch(e){
         console.error(e); // tx error notification handled in store
