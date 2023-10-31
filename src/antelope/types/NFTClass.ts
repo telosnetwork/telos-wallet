@@ -64,9 +64,7 @@ export type NftRawData = { data: GenericIndexerNft, contract: NFTContractClass }
 
 
 export async function getErc721Owner(contract: Contract, tokenId: string): Promise<string> {
-    const contractInstance = await contract.getContractInstance();
-
-    return await contractInstance.ownerOf(tokenId);
+    return await contract.ownerOf(tokenId);
 }
 
 export async function getErc1155Owners(contractAddress: string, tokenId: string, indexer: AxiosInstance): Promise<{ [address: string]: number }> {

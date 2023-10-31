@@ -461,9 +461,16 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
 
         // eztodo handle errors
-        return (await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]))
-            .filter(result => result.status === 'fulfilled')
-            .map(result => (result as PromiseFulfilledResult<Collectible>).value);
+        const settledPromises = await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]);
+
+        const fulfilledPromises = settledPromises.filter(result => result.status === 'fulfilled') as PromiseFulfilledResult<Collectible>[];
+        const rejectedPromises = settledPromises.filter(result => result.status === 'rejected') as PromiseRejectedResult[];
+
+        rejectedPromises.forEach(({ reason }) => {
+            console.error('Error constructing NFT', reason);
+        });
+
+        return fulfilledPromises.map(result => result.value as Collectible);
     }
 
     constructTokenId(token: TokenSourceInfo): string {

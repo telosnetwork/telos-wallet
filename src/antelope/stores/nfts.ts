@@ -154,8 +154,11 @@ export const useNftsStore = defineStore(store_name, {
 
                     if (chain_settings.hasIndexerSupport()) {
                         const filter = toRaw(this.__pagination_filter);
-                        const erc1155Nfts = await chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC1155' });
-                        const erc721Nfts  = await chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC721'  });
+                        const erc1155NftsPromise = chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC1155' });
+                        const erc721NftsPromise  = chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC721'  });
+
+                        const [erc1155Nfts, erc721Nfts] = await Promise.all([erc1155NftsPromise, erc721NftsPromise]);
+
                         const nfts = erc1155Nfts.concat(erc721Nfts);
                         const sortedNfts = nfts.sort((a, b) => b.updated - a.updated);
 
