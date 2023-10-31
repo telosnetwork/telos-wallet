@@ -12,7 +12,7 @@ import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { CURRENT_CONTEXT } from '..';
+import { CURRENT_CONTEXT } from 'src/antelope';
 import { AxiosInstance } from 'axios';
 import { Contract } from 'ethers';
 
