@@ -2,7 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute, useRouter } from 'vue-router';
-import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
+import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT, addressString } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
@@ -31,7 +31,7 @@ const ATTRIBUTES = 'attributes';
 const TRANSFER = 'transfer';
 const OWNERS = 'owners'; // for 1155 only
 
-const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
+const tabs = [ATTRIBUTES, TRANSFER, OWNERS];
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 const address = ref('');
@@ -54,7 +54,7 @@ onBeforeMount(async () => {
             nftType = ERC1155_TYPE;
         }
 
-        if (nft.value.ownerAddress !== loggedAccount.value.address){
+        if (nft.value?.ownerAddress !== loggedAccount.value.address){
             removeTab(TRANSFER);
         }
 
@@ -91,9 +91,9 @@ const loggedAccount = computed(() =>
 );
 
 async function startTransfer(){
-    const nameString = `${nft.value.contractPrettyName || nft.value.contractAddress} #${nft.value.id}`;
+    const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
     try{
-        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value);
+        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value as addressString);
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
         );
@@ -114,7 +114,7 @@ async function startTransfer(){
 }
 
 function removeTab(tab: string){
-    tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
+    tabs.splice(tabs.findIndex(item => item === tab), 1);
 }
 
 </script>
@@ -267,7 +267,7 @@ function removeTab(tab: string){
                 <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
                     <div class="col">
                         <div class="c-nft-transfer__transfer-text">
-                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft.contractPrettyName || nft.contractAddress }} #{{ nft.id }} </span>
+                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft?.contractPrettyName || nft?.contractAddress }} #{{ nft?.id }} </span>
                         </div>
                         <div class="c-nft-transfer__transfer-from c-nft-transfer__transfer-text--small">
                             {{ $t('nft.transfer_from') }}
