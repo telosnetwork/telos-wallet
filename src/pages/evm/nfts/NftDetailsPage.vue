@@ -35,6 +35,7 @@ const OWNERS = 'owners'; // for 1155 only
 const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
+const transferLoading = ref(false);
 const address = ref('');
 
 const contractAddress = route.query.contract as string;
@@ -106,6 +107,7 @@ watch(nft, (nftDetails) => {
 });
 
 async function startTransfer(){
+    transferLoading.value = true;
     const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
     try{
         const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType as NftTokenInterface, loggedAccount.value.address, address.value as addressString);
@@ -118,14 +120,17 @@ async function startTransfer(){
             );
         }).catch((err) => {
             console.error(err);
+            transferLoading.value = false;
         }).finally(async () => {
             dismiss();
             setTimeout(async () => {
                 await updateNftData(nftType as NftTokenInterface);
-            }, 1000); //give the indexer a second to register change in owner before querying
+                transferLoading.value = false;
+            }, 3000); //give the indexer a second to register change in owner before querying
         });
     }catch(e){
         console.error(e); // tx error notification handled in store
+        transferLoading.value = false;
     }
 }
 
@@ -336,7 +341,7 @@ function removeTab(tab: string){
                                 color="primary"
                                 class="wallet-btn"
                                 :label="$t('nft.transfer_collectible')"
-                                :loading="false"
+                                :loading="transferLoading"
                                 :disable="!addressIsValid"
                                 @click="startTransfer"
                             />
