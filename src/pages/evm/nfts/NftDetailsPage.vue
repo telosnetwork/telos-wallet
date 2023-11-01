@@ -2,7 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute, useRouter } from 'vue-router';
-import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT, addressString } from 'src/antelope/types';
+import { ERC1155_TYPE, ERC721_TYPE, NftTokenInterface, ShapedNFT, addressString } from 'src/antelope/types';
 import { computed, onBeforeMount, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
@@ -38,7 +38,8 @@ const address = ref('');
 
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
-let nftType: ERC1155_TYPE | ERC721_TYPE | null = null;
+
+let nftType: NftTokenInterface | null = null;
 
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
@@ -93,7 +94,7 @@ const loggedAccount = computed(() =>
 async function startTransfer(){
     const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
     try{
-        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value as addressString);
+        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType as NftTokenInterface, loggedAccount.value.address, address.value as addressString);
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
         );
@@ -103,13 +104,22 @@ async function startTransfer(){
             );
         }).catch((err) => {
             console.error(err);
-        }).finally(() => {
+        }).finally(async () => {
             dismiss();
+            await updateNftData(nftType as NftTokenInterface);
         });
         router.push({ query: { ...route.query, tab: 'attributes' } });
         removeTab(TRANSFER);
     }catch(e){
         console.error(e); // tx error notification handled in store
+    }
+}
+
+async function updateNftData(tokenType: NftTokenInterface){
+    if (tokenType === ERC721_TYPE){
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+    }else if (tokenType === ERC1155_TYPE){
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
     }
 }
 
