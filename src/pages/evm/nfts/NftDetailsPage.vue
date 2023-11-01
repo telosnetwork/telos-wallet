@@ -3,7 +3,7 @@ import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute, useRouter } from 'vue-router';
 import { ERC1155_TYPE, ERC721_TYPE, NftTokenInterface, ShapedNFT, addressString } from 'src/antelope/types';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
@@ -14,6 +14,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
 import { useI18n } from 'vue-i18n';
+import { EvmAccountModel } from 'src/antelope/stores/account';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,7 +32,7 @@ const ATTRIBUTES = 'attributes';
 const TRANSFER = 'transfer';
 const OWNERS = 'owners'; // for 1155 only
 
-const tabs = [ATTRIBUTES, TRANSFER, OWNERS];
+const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
 const address = ref('');
@@ -47,16 +48,12 @@ onBeforeMount(async () => {
         const erc1155Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
 
         if (erc721Details) {
+            removeTab(OWNERS);
             nft.value = erc721Details;
             nftType = ERC721_TYPE;
-            removeTab(OWNERS);
         } else if (erc1155Details) {
             nft.value = erc1155Details;
             nftType = ERC1155_TYPE;
-        }
-
-        if (nft.value?.ownerAddress !== loggedAccount.value.address){
-            removeTab(TRANSFER);
         }
 
         loading.value = false;
@@ -91,6 +88,23 @@ const loggedAccount = computed(() =>
     accountStore.loggedEvmAccount,
 );
 
+// if user switches account, disable transfer
+watch(loggedAccount, (newAccount: EvmAccountModel) => {
+    if (nft.value?.ownerAddress !== newAccount.address){
+        disableTransfer();
+    }else if (!tabs.value.includes(TRANSFER)){
+        //if user switches to owner of nft, restore transfer functionality
+        tabs.value.push(TRANSFER);
+    }
+});
+
+// if details refresh with new owner (on transfer), disable transfer functionality
+watch(nft, (nftDetails) => {
+    if (nftDetails?.ownerAddress !== loggedAccount.value.address){
+        disableTransfer();
+    }
+});
+
 async function startTransfer(){
     const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
     try{
@@ -106,10 +120,10 @@ async function startTransfer(){
             console.error(err);
         }).finally(async () => {
             dismiss();
-            await updateNftData(nftType as NftTokenInterface);
+            setTimeout(async () => {
+                await updateNftData(nftType as NftTokenInterface);
+            }, 1000); //give the indexer a second to register change in owner before querying
         });
-        router.push({ query: { ...route.query, tab: 'attributes' } });
-        removeTab(TRANSFER);
     }catch(e){
         console.error(e); // tx error notification handled in store
     }
@@ -123,14 +137,21 @@ async function updateNftData(tokenType: NftTokenInterface){
     }
 }
 
+function disableTransfer(){
+    router.push({ query: { ...route.query, tab: 'attributes' } });
+    removeTab(TRANSFER);
+}
+
 function removeTab(tab: string){
-    tabs.splice(tabs.findIndex(item => item === tab), 1);
+    if (tabs.value.includes(tab)){
+        tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
+    }
 }
 
 </script>
 
 <template>
-<AppPage :tabs="tabs">
+<AppPage :tabs="(tabs as string[])">
     <template v-slot:header>
         <div
             :class="{
