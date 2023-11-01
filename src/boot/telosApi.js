@@ -6,7 +6,6 @@ const telosApi = axios.create({
 });
 
 export default boot(({ app }) => {
+    app.provide('$telosApi', telosApi);
     app.config.globalProperties.$telosApi = telosApi;
 });
-
-export { telosApi };

@@ -21,10 +21,6 @@ const goToRoute = (name: string) => {
     router.push({ name });
 };
 
-const goToBuy = () => {
-    window.open(buyMoreLink.value, '_blank')?.focus();
-};
-
 </script>
 
 <template>
@@ -75,8 +71,8 @@ const goToBuy = () => {
             tabindex="0"
             role="link"
             :aria-label="$t('evm_wallet.link_to_buy_aria')"
-            @keydown.space.enter="goToBuy"
-            @click="goToBuy"
+            @keydown.space.enter="goToRoute('evm-buy')"
+            @click="goToRoute('evm-buy')"
         >
             <InlineSvg
                 :src="require('src/assets/icon--buy.svg')"
