@@ -15,7 +15,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { CURRENT_CONTEXT } from 'src/antelope';
 import { AxiosInstance } from 'axios';
 import { Contract } from 'ethers';
-import { AntelopeError } from './AntelopeError';
+import { AntelopeError } from 'src/antelope/types';
 
 export interface NftAttribute {
     label: string;
