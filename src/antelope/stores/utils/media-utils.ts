@@ -1,6 +1,10 @@
 import { NFTSourceTypes, NftSourceType } from 'src/antelope/types';
 
-// eztodo docs
+/**
+ * given a webm source, determine if it's audio or video
+ * @param source
+ * @returns NFTSourceTypes.AUDIO or NFTSourceTypes.VIDEO
+ */
 export async function determineWebmType(source: string): Promise<NftSourceType> {
     return new Promise((resolve, reject) => {
         // Create a video element
@@ -26,12 +30,20 @@ export async function determineWebmType(source: string): Promise<NftSourceType> 
     });
 }
 
-// eztodo docs
+/**
+ * given a url, determine if it's an image
+ * @param url
+ * @returns true if it's an image
+ */
 export function urlIsPicture(url: string): boolean {
     return Boolean(url.match(/\.(gif|avif|apng|jpe?g|jfif|p?jpe?g|png|svg|webp)$/));
 }
 
-// eztodo docs
+/**
+ * given a url, determine if it's audio
+ * @param url
+ * @returns true if it's audio
+ */
 export async function urlIsAudio(url: string) {
     const isNotWebm = !url.match(/\.(webm)$/);
 
@@ -44,7 +56,11 @@ export async function urlIsAudio(url: string) {
     return type === NFTSourceTypes.AUDIO;
 }
 
-// eztodo docs
+/**
+ * given a url, determine if it's a video
+ * @param url
+ * @returns true if it's video
+ */
 export async function urlIsVideo(url: string) {
     const isNotWebm = !url.match(/\.(webm)$/);
 

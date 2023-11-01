@@ -1,7 +1,15 @@
 import { IndexerNftMetadata, NFTSourceTypes, NftSourceType } from 'src/antelope/types';
 import { urlIsAudio, urlIsPicture, urlIsVideo } from 'src/antelope/stores/utils/media-utils';
 
-// eztodo docs
+/**
+ * Given an imageCache URL, tokenUri, and metadata, extract the image URL, mediaType, and mediaSource
+ *
+ * @param imageCache - the imageCache URL
+ * @param tokenUri - the tokenUri
+ * @param metadata - the NFT metadata object
+ *
+ * @returns {Promise<image, mediaType, mediaSource>}
+ */
 export async function extractNftMetadata(
     imageCache: string,
     tokenUri: string,

@@ -45,8 +45,6 @@ interface IndexerNftResult {
     tokenUri?: string;
 }
 
-// eztodo review these types
-
 // results from the /contract/{address}/nfts endpoint
 export interface IndexerCollectionNftResult extends IndexerNftResult {
     supply?: number; // present only for ERC1155

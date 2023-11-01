@@ -520,6 +520,7 @@ export default {
             invalid_contract: 'Contract or contract ABI missing',
             contract_data_required: 'Contract data missing',
             error_retrieving_contract: 'Error retrieving contract for address {address}',
+            error_invalid_nft_contract_type: 'Invalid NFT contract type',
         },
         evm: {
             error_support_provider_request: 'Provider does not support request method',

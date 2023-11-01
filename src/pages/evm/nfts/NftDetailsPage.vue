@@ -2,7 +2,7 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute } from 'vue-router';
-import { Collectible, Erc1155Nft, Erc721Nft, getErc1155Owners, getErc721Owner } from 'src/antelope/types';
+import { AntelopeError, Collectible, Erc1155Nft, Erc721Nft, getErc1155Owners, getErc721Owner } from 'src/antelope/types';
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
@@ -123,8 +123,7 @@ onMounted(() => {
             const contractInstance = await contract?.getContractInstance();
 
             if (!contractInstance) {
-                // eztodo make this antelopeerror
-                throw new Error('Could not get contract instance');
+                throw new AntelopeError('antelope.utils.error_contract_instance');
             }
 
             const owner = await getErc721Owner(contractInstance, nft.value.id);

@@ -34,6 +34,7 @@ import {
     getErc721Owner,
     getErc1155Owners,
     Erc1155Nft,
+    AntelopeError,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -452,8 +453,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             if (!ownersUpdatedWithinThreeMins) {
                 const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, nft.contractAddress))?.getContractInstance();
                 if (!contractInstance) {
-                    // eztodo make this antelopeerror
-                    throw new Error('Could not get contract instance');
+                    throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
                 const owner = await getErc721Owner(contractInstance, nft.id);
                 nft.owner = owner;
@@ -462,7 +462,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
             return nft;
         });
 
-        // eztodo handle errors
         const settledPromises = await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]);
 
         const fulfilledPromises = settledPromises.filter(result => result.status === 'fulfilled') as PromiseFulfilledResult<Collectible>[];

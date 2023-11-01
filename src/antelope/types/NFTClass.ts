@@ -15,6 +15,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { CURRENT_CONTEXT } from 'src/antelope';
 import { AxiosInstance } from 'axios';
 import { Contract } from 'ethers';
+import { AntelopeError } from './AntelopeError';
 
 export interface NftAttribute {
     label: string;
@@ -97,8 +98,7 @@ export async function constructNft(
     const isErc1155 = contract.supportedInterfaces.includes('erc1155');
 
     if (!isErc721 && !isErc1155) {
-        // eztodo antelopeerror
-        throw new Error('Invalid NFT contract type');
+        throw new AntelopeError('antelope.contracts.error_invalid_nft_contract_type');
     }
 
     const cachedNft = nftStore.__contracts[network]?.[contract.address]?.list.find(nft => nft.id === indexerData.tokenId);
@@ -149,8 +149,7 @@ export async function constructNft(
         const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address))?.getContractInstance();
 
         if (!contractInstance) {
-            // eztodo make this antelopeerror
-            throw new Error('Could not get contract instance');
+            throw new AntelopeError('antelope.utils.error_contract_instance');
         }
 
         const owner = commonData.owner ?? await getErc721Owner(contractInstance, indexerData.tokenId);
@@ -167,7 +166,7 @@ export async function constructNft(
     return new Erc1155Nft({
         ...commonData,
         owners,
-        supply: indexerData.supply as number, // eztodo better way?
+        supply: indexerData.supply as number,
     }, contract);
 }
 
