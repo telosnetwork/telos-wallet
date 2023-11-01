@@ -185,6 +185,11 @@ export default {
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
         collectibles_per_page: 'Collectibles per page',
+        // transfer
+        transfer: 'Transfer',
+        transfer_collectible: 'transfer collectible',
+        transfer_from: 'from',
+        transfer_on_telos: 'on Telos',
     },
     evm_wrap: {
         wrap: 'Wrap',
@@ -556,6 +561,7 @@ export default {
             error_unstakes_failed: 'An unknown error occurred when unstaking tokens',
             error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
             error_fetching_token_price: 'An unknown error occurred when fetching token price data',
+            error_transfer_nft: 'An error occured while transferring collectible',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',

@@ -31,7 +31,7 @@ export default defineComponent({
                     }
 
                     if (!this.tabs.includes(newValue.query.tab)) {
-                        this.$router.replace({ query: { tab: this.tabs[0] } });
+                        this.$router.push({ path: this.$route.path, query: { ...this.$route.query, tab: this.tabs[0] } });
                     }
                 }
             },
@@ -60,7 +60,7 @@ export default defineComponent({
                 :key="tab"
                 :name="tab"
                 :label="tab.charAt(0).toUpperCase() + tab.slice(1)"
-                :to="{ query: { tab: tab.toLowerCase() } }"
+                :to="{ query: { ...$route.query, tab: tab.toLowerCase() } }"
                 replace
             />
         </q-tabs>

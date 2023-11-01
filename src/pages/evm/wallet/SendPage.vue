@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import AppPage from 'components/evm/AppPage.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
-import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
+import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError, addressString } from 'src/antelope/types';
 import { WEI_PRECISION, formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
@@ -158,10 +158,6 @@ export default defineComponent({
                 return ethers.constants.Zero;
             }
         },
-        isAddressValid(): boolean {
-            const regex = /^0x[a-fA-F0-9]{40}$/;
-            return regex.test(this.address);
-        },
         isFormValid(): boolean {
             return this.addressIsValid && !(this.amount.isZero() || this.amount.isNegative() || this.amount.gt(this.availableInTokensBn));
         },
@@ -242,7 +238,7 @@ export default defineComponent({
 
             const token = this.token as TokenClass;
             const amount = this.amount;
-            const to = this.address;
+            const to = this.address as addressString;
 
             if (this.isFormValid) {
                 ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {
@@ -406,14 +402,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.q-btn.wallet-btn {
-    @include text--header-5;
-    &+& {
-        margin-left: 16px;
-    }
-}
-
-
 .c-send-page {
     &__title-container {
         flex-direction: column;

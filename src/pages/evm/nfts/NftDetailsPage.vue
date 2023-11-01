@@ -1,47 +1,89 @@
 <script setup lang="ts">
-import AppPage from 'components/evm/AppPage.vue';
-import { useNftsStore } from 'src/antelope/stores/nfts';
-import { useRoute } from 'vue-router';
-import { AntelopeError, Collectible, Erc1155Nft, Erc721Nft, getErc1155Owners, getErc721Owner } from 'src/antelope/types';
-import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
-import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
-import ExternalLink from 'components/ExternalLink.vue';
-import ToolTip from 'components/ToolTip.vue';
+import {
+    computed,
+    onBeforeMount,
+    onMounted,
+    onUnmounted,
+    ref,
+    watch,
+} from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
 import {
     CURRENT_CONTEXT,
+    getAntelope,
     useAccountStore,
     useChainStore,
     useContractStore,
 } from 'src/antelope';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import NumberedList from 'components/NumberedList.vue';
+import {
+    addressString,
+    AntelopeError,
+    Collectible,
+    ERC1155_TYPE,
+    Erc1155Nft,
+    ERC721_TYPE,
+    Erc721Nft,
+    getErc1155Owners,
+    getErc721Owner,
+    NftTokenInterface,
+} from 'src/antelope/types';
+import { useNftsStore } from 'src/antelope/stores/nfts';
+
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
-import { useI18n } from 'vue-i18n';
 import { abbreviateNumber } from 'src/antelope/stores/utils/text-utils';
+import { EvmAccountModel } from 'src/antelope/stores/account';
+
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import AppPage from 'components/evm/AppPage.vue';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import ExternalLink from 'components/ExternalLink.vue';
+import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NumberedList from 'components/NumberedList.vue';
+import ToolTip from 'components/ToolTip.vue';
+import UserInfo from 'components/evm/UserInfo.vue';
 
 const route = useRoute();
+const router = useRouter();
 const { t: $t } = useI18n();
 
+const ant = getAntelope();
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const contractStore = useContractStore();
+const accountStore = useAccountStore();
+
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
+const ATTRIBUTES = 'attributes';
+const TRANSFER = 'transfer';
+const OWNERS = 'owners'; // for 1155 only
+
+let addressIsValid = false;
 
 // data
 const nft = ref<Collectible | null>(null);
 const loading = ref(true);
+const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
+const transferLoading = ref(false);
+const address = ref('');
 
 
 // computed
 // const userAddress = computed(() => useAccountStore().currentEvmAccount?.address); eztodo
 const userAddress = computed(() => '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
+const loggedAccount = computed(() =>
+    accountStore.loggedEvmAccount,
+);
 const isErc721 = computed(() => nft.value instanceof Erc721Nft);
 const isErc1155 = computed(() => nft.value instanceof Erc1155Nft);
+const nftType = computed(() => isErc721.value ? ERC721_TYPE : ERC1155_TYPE);
 const nftAsErc721 = computed(() => nft.value as Erc721Nft);
 const nftAsErc1155 = computed(() => nft.value as Erc1155Nft);
+
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
@@ -86,7 +128,6 @@ const nftQuantityText = computed(() => {
 
     return quantity.toLocaleString();
 });
-
 const nftSupplyText = computed(() => {
     if (!nft.value || isErc721.value) {
         return '';
@@ -105,12 +146,17 @@ const nftSupplyTextAbbreviated = computed(() => {
     return supply.toLocaleString();
 });
 
+
 // methods
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
-        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId);
-        loading.value = false;
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+
+        if (nft.value instanceof Erc721Nft) {
+            removeTab(OWNERS);
+        }
     }
+    loading.value = false;
 });
 
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -141,10 +187,87 @@ onUnmounted(() => {
         clearInterval(timer);
     }
 });
+
+
+// if user switches account, disable transfer
+watch(loggedAccount, (newAccount: EvmAccountModel) => {
+    const shouldDisableTransfer = !nft.value ||
+        (isErc721.value && nftAsErc721.value.owner !== newAccount.address) ||
+        (isErc1155.value && !nftAsErc1155.value.owners[newAccount.address]);
+
+    if (shouldDisableTransfer) {
+        disableTransfer();
+    } else if (!tabs.value.includes(TRANSFER)) {
+        // if user switches to owner of nft, restore transfer functionality
+        tabs.value.push(TRANSFER);
+    }
+});
+
+// if details refresh with new owner (on transfer), disable transfer functionality
+watch(nft, () => {
+    const shouldDisableTransfer = !nft.value ||
+        (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
+        (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+
+    if (shouldDisableTransfer) {
+        disableTransfer();
+    }
+});
+
+async function startTransfer() {
+    transferLoading.value = true;
+    const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
+    try {
+        const trx = await nftStore.transferNft(
+            CURRENT_CONTEXT,
+            contractAddress,
+            nftId,
+            nftType.value,
+            loggedAccount.value.address,
+            address.value as addressString,
+        );
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
+        );
+        trx.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${explorerUrl}/tx/${trx.hash}`,
+            );
+        }).catch((err) => {
+            console.error(err);
+            transferLoading.value = false;
+        }).finally(async () => {
+            dismiss();
+            setTimeout(async () => {
+                await updateNftData();
+                transferLoading.value = false;
+            }, 3000); // give the indexer a second to register change in owner before querying
+        });
+    } catch(e) {
+        console.error(e); // tx error notification handled in store
+        transferLoading.value = false;
+    }
+}
+
+async function updateNftData() {
+    nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+}
+
+function disableTransfer(){
+    router.push({ query: { ...route.query, tab: 'attributes' } });
+    removeTab(TRANSFER);
+}
+
+function removeTab(tab: string){
+    if (tabs.value.includes(tab)){
+        tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
+    }
+}
+
 </script>
 
 <template>
-<AppPage>
+<AppPage :tabs="(tabs as string[])">
     <template v-slot:header>
         <div
             :class="{
@@ -245,87 +368,143 @@ onUnmounted(() => {
         </div>
     </template>
 
-    <div class="c-nft-details__body-container">
-        <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
-        <h4
-            v-else
-            :class="{
-                'q-mb-lg': true,
-                'u-text--center': nft === null,
-            }"
-        >
-            <template v-if="nft === null">
-                {{ $t('nft.collectible_not_found_recommendation') }}
-            </template>
-            <template v-else>
-                {{ $t('global.attributes') }}
-            </template>
-        </h4>
+    <template v-slot:attributes>
+        <div class="c-nft-details__body-container">
+            <q-skeleton v-if="loading" type="text" class="c-nft-details__body-header-skeleton"/>
+            <h4
+                v-else
+                :class="{
+                    'q-mb-lg': true,
+                    'u-text--center': nft === null,
+                }"
+            >
+                <template v-if="nft === null">
+                    {{ $t('nft.collectible_not_found_recommendation') }}
+                </template>
+                <template v-else>
+                    {{ $t('global.attributes') }}
+                </template>
+            </h4>
 
-        <div
-            :class="{
-                'c-nft-details__attributes-container': true,
-                'c-nft-details__attributes-container--not-found': nft === null && !loading,
-            }"
-        >
-            <template v-if="loading">
-                <q-skeleton
-                    v-for="index in 9"
-                    :key="`nft-detail-body-skeleton-${index}`"
-                    class="c-nft-details__attribute-skeleton"
-                />
-            </template>
+            <div
+                :class="{
+                    'c-nft-details__attributes-container': true,
+                    'c-nft-details__attributes-container--not-found': nft === null && !loading,
+                }"
+            >
+                <template v-if="loading">
+                    <q-skeleton
+                        v-for="index in 9"
+                        :key="`nft-detail-body-skeleton-${index}`"
+                        class="c-nft-details__attribute-skeleton"
+                    />
+                </template>
 
-            <template v-else-if="nft === null">
-                <NumberedList>
-                    <template v-slot:1>
-                        <p>
-                            {{ $t('nft.collectible_not_found_contract_part_1') }}
-                            <span class="o-text--paragraph-bold">
-                                {{ $t('nft.collectible_not_found_contract_part_2_bold') }}
-                            </span>
-                            {{ $t('nft.collectible_not_found_contract_part_3') }}
+                <template v-else-if="nft === null">
+                    <NumberedList>
+                        <template v-slot:1>
+                            <p>
+                                {{ $t('nft.collectible_not_found_contract_part_1') }}
+                                <span class="o-text--paragraph-bold">
+                                    {{ $t('nft.collectible_not_found_contract_part_2_bold') }}
+                                </span>
+                                {{ $t('nft.collectible_not_found_contract_part_3') }}
 
-                            <template v-if="contractAddressIsValid">
-                                {{ $t('nft.collectible_not_found_contract_part_4') }}
-                                <br>
-                                <ExternalLink :text="contractAddress" :url="contractLink" />
-                            </template>
+                                <template v-if="contractAddressIsValid">
+                                    {{ $t('nft.collectible_not_found_contract_part_4') }}
+                                    <br>
+                                    <ExternalLink :text="contractAddress" :url="contractLink" />
+                                </template>
 
-                            <template v-else>
-                                {{ $t('nft.collectible_not_found_contract_invalid') }}
-                            </template>
-                        </p>
-                    </template>
+                                <template v-else>
+                                    {{ $t('nft.collectible_not_found_contract_invalid') }}
+                                </template>
+                            </p>
+                        </template>
 
-                    <template v-slot:2>
-                        <p>
-                            {{ $t('nft.collectible_not_found_nft_id_part_1') }}
-                            <span class="o-text--paragraph-bold">
-                                {{ $t('global.id') }}
-                            </span>
-                            {{ $t('nft.collectible_not_found_nft_id_part_3') }}
-                        </p>
-                    </template>
-                </NumberedList>
-            </template>
+                        <template v-slot:2>
+                            <p>
+                                {{ $t('nft.collectible_not_found_nft_id_part_1') }}
+                                <span class="o-text--paragraph-bold">
+                                    {{ $t('global.id') }}
+                                </span>
+                                {{ $t('nft.collectible_not_found_nft_id_part_3') }}
+                            </p>
+                        </template>
+                    </NumberedList>
+                </template>
 
-            <template v-else>
-                <p v-if="!nft.attributes?.length">
-                    {{ $t('nft.no_attributes') }}
-                </p>
+                <template v-else>
+                    <p v-if="!nft.attributes?.length">
+                        {{ $t('nft.no_attributes') }}
+                    </p>
 
-                <NftDetailsCard
-                    v-for="(attribute, index) in filteredAttributes"
-                    :key="`nft-attr-${index}`"
-                    :title="attribute.label"
-                    class="q-mb-sm"
-                >
-                    {{ attribute.text }}
-                </NftDetailsCard>
-            </template>
+                    <NftDetailsCard
+                        v-for="(attribute, index) in filteredAttributes"
+                        :key="`nft-attr-${index}`"
+                        :title="attribute.label"
+                        class="q-mb-sm"
+                    >
+                        {{ attribute.text }}
+                    </NftDetailsCard>
+                </template>
+            </div>
         </div>
-    </div>
+    </template>
+    <template v-slot:transfer>
+        <div class="c-nft-transfer__form-container">
+            <q-form class="c-nft-transfer__form">
+                <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
+                    <div class="col">
+                        <div class="c-nft-transfer__transfer-text">
+                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft?.contractPrettyName || nft?.contractAddress }} #{{ nft?.id }} </span>
+                        </div>
+                        <div class="c-nft-transfer__transfer-from c-nft-transfer__transfer-text--small">
+                            {{ $t('nft.transfer_from') }}
+                            &nbsp;
+                            <UserInfo
+                                class="c-nft-transfer__transfer-text--small c-nft-transfer__transfer-text--bold"
+                                :displayFullAddress="false"
+                                :showAddress="true"
+                                :showCopyBtn="false"
+                                :showUserMenu="false"
+                                :lightweight="true"
+                                :account="loggedAccount"
+                            />
+                            &nbsp;
+                            {{ $t('nft.transfer_on_telos') }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-nft-transfer__row c-nft-transfer__row--2 row">
+                    <div class="col">
+                        <AddressInput
+                            v-model="address"
+                            name="nft-transfer-address-input"
+                            :label="$t('evm_wallet.receiving_account')"
+                            @update:isValid="addressIsValid = $event"
+                        />
+                    </div>
+                </div>
+
+                <div class="c-nft-transfer__row c-nft-transfer__row--3 row">
+                    <div class="col">
+                        <div class="justify-end row">
+                            <q-btn
+                                color="primary"
+                                class="wallet-btn"
+                                :label="$t('nft.transfer_collectible')"
+                                :loading="transferLoading"
+                                :disable="!addressIsValid"
+                                @click="startTransfer"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </q-form>
+        </div>
+    </template>
 </AppPage>
 </template>
 
@@ -446,6 +625,59 @@ onUnmounted(() => {
 
     &__attribute-skeleton {
         height: 100px;
+    }
+}
+
+.c-nft-transfer {
+    &__form-container {
+        animation: #{$anim-slide-in-left};
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    &__form {
+        width: 100%;
+        max-width: 530px;
+    }
+
+    &__row {
+        gap: 16px;
+        &--1 {
+            margin-bottom: 24px;
+        }
+
+        &--2 {
+            margin-bottom: 24px;
+        }
+
+        &--3 {
+            margin-bottom: 24px;
+        }
+    }
+
+    &__transfer-from{
+        display: flex;
+    }
+
+    &__transfer-text{
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 400;
+
+        &--small{
+            font-size: 16px;
+            // override UserInfo component styling
+            .o-text--header-4 {
+                font-size: 16px !important;
+            }
+        }
+
+        &--bold{
+            font-weight: 600;
+        }
     }
 }
 </style>

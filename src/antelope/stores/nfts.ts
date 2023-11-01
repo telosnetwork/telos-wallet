@@ -1,6 +1,6 @@
 /**
  * NFTs: This store is responsible for all functionality pertaining to NFTs,
- * such as fetching them for a given account or getting information on a particular NFT
+ * such as fetching them for a given account, getting information on a particular NFT, or transferring NFTs
  */
 
 import { defineStore } from 'pinia';
@@ -12,14 +12,18 @@ import {
     Collectible,
     NftTokenInterface,
     IndexerPaginationFilter,
+    TransactionResponse,
+    addressString,
 } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
+import { EvmAccountModel, useAccountStore } from 'src/antelope/stores/account';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 export interface NFTsInventory {
     owner: Address;
@@ -288,6 +292,35 @@ export const useNftsStore = defineStore(store_name, {
                 offset: 0,
                 limit: 10000,
             });
+        },
+
+        async subscribeForTransactionReceipt(account: EvmAccountModel, response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
+                    this.updateNFTsForAccount(CURRENT_CONTEXT, account.account);
+                });
+                return newResponse;
+            });
+        },
+
+        async transferNft(label: Label, contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<TransactionResponse> {
+            const funcname = 'transferNft';
+            this.trace(funcname, label, contractAddress, tokenId, type);
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().loggedAccount as EvmAccountModel;
+                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+            } catch (error) {
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
         },
     },
 });
