@@ -2,8 +2,8 @@
 import AppPage from 'components/evm/AppPage.vue';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { useRoute, useRouter } from 'vue-router';
-import { ERC1155_TYPE, ERC721_TYPE, ShapedNFT } from 'src/antelope/types';
-import { computed, onBeforeMount, ref } from 'vue';
+import { ERC1155_TYPE, ERC721_TYPE, NftTokenInterface, ShapedNFT, addressString } from 'src/antelope/types';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
 import ExternalLink from 'components/ExternalLink.vue';
@@ -14,6 +14,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import NumberedList from 'components/NumberedList.vue';
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
 import { useI18n } from 'vue-i18n';
+import { EvmAccountModel } from 'src/antelope/stores/account';
 
 const route = useRoute();
 const router = useRouter();
@@ -34,11 +35,13 @@ const OWNERS = 'owners'; // for 1155 only
 const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const nft = ref<ShapedNFT | null>(null);
 const loading = ref(true);
+const transferLoading = ref(false);
 const address = ref('');
 
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
-let nftType: ERC1155_TYPE | ERC721_TYPE | null = null;
+
+let nftType: NftTokenInterface | null = null;
 
 onBeforeMount(async () => {
     if (contractAddress && nftId) {
@@ -46,16 +49,12 @@ onBeforeMount(async () => {
         const erc1155Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
 
         if (erc721Details) {
+            removeTab(OWNERS);
             nft.value = erc721Details;
             nftType = ERC721_TYPE;
-            removeTab(OWNERS);
         } else if (erc1155Details) {
             nft.value = erc1155Details;
             nftType = ERC1155_TYPE;
-        }
-
-        if (nft.value.ownerAddress !== loggedAccount.value.address){
-            removeTab(TRANSFER);
         }
 
         loading.value = false;
@@ -90,10 +89,28 @@ const loggedAccount = computed(() =>
     accountStore.loggedEvmAccount,
 );
 
+// if user switches account, disable transfer
+watch(loggedAccount, (newAccount: EvmAccountModel) => {
+    if (nft.value?.ownerAddress !== newAccount.address){
+        disableTransfer();
+    }else if (!tabs.value.includes(TRANSFER)){
+        //if user switches to owner of nft, restore transfer functionality
+        tabs.value.push(TRANSFER);
+    }
+});
+
+// if details refresh with new owner (on transfer), disable transfer functionality
+watch(nft, (nftDetails) => {
+    if (nftDetails?.ownerAddress !== loggedAccount.value.address){
+        disableTransfer();
+    }
+});
+
 async function startTransfer(){
-    const nameString = `${nft.value.contractPrettyName || nft.value.contractAddress} #${nft.value.id}`;
+    transferLoading.value = true;
+    const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
     try{
-        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType, loggedAccount.value.address, address.value);
+        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType as NftTokenInterface, loggedAccount.value.address, address.value as addressString);
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
         );
@@ -103,24 +120,43 @@ async function startTransfer(){
             );
         }).catch((err) => {
             console.error(err);
-        }).finally(() => {
+            transferLoading.value = false;
+        }).finally(async () => {
             dismiss();
+            setTimeout(async () => {
+                await updateNftData(nftType as NftTokenInterface);
+                transferLoading.value = false;
+            }, 3000); //give the indexer a second to register change in owner before querying
         });
-        router.push({ query: { tab: 'attributes' } });
-        removeTab(TRANSFER);
     }catch(e){
         console.error(e); // tx error notification handled in store
+        transferLoading.value = false;
     }
 }
 
+async function updateNftData(tokenType: NftTokenInterface){
+    if (tokenType === ERC721_TYPE){
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+    }else if (tokenType === ERC1155_TYPE){
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
+    }
+}
+
+function disableTransfer(){
+    router.push({ query: { ...route.query, tab: 'attributes' } });
+    removeTab(TRANSFER);
+}
+
 function removeTab(tab: string){
-    tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
+    if (tabs.value.includes(tab)){
+        tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
+    }
 }
 
 </script>
 
 <template>
-<AppPage :tabs="tabs">
+<AppPage :tabs="(tabs as string[])">
     <template v-slot:header>
         <div
             :class="{
@@ -267,7 +303,7 @@ function removeTab(tab: string){
                 <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
                     <div class="col">
                         <div class="c-nft-transfer__transfer-text">
-                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft.contractPrettyName || nft.contractAddress }} #{{ nft.id }} </span>
+                            {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft?.contractPrettyName || nft?.contractAddress }} #{{ nft?.id }} </span>
                         </div>
                         <div class="c-nft-transfer__transfer-from c-nft-transfer__transfer-text--small">
                             {{ $t('nft.transfer_from') }}
@@ -305,7 +341,7 @@ function removeTab(tab: string){
                                 color="primary"
                                 class="wallet-btn"
                                 :label="$t('nft.transfer_collectible')"
-                                :loading="false"
+                                :loading="transferLoading"
                                 :disable="!addressIsValid"
                                 @click="startTransfer"
                             />

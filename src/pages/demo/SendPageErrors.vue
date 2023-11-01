@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useUserStore } from 'src/antelope';
-import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError } from 'src/antelope/types';
+import { TransactionResponse, TokenClass, TokenBalance, NativeCurrencyAddress, AntelopeError, addressString } from 'src/antelope/types';
 import { formatWei, prettyPrintBalance, prettyPrintFiatBalance } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
@@ -178,7 +178,7 @@ export default defineComponent({
 
             const token = this.token as TokenClass;
             const amount = this.amount;
-            const to = this.address;
+            const to = this.address as addressString;
 
             // this code should not beallowed in case of invalid form, but for testing purposes we allow it here
             ant.stores.balances.transferTokens(token, to, amount).then((trx: TransactionResponse) => {

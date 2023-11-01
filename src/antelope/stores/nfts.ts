@@ -301,8 +301,7 @@ export const useNftsStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading(funcname);
                 const account = useAccountStore().loggedAccount as EvmAccountModel;
-                const authenticator = useAccountStore().getEVMAuthenticator(label);
-                return await authenticator.transferNft(contractAddress, tokenId, type, from, to)
+                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);

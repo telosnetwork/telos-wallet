@@ -127,7 +127,7 @@ export const useBalancesStore = defineStore(store_name, {
                             // We need to get the value ready to overwrite immediately and therefore avoid the blink
                             const wrapTokens = chain_settings.getWrappedSystemToken();
                             const authenticator = account.authenticator as EVMAuthenticator;
-                            const wrapBalance = await authenticator.getERC20TokenBalance(account.account, wrapTokens.address);
+                            const wrapBalance = await authenticator.getERC20TokenBalance(account.account, wrapTokens.address as addressString);
 
                             // now we call the indexer
                             const newBalances = await chain_settings.getBalances(account.account);
@@ -166,7 +166,7 @@ export const useBalancesStore = defineStore(store_name, {
                             const authenticator = account.authenticator as EVMAuthenticator;
                             const promises = tokens
                                 .filter(token => token.address !== chain_settings.getSystemToken().address)
-                                .map(token => authenticator.getERC20TokenBalance(account.account, token.address)
+                                .map(token => authenticator.getERC20TokenBalance(account.account, token.address as addressString)
                                     .then((balanceBn: BigNumber) => {
                                         this.processBalanceForToken(label, token, balanceBn);
                                     }).catch((error) => {
@@ -303,7 +303,7 @@ export const useBalancesStore = defineStore(store_name, {
             this.setWagmiTokenTransferConfig(config, label);
             this.setWagmiSystemTokenTransferConfig(null, label);
         },
-        async transferTokens(token: TokenClass, to: string, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
+        async transferTokens(token: TokenClass, to: addressString, amount: BigNumber, memo?: string): Promise<TransactionResponse> {
             const funcname = 'transferTokens';
             this.trace(funcname, token, to, amount.toString(), memo);
             const label = CURRENT_CONTEXT;
@@ -413,7 +413,7 @@ export const useBalancesStore = defineStore(store_name, {
             settings: EVMChainSettings,
             account: EvmAccountModel,
             token: TokenClass,
-            to: string,
+            to: addressString,
             amount: BigNumber,
         ): Promise<EvmTransactionResponse | SendTransactionResult> {
             this.trace('transferEVMTokens', settings, account, token, to, amount.toString());
