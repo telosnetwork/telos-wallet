@@ -351,9 +351,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             return [];
         }
         const url = `v1/account/${account}/nfts`;
+        const isErc1155 = params.type === 'ERC1155';
         const paramsWithSupply = {
             ...params,
-            includeTokenIdSupply: params.type === 'ERC1155', // only ERC1155 supports supply
+            includeTokenIdSupply: isErc1155, // only ERC1155 supports supply
         };
         const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
 
@@ -366,6 +367,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.tokenIdSupply,
+            owner: isErc1155 ? undefined : nftResponse.owner,
         }));
 
         this.processNftContractsCalldata(response.contracts);

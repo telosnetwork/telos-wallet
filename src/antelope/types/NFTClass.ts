@@ -26,6 +26,7 @@ interface NftPrecursorData {
     id: string;
     metadata: IndexerNftMetadata;
     updated: number; // epoch
+    owner?: string; // ERC721 only
 
     tokenUri?: string;
     imageCache?: string; // url
@@ -141,6 +142,7 @@ export async function constructNft(
         imgSrc: image,
         videoSrc: mediaType === NFTSourceTypes.VIDEO ? mediaSource : undefined,
         audioSrc: mediaType === NFTSourceTypes.AUDIO ? mediaSource : undefined,
+        owner: indexerData.owner,
     };
 
     if (isErc721) {
@@ -151,7 +153,7 @@ export async function constructNft(
             throw new Error('Could not get contract instance');
         }
 
-        const owner = await getErc721Owner(contractInstance, indexerData.tokenId);
+        const owner = commonData.owner ?? await getErc721Owner(contractInstance, indexerData.tokenId);
 
         return new Erc721Nft({
             ...commonData,

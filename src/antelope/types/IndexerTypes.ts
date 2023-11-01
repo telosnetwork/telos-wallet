@@ -58,6 +58,7 @@ export interface IndexerAccountNftResponse extends IndexerNftResult {
     minter: string;
     blockMinted: number;
     tokenIdSupply?: number; // present only for ERC1155
+    owner: string;
 }
 
 // used as an intermediate type for constructing NFTs from IndexerAccountNftResponse/IndexerCollectionNftResult
@@ -71,6 +72,7 @@ export interface GenericIndexerNft {
     supply?: number; // present only for ERC1155
     minter?: string;
     blockMinted?: number;
+    owner?: string; // present only for ERC721
 }
 
 export interface IndexerNftContract {
