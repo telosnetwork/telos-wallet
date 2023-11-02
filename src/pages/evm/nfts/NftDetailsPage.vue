@@ -151,9 +151,12 @@ onBeforeMount(async () => {
     if (contractAddress && nftId) {
         nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
 
-        if (nft.value instanceof Erc721Nft) {
-            removeTab(OWNERS);
-        }
+        // https://github.com/telosnetwork/telos-wallet/issues/658
+        // if (nft.value instanceof Erc721Nft) {
+        //     removeTab(OWNERS);
+        // }
+
+        removeTab(OWNERS);
     }
     loading.value = false;
 });
@@ -190,9 +193,11 @@ onUnmounted(() => {
 
 // if user switches account, disable transfer
 watch(loggedAccount, (newAccount: EvmAccountModel) => {
-    const shouldDisableTransfer = !nft.value ||
-        (isErc721.value && nftAsErc721.value.owner !== newAccount.address) ||
-        (isErc1155.value && !nftAsErc1155.value.owners[newAccount.address]);
+    // https://github.com/telosnetwork/telos-wallet/issues/658
+    // const shouldDisableTransfer = !nft.value ||
+    //     (isErc721.value && nftAsErc721.value.owner !== newAccount.address) ||
+    //     (isErc1155.value && !nftAsErc1155.value.owners[newAccount.address]);
+    const shouldDisableTransfer = !isErc721.value || (isErc721.value && nftAsErc721.value.owner !== newAccount.address);
 
     if (shouldDisableTransfer) {
         disableTransfer();
