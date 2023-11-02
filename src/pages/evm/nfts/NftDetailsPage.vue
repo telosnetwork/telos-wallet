@@ -73,11 +73,10 @@ const address = ref('');
 
 
 // computed
-// const userAddress = computed(() => useAccountStore().currentEvmAccount?.address); eztodo
-const userAddress = computed(() => '0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
 const loggedAccount = computed(() =>
     accountStore.loggedEvmAccount,
 );
+const userAddress = computed(() => loggedAccount.value.address);
 const isErc721 = computed(() => nft.value instanceof Erc721Nft);
 const isErc1155 = computed(() => nft.value instanceof Erc1155Nft);
 const nftType = computed(() => isErc721.value ? ERC721_TYPE : ERC1155_TYPE);
