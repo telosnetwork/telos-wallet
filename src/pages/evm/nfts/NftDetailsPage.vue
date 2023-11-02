@@ -67,7 +67,7 @@ let addressIsValid = false;
 // data
 const nft = ref<Collectible | null>(null);
 const loading = ref(true);
-const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
+const tabs = ref<string[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const transferLoading = ref(false);
 const address = ref('');
 
@@ -271,7 +271,7 @@ function removeTab(tab: string){
 </script>
 
 <template>
-<AppPage :tabs="(tabs as string[])">
+<AppPage :tabs="tabs">
     <template v-slot:header>
         <div
             :class="{
