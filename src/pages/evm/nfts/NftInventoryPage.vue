@@ -69,8 +69,6 @@ const tableColumns = [
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
 
 // data
-const firstLoadInProgress = ref(false);
-const firstLoadInitiated = ref(false);
 const nftsLoaded = ref(false); // because the account is not necessarily loaded when the page loads, we need to wait for it to load before we can fetch the NFTs
 const initialQueryParamsApplied = ref(false);
 const showNftsAsTiles = ref(initialInventoryDisplayPreference === tile);
@@ -170,18 +168,14 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
     }
 });
 
-watch(accountStore, (store, oldStore) => {
-    const accountChanged = store.loggedAccount?.account !== oldStore?.loggedAccount?.account;
-    const isFirstLoad = !firstLoadInProgress.value && !firstLoadInitiated.value;
+watch(userAccount, (account, oldAccount) => {
+    const accountChanged = account !== oldAccount;
+    const isFirstLoad = oldAccount === undefined;
 
     // fetch initial data / fetchdata when account changes
-    if (store?.loggedAccount?.account && (accountChanged || isFirstLoad)) {
-        firstLoadInProgress.value = true;
-        firstLoadInitiated.value = true;
-
-        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, store.loggedAccount.account).finally(() => {
+    if (account && (accountChanged || isFirstLoad)) {
+        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, account).finally(() => {
             nftsLoaded.value = true;
-            firstLoadInProgress.value = false;
         });
     }
 },
