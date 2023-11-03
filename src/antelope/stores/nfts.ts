@@ -177,7 +177,7 @@ export const useNftsStore = defineStore(store_name, {
                                 loading: false,
                             };
 
-                            if (this.__contracts[network][contractLower].list.includes(nft)) {
+                            if (this.__contracts[network][contractLower].list.find(contractNft => contractNft.id === nft.id)) {
                                 return;
                             }
                             this.__contracts[network][contractLower].list.push(nft);
@@ -186,15 +186,6 @@ export const useNftsStore = defineStore(store_name, {
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
 
                         this.__contracts[network] = this.__contracts[network] || {};
-                        sortedNfts.forEach((nft) => {
-                            const contractLower = nft.contractAddress.toLowerCase();
-                            this.__contracts[network][contractLower] = {
-                                contract: contractLower,
-                                list: [],
-                                loading: false,
-                            };
-                            this.__contracts[network][contractLower].list.push(nft);
-                        });
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
                     } else {
                         // In case the chain does not support index, we don't have any solution yet
