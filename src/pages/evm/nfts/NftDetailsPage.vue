@@ -15,24 +15,19 @@ import {
     getAntelope,
     useAccountStore,
     useChainStore,
-    useContractStore,
 } from 'src/antelope';
 import {
     addressString,
-    AntelopeError,
     Collectible,
     ERC1155_TYPE,
     Erc1155Nft,
     ERC721_TYPE,
     Erc721Nft,
-    getErc1155Owners,
-    getErc721Owner,
-    NftTokenInterface,
 } from 'src/antelope/types';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 
 import { isValidAddressFormat } from 'src/antelope/stores/utils';
-import { abbreviateNumber } from 'src/antelope/stores/utils/text-utils';
+import { abbreviateNumber, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { EvmAccountModel } from 'src/antelope/stores/account';
 
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
@@ -52,7 +47,6 @@ const { t: $t } = useI18n();
 const ant = getAntelope();
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
-const contractStore = useContractStore();
 const accountStore = useAccountStore();
 
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
@@ -155,7 +149,6 @@ onBeforeMount(async () => {
         // if (nft.value instanceof Erc721Nft) {
         //     removeTab(OWNERS);
         // }
-
     }
     removeTab(OWNERS);
     loading.value = false;
@@ -164,23 +157,11 @@ onBeforeMount(async () => {
 let timer: ReturnType<typeof setInterval> | undefined;
 const minuteMilliseconds = 60 * 1000;
 onMounted(() => {
+    const indexer = (chainStore.currentChain.settings as EVMChainSettings).getIndexer();
+
     // update owner info once per minute
     timer = setInterval(async () => {
-        if (nft.value instanceof Erc721Nft) {
-            const contract = await contractStore.getContract(CURRENT_CONTEXT, nft.value.contractAddress);
-            const contractInstance = await contract?.getContractInstance();
-
-            if (!contractInstance) {
-                throw new AntelopeError('antelope.utils.error_contract_instance');
-            }
-
-            const owner = await getErc721Owner(contractInstance, nft.value.id);
-            nft.value.owner = owner;
-        } else if (nft.value instanceof Erc1155Nft) {
-            const indexer = (chainStore.currentChain.settings as EVMChainSettings).getIndexer();
-            const owners = await getErc1155Owners(nft.value.contractAddress, nft.value.id, indexer);
-            nft.value.owners = owners;
-        }
+        // nft.value?.updateOwnerData(indexer);
     }, minuteMilliseconds);
 });
 
@@ -214,12 +195,13 @@ watch(nft, () => {
     // const shouldDisableTransfer = !nft.value ||
     //     (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
     //     (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+
     const shouldDisableTransfer = !isErc721.value || (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address);
 
     if (shouldDisableTransfer) {
         disableTransfer();
     }
-});
+}, { deep: true });
 
 async function startTransfer() {
     transferLoading.value = true;
@@ -234,7 +216,7 @@ async function startTransfer() {
             address.value as addressString,
         );
         const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
+            $t('notification.neutral_message_sending', { quantity: nameString, address: truncateAddress(address.value) }),
         );
         trx.wait().then(() => {
             ant.config.notifySuccessfulTrxHandler(
@@ -242,13 +224,9 @@ async function startTransfer() {
             );
         }).catch((err) => {
             console.error(err);
-            transferLoading.value = false;
-        }).finally(async () => {
+        }).finally(() => {
             dismiss();
-            setTimeout(async () => {
-                await updateNftData();
-                transferLoading.value = false;
-            }, 3000); // give the indexer a second to register change in owner before querying
+            transferLoading.value = false;
         });
     } catch(e) {
         console.error(e); // tx error notification handled in store
@@ -256,12 +234,9 @@ async function startTransfer() {
     }
 }
 
-async function updateNftData() {
-    nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
-}
-
 function disableTransfer(){
     router.push({ query: { ...route.query, tab: 'attributes' } });
+    address.value = '';
     removeTab(TRANSFER);
 }
 

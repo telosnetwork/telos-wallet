@@ -104,6 +104,7 @@ export async function constructNft(
     const cachedNft = nftStore.__contracts[network]?.[contract.address]?.list.find(nft => nft.id === indexerData.tokenId);
 
     if (cachedNft) {
+        await cachedNft.updateOwnerData(chainSettings.getIndexer());
         return cachedNft;
     }
 
@@ -267,6 +268,17 @@ export class Erc721Nft extends NFT {
     get owner(): string {
         return this._owner;
     }
+
+    async updateOwnerData(): Promise<void> {
+        const contract = await useContractStore().getContract(CURRENT_CONTEXT, this.contractAddress);
+        const contractInstance = await contract?.getContractInstance();
+
+        if (!contractInstance) {
+            throw new AntelopeError('antelope.utils.error_contract_instance');
+        }
+
+        this._owner = await getErc721Owner(contractInstance, this.id);
+    }
 }
 
 export class Erc1155Nft extends NFT {
@@ -289,5 +301,9 @@ export class Erc1155Nft extends NFT {
 
     get owners(): { [address: string]: number } {
         return this._owners;
+    }
+
+    async updateOwnerData(indexer: AxiosInstance): Promise<void> {
+        this._owners = await getErc1155Owners(this.contractAddress, this.id, indexer);
     }
 }

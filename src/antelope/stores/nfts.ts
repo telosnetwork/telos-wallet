@@ -167,6 +167,22 @@ export const useNftsStore = defineStore(store_name, {
 
                         this.__inventory[label].list = sortedNfts;
                         this.__inventory[label].loading = false;
+
+                        nfts.forEach((nft) => {
+                            const contractLower = nft.contractAddress.toLowerCase();
+                            this.__contracts[network] = this.__contracts[network] || {};
+                            this.__contracts[network][contractLower] = this.__contracts[network][contractLower] ?? {
+                                contract: contractLower,
+                                list: [],
+                                loading: false,
+                            };
+
+                            if (this.__contracts[network][contractLower].list.includes(nft)) {
+                                return;
+                            }
+                            this.__contracts[network][contractLower].list.push(nft);
+                        });
+
                         this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
 
                         this.__contracts[network] = this.__contracts[network] || {};
@@ -275,6 +291,48 @@ export const useNftsStore = defineStore(store_name, {
             });
         },
 
+        async subscribeForTransactionReceipt(account: EvmAccountModel, response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
+                    this.updateNFTsForAccount(CURRENT_CONTEXT, account.account);
+                });
+                return newResponse;
+            });
+        },
+
+        updateNftOwnerData(label: Label, contractAddress: string, tokenId: string): Promise<void> {
+            this.trace('updateNftOwnerData', label, contractAddress, tokenId);
+            const network = useChainStore().getChain(label).settings.getNetwork();
+            const indexer = (useChainStore().getChain(label).settings as EVMChainSettings).getIndexer();
+            const nft = this.__contracts[network][contractAddress.toLowerCase()].list.find(nft => nft.id === tokenId);
+
+            return nft?.updateOwnerData(indexer) ?? Promise.reject('NFT not found');
+        },
+
+        async transferNft(label: Label, contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<TransactionResponse> {
+            const funcname = 'transferNft';
+            this.trace(funcname, label, contractAddress, tokenId, type);
+
+            try {
+                useFeedbackStore().setLoading(funcname);
+                const account = useAccountStore().loggedAccount as EvmAccountModel;
+                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse))
+                    .finally(() => {
+                        setTimeout(() => {
+                            this.updateNftOwnerData(label, contractAddress, tokenId);
+                        }, 2000); // give the blockchain a moment to propogate owner changes
+                    });
+            } catch (error) {
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
+                getAntelope().config.transactionErrorHandler(trxError, funcname);
+                throw trxError;
+            } finally {
+                useFeedbackStore().unsetLoading(funcname);
+            }
+        },
 
         // commits ---
         setPaginationFilter(filter: IndexerPaginationFilter) {
@@ -291,35 +349,6 @@ export const useNftsStore = defineStore(store_name, {
                 offset: 0,
                 limit: 10000,
             });
-        },
-
-        async subscribeForTransactionReceipt(account: EvmAccountModel, response: TransactionResponse): Promise<TransactionResponse> {
-            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
-            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
-                newResponse.wait().then(() => {
-                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
-                    this.updateNFTsForAccount(CURRENT_CONTEXT, account.account);
-                });
-                return newResponse;
-            });
-        },
-
-        async transferNft(label: Label, contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<TransactionResponse> {
-            const funcname = 'transferNft';
-            this.trace(funcname, label, contractAddress, tokenId, type);
-
-            try {
-                useFeedbackStore().setLoading(funcname);
-                const account = useAccountStore().loggedAccount as EvmAccountModel;
-                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
-                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
-            } catch (error) {
-                const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
-                getAntelope().config.transactionErrorHandler(trxError, funcname);
-                throw trxError;
-            } finally {
-                useFeedbackStore().unsetLoading(funcname);
-            }
         },
     },
 });
