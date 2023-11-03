@@ -156,8 +156,8 @@ onBeforeMount(async () => {
         //     removeTab(OWNERS);
         // }
 
-        removeTab(OWNERS);
     }
+    removeTab(OWNERS);
     loading.value = false;
 });
 
@@ -209,9 +209,12 @@ watch(loggedAccount, (newAccount: EvmAccountModel) => {
 
 // if details refresh with new owner (on transfer), disable transfer functionality
 watch(nft, () => {
-    const shouldDisableTransfer = !nft.value ||
-        (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
-        (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+    // https://github.com/telosnetwork/telos-wallet/issues/658
+
+    // const shouldDisableTransfer = !nft.value ||
+    //     (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
+    //     (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+    const shouldDisableTransfer = !isErc721.value || (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address);
 
     if (shouldDisableTransfer) {
         disableTransfer();
