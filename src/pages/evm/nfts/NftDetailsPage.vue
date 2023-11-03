@@ -161,7 +161,7 @@ onMounted(() => {
 
     // update owner info once per minute
     timer = setInterval(async () => {
-        // nft.value?.updateOwnerData(indexer);
+        nft.value?.updateOwnerData(indexer);
     }, minuteMilliseconds);
 });
 
