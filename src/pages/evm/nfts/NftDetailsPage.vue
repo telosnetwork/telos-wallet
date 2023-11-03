@@ -39,6 +39,7 @@ import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import NumberedList from 'components/NumberedList.vue';
 import ToolTip from 'components/ToolTip.vue';
 import UserInfo from 'components/evm/UserInfo.vue';
+import NftOwnersTable from 'pages/evm/nfts/NftOwnersTable.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -145,12 +146,10 @@ onBeforeMount(async () => {
     if (contractAddress && nftId) {
         nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
 
-        // https://github.com/telosnetwork/telos-wallet/issues/658
-        // if (nft.value instanceof Erc721Nft) {
-        //     removeTab(OWNERS);
-        // }
+        if (nft.value instanceof Erc721Nft) {
+            removeTab(OWNERS);
+        }
     }
-    removeTab(OWNERS);
     loading.value = false;
 });
 
@@ -433,6 +432,7 @@ function removeTab(tab: string){
             </div>
         </div>
     </template>
+
     <template v-slot:transfer>
         <div class="c-nft-transfer__form-container">
             <q-form class="c-nft-transfer__form">
@@ -486,6 +486,10 @@ function removeTab(tab: string){
                 </div>
             </q-form>
         </div>
+    </template>
+
+    <template v-slot:owners>
+        <NftOwnersTable :owners="nftAsErc1155.owners" />
     </template>
 </AppPage>
 </template>

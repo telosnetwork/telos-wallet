@@ -124,6 +124,7 @@ export default {
         inventory: 'Collectibles',
     },
     global: {
+        address: 'Address',
         native: 'Native',
         telos_evm: 'Telos EVM',
         sign_out: 'Sign Out',
@@ -185,6 +186,7 @@ export default {
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
         collectibles_per_page: 'Collectibles per page',
+        view_owner_on_block_explorer_label: 'View owner on block explorer',
         // transfer
         transfer: 'Transfer',
         transfer_collectible: 'transfer collectible',
