@@ -7,6 +7,7 @@ import { useChainStore } from 'src/antelope';
 import TableControls from 'components/evm/TableControls.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import BaseTextInput from 'src/components/evm/inputs/BaseTextInput.vue';
 
 
 const props = defineProps<{
@@ -40,8 +41,20 @@ const pagination = ref<{
     rowsNumber: 0,
 });
 
+const searchValue = ref('');
+
 // computed
-const shapedOwners = computed(() => Object.keys(props.owners).map(address => ({ address, quantity: props.owners[address] })));
+const shapedOwners = computed(() => {
+    const keys = Object.keys(props.owners).filter((address) => {
+        if (!searchValue.value) {
+            return true;
+        }
+
+        return address.toLowerCase().includes(searchValue.value.toLowerCase());
+    });
+
+    return keys.map(address => ({ address, quantity: props.owners[address] }));
+});
 
 const ownersToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
@@ -63,6 +76,16 @@ watch(shapedOwners, () => {
 
 <template>
 <div class="c-nft-owners-table">
+    <BaseTextInput
+        v-model="searchValue"
+        :label="$t('global.search')"
+        class="c-nft-owners-table__input"
+    >
+        <template v-slot:append>
+            <q-icon name="search" />
+        </template>
+    </BaseTextInput>
+
     <q-table
         :columns="columns"
         :rows="ownersToShow"
@@ -102,5 +125,9 @@ watch(shapedOwners, () => {
     width: 100%;
     max-width: 1000px;
     margin: auto;
+
+    &__input {
+        max-width: 400px;
+    }
 }
 </style>
