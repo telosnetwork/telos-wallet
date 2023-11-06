@@ -282,7 +282,7 @@ function setHoverPreviewVisibility(visible: boolean) {
                 ></video>
             </div>
 
-            <template v-if="!isMediaLoading && iconOverlayName">
+            <template v-if="(!isMediaLoading && iconOverlayName) || (!nft.imgSrc && !nft.videoSrc)">
                 <div class="c-nft-viewer__overlay-icon-bg shadow-2"></div>
 
                 <q-icon
@@ -419,6 +419,7 @@ function setHoverPreviewVisibility(visible: boolean) {
         position: relative;
         height: 100%;
         width: 100%;
+        display: flex;
     }
 
     &__image-container,

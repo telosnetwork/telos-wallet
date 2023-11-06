@@ -36,7 +36,7 @@ export async function extractNftMetadata(
         }
     }
     // if there's an image in the metadata, we return that
-    if (!image && metadata?.image) {
+    if (!image && metadata?.image && urlIsPicture(metadata.image)) {
         image = metadata.image as string;
     }
 
