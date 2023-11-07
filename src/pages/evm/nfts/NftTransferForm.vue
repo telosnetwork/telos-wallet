@@ -23,6 +23,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import IntegerInput from 'src/components/evm/inputs/IntegerInput.vue';
 
 
 const props = defineProps<{
@@ -46,6 +47,7 @@ let addressIsValid = false;
 // data
 const address = ref('');
 const transferLoading = ref(false);
+const quantityToTransfer = ref(1);
 
 
 // computed
@@ -54,6 +56,7 @@ const loggedAccount = computed(() =>
 );
 const isErc721 = computed(() => props.nft instanceof Erc721Nft);
 const isErc1155 = computed(() => props.nft instanceof Erc1155Nft);
+const nftAsErc1155 = computed(() => props.nft as Erc1155Nft);
 const nftType = computed(() => isErc721.value ? ERC721_TYPE : ERC1155_TYPE);
 
 // methods
@@ -68,6 +71,7 @@ async function startTransfer() {
             nftType.value,
             loggedAccount.value.address,
             address.value as addressString,
+            Number(quantityToTransfer.value),
         );
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t('notification.neutral_message_sending', { quantity: nameString, address: truncateAddress(address.value) }),
@@ -92,7 +96,7 @@ async function startTransfer() {
 <template>
 <div class="c-nft-transfer__form-container">
     <q-form class="c-nft-transfer__form">
-        <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
+        <div class="row q-mb-lg">
             <div class="col">
                 <div class="c-nft-transfer__transfer-text">
                     {{ $t('nft.transfer') }} <span class="c-nft-transfer__transfer-text--bold"> {{ nft?.contractPrettyName || nft?.contractAddress }} #{{ nft?.id }} </span>
@@ -115,7 +119,7 @@ async function startTransfer() {
             </div>
         </div>
 
-        <div class="c-nft-transfer__row c-nft-transfer__row--2 row">
+        <div class="row">
             <div class="col">
                 <AddressInput
                     v-model="address"
@@ -126,7 +130,17 @@ async function startTransfer() {
             </div>
         </div>
 
-        <div class="c-nft-transfer__row c-nft-transfer__row--3 row">
+        <div v-if="isErc1155" class="row q-mb-lg">
+            <div class="col">
+                {{ quantityToTransfer }}
+                <IntegerInput
+                    v-model="quantityToTransfer"
+                    label="Quantity"
+                />
+            </div>
+        </div>
+
+        <div class="row q-mb-lg">
             <div class="col">
                 <div class="justify-end row">
                     <q-btn
@@ -175,11 +189,11 @@ async function startTransfer() {
         }
     }
 
-    &__transfer-from{
+    &__transfer-from {
         display: flex;
     }
 
-    &__transfer-text{
+    &__transfer-text {
         font-size: 24px;
         font-style: normal;
         font-weight: 400;
@@ -192,7 +206,7 @@ async function startTransfer() {
             }
         }
 
-        &--bold{
+        &--bold {
             font-weight: 600;
         }
     }

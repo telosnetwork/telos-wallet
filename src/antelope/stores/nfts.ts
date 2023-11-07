@@ -300,14 +300,22 @@ export const useNftsStore = defineStore(store_name, {
             return nft?.updateOwnerData(indexer) ?? Promise.reject('NFT not found');
         },
 
-        async transferNft(label: Label, contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<TransactionResponse> {
+        async transferNft(
+            label: Label,
+            contractAddress: string,
+            tokenId: string,
+            type: NftTokenInterface,
+            from: addressString,
+            to: addressString,
+            quantity?: number,
+        ): Promise<TransactionResponse> {
             const funcname = 'transferNft';
             this.trace(funcname, label, contractAddress, tokenId, type);
 
             try {
                 useFeedbackStore().setLoading(funcname);
                 const account = useAccountStore().loggedAccount as EvmAccountModel;
-                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
+                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to, quantity)
                     .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse))
                     .finally(() => {
                         setTimeout(() => {

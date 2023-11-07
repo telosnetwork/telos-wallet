@@ -184,6 +184,8 @@ watch(nft, () => {
 
     if (shouldDisableTransfer) {
         disableTransfer();
+    } else if (!tabs.value.includes(TRANSFER)) {
+        tabs.value.push(TRANSFER);
     }
 }, { deep: true });
 
