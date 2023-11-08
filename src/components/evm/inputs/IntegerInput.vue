@@ -202,7 +202,12 @@ function resetEmptyError() {
     isDirty.value = false;
 }
 
+function focusInput() {
+    (inputRef.value as HTMLInputElement).focus();
+}
+
 defineExpose({
+    focusInput,
     showEmptyError,
     resetEmptyError,
 });
