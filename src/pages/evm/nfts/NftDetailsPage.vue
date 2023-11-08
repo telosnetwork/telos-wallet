@@ -56,7 +56,7 @@ const OWNERS = 'owners'; // for 1155 only
 // data
 const nft = ref<Collectible | null>(null);
 const loading = ref(true);
-const tabs = ref<string[]>([ATTRIBUTES, TRANSFER, OWNERS]);
+const tabs = ref<string[]>([ATTRIBUTES]);
 
 
 // computed
@@ -161,7 +161,6 @@ onUnmounted(() => {
     }
 });
 
-
 // if user switches account, disable transfer
 watch(loggedAccount, (newAccount: EvmAccountModel) => {
     const shouldDisableTransfer = !nft.value ||
@@ -191,7 +190,7 @@ watch(nft, () => {
 
 
 function disableTransfer(){
-    router.push({ query: { ...route.query, tab: 'attributes' } });
+    router.replace({ query: { ...route.query, tab: ATTRIBUTES } });
     removeTab(TRANSFER);
 }
 
