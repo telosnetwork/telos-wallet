@@ -55,6 +55,11 @@ export default defineComponent({
             required: true,
             validator: (value: number) => value >= 0 && Number.isInteger(value),
         },
+        name: {
+            type: String,
+            required: true,
+            validator: (value: string) => value !== '',
+        },
         decimalsToDisplay: {
             // the number of decimals to display in the input.
             type: Number,
@@ -946,7 +951,11 @@ export default defineComponent({
     }"
     @click="focusInput"
 >
-    <div v-if="!loading" class="c-text-input__label-text">
+    <div
+        v-if="!loading"
+        :id="`currency-input-label--${name}`"
+        class="c-text-input__label-text"
+    >
         {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
@@ -976,6 +985,7 @@ export default defineComponent({
         type="text"
         placeholder="0"
         inputmode="decimal"
+        :aria-labelledby="`currency-input-label--${name}`"
         @keydown="handleKeydown"
         @input.stop="handleInput"
         @blur="handleBlur"

@@ -143,6 +143,7 @@ async function startTransfer() {
                     :max="nftAsErc1155.owners[loggedAccount.account]"
                     :min="1"
                     :label="$t('global.quantity')"
+                    name="nft-transfer-form-quantity-input"
                     required="required"
                 />
             </div>

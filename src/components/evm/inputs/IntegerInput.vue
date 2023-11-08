@@ -24,6 +24,7 @@ const { t: $t } = useI18n();
 
 const props = defineProps<{
     modelValue: number;
+    name: string;
     label: string;
     max?: number;
     min?: number;
@@ -240,17 +241,19 @@ defineExpose({
         </template>
     </div>
 
-    <div class="c-text-input__label-text">
+    <div :id="`integer-input-label--${name}`" class="c-text-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
     <input
         ref="inputRef"
         v-bind="inputBindings"
+        :name="name"
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
         class="c-text-input__input"
+        :aria-labelledby="`integer-input-label--${name}`"
         @keydown="handleKeydown"
         @input="handleInput"
         @blur="isDirty = true"
