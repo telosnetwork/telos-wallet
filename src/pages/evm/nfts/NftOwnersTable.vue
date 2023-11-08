@@ -80,6 +80,7 @@ watch(shapedOwners, () => {
         v-model="searchValue"
         :label="$t('global.search')"
         class="c-nft-owners-table__input"
+        name="owners-table-address-search"
     >
         <template v-slot:append>
             <q-icon name="search" />
