@@ -453,6 +453,8 @@ export default defineComponent({
 
     &__token-selector {
         width: 100%;
+        margin-top: 24px;
+
         @include sm-and-up {
             width: 140px;
         }

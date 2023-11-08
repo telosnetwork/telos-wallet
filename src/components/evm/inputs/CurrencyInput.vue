@@ -937,14 +937,16 @@ export default defineComponent({
     :class="{
         [asString($attrs.class)]: !!$attrs.class,
         'c-currency-input': true,
-        'c-currency-input--error': !!visibleErrorText,
-        'c-currency-input--readonly': !!inputElementAttrs.readonly,
-        'c-currency-input--disabled': !!inputElementAttrs.disabled,
         'c-currency-input--ios': isIOS,
+        'c-text-input': true,
+        'c-text-input--error-right': true,
+        'c-text-input--error': !!visibleErrorText,
+        'c-text-input--readonly': !!inputElementAttrs.readonly,
+        'c-text-input--disabled': !!inputElementAttrs.disabled,
     }"
     @click="focusInput"
 >
-    <div v-if="!loading" class="c-currency-input__label-text">
+    <div v-if="!loading" class="c-text-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
@@ -970,7 +972,7 @@ export default defineComponent({
         ref="input"
         v-bind="inputElementAttrs"
         :pattern="`${allowedCharactersRegex}*`"
-        class="c-currency-input__input"
+        class="c-text-input__input"
         type="text"
         placeholder="0"
         inputmode="decimal"
@@ -986,7 +988,11 @@ export default defineComponent({
         class="c-currency-input__spinner"
     />
 
-    <div v-if="hasSwappableCurrency && !loading" class="c-currency-input__currency-switcher" @click="handleSwapCurrencies">
+    <div
+        v-if="hasSwappableCurrency && !loading"
+        class="c-currency-input__currency-switcher"
+        @click="handleSwapCurrencies"
+    >
         <InlineSvg
             :src="swapIcon"
             class="c-currency-input__swap-icon"
@@ -995,7 +1001,7 @@ export default defineComponent({
         {{ prettySecondaryValue }}
     </div>
 
-    <div v-if="!loading" class="c-currency-input__error-text">
+    <div v-if="!loading" class="c-text-input__error-text">
         {{ visibleErrorText }}
     </div>
 
@@ -1011,43 +1017,6 @@ export default defineComponent({
     --symbol-left: 28px;
     $this: &;
 
-    height: 56px;
-    padding: 0 12px;
-    border-radius: 4px;
-    box-shadow: 0 0 0 1px $grey-5;
-    transition: box-shadow 0.3s ease;
-    position: relative;
-    cursor: text;
-
-    &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        box-shadow: 0 0 0 1px $grey-5;
-    }
-
-    &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
-        box-shadow: 0 0 0 2px var(--accent-color);
-
-        #{$this}__label-text {
-            color: var(--accent-color);
-        }
-    }
-
-    &:focus-within#{$this}--error {
-        box-shadow: 0 0 0 2px var(--negative-color);
-    }
-
-    &--disabled,
-    &--readonly {
-        cursor: not-allowed;
-    }
-
-    &--error {
-        box-shadow: 0 0 0 1px var(--negative-color);
-
-        #{$this}__label-text {
-            color: var(--negative-color);
-        }
-    }
-
     &--ios {
         padding: 0 8px;
 
@@ -1062,16 +1031,6 @@ export default defineComponent({
         bottom: 0;
         left: 16px;
         margin: auto;
-    }
-
-    &__label-text {
-        @include text--small;
-
-        position: absolute;
-        top: 4px;
-        left: 14px;
-        color: var(--text-low-contrast);
-        transition: color 0.3s ease;
     }
 
     &__currency-switcher {
@@ -1096,10 +1055,10 @@ export default defineComponent({
         }
     }
 
-    &__error-text,
     &__conversion-rate {
         @include text--small;
 
+        color: var(--text-low-contrast);
         position: absolute;
         bottom: -24px;
         width: max-content;
@@ -1107,18 +1066,10 @@ export default defineComponent({
         text-align: right;
     }
 
-    &__error-text {
-        color: var(--negative-color);
-    }
-
-    &__conversion-rate {
-        color: var(--text-low-contrast);
-    }
-
     &__symbol {
         font-size: 14px;
         position: absolute;
-        top: 25px;
+        top: 27.5px;
         left: var(--symbol-left);
         color: var(--text-low-contrast);
         pointer-events: none;
@@ -1139,14 +1090,6 @@ export default defineComponent({
         #{$this}--readonly &{
             cursor: not-allowed;
         }
-    }
-
-    &__input {
-        border: none;
-        outline: none;
-        background: none;
-        margin-top: 24px;
-        width: 220px;
     }
 }
 </style>

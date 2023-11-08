@@ -212,9 +212,10 @@ defineExpose({
 <div
     :class="{
         'c-integer-input': true,
-        'c-integer-input--readonly': isReadonly,
-        'c-integer-input--disabled': isDisabled,
-        'c-integer-input--error': !!errorText,
+        'c-text-input': true,
+        'c-text-input--readonly': isReadonly,
+        'c-text-input--disabled': isDisabled,
+        'c-text-input--error': !!errorText,
     }"
 >
     <div
@@ -234,7 +235,7 @@ defineExpose({
         </template>
     </div>
 
-    <div class="c-integer-input__label-text">
+    <div class="c-text-input__label-text">
         {{ label.concat(isRequired ? '*' : '') }}
     </div>
 
@@ -244,13 +245,13 @@ defineExpose({
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
-        class="c-integer-input__input"
+        class="c-text-input__input"
         @keydown="handleKeydown"
         @input="handleInput"
         @blur="isDirty = true"
     >
 
-    <div class="c-integer-input__error-text">
+    <div class="c-text-input__error-text">
         {{ errorText }}
     </div>
 </div>
@@ -258,68 +259,7 @@ defineExpose({
 
 <style lang="scss">
 .c-integer-input {
-    $this: &;
-
-    height: 56px;
     width: 200px;
-    padding: 0 12px;
-    border-radius: 4px;
-    box-shadow: 0 0 0 1px $grey-5;
-    transition: box-shadow 0.3s ease;
-    position: relative;
-    margin-top: 24px;
-
-    &:hover:not(#{$this}--readonly):not(#{$this}--error) {
-        box-shadow: 0 0 0 1px $grey-5;
-    }
-
-    &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
-        box-shadow: 0 0 0 2px var(--accent-color);
-
-        #{$this}__label-text {
-            color: var(--accent-color);
-        }
-    }
-
-        &:focus-within#{$this}--error {
-        box-shadow: 0 0 0 2px var(--negative-color);
-    }
-
-    &--disabled,
-    &--readonly {
-        cursor: not-allowed;
-    }
-
-    &--error {
-        box-shadow: 0 0 0 1px var(--negative-color);
-
-        #{$this}__label-text {
-            color: var(--negative-color);
-        }
-    }
-
-    &__label-text {
-        @include text--small;
-
-        position: absolute;
-        top: 4px;
-        left: 14px;
-        color: var(--text-low-contrast);
-        transition: color 0.3s ease;
-        pointer-events: none;
-        user-select: none;
-    }
-
-    &__error-text {
-        @include text--small;
-
-        color: var(--negative-color);
-        position: absolute;
-        width: max-content;
-        text-align: right;
-        bottom: -24px;
-        left: 0;
-    }
 
     &__max-amount {
         @include text--small;
@@ -330,14 +270,6 @@ defineExpose({
         top: -24px;
         right: 0;
         cursor: pointer;
-    }
-
-    &__input {
-        height: 36px;
-        margin-top: 20px;
-        border: none;
-        outline: none;
-        background: none;
     }
 }
 </style>
