@@ -189,7 +189,7 @@ watch(nft, () => {
 
     if (isErc1155.value && !tabs.value.includes(OWNERS)) {
         tabs.value.push(OWNERS);
-    } else {
+    } else if (!isErc1155.value && tabs.value.includes(OWNERS)) {
         removeTab(OWNERS);
     }
 }, { deep: true });
