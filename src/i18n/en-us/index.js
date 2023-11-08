@@ -359,10 +359,8 @@ export default {
             accountNotExists: 'The account "{account}" does not exist',
             copyKey: 'Copy the key to a safe place',
             dateFuture: 'The date must be in the future',
-            greaterOrEqualThan:
-          'The value must be greater than or equal to {value}',
-            lowerOrEqualThan:
-          'The value must be lower than or equal to {value}',
+            greaterOrEqualThan: 'Value must be ≥ {value}',
+            lowerOrEqualThan: 'Value must be ≤ {value}',
             integer: 'Please type an integer',
             natural: 'Please type a natural number (>=0)',
             phoneFormat: 'Please type a valid phone',

@@ -1026,7 +1026,6 @@ export default defineComponent({
     &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
         box-shadow: 0 0 0 2px var(--accent-color);
 
-
         #{$this}__label-text {
             color: var(--accent-color);
         }
