@@ -42,7 +42,7 @@ const largeNumberSeparators = [',', '.'];
 
 
 // data
-const inputValue = ref('');
+const inputValue = ref();
 const inputRef = ref<HTMLInputElement | null>(null);
 const isDirty = ref(false);
 
@@ -87,7 +87,7 @@ const amountAvailableText = computed(() => `${props.max?.toLocaleString()} ${$t(
 
 // watchers
 watch(props, (newProps, oldProps) => {
-    if (newProps.modelValue !== oldProps?.modelValue) {
+    if (newProps.modelValue !== oldProps?.modelValue || newProps.modelValue.toLocaleString() !== inputValue.value) {
         const newValue = newProps.modelValue;
         const input = inputRef.value as HTMLInputElement;
         const newValueFormatted = newValue.toLocaleString();
@@ -96,7 +96,9 @@ watch(props, (newProps, oldProps) => {
             return;
         }
 
-        setInputValue(newValueFormatted);
+        const shouldSetToBlank = !isDirty.value && newValue === 0;
+
+        setInputValue(shouldSetToBlank ? '' : newValueFormatted);
     }
 });
 
@@ -106,7 +108,6 @@ onMounted(() => {
 });
 
 function setInputValue(newValue: string) {
-    isDirty.value = true;
     (inputRef.value as HTMLInputElement).value = newValue;
     inputValue.value = newValue;
 }
@@ -171,6 +172,14 @@ function getSeparatorsToLeftOfCursor(inputValue: string, cursorPosition: number)
     return (inputValue.substring(0, cursorPosition).match(/[.,]/g) || []).length;
 }
 
+function fillMaxAmount() {
+    if (props.max === undefined) {
+        return;
+    }
+    setInputValue(props.max.toLocaleString());
+    handleInput();
+}
+
 function handleInput() {
     const input = inputRef.value as HTMLInputElement;
     const cursorPosition = input.selectionStart as number;
@@ -230,8 +239,8 @@ defineExpose({
         tabindex="0"
         role="button"
         :aria-label="$t('evm_wallet.click_to_fill_max')"
-        @click="setInputValue(max.toLocaleString())"
-        @keydown.space.enter.prevent="setInputValue(max.toLocaleString())"
+        @click="fillMaxAmount"
+        @keydown.space.enter.prevent="fillMaxAmount"
     >
         <ToolTip v-if="enableMaxValueTooltip" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
             {{ amountAvailableText }}
@@ -253,9 +262,11 @@ defineExpose({
         inputmode="numeric"
         pattern="[0-9]*"
         class="c-text-input__input"
+        placeholder="0"
+        autocomplete="off"
         :aria-labelledby="`integer-input-label--${name}`"
         @keydown="handleKeydown"
-        @input="handleInput"
+        @input="() => { isDirty = true; handleInput() }"
         @blur="isDirty = true"
     >
 
