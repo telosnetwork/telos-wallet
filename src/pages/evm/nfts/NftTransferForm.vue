@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -66,6 +66,12 @@ const quantityToTransferIsValid = computed(() => {
 });
 
 // methods
+onMounted(() => {
+    if (isErc1155.value) {
+        quantityToTransfer.value = 0;
+    }
+});
+
 async function startTransfer() {
     transferLoading.value = true;
     const nameString = `${props.nft.contractPrettyName || props.nft.contractAddress} #${props.nft.id}`;

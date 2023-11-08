@@ -8,7 +8,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw } from 'src/antelope/types';
+import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw, erc1155Abi } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
@@ -248,12 +248,14 @@ export abstract class EVMAuthenticator {
     async transferNft(contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString, quantity = 1): Promise<EvmTransactionResponse | WriteContractResult | undefined> {
         this.trace('transferNft', contractAddress, tokenId, type, from, to);
         const contract = await useContractStore().getContract(this.label, contractAddress);
+
         if (contract) {
-            const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
             if (type === ERC721_TYPE){
+                const transferAbi = erc721Abi.filter((abi:EvmABIEntry) => abi.name === 'safeTransferFrom');
                 return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
-            }else if (type === ERC1155_TYPE){
-                return this.signCustomTransaction(contractAddress, [transferAbi[1]], [from, to, tokenId, quantity]);
+            }else if (type === ERC1155_TYPE) {
+                const transferAbi = erc1155Abi.filter((abi: EvmABIEntry) => abi.name === 'safeTransferFrom');
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId, quantity, 0x0]);
             }
         } else {
             throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
