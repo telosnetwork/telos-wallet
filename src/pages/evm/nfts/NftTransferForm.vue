@@ -58,6 +58,12 @@ const isErc721 = computed(() => props.nft instanceof Erc721Nft);
 const isErc1155 = computed(() => props.nft instanceof Erc1155Nft);
 const nftAsErc1155 = computed(() => props.nft as Erc1155Nft);
 const nftType = computed(() => isErc721.value ? ERC721_TYPE : ERC1155_TYPE);
+const quantityToTransferIsValid = computed(() => {
+    if (isErc1155.value) {
+        return quantityToTransfer.value > 0 && quantityToTransfer.value <= nftAsErc1155.value.owners[loggedAccount.value.account];
+    }
+    return quantityToTransfer.value === 1;
+});
 
 // methods
 async function startTransfer() {
@@ -71,7 +77,7 @@ async function startTransfer() {
             nftType.value,
             loggedAccount.value.address,
             address.value as addressString,
-            Number(quantityToTransfer.value),
+            quantityToTransfer.value,
         );
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t('notification.neutral_message_sending', { quantity: nameString, address: truncateAddress(address.value) }),
@@ -132,10 +138,12 @@ async function startTransfer() {
 
         <div v-if="isErc1155" class="row q-mb-lg">
             <div class="col">
-                {{ quantityToTransfer }}
                 <IntegerInput
                     v-model="quantityToTransfer"
-                    label="Quantity"
+                    :max="nftAsErc1155.owners[loggedAccount.account]"
+                    :min="1"
+                    :label="$t('global.quantity')"
+                    required="required"
                 />
             </div>
         </div>
@@ -148,7 +156,7 @@ async function startTransfer() {
                         class="wallet-btn"
                         :label="$t('nft.transfer_collectible')"
                         :loading="transferLoading"
-                        :disable="!addressIsValid"
+                        :disable="!(addressIsValid && quantityToTransferIsValid)"
                         @click="startTransfer"
                     />
                 </div>

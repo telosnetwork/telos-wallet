@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import {
+    computed,
+    ref,
+    useAttrs,
+    watch,
+    onMounted,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
+
 import {
     isPaste,
     modifierKeys,
@@ -7,23 +16,77 @@ import {
     validKeystrokes,
 } from 'src/components/evm/inputs/input-helpers';
 
+import ToolTip from 'components/ToolTip.vue';
+
+
+const $q = useQuasar();
+const { t: $t } = useI18n();
+
 const props = defineProps<{
     modelValue: number;
-    label?: string;
+    label: string;
     max?: number;
     min?: number;
 }>();
+
+if (props.modelValue % 1 !== 0) {
+    throw new Error('IntegerInput modelValue must be an integer');
+}
+
+const attrs = useAttrs();
 
 const emit = defineEmits(['update:modelValue']);
 
 const largeNumberSeparators = [',', '.'];
 
+
 // data
+const inputValue = ref('');
 const inputRef = ref<HTMLInputElement | null>(null);
+const isDirty = ref(false);
+
+
+// computed
+const isRequired = computed(() => [true, 'true', 'required'].includes(attrs.required as string | boolean));
+const isDisabled = computed(() => [true, 'true', 'disabled'].includes(attrs.disabled as string | boolean));
+const isReadonly = computed(() => [true, 'true', 'readonly'].includes(attrs.readonly as string | boolean));
+const inputBindings = computed(() => {
+    const attributes: Record<string, string> = {};
+    if (isDisabled.value) {
+        attributes.disabled = 'disabled';
+    }
+
+    if (isReadonly.value) {
+        attributes.readonly = 'readonly';
+    }
+
+    if (isRequired.value) {
+        attributes.required = 'required';
+    }
+
+    return attributes;
+});
+const errorText = computed(() => {
+    if (isDirty.value && isRequired.value && inputValue.value === '') {
+        return $t('forms.errors.required');
+    }
+
+    if (props.max !== undefined && Number(inputValue.value) > props.max) {
+        return $t('forms.errors.lowerOrEqualThan', { value: props.max.toLocaleString() });
+    }
+
+    if (props.min !== undefined && Number(inputValue.value) < props.min && isDirty.value) {
+        return $t('forms.errors.greaterOrEqualThan', { value: props.min.toLocaleString() });
+    }
+
+    return '';
+});
+const enableMaxValueTooltip = computed(() => !isDisabled.value && !isReadonly.value && !$q.screen.lt.md);
+const amountAvailableText = computed(() => `${props.max?.toLocaleString()} ${$t('global.total')}`);
 
 // watchers
 watch(props, (newProps, oldProps) => {
-    if (newProps.modelValue !== oldProps.modelValue) {
+    if (newProps.modelValue !== oldProps?.modelValue) {
         const newValue = newProps.modelValue;
         const input = inputRef.value as HTMLInputElement;
         const newValueFormatted = newValue.toLocaleString();
@@ -32,13 +95,19 @@ watch(props, (newProps, oldProps) => {
             return;
         }
 
-        input.value = newValueFormatted;
+        setInputValue(newValueFormatted);
     }
 });
 
 // methods
+onMounted(() => {
+    setInputValue(props.modelValue.toLocaleString());
+});
+
 function setInputValue(newValue: string) {
+    isDirty.value = true;
     (inputRef.value as HTMLInputElement).value = newValue;
+    inputValue.value = newValue;
 }
 
 function setInputCaretPosition(position: number) {
@@ -108,9 +177,9 @@ function handleInput() {
     const newValueNumerals = input.value.replace(/[^0-9]/g, '');
 
     if (newValueNumerals === '') {
-        input.value = '';
+        setInputValue('');
     } else {
-        input.value = Number(newValueNumerals).toLocaleString();
+        setInputValue(Number(newValueNumerals).toLocaleString());
         const newSeparatorsToLeftOfCursor = getSeparatorsToLeftOfCursor(input.value, cursorPosition);
         const differenceInSeparators = newSeparatorsToLeftOfCursor - separatorsToLeftOfCursor;
 
@@ -124,29 +193,151 @@ function handleInput() {
         emit('update:modelValue', newValue);
     }
 }
+
+function showEmptyError() {
+    isDirty.value = true;
+}
+
+function resetEmptyError() {
+    isDirty.value = false;
+}
+
+defineExpose({
+    showEmptyError,
+    resetEmptyError,
+});
 </script>
 
 <template>
-<div class="c-integer-input">
-    <div class="o-text--small u-text--link-color text-right">Test</div>
+<div
+    :class="{
+        'c-integer-input': true,
+        'c-integer-input--readonly': isReadonly,
+        'c-integer-input--disabled': isDisabled,
+        'c-integer-input--error': !!errorText,
+    }"
+>
+    <div
+        v-if="max !== undefined && !isDisabled && !isReadonly"
+        class="c-integer-input__max-amount"
+        tabindex="0"
+        role="button"
+        :aria-label="$t('evm_wallet.click_to_fill_max')"
+        @click="setInputValue(max.toLocaleString())"
+        @keydown.space.enter.prevent="setInputValue(max.toLocaleString())"
+    >
+        <ToolTip v-if="enableMaxValueTooltip" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
+            {{ amountAvailableText }}
+        </ToolTip>
+        <template v-else>
+            {{ amountAvailableText }}
+        </template>
+    </div>
+
+    <div class="c-integer-input__label-text">
+        {{ label.concat(isRequired ? '*' : '') }}
+    </div>
 
     <input
         ref="inputRef"
+        v-bind="inputBindings"
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
+        class="c-integer-input__input"
         @keydown="handleKeydown"
         @input="handleInput"
+        @blur="isDirty = true"
     >
+
+    <div class="c-integer-input__error-text">
+        {{ errorText }}
+    </div>
 </div>
 </template>
 
 <style lang="scss">
 .c-integer-input {
-    width: max-content;
+    $this: &;
+
+    height: 56px;
+    width: 200px;
+    padding: 0 12px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px $grey-5;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+    margin-top: 24px;
+
+    &:hover:not(#{$this}--readonly):not(#{$this}--error) {
+        box-shadow: 0 0 0 1px $grey-5;
+    }
+
+    &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
+        box-shadow: 0 0 0 2px var(--accent-color);
+
+        #{$this}__label-text {
+            color: var(--accent-color);
+        }
+    }
+
+        &:focus-within#{$this}--error {
+        box-shadow: 0 0 0 2px var(--negative-color);
+    }
+
+    &--disabled,
+    &--readonly {
+        cursor: not-allowed;
+    }
+
+    &--error {
+        box-shadow: 0 0 0 1px var(--negative-color);
+
+        #{$this}__label-text {
+            color: var(--negative-color);
+        }
+    }
+
+    &__label-text {
+        @include text--small;
+
+        position: absolute;
+        top: 4px;
+        left: 14px;
+        color: var(--text-low-contrast);
+        transition: color 0.3s ease;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    &__error-text {
+        @include text--small;
+
+        color: var(--negative-color);
+        position: absolute;
+        width: max-content;
+        text-align: right;
+        bottom: -24px;
+        left: 0;
+    }
+
+    &__max-amount {
+        @include text--small;
+        @include link-color-text;
+
+        width: max-content;
+        position: absolute;
+        top: -24px;
+        right: 0;
+        cursor: pointer;
+    }
 
     &__input {
-        width: 200px;
+        height: 36px;
+        margin-top: 20px;
+        border: none;
+        outline: none;
+        background: none;
     }
 }
 </style>
