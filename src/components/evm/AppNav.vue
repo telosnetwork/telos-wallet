@@ -5,7 +5,7 @@ import InlineSvg from 'vue-inline-svg';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import { getShortenedHash, prettyPrintBalance } from 'src/antelope/stores/utils';
+import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
@@ -123,7 +123,7 @@ export default defineComponent({
             // if the user has come from an external source, pressing back should go to the parent route
             const navigatedFromApp = sessionStorage.getItem('navigatedFromApp');
 
-            if (navigatedFromApp && this.$route.query.tab !== 'attributes') { // @TODO refactor to avoid explicit conditionals, required to nav back from details page but retain tab navigation history
+            if (navigatedFromApp) {
                 this.$router.go(-1);
             } else {
                 const parent = this.$route.meta.parent as string;

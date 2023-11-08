@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { NFT } from 'src/antelope/types';
+import { Collectible } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
@@ -16,7 +16,7 @@ const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 const { t } = useI18n();
 
 const props = defineProps<{
-    nft: NFT,
+    nft: Collectible,
     quantity: number,
 }>();
 
