@@ -1,0 +1,78 @@
+.c-text-input {
+    $this: &;
+
+    height: 56px;
+    padding: 0 12px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px $grey-5;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+    margin-top: 24px;
+
+    &:hover:not(#{$this}--readonly):not(#{$this}--error) {
+        box-shadow: 0 0 0 1px $grey-5;
+    }
+
+    &:focus-within:not(#{$this}--readonly):not(#{$this}--error) {
+        box-shadow: 0 0 0 2px var(--accent-color);
+
+        #{$this}__label-text {
+            color: var(--accent-color);
+        }
+    }
+
+    &:focus-within#{$this}--error {
+        box-shadow: 0 0 0 2px var(--negative-color);
+    }
+
+    &--disabled,
+    &--readonly {
+        cursor: not-allowed;
+    }
+
+    &--error {
+        box-shadow: 0 0 0 1px var(--negative-color);
+
+        #{$this}__label-text {
+            color: var(--negative-color);
+        }
+    }
+
+    &--error-right {
+        #{$this}__error-text {
+            left: unset;
+            right: 0;
+        }
+    }
+
+    &__label-text {
+        @include text--small;
+
+        position: absolute;
+        top: 4px;
+        left: 14px;
+        color: var(--text-low-contrast);
+        transition: color 0.3s ease;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    &__error-text {
+        @include text--small;
+
+        color: var(--negative-color);
+        position: absolute;
+        width: max-content;
+        text-align: right;
+        bottom: -24px;
+        left: 0;
+    }
+
+    &__input {
+        height: 36px;
+        margin-top: 20px;
+        border: none;
+        outline: none;
+        background: none;
+    }
+}
