@@ -33,6 +33,7 @@ describe('CurrencyInput.vue', () => {
                 secondaryCurrencyDecimals: 2,
                 locale: 'en-US',
                 label: 'TLOS / USD',
+                name: 'test',
             },
         });
         const inputElement = wrapper.find('input');
@@ -78,6 +79,7 @@ describe('CurrencyInput.vue', () => {
                 secondaryCurrencyDecimals: 2,
                 locale: 'en-US',
                 label: 'TLOS / USD',
+                name: 'test-2',
             },
         });
         const inputElement = wrapper.find('input');
