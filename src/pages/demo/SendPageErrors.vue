@@ -270,6 +270,7 @@ export default defineComponent({
                         :error-if-over-max="true"
                         :label="$t('global.amount')"
                         required="required"
+                        name="sendpage-errors-demo-currency-input-1"
                     />
                 </div>
             </div>
