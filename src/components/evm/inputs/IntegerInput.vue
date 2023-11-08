@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import {
+    isPaste,
+    modifierKeys,
+    userIsDoingTextOperation,
+    validKeystrokes,
+} from 'src/components/evm/inputs/input-helpers';
 
 const props = defineProps<{
     modelValue: number;
@@ -42,31 +48,11 @@ function setInputCaretPosition(position: number) {
 }
 
 function handleKeydown(event: KeyboardEvent) {
-    const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    const modifierKeys: ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'];
-
-    const validKeystrokes = [
-        ...numKeys,
-        ...modifierKeys,
-        'ArrowLeft',
-        'ArrowRight',
-        'End',
-        'Home',
-        'Delete',
-        'Backspace',
-        'Tab',
-    ];
-
-    const userIsDoingTextOperation =
-        ['a', 'v', 'x', 'c', 'z'].includes(event.key) && (event.ctrlKey || event.metaKey);
-
-    const isPaste = event.key === 'v' && (event.ctrlKey || event.metaKey);
-
-    if (isPaste) {
+    if (isPaste(event)) {
         return;
     }
 
-    if (!validKeystrokes.includes(event.key) && !userIsDoingTextOperation) {
+    if (!validKeystrokes.includes(event.key) && !userIsDoingTextOperation(event)) {
         event.preventDefault();
         return;
     }

@@ -1,9 +1,17 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
+
 import { usePlatformStore } from 'src/antelope';
+import {
+    isPaste,
+    modifierKeys,
+    numKeys,
+    userIsDoingTextOperation,
+    validKeystrokes,
+} from 'src/components/evm/inputs/input-helpers';
+
 import InlineSvg from 'vue-inline-svg';
 
 import {
@@ -691,28 +699,7 @@ export default defineComponent({
         // handle keydown events; contains logic for ensuring only valid characters can be typed, handling deletion of
         // decimal/large number separators, and other keystroke-related logic
         handleKeydown(event: KeyboardEvent) {
-            const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            const modifierKeys: ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'];
-
-            const validKeystrokes = [
-                ...numKeys,
-                ...modifierKeys,
-                this.decimalSeparator,
-                'ArrowLeft',
-                'ArrowRight',
-                'End',
-                'Home',
-                'Delete',
-                'Backspace',
-                'Tab',
-            ];
-
-            const userIsDoingTextOperation =
-                ['a', 'v', 'x', 'c', 'z'].includes(event.key) && (event.ctrlKey || event.metaKey);
-
-            const isPaste = event.key === 'v' && (event.ctrlKey || event.metaKey);
-
-            if (isPaste) {
+            if (isPaste(event)) {
                 // paste logic is handled in handlePaste
                 return;
             }
