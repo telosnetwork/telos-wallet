@@ -962,7 +962,11 @@ export default defineComponent({
     <div
         v-if="!!maxValue && !loading"
         class="c-currency-input__amount-available"
+        tabindex="0"
+        role="button"
+        :aria-label="$t('evm_wallet.click_to_fill_max')"
         @click="fillMaxValue"
+        @keydown.space.enter.prevent="fillMaxValue"
     >
         <ToolTip v-if="enableMaxValTooltip" :text="$t('evm_wallet.click_to_fill_max')" :hide-icon="true">
             {{ prettyMaxValue }}
