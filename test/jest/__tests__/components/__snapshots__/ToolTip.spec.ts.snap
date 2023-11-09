@@ -14,6 +14,7 @@ exports[`ToolTip.vue should render correctly with default options 1`] = `
     transformsource="[Function]"
   />
   <q-tooltip-stub
+    class="c-tooltip__tooltip"
     model-value="false"
     transition-hide="scale"
     transition-show="scale"
@@ -49,6 +50,7 @@ exports[`ToolTip.vue should render correctly with default options 2`] = `
     transformsource="[Function]"
   />
   <q-tooltip-stub
+    class="c-tooltip__tooltip"
     model-value="false"
     transition-hide="scale"
     transition-show="scale"
@@ -110,6 +112,7 @@ exports[`ToolTip.vue should render correctly with hidden icon 1`] = `
   
   <!--v-if-->
   <q-tooltip-stub
+    class="c-tooltip__tooltip"
     model-value="false"
     transition-hide="scale"
     transition-show="scale"
@@ -146,6 +149,7 @@ exports[`ToolTip.vue should render correctly with something in its slot 1`] = `
     transformsource="[Function]"
   />
   <q-tooltip-stub
+    class="c-tooltip__tooltip"
     model-value="false"
     transition-hide="scale"
     transition-show="scale"

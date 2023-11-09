@@ -432,7 +432,7 @@ export default defineComponent({
         width: 100vw;
         transform: translateX(-100%);
         transition: 0.2s transform ease;
-        background: $site-gradient;
+        background: var(--site-gradient);
         z-index: $z-index--menu;
 
         &--open {

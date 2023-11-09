@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { ShapedNFT } from 'src/antelope/types';
+import { NFT } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import NftViewer from 'pages/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
+import ToolTip from 'components/ToolTip.vue';
+import { abbreviateNumber, getShapedNftName } from 'src/antelope/stores/utils/text-utils';
 
 const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
-const router = useRouter();
 const { t } = useI18n();
 
 const props = defineProps<{
-    nft: ShapedNFT,
+    nft: NFT,
+    quantity: number,
 }>();
 
 // data
@@ -32,7 +33,8 @@ const nftDetailsRoute = {
 const creatorLinkText = computed(() => props.nft.contractPrettyName || props.nft.contractAddress);
 const creatorLinkUrl = computed(() => `${chainSettings.getExplorerUrl()}/address/${props.nft.contractAddress}`);
 // hide ID text if the NFT name includes the ID, which is common
-const showId = computed(() => !props.nft.name.includes(props.nft.id));
+const nftName = computed(() => getShapedNftName(props.nft.name, props.nft.id));
+const nftQuantityText = computed(() => abbreviateNumber(navigator.language, props.quantity));
 
 </script>
 
@@ -50,13 +52,18 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
             :preview-mode="true"
             :tile-mode="true"
         />
+        <div v-if="quantity > 1" class="c-nft-tile__quantity-badge">
+            <ToolTip :text="quantity.toString()" :hide-icon="true">
+                x{{ nftQuantityText }}
+            </ToolTip>
+        </div>
     </router-link>
     <div class="c-nft-tile__text-container">
         <h4 class="c-nft-tile__text">
             <span v-if="nft.name" class="u-text--high-contrast q-pr-sm">
-                {{nft.name}}
+                {{ nftName }}
             </span>
-            <span v-if="showId" class="u-text--default-contrast">{{nft.id}}</span>
+            <span class="u-text--default-contrast">{{nft.id}}</span>
         </h4>
         <ExternalLink :text="creatorLinkText" :url="creatorLinkUrl" />
     </div>
@@ -66,7 +73,7 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
 <style lang="scss">
 .c-nft-tile {
     border-radius: 4px;
-    border: 1px solid var(--accent-color-5);
+    border: 1px solid var(--accent-color-3);
     padding: 16px 24px;
 
     display: flex;
@@ -88,6 +95,23 @@ const showId = computed(() => !props.nft.name.includes(props.nft.id));
     &__link {
         height: 100%;
         text-decoration: none;
+        position: relative;
+    }
+
+    &__quantity-badge {
+        @include text--small-bold;
+
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 32px;
+        width: 56px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--bg-color);
+        border-radius: 4px 0 0 0;
+        color: var(--accent-color-2);
     }
 }
 </style>

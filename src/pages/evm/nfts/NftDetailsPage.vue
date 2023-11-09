@@ -1,20 +1,44 @@
 <script setup lang="ts">
-import AppPage from 'components/evm/AppPage.vue';
-import { useNftsStore } from 'src/antelope/stores/nfts';
+import {
+    computed,
+    onBeforeMount,
+    onMounted,
+    onUnmounted,
+    ref,
+    watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ERC1155_TYPE, ERC721_TYPE, NftTokenInterface, ShapedNFT, addressString } from 'src/antelope/types';
-import { computed, onBeforeMount, ref, watch } from 'vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
-import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
-import ExternalLink from 'components/ExternalLink.vue';
-import AddressInput from 'components/evm/inputs/AddressInput.vue';
-import UserInfo from 'components/evm/UserInfo.vue';
-import { CURRENT_CONTEXT, useChainStore, useAccountStore, getAntelope } from 'src/antelope';
-import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import NumberedList from 'components/NumberedList.vue';
-import { isValidAddressFormat } from 'src/antelope/stores/utils';
 import { useI18n } from 'vue-i18n';
+
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useChainStore,
+} from 'src/antelope';
+import {
+    addressString,
+    Collectible,
+    ERC1155_TYPE,
+    Erc1155Nft,
+    ERC721_TYPE,
+    Erc721Nft,
+} from 'src/antelope/types';
+import { useNftsStore } from 'src/antelope/stores/nfts';
+
+import { isValidAddressFormat } from 'src/antelope/stores/utils';
+import { abbreviateNumber, truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { EvmAccountModel } from 'src/antelope/stores/account';
+
+import AddressInput from 'components/evm/inputs/AddressInput.vue';
+import AppPage from 'components/evm/AppPage.vue';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import ExternalLink from 'components/ExternalLink.vue';
+import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
+import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NumberedList from 'components/NumberedList.vue';
+import ToolTip from 'components/ToolTip.vue';
+import UserInfo from 'components/evm/UserInfo.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -26,45 +50,36 @@ const chainStore = useChainStore();
 const accountStore = useAccountStore();
 
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
-let addressIsValid = false;
-
+const contractAddress = route.query.contract as string;
+const nftId = route.query.id as string;
 const ATTRIBUTES = 'attributes';
 const TRANSFER = 'transfer';
 const OWNERS = 'owners'; // for 1155 only
 
-const tabs = ref<String[]>([ATTRIBUTES, TRANSFER, OWNERS]);
-const nft = ref<ShapedNFT | null>(null);
+let addressIsValid = false;
+
+// data
+const nft = ref<Collectible | null>(null);
 const loading = ref(true);
+const tabs = ref<string[]>([ATTRIBUTES, TRANSFER, OWNERS]);
 const transferLoading = ref(false);
 const address = ref('');
 
-const contractAddress = route.query.contract as string;
-const nftId = route.query.id as string;
 
-let nftType: NftTokenInterface | null = null;
-
-onBeforeMount(async () => {
-    if (contractAddress && nftId) {
-        const erc721Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
-        const erc1155Details = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
-
-        if (erc721Details) {
-            removeTab(OWNERS);
-            nft.value = erc721Details;
-            nftType = ERC721_TYPE;
-        } else if (erc1155Details) {
-            nft.value = erc1155Details;
-            nftType = ERC1155_TYPE;
-        }
-
-        loading.value = false;
-    }
-});
+// computed
+const loggedAccount = computed(() =>
+    accountStore.loggedEvmAccount,
+);
+const userAddress = computed(() => loggedAccount.value.address);
+const isErc721 = computed(() => nft.value instanceof Erc721Nft);
+const isErc1155 = computed(() => nft.value instanceof Erc1155Nft);
+const nftType = computed(() => isErc721.value ? ERC721_TYPE : ERC1155_TYPE);
+const nftAsErc721 = computed(() => nft.value as Erc721Nft);
+const nftAsErc1155 = computed(() => nft.value as Erc1155Nft);
 
 const contractAddressIsValid = computed(
     () => isValidAddressFormat(contractAddress),
 );
-
 const contractLink = computed(() => {
     if (!contractAddressIsValid.value) {
         return '';
@@ -72,47 +87,136 @@ const contractLink = computed(() => {
 
     return `${explorerUrl}/address/${contractAddress}`;
 });
-
 const ownerLink = computed(() => {
-    if (!nft.value) {
+    if (!nft.value || isErc1155.value) {
         return '';
     }
 
-    return `${explorerUrl}/address/${nft.value.ownerAddress}`;
+    return `${explorerUrl}/address/${(nft.value as Erc721Nft).owner}`;
 });
-
 const filteredAttributes = computed(() =>
     nft.value?.attributes.filter(attr => !!attr.label && !!attr.text),
 );
+const nftOwnersText = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
 
-const loggedAccount = computed(() =>
-    accountStore.loggedEvmAccount,
-);
+    const owners = Object.keys((nft.value as Erc1155Nft).owners).length;
+    if (owners.toString().length > 6) {
+        return abbreviateNumber(navigator.language, owners);
+    }
+
+    return owners.toLocaleString();
+});
+const nftQuantityText = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
+
+    const quantity = (nft.value as Erc1155Nft).owners[userAddress.value] ?? 0;
+    if (quantity.toString().length > 6) {
+        return abbreviateNumber(navigator.language, quantity);
+    }
+
+    return quantity.toLocaleString();
+});
+const nftSupplyText = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
+    return (nft.value as Erc1155Nft).supply.toLocaleString();
+});
+const nftSupplyTextAbbreviated = computed(() => {
+    if (!nft.value || isErc721.value) {
+        return '';
+    }
+    const supply = (nft.value as Erc1155Nft).supply;
+    if (supply.toString().length > 6) {
+        return abbreviateNumber(navigator.language, supply);
+    }
+
+    return supply.toLocaleString();
+});
+
+
+// methods
+onBeforeMount(async () => {
+    if (contractAddress && nftId) {
+        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
+
+        // https://github.com/telosnetwork/telos-wallet/issues/658
+        // if (nft.value instanceof Erc721Nft) {
+        //     removeTab(OWNERS);
+        // }
+    }
+    removeTab(OWNERS);
+    loading.value = false;
+});
+
+let timer: ReturnType<typeof setInterval> | undefined;
+const minuteMilliseconds = 60 * 1000;
+onMounted(() => {
+    const indexer = (chainStore.currentChain.settings as EVMChainSettings).getIndexer();
+
+    // update owner info once per minute
+    timer = setInterval(async () => {
+        nft.value?.updateOwnerData(indexer);
+    }, minuteMilliseconds);
+});
+
+onUnmounted(() => {
+    if (timer) {
+        clearInterval(timer);
+    }
+});
+
 
 // if user switches account, disable transfer
 watch(loggedAccount, (newAccount: EvmAccountModel) => {
-    if (nft.value?.ownerAddress !== newAccount.address){
+    // https://github.com/telosnetwork/telos-wallet/issues/658
+    // const shouldDisableTransfer = !nft.value ||
+    //     (isErc721.value && nftAsErc721.value.owner !== newAccount.address) ||
+    //     (isErc1155.value && !nftAsErc1155.value.owners[newAccount.address]);
+    const shouldDisableTransfer = !isErc721.value || (isErc721.value && nftAsErc721.value.owner !== newAccount.address);
+
+    if (shouldDisableTransfer) {
         disableTransfer();
-    }else if (!tabs.value.includes(TRANSFER)){
-        //if user switches to owner of nft, restore transfer functionality
+    } else if (!tabs.value.includes(TRANSFER)) {
+        // if user switches to owner of nft, restore transfer functionality
         tabs.value.push(TRANSFER);
     }
 });
 
 // if details refresh with new owner (on transfer), disable transfer functionality
-watch(nft, (nftDetails) => {
-    if (nftDetails?.ownerAddress !== loggedAccount.value.address){
+watch(nft, () => {
+    // https://github.com/telosnetwork/telos-wallet/issues/658
+
+    // const shouldDisableTransfer = !nft.value ||
+    //     (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
+    //     (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+
+    const shouldDisableTransfer = !isErc721.value || (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address);
+
+    if (shouldDisableTransfer) {
         disableTransfer();
     }
-});
+}, { deep: true });
 
-async function startTransfer(){
+async function startTransfer() {
     transferLoading.value = true;
     const nameString = `${nft.value?.contractPrettyName || nft.value?.contractAddress} #${nft.value?.id}`;
-    try{
-        const trx = await nftStore.transferNft(CURRENT_CONTEXT, contractAddress, nftId, nftType as NftTokenInterface, loggedAccount.value.address, address.value as addressString);
+    try {
+        const trx = await nftStore.transferNft(
+            CURRENT_CONTEXT,
+            contractAddress,
+            nftId,
+            nftType.value,
+            loggedAccount.value.address,
+            address.value as addressString,
+        );
         const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t('notification.neutral_message_sending', { quantity: nameString, address: address.value }),
+            $t('notification.neutral_message_sending', { quantity: nameString, address: truncateAddress(address.value) }),
         );
         trx.wait().then(() => {
             ant.config.notifySuccessfulTrxHandler(
@@ -120,30 +224,19 @@ async function startTransfer(){
             );
         }).catch((err) => {
             console.error(err);
-            transferLoading.value = false;
-        }).finally(async () => {
+        }).finally(() => {
             dismiss();
-            setTimeout(async () => {
-                await updateNftData(nftType as NftTokenInterface);
-                transferLoading.value = false;
-            }, 3000); //give the indexer a second to register change in owner before querying
+            transferLoading.value = false;
         });
-    }catch(e){
+    } catch(e) {
         console.error(e); // tx error notification handled in store
         transferLoading.value = false;
     }
 }
 
-async function updateNftData(tokenType: NftTokenInterface){
-    if (tokenType === ERC721_TYPE){
-        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC721_TYPE);
-    }else if (tokenType === ERC1155_TYPE){
-        nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, contractAddress, nftId, ERC1155_TYPE);
-    }
-}
-
 function disableTransfer(){
     router.push({ query: { ...route.query, tab: 'attributes' } });
+    address.value = '';
     removeTab(TRANSFER);
 }
 
@@ -156,7 +249,7 @@ function removeTab(tab: string){
 </script>
 
 <template>
-<AppPage :tabs="(tabs as string[])">
+<AppPage :tabs="tabs">
     <template v-slot:header>
         <div
             :class="{
@@ -190,21 +283,68 @@ function removeTab(tab: string){
                     :tileMode="true"
                     class="c-nft-details__viewer"
                 />
-                <NftDetailsCard title="Collection" class="c-nft-details__header-card">
+                <NftDetailsCard :title="$t('global.collection')" class="c-nft-details__header-card">
                     <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
                 </NftDetailsCard>
 
-                <NftDetailsCard title="ID" class="c-nft-details__header-card">
+                <NftDetailsCard :title="$t('global.id')" class="c-nft-details__header-card">
                     {{ nft.id }}
                 </NftDetailsCard>
 
-                <NftDetailsCard title="Owner" class="c-nft-details__header-card">
-                    <ExternalLink :text="nft.ownerAddress" :url="ownerLink" />
+                <NftDetailsCard
+                    v-if="isErc721"
+                    :title="$t('global.owner')"
+                    class="c-nft-details__header-card"
+                >
+                    <ExternalLink :text="nftAsErc721.owner" :url="ownerLink" />
                 </NftDetailsCard>
 
-                <NftDetailsCard v-if="nft.description" title="Description" class="c-nft-details__header-card">
+                <NftDetailsCard
+                    v-else
+                    :title="$t('global.owners')"
+                    class="c-nft-details__header-card"
+                >
+                    <ToolTip
+                        :text="Object.keys(nftAsErc1155.owners).length.toLocaleString()"
+                        :hideIcon="true"
+                    >
+                        {{ nftOwnersText }}
+                    </ToolTip>
+                </NftDetailsCard>
+
+                <NftDetailsCard
+                    v-if="nft.description"
+                    :title="$t('global.description')"
+                    class="c-nft-details__header-card"
+                >
                     {{ nft.description }}
                 </NftDetailsCard>
+
+                <template v-if="isErc1155 && userAddress">
+                    <NftDetailsCard
+                        :title="$t('global.owned_by_you')"
+                        class="c-nft-details__header-card"
+                    >
+                        <ToolTip
+                            :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
+                            :hideIcon="true"
+                        >
+                            {{ nftQuantityText }}
+                        </ToolTip>
+                    </NftDetailsCard>
+
+                    <NftDetailsCard
+                        :title="$t('global.total')"
+                        class="c-nft-details__header-card"
+                    >
+                        <ToolTip
+                            :text="nftSupplyText"
+                            :hideIcon="true"
+                        >
+                            {{ nftSupplyTextAbbreviated }}
+                        </ToolTip>
+                    </NftDetailsCard>
+                </template>
             </template>
 
         </div>
@@ -295,11 +435,7 @@ function removeTab(tab: string){
     </template>
     <template v-slot:transfer>
         <div class="c-nft-transfer__form-container">
-
-            <q-form
-                class="c-nft-transfer__form"
-            >
-
+            <q-form class="c-nft-transfer__form">
                 <div class="c-nft-transfer__row c-nft-transfer__row--1 row">
                     <div class="col">
                         <div class="c-nft-transfer__transfer-text">
@@ -515,8 +651,8 @@ function removeTab(tab: string){
 
         &--small{
             font-size: 16px;
-                // override UserInfo component styling
-            .o-text--header-4{
+            // override UserInfo component styling
+            .o-text--header-4 {
                 font-size: 16px !important;
             }
         }

@@ -195,7 +195,7 @@ export default defineComponent({
         gap: 8px;
         padding-bottom: 24px;
         margin-bottom: 24px;
-        border-bottom: 2px solid var(--accent-color-5);
+        border-bottom: 2px solid var(--accent-color-3);
 
         @media only screen and (min-width: $breakpoint-sm-min) {
             flex-direction: row;

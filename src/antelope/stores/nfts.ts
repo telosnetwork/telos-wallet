@@ -5,13 +5,21 @@
 
 import { defineStore } from 'pinia';
 
-import { Label, Network, Address, IndexerTransactionsFilter, NFTClass, NftTokenInterface, TransactionResponse, addressString } from 'src/antelope/types';
+import {
+    Label,
+    Network,
+    Address,
+    Collectible,
+    NftTokenInterface,
+    IndexerPaginationFilter,
+    TransactionResponse,
+    addressString,
+} from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
-import { AccountModel, EvmAccountModel, useAccountStore } from 'src/antelope/stores/account';
-import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
+import { EvmAccountModel, useAccountStore } from 'src/antelope/stores/account';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
@@ -19,13 +27,13 @@ import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-ut
 
 export interface NFTsInventory {
     owner: Address;
-    list: NFTClass[];
+    list: Collectible[];
     loading: boolean;
 }
 
 export interface NFTsCollection {
     contract: Address;
-    list: NFTClass[];
+    list: Collectible[];
     loading: boolean;
 }
 
@@ -35,7 +43,7 @@ export interface UserNftFilter {
 }
 
 export interface NftsState {
-    __indexer_filter: IndexerTransactionsFilter;
+    __pagination_filter: IndexerPaginationFilter;
     __user_filter: UserNftFilter;
     __inventory: Record<Label, NFTsInventory>;
     __contracts: Record<Network, Record<Address, NFTsCollection>>;
@@ -127,14 +135,11 @@ export const useNftsStore = defineStore(store_name, {
                 },
             });
         },
-
-        async updateNFTsForAccount(label: string, account: AccountModel | null) {
+        async updateNFTsForAccount(label: string, account: string) {
             this.trace('updateNFTsForAccount', label, account);
-            if (!account?.account) {
-                return;
-            }
+            const network = useChainStore().getChain(label).settings.getNetwork();
 
-            const owner = account.account;
+            const owner = account;
 
             // we initialize the inventory for this label or take the existing one
             this.__inventory[label] = this.__inventory[label] || {
@@ -146,29 +151,40 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 const chain = useChainStore().getChain(label);
                 if (chain.settings.isNative()) {
-                    const chain_settings = chain.settings as NativeChainSettings;
-                    chain_settings.getNFTsInventory(owner, toRaw(this.__indexer_filter)).then((nfts) => {
-                        this.__inventory[label].list = nfts;
-                        this.__inventory[label].loading = false;
-                        this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
-                        useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                    });
+                    throw new Error('Method updateNFTsForAccount not implemented for native chain');
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
 
                     if (chain_settings.hasIndexerSupport()) {
-                        chain_settings.getNFTsInventory(owner, toRaw(this.__indexer_filter)).then((nfts) => {
-                            this.__inventory[label].list = nfts;
-                            this.__inventory[label].loading = false;
-                            this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
-                            useFeedbackStore().unsetLoading('updateNFTsForAccount');
-                            nfts.forEach((nft) => {
-                                nft.watch(() => {
-                                    // this forces an update for watchers to be called
-                                    this.__inventory[label].list = [...nfts];
-                                });
-                            });
+                        const filter = toRaw(this.__pagination_filter);
+                        const erc1155NftsPromise = chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC1155' });
+                        const erc721NftsPromise  = chain_settings.getNftsForAccount(owner, { ...filter, type: 'ERC721'  });
+
+                        const [erc1155Nfts, erc721Nfts] = await Promise.all([erc1155NftsPromise, erc721NftsPromise]);
+
+                        const nfts = erc1155Nfts.concat(erc721Nfts);
+                        const sortedNfts = nfts.sort((a, b) => b.updated - a.updated);
+
+                        this.__inventory[label].list = sortedNfts;
+                        this.__inventory[label].loading = false;
+
+                        this.__contracts[network] = this.__contracts[network] || {};
+                        nfts.forEach((nft) => {
+                            const contractLower = nft.contractAddress.toLowerCase();
+                            this.__contracts[network][contractLower] = this.__contracts[network][contractLower] ?? {
+                                contract: contractLower,
+                                list: [],
+                                loading: false,
+                            };
+
+                            if (this.__contracts[network][contractLower].list.find(contractNft => contractNft.id === nft.id)) {
+                                return;
+                            }
+                            this.__contracts[network][contractLower].list.push(nft);
                         });
+
+                        this.trace('updateNFTsForAccount', 'indexer returned:', nfts);
+                        useFeedbackStore().unsetLoading('updateNFTsForAccount');
                     } else {
                         // In case the chain does not support index, we don't have any solution yet
                         this.trace('updateNFTsForAccount', 'No alternative for indexer, returning []');
@@ -182,40 +198,36 @@ export const useNftsStore = defineStore(store_name, {
             }
         },
 
-        async fetchNftDetails(label: Label, contract: string, tokenId: string, type: NftTokenInterface): Promise<NFTClass | null> {
+        async fetchNftDetails(
+            label: Label,
+            contract: string,
+            tokenId: string,
+            type?: NftTokenInterface,
+        ): Promise<Collectible | null> {
             this.trace('fetchNftDetails', label, contract, tokenId, type);
-            let promise = Promise.resolve(null) as Promise<NFTClass | null>;
+            let promise = Promise.resolve(null) as Promise<Collectible | null>;
             try {
+                const contractLower = contract.toLowerCase();
                 const chain = useChainStore().getChain(label);
                 const network = chain.settings.getNetwork();
 
-                // If we already have an inventory for that label, we search for the NFT in that list first
-                if (this.__inventory[label]) {
-                    const nft = this.__inventory[label].list.find(
-                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
-                    );
-                    if (nft) {
-                        return nft;
-                    }
-                }
-
                 const new_filter = {
-                    ...toRaw(this.__indexer_filter),
+                    ...toRaw(this.__pagination_filter),
                     tokenId,
                 };
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
-                if (this.__contracts[network][contract]) {
-                    const nft = this.__contracts[network][contract].list.find(
-                        nft => nft.item.contract?.address.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
+                if (this.__contracts[network][contractLower]) {
+                    const nft = this.__contracts[network][contractLower].list.find(
+                        nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
                         return nft;
                     }
                 } else {
-                    this.__contracts[network][contract] = {
-                        contract,
+                    this.__contracts[network][contractLower] = {
+                        contract: contractLower,
                         list: [],
                         loading: false,
                     };
@@ -224,10 +236,12 @@ export const useNftsStore = defineStore(store_name, {
                 // we don't have the NFT on any cache, we fetch it from the indexer
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
-                    promise = chain.settings.getNFTsCollection(contract, new_filter).then((nfts) => {
+                    promise = chain.settings.getNftsForCollection(contract, new_filter).then((nfts) => {
+                        const contractLower = contract.toLowerCase();
+
                         this.trace('fetchNftDetails', 'indexer returned:', nfts);
-                        this.__contracts[network][contract].list = this.__contracts[network][contract].list.concat(nfts);
-                        this.__contracts[network][contract].loading = false;
+                        this.__contracts[network][contractLower].list = this.__contracts[network][contractLower].list.concat(nfts);
+                        this.__contracts[network][contractLower].loading = false;
                         useFeedbackStore().unsetLoading('updateNFTsForAccount');
                         return nfts.find(nft => nft.id === tokenId) || null;
                     });
@@ -238,12 +252,13 @@ export const useNftsStore = defineStore(store_name, {
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
-                            type.toUpperCase(),
+                            (type ?? 'ERC721').toUpperCase(),
                         ).then((nft) => {
+                            const contractLower = contract.toLowerCase();
                             this.trace('fetchNftDetails', 'indexer fallback:', nft);
                             if (nft) {
-                                this.__contracts[network][contract].list.push(nft);
-                                this.__contracts[network][contract].loading = false;
+                                this.__contracts[network][contractLower].list.push(nft);
+                                this.__contracts[network][contractLower].loading = false;
                             }
                             useFeedbackStore().unsetLoading('updateNFTsForAccount');
                             return nft;
@@ -265,33 +280,24 @@ export const useNftsStore = defineStore(store_name, {
             });
         },
 
-
-        // commits ---
-        setPaginationFilter(filter: IndexerTransactionsFilter) {
-            this.__indexer_filter = filter;
-        },
-        setUserFilter(filter: UserNftFilter) {
-            this.__user_filter = filter;
-        },
-        clearNFTs() {
-            this.trace('clearNFTs');
-            this.__inventory = {};
-            this.setUserFilter({});
-            this.setPaginationFilter({
-                address: '',
-                limit: 10000,
-            });
-        },
-
         async subscribeForTransactionReceipt(account: EvmAccountModel, response: TransactionResponse): Promise<TransactionResponse> {
             this.trace('subscribeForTransactionReceipt', account.account, response.hash);
             return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
                 newResponse.wait().then(() => {
                     this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
-                    this.updateNFTsForAccount(CURRENT_CONTEXT, account);
+                    this.updateNFTsForAccount(CURRENT_CONTEXT, account.account);
                 });
                 return newResponse;
             });
+        },
+
+        updateNftOwnerData(label: Label, contractAddress: string, tokenId: string): Promise<void> {
+            this.trace('updateNftOwnerData', label, contractAddress, tokenId);
+            const network = useChainStore().getChain(label).settings.getNetwork();
+            const indexer = (useChainStore().getChain(label).settings as EVMChainSettings).getIndexer();
+            const nft = this.__contracts[network][contractAddress.toLowerCase()].list.find(nft => nft.id === tokenId);
+
+            return nft?.updateOwnerData(indexer) ?? Promise.reject('NFT not found');
         },
 
         async transferNft(label: Label, contractAddress: string, tokenId: string, type: NftTokenInterface, from: addressString, to: addressString): Promise<TransactionResponse> {
@@ -302,7 +308,12 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().setLoading(funcname);
                 const account = useAccountStore().loggedAccount as EvmAccountModel;
                 return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to)
-                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
+                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse))
+                    .finally(() => {
+                        setTimeout(() => {
+                            this.updateNftOwnerData(label, contractAddress, tokenId);
+                        }, 2000); // give the blockchain a moment to propogate owner changes
+                    });
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
@@ -311,14 +322,31 @@ export const useNftsStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading(funcname);
             }
         },
+
+        // commits ---
+        setPaginationFilter(filter: IndexerPaginationFilter) {
+            this.__pagination_filter = filter;
+        },
+        setUserFilter(filter: UserNftFilter) {
+            this.__user_filter = filter;
+        },
+        clearNFTs() {
+            this.trace('clearNFTs');
+            this.__inventory = {};
+            this.setUserFilter({});
+            this.setPaginationFilter({
+                offset: 0,
+                limit: 10000,
+            });
+        },
     },
 });
 
 
 
 const nftsInitialState: NftsState = {
-    __indexer_filter: {
-        address: '',
+    __pagination_filter: {
+        offset: 0,
         limit: 10000, // override api limit default value of 50
     },
     __user_filter: {
