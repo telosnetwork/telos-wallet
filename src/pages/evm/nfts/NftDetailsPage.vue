@@ -164,8 +164,8 @@ onUnmounted(() => {
 // if user switches account, disable transfer
 watch(loggedAccount, (newAccount: EvmAccountModel) => {
     const shouldDisableTransfer = !nft.value ||
-        (isErc721.value && nftAsErc721.value.owner !== newAccount.address) ||
-        (isErc1155.value && !nftAsErc1155.value.owners[newAccount.address]);
+        (isErc721.value && nftAsErc721.value.owner !== newAccount?.address) ||
+        (isErc1155.value && !nftAsErc1155.value.owners[newAccount?.address]);
 
     if (shouldDisableTransfer) {
         disableTransfer();
@@ -178,8 +178,8 @@ watch(loggedAccount, (newAccount: EvmAccountModel) => {
 // if details refresh with new owner (on transfer), disable transfer functionality
 watch(nft, () => {
     const shouldDisableTransfer = !nft.value ||
-        (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value.address) ||
-        (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value.address]);
+        (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value?.address) ||
+        (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value?.address]);
 
     if (shouldDisableTransfer) {
         disableTransfer();
