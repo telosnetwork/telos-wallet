@@ -315,13 +315,16 @@ export const useNftsStore = defineStore(store_name, {
             try {
                 useFeedbackStore().setLoading(funcname);
                 const account = useAccountStore().loggedAccount as EvmAccountModel;
-                return await account.authenticator.transferNft(contractAddress, tokenId, type, from, to, quantity)
-                    .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse))
-                    .finally(() => {
-                        setTimeout(() => {
-                            this.updateNftOwnerData(label, contractAddress, tokenId);
-                        }, 2000); // give the blockchain a moment to propogate owner changes
-                    });
+                const transferNftResponse = await account.authenticator.transferNft(contractAddress, tokenId, type, from, to, quantity);
+                const receiptPromise = this.subscribeForTransactionReceipt(account, transferNftResponse as TransactionResponse);
+
+                receiptPromise.then(r => r.wait().then(() => {
+                    setTimeout(() => {
+                        this.updateNftOwnerData(label, contractAddress, tokenId);
+                    }, 3000); // give the indexer some time to update owner information
+                }));
+
+                return receiptPromise;
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_nft', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);
