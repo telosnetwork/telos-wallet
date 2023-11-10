@@ -63,7 +63,7 @@ const tabs = ref<string[]>([ATTRIBUTES]);
 const loggedAccount = computed(() =>
     accountStore.loggedEvmAccount,
 );
-const userAddress = computed(() => loggedAccount.value.address);
+const userAddress = computed(() => loggedAccount.value?.address ?? '');
 const isErc721 = computed(() => nft.value instanceof Erc721Nft);
 const isErc1155 = computed(() => nft.value instanceof Erc1155Nft);
 const nftAsErc721 = computed(() => nft.value as Erc721Nft);
