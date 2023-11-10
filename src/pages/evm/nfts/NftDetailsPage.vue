@@ -48,15 +48,18 @@ const accountStore = useAccountStore();
 const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
+
+type Tab = 'attributes' | 'transfer' | 'owners';
 const ATTRIBUTES = 'attributes';
 const TRANSFER = 'transfer';
 const OWNERS = 'owners'; // for 1155 only
+const tabsOrder: Record<Tab, number> = { [ATTRIBUTES]: 1, [TRANSFER]: 2, [OWNERS]: 3 };
 
 
 // data
 const nft = ref<Collectible | null>(null);
 const loading = ref(true);
-const tabs = ref<string[]>([ATTRIBUTES]);
+const tabs = ref<Tab[]>([ATTRIBUTES]);
 
 
 // computed
@@ -171,7 +174,7 @@ watch(loggedAccount, (newAccount: EvmAccountModel) => {
         disableTransfer();
     } else if (!tabs.value.includes(TRANSFER)) {
         // if user switches to owner of nft, restore transfer functionality
-        tabs.value.push(TRANSFER);
+        enableTab(TRANSFER);
     }
 });
 
@@ -184,11 +187,11 @@ watch(nft, () => {
     if (shouldDisableTransfer) {
         disableTransfer();
     } else if (!tabs.value.includes(TRANSFER)) {
-        tabs.value.push(TRANSFER);
+        enableTab(TRANSFER);
     }
 
     if (isErc1155.value && !tabs.value.includes(OWNERS)) {
-        tabs.value.push(OWNERS);
+        enableTab(OWNERS);
     } else if (!isErc1155.value && tabs.value.includes(OWNERS)) {
         removeTab(OWNERS);
     }
@@ -200,7 +203,16 @@ function disableTransfer(){
     removeTab(TRANSFER);
 }
 
-function removeTab(tab: string){
+function enableTab(tab: Tab) {
+    const newTabs: Tab[] = [...tabs.value];
+    if (!newTabs.includes(tab)) {
+        newTabs.push(tab);
+    }
+
+    tabs.value = newTabs.sort((a, b) => tabsOrder[a] - tabsOrder[b]);
+}
+
+function removeTab(tab: Tab){
     if (tabs.value.includes(tab)){
         tabs.value.splice(tabs.value.findIndex(item => item === tab), 1);
     }

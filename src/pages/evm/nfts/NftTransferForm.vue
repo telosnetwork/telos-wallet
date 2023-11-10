@@ -96,7 +96,10 @@ async function startTransfer() {
             console.error(err);
         }).finally(() => {
             dismiss();
-            transferLoading.value = false;
+
+            setTimeout(() => {
+                transferLoading.value = false;
+            }, 3000); // give the indexer some time to update owner information
         });
     } catch (e) {
         console.error(e); // tx error notification handled in store
