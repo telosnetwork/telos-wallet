@@ -279,31 +279,32 @@ function removeTab(tab: string){
                     {{ nft.description }}
                 </NftDetailsCard>
 
-                <template v-if="isErc1155 && userAddress">
-                    <NftDetailsCard
-                        :title="$t('global.owned_by_you')"
-                        class="c-nft-details__header-card"
-                    >
-                        <ToolTip
-                            :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
-                            :hideIcon="true"
-                        >
-                            {{ nftQuantityText }}
-                        </ToolTip>
-                    </NftDetailsCard>
 
-                    <NftDetailsCard
-                        :title="$t('global.total')"
-                        class="c-nft-details__header-card"
+                <NftDetailsCard
+                    v-if="isErc1155 && userAddress"
+                    :title="$t('global.owned_by_you')"
+                    class="c-nft-details__header-card"
+                >
+                    <ToolTip
+                        :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
+                        :hideIcon="true"
                     >
-                        <ToolTip
-                            :text="nftSupplyText"
-                            :hideIcon="true"
-                        >
-                            {{ nftSupplyTextAbbreviated }}
-                        </ToolTip>
-                    </NftDetailsCard>
-                </template>
+                        {{ nftQuantityText }}
+                    </ToolTip>
+                </NftDetailsCard>
+
+                <NftDetailsCard
+                    v-if="isErc1155"
+                    :title="$t('global.total')"
+                    class="c-nft-details__header-card"
+                >
+                    <ToolTip
+                        :text="nftSupplyText"
+                        :hideIcon="true"
+                    >
+                        {{ nftSupplyTextAbbreviated }}
+                    </ToolTip>
+                </NftDetailsCard>
             </template>
         </div>
     </template>
