@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import {
     Name,
@@ -76,12 +76,13 @@ export default abstract class NativeChainSettings implements ChainSettings {
         let pendingRequests = 0;
 
         // Interceptor handlers -- these handlers are used to limit the number of concurrent requests
-        const requestHandler = (config: AxiosRequestConfig) => new Promise((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const requestHandler = (value: InternalAxiosRequestConfig) => new Promise<InternalAxiosRequestConfig<any>>((resolve) => {
             const interval = setInterval(() => {
                 if (pendingRequests < MAX_REQUESTS_COUNT) {
                     pendingRequests++;
                     clearInterval(interval);
-                    resolve(config);
+                    resolve(value);
                 }
             }, INTERVAL_MS);
         });
