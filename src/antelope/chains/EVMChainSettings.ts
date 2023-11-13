@@ -303,12 +303,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    const priceUpdatedWithinTenMins =
+                    const priceIsCurrent =
                         !!contractData.calldata.marketdata_updated &&
                         dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
-                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
+                    if (typeof contractData.calldata === 'object' && priceIsCurrent) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
