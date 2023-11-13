@@ -120,7 +120,11 @@ export async function extractNftMetadata(
 }
 
 
-// eztodo docs
+/**
+ * Given an IPFS media URL, determine the media type
+ * @param url - the IPFS media URL
+ * @returns {Promise<NftSourceType>} - the media type
+ */
 export async function determineIpfsMediaType(url: string): Promise<NftSourceType> {
     try {
         const response = await fetch(url);
