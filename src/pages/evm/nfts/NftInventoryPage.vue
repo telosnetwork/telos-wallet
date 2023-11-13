@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, toRaw } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -18,7 +19,6 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
-import { storeToRefs } from 'pinia';
 
 
 const nftStore = useNftsStore();
@@ -447,7 +447,7 @@ onUnmounted(() => {
                                 @click="goToDetailPage(props.row)"
                                 @keydown.space.enter.prevent="goToDetailPage(props.row)"
                             >
-                                <template v-if="props.row.image">
+                                <template v-if="props.row.image || props.row.isVideo">
                                     <NftViewer
                                         :nft="getNftForViewer(props.row)"
                                         :previewMode="false"

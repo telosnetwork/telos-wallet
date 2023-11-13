@@ -226,16 +226,35 @@ function removeTab(tab: Tab){
             :class="{
                 'c-nft-details__header-container': true,
                 'c-nft-details__header-container--grid': nft !== null || loading,
+                'row': true,
             }"
         >
             <template v-if="loading">
-                <div
-                    v-for="index in 5"
-                    :key="`nft-details-page-${index}`"
-                    class="c-nft-details__header-card c-nft-details__header-card--placeholder"
-                >
-                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                <div class="col-12">
+                    <div class="row q-col-gutter-sm">
+                        <div class="col-12 col-md-6">
+                            <q-skeleton type="rect" class="c-nft-details__header-skeleton--large" />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="row q-col-gutter-sm">
+                                <div class="col-12">
+                                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                                </div>
+                                <div class="col-6">
+                                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                                </div>
+                                <div class="col-6">
+                                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                                </div>
+                                <div class="col-12">
+                                    <q-skeleton type="rect" class="c-nft-details__header-skeleton" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </template>
 
             <template v-else-if="nft === null">
@@ -252,71 +271,84 @@ function removeTab(tab: Tab){
                     :nft="nft"
                     :previewMode="false"
                     :tileMode="true"
-                    class="c-nft-details__viewer"
+                    class="col-12 col-md-6 q-mb-md q-pr-md"
                 />
-                <NftDetailsCard :title="$t('global.collection')" class="c-nft-details__header-card">
-                    <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
-                </NftDetailsCard>
 
-                <NftDetailsCard :title="$t('global.id')" class="c-nft-details__header-card">
-                    {{ nft.id }}
-                </NftDetailsCard>
+                <div class="col-12 col-md-6">
+                    <div class="row q-col-gutter-sm">
+                        <div class="col-12">
+                            <NftDetailsCard :title="$t('global.collection')" class="c-nft-details__header-card">
+                                <ExternalLink :text="nft.contractPrettyName || nft.contractAddress" :url="contractLink" />
+                            </NftDetailsCard>
+                        </div>
 
-                <NftDetailsCard
-                    v-if="isErc721"
-                    :title="$t('global.owner')"
-                    class="c-nft-details__header-card"
-                >
-                    <ExternalLink :text="nftAsErc721.owner" :url="ownerLink" />
-                </NftDetailsCard>
+                        <div class="col-6">
+                            <NftDetailsCard :title="$t('global.id')" class="c-nft-details__header-card col-6">
+                                {{ nft.id }}
+                            </NftDetailsCard>
+                        </div>
 
-                <NftDetailsCard
-                    v-else
-                    :title="$t('global.owners')"
-                    class="c-nft-details__header-card"
-                >
-                    <ToolTip
-                        :text="Object.keys(nftAsErc1155.owners).length.toLocaleString()"
-                        :hideIcon="true"
-                    >
-                        {{ nftOwnersText }}
-                    </ToolTip>
-                </NftDetailsCard>
+                        <div class="col-6">
+                            <NftDetailsCard
+                                v-if="isErc721"
+                                :title="$t('global.owner')"
+                                class="c-nft-details__header-card"
+                            >
+                                <ExternalLink :text="nftAsErc721.owner" :url="ownerLink" />
+                            </NftDetailsCard>
 
-                <NftDetailsCard
-                    v-if="nft.description"
-                    :title="$t('global.description')"
-                    class="c-nft-details__header-card"
-                >
-                    {{ nft.description }}
-                </NftDetailsCard>
+                            <NftDetailsCard
+                                v-else
+                                :title="$t('global.owners')"
+                                class="c-nft-details__header-card"
+                            >
+                                <ToolTip
+                                    :text="Object.keys(nftAsErc1155.owners).length.toLocaleString()"
+                                    :hideIcon="true"
+                                >
+                                    {{ nftOwnersText }}
+                                </ToolTip>
+                            </NftDetailsCard>
+                        </div>
 
+                        <div v-if="nft.description" class="col-12">
+                            <NftDetailsCard
+                                :title="$t('global.description')"
+                                class="c-nft-details__header-card"
+                            >
+                                {{ nft.description }}
+                            </NftDetailsCard>
+                        </div>
 
-                <NftDetailsCard
-                    v-if="isErc1155 && userAddress"
-                    :title="$t('global.owned_by_you')"
-                    class="c-nft-details__header-card"
-                >
-                    <ToolTip
-                        :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
-                        :hideIcon="true"
-                    >
-                        {{ nftQuantityText }}
-                    </ToolTip>
-                </NftDetailsCard>
+                        <div v-if="isErc1155 && userAddress" class="col-6">
+                            <NftDetailsCard
+                                :title="$t('global.owned_by_you')"
+                                class="c-nft-details__header-card"
+                            >
+                                <ToolTip
+                                    :text="(nftAsErc1155.owners[userAddress] ?? 0).toLocaleString()"
+                                    :hideIcon="true"
+                                >
+                                    {{ nftQuantityText }}
+                                </ToolTip>
+                            </NftDetailsCard>
+                        </div>
 
-                <NftDetailsCard
-                    v-if="isErc1155"
-                    :title="$t('global.total')"
-                    class="c-nft-details__header-card"
-                >
-                    <ToolTip
-                        :text="nftSupplyText"
-                        :hideIcon="true"
-                    >
-                        {{ nftSupplyTextAbbreviated }}
-                    </ToolTip>
-                </NftDetailsCard>
+                        <div v-if="isErc1155" class="col-6">
+                            <NftDetailsCard
+                                :title="$t('global.total')"
+                                class="c-nft-details__header-card col-6"
+                            >
+                                <ToolTip
+                                    :text="nftSupplyText"
+                                    :hideIcon="true"
+                                >
+                                    {{ nftSupplyTextAbbreviated }}
+                                </ToolTip>
+                            </NftDetailsCard>
+                        </div>
+                    </div>
+                </div>
             </template>
         </div>
     </template>
@@ -421,34 +453,14 @@ function removeTab(tab: Tab){
 
     &__header-container {
         &--grid {
-            display: grid;
-            grid-template-areas:
-                'a'
-                'b'
-                'c'
-                'd'
-                'e';
-            gap: 8px;
             width: 100%;
 
             @include sm-and-up {
-                grid-template-areas:
-                'a a'
-                'b b'
-                'c d'
-                'e e';
                 max-width: 432px;
             }
 
             @include md-and-up {
-                grid-template-areas:
-                'a a a b b'
-                'a a a c d'
-                'a a a e e'
-                'a a a . .';
                 max-width: 1000px;
-                width: max-content;
-                grid-template-columns: repeat(5, 1fr);
             }
         }
     }
@@ -458,48 +470,19 @@ function removeTab(tab: Tab){
         max-width: 1000px;
     }
 
-    &__viewer {
-        grid-area: a;
-    }
-
     &__header-card {
-        &:nth-of-type(2) {
-            grid-area: b;
-        }
-
-        &:nth-of-type(3) {
-            grid-area: c;
-        }
-
-        &:nth-of-type(4) {
-            grid-area: d;
-        }
-
-        &:nth-of-type(5) {
-            grid-area: e;
-        }
-
-        &--placeholder {
-            margin: auto;
-            height: 80px;
-            width: 100%;
-
-            &:first-of-type {
-                grid-area: a;
-                width: 270px;
-                height: 270px;
-
-                @include md-and-up {
-                    width: 432px;
-                    height: 432px;
-                }
-            }
-        }
+        min-height: 88px;
     }
 
     &__header-skeleton {
-        height: 100%;
+        height: 88px;
         width: 100%;
+
+        &--large {
+            margin: auto;
+            height: 270px;
+            max-width: 270px;
+        }
     }
 
     &__attributes-container {

@@ -398,7 +398,12 @@ function setHoverPreviewVisibility(visible: boolean) {
         &--preview {
             max-height: 270px;
 
-            #{$this}__image {
+            #{$this}__video-container {
+                height: 100%;
+            }
+
+            #{$this}__image,
+            #{$this}__video {
                 height: 100%;
                 width: 100%;
                 max-height: unset;
@@ -420,6 +425,7 @@ function setHoverPreviewVisibility(visible: boolean) {
         height: 100%;
         width: 100%;
         display: flex;
+        max-height: 80vh;
     }
 
     &__image-container,
@@ -442,7 +448,6 @@ function setHoverPreviewVisibility(visible: boolean) {
         height: auto;
         width: auto;
         max-width: 100%;
-        max-height: 100%;
     }
 
     &__image-loading {
@@ -500,11 +505,14 @@ function setHoverPreviewVisibility(visible: boolean) {
 
     &__video-container {
         margin: auto;
+        display: flex;
+        max-height: 100%;
     }
 
     &__video {
         width: 100%;
         cursor: pointer;
+        max-height: 100%;
     }
 
     &__audio {

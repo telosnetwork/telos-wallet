@@ -107,5 +107,35 @@ export async function extractNftMetadata(
         }
     }
 
+    if (metadata?.image?.includes('https://cloudflare-ipfs.com/ipfs/')) {
+        mediaType = await determineIpfsMediaType(metadata?.image);
+
+        if (mediaType === NFTSourceTypes.IMAGE) {
+            image = metadata?.image;
+        }
+        mediaSource = metadata?.image;
+    }
+
     return { image, mediaType, mediaSource };
+}
+
+
+// eztodo docs
+export async function determineIpfsMediaType(url: string): Promise<NftSourceType> {
+    try {
+        const response = await fetch(url);
+        const contentType = response.headers.get('Content-Type') ?? '';
+
+        if (contentType.startsWith('image/')) {
+            return NFTSourceTypes.IMAGE;
+        } else if (contentType.startsWith('video/')) {
+            return NFTSourceTypes.VIDEO;
+        } else if (contentType.startsWith('audio/')) {
+            return NFTSourceTypes.AUDIO;
+        } else {
+            return NFTSourceTypes.UNKNOWN;
+        }
+    } catch (error) {
+        throw new Error('Error determining IPFS media type');
+    }
 }
