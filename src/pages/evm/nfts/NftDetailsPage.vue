@@ -456,6 +456,8 @@ function removeTab(tab: Tab){
 
         &--grid {
             width: 100%;
+            flex-direction: row;
+
 
             @include sm-and-up {
                 max-width: 432px;
