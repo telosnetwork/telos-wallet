@@ -92,7 +92,7 @@ export default {
         link_to_receive_aria: 'Link to Receive page',
         link_to_buy_aria: 'External link to buy tokens',
         balance_row_actions_aria: 'Balance row actions',
-        no_fiat_value: 'No reliable fiat value found',
+        no_fiat_value: 'We obtain price data from many sources, we do not display data that is older than 30 minutes.',
         receiving_account: 'Receiving Account',
         account_required: 'Account is required',
         token: 'Token',
