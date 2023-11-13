@@ -452,6 +452,8 @@ function removeTab(tab: Tab){
     $this: &;
 
     &__header-container {
+        flex-direction: column;
+
         &--grid {
             width: 100%;
 
