@@ -8,7 +8,7 @@ import {
     IndexerNftMetadata,
     IndexerTokenHoldersResponse,
 } from 'src/antelope/types/IndexerTypes';
-import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
+import { IPFS_GATEWAY, extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -129,7 +129,7 @@ export async function constructNft(
                 }, {} as { [key: string]: string });
     }
 
-    indexerData.metadata.image = ((indexerData.metadata.image as string) ?? '').replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+    indexerData.metadata.image = ((indexerData.metadata.image as string) ?? '').replace('ipfs://', IPFS_GATEWAY);
 
     const { image, mediaType, mediaSource } = await extractNftMetadata(indexerData.imageCache ?? '', indexerData.tokenUri ?? '', indexerData.metadata ?? {});
     const commonData: NftPrecursorData = {
