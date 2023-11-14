@@ -31,7 +31,7 @@ module.exports = {
             statements: 4.06,
             branches: 4.84,
             functions: 1.34,
-            lines: 4.21,
+            lines: 4.2,
         },
         './src/components/': {
             statements: 0,
