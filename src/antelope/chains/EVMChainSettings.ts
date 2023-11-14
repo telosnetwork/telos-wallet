@@ -1,5 +1,5 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, Method } from 'axios';
 import {
     AbiSignature,
     ChainSettings,
@@ -92,7 +92,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // Interceptor handlers -- these handlers are used to limit the number of concurrent requests
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const requestHandler = (value: any) => new Promise<any>((resolve) => {
+        const requestHandler = (value: InternalAxiosRequestConfig) => new Promise<InternalAxiosRequestConfig<any>>((resolve) => {
             const interval = setInterval(() => {
                 if (pendingRequests < MAX_REQUESTS_COUNT) {
                     pendingRequests++;
