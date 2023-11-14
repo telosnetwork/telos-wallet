@@ -147,7 +147,7 @@ export async function constructNft(
     };
 
     if (isErc721) {
-        const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address))?.getContractInstance();
+        const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address, 'erc721'))?.getContractInstance();
 
         if (!contractInstance) {
             throw new AntelopeError('antelope.utils.error_contract_instance');
