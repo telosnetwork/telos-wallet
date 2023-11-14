@@ -17,6 +17,7 @@ import {
     useFeedbackStore,
     useChainStore,
     useEVMStore,
+    getAntelope,
 } from 'src/antelope';
 import {
     AntelopeError,
@@ -46,7 +47,7 @@ const LOCAL_SORAGE_CONTRACTS_KEY = 'antelope.contracts';
 
 const createManager = (authenticator: EVMAuthenticator):EvmContractManagerI => ({
     getSigner: async () => toRaw((await authenticator.web3Provider()).getSigner(useAccountStore().getAccount(authenticator.label).account)),
-    getWeb3Provider: () => authenticator.web3Provider(),
+    getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
 });
