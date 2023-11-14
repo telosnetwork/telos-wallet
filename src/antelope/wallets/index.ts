@@ -49,7 +49,7 @@ export class AntelopeWallets {
             this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e1);
         }
 
-        // we try to build a web4 provider from a local injected provider it it exists
+        // we try to build a web3 provider from a local injected provider it it exists
         try {
             if (window.ethereum) {
                 const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
