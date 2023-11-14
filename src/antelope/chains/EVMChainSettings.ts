@@ -41,7 +41,7 @@ import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
-import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -303,10 +303,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    const priceUpdatedWithinTenMins = !!contractData.calldata.marketdata_updated && dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, 10);
+                    const priceIsCurrent =
+                        !!contractData.calldata.marketdata_updated &&
+                        dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
-                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
+                    if (typeof contractData.calldata === 'object' && priceIsCurrent) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
