@@ -31,7 +31,7 @@ import AppPage from 'components/evm/AppPage.vue';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ExternalLink from 'components/ExternalLink.vue';
 import NftDetailsCard from 'pages/evm/nfts/NftDetailsCard.vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NumberedList from 'components/NumberedList.vue';
 import ToolTip from 'components/ToolTip.vue';
 import NftOwnersTable from 'pages/evm/nfts/NftOwnersTable.vue';

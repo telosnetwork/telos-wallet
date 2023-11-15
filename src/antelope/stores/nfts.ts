@@ -14,6 +14,7 @@ import {
     IndexerPaginationFilter,
     TransactionResponse,
     addressString,
+    AntelopeError,
 } from 'src/antelope/types';
 
 import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
@@ -271,6 +272,45 @@ export const useNftsStore = defineStore(store_name, {
             }
 
             return promise;
+        },
+
+        async fetchNftsFromCollection(label: Label, contract: string): Promise<Collectible[] | null> {
+            this.trace('fetchNftsFromCollection', label, contract);
+            const feedbackStore = useFeedbackStore();
+            const chain = useChainStore().getChain(label);
+            const network = chain.settings.getNetwork();
+
+            if (this.__contracts[network] && this.__contracts[network][contract.toLowerCase()]) {
+                return Promise.resolve(this.__contracts[network][contract].list);
+            }
+
+            if (!this.__contracts[network]) {
+                this.__contracts[network] = {};
+            }
+
+            if (!this.__contracts[network][contract]) {
+                this.__contracts[network][contract] = {
+                    contract,
+                    list: [],
+                    loading: true,
+                };
+            }
+
+            this.__contracts[network][contract].loading = true;
+
+            feedbackStore.setLoading('fetchNftsFromCollection');
+            try {
+                const nfts = await chain.settings.getNftsForCollection(contract, { limit: 10000 });
+                this.__contracts[network][contract].list = nfts;
+
+                return nfts;
+            } catch {
+                this.__contracts[network][contract].list = [];
+                throw new AntelopeError('antelope.nfts.error_fetching_collection_nfts');
+            } finally {
+                feedbackStore.unsetLoading('fetchNftsFromCollection');
+                this.__contracts[network][contract].loading = false;
+            }
         },
 
         clearUserFilter() {
