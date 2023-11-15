@@ -8,7 +8,7 @@ import {
     IndexerNftMetadata,
     IndexerTokenHoldersResponse,
 } from 'src/antelope/types/IndexerTypes';
-import { extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
+import { IPFS_GATEWAY, extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -118,7 +118,7 @@ export async function constructNft(
         console.error('Error parsing metadata', `"${indexerData.metadata}"`, e);
     }
     if (!indexerData.metadata || typeof indexerData.metadata !== 'object') {
-        // we create a new metadata object with the actual string atributes of the item
+        // we create a new metadata object with the actual string attributes of the item
         const list = indexerData as unknown as { [key: string]: unknown };
         indexerData.metadata =
             Object.keys(indexerData)
@@ -128,6 +128,8 @@ export async function constructNft(
                     return obj;
                 }, {} as { [key: string]: string });
     }
+
+    indexerData.metadata.image = ((indexerData.metadata.image as string) ?? '').replace('ipfs://', IPFS_GATEWAY);
 
     const { image, mediaType, mediaSource } = await extractNftMetadata(indexerData.imageCache ?? '', indexerData.tokenUri ?? '', indexerData.metadata ?? {});
     const commonData: NftPrecursorData = {

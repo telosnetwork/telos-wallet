@@ -1,6 +1,8 @@
 import { IndexerNftMetadata, NFTSourceTypes, NftSourceType } from 'src/antelope/types';
 import { urlIsAudio, urlIsPicture, urlIsVideo } from 'src/antelope/stores/utils/media-utils';
 
+export const IPFS_GATEWAY = 'https://cloudflare-ipfs.com/ipfs/';
+
 /**
  * Given an imageCache URL, tokenUri, and metadata, extract the image URL, mediaType, and mediaSource
  *
@@ -107,5 +109,39 @@ export async function extractNftMetadata(
         }
     }
 
+    if (metadata?.image?.includes(IPFS_GATEWAY)) {
+        mediaType = await determineIpfsMediaType(metadata?.image);
+
+        if (mediaType === NFTSourceTypes.IMAGE) {
+            image = metadata?.image;
+        }
+        mediaSource = metadata?.image;
+    }
+
     return { image, mediaType, mediaSource };
+}
+
+
+/**
+ * Given an IPFS media URL, determine the media type
+ * @param url - the IPFS media URL
+ * @returns {Promise<NftSourceType>} - the media type
+ */
+export async function determineIpfsMediaType(url: string): Promise<NftSourceType> {
+    try {
+        const response = await fetch(url);
+        const contentType = response.headers.get('Content-Type') ?? '';
+
+        if (contentType.startsWith('image/')) {
+            return NFTSourceTypes.IMAGE;
+        } else if (contentType.startsWith('video/')) {
+            return NFTSourceTypes.VIDEO;
+        } else if (contentType.startsWith('audio/')) {
+            return NFTSourceTypes.AUDIO;
+        } else {
+            return NFTSourceTypes.UNKNOWN;
+        }
+    } catch (error) {
+        throw new Error('Error determining IPFS media type');
+    }
 }
