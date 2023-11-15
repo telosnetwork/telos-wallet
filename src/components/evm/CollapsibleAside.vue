@@ -69,7 +69,7 @@ function handleExpansionItemUpdate() {
             max-width: 100%;
         }
 
-        // quasiar overrides
+        // quasar overrides
         .q-item__label {
             @include text--header-4;
         }

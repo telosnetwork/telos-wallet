@@ -340,9 +340,9 @@ export const useHistoryStore = defineStore(store_name, {
                                     tokenName: nftDetails.name,
                                     collectionAddress: transferInfo.contract,
                                     collectionName: nftDetails.contractPrettyName,
-                                    type: nftDetails.item.type,
+                                    type: nftDetails.mediaType,
                                     nftInterface: transferInfo.type.toUpperCase() as NftTokenInterface,
-                                    imgSrc: nftDetails.imageSrcFull,
+                                    imgSrc: nftDetails.imgSrc,
                                     videoSrc: nftDetails.videoSrc,
                                     audioSrc: nftDetails.audioSrc,
                                 };

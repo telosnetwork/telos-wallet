@@ -145,3 +145,28 @@ export const quasarInputProps = {
         default: false,
     },
 };
+
+export const numKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+export const modifierKeys: ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'];
+
+export const validKeystrokes = [
+    ...numKeys,
+    ...modifierKeys,
+    'ArrowLeft',
+    'ArrowRight',
+    'End',
+    'Home',
+    'Delete',
+    'Backspace',
+    'Tab',
+];
+
+export function userIsDoingTextOperation(event: KeyboardEvent) {
+    return ['a', 'v', 'x', 'c', 'z'].includes(event.key) && (event.ctrlKey || event.metaKey);
+}
+
+export function isPaste(event: KeyboardEvent) {
+    return event.key === 'v' && (event.ctrlKey || event.metaKey);
+}
+

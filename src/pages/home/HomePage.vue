@@ -4,7 +4,6 @@ import { mapGetters } from 'vuex';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import { getAntelope, useEVMStore, usePlatformStore } from 'src/antelope';
 import { Menu } from 'src/pages/home/MenuType';
 
 export default defineComponent({
@@ -148,7 +147,7 @@ export default defineComponent({
 <style lang="scss">
 .c-home {
     position: relative;
-    background: $site-gradient;
+    background: var(--site-gradient);
     min-height: 100vh;
     display: flex;
 

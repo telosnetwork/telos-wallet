@@ -93,7 +93,7 @@ export default {
         link_to_receive_aria: 'Link to Receive page',
         link_to_buy_aria: 'External link to buy tokens',
         balance_row_actions_aria: 'Balance row actions',
-        no_fiat_value: 'No reliable fiat value found',
+        no_fiat_value: 'current fiat price unavailable',
         receiving_account: 'Receiving Account',
         account_required: 'Account is required',
         token: 'Token',
@@ -125,6 +125,7 @@ export default {
         inventory: 'Collectibles',
     },
     global: {
+        address: 'Address',
         native: 'Native',
         telos_evm: 'Telos EVM',
         sign_out: 'Sign Out',
@@ -147,10 +148,17 @@ export default {
         collection: 'Collection',
         search: 'Search',
         no_results: 'No results found',
+        quantity: 'Quantity',
         toggle: 'Toggle "{text}"',
         arrow_icon_alt: 'Arrow icon',
         new_app_version: 'Telos Wallet has been updated 🚀 Please login again',
         revoke: 'Revoke',
+        owner: 'Owner',
+        description: 'Description',
+        owned: 'Owned',
+        owned_by_you: 'Owned by you',
+        owners: 'Owners',
+        total: 'Total',
     },
     nft : {
         collectible: 'Collectible',
@@ -180,6 +188,12 @@ export default {
         empty_collection_message: 'Purchase your first collectible',
         empty_collection_link_text: 'here',
         collectibles_per_page: 'Collectibles per page',
+        view_owner_on_block_explorer_label: 'View owner on block explorer',
+        // transfer
+        transfer: 'Transfer',
+        transfer_collectible: 'transfer collectible',
+        transfer_from: 'from',
+        transfer_on_telos: 'on Telos',
     },
     evm_wrap: {
         wrap: 'Wrap',
@@ -359,10 +373,8 @@ export default {
             accountNotExists: 'The account "{account}" does not exist',
             copyKey: 'Copy the key to a safe place',
             dateFuture: 'The date must be in the future',
-            greaterOrEqualThan:
-          'The value must be greater than or equal to {value}',
-            lowerOrEqualThan:
-          'The value must be lower than or equal to {value}',
+            greaterOrEqualThan: 'Value must be ≥ {value}',
+            lowerOrEqualThan: 'Value must be ≤ {value}',
             integer: 'Please type an integer',
             natural: 'Please type a natural number (>=0)',
             phoneFormat: 'Please type a valid phone',
@@ -527,6 +539,7 @@ export default {
             invalid_contract: 'Contract or contract ABI missing',
             contract_data_required: 'Contract data missing',
             error_retrieving_contract: 'Error retrieving contract for address {address}',
+            error_invalid_nft_contract_type: 'Invalid NFT contract type',
         },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
@@ -562,6 +575,7 @@ export default {
             error_unstakes_failed: 'An unknown error occurred when unstaking tokens',
             error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
             error_fetching_token_price: 'An unknown error occurred when fetching token price data',
+            error_transfer_nft: 'An error occured while transferring collectible',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',

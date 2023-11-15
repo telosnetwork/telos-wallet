@@ -1,0 +1,8 @@
+.q-btn.wallet-btn {
+    @include text--header-5;
+    width: auto;
+    padding: 13px 24px;
+    &+& {
+        margin-left: 16px;
+    }
+}

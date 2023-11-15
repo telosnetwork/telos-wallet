@@ -6,12 +6,13 @@ const props = defineProps<{
     text: string,
     url: string,
     purpose?: string,
+    expandAddress?: boolean,
 }>();
 
 const formattedText = computed(() => {
     const textIsAddress = /^0x[0-9a-fA-F]+$/.test(props.text);
 
-    if (textIsAddress) {
+    if (textIsAddress && !props.expandAddress) {
         return getShortenedHash(props.text);
     }
 
