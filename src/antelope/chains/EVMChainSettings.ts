@@ -362,6 +362,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
         };
         const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
 
+        // If the contract does not have the list of supported interfaces, we provide one
+        Object.values(response.contracts).forEach((contract) => {
+            if (contract.supportedInterfaces === null) {
+                contract.supportedInterfaces = [params.type];
+            }
+        });
+
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
             metadata: JSON.parse(nftResponse.metadata),

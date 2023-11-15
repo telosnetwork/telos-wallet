@@ -6,6 +6,7 @@
  * contracts on the blockchain. It also includes support for decoding and encoding data
  * using contract ABI, which describes the interface of the contract.
  *
+ * file: src/antelope/stores/contract.ts
  */
 
 
@@ -170,7 +171,18 @@ export const useContractStore = defineStore(store_name, {
             }
 
             // if we have it in cache, return it
-            if (typeof this.__contracts[network].cached[addressLower] !== 'undefined') {
+            if (
+                // Only if we have the contract
+                typeof this.__contracts[network].cached[addressLower] !== 'undefined' &&
+                // and the metadata
+                typeof this.__contracts[network].metadata[addressLower] !== 'undefined' &&
+                (
+                    // and either we don't have a interface type
+                    !suspectedToken ||
+                    // the the contract supports the interface type
+                    (this.__contracts[network].metadata[addressLower]?.supportedInterfaces ?? []).includes(suspectedToken)
+                )
+            ) {
                 this.trace('getContract', 'returning cached contract', address, [this.__contracts[network].cached[addressLower]]);
                 return this.__contracts[network].cached[addressLower];
             }
@@ -178,6 +190,8 @@ export const useContractStore = defineStore(store_name, {
             // if we have the metadata, we can create the contract and return it
             if (typeof this.__contracts[network].metadata[addressLower] !== 'undefined') {
                 const metadata = this.__contracts[network].metadata[addressLower] as EvmContractFactoryData;
+                // we ensure the contract hast the proper list of supported interfaces
+                metadata.supportedInterfaces = metadata.supportedInterfaces || (suspectedToken ? [suspectedToken] : undefined);
                 this.trace('getContract', 'returning cached metadata', address, [metadata]);
                 return this.createAndStoreContract(label, addressLower, metadata);
             }
