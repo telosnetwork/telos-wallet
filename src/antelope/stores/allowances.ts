@@ -99,7 +99,23 @@ export const useAllowancesStore = defineStore(store_name, {
                 ...notAllowedAllowancesSorted,
             ];
         },
-        allowancesSortedBySpender: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
+        allowancesSortedBySpender: () => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+            const allAllowances = useAllowancesStore().allowances(label);
+            const allowancesWithSpenderName    = allAllowances.filter(allowance => allowance.spenderName);
+            const allowancesWithoutSpenderName = allAllowances.filter(allowance => !allowance.spenderName);
+
+            const sortedAllowancesWithSpenderName = allowancesWithSpenderName.sort((a, b) => {
+                const aSpender = a.spenderName as string;
+                const bSpender = b.spenderName as string;
+                return order === Sort.ascending ? aSpender.localeCompare(bSpender) : bSpender.localeCompare(aSpender);
+            });
+            const sortedAllowancesWithoutSpenderName = allowancesWithoutSpenderName.sort((a, b) => order === Sort.ascending ? a.spenderAddress.localeCompare(b.spenderAddress) : b.spenderAddress.localeCompare(a.spenderAddress));
+
+            return [
+                ...sortedAllowancesWithSpenderName,
+                ...sortedAllowancesWithoutSpenderName,
+            ];
+        },
         allowancesSortedByAssetType: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
         allowancesSortedByLastUpdated: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
     },
