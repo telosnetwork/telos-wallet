@@ -429,7 +429,7 @@ export const useBalancesStore = defineStore(store_name, {
                 const result = await account.authenticator.transferTokens(token, amount, to);
                 return result as EvmTransactionResponse | SendTransactionResult;
             } catch (error) {
-                console.error(error, 'we throw an AntelopeError');
+                console.error(error);
                 throw getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
             } finally {
                 useFeedbackStore().unsetLoading('transferEVMTokens');
