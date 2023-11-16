@@ -56,7 +56,8 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            return process.env.NODE_ENV === 'production' && !window.location.origin.includes('netlify');
+            // only enable demo route for staging & development
+            return window.location.origin.includes('telos.net');
         },
         accountActionText() {
             if (this.loggedAccount) {
