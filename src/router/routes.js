@@ -122,6 +122,11 @@ const routes = [
                 name: 'demos.scrollable-cards',
                 component: () => import('pages/demo/ScrollableInfoCardDemos.vue'),
             },
+            {
+                path: 'indexer',
+                name: 'demos.indexer',
+                component: () => import('pages/demo/IndexerDemos.vue'),
+            },
         ],
     },
 

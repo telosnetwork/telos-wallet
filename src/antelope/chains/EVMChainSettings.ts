@@ -32,9 +32,9 @@ import {
     IndexerCollectionNftsResponse,
     Erc721Nft,
     getErc721Owner,
-    getErc1155Owners,
     Erc1155Nft,
     AntelopeError,
+    getErc1155OwnersFromIndexer,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -82,6 +82,16 @@ export default abstract class EVMChainSettings implements ChainSettings {
         promise: Promise<EvmContract | false>;
         resolve?: (value: EvmContract | false) => void;
     }> = {};
+
+    // this variable helps to show the indexer health warning only once per session
+    indexerHealthWarningShown = false;
+
+    // This variable is used to simulate a bad indexer health state
+    indexerBadHealthSimulated = false;
+
+    simulateIndexerDown(isBad: boolean) {
+        this.indexerBadHealthSimulated = isBad;
+    }
 
     constructor(network: string) {
         this.network = network;
@@ -202,11 +212,29 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return promise;
     }
 
+    /**
+     * This function checks if the indexer is healthy and warns the user if it is not.
+     * This warning should appear only once per session.
+     */
+    checkAndWarnIndexerHealth() {
+        if (!this.indexerHealthWarningShown && !this.isIndexerHealthy()) {
+            this.indexerHealthWarningShown = true;
+            const  ant = getAntelope();
+            ant.config.notifyNeutralMessageHandler(
+                ant.config.localizationHandler('antelope.chain.indexer_bad_health_warning'),
+            );
+        }
+    }
+
     isIndexerHealthy(): boolean {
-        return (
-            this._indexerHealthState.state.success &&
-            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
-        );
+        if (this.indexerBadHealthSimulated) {
+            return false;
+        } else {
+            return (
+                this._indexerHealthState.state.success &&
+                this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+            );
+        }
     }
 
     get indexerHealthState(): IndexerHealthResponse {
@@ -374,6 +402,14 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+
+        // if the owner does not comes from the indexer, let's set it
+        shapedNftData.forEach((nft) => {
+            if (!nft.data.owner) {
+                nft.data.owner = account;
+            }
+        });
+
         return this.processNftRawData(shapedNftData);
     }
 
@@ -439,7 +475,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                 if (!ownersUpdatedWithinThreeMins) {
                     const indexer = this.getIndexer();
-                    const owners = await getErc1155Owners(nft.contractAddress, nft.id, indexer);
+                    const owners = await getErc1155OwnersFromIndexer(nft.contractAddress, nft.id, indexer);
                     nft.owners = owners;
                 }
 
