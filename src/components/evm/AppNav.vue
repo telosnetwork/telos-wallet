@@ -56,7 +56,7 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            return process.env.NODE_ENV === 'production';
+            return process.env.NODE_ENV === 'production' && !window.location.hostname.includes('netlify');
         },
         accountActionText() {
             if (this.loggedAccount) {
