@@ -1,5 +1,9 @@
 import { NftTokenInterface } from 'src/antelope/types/NFTClass';
 
+export enum Sort {
+    ascending = 'asc',
+    descending = 'desc',
+}
 
 export interface HyperionAbiSignatureFilter {
     type?: string;
