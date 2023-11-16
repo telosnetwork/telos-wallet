@@ -12,7 +12,11 @@ const loggedNativeAccount = jest.fn().mockImplementation(() => null);
 const currentAccount = jest.fn().mockImplementation(() => null);
 const currentEvmAccount = jest.fn().mockImplementation(() => null);
 const currentIsLogged = jest.fn().mockImplementation(() => true);
-const getAccount = jest.fn().mockImplementation(() => null);
+const getAccount = jest.fn().mockImplementation(() => ({
+    authenticator: jest.fn().mockImplementation(() => ({
+        web3Provider: jest.fn().mockImplementation(() => 'do you need to get deeper?'),
+    })),
+}));
 const getAuthenticator = jest.fn().mockImplementation(() => null);
 const getEVMAuthenticator = jest.fn().mockImplementation(() => MockData.EvmAuthenticator);
 const getNativeAuthenticator = jest.fn().mockImplementation(() => null);
