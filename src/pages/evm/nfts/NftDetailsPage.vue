@@ -277,7 +277,7 @@ function removeTab(tab: Tab){
 
             <template v-else>
                 <NftViewer
-                    :nft="(nft as Collectible)"
+                    :nft="nft"
                     :previewMode="false"
                     :tileMode="true"
                     class="col-12 col-md-6 q-mb-md q-pr-md"
@@ -447,7 +447,7 @@ function removeTab(tab: Tab){
     </template>
 
     <template v-slot:transfer>
-        <NftTransferForm :nft="(nft as Collectible)" />
+        <NftTransferForm :nft="nft" />
     </template>
 
     <template v-slot:owners>

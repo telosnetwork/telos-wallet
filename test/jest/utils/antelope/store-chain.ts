@@ -19,6 +19,7 @@ const ChainSettings = {
     getNetwork: jest.fn().mockImplementation(() => MockData.Network),
     getSystemTokens: jest.fn().mockImplementation(() => [MockData.Token.SYSTEM_TOKEN, MockData.Token.WRAPPED_TOKEN, MockData.Token.STAKED_TOKEN]),
     getExplorerUrl: jest.fn().mockImplementation(() => MockData.ExplorerUrl),
+    getRPCEndpoint: jest.fn().mockImplementation(() => MockData.RpcEndpoint),
 };
 
 const Chain = {
