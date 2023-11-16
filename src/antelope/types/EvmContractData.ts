@@ -17,7 +17,7 @@ export interface EvmContractConstructorData {
 }
 
 export interface EvmContractManagerI {
-    getSigner: () => Promise<ethers.Signer>;
+    getSigner: () => Promise<ethers.Signer | null>;
     getWeb3Provider: () => Promise<ethers.providers.Web3Provider>;
     getFunctionIface: (hash:string) => Promise<ethers.utils.Interface | null>;
     getEventIface: (hash:string) => Promise<ethers.utils.Interface | null>;
