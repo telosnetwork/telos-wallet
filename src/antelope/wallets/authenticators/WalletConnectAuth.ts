@@ -287,15 +287,23 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return web3Provider as ethers.providers.Web3Provider;
     }
 
-    handleCatchError(error: never): AntelopeError {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCatchError(error: any): AntelopeError {
         this.trace('handleCatchError', error);
-        console.error(error);
-        return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        if (error.message.includes('rejected the request')) {
+            return new AntelopeError('antelope.evm.error_transaction_canceled');
+        } else {
+            return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        }
     }
 
     async sendSystemToken(to: string, amount: ethers.BigNumber): Promise<SendTransactionResult> {
         this.trace('sendSystemToken', to, amount.toString());
-        return await sendTransaction(this.sendConfig as PrepareSendTransactionResult);
+        return sendTransaction(this.sendConfig as PrepareSendTransactionResult).then(
+            (transaction: SendTransactionResult) => transaction,
+        ).catch((error) => {
+            throw this.handleCatchError(error);
+        });
     }
 
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<WriteContractResult> {
