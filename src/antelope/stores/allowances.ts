@@ -12,11 +12,24 @@ import {
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
     ShapedAllowanceRowSingleERC721,
+    ShapedCollectionAllowanceRow,
     Sort,
+    isErc20AllowanceRow,
+    isErc721SingleAllowanceRow,
+    isNftCollectionAllowanceRow,
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { BigNumber } from 'ethers';
 
 const store_name = 'allowances';
+
+const tenBn = BigNumber.from(10);
+
+function sortAllowanceRowsByCollection(a: ShapedCollectionAllowanceRow, b: ShapedCollectionAllowanceRow, order: Sort): number {
+    const aContractString = a?.collectionName ?? a.collectionAddress;
+    const bContractString = b?.collectionName ?? b.collectionAddress;
+    return order === Sort.ascending ? aContractString.localeCompare(bContractString) : bContractString.localeCompare(aContractString);
+}
 
 export interface AllowancesState {
     __erc_20_allowances:   { [label: Label]: ShapedAllowanceRowERC20[] };
@@ -32,7 +45,38 @@ export const useAllowancesStore = defineStore(store_name, {
             .concat(state.__erc_1155_allowances[label] ?? []),
         allowancesSortedByAssetQuantity: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
         allowancesSortedByAllowanceFiatValue: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
-        allowancesSortedByAllowanceAmount: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
+        allowancesSortedByAllowanceAmount: () => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+            /*
+                Sort order:
+                1. assets with allowances which are allowed (ERC721 collections, single ERC721s, and ERC1155 collections) - secondary sort descending by contract name or address
+                2. assets with numerical allowances (ERC20s) - secondary sort descending by numerical allowance amount
+                3. assets with allowances which are not allowed (ERC721 collections, single ERC721s, and ERC1155 collections) - secondary sort descending by contract name or address
+            */
+            const allowances = useAllowancesStore().allowances(label);
+
+            const erc20Allowances = allowances
+                .filter(isErc20AllowanceRow)
+                .sort((a, b) => {
+                    const normalizedA = a.allowance.div(tenBn.pow(a.tokenDecimals));
+                    const normalizedB = b.allowance.div(tenBn.pow(b.tokenDecimals));
+
+                    return order === Sort.ascending ? normalizedA.sub(normalizedB).toNumber() : normalizedB.sub(normalizedA).toNumber();
+                });
+
+            const allowedAllowances = (allowances
+                .filter(allowance => !isErc20AllowanceRow(allowance) && allowance.allowed) as (ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721)[])
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, order));
+
+            const notAllowedAllowances = (allowances
+                .filter(allowance => !isErc20AllowanceRow(allowance) && !allowance.allowed) as (ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721)[])
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, order));
+
+            return [
+                ...allowedAllowances,
+                ...erc20Allowances,
+                ...notAllowedAllowances,
+            ];
+        },
         allowancesSortedBySpender: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
         allowancesSortedByAssetType: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
         allowancesSortedByLastUpdated: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],

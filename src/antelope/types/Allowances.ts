@@ -18,7 +18,7 @@ export interface ShapedAllowanceRowERC20 extends AllowanceRow {
     tokenAddress: string; // address for the token contract
 
     // allowance amount, expressed in the token's smallest unit, e.g. 6 decimals for USDT or wei for TLOS/ETH
-    allowance?: BigNumber;
+    allowance: BigNumber;
 
     // balance amount expressed in the token's smallest unit, e.g. 6 decimals for USDT or wei for TLOS/ETH
     balance: BigNumber;
@@ -49,6 +49,7 @@ export interface ShapedAllowanceRowSingleERC721 extends AllowanceRow {
 }
 
 export type ShapedAllowanceRow = ShapedAllowanceRowERC20 | ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721;
+export type ShapedCollectionAllowanceRow = ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721;
 
 // type guards for shaped allowance rows
 export function isErc20AllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowERC20 {
