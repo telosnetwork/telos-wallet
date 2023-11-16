@@ -4,18 +4,28 @@ import { computed,  onMounted,  ref } from 'vue';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import { Menu } from 'src/pages/home/MenuType';
-import { LocationQueryValue, useRoute } from 'vue-router';
+import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
 
 type TabReference = 'evm' | 'zero';
+
+const route = useRoute();
+const router = useRouter();
 
 const tab = ref<TabReference>('evm');
 const currentMenu = ref<Menu>(Menu.MAIN);
 
 const showLoginBtns = computed((): boolean => currentMenu.value === Menu.MAIN);
-const walletOption = computed(() => useRoute().query.login as LocationQueryValue);
+const walletOption = computed(() => route.query.login as LocationQueryValue);
 
 function goBack(): void {
     currentMenu.value = Menu.MAIN;
+}
+
+function setTab(login: TabReference): void {
+    if (route.path !== login){
+        router.replace({ path: route.path, query:{ login } });
+        tab.value = login;
+    }
 }
 
 onMounted(() => {
@@ -45,8 +55,8 @@ onMounted(() => {
                             }"
                             role="tab"
                             :aria-selected="tab === 'evm'"
-                            @keydown.enter="tab = 'evm'"
-                            @click="tab = 'evm'"
+                            @keydown.enter="setTab('evm')"
+                            @click="setTab('evm')"
                         >
 
                             {{ $t('global.telos_evm') }}
@@ -58,8 +68,8 @@ onMounted(() => {
                             }"
                             role="tab"
                             :aria-selected="tab === 'zero'"
-                            @keydown.enter.space="tab = 'zero'"
-                            @click="tab = 'zero'"
+                            @keydown.enter.space="setTab('zero')"
+                            @click="setTab('zero')"
                         >
 
                             {{ $t('global.native') }}
