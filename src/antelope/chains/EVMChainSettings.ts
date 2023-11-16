@@ -423,7 +423,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // process the shaped raw data into NFTs
     async processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
-        console.log('EVMChainSettings.processNftRawData()', shapedRawNfts);
         const contractStore = useContractStore();
         const nftsStore = useNftsStore();
 
@@ -462,7 +461,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
             const ownersUpdatedWithinThreeMins = dateIsWithinXMinutes(nft.ownerDataLastFetched, 3);
 
             if (!ownersUpdatedWithinThreeMins) {
-                console.log('EVMChainSettings.processNftRawData() antes de .getContractInstance()', nft.contractAddress, data, contract);
                 const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, nft.contractAddress))?.getContractInstance();
                 if (!contractInstance) {
                     throw new AntelopeError('antelope.utils.error_contract_instance');
