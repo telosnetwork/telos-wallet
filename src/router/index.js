@@ -26,6 +26,7 @@ export default function (/* { store, ssrContext } */) {
     });
 
     Router.beforeEach((to, from) => {
+        debugger;
         // allow us to programmatically tell if the user came from the app or an external site. See AppNav.vue > goBack()
         sessionStorage.removeItem('navigatedFromApp');
         if (from.fullPath !== '/') {
@@ -33,7 +34,7 @@ export default function (/* { store, ssrContext } */) {
         }
 
         // this prevents the general public from accessing the demo pages
-        if (to.meta.notInProduction && process.env.NODE_ENV === 'production') {
+        if (to.meta.notInProduction && window.location.origin.includes('telos.net')) {
             return { name: 'home' };
         }
 
