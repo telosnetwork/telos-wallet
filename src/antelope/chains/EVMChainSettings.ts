@@ -41,7 +41,7 @@ import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
-import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -331,10 +331,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    const priceUpdatedWithinTenMins = !!contractData.calldata.marketdata_updated && dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, 10);
+                    const priceIsCurrent =
+                        !!contractData.calldata.marketdata_updated &&
+                        dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
-                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
+                    if (typeof contractData.calldata === 'object' && priceIsCurrent) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
@@ -387,6 +389,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
             includeTokenIdSupply: isErc1155, // only ERC1155 supports supply
         };
         const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
+
+        // If the contract does not have the list of supported interfaces, we provide one
+        Object.values(response.contracts).forEach((contract) => {
+            if (contract.supportedInterfaces === null) {
+                contract.supportedInterfaces = [params.type];
+            }
+        });
 
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
