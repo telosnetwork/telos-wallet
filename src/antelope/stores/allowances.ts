@@ -116,8 +116,35 @@ export const useAllowancesStore = defineStore(store_name, {
                 ...sortedAllowancesWithoutSpenderName,
             ];
         },
-        allowancesSortedByAssetType: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
-        allowancesSortedByLastUpdated: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
+        allowancesSortedByAssetType: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+            // types are Collectible (ERC721/ERC1155) or Token (ERC20)
+            const erc20Allowances = state.__erc_20_allowances[label] ?? [];
+            const nonErc20Allowances = useAllowancesStore().nonErc20Allowances(label);
+
+            const tokensSorted = erc20Allowances.sort((a, b) => {
+                const normalizedAAllowance = Number(formatUnits(a.allowance, a.tokenDecimals));
+                const normalizedBAllowance = Number(formatUnits(b.allowance, b.tokenDecimals));
+
+                return normalizedAAllowance - normalizedBAllowance;
+            });
+
+            const allowedAllowancesSorted = nonErc20Allowances
+                .filter(allowance => allowance.allowed)
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, Sort.ascending));
+
+            const notAllowedAllowancesSorted = nonErc20Allowances
+                .filter(allowance => !allowance.allowed)
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, Sort.ascending));
+
+            const collectiblesSorted = [
+                ...allowedAllowancesSorted,
+                ...notAllowedAllowancesSorted,
+            ];
+
+            return order === Sort.ascending ? [...collectiblesSorted, ...tokensSorted] : [...tokensSorted, ...collectiblesSorted];
+        },
+        allowancesSortedByLastUpdated: () => (label: Label, order: Sort): ShapedAllowanceRow[] => useAllowancesStore().allowances(label)
+            .sort((a, b) => order === Sort.ascending ? a.lastUpdated - b.lastUpdated : b.lastUpdated - a.lastUpdated),
     },
     actions: {
         trace: createTraceFunction(store_name),

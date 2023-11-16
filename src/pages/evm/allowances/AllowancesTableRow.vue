@@ -17,7 +17,7 @@ import {
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
-import { NFTClass } from 'src/antelope/types';
+import { Collectible } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import ToolTip from 'src/components/ToolTip.vue';
@@ -43,7 +43,7 @@ const isSingleErc721Row = isErc721SingleAllowanceRow(props.row);
 const isCollectionRow = isNftCollectionAllowanceRow(props.row);
 
 // data
-const erc721Nft = ref<NFTClass | null>(null);
+const erc721Nft = ref<Collectible | null>(null);
 
 // computed
 const rowAsErc20Row = computed(() => props.row as ShapedAllowanceRowERC20);
