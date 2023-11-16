@@ -10,21 +10,21 @@ const pagesData = [
         title: 'Balance',
         caption: 'Balance',
         icon: 'fas fa-wallet',
-        path: '/native/balance',
+        path: '/zero/balance',
         available: true,
     },
     {
         title: 'DappSearch',
         caption: 'DappSearch',
         icon: 'fas fa-th-large',
-        path: '/native/dappsearch',
+        path: '/zero/dappsearch',
         available: true,
     },
     {
         title: 'Settings',
         caption: 'Settings',
         icon: 'fas fa-cog',
-        path: '/native/settings',
+        path: '/zero/settings',
         available: true,
     },
 ];
@@ -75,11 +75,11 @@ export default {
         ]),
         checkPath() {
             if (!this.isUserAuthenticated) {
-                if (!['/', '/native/dappsearch'].includes(this.$route.path)) {
+                if (!['/', '/zero/dappsearch'].includes(this.$route.path)) {
                     window.location = '/';
                 }
             } else if (this.$route.path === '/') {
-                window.location = '/native/balance';
+                window.location = '/zero/balance';
             }
         },
         async loadUserProfile() {
@@ -173,9 +173,9 @@ export default {
         </div>
         <!-- Profile Image top right -->
         <q-avatar
-            v-if="$route.path === '/native/balance'"
+            v-if="$route.path === '/zero/balance'"
             class="profileImg"
-            @click="$router.push('/native/profile')"
+            @click="$router.push('/zero/profile')"
         >
             <img :src="userAvatar" >
         </q-avatar>

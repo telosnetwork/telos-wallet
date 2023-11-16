@@ -89,18 +89,18 @@ export default {
             this.selectedTab = val;
             switch (val) {
             case 'coins':
-                this.$router.push('/native/balance', () => {});
+                this.$router.push('/zero/balance', () => {});
                 this.$emit('update:balanceTab', 'coins');
                 break;
             case 'dapps':
-                this.$router.push('/native/dappsearch', () => {});
+                this.$router.push('/zero/dappsearch', () => {});
                 break;
             case 'nft':
-                this.$router.push('/native/balance', () => {});
+                this.$router.push('/zero/balance', () => {});
                 this.$emit('update:balanceTab', 'collectables');
                 break;
             case 'profile':
-                this.$router.push('/native/profile', () => {});
+                this.$router.push('/zero/profile', () => {});
                 break;
             case 'earn':
                 this.showRexStakeDlg = true;
