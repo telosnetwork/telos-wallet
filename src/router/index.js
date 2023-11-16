@@ -26,7 +26,6 @@ export default function (/* { store, ssrContext } */) {
     });
 
     Router.beforeEach((to, from) => {
-        debugger;
         // allow us to programmatically tell if the user came from the app or an external site. See AppNav.vue > goBack()
         sessionStorage.removeItem('navigatedFromApp');
         if (from.fullPath !== '/') {
