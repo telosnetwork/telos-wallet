@@ -5,7 +5,7 @@ const routes = [
         component: () => import('pages/home/HomePage.vue'),
     },
     {
-        path: '/native',
+        path: '/zero',
         component: () => import('layouts/NativeLayout.vue'),
         children: [
             {

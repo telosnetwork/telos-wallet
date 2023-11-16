@@ -125,7 +125,7 @@ export default {
     },
     global: {
         address: 'Address',
-        native: 'Native',
+        native: 'Telos Zero',
         telos_evm: 'Telos EVM',
         sign_out: 'Sign Out',
         dark_mode: 'Dark Mode',

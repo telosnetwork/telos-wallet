@@ -19,7 +19,6 @@ function goBack(): void {
 }
 
 onMounted(() => {
-    debugger;
     if (walletOption.value){
         tab.value = walletOption.value as TabReference;
     }
