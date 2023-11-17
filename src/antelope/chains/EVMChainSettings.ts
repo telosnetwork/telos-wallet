@@ -576,7 +576,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return this.indexer.get(url, { params })
             .then(response => response.data as IndexerAccountTransfersResponse)
             .then((data) => {
-                // we recreate the supportedInterfaces property if is not pressent in the response
+                // set supportedInterfaces property if undefined in the response
                 Object.values(data.contracts).forEach((contract) => {
                     if (contract.supportedInterfaces === null && type !== undefined) {
                         contract.supportedInterfaces = [type];
