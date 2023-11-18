@@ -213,7 +213,13 @@ function setHoverPreviewVisibility(visible: boolean) {
         }"
     >
         <div class="c-nft-viewer__media-container">
-            <div v-if="showCoverImage" class="c-nft-viewer__image-container">
+            <div
+                v-if="showCoverImage"
+                :class="{
+                    'c-nft-viewer__image-container': true,
+                    'c-nft-viewer__image-container--preview-mode': previewMode
+                }"
+            >
                 <q-skeleton v-if="!passedMaxLoadingTime && isMediaLoading" type="rect" class="c-nft-viewer__image-loading" />
                 <img
                     v-show="!showPlaceholderCoverImage && !isMediaLoading && !imageError"
@@ -439,8 +445,10 @@ function setHoverPreviewVisibility(visible: boolean) {
         justify-content: center;
         align-items: center;
         margin: auto;
-        height: 100%;
-        max-height: 432px;
+        &--preview-mode{
+            height: 100%;
+            max-height: 432px;
+        }
     }
 
     &__image {
