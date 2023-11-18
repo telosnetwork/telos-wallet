@@ -205,7 +205,10 @@ export class OreIdAuth extends EVMAuthenticator {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleCatchError(error: Error): AntelopeError {
         this.trace('handleCatchError', error.message);
-        if (error.message === 'Closed by user') {
+        if (
+            error.message === 'Closed by user' ||
+            error.message === 'sign_transaction_cancelled_by_user'
+        ) {
             return new AntelopeError('antelope.evm.error_transaction_canceled');
         } else {
             return new AntelopeError('antelope.evm.error_send_transaction', { error });
