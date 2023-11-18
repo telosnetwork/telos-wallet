@@ -406,18 +406,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.tokenIdSupply,
-            owner: isErc1155 ? undefined : nftResponse.owner,
+            owner: nftResponse.owner ?? account,
         }));
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
-
-        // if the owner does not comes from the indexer, let's set it
-        shapedNftData.forEach((nft) => {
-            if (!nft.data.owner) {
-                nft.data.owner = account;
-            }
-        });
 
         return this.processNftRawData(shapedNftData);
     }
