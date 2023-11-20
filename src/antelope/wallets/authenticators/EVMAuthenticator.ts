@@ -255,7 +255,7 @@ export abstract class EVMAuthenticator {
                 return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId]);
             }else if (type === ERC1155_TYPE) {
                 const transferAbi = erc1155Abi.filter((abi: EvmABIEntry) => abi.name === 'safeTransferFrom');
-                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId, quantity, 0x0]);
+                return this.signCustomTransaction(contractAddress, [transferAbi[0]], [from, to, tokenId, quantity, '0x0']);
             }
         } else {
             throw new AntelopeError('antelope.balances.error_token_contract_not_found', { address: contractAddress });
