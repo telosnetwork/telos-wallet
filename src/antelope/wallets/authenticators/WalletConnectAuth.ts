@@ -290,7 +290,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleCatchError(error: any): AntelopeError {
         this.trace('handleCatchError', error);
-        if (error.message.includes('rejected the request')) {
+        if (error.message.includes('User rejected the')) {
             return new AntelopeError('antelope.evm.error_transaction_canceled');
         } else {
             return new AntelopeError('antelope.evm.error_send_transaction', { error });
