@@ -17,7 +17,6 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
-import { AntelopeError } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
 const ant = getAntelope();
@@ -162,6 +161,7 @@ async function handleCtaClick() {
                 :label="$t('evm_wrap.wrap_input_label')"
                 :max-value="availableToWrap"
                 class="c-wrap-tab__input"
+                name="wrap-tab-currency-input-1"
             />
         </div>
     </div>
@@ -189,6 +189,7 @@ async function handleCtaClick() {
                 :label="$t('evm_wrap.wrap_input_label')"
                 class="c-wrap-tab__input"
                 readonly="readonly"
+                name="wrap-tab-currency-input-2"
             />
         </div>
     </div>

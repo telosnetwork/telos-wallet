@@ -242,6 +242,7 @@ export default defineComponent({
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (Token)"
                     class="q-mb-xl c-input-demos__currency-input"
+                    name="demo-currency-input-1"
                 />
                 Input amount: {{ currencyTokenInputValue.toString() }} (as BigNumber)
             </div>
@@ -263,6 +264,7 @@ export default defineComponent({
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USDT)"
                     class="q-mb-xl c-input-demos__currency-input"
+                    name="demo-currency-input-2"
                 />
                 Input amount: {{ currencyTlosUsdtInputValue.toString() }} (as BigNumber)
             </div>
@@ -286,6 +288,7 @@ export default defineComponent({
                     :error-if-over-max="currencyInputMaxValueError"
                     label="Amount (TLOS/USD)"
                     class="q-mb-xl c-input-demos__currency-input"
+                    name="demo-currency-input-3"
                 />
                 Input amount: {{ currencyTlosUsdInputValue.toString() }} (as BigNumber)
             </div>
@@ -305,6 +308,7 @@ export default defineComponent({
                     :error-text="currencyInputErrorMessage"
                     label="Amount (USD/USDT)"
                     class="q-mb-xl c-input-demos__currency-input"
+                    name="demo-currency-input-4"
                 />
                 Input amount: {{ currencyUsdUsdtInputValue.toString() }} (as BigNumber)
             </div>

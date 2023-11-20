@@ -23,6 +23,10 @@ const props = defineProps({
         type: String,
         default: () => 'global.rows_per_page',
     },
+    scrollOnUpdate: {
+        type: Boolean,
+        default: () => true,
+    },
 });
 const emit = defineEmits(['pagination-updated']);
 
@@ -68,7 +72,9 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         page,
     });
 
-    window.scrollTo(0, 0);
+    if (props.scrollOnUpdate) {
+        window.scrollTo(0, 0);
+    }
 }
 </script>
 

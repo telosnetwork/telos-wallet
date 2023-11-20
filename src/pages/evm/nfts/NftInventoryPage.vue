@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch, onBeforeMount, onMounted, onUnmounted, toRaw } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
@@ -10,7 +11,7 @@ import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
-import { NFTClass, ShapedNFT } from 'src/antelope/types';
+import { Collectible, Erc1155Nft } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
@@ -18,12 +19,15 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
-import { storeToRefs } from 'pinia';
 
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
+const chainSettings = (chainStore.currentChain.settings as EVMChainSettings);
+
+// This warns the user (once per session) that the indexer is not healthy and can be outdated data
+chainSettings.checkAndWarnIndexerHealth();
 
 const router = useRouter();
 const route = useRoute();
@@ -58,6 +62,12 @@ const tableColumns = [
         label: $t('global.collection'),
         align: 'left' as 'left',
     },
+    {
+        name: 'quantity',
+        field: 'quantity',
+        label: $t('global.quantity'),
+        align: 'left' as 'left',
+    },
 ];
 
 const rowsPerPageOptions = [6, 12, 24, 48, 96];
@@ -81,9 +91,10 @@ const pagination = ref<{
 const { __user_filter: userInventoryFilter } = storeToRefs(nftStore);
 
 // computed
+const userAccount = computed(() => accountStore.loggedAccount?.account);
 const loading = computed(() => nftStore.loggedInventoryLoading || !nftsLoaded.value || Boolean(!collectionList.value.length && nfts.value.length));
 const nftsAndCollectionListLoaded = computed(() => nftsLoaded.value && collectionList.value.length);
-const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as NFTClass[]) : []);
+const nfts = computed(() => nftsLoaded.value ? (nftStore.getUserFilteredInventory(CURRENT_CONTEXT) as Collectible[]) : []);
 const nftsToShow = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
@@ -98,14 +109,15 @@ const tableRows = computed(() => {
         return [];
     }
 
-    return nftsToShow.value.map((nft: ShapedNFT) => ({
-        image: nft.imageSrcIcon || nft.imageSrcFull,
+    return nftsToShow.value.map((nft: Collectible) => ({
+        image: nft.imgSrc,
         name: truncateText(nft.name, 35),
         isAudio: !!nft.audioSrc,
         isVideo: !!nft.videoSrc,
         id: nft.id,
         collectionName: nft.contractPrettyName || nft.contractAddress,
         collectionAddress: nft.contractAddress,
+        quantity: nft instanceof Erc1155Nft ? (nft.owners[userAccount.value] ?? 0) : 1,
     }));
 });
 const showNoFilteredResultsState = computed(() => (collectionFilter.value || searchFilter.value) && !nftsToShow.value.length);
@@ -160,10 +172,13 @@ watch(nftsAndCollectionListLoaded, (loaded) => {
     }
 });
 
-watch(accountStore, (store) => {
-    // fetch initial data
-    if (store.loggedAccount) {
-        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, toRaw(store.loggedAccount)).finally(() => {
+watch(userAccount, (account, oldAccount) => {
+    const accountChanged = account !== oldAccount;
+    const isFirstLoad = oldAccount === undefined;
+
+    // fetch initial data / fetchdata when account changes
+    if (account && (accountChanged || isFirstLoad)) {
+        nftStore.updateNFTsForAccount(CURRENT_CONTEXT, account).finally(() => {
             nftsLoaded.value = true;
         });
     }
@@ -254,10 +269,9 @@ watch(searchFilter, (filter) => {
     }
 });
 
-
 // methods
 function getCollectionUrl(address: string) {
-    const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+    const explorer = chainSettings.getExplorerUrl();
 
     return `${explorer}/address/${address}`;
 }
@@ -286,17 +300,18 @@ function goToDetailPage({ collectionAddress, id }: Record<string, string>) {
 
 function getNftForViewer(row: { id: string, collectionAddress: string }) {
     // nft definitely exists as it comes from the list of NFTs, hence 'as NFTClass' for NftViewer prop typing
-    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as NFTClass;
+    return nftsToShow.value.find(nft => nft.id === row.id && nft.contractAddress === row.collectionAddress) as Collectible;
 }
 
 // we update the inventory while the user is on the page
-let timer: string | number | NodeJS.Timer | undefined;
+let timer: ReturnType<typeof setInterval> | undefined;
+const minuteMilliseconds = 1000 * 60;
 onMounted(async () => {
     timer = setInterval(async () => {
         if (accountStore.loggedAccount) {
-            await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount);
+            await nftStore.updateNFTsForAccount(CURRENT_CONTEXT, accountStore.loggedAccount.account);
         }
-    }, 13000);
+    }, minuteMilliseconds);
 });
 
 onUnmounted(() => {
@@ -400,6 +415,7 @@ onUnmounted(() => {
                     v-for="nft in nftsToShow"
                     :key="nft.key"
                     :nft="nft"
+                    :quantity="nft instanceof Erc1155Nft ? (nft.owners[userAccount] ?? 0) : 1"
                 />
             </div>
 
@@ -435,7 +451,7 @@ onUnmounted(() => {
                                 @click="goToDetailPage(props.row)"
                                 @keydown.space.enter.prevent="goToDetailPage(props.row)"
                             >
-                                <template v-if="props.row.image">
+                                <template v-if="props.row.image || props.row.isVideo">
                                     <NftViewer
                                         :nft="getNftForViewer(props.row)"
                                         :previewMode="false"
@@ -469,6 +485,9 @@ onUnmounted(() => {
                                 :text="props.row.collectionName"
                                 :url="getCollectionUrl(props.row.collectionAddress)"
                             />
+                        </q-td>
+                        <q-td key="quantity" :props="props">
+                            {{ props.row.quantity }}
                         </q-td>
                     </q-tr>
                 </template>

@@ -42,6 +42,7 @@ function setTooltipVisibility(enable: boolean) {
         v-bind="{ ...$attrs }"
         transition-show="scale"
         transition-hide="scale"
+        class="c-tooltip__tooltip"
         @update:model-value="() => {}"
     >
         <div class="c-tooltip__text-container">
@@ -114,5 +115,12 @@ function setTooltipVisibility(enable: boolean) {
         @include text--small-bold;
         white-space: pre-line;
     }
+}
+
+// quasar override
+.q-tooltip {
+    // equivalent to --site-gradient (with some alpha), defined here because the quasar tooltip component
+    // moves the tooltip element to be a sibling of <body>, where our CSS vars are defined
+    background: linear-gradient(0.4turn, rgba(#071033, 0.85), rgba(#6039A4, 0.85));
 }
 </style>

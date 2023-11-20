@@ -5,7 +5,7 @@ const routes = [
         component: () => import('pages/home/HomePage.vue'),
     },
     {
-        path: '/native',
+        path: '/zero',
         component: () => import('layouts/NativeLayout.vue'),
         children: [
             {
@@ -121,6 +121,11 @@ const routes = [
                 path: 'scrollable-cards',
                 name: 'demos.scrollable-cards',
                 component: () => import('pages/demo/ScrollableInfoCardDemos.vue'),
+            },
+            {
+                path: 'indexer',
+                name: 'demos.indexer',
+                component: () => import('pages/demo/IndexerDemos.vue'),
             },
         ],
     },

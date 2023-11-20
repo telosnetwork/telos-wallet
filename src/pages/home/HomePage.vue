@@ -1,39 +1,39 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { mapGetters } from 'vuex';
+<script setup lang="ts">
+import { computed,  onMounted,  ref } from 'vue';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import { getAntelope, useEVMStore, usePlatformStore } from 'src/antelope';
 import { Menu } from 'src/pages/home/MenuType';
+import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    name: 'HomePage',
-    components: {
-        EVMLoginButtons,
-        NativeLoginButton,
-    },
-    data: (): {
-        tab: 'left' | 'right',
-        currentMenu: Menu,
-    } => ({
-        tab: 'left',
-        currentMenu: Menu.MAIN,
-    }),
+type TabReference = 'evm' | 'zero';
 
-    computed: {
-        ...mapGetters('account', ['isAuthenticated']),
-        showLeftRightBtns(): boolean {
-            return this.currentMenu === Menu.MAIN;
-        },
-    },
+const route = useRoute();
+const router = useRouter();
 
-    methods: {
-        goBack(): void {
-            this.currentMenu = Menu.MAIN;
-        },
-    },
+const tab = ref<TabReference>('evm');
+const currentMenu = ref<Menu>(Menu.MAIN);
+
+const showLoginBtns = computed((): boolean => currentMenu.value === Menu.MAIN);
+const walletOption = computed(() => route.query.login as LocationQueryValue);
+
+function goBack(): void {
+    currentMenu.value = Menu.MAIN;
+}
+
+function setTab(login: TabReference): void {
+    if (route.path !== login){
+        router.replace({ path: route.path, query:{ login } });
+        tab.value = login;
+    }
+}
+
+onMounted(() => {
+    if (walletOption.value){
+        tab.value = walletOption.value as TabReference;
+    }
 });
+
 </script>
 
 <template>
@@ -47,16 +47,16 @@ export default defineComponent({
                     class="c-home__logo"
                 >
                 <div class="c-home__button-container">
-                    <div v-if="showLeftRightBtns" class="c-home__network-toggle-container" role="tablist">
+                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'left',
+                                'c-home__network-toggle-button--activated': tab === 'evm',
                             }"
                             role="tab"
-                            :aria-selected="tab === 'left'"
-                            @keydown.enter="tab = 'left'"
-                            @click="tab = 'left'"
+                            :aria-selected="tab === 'evm'"
+                            @keydown.enter="setTab('evm')"
+                            @click="setTab('evm')"
                         >
 
                             {{ $t('global.telos_evm') }}
@@ -64,12 +64,12 @@ export default defineComponent({
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'right',
+                                'c-home__network-toggle-button--activated': tab === 'zero',
                             }"
                             role="tab"
-                            :aria-selected="tab === 'right'"
-                            @keydown.enter.space="tab = 'right'"
-                            @click="tab = 'right'"
+                            :aria-selected="tab === 'zero'"
+                            @keydown.enter.space="setTab('zero')"
+                            @click="setTab('zero')"
                         >
 
                             {{ $t('global.native') }}
@@ -88,10 +88,10 @@ export default defineComponent({
                         </q-btn>
                     </div>
 
-                    <NativeLoginButton v-if="tab === 'right'" />
+                    <NativeLoginButton v-if="tab === 'zero'" />
 
                     <EVMLoginButtons
-                        v-else-if="tab === 'left'"
+                        v-else-if="tab === 'evm'"
                         v-model="currentMenu"
                     />
                 </div>
@@ -148,7 +148,7 @@ export default defineComponent({
 <style lang="scss">
 .c-home {
     position: relative;
-    background: $site-gradient;
+    background: var(--site-gradient);
     min-height: 100vh;
     display: flex;
 
