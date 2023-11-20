@@ -4,7 +4,10 @@ import { filter } from 'rxjs';
 import {
     CURRENT_CONTEXT,
     getAntelope,
+    useChainStore,
     useFeedbackStore,
+    useTokensStore,
+    useUserStore,
 } from 'src/antelope';
 import {
     Label,
@@ -67,7 +70,16 @@ export const useAllowancesStore = defineStore(store_name, {
 
             return order === Sort.ascending ? quantityA - quantityB : quantityB - quantityA;
         }),
-        allowancesSortedByAllowanceFiatValue: state => (label: Label, order: Sort): ShapedAllowanceRow[] => [],
+        allowancesSortedByAllowanceFiatValue: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+            const erc20WithFiatValue = state.__erc_20_allowances[label].filter(allowance => allowance.tokenPrice)
+                .sort((a, b) => order === Sort.ascending ? a.tokenPrice - b.tokenPrice : b.tokenPrice - a.tokenPrice);
+            const erc20WithoutFiatValue = state.__erc_20_allowances[label].filter(allowance => !allowance.tokenPrice);
+            const rowsWithoutFiatValue = (state.__erc_721_allowances[label].concat(state.__erc_1155_allowances[label]) as ShapedAllowanceRow[])
+                .concat(erc20WithoutFiatValue)
+                .sort((a, b) => (a.spenderName ?? a.spenderAddress).localeCompare(b.spenderName ?? b.spenderAddress));
+
+            return order === Sort.ascending ? [...erc20WithFiatValue, ...rowsWithoutFiatValue] : [...rowsWithoutFiatValue, ...erc20WithFiatValue];
+        },
         allowancesSortedByAllowanceAmount: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
             /*
                 Sort order:
@@ -151,6 +163,7 @@ export const useAllowancesStore = defineStore(store_name, {
         init: () => {
             const allowancesStore = useAllowancesStore();
             // eztodo in account store, wipe allowances on logout
+            // eztodo on a timer, refresh allowance fiat values
             useFeedbackStore().setDebug(store_name, isTracingAll());
 
             getAntelope().events.onAccountChanged.pipe(
