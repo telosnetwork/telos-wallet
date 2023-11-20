@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
+import { formatUnits } from 'ethers/lib/utils';
 
 import {
     CURRENT_CONTEXT,
     getAntelope,
-    useChainStore,
     useFeedbackStore,
-    useTokensStore,
-    useUserStore,
 } from 'src/antelope';
 import {
     Label,
@@ -19,15 +17,10 @@ import {
     Sort,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
-    isNftCollectionAllowanceRow,
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
-import { BigNumber } from 'ethers';
-import { formatUnits } from 'ethers/lib/utils';
 
 const store_name = 'allowances';
-
-const tenBn = BigNumber.from(10);
 
 function sortAllowanceRowsByCollection(a: ShapedCollectionAllowanceRow, b: ShapedCollectionAllowanceRow, order: Sort): number {
     const aContractString = a?.collectionName ?? a.collectionAddress;
