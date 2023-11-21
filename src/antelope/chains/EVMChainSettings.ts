@@ -27,7 +27,7 @@ import {
     IndexerAccountNftsFilter,
     IndexerAccountNftsResponse,
     GenericIndexerNft,
-    IndexerNftContract,
+    IndexerContract,
     NftRawData,
     IndexerCollectionNftsResponse,
     Erc721Nft,
@@ -35,6 +35,10 @@ import {
     getErc1155Owners,
     Erc1155Nft,
     AntelopeError,
+    IndexerAllowanceFilter,
+    IndexerAllowanceResponseErc20,
+    IndexerAllowanceResponseErc721,
+    IndexerAllowanceResponseErc1155,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -387,7 +391,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // ensure NFT contract calldata is an object
-    processNftContractsCalldata(contracts: Record<string, IndexerNftContract>) {
+    processNftContractsCalldata(contracts: Record<string, IndexerContract>) {
         for (const contract of Object.values(contracts)) {
             try {
                 contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
@@ -400,7 +404,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     // shape the raw data from the indexer into a format that can be used to construct NFTs
     shapeNftRawData(
         raw: GenericIndexerNft[],
-        contracts: Record<string, IndexerNftContract>,
+        contracts: Record<string, IndexerContract>,
     ): NftRawData[] {
         const shaped = [] as NftRawData[];
         for (const item_source of raw) {
@@ -664,5 +668,34 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error('type of response.result', typeof response.result, [response.result]);
             return response.result as EvmBlockData;
         });
+    }
+
+    // allowances
+
+    async fetchErc20Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc20> {
+        const params = {
+            ...filter,
+            type: 'erc20',
+        };
+        const response = await this.indexer.get(`v1/address/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc20;
+    }
+
+    async fetchErc721Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc721> {
+        const params = {
+            ...filter,
+            type: 'erc721',
+        };
+        const response = await this.indexer.get(`v1/address/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc721;
+    }
+
+    async fetchErc1155Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc1155> {
+        const params = {
+            ...filter,
+            type: 'erc1155',
+        };
+        const response = await this.indexer.get(`v1/address/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc1155;
     }
 }

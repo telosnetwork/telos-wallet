@@ -5,9 +5,17 @@ import { formatUnits } from 'ethers/lib/utils';
 import {
     CURRENT_CONTEXT,
     getAntelope,
+    useChainStore,
     useFeedbackStore,
 } from 'src/antelope';
 import {
+    IndexerAllowanceResponse,
+    IndexerAllowanceResponseErc1155,
+    IndexerAllowanceResponseErc20,
+    IndexerAllowanceResponseErc721,
+    IndexerErc1155AllowanceResult,
+    IndexerErc20AllowanceResult,
+    IndexerErc721AllowanceResult,
     Label,
     ShapedAllowanceRow,
     ShapedAllowanceRowERC20,
@@ -17,10 +25,16 @@ import {
     Sort,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
+    isIndexerAllowanceResponseErc1155,
+    isIndexerAllowanceResponseErc20,
+    isIndexerAllowanceResponseErc721,
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 const store_name = 'allowances';
+
+const ALLOWANCES_LIMIT = 10000;
 
 function sortAllowanceRowsByCollection(a: ShapedCollectionAllowanceRow, b: ShapedCollectionAllowanceRow, order: Sort): number {
     const aContractString = a?.collectionName ?? a.collectionAddress;
@@ -175,13 +189,79 @@ export const useAllowancesStore = defineStore(store_name, {
             this.trace('fetchAllowancesForAccount', account);
             useFeedbackStore().setLoading('fetchAllowancesForAccount');
 
-            // fetch erc20 allowances .then shape .then setErc20Allowances
-            // fetch erc721 allowances .then shape .then setErc721Allowances
-            // fetch erc1155 allowances .then shape .then setErc1155Allowances
+            const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
-            // await promise allsettled for all 3
+            const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
+            const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
+            const erc1155AllowancesPromise = chainSettings.fetchErc1155Allowances(account, { limit: ALLOWANCES_LIMIT });
+            const settledAllowancePromises = await Promise.allSettled([erc20AllowancesPromise, erc721AllowancesPromise, erc1155AllowancesPromise]);
+
+            const fulfilledPromises: PromiseFulfilledResult<IndexerAllowanceResponse>[] = [];
+            const rejectedPromises: PromiseRejectedResult[] = [];
+
+            settledAllowancePromises.forEach((promise) => {
+                if (promise.status === 'fulfilled') {
+                    fulfilledPromises.push(promise as PromiseFulfilledResult<IndexerAllowanceResponse>);
+                } else {
+                    rejectedPromises.push(promise as PromiseRejectedResult);
+                    console.error('Error fetching allowances', promise.reason);
+                }
+            });
+
+            const erc20AllowancesData   = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc20(value))?.value as IndexerAllowanceResponseErc20 | undefined;
+            const erc721AllowancesData  = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc721(value))?.value as IndexerAllowanceResponseErc721 | undefined;
+            const erc1155AllowancesData = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc1155(value))?.value as IndexerAllowanceResponseErc1155 | undefined;
+
+            const shapedRowPromises = [];
+
+            if (erc20AllowancesData) {
+                const shapedErc20AllowancePromises = erc20AllowancesData.results.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData));
+                shapedRowPromises.push(Promise.allSettled(shapedErc20AllowancePromises));
+            } else {
+                shapedRowPromises.push(Promise.resolve(undefined));
+            }
+
+            if (erc721AllowancesData) {
+                const shapedErc721AllowancePromises = erc721AllowancesData.results.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData));
+                shapedRowPromises.push(Promise.allSettled(shapedErc721AllowancePromises));
+            } else {
+                shapedRowPromises.push(Promise.resolve(undefined));
+            }
+
+            if (erc1155AllowancesData) {
+                const shapedErc1155AllowancePromises = erc1155AllowancesData.results.map(allowanceData => this.shapeErc1155AllowanceRow(allowanceData));
+                shapedRowPromises.push(Promise.allSettled(shapedErc1155AllowancePromises));
+            } else {
+                shapedRowPromises.push(Promise.resolve(undefined));
+            }
+
+            const results = await Promise.all(shapedRowPromises);
+
+            results.forEach((settledPromises, index) => {
+                if (!settledPromises) {
+                    return;
+                }
+                const shapedAllowances = settledPromises.reduce((acc, promise) => {
+                    if (promise.status === 'fulfilled') {
+                        acc.push(promise.value);
+                    } else {
+                        console.error('Error processing allowance data', promise.reason);
+                    }
+                    return acc;
+                }, [] as ShapedAllowanceRow[]);
+
+                if (index === 0 && erc20AllowancesData) {
+                    this.setErc20Allowances(CURRENT_CONTEXT, shapedAllowances as ShapedAllowanceRowERC20[]);
+                } else if (index === 1 && erc721AllowancesData) {
+                    this.setErc721Allowances(CURRENT_CONTEXT, shapedAllowances as (ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721)[]);
+                } else if (index === 2 && erc1155AllowancesData) {
+                    this.setErc1155Allowances(CURRENT_CONTEXT, shapedAllowances as ShapedAllowanceRowNftCollection[]);
+                }
+            });
+
             useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
-            // return
+
+            return Promise.resolve();
         },
 
         // commits
@@ -204,6 +284,15 @@ export const useAllowancesStore = defineStore(store_name, {
             this.__erc_20_allowances = {};
             this.__erc_721_allowances = {};
             this.__erc_1155_allowances = {};
+        },
+        shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20> {
+            // eztodo
+        },
+        shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection> {
+            // eztodo
+        },
+        shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection> {
+            // eztodo
         },
     },
 });
