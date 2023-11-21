@@ -79,15 +79,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss">
-.q-btn.wallet-btn {
-    @include text--header-5;
-    width: auto;
-    padding: 13px 24px;
-    &+& {
-        margin-left: 16px;
-    }
-}
-
 .c-receive-page {
     &__title-container {
         animation: #{$anim-slide-in-left};
@@ -122,6 +113,4 @@ export default defineComponent({
         max-width: 200px;
     }
 }
-
-
 </style>

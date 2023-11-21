@@ -165,6 +165,7 @@ async function handleCtaClick() {
                 :label="$t('evm_stake.unstake_input_label')"
                 :max-value="availableToUnstake"
                 class="c-unstake-tab__input"
+                name="unstaking-tab-currency-input-1"
             />
         </div>
     </div>
@@ -196,6 +197,7 @@ async function handleCtaClick() {
                 :label="$t('evm_stake.unstake_output_label')"
                 class="c-unstake-tab__input"
                 readonly="readonly"
+                name="unstaking-tab-currency-input-2"
             />
         </div>
     </div>

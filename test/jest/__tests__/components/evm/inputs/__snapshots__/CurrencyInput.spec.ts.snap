@@ -2,10 +2,11 @@
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 1`] = `
 <div
-  class="c-currency-input"
+  class="c-currency-input c-text-input c-text-input--error-right"
 >
   <div
-    class="c-currency-input__label-text"
+    class="c-text-input__label-text"
+    id="currency-input-label--test"
   >
     TLOS / USD
   </div>
@@ -16,7 +17,8 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     TLOS
   </div>
   <input
-    class="c-currency-input__input"
+    aria-labelledby="currency-input-label--test"
+    class="c-text-input__input"
     inputmode="decimal"
     pattern="[0-9,.]*"
     placeholder="0"
@@ -44,7 +46,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
      0.00 USD
   </div>
   <div
-    class="c-currency-input__error-text"
+    class="c-text-input__error-text"
   />
   <div
     class="c-currency-input__conversion-rate"
@@ -56,11 +58,12 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 2`] = `
 <div
-  class="c-currency-input"
+  class="c-currency-input c-text-input c-text-input--error-right"
   style="--symbol-left: 31px;"
 >
   <div
-    class="c-currency-input__label-text"
+    class="c-text-input__label-text"
+    id="currency-input-label--test"
   >
     TLOS / USD
   </div>
@@ -71,7 +74,8 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     TLOS
   </div>
   <input
-    class="c-currency-input__input"
+    aria-labelledby="currency-input-label--test"
+    class="c-text-input__input"
     inputmode="decimal"
     pattern="[0-9,.]*"
     placeholder="0"
@@ -99,7 +103,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
      0.19 USD
   </div>
   <div
-    class="c-currency-input__error-text"
+    class="c-text-input__error-text"
   />
   <div
     class="c-currency-input__conversion-rate"
@@ -111,11 +115,12 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 3`] = `
 <div
-  class="c-currency-input"
+  class="c-currency-input c-text-input c-text-input--error-right"
   style="--symbol-left: 59px;"
 >
   <div
-    class="c-currency-input__label-text"
+    class="c-text-input__label-text"
+    id="currency-input-label--test"
   >
     TLOS / USD
   </div>
@@ -126,7 +131,8 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     TLOS
   </div>
   <input
-    class="c-currency-input__input"
+    aria-labelledby="currency-input-label--test"
+    class="c-text-input__input"
     inputmode="decimal"
     pattern="[0-9,.]*"
     placeholder="0"
@@ -154,7 +160,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
      285.00 USD
   </div>
   <div
-    class="c-currency-input__error-text"
+    class="c-text-input__error-text"
   />
   <div
     class="c-currency-input__conversion-rate"
@@ -166,11 +172,12 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 
 exports[`CurrencyInput.vue should emit the correct values when currencies are swapped 1`] = `
 <div
-  class="c-currency-input"
+  class="c-currency-input c-text-input c-text-input--error-right"
   style="--symbol-left: 43px;"
 >
   <div
-    class="c-currency-input__label-text"
+    class="c-text-input__label-text"
+    id="currency-input-label--test-2"
   >
     TLOS / USD
   </div>
@@ -181,7 +188,8 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are sw
     USD
   </div>
   <input
-    class="c-currency-input__input"
+    aria-labelledby="currency-input-label--test-2"
+    class="c-text-input__input"
     inputmode="decimal"
     pattern="[0-9,.]*"
     placeholder="0"
@@ -209,7 +217,7 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are sw
      1.0000 TLOS
   </div>
   <div
-    class="c-currency-input__error-text"
+    class="c-text-input__error-text"
   />
   <div
     class="c-currency-input__conversion-rate"

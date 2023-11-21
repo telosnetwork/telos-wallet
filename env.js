@@ -8,7 +8,7 @@ const sharedEnv = {
     GOOGLE_ANALYTICS: 'UA-154600181-2',
     IMGUR_CLIENT_ID: 'b6f46df9d1da9d9',
     EVM_CONTRACT: 'eosio.evm',
-    PROJECT_ID: '14ec76c44bae7d461fa0f5fd5f8a9da1',
+    PROJECT_ID: '2392473d6d98499c7138cd2d705a791f',
 };
 
 const TESTNET = {

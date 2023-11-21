@@ -1,5 +1,5 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, Method } from 'axios';
 import {
     AbiSignature,
     ChainSettings,
@@ -17,21 +17,31 @@ import {
     MarketSourceInfo,
     TokenMarketData,
     IndexerHealthResponse,
-    NFTClass,
-    IndexerNftResponse,
+    Collectible,
     NFTContractClass,
-    IndexerNftItemResult,
-    NFTItemClass,
     addressString,
     IndexerTransfersFilter,
     IndexerAccountTransfersResponse,
+    constructNft,
+    IndexerCollectionNftsFilter,
+    IndexerAccountNftsFilter,
+    IndexerAccountNftsResponse,
+    GenericIndexerNft,
+    IndexerNftContract,
+    NftRawData,
+    IndexerCollectionNftsResponse,
+    Erc721Nft,
+    getErc721Owner,
+    Erc1155Nft,
+    AntelopeError,
+    getErc1155OwnersFromIndexer,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
 import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
-import { getAntelope } from 'src/antelope';
-import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
+import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -73,6 +83,16 @@ export default abstract class EVMChainSettings implements ChainSettings {
         resolve?: (value: EvmContract | false) => void;
     }> = {};
 
+    // this variable helps to show the indexer health warning only once per session
+    indexerHealthWarningShown = false;
+
+    // This variable is used to simulate a bad indexer health state
+    indexerBadHealthSimulated = false;
+
+    simulateIndexerDown(isBad: boolean) {
+        this.indexerBadHealthSimulated = isBad;
+    }
+
     constructor(network: string) {
         this.network = network;
 
@@ -81,12 +101,13 @@ export default abstract class EVMChainSettings implements ChainSettings {
         let pendingRequests = 0;
 
         // Interceptor handlers -- these handlers are used to limit the number of concurrent requests
-        const requestHandler = (config: AxiosRequestConfig) => new Promise((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const requestHandler = (value: InternalAxiosRequestConfig) => new Promise<InternalAxiosRequestConfig<any>>((resolve) => {
             const interval = setInterval(() => {
                 if (pendingRequests < MAX_REQUESTS_COUNT) {
                     pendingRequests++;
                     clearInterval(interval);
-                    resolve(config);
+                    resolve(value);
                 }
             }, INTERVAL_MS);
         });
@@ -191,11 +212,29 @@ export default abstract class EVMChainSettings implements ChainSettings {
         return promise;
     }
 
+    /**
+     * This function checks if the indexer is healthy and warns the user if it is not.
+     * This warning should appear only once per session.
+     */
+    checkAndWarnIndexerHealth() {
+        if (!this.indexerHealthWarningShown && !this.isIndexerHealthy()) {
+            this.indexerHealthWarningShown = true;
+            const  ant = getAntelope();
+            ant.config.notifyNeutralMessageHandler(
+                ant.config.localizationHandler('antelope.chain.indexer_bad_health_warning'),
+            );
+        }
+    }
+
     isIndexerHealthy(): boolean {
-        return (
-            this._indexerHealthState.state.success &&
-            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
-        );
+        if (this.indexerBadHealthSimulated) {
+            return false;
+        } else {
+            return (
+                this._indexerHealthState.state.success &&
+                this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+            );
+        }
     }
 
     get indexerHealthState(): IndexerHealthResponse {
@@ -292,10 +331,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const balance = ethers.BigNumber.from(result.balance);
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
-                    const priceUpdatedWithinTenMins = !!contractData.calldata.marketdata_updated && dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, 10);
+                    const priceIsCurrent =
+                        !!contractData.calldata.marketdata_updated &&
+                        dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
-                    if (typeof contractData.calldata === 'object' && priceUpdatedWithinTenMins) {
+                    if (typeof contractData.calldata === 'object' && priceIsCurrent) {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
@@ -310,69 +351,166 @@ export default abstract class EVMChainSettings implements ChainSettings {
         });
     }
 
-    async getNFTsFromIndexer(url:string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
+    // get the NFTs belonging to a particular contract (collection)
+    async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<Collectible[]> {
         if (!this.hasIndexerSupport()) {
-            console.error('Indexer API not supported for this chain:', this.getNetwork());
+            console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
-        const params = {
-            ... filter,
-            address: undefined,
+        const url = `v1/contract/${collection}/nfts`;
+        const response = (await this.indexer.get(url, { params })).data as IndexerCollectionNftsResponse;
+
+        // the indexer NFT data which will be used to construct NFTs
+        const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
+            metadata: JSON.parse(nftResponse.metadata),
+            tokenId: nftResponse.tokenId,
+            contract: nftResponse.contract,
+            updated: nftResponse.updated,
+            imageCache: nftResponse.imageCache,
+            tokenUri: nftResponse.tokenUri,
+            supply: nftResponse.supply,
+        }));
+
+        this.processNftContractsCalldata(response.contracts);
+        const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+        return this.processNftRawData(shapedNftData);
+    }
+
+    // get the NFTs belonging to a particular account
+    async getNftsForAccount(account: string, params: IndexerAccountNftsFilter): Promise<Collectible[]> {
+        if (!this.hasIndexerSupport()) {
+            console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
+            return [];
+        }
+        const url = `v1/account/${account}/nfts`;
+        const isErc1155 = params.type === 'ERC1155';
+        const paramsWithSupply = {
+            ...params,
+            includeTokenIdSupply: isErc1155, // only ERC1155 supports supply
         };
-        return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerNftResponse)
-            .then((response) => {
-                // iterate over the contracts and parse json the calldata using try catch
-                for (const contract of Object.values(response.contracts)) {
-                    try {
-                        contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
-                    } catch (e) {
-                        console.error('Error parsing metadata', `"${contract.calldata}"`, e);
-                    }
-                }
-                const nfts = [] as NFTClass[];
-                for (const item_source of response.results as unknown as IndexerNftItemResult[]) {
-                    try {
-                        item_source.metadata = typeof item_source.metadata === 'string' ? JSON.parse(item_source.metadata) : item_source.metadata;
-                    } catch (e) {
-                        console.error('Error parsing metadata', `"${item_source.metadata}"`, e);
-                    }
-                    if (!item_source.metadata || typeof item_source.metadata !== 'object') {
-                        // we create a new metadata object with the actual string atributes of the item
-                        const list = item_source as unknown as { [key: string]: unknown };
-                        item_source.metadata =
-                            Object.keys(item_source)
-                                .filter(k => typeof list[k] === 'string')
-                                .reduce((obj, key) => {
-                                    obj[key] = list[key] as string;
-                                    return obj;
-                                }, {} as { [key: string]: string });
+        const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
 
-                    }
-                    const contract_source = response.contracts[item_source.contract];
+        // If the contract does not have the list of supported interfaces, we provide one
+        Object.values(response.contracts).forEach((contract) => {
+            if (contract.supportedInterfaces === null) {
+                contract.supportedInterfaces = [params.type];
+            }
+        });
 
-                    if (!contract_source) {
-                        // this case only happens if the indexer fails to index contract data
-                        continue;
-                    }
-                    const contract = new NFTContractClass(contract_source);
-                    const item = new NFTItemClass(item_source, contract);
-                    const nft = new NFTClass(item);
-                    nfts.push(nft);
-                }
-                return nfts;
-            }).catch((error) => {
-                console.error(error);
-                return [];
+        // the indexer NFT data which will be used to construct NFTs
+        const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
+            metadata: JSON.parse(nftResponse.metadata),
+            tokenId: nftResponse.tokenId,
+            contract: nftResponse.contract,
+            updated: nftResponse.updated,
+            imageCache: nftResponse.imageCache,
+            tokenUri: nftResponse.tokenUri,
+            supply: nftResponse.tokenIdSupply,
+            owner: nftResponse.owner ?? account,
+        }));
+
+        this.processNftContractsCalldata(response.contracts);
+        const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+
+        return this.processNftRawData(shapedNftData);
+    }
+
+    // ensure NFT contract calldata is an object
+    processNftContractsCalldata(contracts: Record<string, IndexerNftContract>) {
+        for (const contract of Object.values(contracts)) {
+            try {
+                contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
+            } catch (e) {
+                console.error('Error parsing metadata', `"${contract.calldata}"`, e);
+            }
+        }
+    }
+
+    // shape the raw data from the indexer into a format that can be used to construct NFTs
+    shapeNftRawData(
+        raw: GenericIndexerNft[],
+        contracts: Record<string, IndexerNftContract>,
+    ): NftRawData[] {
+        const shaped = [] as NftRawData[];
+        for (const item_source of raw) {
+            const contract_source = contracts[item_source.contract];
+
+            if (!contract_source) {
+                // this case only happens if the indexer fails to index contract data
+                continue;
+            }
+            const contract = new NFTContractClass(contract_source);
+
+            shaped.push({
+                data: item_source,
+                contract,
             });
+        }
+
+        return shaped;
     }
 
-    async getNFTsCollection(owner: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
-        return this.getNFTsFromIndexer(`v1/contract/${owner}/nfts`, filter);
-    }
+    // process the shaped raw data into NFTs
+    async processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
+        const contractStore = useContractStore();
+        const nftsStore = useNftsStore();
 
-    async getNFTsInventory(account: string, filter: IndexerTransactionsFilter): Promise<NFTClass[]> {
-        return this.getNFTsFromIndexer(`v1/account/${account}/nfts`, filter);
+        // the same ERC1155 NFT can be returned multiple times by the indexer, once for each owner
+        // so we need to filter out duplicates
+        const erc1155RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc1155'));
+        const dedupedErc1155RawData = (() => {
+            // filter out NFTs with the same contract address and tokenId
+            const seen = new Set<string>();
+            return erc1155RawData.filter(({ data }) => {
+                const id = `${data.contract}-${data.tokenId}`;
+                if (seen.has(id)) {
+                    return false;
+                }
+                seen.add(id);
+                return true;
+            });
+        })();
+        const erc1155Nfts = Object.values(dedupedErc1155RawData)
+            .map(async ({ data, contract }) => {
+                const nft = (await constructNft(contract, data, this, contractStore, nftsStore)) as Erc1155Nft;
+                const ownersUpdatedWithinThreeMins = dateIsWithinXMinutes(nft.ownerDataLastFetched, 3);
+
+                if (!ownersUpdatedWithinThreeMins) {
+                    const indexer = this.getIndexer();
+                    const owners = await getErc1155OwnersFromIndexer(nft.contractAddress, nft.id, indexer);
+                    nft.owners = owners;
+                }
+
+                return nft;
+            });
+
+        const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
+        const erc721Nfts = erc721RawData.map(async ({ data, contract }) => {
+            const nft = (await constructNft(contract, data, this, contractStore, nftsStore)) as Erc721Nft;
+            const ownersUpdatedWithinThreeMins = dateIsWithinXMinutes(nft.ownerDataLastFetched, 3);
+
+            if (!ownersUpdatedWithinThreeMins) {
+                const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, nft.contractAddress))?.getContractInstance();
+                if (!contractInstance) {
+                    throw new AntelopeError('antelope.utils.error_contract_instance');
+                }
+                const owner = await getErc721Owner(contractInstance, nft.id);
+                nft.owner = owner;
+            }
+
+            return nft;
+        });
+
+        const settledPromises = await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]);
+
+        const fulfilledPromises = settledPromises.filter(result => result.status === 'fulfilled') as PromiseFulfilledResult<Collectible>[];
+        const rejectedPromises = settledPromises.filter(result => result.status === 'rejected') as PromiseRejectedResult[];
+
+        rejectedPromises.forEach(({ reason }) => {
+            console.error('Error constructing NFT', reason);
+        });
+
+        return fulfilledPromises.map(result => result.value as Collectible);
     }
 
     constructTokenId(token: TokenSourceInfo): string {
@@ -465,7 +603,16 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const url = `v1/account/${account}/transfers`;
 
         return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerAccountTransfersResponse);
+            .then(response => response.data as IndexerAccountTransfersResponse)
+            .then((data) => {
+                // set supportedInterfaces property if undefined in the response
+                Object.values(data.contracts).forEach((contract) => {
+                    if (contract.supportedInterfaces === null && type !== undefined) {
+                        contract.supportedInterfaces = [type];
+                    }
+                });
+                return data;
+            });
     }
 
     async getTokenList(): Promise<TokenClass[]> {

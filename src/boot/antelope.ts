@@ -10,6 +10,7 @@ import {
     OreIdAuth,
     SafePalAuth,
 } from 'src/antelope/wallets';
+import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 
@@ -31,7 +32,7 @@ export default boot(({ app }) => {
     ant.config.setNotifySuccessfulTrxHandler(app.config.globalProperties.$notifySuccessTransaction);
     ant.config.setNotifySuccessMessageHandler(app.config.globalProperties.$notifySuccessMessage);
     ant.config.setNotifySuccessCopyHandler(app.config.globalProperties.$notifySuccessCopy);
-    ant.config.setnotifyFailureMessage(app.config.globalProperties.$notifyFailure);
+    ant.config.setNotifyFailureMessage(app.config.globalProperties.$notifyFailure);
     ant.config.setNotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
     ant.config.setNotifyDisconnectedHandler(app.config.globalProperties.$notifyDisconnected);
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
@@ -80,6 +81,7 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new WalletConnectAuth(options, wagmiClient));
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
+    ant.wallets.addEVMAuthenticator(new BraveAuth());
     const oreIdOptions: OreIdOptions = {
         appName: process.env.APP_NAME,
         appId: process.env.OREID_APP_ID as string,

@@ -187,6 +187,7 @@ async function handleCtaClick() {
                 :label="$t('evm_stake.stake_input_label')"
                 :max-value="availableTostake"
                 class="c-stake-tab__input"
+                name="staking-tab-currency-input-1"
             />
         </div>
     </div>
@@ -215,6 +216,7 @@ async function handleCtaClick() {
                 :label="$t('evm_stake.stake_output_label')"
                 class="c-stake-tab__input"
                 readonly="readonly"
+                name="staking-tab-currency-input-2"
             />
         </div>
     </div>

@@ -5,7 +5,7 @@ import InlineSvg from 'vue-inline-svg';
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import { getShortenedHash, prettyPrintBalance } from 'src/antelope/stores/utils';
+import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
 const accountStore = ant.stores.account;
@@ -56,7 +56,8 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            return process.env.NODE_ENV === 'production';
+            // only enable demo route for staging & development
+            return window.location.origin.includes('telos.net');
         },
         accountActionText() {
             if (this.loggedAccount) {
@@ -432,7 +433,7 @@ export default defineComponent({
         width: 100vw;
         transform: translateX(-100%);
         transition: 0.2s transform ease;
-        background: $site-gradient;
+        background: var(--site-gradient);
         z-index: $z-index--menu;
 
         &--open {

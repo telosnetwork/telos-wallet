@@ -161,6 +161,7 @@ async function handleCtaClick() {
                 :label="$t('evm_wrap.wrap_input_label')"
                 :max-value="availableToWrap"
                 class="c-wrap-tab__input"
+                name="wrap-tab-currency-input-1"
             />
         </div>
     </div>
@@ -188,6 +189,7 @@ async function handleCtaClick() {
                 :label="$t('evm_wrap.wrap_input_label')"
                 class="c-wrap-tab__input"
                 readonly="readonly"
+                name="wrap-tab-currency-input-2"
             />
         </div>
     </div>

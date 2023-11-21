@@ -144,6 +144,7 @@ async function handleUnwrapClick() {
                 :label="$t('evm_wrap.unwrap_input_label')"
                 :max-value="availableToUnwrap"
                 class="c-unwrap-tab__input"
+                name="unwrap-tab-currency-input-1"
             />
         </div>
     </div>
@@ -171,6 +172,7 @@ async function handleUnwrapClick() {
                 :label="$t('evm_wrap.unwrap_input_label')"
                 class="c-unwrap-tab__input"
                 readonly="readonly"
+                name="unwrap-tab-currency-input-2"
             />
         </div>
     </div>

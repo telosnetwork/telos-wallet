@@ -4,7 +4,7 @@ import { getAntelope } from 'src/antelope';
 import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 
 export class AntelopeConfig {
-    wrapError(description: string, error: unknown): AntelopeError {
+    transactionError(description: string, error: unknown): AntelopeError {
         if (error instanceof AntelopeError) {
             return error as AntelopeError;
         }
@@ -209,7 +209,7 @@ export class AntelopeConfig {
         this.__notify_success_copy_handler = handler;
     }
 
-    public setnotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+    public setNotifyFailureMessage(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
         this.__notify_failure_message_handler = handler;
     }
 
