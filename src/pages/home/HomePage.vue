@@ -249,10 +249,11 @@ onMounted(() => {
     // guarantees wallet connect on top of footer
     &__footer {
         position: relative;
-        background: url("/branding/background.png");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: center;
+        background: white;
+        // background: url("/branding/background.png");
+        // background-position: center;
+        // background-repeat: no-repeat;
+        // background-size: center;
         color: $default-contrast-text-color;
     }
     &__connect-wallet {
@@ -268,7 +269,8 @@ onMounted(() => {
             left: 0;
             right: 0;
             height: 1px;
-            background-color: $default-contrast-text-color;
+            background:rgba($default-contrast-text-color, 0.2);
+
         }
 
         &--small {
