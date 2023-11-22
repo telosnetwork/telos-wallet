@@ -1,12 +1,16 @@
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
-import { formatUnits } from 'ethers/lib/utils';
+import { formatUnits, parseUnits } from 'ethers/lib/utils';
 
 import {
     CURRENT_CONTEXT,
     getAntelope,
+    useBalancesStore,
     useChainStore,
+    useContractStore,
     useFeedbackStore,
+    useNftsStore,
+    useTokensStore,
 } from 'src/antelope';
 import {
     IndexerAllowanceResponse,
@@ -31,6 +35,7 @@ import {
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { BigNumber } from 'ethers';
 
 const store_name = 'allowances';
 
@@ -243,7 +248,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
                 const shapedAllowances = settledPromises.reduce((acc, promise) => {
                     if (promise.status === 'fulfilled') {
-                        acc.push(promise.value);
+                        acc.push(promise.value as ShapedAllowanceRow);
                     } else {
                         console.error('Error processing allowance data', promise.reason);
                     }
@@ -285,14 +290,76 @@ export const useAllowancesStore = defineStore(store_name, {
             this.__erc_721_allowances = {};
             this.__erc_1155_allowances = {};
         },
-        shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20> {
-            // eztodo
+        async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
+            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
+            const balanceInfo = useBalancesStore().currentBalances.find(balance => balance.contract === data.contract);
+
+            if (!spenderContract || !balanceInfo) {
+                return null;
+            }
+
+            return {
+                lastUpdated: data.updated,
+                spenderAddress: data.spender,
+                spenderName: spenderContract?.name,
+                tokenName: balanceInfo.name,
+                tokenAddress: data.contract,
+                allowance: BigNumber.from(data.amount),
+                balance: balanceInfo.balance,
+                tokenDecimals: balanceInfo.decimals,
+                tokenSymbol: balanceInfo.symbol,
+                tokenPrice: Number(balanceInfo.price.str),
+                tokenLogo: balanceInfo.logo,
+            };
         },
-        shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection> {
-            // eztodo
+        async shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection | null> {
+            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+
+            const commonAttributes = {
+                lastUpdated: data.updated,
+                spenderAddress: data.operator,
+                spenderName: spenderContract?.name,
+                allowed: data.approved,
+            };
+
+            if (data.single) {
+                const tokenId = data.tokenId as string;
+                const nftDetails = await useNftsStore().fetchNftDetails(CURRENT_CONTEXT, data.contract, tokenId);
+
+                return nftDetails ? {
+                    ...commonAttributes,
+                    tokenId,
+                    tokenName: nftDetails.name,
+                    collectionAddress: nftDetails.contractAddress,
+                    collectionName: nftDetails.contractPrettyName,
+                } : null;
+            }
+
+            const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+            const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
+
+            return collectionInfo ? {
+                ...commonAttributes,
+                collectionAddress: collectionInfo.address,
+                collectionName: collectionInfo.name,
+                balance,
+            } : null;
+
         },
-        shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection> {
-            // eztodo
+        async shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection | null> {
+            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+            const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+            const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
+
+            return collectionInfo ? {
+                lastUpdated: data.updated,
+                spenderAddress: data.operator,
+                spenderName: spenderContract?.name,
+                allowed: data.approved,
+                collectionAddress: collectionInfo.address,
+                collectionName: collectionInfo.name,
+                balance,
+            } : null;
         },
     },
 });
