@@ -106,7 +106,7 @@ onMounted(() => {
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
+                    <q-toolbar class="c-home__footer-first-line flex-center">
                         <a
                             href="https://docs.telos.net/evm/cloud-wallet/"
                             target="_blank"
@@ -119,7 +119,7 @@ onMounted(() => {
                             <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
                         </a>
                     </q-toolbar>
-                    <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
+                    <q-toolbar class="c-home__footer-second-line flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
@@ -148,13 +148,16 @@ onMounted(() => {
 <style lang="scss">
 .c-home {
     position: relative;
-    background: var(--site-gradient);
     min-height: 100vh;
     display: flex;
 
     &__page-container {
         // override inline style of unknown origin (do not delete)
         padding-bottom: 0 !important;
+        background: url("/branding/background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size:cover;
     }
 
     &__container {
@@ -177,8 +180,14 @@ onMounted(() => {
         align-self: center;
         border-radius: 4px;
         padding: 24px;
-        background-color: rgba(white, 0.1);
-        max-width: 320px;
+        background-color: rgba($default-contrast-text-color, 0.1);
+        height: 435px;
+        width: 320px;
+
+        background: url("/branding/background.png");
+        // background-position: center;
+        background-repeat: no-repeat;
+        background-size:cover;
     }
 
     &__network-toggle-container {
@@ -191,7 +200,7 @@ onMounted(() => {
         text-transform: uppercase;
         text-align: center;
         padding: 8px 24px;
-        background-color: rgba(white, 0.2);
+        background-color: rgba($default-contrast-text-color, 0.1);
         border: unset;
         color: white;
         cursor: pointer;
@@ -211,7 +220,7 @@ onMounted(() => {
     }
 
     &__menu-back-button {
-        color: white;
+        color: $default-contrast-text-color;
         margin-bottom: 24px;
     }
 
@@ -224,12 +233,12 @@ onMounted(() => {
         gap: 4px;
 
         margin-top: 24px;
-        color: white;
+        color: $default-contrast-text-color;
     }
 
     &__external-link-text {
         @include text--small;
-        color: white;
+        color: $default-contrast-text-color;
         text-decoration: none;
 
         &:hover {
@@ -240,6 +249,11 @@ onMounted(() => {
     // guarantees wallet connect on top of footer
     &__footer {
         position: relative;
+        background: url("/branding/background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: center;
+        color: $default-contrast-text-color;
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
@@ -254,7 +268,7 @@ onMounted(() => {
             left: 0;
             right: 0;
             height: 1px;
-            background-color: #392468;
+            background-color: $default-contrast-text-color;
         }
 
         &--small {
@@ -297,7 +311,7 @@ onMounted(() => {
         &-text {
             @include text--small;
             grid-area: b;
-            color: white;
+            color: $default-contrast-text-color;
             text-align: left;
             &--small {
                 display: none;
@@ -305,7 +319,7 @@ onMounted(() => {
         }
         &-icon {
             grid-area: c;
-            color: white;
+            color: $default-contrast-text-color;
             text-align: right;
         }
     }

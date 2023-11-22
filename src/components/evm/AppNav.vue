@@ -433,8 +433,12 @@ export default defineComponent({
         width: 100vw;
         transform: translateX(-100%);
         transition: 0.2s transform ease;
-        background: var(--site-gradient);
         z-index: $z-index--menu;
+        padding-bottom: 0 !important;
+        background: url("/branding/background.png");
+        // background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
 
         &--open {
             transform: translateX(0);

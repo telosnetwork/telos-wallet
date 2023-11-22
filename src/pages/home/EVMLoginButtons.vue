@@ -304,6 +304,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     gap: 14px;
+    margin-bottom: 48px;
 
     &__loading{
         width: 100%;
