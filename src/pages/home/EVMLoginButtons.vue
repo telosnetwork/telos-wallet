@@ -376,6 +376,7 @@ export default defineComponent({
             color: $white;
             outline-color: $white;
             outline-width: 2px;
+            background-color: #FFFFFF10;
         }
 
         &:not(:hover) #{$self}__icon {
