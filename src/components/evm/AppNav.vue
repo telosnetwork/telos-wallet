@@ -207,7 +207,7 @@ export default defineComponent({
         <div class="flex justify-between">
             <img
                 ref="logo-image"
-                src="~assets/logo--telos-wallet.svg"
+                src="/branding/telos-wallet.svg"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
                 role="link"
