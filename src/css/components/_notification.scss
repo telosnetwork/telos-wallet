@@ -58,7 +58,7 @@
         display: flex;
         flex-direction: column;
     }
-    &__checkbox--telos-cloud-discontinued {
+    &__checkbox-container {
         display: var(--c-notify__checkbox--display);
         margin: 2rem 0 0 2rem;
         input {
