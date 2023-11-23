@@ -316,14 +316,14 @@ const notifyRememberInfo = function(title, message, payload, key) {
 
 
 export default boot(({ app, store }) => {
-    app.config.globalProperties.$errorNotification            = errorNotification.bind(store);
-    app.config.globalProperties.$unexpectedErrorNotification  = unexpectedErrorNotification.bind(store);
-    app.config.globalProperties.$warningNotification          = warningNotification.bind(store);
-    app.config.globalProperties.$successNotification          = successNotification.bind(store);
-    store['$errorNotification']                               = app.config.globalProperties.$errorNotification;
-    store['$unexpectedErrorNotification']                     = app.config.globalProperties.$unexpectedErrorNotification;
-    store['$warningNotification']                             = app.config.globalProperties.$warningNotification;
-    store['$successNotification']                             = app.config.globalProperties.$successNotification;
+    app.config.globalProperties.$errorNotification           = errorNotification.bind(store);
+    app.config.globalProperties.$unexpectedErrorNotification = unexpectedErrorNotification.bind(store);
+    app.config.globalProperties.$warningNotification         = warningNotification.bind(store);
+    app.config.globalProperties.$successNotification         = successNotification.bind(store);
+    store['$errorNotification']                              = app.config.globalProperties.$errorNotification;
+    store['$unexpectedErrorNotification']                    = app.config.globalProperties.$unexpectedErrorNotification;
+    store['$warningNotification']                            = app.config.globalProperties.$warningNotification;
+    store['$successNotification']                            = app.config.globalProperties.$successNotification;
 
     // new Message notifications handlers
     app.config.globalProperties.$notifySuccessTransaction = notifySuccessTransaction.bind(store);
