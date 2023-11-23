@@ -8,6 +8,7 @@ import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
 import { shapedAllowanceRows } from 'src/pages/evm/allowances/temp-allowances-fixtures';
+import { useAllowancesStore } from 'src/antelope';
 
 const { t: $t } = useI18n();
 
@@ -37,6 +38,8 @@ onMounted(() => {
     setTimeout(() => {
         loading.value = false;
     }, 2000);
+
+    useAllowancesStore().fetchAllowancesForAccount('0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
 });
 
 function handleSearchUpdated(searchText: string) {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
+import { formatUnits } from 'ethers/lib/utils';
+import { BigNumber } from 'ethers';
 
 import {
     CURRENT_CONTEXT,
@@ -10,7 +11,6 @@ import {
     useContractStore,
     useFeedbackStore,
     useNftsStore,
-    useTokensStore,
 } from 'src/antelope';
 import {
     IndexerAllowanceResponse,
@@ -35,7 +35,6 @@ import {
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { BigNumber } from 'ethers';
 
 const store_name = 'allowances';
 
@@ -183,7 +182,7 @@ export const useAllowancesStore = defineStore(store_name, {
             ).subscribe({
                 next: ({ label, account }) => {
                     if (label === CURRENT_CONTEXT && account?.account) {
-                        allowancesStore.fetchAllowancesForAccount(account?.account);
+                        // allowancesStore.fetchAllowancesForAccount(account?.account); eztodo uncomment
                     }
                 },
             });
@@ -240,7 +239,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 shapedRowPromises.push(Promise.resolve(undefined));
             }
 
-            const results = await Promise.all(shapedRowPromises);
+            const results = await Promise.allSettled(shapedRowPromises);
 
             results.forEach((settledPromises, index) => {
                 if (!settledPromises) {
