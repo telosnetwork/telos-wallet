@@ -31,7 +31,6 @@ export default {
                 (this as any).$t('global.new_app_version'),
             );
         } else if (userIsNew) {
-            localStorage.clear();
             localStorage.setItem('appVersion', currentVersion);
         } else if (clientVersion !== currentVersion) {
             localStorage.clear();
