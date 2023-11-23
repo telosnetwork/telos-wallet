@@ -35,6 +35,7 @@ export default boot(({ app }) => {
     ant.config.setNotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
     ant.config.setNotifyDisconnectedHandler(app.config.globalProperties.$notifyDisconnected);
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
+    ant.config.setNotifyRememberInfoHandler(app.config.globalProperties.$notifyRememberInfo);
 
     // setting log in and out callbacks --
 

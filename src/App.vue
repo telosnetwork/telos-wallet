@@ -1,10 +1,14 @@
 <script lang="ts">
-import { useChainStore } from 'src/antelope';
+import { getAntelope, useChainStore } from 'src/antelope';
+import { ComplexMessage } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { TELOS_CHAIN_IDS } from 'src/antelope/chains/chain-constants';
 import packageInfo from '../package.json';
+import { defineComponent } from 'vue';
 
-export default {
+export const isTodayBeforeTelosCloudDown = new Date().getTime() < new Date('2023-12-31').getTime();
+
+export default defineComponent({
     name: 'App',
     created() {
         const appVersionJustUpdated = 'UPDATED_NOTIFY_USER';
@@ -51,8 +55,25 @@ export default {
             script.defer = true;
             document.body.appendChild(script);
         }
+
+        if (isTodayBeforeTelosCloudDown) {
+            getAntelope().config.notifyRememberInfoHandler(
+                this.$t('temporal.telos_cloud_discontinued_title'),
+                [{
+                    tag: 'p',
+                    class: 'c-notify__message--subtitle',
+                    text: this.$t('temporal.telos_cloud_discontinued_message_title'),
+                }, {
+                    tag: 'p',
+                    class: '',
+                    text: this.$t('temporal.telos_cloud_discontinued_message_body'),
+                }],
+                '',
+                'telos-cloud-discontinued',
+            );
+        }
     },
-};
+});
 </script>
 
 <template>
