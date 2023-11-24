@@ -220,6 +220,13 @@ export const useNftsStore = defineStore(store_name, {
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
                 if (this.__contracts[network][contractLower]) {
+                    if (this.__contracts[network][contractLower].loading) {
+                        let waitCount = 0;
+                        while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+
                     const nft = this.__contracts[network][contractLower].list.find(
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
@@ -282,6 +289,12 @@ export const useNftsStore = defineStore(store_name, {
             const network = chain.settings.getNetwork();
 
             if (this.__contracts[network] && this.__contracts[network][contractLower]) {
+                if (this.__contracts[network][contractLower].loading) {
+                    let waitCount = 0;
+                    while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                }
                 return Promise.resolve(this.__contracts[network][contractLower].list);
             }
 
