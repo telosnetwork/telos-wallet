@@ -249,7 +249,7 @@ export const useNftsStore = defineStore(store_name, {
                 } else {
                     if (!chain.settings.isNative()) {
                         // this means we have the indexer down
-                        // we have the contract and the addres so we try to fetch the NFT from the contract
+                        // we have the contract and the address so we try to fetch the NFT from the contract
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
@@ -276,40 +276,41 @@ export const useNftsStore = defineStore(store_name, {
 
         async fetchNftsFromCollection(label: Label, contract: string): Promise<Collectible[] | null> {
             this.trace('fetchNftsFromCollection', label, contract);
+            const contractLower = contract.toLowerCase();
             const feedbackStore = useFeedbackStore();
             const chain = useChainStore().getChain(label);
             const network = chain.settings.getNetwork();
 
-            if (this.__contracts[network] && this.__contracts[network][contract.toLowerCase()]) {
-                return Promise.resolve(this.__contracts[network][contract].list);
+            if (this.__contracts[network] && this.__contracts[network][contractLower]) {
+                return Promise.resolve(this.__contracts[network][contractLower].list);
             }
 
             if (!this.__contracts[network]) {
                 this.__contracts[network] = {};
             }
 
-            if (!this.__contracts[network][contract]) {
-                this.__contracts[network][contract] = {
+            if (!this.__contracts[network][contractLower]) {
+                this.__contracts[network][contractLower] = {
                     contract,
                     list: [],
                     loading: true,
                 };
             }
 
-            this.__contracts[network][contract].loading = true;
+            this.__contracts[network][contractLower].loading = true;
 
             feedbackStore.setLoading('fetchNftsFromCollection');
             try {
                 const nfts = await chain.settings.getNftsForCollection(contract, { limit: 10000 });
-                this.__contracts[network][contract].list = nfts;
+                this.__contracts[network][contractLower].list = nfts;
 
                 return nfts;
             } catch {
-                this.__contracts[network][contract].list = [];
+                this.__contracts[network][contractLower].list = [];
                 throw new AntelopeError('antelope.nfts.error_fetching_collection_nfts');
             } finally {
                 feedbackStore.unsetLoading('fetchNftsFromCollection');
-                this.__contracts[network][contract].loading = false;
+                this.__contracts[network][contractLower].loading = false;
             }
         },
 

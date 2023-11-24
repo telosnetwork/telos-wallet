@@ -367,6 +367,7 @@ export const useAllowancesStore = defineStore(store_name, {
 
             if (collectionNftIds.length === 0) {
                 console.error(`Collection ${data.contract} has no NFTs`);
+
                 return null;
             }
 
