@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { ShapedAllowanceRow } from 'src/antelope/types/Allowances';
@@ -7,11 +8,12 @@ import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 
 import AllowancesTableRow from 'pages/evm/allowances/AllowancesTableRow.vue';
 import TableControls from 'components/evm/TableControls.vue';
-import { computed, ref } from 'vue';
 
 const props = defineProps<{
     rows: ShapedAllowanceRow[];
 }>();
+
+const emit = defineEmits(['sortChanged']);
 
 const { t: $t } = useI18n();
 const { fiatLocale, fiatCurrency } = useUserStore();
@@ -76,17 +78,23 @@ const tableRows = computed(() => {
 
     return props.rows.slice(start, end);
 });
+
+// methods
+function handleTableRequest({ pagination }: { pagination: { descending: boolean, sortBy: string } }) {
+    emit('sortChanged', { descending: pagination.descending, sortBy: pagination.sortBy });
+}
 </script>
 
 <template>
 <q-table
     :columns="tableColumns"
     :rows="tableRows"
-    :binary-state-sort="true"
-    :pagination="{ rowsPerPage: 0 }"
+    :pagination="pagination"
+    binary-state-sort
     hide-pagination
     flat
     class="q-mb-md"
+    @request="handleTableRequest"
 >
     <template v-slot:header="props">
         <q-tr :props="props">

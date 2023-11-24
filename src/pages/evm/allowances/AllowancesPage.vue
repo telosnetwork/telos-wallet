@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
@@ -8,7 +8,7 @@ import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
 import { CURRENT_CONTEXT, useAllowancesStore } from 'src/antelope';
-import { ShapedAllowanceRow, Sort } from 'src/antelope/types';
+import { Sort } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
 
@@ -31,12 +31,16 @@ const asideContent = [{
 
 // data
 const loading = ref(true);
-const shapedAllowanceRows = ref<ShapedAllowanceRow[]>([]);
+const includeCancelledAllowances = ref(false);
+// const shapedAllowanceRows = ref<ShapedAllowanceRow[]>([]);
+
+// computed
+const shapedAllowanceRows = computed(() => useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending));
 
 // methods
 onMounted(() => {
     useAllowancesStore().fetchAllowancesForAccount('0x13B745FC35b0BAC9bab9fD20B7C9f46668232607').then(() => {
-        shapedAllowanceRows.value = useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending);
+        // shapedAllowanceRows.value = useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending);
         loading.value = false;
     }); // eztodo get address from store
 });
@@ -46,7 +50,12 @@ function handleSearchUpdated(searchText: string) {
 }
 
 function handleIncludeCancelledUpdated(includeCancelled: boolean) {
-    console.log('Include cancelled updated', includeCancelled);
+    includeCancelledAllowances.value = includeCancelled;
+}
+
+function handleSortChanged(newSort: { descending: boolean, sortBy: string }) {
+    console.log('Sort changed', newSort);
+
 }
 </script>
 
@@ -79,7 +88,7 @@ function handleIncludeCancelledUpdated(includeCancelled: boolean) {
                 type="rect"
             />
         </div>
-        <AllowancesTable v-else :rows="shapedAllowanceRows" />
+        <AllowancesTable v-else :rows="shapedAllowanceRows" @sortChanged="handleSortChanged"/>
     </div>
 </AppPage>
 </template>
