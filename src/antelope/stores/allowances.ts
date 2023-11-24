@@ -212,56 +212,67 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
             });
 
-            const erc20AllowancesData   = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc20(value))?.value as IndexerAllowanceResponseErc20 | undefined;
-            const erc721AllowancesData  = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc721(value))?.value as IndexerAllowanceResponseErc721 | undefined;
-            const erc1155AllowancesData = fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc1155(value))?.value as IndexerAllowanceResponseErc1155 | undefined;
+            const erc20AllowancesData   = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc20(value))?.value as IndexerAllowanceResponseErc20 | undefined)?.results ?? [];
+            const erc721AllowancesData  = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc721(value))?.value as IndexerAllowanceResponseErc721 | undefined)?.results ?? [];
+            const erc1155AllowancesData = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc1155(value))?.value as IndexerAllowanceResponseErc1155 | undefined)?.results ?? [];
 
-            const shapedRowPromises = [];
+            const shapedErc20AllowanceRowPromises   = Promise.allSettled(erc20AllowancesData.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData)));
+            const shapedErc721AllowanceRowPromises  = Promise.allSettled(erc721AllowancesData.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData)));
+            const shapedErc1155AllowanceRowPromises = Promise.allSettled(erc1155AllowancesData.map(allowanceData => this.shapeErc1155AllowanceRow(allowanceData)));
 
-            if (erc20AllowancesData) {
-                const shapedErc20AllowancePromises = erc20AllowancesData.results.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData));
-                shapedRowPromises.push(Promise.allSettled(shapedErc20AllowancePromises));
-            } else {
-                shapedRowPromises.push(Promise.resolve(undefined));
-            }
+            const [settledErc20Results, settledErc721Results, settledErc1155Results] = await Promise.allSettled([
+                shapedErc20AllowanceRowPromises,
+                shapedErc721AllowanceRowPromises,
+                shapedErc1155AllowanceRowPromises,
+            ]);
 
-            if (erc721AllowancesData) {
-                const shapedErc721AllowancePromises = erc721AllowancesData.results.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData));
-                shapedRowPromises.push(Promise.allSettled(shapedErc721AllowancePromises));
-            } else {
-                shapedRowPromises.push(Promise.resolve(undefined));
-            }
+            if (settledErc20Results.status === 'fulfilled') {
+                const shapedErc20Rows: ShapedAllowanceRowERC20[] = [];
 
-            if (erc1155AllowancesData) {
-                const shapedErc1155AllowancePromises = erc1155AllowancesData.results.map(allowanceData => this.shapeErc1155AllowanceRow(allowanceData));
-                shapedRowPromises.push(Promise.allSettled(shapedErc1155AllowancePromises));
-            } else {
-                shapedRowPromises.push(Promise.resolve(undefined));
-            }
-
-            const results = await Promise.allSettled(shapedRowPromises);
-
-            results.forEach((settledPromises, index) => {
-                if (!settledPromises) {
-                    return;
-                }
-                const shapedAllowances = settledPromises.reduce((acc, promise) => {
-                    if (promise.status === 'fulfilled') {
-                        acc.push(promise.value as ShapedAllowanceRow);
+                settledErc20Results.value.forEach((result) => {
+                    if (result.status === 'fulfilled') {
+                        result.value && shapedErc20Rows.push(result.value);
                     } else {
-                        console.error('Error processing allowance data', promise.reason);
+                        console.error('Error shaping ERC20 allowance row', result.reason);
                     }
-                    return acc;
-                }, [] as ShapedAllowanceRow[]);
+                });
 
-                if (index === 0 && erc20AllowancesData) {
-                    this.setErc20Allowances(CURRENT_CONTEXT, shapedAllowances as ShapedAllowanceRowERC20[]);
-                } else if (index === 1 && erc721AllowancesData) {
-                    this.setErc721Allowances(CURRENT_CONTEXT, shapedAllowances as (ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721)[]);
-                } else if (index === 2 && erc1155AllowancesData) {
-                    this.setErc1155Allowances(CURRENT_CONTEXT, shapedAllowances as ShapedAllowanceRowNftCollection[]);
-                }
-            });
+                this.setErc20Allowances(CURRENT_CONTEXT, shapedErc20Rows);
+            } else {
+                console.error('Error shaping ERC20 allowance rows', settledErc20Results.reason);
+            }
+
+            if (settledErc721Results.status === 'fulfilled') {
+                const shapedErc721Rows: (ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection)[] = [];
+
+                settledErc721Results.value.forEach((result) => {
+                    if (result.status === 'fulfilled') {
+                        result.value && shapedErc721Rows.push(result.value);
+                    } else {
+                        console.error('Error shaping ERC721 allowance row', result.reason);
+                    }
+                });
+
+                this.setErc721Allowances(CURRENT_CONTEXT, shapedErc721Rows);
+            } else {
+                console.error('Error shaping ERC721 allowance rows', settledErc721Results.reason);
+            }
+
+            if (settledErc1155Results.status === 'fulfilled') {
+                const shapedErc1155Rows: ShapedAllowanceRowNftCollection[] = [];
+
+                settledErc1155Results.value.forEach((result) => {
+                    if (result.status === 'fulfilled') {
+                        result.value && shapedErc1155Rows.push(result.value);
+                    } else {
+                        console.error('Error shaping ERC1155 allowance row', result.reason);
+                    }
+                });
+
+                this.setErc1155Allowances(CURRENT_CONTEXT, shapedErc1155Rows);
+            } else {
+                console.error('Error shaping ERC1155 allowance rows', settledErc1155Results.reason);
+            }
 
             useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
 
@@ -346,19 +357,41 @@ export const useAllowancesStore = defineStore(store_name, {
 
         },
         async shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection | null> {
+            const network = useChainStore().getChain(CURRENT_CONTEXT).settings.getNetwork();
+
             const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
             const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-            const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
+            await useNftsStore().fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
+            const collectionNftIds = (useNftsStore().__contracts[network][data.contract]?.list ?? []).map(nft => nft.id);
 
-            return collectionInfo ? {
-                lastUpdated: data.updated,
-                spenderAddress: data.operator,
-                spenderName: spenderContract?.name,
-                allowed: data.approved,
-                collectionAddress: collectionInfo.address,
-                collectionName: collectionInfo.name,
-                balance,
-            } : null;
+            if (collectionNftIds.length === 0) {
+                console.error(`Collection ${data.contract} has no NFTs`);
+                return null;
+            }
+
+            const balancePromises = collectionNftIds.map(async (tokenId) => {
+                const contractInstance = await collectionInfo?.getContractInstance();
+                return contractInstance?.balanceOf(data.owner, tokenId);
+            });
+
+            try {
+                const balancesOfAllIdsInCollection = await Promise.all(balancePromises);
+                const balance = balancesOfAllIdsInCollection.reduce((acc, balance) => acc.add(balance ?? 0), BigNumber.from(0));
+
+                return collectionInfo ? {
+                    lastUpdated: data.updated,
+                    spenderAddress: data.operator,
+                    spenderName: spenderContract?.name,
+                    allowed: data.approved,
+                    collectionAddress: collectionInfo.address,
+                    collectionName: collectionInfo.name,
+                    balance,
+                } : null;
+            } catch (e) {
+                console.error(`Error fetching ERC1155 balances for collection ${data.contract}`, e);
+                return null;
+            }
+
         },
     },
 });
