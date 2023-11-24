@@ -358,11 +358,12 @@ export const useAllowancesStore = defineStore(store_name, {
         },
         async shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection | null> {
             const network = useChainStore().getChain(CURRENT_CONTEXT).settings.getNetwork();
+            const nftsStore = useNftsStore();
 
             const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
             const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-            await useNftsStore().fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
-            const collectionNftIds = (useNftsStore().__contracts[network][data.contract]?.list ?? []).map(nft => nft.id);
+            await nftsStore.fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
+            const collectionNftIds = (nftsStore.__contracts[network][data.contract]?.list ?? []).map(nft => nft.id);
 
             if (collectionNftIds.length === 0) {
                 console.error(`Collection ${data.contract} has no NFTs`);
@@ -371,7 +372,7 @@ export const useAllowancesStore = defineStore(store_name, {
 
             const balancePromises = collectionNftIds.map(async (tokenId) => {
                 const contractInstance = await collectionInfo?.getContractInstance();
-                return contractInstance?.balanceOf(data.owner, tokenId);
+                return contractInstance?.balanceOf(data.owner, tokenId) as BigNumber;
             });
 
             try {
