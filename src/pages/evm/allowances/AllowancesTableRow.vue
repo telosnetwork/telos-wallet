@@ -212,7 +212,7 @@ onMounted(async () => {
     </q-td>
     <q-td key="spender">
         <ExternalLink
-            :text="row.spenderName ?? row.spenderAddress"
+            :text="row.spenderName || row.spenderAddress"
             :url="spenderUrl"
             :purpose="$t('evm_allowances.spender_link_label')"
         />

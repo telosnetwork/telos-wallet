@@ -7,8 +7,8 @@ import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.
 import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
-import { shapedAllowanceRows } from 'src/pages/evm/allowances/temp-allowances-fixtures';
-import { useAllowancesStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useAllowancesStore } from 'src/antelope';
+import { ShapedAllowanceRow, Sort } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
 
@@ -31,15 +31,14 @@ const asideContent = [{
 
 // data
 const loading = ref(true);
+const shapedAllowanceRows = ref<ShapedAllowanceRow[]>([]);
 
 // methods
 onMounted(() => {
-    // simulate loading
-    setTimeout(() => {
+    useAllowancesStore().fetchAllowancesForAccount('0x13B745FC35b0BAC9bab9fD20B7C9f46668232607').then(() => {
+        shapedAllowanceRows.value = useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending);
         loading.value = false;
-    }, 2000);
-
-    useAllowancesStore().fetchAllowancesForAccount('0x13B745FC35b0BAC9bab9fD20B7C9f46668232607');
+    }); // eztodo get address from store
 });
 
 function handleSearchUpdated(searchText: string) {
