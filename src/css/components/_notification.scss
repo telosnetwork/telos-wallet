@@ -64,7 +64,7 @@
         input {
             margin-right: 0.5rem;
         }
-        span {
+        label {
             color: var(--text-color, #000);
             @include text--paragraph;
         }
