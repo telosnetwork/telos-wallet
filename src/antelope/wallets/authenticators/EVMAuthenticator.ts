@@ -4,22 +4,21 @@ import { SendTransactionResult, WriteContractResult } from '@wagmi/core';
 import { BigNumber, ethers } from 'ethers';
 import { CURRENT_CONTEXT, getAntelope, useAccountStore, useContractStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { AntelopeDebugTraceType, createTraceFunction } from 'src/antelope/config';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
-import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
 import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw, erc1155Abi } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
     readonly label: string;
-    readonly trace: (message: string, ...args: unknown[]) => void;
+    readonly trace: AntelopeDebugTraceType;
 
     constructor(label: string) {
         this.label = label;
         const name = `${this.getName()}(${label})`;
         this.trace = createTraceFunction(name);
-        useFeedbackStore().setDebug(name, isTracingAll());
     }
 
     /**

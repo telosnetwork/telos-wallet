@@ -15,7 +15,6 @@
 import { defineStore } from 'pinia';
 import {
     useAccountStore,
-    useFeedbackStore,
     useChainStore,
     useEVMStore,
     getAntelope,
@@ -35,7 +34,7 @@ import {
     EvmContractFactoryData,
 } from 'src/antelope/types';
 
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createTraceFunction } from 'src/antelope/config';
 import EvmContract, { Erc20Transfer } from 'src/antelope/stores/utils/contracts/EvmContract';
 import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -80,7 +79,6 @@ export const useContractStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init() {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             this.loadCache();
         },
 

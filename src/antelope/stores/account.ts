@@ -16,7 +16,6 @@
 import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
     CURRENT_CONTEXT,
@@ -26,7 +25,7 @@ import {
     useNftsStore,
 } from 'src/antelope';
 import { getAntelope, useChainStore } from 'src/antelope';
-import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
     Action,
@@ -114,7 +113,6 @@ export const useAccountStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
         async loginNative({ authenticator, network }: LoginNativeActionData): Promise<boolean> {
             this.trace('loginNative', authenticator, network);
             let success = false;

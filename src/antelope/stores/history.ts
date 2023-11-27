@@ -15,8 +15,6 @@
 
 import { defineStore } from 'pinia';
 import {
-    createTraceFunction,
-    isTracingAll,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import {
@@ -49,6 +47,7 @@ import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
+import { createTraceFunction } from 'src/antelope/config';
 
 export const transfers_filter_limit = 10000;
 
@@ -101,7 +100,6 @@ export const useHistoryStore = defineStore(store_name, {
             const self = useHistoryStore();
             self.clearEvmNftTransfers();
             self.clearEvmTransactions();
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.subscribe({
                 next: ({ account }) => {
                     if (account) {

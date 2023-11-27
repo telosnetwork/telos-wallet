@@ -1,8 +1,9 @@
-import { App } from 'vue';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App, toRaw } from 'vue';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
+import { AntelopeConfig, AntelopeDebug, chainNetworkNames } from 'src/antelope/config/';
 import installPinia from 'src/antelope/stores';
 
 import { AccountModel } from 'src/antelope/stores/account';
@@ -111,9 +112,39 @@ export class Antelope {
     get events() {
         return events;
     }
+
+    extractStoreState(store: Store) {
+        const state = store.$state;
+        const result: Record<string, unknown> = {};
+        Object.keys(state).forEach((key) => {
+            const value = toRaw((state as any)[key] as never);
+            if (key.substring(0, 2) === '__') {
+                result[key] = value;
+            }
+        });
+        return result;
+    }
+
+    /**
+     * This function prints the state of the store in the console
+     */
+    print() {
+        if (this.config.debug.isDebugging()) {
+            console.log('--- Antelope lib ---');
+            console.log('Config: ', [this.config]);
+            console.log('Wallets:', [this.wallets]);
+            console.log('   --- Stores ---   ');
+            const stores = this.stores;
+            Object.keys(stores).forEach((key) => {
+                const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+                const eventName = `${titlecase(key)}:`;
+                console.log(eventName.padEnd(10, ' '), [this.extractStoreState((stores as any)[key])]);
+            });
+        }
+    }
 }
 
-const antelope = new Antelope(new AntelopeConfig(), new AntelopeWallets());
+const antelope = new Antelope(new AntelopeConfig(new AntelopeDebug()), new AntelopeWallets());
 export const getAntelope = () => antelope;
 export const installAntelope = (app: App) => {
     if (app.config.globalProperties.$antelope) {

@@ -41,6 +41,7 @@ import TelosEVMTestnet from 'src/antelope/chains/evm/telos-evm-testnet';
 import { getAntelope } from 'src/antelope';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { createTraceFunction } from 'src/antelope/config';
 import {
     AntelopeError,
     ChainSettings,
@@ -48,8 +49,6 @@ import {
     TokenClass,
 } from 'src/antelope/types';
 import { ethers } from 'ethers';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
-
 
 
 export const settings: { [key: string]: ChainSettings } = {
@@ -103,6 +102,8 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
 export interface ChainState {
     // chains mapped by label
     __chains: { [label: Label]: ChainModel };
+    // notwork settings
+    __networks: { [network: string]: ChainSettings };
 }
 
 const store_name = 'chain';
@@ -128,7 +129,6 @@ export const useChainStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
         // Updates ----
         async updateChainData(label: string): Promise<void> {
             this.trace('updateChainData');
@@ -298,4 +298,5 @@ export const useChainStore = defineStore(store_name, {
 
 const chainInitialState: ChainState = {
     __chains: {},
+    __networks: settings,
 };

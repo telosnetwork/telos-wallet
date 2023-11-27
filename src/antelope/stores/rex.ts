@@ -9,8 +9,6 @@ import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
 import {
-    isTracingAll,
-    createTraceFunction,
     useFeedbackStore,
 } from 'src/antelope/stores/feedback';
 import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
@@ -21,6 +19,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 import { formatUnstakePeriod } from 'src/antelope/stores/utils/date-utils';
+import { createTraceFunction } from 'src/antelope/config';
 
 
 export interface RexModel {
@@ -66,7 +65,6 @@ export const useRexStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({

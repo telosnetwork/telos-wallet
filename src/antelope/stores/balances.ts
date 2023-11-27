@@ -26,7 +26,7 @@ import {
     AntelopeError,
 
 } from 'src/antelope/types';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createTraceFunction } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import {
@@ -72,7 +72,6 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const balanceStore = useBalancesStore();
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
@@ -478,7 +477,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         updateBalance(label: string, balance: TokenBalance): void {
-            this.trace('updateBalance', label, balance);
+            this.trace('updateBalance', label, balance.str, balance.token.symbol);
             const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 if (

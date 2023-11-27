@@ -13,7 +13,6 @@ import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { BehaviorSubject, filter } from 'rxjs';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { events_signatures, functions_overrides } from 'src/antelope/stores/utils';
@@ -33,6 +32,7 @@ import {
     useFeedbackStore,
 } from 'src/antelope';
 import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
+import { createTraceFunction } from 'src/antelope/config';
 
 const onEvmReady = new BehaviorSubject<boolean>(false);
 
@@ -60,7 +60,6 @@ export const useEVMStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
 
         // actions ---
         async initInjectedProvider(authenticator: InjectedProviderAuth): Promise<void> {

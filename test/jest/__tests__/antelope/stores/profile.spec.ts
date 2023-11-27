@@ -1,8 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 
 // Mockups
-jest.mock('src/antelope/stores/feedback', () => ({
-    createInitFunction: jest.fn(),
+jest.mock('src/antelope/config', () => ({
     createTraceFunction: jest.fn(),
 }));
 
