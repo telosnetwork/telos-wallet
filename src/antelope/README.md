@@ -1,18 +1,29 @@
-## Antelope library
+## Antelope library - Working Proposal
 
-Antelope is a TypeScript library that streamlines the process of developing blockchain applications for the Antelope Alliance, which includes platforms like EOS, Telos, WAX, UX and their respectives EVMs. The library enables MetaMask-based authentication for EVM blockchains as long as any UAL-compatible wallet for native Antelope blockchains. Utilizing Pinia as a storage solution, Antelope maintains and stores application data, and leverages observables from RxJS to trigger internal events, to which developers can subscribe and respond.
+## Products
 
-It is essential to note that Antelope is still a work in progress, and its architecture is subject to design changes. This library incorporates the experiences of multiple developers and is built from code fragments currently in use by websites under the Telos Network group. The objective is to aggregate all this code into a singular library and subsequently adapt the websites to implement this new library.
+### 1 - Antelope library
+- Support for EVM and Native
+- Its own github repo and its own node package
+
+### 2 - Telos Wallet Native / Zero
+- Complete reimplementation of the native part of the wallet using the new Antelope library
+- Re design of UI: following the same EVM style and good interactions
+- Incorporate the new Branding
 
 
-## External dependencies
-```typescript
-import { App } from 'vue';
-import { Authenticator, RpcEndpoint } from "universal-authenticator-library";
-import { Subject, BehaviorSubject, filter } from 'rxjs';
-import { StoreCallback } from '@quasar/app-webpack';
-import { store } from 'quasar/wrappers';
-import { createPinia, defineStore } from 'pinia';
-import { ethers } from 'ethers';
-import { ExternalProvider } from '@ethersproject/providers';
-```
+
+## Milestones
+
+### Milestone 1 - Extract the Antelope lib
+- Create Githubrepo for Antelope lib
+- Unit test, doc, examples
+- PR: import Antelope lib and remove code from the wallet
+### Milestone 2 - Extend the lib
+- Native support
+- Multi-chain support
+- Unit test, doc, examples
+### Milestone 3 - Finish Telos Wallet Native
+- New Branding
+- New Design
+- Import Antelope
