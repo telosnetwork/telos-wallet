@@ -101,7 +101,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 .sort((a, b) => (a.spenderName ?? a.spenderAddress).localeCompare(b.spenderName ?? b.spenderAddress))
                 .filter(row => filterCancelledAllowances(includeCancelled, row));
 
-            return order === Sort.ascending ? [...erc20WithFiatValue, ...rowsWithoutFiatValue] : [...rowsWithoutFiatValue, ...erc20WithFiatValue];
+            return order === Sort.descending ? [...erc20WithFiatValue, ...rowsWithoutFiatValue] : [...rowsWithoutFiatValue, ...erc20WithFiatValue];
         },
         allowancesSortedByAllowanceAmount: state => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             /*
@@ -137,12 +137,10 @@ export const useAllowancesStore = defineStore(store_name, {
         },
         allowancesSortedBySpender: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             const allAllowances = useAllowancesStore().allowances(label);
-            const allowancesWithSpenderName    = allAllowances
-                .filter(allowance => allowance.spenderName)
-                .filter(row => filterCancelledAllowances(includeCancelled, row));
+            const allowancesWithSpenderName = allAllowances
+                .filter(allowance => allowance.spenderName && filterCancelledAllowances(includeCancelled, allowance));
             const allowancesWithoutSpenderName = allAllowances
-                .filter(allowance => !allowance.spenderName)
-                .filter(row => filterCancelledAllowances(includeCancelled, row));
+                .filter(allowance => !allowance.spenderName && filterCancelledAllowances(includeCancelled, allowance));
 
             const sortedAllowancesWithSpenderName = allowancesWithSpenderName.sort((a, b) => {
                 const aSpender = a.spenderName as string;
