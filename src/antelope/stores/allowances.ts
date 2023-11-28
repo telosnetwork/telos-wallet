@@ -130,7 +130,7 @@ export const useAllowancesStore = defineStore(store_name, {
             const sortedAllowancesWithSpenderName = allowancesWithSpenderName.sort((a, b) => {
                 const aSpender = a.spenderName as string;
                 const bSpender = b.spenderName as string;
-                return order === Sort.ascending ? aSpender.localeCompare(bSpender) : bSpender.localeCompare(aSpender);
+                return order === Sort.descending ? aSpender.localeCompare(bSpender) : bSpender.localeCompare(aSpender);
             });
             const sortedAllowancesWithoutSpenderName = allowancesWithoutSpenderName.sort((a, b) => order === Sort.ascending ? a.spenderAddress.localeCompare(b.spenderAddress) : b.spenderAddress.localeCompare(a.spenderAddress));
 
@@ -175,6 +175,7 @@ export const useAllowancesStore = defineStore(store_name, {
             const allowancesStore = useAllowancesStore();
             // eztodo in account store, wipe allowances on logout
             // eztodo on a timer, refresh allowance fiat values
+            // eztodo add allowances of all kinds on team account on testnet
             useFeedbackStore().setDebug(store_name, isTracingAll());
 
             getAntelope().events.onAccountChanged.pipe(

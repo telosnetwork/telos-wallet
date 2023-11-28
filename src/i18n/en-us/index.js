@@ -174,6 +174,8 @@ export default {
         none: 'None',
         token: 'Token',
         time_ago: '{time} ago',
+        sort_by_ascending: 'Sort by {column}, ascending',
+        sort_by_descending: 'Sort by {column}, descending',
     },
     nft : {
         collectible: 'Collectible',
@@ -297,6 +299,12 @@ export default {
         excludes_cancelled_allowances: 'Does not include cancelled allowances',
         spender_link_label: 'Go to the block explorer page for the spender contract',
         asset_logo_alt: 'Logo for {symbol}',
+        column_description_asset: 'asset balance',
+        column_description_value: 'fiat value',
+        column_description_allowance: 'allowance amount',
+        column_description_spender: 'spender contract',
+        column_description_asset_type: 'asset type (collectible or token)',
+        column_description_updated: 'date of last allowance update',
     },
     notification:{
         success_title_trx: 'Success',

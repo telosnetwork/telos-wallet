@@ -8,9 +8,10 @@ import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
 import { CURRENT_CONTEXT, useAllowancesStore } from 'src/antelope';
-import { Sort } from 'src/antelope/types';
+import { AllowanceTableColumns, Sort } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
+const allowanceStore = useAllowancesStore();
 
 const asideHeader = $t('evm_allowances.aside_header');
 
@@ -32,10 +33,40 @@ const asideContent = [{
 // data
 const loading = ref(true);
 const includeCancelledAllowances = ref(false);
-// const shapedAllowanceRows = ref<ShapedAllowanceRow[]>([]);
+const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
+    descending: true,
+    sortBy: AllowanceTableColumns.asset,
+});
 
 // computed
-const shapedAllowanceRows = computed(() => useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending));
+const shapedAllowanceRows = computed(() => {
+    const {
+        asset,
+        value,
+        allowance,
+        spender,
+        type,
+    } = AllowanceTableColumns;
+    const { sortBy } = sort.value;
+
+    const order = sort.value.descending ? Sort.descending : Sort.ascending;
+    const getterArgs: [string, Sort] = [CURRENT_CONTEXT, order];
+
+    // eztodo add includeCancelledAllowances to store getters
+    if (sortBy === asset) {
+        return allowanceStore.allowancesSortedByAssetQuantity(...getterArgs);
+    } else if (sortBy === value) {
+        return allowanceStore.allowancesSortedByAllowanceFiatValue(...getterArgs);
+    } else if (sortBy === allowance) {
+        return allowanceStore.allowancesSortedByAllowanceAmount(...getterArgs);
+    } else if (sortBy === spender) {
+        return allowanceStore.allowancesSortedBySpender(...getterArgs);
+    } else if (sortBy === type) {
+        return allowanceStore.allowancesSortedByAssetType(...getterArgs);
+    } else {
+        return allowanceStore.allowancesSortedByLastUpdated(...getterArgs);
+    }
+});
 
 // methods
 onMounted(() => {
@@ -53,9 +84,11 @@ function handleIncludeCancelledUpdated(includeCancelled: boolean) {
     includeCancelledAllowances.value = includeCancelled;
 }
 
-function handleSortChanged(newSort: { descending: boolean, sortBy: string }) {
-    console.log('Sort changed', newSort);
-
+function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTableColumns }) {
+    sort.value = {
+        descending: newSort.descending,
+        sortBy: newSort.sortBy,
+    };
 }
 </script>
 

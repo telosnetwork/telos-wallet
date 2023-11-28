@@ -65,3 +65,12 @@ export function isErc721SingleAllowanceRow(row: ShapedAllowanceRow): row is Shap
 export function isNftCollectionAllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowNftCollection {
     return !(isErc20AllowanceRow(row) || isErc721SingleAllowanceRow(row));
 }
+
+export enum AllowanceTableColumns {
+    asset = 'asset',
+    value = 'value',
+    allowance = 'allowance',
+    spender = 'spender',
+    type = 'type',
+    updated = 'updated',
+}

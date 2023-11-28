@@ -51,6 +51,7 @@ export function prettyTimePeriod(seconds: number|null, $t: (key: string) => stri
     let quantity;
     let unit;
 
+    // eztodo support plurals here
     if (seconds < HOUR_SECONDS) {
         quantity = seconds / MINUTE_SECONDS;
         unit = $t('minutes');
