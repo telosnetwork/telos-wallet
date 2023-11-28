@@ -374,7 +374,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         // we fix the supportedInterfaces property if it is undefined in the response but present in the request
         Object.values(response.contracts).forEach((contract) => {
             contract.supportedInterfaces = contract.supportedInterfaces ||
-                params.type ? [params.type?.toLocaleLowerCase() as string] : undefined;
+                params.type ? [params.type?.toLowerCase() as string] : undefined;
         });
 
         this.processNftContractsCalldata(response.contracts);
