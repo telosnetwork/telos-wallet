@@ -191,8 +191,6 @@ export const useAllowancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const allowancesStore = useAllowancesStore();
-            // eztodo in account store, wipe allowances on logout
-            // eztodo on a timer, refresh allowance fiat values
             // eztodo add allowances of all kinds on team account on testnet
             useFeedbackStore().setDebug(store_name, isTracingAll());
 
@@ -415,7 +413,6 @@ export const useAllowancesStore = defineStore(store_name, {
                 console.error(`Error fetching ERC1155 balances for collection ${data.contract}`, e);
                 return null;
             }
-
         },
     },
 });

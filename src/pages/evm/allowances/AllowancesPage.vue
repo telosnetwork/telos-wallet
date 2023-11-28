@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
@@ -37,6 +37,7 @@ const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
     descending: true,
     sortBy: AllowanceTableColumns.asset,
 });
+const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
@@ -80,7 +81,20 @@ watch(userAddress, (address) => {
 }, { immediate: true });
 
 // methods
+onMounted(() => {
+    timeout.value = setTimeout(() => {
+        useAllowancesStore().fetchAllowancesForAccount(userAddress.value);
+    }, 13000);
+});
+
+onBeforeUnmount(() => {
+    if (timeout.value) {
+        clearTimeout(timeout.value);
+    }
+});
+
 function handleSearchUpdated(searchText: string) {
+    // eztodo implement
     console.log('Search updated', searchText);
 }
 
