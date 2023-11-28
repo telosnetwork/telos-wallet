@@ -134,7 +134,7 @@ const allowanceTextShort = computed(() => {
 const allowanceTextFull = computed(() => {
     if (isErc20Row) {
         const allowance = props.row.allowance ?? BigNumber.from(0);
-        return prettyPrintCurrency(allowance, 4, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
+        return prettyPrintCurrency(allowance, 18, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
     }
 
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
