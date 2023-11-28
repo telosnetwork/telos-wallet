@@ -207,7 +207,7 @@ export default defineComponent({
         <div class="flex justify-between">
             <img
                 ref="logo-image"
-                src="~assets/logo--telos-wallet.svg"
+                src="/branding/telos-wallet.svg"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
                 role="link"
@@ -433,8 +433,13 @@ export default defineComponent({
         width: 100vw;
         transform: translateX(-100%);
         transition: 0.2s transform ease;
-        background: var(--site-gradient);
         z-index: $z-index--menu;
+        padding-bottom: 0 !important;
+        background: url("/branding/background.png");
+        // background-position: right; // blue/green to light
+        // background-position: left;
+        background-repeat: no-repeat;
+        background-size: cover;
 
         &--open {
             transform: translateX(0);

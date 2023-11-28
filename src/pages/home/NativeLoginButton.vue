@@ -234,7 +234,7 @@ export default defineComponent({
         <div class="q-mt-md q-mb-sm">
             <q-btn
                 :label="$t('home.connect_with_wallet')"
-                class="purpleGradient q-px-md q-py-sm"
+                class="purpleGradient q-px-md q-py-sm login-button"
                 @click="showLogin = true"
             />
         </div>
@@ -245,7 +245,7 @@ export default defineComponent({
                 text-color="white"
                 outline
                 :label="$t('home.view_any_account')"
-                class="q-px-md q-py-sm"
+                class="q-px-md q-py-sm login-button"
                 @click="loginAsJustViewer()"
             />
         </div>
@@ -256,7 +256,7 @@ export default defineComponent({
                 text-color="white"
                 outline
                 :label="$t('home.create_new_account')"
-                class="q-px-md q-py-sm"
+                class="q-px-md q-py-sm login-button"
                 @click="signUp"
             />
         </div>
@@ -399,6 +399,10 @@ export default defineComponent({
     width: 30rem;
     height: auto;
     margin-bottom: 5rem;
+}
+
+.login-button {
+    width: 208px;
 }
 
 

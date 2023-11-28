@@ -12,20 +12,26 @@ $purple: #8946DF;
 $saveBtn: #2e1f4f;
 
 /************************
+ *** Defaults ***
+ ************************/
+ $default-contrast-text-color: #404041;
+
+
+/************************
  *** Dark/Light Mode ***
  ************************/
 
 // Light Mode
 .body--light {
-    $accent-1: #571AFF;
-    $accent-2: #505DCD;
+    $accent-1: #86469a;//#571AFF;
+    $accent-2: #87469a;//#c2dfa3; //#238ecb; //#505DCD;
     $accent-3: #DDD1FF;
     $accent-4: #A5A6F6;
     $accent-5: #F7F5FF;
     $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
     $tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8));
     $high-contrast-text-color: #282828;
-    $default-contrast-text-color: #4D4D4D;
+    $default-contrast-text-color: #404041;
     $low-contrast-text-color: #939393;
     $native-contrast-text-color: #F7F5FF;
     $menu-text: #fff;

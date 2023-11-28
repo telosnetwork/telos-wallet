@@ -42,58 +42,60 @@ onMounted(() => {
         <div class="c-home">
             <div class="c-home__container">
                 <img
-                    src="~assets/logo--telos-wallet.svg"
+                    src="/branding/telos-wallet.svg"
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
                 <div class="c-home__button-container">
-                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'evm',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'evm'"
-                            @keydown.enter="setTab('evm')"
-                            @click="setTab('evm')"
-                        >
+                    <div class="c-home__button-container-background">
+                        <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
+                            <button
+                                :class="{
+                                    'c-home__network-toggle-button': true,
+                                    'c-home__network-toggle-button--activated': tab === 'evm',
+                                }"
+                                role="tab"
+                                :aria-selected="tab === 'evm'"
+                                @keydown.enter="setTab('evm')"
+                                @click="setTab('evm')"
+                            >
 
-                            {{ $t('global.telos_evm') }}
-                        </button>
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'zero',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'zero'"
-                            @keydown.enter.space="setTab('zero')"
-                            @click="setTab('zero')"
-                        >
+                                {{ $t('global.telos_evm') }}
+                            </button>
+                            <button
+                                :class="{
+                                    'c-home__network-toggle-button': true,
+                                    'c-home__network-toggle-button--activated': tab === 'zero',
+                                }"
+                                role="tab"
+                                :aria-selected="tab === 'zero'"
+                                @keydown.enter.space="setTab('zero')"
+                                @click="setTab('zero')"
+                            >
 
-                            {{ $t('global.native') }}
-                        </button>
+                                {{ $t('global.native') }}
+                            </button>
+                        </div>
+                        <div v-else>
+                            <q-btn
+                                class="c-home__menu-back-button"
+                                flat
+                                dense
+                                icon="arrow_back_ios"
+                                @click="goBack"
+                            >
+
+                                {{ $t('global.back') }}
+                            </q-btn>
+                        </div>
+
+                        <NativeLoginButton v-if="tab === 'zero'" />
+
+                        <EVMLoginButtons
+                            v-else-if="tab === 'evm'"
+                            v-model="currentMenu"
+                        />
                     </div>
-                    <div v-else>
-                        <q-btn
-                            class="c-home__menu-back-button"
-                            flat
-                            dense
-                            icon="arrow_back_ios"
-                            @click="goBack"
-                        >
-
-                            {{ $t('global.back') }}
-                        </q-btn>
-                    </div>
-
-                    <NativeLoginButton v-if="tab === 'zero'" />
-
-                    <EVMLoginButtons
-                        v-else-if="tab === 'evm'"
-                        v-model="currentMenu"
-                    />
                 </div>
                 <div class="c-home__external-link">
                     <a
@@ -136,13 +138,16 @@ onMounted(() => {
 <style lang="scss">
 .c-home {
     position: relative;
-    background: var(--site-gradient);
     min-height: 100vh;
     display: flex;
 
     &__page-container {
         // override inline style of unknown origin (do not delete)
         padding-bottom: 0 !important;
+        background: url("/branding/background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size:cover;
     }
 
     &__container {
@@ -163,10 +168,20 @@ onMounted(() => {
 
     &__button-container {
         align-self: center;
+        height: 455px;
+    }
+
+    &__button-container-background{
         border-radius: 4px;
         padding: 24px;
-        background-color: rgba(white, 0.1);
-        max-width: 320px;
+        background-color: rgba($default-contrast-text-color, 0.1);
+        height: fit-content;
+        width: 320px;
+
+        background: url("/branding/background.png");
+        // background-position: left;
+        background-repeat: no-repeat;
+        background-size: cover;
     }
 
     &__network-toggle-container {
@@ -179,7 +194,7 @@ onMounted(() => {
         text-transform: uppercase;
         text-align: center;
         padding: 8px 24px;
-        background-color: rgba(white, 0.2);
+        background-color: rgba($default-contrast-text-color, 0.1);
         border: unset;
         color: white;
         cursor: pointer;
@@ -199,7 +214,7 @@ onMounted(() => {
     }
 
     &__menu-back-button {
-        color: white;
+        color: $default-contrast-text-color;
         margin-bottom: 24px;
     }
 
@@ -212,12 +227,12 @@ onMounted(() => {
         gap: 4px;
 
         margin-top: 24px;
-        color: white;
+        color: $default-contrast-text-color;
     }
 
     &__external-link-text {
         @include text--small;
-        color: white;
+        color: $default-contrast-text-color;
         text-decoration: none;
 
         &:hover {
@@ -228,6 +243,12 @@ onMounted(() => {
     // guarantees wallet connect on top of footer
     &__footer {
         position: relative;
+        background: white;
+        // background: url("/branding/background.png");
+        // background-position: center;
+        // background-repeat: no-repeat;
+        // background-size: center;
+        color: $default-contrast-text-color;
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;

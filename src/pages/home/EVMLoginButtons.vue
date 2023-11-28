@@ -346,6 +346,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     gap: 14px;
+    margin-bottom: 24px;
 
     &__loading{
         width: 100%;
@@ -417,6 +418,7 @@ export default defineComponent({
             color: $white;
             outline-color: $white;
             outline-width: 2px;
+            background-color: #FFFFFF10;
         }
 
         &:not(:hover) #{$self}__icon {
