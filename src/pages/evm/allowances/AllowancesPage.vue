@@ -50,9 +50,8 @@ const shapedAllowanceRows = computed(() => {
     const { sortBy } = sort.value;
 
     const order = sort.value.descending ? Sort.descending : Sort.ascending;
-    const getterArgs: [string, Sort] = [CURRENT_CONTEXT, order];
+    const getterArgs: [string, Sort, boolean] = [CURRENT_CONTEXT, order, includeCancelledAllowances.value];
 
-    // eztodo add includeCancelledAllowances to store getters
     if (sortBy === asset) {
         return allowanceStore.allowancesSortedByAssetQuantity(...getterArgs);
     } else if (sortBy === value) {

@@ -46,6 +46,14 @@ function sortAllowanceRowsByCollection(a: ShapedCollectionAllowanceRow, b: Shape
     return order === Sort.ascending ? aContractString.localeCompare(bContractString) : bContractString.localeCompare(aContractString);
 }
 
+function filterCancelledAllowances(includeCancelled: boolean, row: ShapedAllowanceRow): boolean {
+    if (includeCancelled) {
+        return true;
+    }
+
+    return isErc20AllowanceRow(row) ? row.allowance.gt(0) : row.allowed;
+}
+
 export interface AllowancesState {
     __erc_20_allowances:   { [label: Label]: ShapedAllowanceRowERC20[] };
     __erc_721_allowances:  { [label: Label]: (ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721)[] };
@@ -59,7 +67,7 @@ export const useAllowancesStore = defineStore(store_name, {
             .concat(state.__erc_721_allowances[label] ?? [])
             .concat(state.__erc_1155_allowances[label] ?? []),
         nonErc20Allowances: state => (label: Label): ShapedCollectionAllowanceRow[] => ((state.__erc_1155_allowances[label] ?? []) as ShapedCollectionAllowanceRow[]).concat(state.__erc_721_allowances[label] ?? []),
-        allowancesSortedByAssetQuantity: () => (label: Label, order: Sort): ShapedAllowanceRow[] => useAllowancesStore().allowances(label).sort((a, b) => {
+        allowancesSortedByAssetQuantity: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => useAllowancesStore().allowances(label).sort((a, b) => {
             let quantityA: number;
             let quantityB: number;
 
@@ -80,18 +88,22 @@ export const useAllowancesStore = defineStore(store_name, {
             }
 
             return order === Sort.ascending ? quantityA - quantityB : quantityB - quantityA;
-        }),
-        allowancesSortedByAllowanceFiatValue: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+        }).filter(row => filterCancelledAllowances(includeCancelled, row)),
+        allowancesSortedByAllowanceFiatValue: state => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             const erc20WithFiatValue = state.__erc_20_allowances[label].filter(allowance => allowance.tokenPrice)
-                .sort((a, b) => order === Sort.ascending ? a.tokenPrice - b.tokenPrice : b.tokenPrice - a.tokenPrice);
-            const erc20WithoutFiatValue = state.__erc_20_allowances[label].filter(allowance => !allowance.tokenPrice);
-            const rowsWithoutFiatValue = (state.__erc_721_allowances[label].concat(state.__erc_1155_allowances[label]) as ShapedAllowanceRow[])
+                .sort((a, b) => order === Sort.ascending ? a.tokenPrice - b.tokenPrice : b.tokenPrice - a.tokenPrice)
+                .filter(row => filterCancelledAllowances(includeCancelled, row));
+            const erc20WithoutFiatValue = state.__erc_20_allowances[label]
+                .filter(allowance => !allowance.tokenPrice && filterCancelledAllowances(includeCancelled, allowance));
+            const rowsWithoutFiatValue = (state.__erc_721_allowances[label]
+                .concat(state.__erc_1155_allowances[label]) as ShapedAllowanceRow[])
                 .concat(erc20WithoutFiatValue)
-                .sort((a, b) => (a.spenderName ?? a.spenderAddress).localeCompare(b.spenderName ?? b.spenderAddress));
+                .sort((a, b) => (a.spenderName ?? a.spenderAddress).localeCompare(b.spenderName ?? b.spenderAddress))
+                .filter(row => filterCancelledAllowances(includeCancelled, row));
 
             return order === Sort.ascending ? [...erc20WithFiatValue, ...rowsWithoutFiatValue] : [...rowsWithoutFiatValue, ...erc20WithFiatValue];
         },
-        allowancesSortedByAllowanceAmount: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+        allowancesSortedByAllowanceAmount: state => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             /*
                 Sort order:
                 1. assets with allowances which are allowed (ERC721 collections, single ERC721s, and ERC1155 collections) - secondary sort descending by contract name or address
@@ -106,15 +118,16 @@ export const useAllowancesStore = defineStore(store_name, {
                     const normalizedBAllowance = Number(formatUnits(b.allowance, b.tokenDecimals));
 
                     return order === Sort.ascending ? normalizedAAllowance - normalizedBAllowance : normalizedBAllowance - normalizedAAllowance;
-                });
+                })
+                .filter(row => filterCancelledAllowances(includeCancelled, row));
 
             const allowedAllowancesSorted = nonErc20Allowances
                 .filter(allowance => allowance.allowed)
                 .sort((a, b) => sortAllowanceRowsByCollection(a, b, order));
 
-            const notAllowedAllowancesSorted = nonErc20Allowances
+            const notAllowedAllowancesSorted = includeCancelled ? nonErc20Allowances
                 .filter(allowance => !allowance.allowed)
-                .sort((a, b) => sortAllowanceRowsByCollection(a, b, order));
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, order)) : [];
 
             return [
                 ...allowedAllowancesSorted,
@@ -122,10 +135,14 @@ export const useAllowancesStore = defineStore(store_name, {
                 ...notAllowedAllowancesSorted,
             ];
         },
-        allowancesSortedBySpender: () => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+        allowancesSortedBySpender: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             const allAllowances = useAllowancesStore().allowances(label);
-            const allowancesWithSpenderName    = allAllowances.filter(allowance => allowance.spenderName);
-            const allowancesWithoutSpenderName = allAllowances.filter(allowance => !allowance.spenderName);
+            const allowancesWithSpenderName    = allAllowances
+                .filter(allowance => allowance.spenderName)
+                .filter(row => filterCancelledAllowances(includeCancelled, row));
+            const allowancesWithoutSpenderName = allAllowances
+                .filter(allowance => !allowance.spenderName)
+                .filter(row => filterCancelledAllowances(includeCancelled, row));
 
             const sortedAllowancesWithSpenderName = allowancesWithSpenderName.sort((a, b) => {
                 const aSpender = a.spenderName as string;
@@ -139,7 +156,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 ...sortedAllowancesWithoutSpenderName,
             ];
         },
-        allowancesSortedByAssetType: state => (label: Label, order: Sort): ShapedAllowanceRow[] => {
+        allowancesSortedByAssetType: state => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => {
             // types are Collectible (ERC721/ERC1155) or Token (ERC20)
             const erc20Allowances = state.__erc_20_allowances[label] ?? [];
             const nonErc20Allowances = useAllowancesStore().nonErc20Allowances(label);
@@ -149,15 +166,15 @@ export const useAllowancesStore = defineStore(store_name, {
                 const normalizedBAllowance = Number(formatUnits(b.allowance, b.tokenDecimals));
 
                 return normalizedAAllowance - normalizedBAllowance;
-            });
+            }).filter(row => filterCancelledAllowances(includeCancelled, row));
 
             const allowedAllowancesSorted = nonErc20Allowances
                 .filter(allowance => allowance.allowed)
                 .sort((a, b) => sortAllowanceRowsByCollection(a, b, Sort.ascending));
 
-            const notAllowedAllowancesSorted = nonErc20Allowances
+            const notAllowedAllowancesSorted = includeCancelled ? nonErc20Allowances
                 .filter(allowance => !allowance.allowed)
-                .sort((a, b) => sortAllowanceRowsByCollection(a, b, Sort.ascending));
+                .sort((a, b) => sortAllowanceRowsByCollection(a, b, Sort.ascending)) : [];
 
             const collectiblesSorted = [
                 ...allowedAllowancesSorted,
@@ -166,8 +183,9 @@ export const useAllowancesStore = defineStore(store_name, {
 
             return order === Sort.ascending ? [...collectiblesSorted, ...tokensSorted] : [...tokensSorted, ...collectiblesSorted];
         },
-        allowancesSortedByLastUpdated: () => (label: Label, order: Sort): ShapedAllowanceRow[] => useAllowancesStore().allowances(label)
-            .sort((a, b) => order === Sort.ascending ? a.lastUpdated - b.lastUpdated : b.lastUpdated - a.lastUpdated),
+        allowancesSortedByLastUpdated: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => useAllowancesStore().allowances(label)
+            .sort((a, b) => order === Sort.ascending ? a.lastUpdated - b.lastUpdated : b.lastUpdated - a.lastUpdated)
+            .filter(row => filterCancelledAllowances(includeCancelled, row)),
     },
     actions: {
         trace: createTraceFunction(store_name),
