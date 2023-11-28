@@ -47,53 +47,55 @@ onMounted(() => {
                     class="c-home__logo"
                 >
                 <div class="c-home__button-container">
-                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'evm',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'evm'"
-                            @keydown.enter="setTab('evm')"
-                            @click="setTab('evm')"
-                        >
+                    <div class="c-home__button-container-background">
+                        <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
+                            <button
+                                :class="{
+                                    'c-home__network-toggle-button': true,
+                                    'c-home__network-toggle-button--activated': tab === 'evm',
+                                }"
+                                role="tab"
+                                :aria-selected="tab === 'evm'"
+                                @keydown.enter="setTab('evm')"
+                                @click="setTab('evm')"
+                            >
 
-                            {{ $t('global.telos_evm') }}
-                        </button>
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'zero',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'zero'"
-                            @keydown.enter.space="setTab('zero')"
-                            @click="setTab('zero')"
-                        >
+                                {{ $t('global.telos_evm') }}
+                            </button>
+                            <button
+                                :class="{
+                                    'c-home__network-toggle-button': true,
+                                    'c-home__network-toggle-button--activated': tab === 'zero',
+                                }"
+                                role="tab"
+                                :aria-selected="tab === 'zero'"
+                                @keydown.enter.space="setTab('zero')"
+                                @click="setTab('zero')"
+                            >
 
-                            {{ $t('global.native') }}
-                        </button>
+                                {{ $t('global.native') }}
+                            </button>
+                        </div>
+                        <div v-else>
+                            <q-btn
+                                class="c-home__menu-back-button"
+                                flat
+                                dense
+                                icon="arrow_back_ios"
+                                @click="goBack"
+                            >
+
+                                {{ $t('global.back') }}
+                            </q-btn>
+                        </div>
+
+                        <NativeLoginButton v-if="tab === 'zero'" />
+
+                        <EVMLoginButtons
+                            v-else-if="tab === 'evm'"
+                            v-model="currentMenu"
+                        />
                     </div>
-                    <div v-else>
-                        <q-btn
-                            class="c-home__menu-back-button"
-                            flat
-                            dense
-                            icon="arrow_back_ios"
-                            @click="goBack"
-                        >
-
-                            {{ $t('global.back') }}
-                        </q-btn>
-                    </div>
-
-                    <NativeLoginButton v-if="tab === 'zero'" />
-
-                    <EVMLoginButtons
-                        v-else-if="tab === 'evm'"
-                        v-model="currentMenu"
-                    />
                 </div>
                 <div class="c-home__external-link">
                     <a
@@ -106,20 +108,8 @@ onMounted(() => {
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="c-home__footer-first-line flex-center">
-                        <a
-                            href="https://docs.telos.net/evm/cloud-wallet/"
-                            target="_blank"
-                            class="c-home__footer-developer-link"
-                        >
-                            <div class="c-home__footer-developer-title">
-                                <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
-                            </div>
-                            <div class="c-home__footer-developer-text">{{ $t('home.developers_banner_text') }}</div>
-                            <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
-                        </a>
-                    </q-toolbar>
-                    <q-toolbar class="c-home__footer-second-line flex-center">
+
+                    <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
                             target="_blank"
@@ -178,16 +168,20 @@ onMounted(() => {
 
     &__button-container {
         align-self: center;
+        height: 455px;
+    }
+
+    &__button-container-background{
         border-radius: 4px;
         padding: 24px;
         background-color: rgba($default-contrast-text-color, 0.1);
-        height: 435px;
+        height: fit-content;
         width: 320px;
 
         background: url("/branding/background.png");
-        // background-position: center;
+        // background-position: left;
         background-repeat: no-repeat;
-        background-size:cover;
+        background-size: cover;
     }
 
     &__network-toggle-container {
@@ -258,72 +252,6 @@ onMounted(() => {
     }
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
-    }
-
-    &__footer-first-line {
-        // bottom border for first line
-        &::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background:rgba($default-contrast-text-color, 0.2);
-
-        }
-
-        &--small {
-            min-height: 38px;
-        }
-    }
-
-    &__footer-developer {
-        &-link {
-            text-decoration: none;
-            max-width: 320px;
-            padding: 10px;
-            display: grid;
-            gap: 5px;
-            grid-template:
-                "a a"
-                "b c";
-
-            @include sm-and-up {
-                padding: 0px;
-                gap: 14px;
-                grid-template: 'a b c' / auto auto max-content;
-                max-width: none;
-            }
-
-            &--small {
-                grid-template: 'a c' / auto auto;
-            }
-        }
-        &-title {
-            grid-area: a;
-            text-align: center;
-            &-text {
-                @include text--small-bold;
-                @include gradient_text;
-                text-transform: uppercase;
-                vertical-align: top;
-            }
-        }
-        &-text {
-            @include text--small;
-            grid-area: b;
-            color: $default-contrast-text-color;
-            text-align: left;
-            &--small {
-                display: none;
-            }
-        }
-        &-icon {
-            grid-area: c;
-            color: $default-contrast-text-color;
-            text-align: right;
-        }
     }
 
     @media only screen and (max-height: 800px) {

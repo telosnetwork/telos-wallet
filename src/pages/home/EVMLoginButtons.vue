@@ -5,6 +5,7 @@ import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
+import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -37,10 +38,16 @@ export default defineComponent({
             return e && (isMobile.value ? e.isSafePal : e._isSafePal);
         });
 
+        const supportsBrave = computed(() => {
+            const e = window.ethereum as unknown as { [key:string]: boolean };
+            return e && e.isBraveWallet;
+        });
+
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
         const injectedProviderDetected = computed(() => !!window.ethereum);
         const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value || (isMobile.value && isBraveBrowser.value)); // temp solution until Brave support is added https://github.com/telosnetwork/telos-wallet/issues/501
+        const showBraveButton = isBraveBrowser.value && !isMobile.value;
 
         const unsupportedExtensions = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
@@ -69,7 +76,10 @@ export default defineComponent({
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
-        const setSafepalAuthenticator = async () => {
+        const setBraveAuthenticator = async () => {
+            setAuthenticator('Brave', CURRENT_CONTEXT);
+        };
+        const setSafePalAuthenticator = async () => {
             setAuthenticator('SafePal', CURRENT_CONTEXT);
         };
         const setWalletConnectAuthenticator = async () => {
@@ -102,6 +112,11 @@ export default defineComponent({
             ant.config.notifyFailureMessage(message);
         };
 
+        const notifyEnableBrave = () => {
+            const message = globalProps.$t('home.enable_brave_notification_message');
+            ant.config.notifyFailureMessage(message);
+        };
+
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
         const isLoadingOreId = (provider: string) =>
             selectedOAuthProvider.value === provider &&
@@ -115,21 +130,27 @@ export default defineComponent({
             emit('update:modelValue', Menu.CLOUD);
         };
 
+
         return {
             isLoading,
             isLoadingOreId,
             supportsMetamask,
+            supportsBrave,
             supportsSafePal,
             showMetamaskButton,
+            showBraveButton,
             showSafePalButton,
             showWalletConnectButton,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
-            setSafepalAuthenticator,
+            setBraveAuthenticator,
+            setSafePalAuthenticator,
             setWalletConnectAuthenticator,
             notifyNoProvider,
+            notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
+            isTodayBeforeTelosCloudDown,
             // menu navigation
             showMainMenu,
             showTelosCloudMenu,
@@ -145,7 +166,7 @@ export default defineComponent({
     <template v-if="showMainMenu">
 
         <!-- Google OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+        <div v-if="isTodayBeforeTelosCloudDown" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
             <div class="c-evm-login-buttons__cloud-btn-container">
                 <div class="c-evm-login-buttons__cloud-btn-line-title">
                     <img
@@ -175,6 +196,27 @@ export default defineComponent({
             </div>
         </div>
 
+        <!-- Brave Authenticator button -->
+        <div
+            v-if="showBraveButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
+        >
+            <template v-if="isLoading('Brave.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/brave_lion.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
+            </template>
+        </div>
+
         <!-- Metamask Authenticator button -->
         <div
             v-if="showMetamaskButton"
@@ -200,7 +242,7 @@ export default defineComponent({
         <div
             v-if="showSafePalButton"
             class="c-evm-login-buttons__option"
-            @click="supportsSafePal ? setSafepalAuthenticator() : redirectToSafepalDownload()"
+            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
         >
             <template v-if="isLoading('SafePal.login')">
                 <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
@@ -304,7 +346,7 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     gap: 14px;
-    margin-bottom: 48px;
+    margin-bottom: 24px;
 
     &__loading{
         width: 100%;

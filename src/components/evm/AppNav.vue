@@ -436,7 +436,8 @@ export default defineComponent({
         z-index: $z-index--menu;
         padding-bottom: 0 !important;
         background: url("/branding/background.png");
-        // background-position: center;
+        // background-position: right; // blue/green to light
+        // background-position: left;
         background-repeat: no-repeat;
         background-size: cover;
 

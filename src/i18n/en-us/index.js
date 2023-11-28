@@ -27,8 +27,7 @@ export default {
     home: {
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
-        developers_banner_title: 'Developers',
-        developers_banner_text: 'Find out how to integrate Telos Cloud Wallet into your app here',
+        telos_cloud_discontinued: 'Telos Cloud Wallet will be discontinued. It is crucial for you to transfer your assets out of your Telos Cloud Wallet Accounts before December 15th.',
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
@@ -46,10 +45,12 @@ export default {
         metamask: 'MetaMask',
         install_safepal: 'Install SafePal',
         safepal: 'SafePal',
+        brave: 'Brave Wallet',
         walletconnect: 'WalletConnect',
         connect_your_wallet: 'Connect Your Wallet',
         wallet_introduction: 'What is a Web Wallet?',
         multiple_providers_notification_message: 'Multiple providers detected. Disable all providers except MetaMask to continue.',
+        enable_brave_notification_message: 'Brave Browser detected. Please enable the wallet in the browser config, refresh the page and try again.',
         no_provider_action_label: 'Install {provider}',
         no_injected_provider_found: '{providerName}\'s provider was not found.',
         sign_in_with: 'Sign in with',
@@ -285,6 +286,7 @@ export default {
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
         neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
+        dont_show_message_again: 'Don\'t show me this message again',
     },
     resources: {
         title: 'Network Resources',
@@ -610,5 +612,10 @@ export default {
             minutes: 'minutes',
             seconds: 'seconds',
         },
+    },
+    temporal: {
+        telos_cloud_discontinued_title: 'Important',
+        telos_cloud_discontinued_message_title: 'Telos Cloud Wallet will be discontinued',
+        telos_cloud_discontinued_message_body: 'It is crucial for you to transfer your assets out of your Telos Cloud Wallet Accounts before December 31st.',
     },
 };

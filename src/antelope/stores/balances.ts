@@ -307,20 +307,27 @@ export const useBalancesStore = defineStore(store_name, {
             const funcname = 'transferTokens';
             this.trace(funcname, token, to, amount.toString(), memo);
             const label = CURRENT_CONTEXT;
+            let promise = Promise.resolve({} as TransactionResponse);
             try {
                 useFeedbackStore().setLoading(funcname);
                 const chain = useChainStore().loggedChain;
                 if (chain.settings.isNative()) {
                     const chain_settings = chain.settings as NativeChainSettings;
                     const account = useAccountStore().loggedAccount;
-                    return await this.transferNativeTokens(chain_settings, account, token, to, amount, memo ?? '')
+                    promise = this.transferNativeTokens(chain_settings, account, token, to, amount, memo ?? '')
                         .then(r => this.subscribeForTransactionReceipt(account, r));
                 } else {
                     const chain_settings = chain.settings as EVMChainSettings;
                     const account = useAccountStore().loggedAccount as EvmAccountModel;
-                    return this.transferEVMTokens(label, chain_settings, account, token, to, amount)
+                    promise = this.transferEVMTokens(label, chain_settings, account, token, to, amount)
                         .then(r => this.subscribeForTransactionReceipt(account, r as TransactionResponse));
                 }
+                promise.catch((error) => {
+                    const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
+                    getAntelope().config.transactionErrorHandler(trxError, funcname);
+                    throw trxError;
+                });
+                return promise;
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_transfer_failed', error);
                 getAntelope().config.transactionErrorHandler(trxError, funcname);

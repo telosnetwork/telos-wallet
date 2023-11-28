@@ -121,11 +121,11 @@ const goToBuy = () => {
 
         // svg overrides
         path {
-            fill: $primary;
+            fill: var(--accent-color);
         }
 
         rect {
-            stroke: $primary;
+            stroke: var(--accent-color);
         }
 
         &--rotated {
