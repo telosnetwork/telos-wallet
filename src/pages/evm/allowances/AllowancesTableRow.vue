@@ -121,7 +121,7 @@ const allowanceTextShort = computed(() => {
             return $t('global.huge');
         }
 
-        if (numberAllowed < TINY_ALLOWANCE_THRESHOLD) {
+        if (numberAllowed < TINY_ALLOWANCE_THRESHOLD && numberAllowed > 0) {
             return $t('global.less_than', { amount: TINY_ALLOWANCE_THRESHOLD });
         }
 
