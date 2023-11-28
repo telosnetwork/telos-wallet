@@ -27,6 +27,7 @@ import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
 import TextBadge from 'src/components/TextBadge.vue';
 import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -134,7 +135,7 @@ const allowanceTextShort = computed(() => {
 const allowanceTextFull = computed(() => {
     if (isErc20Row) {
         const allowance = props.row.allowance ?? BigNumber.from(0);
-        return prettyPrintCurrency(allowance, 18, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
+        return prettyPrintCurrency(allowance, WEI_PRECISION, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
     }
 
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
