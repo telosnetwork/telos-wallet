@@ -172,11 +172,11 @@ export default {
         allowed: 'Allowed',
         huge: 'Huge',
         none: 'None',
-        tiny: 'Tiny',
         token: 'Token',
         time_ago: '{time} ago',
         sort_by_ascending: 'Sort by {column}, ascending',
         sort_by_descending: 'Sort by {column}, descending',
+        less_than: 'Less than {amount}',
     },
     nft : {
         collectible: 'Collectible',

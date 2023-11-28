@@ -122,7 +122,7 @@ const allowanceTextShort = computed(() => {
         }
 
         if (numberAllowed < TINY_ALLOWANCE_THRESHOLD) {
-            return $t('global.tiny');
+            return $t('global.less_than', { amount: TINY_ALLOWANCE_THRESHOLD });
         }
 
         return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
