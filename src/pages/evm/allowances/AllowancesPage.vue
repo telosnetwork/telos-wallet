@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
@@ -7,7 +7,7 @@ import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.
 import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
-import { CURRENT_CONTEXT, useAllowancesStore } from 'src/antelope';
+import { CURRENT_CONTEXT, useAccountStore, useAllowancesStore } from 'src/antelope';
 import { AllowanceTableColumns, Sort } from 'src/antelope/types';
 
 const { t: $t } = useI18n();
@@ -39,6 +39,7 @@ const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
 });
 
 // computed
+const userAddress = computed(() => useAccountStore().currentAccount.account);
 const shapedAllowanceRows = computed(() => {
     const {
         asset,
@@ -67,14 +68,18 @@ const shapedAllowanceRows = computed(() => {
     }
 });
 
-// methods
-onMounted(() => {
-    useAllowancesStore().fetchAllowancesForAccount('0x13B745FC35b0BAC9bab9fD20B7C9f46668232607').then(() => {
-        // shapedAllowanceRows.value = useAllowancesStore().allowancesSortedByAllowanceFiatValue(CURRENT_CONTEXT, Sort.descending);
-        loading.value = false;
-    }); // eztodo get address from store
-});
+// watchers
+watch(userAddress, (address) => {
+    if (address) {
+        loading.value = true;
+        useAllowancesStore().fetchAllowancesForAccount(address).then(() => {
+            loading.value = false;
+        });
+    }
 
+}, { immediate: true });
+
+// methods
 function handleSearchUpdated(searchText: string) {
     console.log('Search updated', searchText);
 }

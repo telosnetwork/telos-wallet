@@ -55,6 +55,7 @@ function handleRevokeSelected() {
     v-model="includeCancelled"
     :label="includeCancelledLabel"
     color="primary"
+    @update:model-value="emit('include-cancelled-updated', $event)"
 />
 
 </template>

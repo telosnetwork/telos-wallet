@@ -201,7 +201,7 @@ export const useAllowancesStore = defineStore(store_name, {
             ).subscribe({
                 next: ({ label, account }) => {
                     if (label === CURRENT_CONTEXT && account?.account) {
-                        // allowancesStore.fetchAllowancesForAccount(account?.account); eztodo uncomment
+                        allowancesStore.fetchAllowancesForAccount(account?.account);
                     }
                 },
             });
@@ -211,6 +211,9 @@ export const useAllowancesStore = defineStore(store_name, {
         async fetchAllowancesForAccount(account: string): Promise<void> {
             this.trace('fetchAllowancesForAccount', account);
             useFeedbackStore().setLoading('fetchAllowancesForAccount');
+
+            // ERC20 balances are needed for ERC20 allowance row data
+            await useBalancesStore().updateBalances(CURRENT_CONTEXT);
 
             const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 

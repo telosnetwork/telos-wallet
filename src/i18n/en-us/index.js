@@ -172,6 +172,7 @@ export default {
         allowed: 'Allowed',
         huge: 'Huge',
         none: 'None',
+        tiny: 'Tiny',
         token: 'Token',
         time_ago: '{time} ago',
         sort_by_ascending: 'Sort by {column}, ascending',

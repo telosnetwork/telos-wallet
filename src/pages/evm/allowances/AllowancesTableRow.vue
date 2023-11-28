@@ -10,6 +10,7 @@ import {
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
     ShapedAllowanceRowSingleERC721,
+    TINY_ALLOWANCE_THRESHOLD,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
     isNftCollectionAllowanceRow,
@@ -108,22 +109,23 @@ const fiatValueTextFull = computed(() => {
 
 const allowanceTextShort = computed(() => {
     if (isErc20Row) {
-        if (props.row.allowance instanceof BigNumber) {
-            const allowance = props.row.allowance.div(BigNumber.from(10).pow(props.row.tokenDecimals));
+        const allowanceBn = props.row.allowance;
 
-            if (allowance.gte(HUGE_ALLOWANCE_THRESHOLD)) {
-                return $t('global.huge');
-            }
-
-            if (allowance.eq(0)) {
-                return $t('global.none');
-            }
-            const numberAllowed = Number(formatUnits(props.row.allowance, props.row.tokenDecimals));
-
-            return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
+        if (allowanceBn.eq(0)) {
+            return $t('global.none');
         }
 
-        return $t('global.none');
+        const numberAllowed = Number(formatUnits(allowanceBn, props.row.tokenDecimals));
+
+        if (numberAllowed > HUGE_ALLOWANCE_THRESHOLD) {
+            return $t('global.huge');
+        }
+
+        if (numberAllowed < TINY_ALLOWANCE_THRESHOLD) {
+            return $t('global.tiny');
+        }
+
+        return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
     }
 
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');

@@ -1,7 +1,10 @@
 import { BigNumber } from 'ethers';
 
 // 1 Quadrillion. Any allowance above this amount is considered 'huge'
-export const HUGE_ALLOWANCE_THRESHOLD = BigNumber.from('1000000000000000');
+export const HUGE_ALLOWANCE_THRESHOLD = 1000000000000000;
+
+// Any allowance below this amount is considered 'tiny'
+export const TINY_ALLOWANCE_THRESHOLD = 0.01;
 
 // some notes about allowances:
 // 1. ERC721 tokens can be approved for a single token (e.g. approve) or for all tokens in a collection (e.g. setApprovalForAll)
