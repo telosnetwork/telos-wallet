@@ -155,9 +155,7 @@ onMounted(() => {
     }
 
     &__logo {
-        width: 240px;
-        // align-self: center;
-        // flex-grow: 1;
+        width: 220px;
         align-self: center;
         margin-top: 10rem;
         margin-bottom: 10rem;
@@ -235,14 +233,14 @@ onMounted(() => {
         z-index: $z-index--connect-wallet-popup;
     }
 
-    @media only screen and (max-height: 800px) {
+    @media only screen and (max-height: 850px) {
         .c-home {
             &__container{
                 min-height: unset;
             }
             &__logo{
                 margin-top: unset;
-                margin-bottom: unset;
+                margin-bottom: 2rem;
             }
             &__button-container{
                 margin-top: 2rem;
