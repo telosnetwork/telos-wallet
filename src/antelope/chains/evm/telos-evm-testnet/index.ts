@@ -6,7 +6,7 @@ import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
-const LOGO = 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg';
+const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png';
 const CHAIN_ID = '41';
 export const NETWORK = 'telos-evm-testnet';
 const DISPLAY = 'Telos EVM Testnet';
@@ -28,7 +28,7 @@ const S_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/stlos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
@@ -39,7 +39,7 @@ const W_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
