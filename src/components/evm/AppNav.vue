@@ -489,6 +489,10 @@ export default defineComponent({
         margin-bottom: 32px;
         width: max-content;
 
+        .c-app-nav__icon--acorn{
+            filter: grayscale(1);
+        }
+
         &:hover {
             color: var(--link-color);
 
@@ -497,8 +501,8 @@ export default defineComponent({
                 fill: var(--link-color);
             }
 
-            #{$this}__icon--acorn path {
-                stroke: var(--link-color);
+            #{$this}__icon--acorn{
+                filter: grayscale(0);
             }
         }
     }
@@ -523,8 +527,8 @@ export default defineComponent({
             fill: var(--link-color);
         }
 
-        &--current-route#{$this}__icon--acorn path {
-            stroke: var(--link-color);
+        &--current-route#{$this}__icon--acorn {
+            filter: grayscale(0);
         }
     }
 
