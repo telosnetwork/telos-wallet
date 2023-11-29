@@ -221,7 +221,7 @@ export default {
                                 <img
                                     class="flex q-ml-auto q-mt-auto evm-logo"
                                     alt="tEVM"
-                                    src="~assets/evm/evm_logo.png"
+                                    src='/branding/telos-scan.png'
                                 >
                             </div>
                         </q-avatar>
@@ -239,12 +239,12 @@ export default {
                                 <img
                                     class="flex q-ml-auto q-mt-auto evm-logo"
                                     alt="tEVM"
-                                    src="~assets/evm/evm_logo.png"
+                                    src='/branding/telos-scan.png'
                                 >
                             </div>
                             <img
                                 v-if="networkType === 'ethereum'"
-                                src="~assets/tokens/pTLOS.svg"
+                                src='/branding/telos.png'
                             >
                             <div
                                 v-if="networkType === 'ethereum'"

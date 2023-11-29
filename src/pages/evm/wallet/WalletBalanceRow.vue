@@ -41,7 +41,7 @@ export default defineComponent({
             if (this.token.logoURI) {
                 return this.token.logoURI;
             } else {
-                return require('src/assets/logo--tlos.svg');
+                return require('src/assets/tokens/telos.png');
             }
         },
         grayLogo(): boolean {
