@@ -218,8 +218,6 @@ export default {
                                 class="flex q-ml-auto"
                                 alt="tEVM"
                                 src='/branding/telos-scan.png'
-                                width="80"
-                                height="80"
                             >
                         </div>
                         <div
@@ -230,8 +228,6 @@ export default {
                                 class="flex q-ml-auto"
                                 alt="tEVM"
                                 src='/branding/telos.png'
-                                width="80"
-                                height="80"
                             >
                         </div>
                         <TokenAvatar v-else :token="selectedCoin.icon" :avatarSize="80" />
