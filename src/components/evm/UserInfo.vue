@@ -173,6 +173,10 @@ export default defineComponent({
         transition: background-color 0.1s ease-in-out;
         transition-property: background-color, color;
 
+        .c-user-info__icon--acorn{
+            filter: grayscale(1);
+        }
+
         &:hover {
             background-color: var(--accent-color-5);
             color: var(--accent-color);
@@ -182,8 +186,8 @@ export default defineComponent({
                     fill: var(--accent-color);
                 }
 
-                &#{$this}__icon--acorn path {
-                    stroke: var(--accent-color);
+                &#{$this}__icon--acorn {
+                    filter: grayscale(0);
                 }
             }
         }
