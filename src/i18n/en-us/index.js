@@ -577,7 +577,7 @@ export default {
             error_no_default_authenticator: 'No default authenticator found',
             error_settings_not_found: 'Settings not found',
             error_staked_ratio: 'Error in getting staked ratio',
-            indexer_bad_health_warning: 'The indexer is not healthy. You may encounter outdated data.',
+            indexer_bad_health_warning: 'Data is temporarily out of sync and may be outdated.',
         },
         account: {
             error_login_native: 'An error has occurred trying to login to the native chain',
