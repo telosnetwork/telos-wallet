@@ -46,7 +46,6 @@ export default defineComponent({
     },
     mounted() {
         const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
-
         // if the organization using this application is Telos, import Fathom analytics
         if (TELOS_CHAIN_IDS.includes(chainSettings.getChainId())) {
             const script = document.createElement('script');
