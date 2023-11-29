@@ -64,4 +64,5 @@ export interface IndexerCollectionNftsFilter extends IndexerPaginationFilter {
     includeAbi?: boolean; // indicate whether to include abi
     tokenId?: string; // only query results for a specific token ID
     includeTokenIdSupply?: boolean;
+    type?: NftTokenInterface;
 }

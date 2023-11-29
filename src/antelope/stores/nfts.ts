@@ -212,6 +212,7 @@ export const useNftsStore = defineStore(store_name, {
                 const new_filter = {
                     ...toRaw(this.__pagination_filter),
                     tokenId,
+                    type,
                 };
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first

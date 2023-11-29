@@ -188,7 +188,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     async updateIndexerHealthState() {
         // resolve if this chain has indexer api support and is working fine
-
         const promise =
             Promise.resolve(this.hasIndexerSupport())
                 .then(hasIndexerSupport =>
@@ -370,6 +369,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.supply,
         }));
+
+        // we fix the supportedInterfaces property if it is undefined in the response but present in the request
+        Object.values(response.contracts).forEach((contract) => {
+            contract.supportedInterfaces = contract.supportedInterfaces ||
+                params.type ? [params.type?.toLowerCase() as string] : undefined;
+        });
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);

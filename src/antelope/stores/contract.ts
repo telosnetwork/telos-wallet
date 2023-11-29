@@ -259,10 +259,16 @@ export const useContractStore = defineStore(store_name, {
                         return resolve(this.createAndStoreVerifiedContract(label, addressLower, metadata, creationInfo, suspectedToken));
                     }
 
-                    const contract = await this.createAndStoreContractFromTokenList(label, address, suspectedToken, creationInfo);
-                    if (contract) {
-                        this.trace('fetchContractUsingHyperion', 'returning contract from token list', address, contract);
-                        return resolve(contract);
+                    const tokenContract = await this.createAndStoreContractFromTokenList(label, address, suspectedToken, creationInfo);
+                    if (tokenContract) {
+                        this.trace('fetchContractUsingHyperion', 'returning contract from token list', address, tokenContract);
+                        return resolve(tokenContract);
+                    }
+
+                    const suspectedTokenContract = await this.createAndStoreContractFromSuspectedType(label, address, suspectedToken, creationInfo);
+                    if (suspectedTokenContract) {
+                        this.trace('fetchContractUsingHyperion', 'returning contract from suspected type', address, suspectedTokenContract);
+                        return resolve(suspectedTokenContract);
                     }
 
                     if (creationInfo) {
@@ -393,6 +399,16 @@ export const useContractStore = defineStore(store_name, {
         },
 
         // utility functions ---------------------
+        /**
+         * This function creates a verified contract based on its metadata and creation info,
+         * which was used to verify this contract previously.
+         * @param label identifies the chain
+         * @param address address of the contract
+         * @param metadata verified metadata of the contract
+         * @param creationInfo creation info of the contract
+         * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
+         * @returns the contract
+         */
         async createAndStoreVerifiedContract(
             label: string,
             address:string,
@@ -413,6 +429,13 @@ export const useContractStore = defineStore(store_name, {
             } as EvmContractFactoryData);
         },
 
+        /**
+         * This function creates an empty contract based on its creation info.
+         * @param label identifies the chain
+         * @param address address of the contract
+         * @param creationInfo creation info of the contract
+         * @returns the contract
+         */
         async createAndStoreEmptyContract(
             label: string,
             address:string,
@@ -423,10 +446,19 @@ export const useContractStore = defineStore(store_name, {
                 name: `0x${address.slice(0, 16)}...`,
                 address,
                 creationInfo,
-                supportedInterfaces: [],
+                supportedInterfaces: undefined,
             } as EvmContractFactoryData);
         },
 
+        /**
+         * This function tries to create a contract based on the known token list.
+         * If the address is not in the list, it will return null.
+         * @param label identifies the chain
+         * @param address address of the contract
+         * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
+         * @param creationInfo creation info of the contract
+         * @returns the contract or null if the address is not in the token list
+         */
         async createAndStoreContractFromTokenList(
             label:string,
             address:string,
@@ -443,6 +475,35 @@ export const useContractStore = defineStore(store_name, {
                     abi,
                     token,
                     supportedInterfaces: [token.type],
+                } as EvmContractFactoryData);
+            } else {
+                return null;
+            }
+        },
+
+        /**
+         * This function tries to create a contract from a suspected type (using the corresponding known ABI).
+         * It will return null if the type is not supported.
+         * @param label identifies the chain
+         * @param address address of the contract
+         * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
+         * @param creationInfo creation info of the contract
+         * @returns the contract or null if the type is not supported
+         */
+        async createAndStoreContractFromSuspectedType(
+            label:string,
+            address:string,
+            suspectedType:string,
+            creationInfo:EvmContractCreationInfo | null,
+        ): Promise<EvmContract | null> {
+            const abi = this.getTokenABI(suspectedType);
+            if (abi) {
+                return this.createAndStoreContract(label, address, {
+                    name: `0x${address.slice(0, 16)}...`,
+                    address,
+                    creationInfo,
+                    abi,
+                    supportedInterfaces: [suspectedType],
                 } as EvmContractFactoryData);
             } else {
                 return null;

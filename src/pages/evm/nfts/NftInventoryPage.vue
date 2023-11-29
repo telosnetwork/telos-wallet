@@ -20,14 +20,16 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
-
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
 const chainSettings = (chainStore.currentChain.settings as EVMChainSettings);
 
-// This warns the user (once per session) that the indexer is not healthy and can be outdated data
-chainSettings.checkAndWarnIndexerHealth();
+//TODO: remove timeout, see https://github.com/telosnetwork/telos-wallet/issues/697
+setTimeout(() => {
+    // This warns the user (once per session) that the indexer is not healthy and can be outdated data
+    chainSettings.checkAndWarnIndexerHealth();
+}, 1000);
 
 const router = useRouter();
 const route = useRoute();
