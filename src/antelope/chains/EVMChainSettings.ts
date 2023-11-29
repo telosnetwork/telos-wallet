@@ -42,6 +42,7 @@ import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
 import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
+import { BehaviorSubject, filter } from 'rxjs';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -88,6 +89,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // This variable is used to simulate a bad indexer health state
     indexerBadHealthSimulated = false;
+
+    // This observable is used to check if the indexer health state was already checked
+    indexerChecked$ = new BehaviorSubject(false);
 
     simulateIndexerDown(isBad: boolean) {
         this.indexerBadHealthSimulated = isBad;
@@ -206,6 +210,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         // update indexer health state
         promise.then((state) => {
             this._indexerHealthState.state = state;
+            this.indexerChecked$.next(true);
         });
 
         return promise;
@@ -216,13 +221,18 @@ export default abstract class EVMChainSettings implements ChainSettings {
      * This warning should appear only once per session.
      */
     checkAndWarnIndexerHealth() {
-        if (!this.indexerHealthWarningShown && !this.isIndexerHealthy()) {
-            this.indexerHealthWarningShown = true;
-            const  ant = getAntelope();
-            ant.config.notifyNeutralMessageHandler(
-                ant.config.localizationHandler('antelope.chain.indexer_bad_health_warning'),
-            );
-        }
+        this.indexerChecked$.pipe(
+            // This filter only allows to continue if the indexer health was already checked
+            filter(indexerChecked => indexerChecked === true),
+        ).subscribe(() => {
+            if (!this.indexerHealthWarningShown && !this.isIndexerHealthy()) {
+                this.indexerHealthWarningShown = true;
+                const  ant = getAntelope();
+                ant.config.notifyNeutralMessageHandler(
+                    ant.config.localizationHandler('antelope.chain.indexer_bad_health_warning'),
+                );
+            }
+        });
     }
 
     isIndexerHealthy(): boolean {
