@@ -188,7 +188,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     async updateIndexerHealthState() {
         // resolve if this chain has indexer api support and is working fine
-
         const promise =
             Promise.resolve(this.hasIndexerSupport())
                 .then(hasIndexerSupport =>
