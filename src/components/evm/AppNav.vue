@@ -279,8 +279,9 @@ export default defineComponent({
                 @click="goTo('evm-staking')"
                 @keypress.space.enter="goTo('evm-staking')"
             >
-                <InlineSvg
-                    :src="require('src/assets/icon--acorn.svg')"
+
+                <img
+                    src="/branding/stlos.png"
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--acorn': true,
@@ -289,7 +290,7 @@ export default defineComponent({
                     height="24"
                     width="24"
                     aria-hidden="true"
-                />
+                >
                 {{ $t('nav.staking') }}
                 <span class="c-app-nav__apy-box">  {{ $t('evm_stake.apy_card_label') }}
                     <q-spinner
