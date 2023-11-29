@@ -197,7 +197,7 @@ export default {
                                             <img
                                                 class="flex q-ml-auto q-mt-auto evm-logo"
                                                 alt="tEVM"
-                                                src="~assets/evm/evm_logo.png"
+                                                src='/branding/telos-scan.png'
                                             >
                                         </div>
                                     </q-avatar>

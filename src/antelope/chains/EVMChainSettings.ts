@@ -632,7 +632,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(tokens => tokens.map(t => ({
                 ...t,
                 network: this.getNetwork(),
-                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
+                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/tokens/telos.png'),
             }) as unknown as TokenSourceInfo))
             .then(tokens => tokens.map(t => new TokenClass(t)))
             .then(tokens => [this.getSystemToken(), this.getWrappedSystemToken(), this.getStakedSystemToken(), ...tokens]);
