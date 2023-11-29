@@ -128,7 +128,7 @@ export default {
 <template>
 <div>
     <nav class="leftNavBar">
-        <img src="~assets/telosLogo.svg" class="telosLogo" >
+        <img src="/branding/telos-wallet-light.png" class="telosLogo" >
         <ul>
             <li>
                 <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
