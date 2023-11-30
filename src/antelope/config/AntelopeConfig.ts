@@ -4,6 +4,11 @@ import { getAntelope } from 'src/antelope';
 import { AntelopeError, AntelopeErrorPayload } from 'src/antelope/types';
 import { AntelopeDebug } from 'src/antelope/config/AntelopeDebug';
 
+export interface ComplexMessage {
+    tag: string,
+    class: string,
+    text: string,
+}
 
 export const chainNetworkNames: Record<string, string> = {
     telos: 'telos-evm',
@@ -34,7 +39,7 @@ export class AntelopeConfig {
     // indexer health check interval --
     private __indexer_health_check_interval = 1000 * 60 * 5; // 5 minutes expressed in milliseconds
 
-    // notification handlers --
+    // notifucation handlers --
     private __notify_error_handler: (message: string) => void = m => alert(`Error: ${m}`);
     private __notify_success_handler: (message: string) => void = alert;
     private __notify_warning_handler: (message: string) => void = alert;
@@ -47,6 +52,7 @@ export class AntelopeConfig {
     private __notify_failure_action_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
     private __notify_disconnected_handler: () => void = alert;
     private __notify_neutral_message_handler: (message: string) => (() => void) = () => (() => void 0);
+    private __notify_remember_info_handler: (title: string, message: string | ComplexMessage[], payload: string, key: string) => (() => void) = () => (() => void 0);
 
     // ual authenticators list getter --
     private __authenticators_getter: () => Authenticator[] = () => [];
@@ -171,6 +177,10 @@ export class AntelopeConfig {
         return this.__notify_neutral_message_handler;
     }
 
+    get notifyRememberInfoHandler() {
+        return this.__notify_remember_info_handler;
+    }
+
     get authenticatorsGetter() {
         return this.__authenticators_getter;
     }
@@ -237,6 +247,15 @@ export class AntelopeConfig {
         this.__notify_neutral_message_handler = handler;
     }
 
+    public setNotifyRememberInfoHandler(handler: (
+        title: string,
+        message: string | ComplexMessage[],
+        payload: string,
+        key: string,
+    ) => (() => void)) {
+        this.__notify_remember_info_handler = handler;
+    }
+
     // setting authenticators getter --
     public setAuthenticatorsGetter(getter: () => Authenticator[]) {
         this.__authenticators_getter = getter;
@@ -256,5 +275,6 @@ export class AntelopeConfig {
     public setErrorToStringHandler(handler: (catched: unknown) => string) {
         this.__error_to_string_handler = handler;
     }
+
 }
 

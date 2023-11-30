@@ -43,14 +43,16 @@ export class AntelopeDebug {
     setDebugMode(debug: boolean) {
         if (!this.__debugModeAllowed) {
             this.__debugMode = false;
-            return;
+            return 'debug mode not allowed';
         }
         this.__debugMode = debug;
         this.saveDebugConfig();
         if (this.isDebugging()) {
             this.publishAntelopeAPItoWindow();
+            return 'debug mode enabled';
         } else {
             this.removeAntelopeAPIfromWindow();
+            return 'debug mode disabled';
         }
     }
 
@@ -136,7 +138,6 @@ export class AntelopeDebug {
     saveDebugConfig() {
         localStorage.setItem(localStorageKey, this.__debugMode.toString());
         if (this.__filtered.size === 0) {
-            console.error('localStorage.removeItem(localStorageKeyTurnedOff);');
             localStorage.removeItem(localStorageKeyTurnedOff);
             return;
         } else {
