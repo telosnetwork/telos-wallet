@@ -59,7 +59,7 @@ const assetTextShort = computed(() => {
         prettyAmount = '1 '.concat(truncateText(props.row.tokenName, 12));
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, true, tokenSymbol, false, tokenDecimals, true);
+        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ? truncateText(collectionName, 12) : truncateAddress(collectionAddress);
@@ -76,14 +76,14 @@ const assetTextFull = computed(() => {
         prettyAmount = '1 '.concat(props.row.tokenName);
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, false);
+        prettyAmount = prettyPrintCurrency(balance, WEI_PRECISION, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ?? collectionAddress;
         prettyAmount = prettyPrintCurrency(balance, 0, fiatLocale, false, collectionNamePretty, false, 0, false);
     }
 
-    return prettyAmount;
+    return $t('evm_allowances.you_own', { asset: prettyAmount });
 });
 
 const fiatValueTextShort = computed(() => {
@@ -105,7 +105,7 @@ const fiatValueTextFull = computed(() => {
     const balance = Number(formatUnits(props.row.balance, props.row.tokenDecimals));
     const fiatValue = balance * props.row.tokenPrice;
 
-    return prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency);
+    return `1 ${props.row.tokenSymbol} = ${prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency)}`;
 });
 
 const allowanceTextShort = computed(() => {

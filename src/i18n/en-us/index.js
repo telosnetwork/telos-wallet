@@ -306,6 +306,7 @@ export default {
         column_description_spender: 'spender contract',
         column_description_asset_type: 'asset type (collectible or token)',
         column_description_updated: 'date of last allowance update',
+        you_own: 'You own {asset}',
     },
     notification:{
         success_title_trx: 'Success',

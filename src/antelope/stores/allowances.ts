@@ -189,7 +189,6 @@ export const useAllowancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const allowancesStore = useAllowancesStore();
-            // eztodo add allowances of all kinds on team account on testnet
             useFeedbackStore().setDebug(store_name, isTracingAll());
 
             getAntelope().events.onAccountChanged.pipe(
