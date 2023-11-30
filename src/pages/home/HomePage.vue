@@ -41,11 +41,11 @@ onMounted(() => {
     <q-page-container class="c-home__page-container">
         <div class="c-home">
             <div class="c-home__container">
-                <img
+                <div class="c-home__logo-container"><img
                     src="branding/telos-wallet-light.png"
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
-                >
+                ></div>
                 <div class="c-home__button-container">
                     <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
@@ -154,11 +154,16 @@ onMounted(() => {
         justify-content: space-between;
     }
 
+    &__logo-container {
+        flex-grow: 1;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
     &__logo {
         width: 220px;
-        align-self: center;
-        margin-top: 10rem;
-        margin-bottom: 10rem;
     }
 
     &__button-container {
