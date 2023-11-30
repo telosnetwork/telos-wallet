@@ -63,20 +63,15 @@ export default {
                 <q-item-section flat avatar>
                     <q-avatar size="45px" class="q-my-sm">
                         <img
-                            v-if="coin.network === 'tevm' || coin.name === 'Telos'"
-                            src="/coins/TLOS.png"
+                            v-if="coin.name === 'Telos'"
+                            src="/branding/telos.png"
+                        >
+                        <img
+                            v-if="coin.network === 'tevm'"
+                            alt="tEVM"
+                            src="/branding/telos-scan.png"
                         >
                         <TokenAvatar :token="coin.icon" :avatarSize="45" />
-                        <div
-                            v-if="coin.network === 'tevm'"
-                            class="flex absolute full-width full-height"
-                        >
-                            <img
-                                class="flex q-ml-auto q-mt-auto evm-logo"
-                                alt="tEVM"
-                                src="~assets/evm/evm_logo.png"
-                            >
-                        </div>
                     </q-avatar>
                 </q-item-section>
                 <q-item-section class="coin-grid">

@@ -25,11 +25,7 @@ const chainStore = useChainStore();
 const accountStore = useAccountStore();
 const chainSettings = (chainStore.currentChain.settings as EVMChainSettings);
 
-//TODO: remove timeout, see https://github.com/telosnetwork/telos-wallet/issues/697
-setTimeout(() => {
-    // This warns the user (once per session) that the indexer is not healthy and can be outdated data
-    chainSettings.checkAndWarnIndexerHealth();
-}, 1000);
+chainSettings.checkAndWarnIndexerHealth();
 
 const router = useRouter();
 const route = useRoute();

@@ -41,11 +41,11 @@ onMounted(() => {
     <q-page-container class="c-home__page-container">
         <div class="c-home">
             <div class="c-home__container">
-                <img
-                    src="~assets/logo--telos-wallet.svg"
+                <div class="c-home__logo-container"><img
+                    src="branding/telos-wallet-light.png"
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
-                >
+                ></div>
                 <div class="c-home__button-container">
                     <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
@@ -154,11 +154,16 @@ onMounted(() => {
         justify-content: space-between;
     }
 
-    &__logo {
-        width: 240px;
-        align-self: center;
+    &__logo-container {
         flex-grow: 1;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
 
+    &__logo {
+        width: 220px;
     }
 
     &__button-container {
@@ -233,14 +238,14 @@ onMounted(() => {
         z-index: $z-index--connect-wallet-popup;
     }
 
-    @media only screen and (max-height: 800px) {
+    @media only screen and (max-height: 850px) {
         .c-home {
             &__container{
                 min-height: unset;
             }
             &__logo{
                 margin-top: unset;
-                margin-bottom: unset;
+                margin-bottom: 2rem;
             }
             &__button-container{
                 margin-top: 2rem;

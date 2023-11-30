@@ -207,7 +207,7 @@ export default defineComponent({
         <div class="flex justify-between">
             <img
                 ref="logo-image"
-                src="~assets/logo--telos-wallet.svg"
+                src="branding/telos-wallet-light.png"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
                 role="link"
@@ -279,8 +279,9 @@ export default defineComponent({
                 @click="goTo('evm-staking')"
                 @keypress.space.enter="goTo('evm-staking')"
             >
-                <InlineSvg
-                    :src="require('src/assets/icon--acorn.svg')"
+
+                <img
+                    src="/branding/stlos.png"
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--acorn': true,
@@ -289,7 +290,7 @@ export default defineComponent({
                     height="24"
                     width="24"
                     aria-hidden="true"
-                />
+                >
                 {{ $t('nav.staking') }}
                 <span class="c-app-nav__apy-box">  {{ $t('evm_stake.apy_card_label') }}
                     <q-spinner
@@ -466,9 +467,10 @@ export default defineComponent({
     }
 
     &__logo {
-        height: 56px;
+        width: 200px;
         margin-top: 24px;
-        margin-left: 32px;
+        margin-left: 48px;
+        margin-right: 48px;
         cursor: pointer;
     }
 
@@ -487,6 +489,10 @@ export default defineComponent({
         margin-bottom: 32px;
         width: max-content;
 
+        .c-app-nav__icon--acorn{
+            filter: grayscale(1);
+        }
+
         &:hover {
             color: var(--link-color);
 
@@ -495,8 +501,8 @@ export default defineComponent({
                 fill: var(--link-color);
             }
 
-            #{$this}__icon--acorn path {
-                stroke: var(--link-color);
+            #{$this}__icon--acorn{
+                filter: grayscale(0);
             }
         }
     }
@@ -521,8 +527,8 @@ export default defineComponent({
             fill: var(--link-color);
         }
 
-        &--current-route#{$this}__icon--acorn path {
-            stroke: var(--link-color);
+        &--current-route#{$this}__icon--acorn {
+            filter: grayscale(0);
         }
     }
 

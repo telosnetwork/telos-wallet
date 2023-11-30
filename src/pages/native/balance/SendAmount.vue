@@ -210,17 +210,27 @@ export default {
                 </div>
                 <div class="inputContainer">
                     <q-avatar class="coinAvatar" size="5rem">
-                        <TokenAvatar :token="selectedCoin.icon" :avatarSize="80" />
                         <div
                             v-if="selectedCoin.name == 'Telos EVM'"
                             class="flex absolute full-width full-height"
                         >
                             <img
-                                class="flex q-ml-auto evm-logo"
+                                class="flex q-ml-auto"
                                 alt="tEVM"
-                                src="~assets/evm/evm_logo.png"
+                                src='/branding/telos-scan.png'
                             >
                         </div>
+                        <div
+                            v-else-if="selectedCoin.name == 'Telos'"
+                            class="flex absolute full-width full-height"
+                        >
+                            <img
+                                class="flex q-ml-auto"
+                                alt="tEVM"
+                                src='/branding/telos.png'
+                            >
+                        </div>
+                        <TokenAvatar v-else :token="selectedCoin.icon" :avatarSize="80" />
                     </q-avatar>
                     <div class="desktop-only flex flex-center">
                         <label

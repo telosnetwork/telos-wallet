@@ -205,7 +205,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
             .then(tokens => tokens.map(t => ({
                 ...t,
                 network: this.getNetwork(),
-                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
+                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/tokens/telos.png'),
             }) as unknown as TokenSourceInfo))
             .then(originals => originals.map(info => new TokenClass(info)))
             .catch((error) => {
