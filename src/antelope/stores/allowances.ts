@@ -380,7 +380,7 @@ export const useAllowancesStore = defineStore(store_name, {
             const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
             const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
             await nftsStore.fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
-            const collectionNftIds = (nftsStore.__contracts[network][data.contract]?.list ?? []).map(nft => nft.id);
+            const collectionNftIds = (nftsStore.__contracts[network][data.contract.toLowerCase()]?.list ?? []).map(nft => nft.id);
 
             if (collectionNftIds.length === 0) {
                 console.error(`Collection ${data.contract} has no NFTs`);
