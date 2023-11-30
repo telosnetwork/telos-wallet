@@ -215,6 +215,7 @@ export const useNftsStore = defineStore(store_name, {
                 const new_filter = {
                     ...toRaw(this.__pagination_filter),
                     tokenId,
+                    type,
                 };
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
@@ -348,10 +349,9 @@ export const useNftsStore = defineStore(store_name, {
         updateNftOwnerData(label: Label, contractAddress: string, tokenId: string): Promise<void> {
             this.trace('updateNftOwnerData', label, contractAddress, tokenId);
             const network = useChainStore().getChain(label).settings.getNetwork();
-            const indexer = (useChainStore().getChain(label).settings as EVMChainSettings).getIndexer();
             const nft = this.__contracts[network][contractAddress.toLowerCase()].list.find(nft => nft.id === tokenId);
 
-            return nft?.updateOwnerData(indexer) ?? Promise.reject('NFT not found');
+            return nft?.updateOwnerData() ?? Promise.reject('NFT not found');
         },
 
         async transferNft(

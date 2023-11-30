@@ -29,6 +29,8 @@
     }
     // container will say if this notification is success or error and set the color
     &__container {
+        --c-notify__checkbox--display: none;
+        --c-notify__message--align: center;
         &--success {
             --notify-color: #{$notify-success};
             --c-notify__title--display: flex;
@@ -40,14 +42,32 @@
             --c-notify__title--display: flex;
             --c-notify__message--padding: 0 2rem;
         }
+        &--info {
+            --notify-color: #{$notify-info};
+            --c-notify__title--display: flex;
+            --c-notify__message--padding: 0 2rem;
+            --c-notify__checkbox--display: block;
+            --c-notify__message--align: left;
+        }
         &--neutral {
             --notify-color: #{$notify-neutral};
             --c-notify__title--display: none;
             --c-notify__message--padding: 1.2rem 2rem;
             --c-notify__header--animation: consuming-bar 5s linear forwards;
         }
-            display: flex;
+        display: flex;
         flex-direction: column;
+    }
+    &__checkbox-container {
+        display: var(--c-notify__checkbox--display);
+        margin: 2rem 0 0 2rem;
+        input {
+            margin-right: 0.5rem;
+        }
+        label {
+            color: var(--text-color, #000);
+            @include text--paragraph;
+        }
     }
     &__header {
         height: 8px;
@@ -70,13 +90,20 @@
             color:  var(--notify-color);
             font-weight: 600;
         }
+        &--neutral {
+            display: none;
+        }
     }
     &__message {
         color: var(--text-color, #000);
         padding: var(--c-notify__message--padding);
-        text-align: center;
+        text-align: var(--c-notify__message--align, center);
         span {
             @include text--paragraph;
+        }
+        &--subtitle {
+            font-weight: bold;
+            margin-bottom: 1rem;
         }
     }
     &__action-btn {

@@ -33,7 +33,7 @@ export default function (/* { store, ssrContext } */) {
         }
 
         // this prevents the general public from accessing the demo pages
-        if (to.meta.notInProduction && process.env.NODE_ENV === 'production') {
+        if (to.meta.notInProduction && window.location.origin.includes('telos.net')) {
             return { name: 'home' };
         }
 

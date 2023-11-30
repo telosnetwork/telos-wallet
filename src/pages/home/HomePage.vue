@@ -1,38 +1,39 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { mapGetters } from 'vuex';
+<script setup lang="ts">
+import { computed,  onMounted,  ref } from 'vue';
 
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
 import { Menu } from 'src/pages/home/MenuType';
+import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    name: 'HomePage',
-    components: {
-        EVMLoginButtons,
-        NativeLoginButton,
-    },
-    data: (): {
-        tab: 'left' | 'right',
-        currentMenu: Menu,
-    } => ({
-        tab: 'left',
-        currentMenu: Menu.MAIN,
-    }),
+type TabReference = 'evm' | 'zero';
 
-    computed: {
-        ...mapGetters('account', ['isAuthenticated']),
-        showLeftRightBtns(): boolean {
-            return this.currentMenu === Menu.MAIN;
-        },
-    },
+const route = useRoute();
+const router = useRouter();
 
-    methods: {
-        goBack(): void {
-            this.currentMenu = Menu.MAIN;
-        },
-    },
+const tab = ref<TabReference>('evm');
+const currentMenu = ref<Menu>(Menu.MAIN);
+
+const showLoginBtns = computed((): boolean => currentMenu.value === Menu.MAIN);
+const walletOption = computed(() => route.query.login as LocationQueryValue);
+
+function goBack(): void {
+    currentMenu.value = Menu.MAIN;
+}
+
+function setTab(login: TabReference): void {
+    if (route.path !== login){
+        router.replace({ path: route.path, query:{ login } });
+        tab.value = login;
+    }
+}
+
+onMounted(() => {
+    if (walletOption.value){
+        tab.value = walletOption.value as TabReference;
+    }
 });
+
 </script>
 
 <template>
@@ -41,21 +42,21 @@ export default defineComponent({
         <div class="c-home">
             <div class="c-home__container">
                 <img
-                    src="~assets/logo--telos-wallet.svg"
+                    src="branding/telos-wallet-light.png"
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
                 <div class="c-home__button-container">
-                    <div v-if="showLeftRightBtns" class="c-home__network-toggle-container" role="tablist">
+                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'left',
+                                'c-home__network-toggle-button--activated': tab === 'evm',
                             }"
                             role="tab"
-                            :aria-selected="tab === 'left'"
-                            @keydown.enter="tab = 'left'"
-                            @click="tab = 'left'"
+                            :aria-selected="tab === 'evm'"
+                            @keydown.enter="setTab('evm')"
+                            @click="setTab('evm')"
                         >
 
                             {{ $t('global.telos_evm') }}
@@ -63,12 +64,12 @@ export default defineComponent({
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'right',
+                                'c-home__network-toggle-button--activated': tab === 'zero',
                             }"
                             role="tab"
-                            :aria-selected="tab === 'right'"
-                            @keydown.enter.space="tab = 'right'"
-                            @click="tab = 'right'"
+                            :aria-selected="tab === 'zero'"
+                            @keydown.enter.space="setTab('zero')"
+                            @click="setTab('zero')"
                         >
 
                             {{ $t('global.native') }}
@@ -87,10 +88,10 @@ export default defineComponent({
                         </q-btn>
                     </div>
 
-                    <NativeLoginButton v-if="tab === 'right'" />
+                    <NativeLoginButton v-if="tab === 'zero'" />
 
                     <EVMLoginButtons
-                        v-else-if="tab === 'left'"
+                        v-else-if="tab === 'evm'"
                         v-model="currentMenu"
                     />
                 </div>
@@ -105,19 +106,7 @@ export default defineComponent({
                     <q-icon size="16px" name="launch" />
                 </div>
                 <q-footer bordered class="c-home__footer">
-                    <q-toolbar class="c-home__footer-first-line bg-dark flex-center">
-                        <a
-                            href="https://docs.telos.net/evm/cloud-wallet/"
-                            target="_blank"
-                            class="c-home__footer-developer-link"
-                        >
-                            <div class="c-home__footer-developer-title">
-                                <span class="c-home__footer-developer-title-text">{{ $t('home.developers_banner_title') }}</span>
-                            </div>
-                            <div class="c-home__footer-developer-text">{{ $t('home.developers_banner_text') }}</div>
-                            <q-icon class="c-home__footer-developer-icon" size="16px" name="arrow_forward" />
-                        </a>
-                    </q-toolbar>
+
                     <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
                             href="https://www.telos.net/terms-of-service"
@@ -166,10 +155,10 @@ export default defineComponent({
     }
 
     &__logo {
-        width: 240px;
+        width: 220px;
         align-self: center;
-        flex-grow: 1;
-
+        margin-top: 10rem;
+        margin-bottom: 10rem;
     }
 
     &__button-container {
@@ -244,79 +233,14 @@ export default defineComponent({
         z-index: $z-index--connect-wallet-popup;
     }
 
-    &__footer-first-line {
-        // bottom border for first line
-        &::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background-color: #392468;
-        }
-
-        &--small {
-            min-height: 38px;
-        }
-    }
-
-    &__footer-developer {
-        &-link {
-            text-decoration: none;
-            max-width: 320px;
-            padding: 10px;
-            display: grid;
-            gap: 5px;
-            grid-template:
-                "a a"
-                "b c";
-
-            @include sm-and-up {
-                padding: 0px;
-                gap: 14px;
-                grid-template: 'a b c' / auto auto max-content;
-                max-width: none;
-            }
-
-            &--small {
-                grid-template: 'a c' / auto auto;
-            }
-        }
-        &-title {
-            grid-area: a;
-            text-align: center;
-            &-text {
-                @include text--small-bold;
-                @include gradient_text;
-                text-transform: uppercase;
-                vertical-align: top;
-            }
-        }
-        &-text {
-            @include text--small;
-            grid-area: b;
-            color: white;
-            text-align: left;
-            &--small {
-                display: none;
-            }
-        }
-        &-icon {
-            grid-area: c;
-            color: white;
-            text-align: right;
-        }
-    }
-
-    @media only screen and (max-height: 800px) {
+    @media only screen and (max-height: 850px) {
         .c-home {
             &__container{
                 min-height: unset;
             }
             &__logo{
                 margin-top: unset;
-                margin-bottom: unset;
+                margin-bottom: 2rem;
             }
             &__button-container{
                 margin-top: 2rem;

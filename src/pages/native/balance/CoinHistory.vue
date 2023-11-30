@@ -186,20 +186,27 @@ export default {
                             <div class="absolute crypto-image-container">
                                 <q-item-section avatar class="cryptoImg">
                                     <q-avatar size="6rem">
-                                        <TokenAvatar
-                                            :token="selectedCoin.icon"
-                                            :avatarSize="100"
-                                        />
                                         <div
-                                            v-if="selectedCoin.name === 'Telos EVM'"
+                                            v-if="selectedCoin.name == 'Telos EVM'"
                                             class="flex absolute full-width full-height"
                                         >
                                             <img
-                                                class="flex q-ml-auto q-mt-auto evm-logo"
+                                                class="flex q-ml-auto"
                                                 alt="tEVM"
-                                                src="~assets/evm/evm_logo.png"
+                                                src='/branding/telos-scan.png'
                                             >
                                         </div>
+                                        <div
+                                            v-else-if="selectedCoin.name == 'Telos'"
+                                            class="flex absolute full-width full-height"
+                                        >
+                                            <img
+                                                class="flex q-ml-auto"
+                                                alt="tEVM"
+                                                src='/branding/telos.png'
+                                            >
+                                        </div>
+                                        <TokenAvatar v-else :token="selectedCoin.icon" :avatarSize="100" />
                                     </q-avatar>
                                 </q-item-section>
                                 <img

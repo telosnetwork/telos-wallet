@@ -45,7 +45,8 @@ const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
 
-const explorerUrl = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
+const explorerUrl = chainSettings.getExplorerUrl();
 const contractAddress = route.query.contract as string;
 const nftId = route.query.id as string;
 
@@ -150,11 +151,9 @@ onBeforeMount(async () => {
 let timer: ReturnType<typeof setInterval> | undefined;
 const minuteMilliseconds = 60 * 1000;
 onMounted(() => {
-    const indexer = (chainStore.currentChain.settings as EVMChainSettings).getIndexer();
-
     // update owner info once per minute
     timer = setInterval(async () => {
-        nft.value?.updateOwnerData(indexer);
+        nft.value?.updateOwnerData();
     }, minuteMilliseconds);
 });
 
@@ -178,8 +177,18 @@ watch(loggedAccount, (newAccount: EvmAccountModel) => {
     }
 });
 
+
+const ownerFirstCheck = ref(false);
+const indexer = chainSettings.getIndexer();
 // if details refresh with new owner (on transfer), disable transfer functionality
 watch(nft, () => {
+    // Only if the indexer is down or behind, we want to update the owner data only once
+    // just in case the current user is not the owner anymore
+    if (nft.value && !chainSettings.isIndexerHealthy() && !ownerFirstCheck.value) {
+        ownerFirstCheck.value = true;
+        nft.value.updateOwnerData();
+    }
+
     const shouldDisableTransfer = !nft.value ||
         (isErc721.value && nftAsErc721.value.owner !== loggedAccount.value?.address) ||
         (isErc1155.value && !nftAsErc1155.value.owners[loggedAccount.value?.address]);

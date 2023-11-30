@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
 import { AccountModel } from 'src/antelope/stores/account';
-import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types';
+import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types/TokenClass';
 
 // BALANCE ---
 const BALANCE_SYSTEM_TOKEN   = ethers.BigNumber.from('123'.concat('4'.repeat(18)));
@@ -25,6 +25,15 @@ const TEST_NETWORK_NAME = 'Test Network';
 const EXPLORER_URL = 'https://explorer.testnet.telos.net';
 const ECOSYSTEM_URL = 'https://ecosystem.telos.net';
 const ENDPOINT_URL = 'https://test-network.telos.net';
+const ENDPOINT_PROTOCOL = 'http';
+const ENDPOINT_PORT = 1234;
+const ENDPOINT_PATH = '/api';
+const ENDPOINT = {
+    protocol: ENDPOINT_PROTOCOL,
+    host: ENDPOINT_URL,
+    port: ENDPOINT_PORT,
+    path: ENDPOINT_PATH,
+};
 
 const commonToken = {
     decimals: 18,
@@ -100,6 +109,7 @@ const MockData = {
         unstakedRatio: ethers.BigNumber.from('1200000000000000000'),
     },
     Network: TEST_NETWORK,
+    RpcEndpoint: ENDPOINT,
     ExplorerUrl: EXPLORER_URL,
     EcosystemUrl: ECOSYSTEM_URL,
     Balance: {

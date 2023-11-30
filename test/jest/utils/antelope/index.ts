@@ -29,6 +29,7 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
 
 const CURRENT_CONTEXT = 'current';
 
+/*
 jest.mock('src/antelope', () => ({
     useChainStore,
     useAccountStore,
@@ -38,7 +39,7 @@ jest.mock('src/antelope', () => ({
     getAntelope,
     CURRENT_CONTEXT,
 }));
-
+*/
 
 jest.mock('src/antelope/config', () => ({
     errorToString: jest.fn().mockImplementation(e => e),

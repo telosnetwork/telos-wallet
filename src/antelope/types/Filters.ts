@@ -43,7 +43,7 @@ export interface IndexerTransactionsFilter extends IndexerPaginationFilter {
 
 export interface IndexerTransfersFilter extends IndexerPaginationFilter {
     account: string;
-    type?: 'erc20' | 'erc721' | 'erc1155'; // filter by token type
+    type?: 'erc20' | 'erc721' | 'erc1155' | 'none'; // filter by token type
     includePagination?: boolean; // include the total count and more flag in response
     endBlock?: number; // last block to include in the query
     startBlock?: number; // first block to include in the query
@@ -68,6 +68,7 @@ export interface IndexerCollectionNftsFilter extends IndexerPaginationFilter {
     includeAbi?: boolean; // indicate whether to include abi
     tokenId?: string; // only query results for a specific token ID
     includeTokenIdSupply?: boolean;
+    type?: NftTokenInterface;
 }
 
 export interface IndexerAllowanceFilter extends IndexerPaginationFilter {

@@ -89,18 +89,18 @@ export default {
             this.selectedTab = val;
             switch (val) {
             case 'coins':
-                this.$router.push('/native/balance', () => {});
+                this.$router.push('/zero/balance', () => {});
                 this.$emit('update:balanceTab', 'coins');
                 break;
             case 'dapps':
-                this.$router.push('/native/dappsearch', () => {});
+                this.$router.push('/zero/dappsearch', () => {});
                 break;
             case 'nft':
-                this.$router.push('/native/balance', () => {});
+                this.$router.push('/zero/balance', () => {});
                 this.$emit('update:balanceTab', 'collectables');
                 break;
             case 'profile':
-                this.$router.push('/native/profile', () => {});
+                this.$router.push('/zero/profile', () => {});
                 break;
             case 'earn':
                 this.showRexStakeDlg = true;
@@ -128,7 +128,7 @@ export default {
 <template>
 <div>
     <nav class="leftNavBar">
-        <img src="~assets/telosLogo.svg" class="telosLogo" >
+        <img src="/branding/telos-wallet-light.png" class="telosLogo" >
         <ul>
             <li>
                 <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
