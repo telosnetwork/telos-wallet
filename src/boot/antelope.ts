@@ -100,7 +100,8 @@ export default boot(({ app }) => {
     ant.config.debug.allowDebugMode(
         process.env.NODE_ENV !== 'production' ||
         document.location.hostname === 'localhost' ||
-        document.location.hostname.includes('netlify'),
+        document.location.hostname.includes('netlify') ||
+        true, // this is temporal for the demo
     );
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
