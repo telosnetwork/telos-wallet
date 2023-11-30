@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { formatUnits } from 'ethers/lib/utils';
 
 import AppPage from 'components/evm/AppPage.vue';
 import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.vue';
@@ -8,7 +9,12 @@ import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
 import { CURRENT_CONTEXT, useAccountStore, useAllowancesStore } from 'src/antelope';
-import { AllowanceTableColumns, Sort } from 'src/antelope/types';
+import {
+    AllowanceTableColumns,
+    HUGE_ALLOWANCE_THRESHOLD,
+    Sort,
+    isErc20AllowanceRow,
+} from 'src/antelope/types';
 
 const { t: $t } = useI18n();
 const allowanceStore = useAllowancesStore();
@@ -37,6 +43,7 @@ const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
     descending: true,
     sortBy: AllowanceTableColumns.asset,
 });
+const searchText = ref('');
 const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 // computed
@@ -54,19 +61,64 @@ const shapedAllowanceRows = computed(() => {
     const order = sort.value.descending ? Sort.descending : Sort.ascending;
     const getterArgs: [string, Sort, boolean] = [CURRENT_CONTEXT, order, includeCancelledAllowances.value];
 
+    let allowances;
+
     if (sortBy === asset) {
-        return allowanceStore.allowancesSortedByAssetQuantity(...getterArgs);
+        allowances = allowanceStore.allowancesSortedByAssetQuantity(...getterArgs);
     } else if (sortBy === value) {
-        return allowanceStore.allowancesSortedByAllowanceFiatValue(...getterArgs);
+        allowances = allowanceStore.allowancesSortedByAllowanceFiatValue(...getterArgs);
     } else if (sortBy === allowance) {
-        return allowanceStore.allowancesSortedByAllowanceAmount(...getterArgs);
+        allowances = allowanceStore.allowancesSortedByAllowanceAmount(...getterArgs);
     } else if (sortBy === spender) {
-        return allowanceStore.allowancesSortedBySpender(...getterArgs);
+        allowances = allowanceStore.allowancesSortedBySpender(...getterArgs);
     } else if (sortBy === type) {
-        return allowanceStore.allowancesSortedByAssetType(...getterArgs);
+        allowances = allowanceStore.allowancesSortedByAssetType(...getterArgs);
     } else {
-        return allowanceStore.allowancesSortedByLastUpdated(...getterArgs);
+        allowances = allowanceStore.allowancesSortedByLastUpdated(...getterArgs);
     }
+
+    if (searchText.value) {
+        allowances = allowances.filter((row) => {
+            const searchTextLower = searchText.value.toLowerCase();
+            const localizedNone = $t('global.none').toLowerCase();
+            const localizedHuge = $t('global.huge').toLowerCase();
+            const localizedAllowed = $t('global.allowed').toLowerCase();
+            const localizedNotAllowed = $t('global.not_allowed').toLowerCase();
+
+            const rowIsErc20 = isErc20AllowanceRow(row);
+
+            let tokenNameMatches = false;
+            let tokenContractMatches = false;
+            let allowanceMatches = false;
+
+            if (rowIsErc20) {
+                tokenNameMatches = row.tokenSymbol.toLowerCase().includes(searchTextLower);
+                tokenContractMatches = row.tokenAddress.toLowerCase().includes(searchTextLower);
+
+                allowanceMatches =
+                    row.allowance.toString().includes(searchTextLower) ||
+                    (row.allowance.toString() === '0' && (localizedNone.includes(searchTextLower) || localizedNotAllowed.includes(searchTextLower))) ||
+                    (Number(formatUnits(row.allowance, row.tokenDecimals)) > HUGE_ALLOWANCE_THRESHOLD && localizedHuge.includes(searchTextLower)) ||
+                    (row.allowance.toString() !== '0' && localizedAllowed.includes(searchTextLower));
+
+            } else {
+                tokenNameMatches = (row.collectionName ?? row.collectionAddress).toLowerCase().includes(searchTextLower);
+                tokenContractMatches = row.collectionAddress.toLowerCase().includes(searchTextLower);
+
+                allowanceMatches =
+                    (row.allowed && localizedAllowed.includes(searchTextLower)) ||
+                    (!row.allowed && (localizedNotAllowed.includes(searchTextLower) || localizedNone.includes(searchTextLower)));
+            }
+
+            const spenderMatches =
+                row.spenderAddress.toLowerCase().includes(searchTextLower) ||
+                (row.spenderName ?? '').toLowerCase().includes(searchTextLower);
+
+            return tokenNameMatches || allowanceMatches || spenderMatches || tokenContractMatches;
+        });
+    }
+
+    return allowances;
 });
 
 // watchers
@@ -93,9 +145,8 @@ onBeforeUnmount(() => {
     }
 });
 
-function handleSearchUpdated(searchText: string) {
-    // eztodo implement
-    console.log('Search updated', searchText);
+function handleSearchUpdated(newSearchText: string) {
+    searchText.value = newSearchText;
 }
 
 function handleIncludeCancelledUpdated(includeCancelled: boolean) {
