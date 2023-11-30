@@ -3,7 +3,7 @@ import { App, toRaw } from 'vue';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig, AntelopeDebug, chainNetworkNames } from 'src/antelope/config/';
+import { AntelopeConfig, AntelopeDebug, chainNetworkNames } from 'src/antelope/config';
 import installPinia from 'src/antelope/stores';
 
 import { AccountModel } from 'src/antelope/stores/account';
