@@ -105,13 +105,15 @@ export default defineComponent({
                     @click="gotoTeloscan()"
                     @keypress.space.enter="gotoTeloscan()"
                 >
-                    <div class="c-user-info__icon-wrapper"><InlineSvg
-                        :src="require('src/assets/icon--acorn.svg')"
-                        class="c-user-info__icon c-user-info__icon--acorn"
-                        height="24"
-                        width="24"
-                        aria-hidden="true"
-                    /></div>
+                    <div class="c-user-info__icon-wrapper">
+                        <img
+                            src="/branding/telos-scan.png"
+                            class="c-user-info__icon c-user-info__icon--acorn"
+                            height="24"
+                            width="24"
+                            aria-hidden="true"
+                        >
+                    </div>
                     <h5>{{ $t('nav.teloscan') }}</h5>
                     <q-icon size="xs" name="o_launch" class="c-user-info__menu-item-min-icon" />
                 </li>
@@ -171,6 +173,10 @@ export default defineComponent({
         transition: background-color 0.1s ease-in-out;
         transition-property: background-color, color;
 
+        .c-user-info__icon--acorn{
+            filter: grayscale(1);
+        }
+
         &:hover {
             background-color: var(--accent-color-5);
             color: var(--accent-color);
@@ -180,8 +186,8 @@ export default defineComponent({
                     fill: var(--accent-color);
                 }
 
-                &#{$this}__icon--acorn path {
-                    stroke: var(--accent-color);
+                &#{$this}__icon--acorn {
+                    filter: grayscale(0);
                 }
             }
         }

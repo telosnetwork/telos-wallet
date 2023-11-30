@@ -42,7 +42,7 @@ onMounted(() => {
         <div class="c-home">
             <div class="c-home__container">
                 <img
-                    src="~assets/logo--telos-wallet.svg"
+                    src="branding/telos-wallet-light.png"
                     :alt="$t('home.wallet_logo_alt')"
                     class="c-home__logo"
                 >
@@ -155,10 +155,10 @@ onMounted(() => {
     }
 
     &__logo {
-        width: 240px;
+        width: 220px;
         align-self: center;
-        flex-grow: 1;
-
+        margin-top: 10rem;
+        margin-bottom: 10rem;
     }
 
     &__button-container {
@@ -233,14 +233,14 @@ onMounted(() => {
         z-index: $z-index--connect-wallet-popup;
     }
 
-    @media only screen and (max-height: 800px) {
+    @media only screen and (max-height: 850px) {
         .c-home {
             &__container{
                 min-height: unset;
             }
             &__logo{
                 margin-top: unset;
-                margin-bottom: unset;
+                margin-bottom: 2rem;
             }
             &__button-container{
                 margin-top: 2rem;
