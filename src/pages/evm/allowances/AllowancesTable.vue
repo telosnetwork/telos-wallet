@@ -69,7 +69,6 @@ const tableColumns = [
 ];
 
 // computed
-// eztodo put pagination in URL for deeplinking
 const tableRows = computed(() => {
     const { page, rowsPerPage } = pagination.value;
     const start = page === 1 ? 0 : (page - 1) * rowsPerPage;
