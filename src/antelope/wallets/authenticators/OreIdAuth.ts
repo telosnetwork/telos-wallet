@@ -202,10 +202,17 @@ export class OreIdAuth extends EVMAuthenticator {
         return this.userChainAccount?.chainAccount as addressString;
     }
 
-    handleCatchError(error: never): AntelopeError {
-        this.trace('handleCatchError', error);
-        console.error(error);
-        return new AntelopeError('antelope.evm.error_send_transaction', { error });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCatchError(error: Error): AntelopeError {
+        this.trace('handleCatchError', error.message);
+        if (
+            error.message === 'Closed by user' ||
+            error.message === 'sign_transaction_cancelled_by_user'
+        ) {
+            return new AntelopeError('antelope.evm.error_transaction_canceled');
+        } else {
+            return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        }
     }
 
     /**
@@ -226,7 +233,7 @@ export class OreIdAuth extends EVMAuthenticator {
     }
 
     async performOreIdTransaction(from: addressString, json: JSONObject): Promise<EvmTransactionResponse> {
-
+        this.trace('performOreIdTransaction', from, json);
         const oreIdInstance = oreId as OreId;
 
         // sign a blockchain transaction
@@ -253,10 +260,16 @@ export class OreIdAuth extends EVMAuthenticator {
         this.trace('sendSystemToken', to, amount.toString());
         const from = this.getAccountAddress();
         const value = amount.toHexString();
+
+        // Send the transaction
         return this.performOreIdTransaction(from, {
             from,
             to,
             value,
+        }).then(
+            (transaction: ethers.providers.TransactionResponse) => transaction,
+        ).catch((error) => {
+            throw this.handleCatchError(error);
         });
     }
 

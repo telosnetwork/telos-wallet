@@ -84,10 +84,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
             if (typeof provider === 'undefined') {
                 this.usingQR = true;
             } else {
-                const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0] : '';
+                const providerAddress = (provider._state?.accounts) ? provider._state?.accounts[0]??'' : '';
+                this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address);
                 const sameAddress = providerAddress.toLocaleLowerCase() === address.toLocaleLowerCase();
                 this.usingQR = !sameAddress;
-                this.trace('walletConnectLogin', 'providerAddress:', providerAddress, 'address:', address, 'sameAddress:', sameAddress);
+                this.trace('walletConnectLogin', 'sameAddress:', sameAddress);
             }
             this.trace('walletConnectLogin', 'using QR:', this.usingQR);
 
@@ -287,15 +288,23 @@ export class WalletConnectAuth extends EVMAuthenticator {
         return web3Provider as ethers.providers.Web3Provider;
     }
 
-    handleCatchError(error: never): AntelopeError {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCatchError(error: any): AntelopeError {
         this.trace('handleCatchError', error);
-        console.error(error);
-        return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        if (error.message.includes('User rejected the')) {
+            return new AntelopeError('antelope.evm.error_transaction_canceled');
+        } else {
+            return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        }
     }
 
     async sendSystemToken(to: string, amount: ethers.BigNumber): Promise<SendTransactionResult> {
         this.trace('sendSystemToken', to, amount.toString());
-        return await sendTransaction(this.sendConfig as PrepareSendTransactionResult);
+        return sendTransaction(this.sendConfig as PrepareSendTransactionResult).then(
+            (transaction: SendTransactionResult) => transaction,
+        ).catch((error) => {
+            throw this.handleCatchError(error);
+        });
     }
 
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<WriteContractResult> {

@@ -12,9 +12,9 @@ import { IPFS_GATEWAY, extractNftMetadata } from 'src/antelope/stores/utils/nft-
 import { useContractStore } from 'src/antelope/stores/contract';
 import { useNftsStore } from 'src/antelope/stores/nfts';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { CURRENT_CONTEXT } from 'src/antelope';
+import { CURRENT_CONTEXT, useAccountStore, useChainStore } from 'src/antelope';
 import { AxiosInstance } from 'axios';
-import { Contract } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import { AntelopeError } from 'src/antelope/types';
 
 export interface NftAttribute {
@@ -69,7 +69,7 @@ export async function getErc721Owner(contract: Contract, tokenId: string): Promi
     return await contract.ownerOf(tokenId);
 }
 
-export async function getErc1155Owners(contractAddress: string, tokenId: string, indexer: AxiosInstance): Promise<{ [address: string]: number }> {
+export async function getErc1155OwnersFromIndexer(contractAddress: string, tokenId: string, indexer: AxiosInstance): Promise<{ [address: string]: number }> {
     const holdersResponse = (await indexer.get(`/v1/token/${contractAddress}/holders?limit=10000&token_id=${tokenId}`)).data as IndexerTokenHoldersResponse;
     const holders = holdersResponse.results;
 
@@ -78,6 +78,20 @@ export async function getErc1155Owners(contractAddress: string, tokenId: string,
         return acc;
     }, {} as { [address: string]: number });
 }
+
+export async function getErc1155OwnersFromContract(ownerAddress: string, tokenId: string, contract: Contract): Promise<{ [address: string]: number }> {
+    // we create a reduced list of owners containing just the balance of the current user
+    // because we can't get all the owners from the contract (without a loop)
+    const _owners = await contract.balanceOf(ownerAddress, tokenId).then((balance: ethers.BigNumber) => {
+        const _balance = balance.toNumber();
+        const _owners: { [address: string]: number } = {};
+        _owners[ownerAddress] = _balance;
+        return _owners;
+    });
+    return _owners;
+}
+
+
 
 /**
  * Construct an NFT from indexer data
@@ -104,7 +118,7 @@ export async function constructNft(
     const cachedNft = nftStore.__contracts[network]?.[contract.address]?.list.find(nft => nft.id === indexerData.tokenId);
 
     if (cachedNft) {
-        await cachedNft.updateOwnerData(chainSettings.getIndexer());
+        await cachedNft.updateOwnerData();
         return cachedNft;
     }
 
@@ -164,7 +178,7 @@ export async function constructNft(
     }
 
     const indexer = chainSettings.getIndexer();
-    const owners = await getErc1155Owners(contract.address, indexerData.tokenId, indexer);
+    const owners = await getErc1155OwnersFromIndexer(contract.address, indexerData.tokenId, indexer);
 
     return new Erc1155Nft({
         ...commonData,
@@ -305,7 +319,23 @@ export class Erc1155Nft extends NFT {
         return this._owners;
     }
 
-    async updateOwnerData(indexer: AxiosInstance): Promise<void> {
-        this._owners = await getErc1155Owners(this.contractAddress, this.id, indexer);
+
+    async updateOwnerData(): Promise<void> {
+        const chainSettings = (useChainStore().currentChain.settings as EVMChainSettings);
+        if (chainSettings.isIndexerHealthy()) {
+            const indexer = chainSettings.getIndexer();
+            this._owners = await getErc1155OwnersFromIndexer(this.contractAddress, this.id, indexer);
+        } else {
+            const account = useAccountStore().getAccount(CURRENT_CONTEXT);
+            const contract = await useContractStore().getContract(CURRENT_CONTEXT, this.contractAddress);
+            const contractInstance = await contract?.getContractInstance();
+
+            if (!contractInstance) {
+                throw new AntelopeError('antelope.utils.error_contract_instance');
+            }
+
+            const updated_owners = await getErc1155OwnersFromContract(account.account, this.id, contractInstance);
+            this._owners = { ...this._owners, ...updated_owners };
+        }
     }
 }

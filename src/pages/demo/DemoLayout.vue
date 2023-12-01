@@ -24,6 +24,9 @@
         <li>
             <router-link :to="{ name: 'demos.scrollable-cards' }">Scrollable Info Cards</router-link>
         </li>
+        <li>
+            <router-link :to="{ name: 'demos.indexer' }">Simulate Indexer Down</router-link>
+        </li>
     </ul>
 
     <router-view />

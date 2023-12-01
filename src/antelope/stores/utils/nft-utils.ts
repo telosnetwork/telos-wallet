@@ -1,7 +1,7 @@
 import { IndexerNftMetadata, NFTSourceTypes, NftSourceType } from 'src/antelope/types';
 import { urlIsAudio, urlIsPicture, urlIsVideo } from 'src/antelope/stores/utils/media-utils';
 
-export const IPFS_GATEWAY = 'https://cloudflare-ipfs.com/ipfs/';
+export const IPFS_GATEWAY = 'https://ipfs.telos.net/ipfs/';
 
 /**
  * Given an imageCache URL, tokenUri, and metadata, extract the image URL, mediaType, and mediaSource
@@ -109,7 +109,9 @@ export async function extractNftMetadata(
         }
     }
 
-    if (metadata?.image?.includes(IPFS_GATEWAY)) {
+    const metadataImageIsMediaUrl = await urlIsVideo(metadata?.image ?? '') || await urlIsAudio(metadata?.image ?? '') || urlIsPicture(metadata?.image ?? '');
+
+    if (metadata?.image?.includes(IPFS_GATEWAY) && !metadataImageIsMediaUrl) {
         mediaType = await determineIpfsMediaType(metadata?.image);
 
         if (mediaType === NFTSourceTypes.IMAGE) {

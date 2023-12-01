@@ -32,9 +32,9 @@ import {
     IndexerCollectionNftsResponse,
     Erc721Nft,
     getErc721Owner,
-    getErc1155Owners,
     Erc1155Nft,
     AntelopeError,
+    getErc1155OwnersFromIndexer,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
 import { ethers } from 'ethers';
@@ -42,6 +42,7 @@ import { toStringNumber } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
 import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
+import { BehaviorSubject, filter } from 'rxjs';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -82,6 +83,19 @@ export default abstract class EVMChainSettings implements ChainSettings {
         promise: Promise<EvmContract | false>;
         resolve?: (value: EvmContract | false) => void;
     }> = {};
+
+    // this variable helps to show the indexer health warning only once per session
+    indexerHealthWarningShown = false;
+
+    // This variable is used to simulate a bad indexer health state
+    indexerBadHealthSimulated = false;
+
+    // This observable is used to check if the indexer health state was already checked
+    indexerChecked$ = new BehaviorSubject(false);
+
+    simulateIndexerDown(isBad: boolean) {
+        this.indexerBadHealthSimulated = isBad;
+    }
 
     constructor(network: string) {
         this.network = network;
@@ -178,7 +192,6 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     async updateIndexerHealthState() {
         // resolve if this chain has indexer api support and is working fine
-
         const promise =
             Promise.resolve(this.hasIndexerSupport())
                 .then(hasIndexerSupport =>
@@ -197,16 +210,40 @@ export default abstract class EVMChainSettings implements ChainSettings {
         // update indexer health state
         promise.then((state) => {
             this._indexerHealthState.state = state;
+            this.indexerChecked$.next(true);
         });
 
         return promise;
     }
 
+    /**
+     * This function checks if the indexer is healthy and warns the user if it is not.
+     * This warning should appear only once per session.
+     */
+    checkAndWarnIndexerHealth() {
+        this.indexerChecked$.pipe(
+            // This filter only allows to continue if the indexer health was already checked
+            filter(indexerChecked => indexerChecked === true),
+        ).subscribe(() => {
+            if (!this.indexerHealthWarningShown && !this.isIndexerHealthy()) {
+                this.indexerHealthWarningShown = true;
+                const  ant = getAntelope();
+                ant.config.notifyNeutralMessageHandler(
+                    ant.config.localizationHandler('antelope.chain.indexer_bad_health_warning'),
+                );
+            }
+        });
+    }
+
     isIndexerHealthy(): boolean {
-        return (
-            this._indexerHealthState.state.success &&
-            this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
-        );
+        if (this.indexerBadHealthSimulated) {
+            return false;
+        } else {
+            return (
+                this._indexerHealthState.state.success &&
+                this._indexerHealthState.state.secondsBehind < getAntelope().config.indexerHealthThresholdSeconds
+            );
+        }
     }
 
     get indexerHealthState(): IndexerHealthResponse {
@@ -343,6 +380,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
             supply: nftResponse.supply,
         }));
 
+        // we fix the supportedInterfaces property if it is undefined in the response but present in the request
+        Object.values(response.contracts).forEach((contract) => {
+            contract.supportedInterfaces = contract.supportedInterfaces ||
+                params.type ? [params.type?.toLowerCase() as string] : undefined;
+        });
+
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
         return this.processNftRawData(shapedNftData);
@@ -378,11 +421,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.tokenIdSupply,
-            owner: isErc1155 ? undefined : nftResponse.owner,
+            owner: nftResponse.owner ?? account,
         }));
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+
         return this.processNftRawData(shapedNftData);
     }
 
@@ -448,7 +492,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                 if (!ownersUpdatedWithinThreeMins) {
                     const indexer = this.getIndexer();
-                    const owners = await getErc1155Owners(nft.contractAddress, nft.id, indexer);
+                    const owners = await getErc1155OwnersFromIndexer(nft.contractAddress, nft.id, indexer);
                     nft.owners = owners;
                 }
 
@@ -574,7 +618,16 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const url = `v1/account/${account}/transfers`;
 
         return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerAccountTransfersResponse);
+            .then(response => response.data as IndexerAccountTransfersResponse)
+            .then((data) => {
+                // set supportedInterfaces property if undefined in the response
+                Object.values(data.contracts).forEach((contract) => {
+                    if (contract.supportedInterfaces === null && type !== undefined) {
+                        contract.supportedInterfaces = [type];
+                    }
+                });
+                return data;
+            });
     }
 
     async getTokenList(): Promise<TokenClass[]> {
@@ -589,7 +642,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             .then(tokens => tokens.map(t => ({
                 ...t,
                 network: this.getNetwork(),
-                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/logo--tlos.svg'),
+                logoURI: t.logoURI?.replace('ipfs://', 'https://w3s.link/ipfs/') ?? require('src/assets/tokens/telos.png'),
             }) as unknown as TokenSourceInfo))
             .then(tokens => tokens.map(t => new TokenClass(t)))
             .then(tokens => [this.getSystemToken(), this.getWrappedSystemToken(), this.getStakedSystemToken(), ...tokens]);

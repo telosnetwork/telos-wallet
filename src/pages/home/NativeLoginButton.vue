@@ -80,7 +80,7 @@ export default defineComponent({
             const error = await this.login({ idx, justViewer });
             if (!error) {
                 this.showLogin = false;
-                await this.$router.push({ path: '/native/balance' });
+                await this.$router.push({ path: '/zero/balance' });
             } else {
                 this.error = error;
             }
@@ -263,14 +263,14 @@ export default defineComponent({
     </div>
 
     <div v-else class="q-px-md flex justify-center column">
-        <p class="q-mb-lg"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
+        <p class="q-mb-lg logged-in"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
 
         <q-btn
             text-color="white"
             outline
             :label="$t('home.view_wallet')"
             class="q-px-md q-py-sm q-mb-lg"
-            @click="$router.push('/native/balance')"
+            @click="$router.push('/zero/balance')"
         />
 
         <q-btn
@@ -399,6 +399,12 @@ export default defineComponent({
     width: 30rem;
     height: auto;
     margin-bottom: 5rem;
+}
+
+.logged-in{
+    color: white;
+    font-size: 16px !important;
+    margin-bottom: 2rem;
 }
 
 

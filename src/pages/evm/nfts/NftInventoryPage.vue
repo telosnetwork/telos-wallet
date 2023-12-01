@@ -20,10 +20,12 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
-
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
+const chainSettings = (chainStore.currentChain.settings as EVMChainSettings);
+
+chainSettings.checkAndWarnIndexerHealth();
 
 const router = useRouter();
 const route = useRoute();
@@ -267,7 +269,7 @@ watch(searchFilter, (filter) => {
 
 // methods
 function getCollectionUrl(address: string) {
-    const explorer = (chainStore.currentChain.settings as EVMChainSettings).getExplorerUrl();
+    const explorer = chainSettings.getExplorerUrl();
 
     return `${explorer}/address/${address}`;
 }
