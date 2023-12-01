@@ -102,7 +102,10 @@ const shapedAllowanceRows = computed(() => {
                     (row.allowance.toString() !== '0' && localizedAllowed.includes(searchTextLower));
 
             } else {
-                tokenNameMatches = (row.collectionName ?? row.collectionAddress).toLowerCase().includes(searchTextLower);
+                tokenNameMatches =
+                    (row.collectionName ?? '').toLowerCase().includes(searchTextLower) ||
+                    row.collectionAddress.toLowerCase().includes(searchTextLower);
+
                 tokenContractMatches = row.collectionAddress.toLowerCase().includes(searchTextLower);
 
                 allowanceMatches =
