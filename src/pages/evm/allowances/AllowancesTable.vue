@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { AllowanceTableColumns, ShapedAllowanceRow } from 'src/antelope/types/Allowances';
+import { AllowanceTableColumns, ShapedAllowanceRow, isErc20AllowanceRow } from 'src/antelope/types/Allowances';
 import { useUserStore } from 'src/antelope';
 import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 
@@ -21,6 +21,7 @@ const { fiatLocale, fiatCurrency } = useUserStore();
 const fiatSymbol = getCurrencySymbol(fiatLocale, fiatCurrency);
 
 // data
+const revokeAllCheckboxChecked = ref(false);
 const pagination = ref({
     page: 1,
     rowsPerPage: 10,
@@ -28,8 +29,15 @@ const pagination = ref({
     sortBy: AllowanceTableColumns.asset,
     descending: true,
 });
+const revokeCheckboxesModel = ref<Record<string, boolean>>({});
 
 const tableColumns = [
+    {
+        name: AllowanceTableColumns.revoke,
+        field: AllowanceTableColumns.revoke,
+        label: '',
+        align: 'left' as 'left',
+    },
     {
         name: AllowanceTableColumns.asset,
         field: AllowanceTableColumns.asset,
@@ -76,6 +84,16 @@ const tableRows = computed(() => {
 
     return props.rows.slice(start, end);
 });
+
+// watchers
+watch(props.rows, (newRows) => {
+    revokeCheckboxesModel.value = newRows.reduce((acc, row) => {
+        const rowIsErc20 = isErc20AllowanceRow(row);
+        const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
+        acc[`${row.spenderAddress}-${tokenAddress}`] = false;
+        return acc;
+    }, {} as Record<string, boolean>);
+}, { immediate: true });
 
 // methods
 function getAriaLabelForTh(columnName: AllowanceTableColumns) {
@@ -127,6 +145,33 @@ function handleThClick(columnName: AllowanceTableColumns) {
 
     emit('sortChanged', { descending: newDescending, sortBy: columnName });
 }
+
+function updateAllRevokeCheckboxes() {
+    const { value: checked } = revokeAllCheckboxChecked;
+    Object.keys(revokeCheckboxesModel.value).forEach((key) => {
+        revokeCheckboxesModel.value[key] = checked;
+    });
+}
+
+function getCheckboxModelForRow(row: ShapedAllowanceRow) {
+    const rowIsErc20 = isErc20AllowanceRow(row);
+    const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
+    return revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`];
+}
+
+function toggleRevokeChecked(row: ShapedAllowanceRow) {
+    const rowIsErc20 = isErc20AllowanceRow(row);
+    const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
+    revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`] = !revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`];
+
+    if (!revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`]) {
+        revokeAllCheckboxChecked.value = false;
+    }
+
+    if (Object.values(revokeCheckboxesModel.value).every(value => value)) {
+        revokeAllCheckboxChecked.value = true;
+    }
+}
 </script>
 
 <template>
@@ -147,7 +192,16 @@ function handleThClick(columnName: AllowanceTableColumns) {
                 :props="props"
                 class="o-text--paragraph u-text--default-contrast"
             >
+                <div v-if="col.name === AllowanceTableColumns.revoke" class="flex items-center">
+                    <q-checkbox
+                        v-model="revokeAllCheckboxChecked"
+                        :aria-label="$t('evm_allowances.revoke_all_checkbox_aria_label')"
+                        size="xs"
+                        @update:model-value="updateAllRevokeCheckboxes"
+                    />
+                </div>
                 <div
+                    v-else
                     class="c-allowances-table__th-container"
                     tabindex="0"
                     :aria-label="getAriaLabelForTh(col.name)"
@@ -169,7 +223,12 @@ function handleThClick(columnName: AllowanceTableColumns) {
     </template>
 
     <template v-slot:body="props">
-        <AllowancesTableRow :key="props.row.collectionAddress" :row="props.row" />
+        <AllowancesTableRow
+            :key="props.row.collectionAddress"
+            :row="props.row"
+            :revokeChecked="getCheckboxModelForRow(props.row)"
+            @revoke-toggled="toggleRevokeChecked(props.row)"
+        />
     </template>
 </q-table>
 

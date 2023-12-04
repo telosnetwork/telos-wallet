@@ -70,6 +70,7 @@ export function isNftCollectionAllowanceRow(row: ShapedAllowanceRow): row is Sha
 }
 
 export enum AllowanceTableColumns {
+    revoke = 'revoke',
     asset = 'asset',
     value = 'value',
     allowance = 'allowance',

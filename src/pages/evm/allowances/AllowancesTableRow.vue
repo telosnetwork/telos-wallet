@@ -33,7 +33,10 @@ const tlosLogo = require('src/assets/logo--tlos.svg');
 
 const props = defineProps<{
     row: ShapedAllowanceRow;
+    revokeChecked: boolean;
 }>();
+
+const emit = defineEmits(['revoke-toggled']);
 
 const { t: $t } = useI18n();
 const nftStore = useNftsStore();
@@ -159,6 +162,15 @@ const updatedTextPretty = computed(() => {
 });
 const updatedTextFull = computed(() => getFormattedDate(props.row.lastUpdated / 1000, DEFAULT_DATE_FORMAT, true));
 
+const ariaLabelForRevokeCheckbox = computed(() => {
+    const { spenderName, spenderAddress } = props.row;
+    const spenderPretty = spenderName || truncateAddress(spenderAddress);
+
+    const tokenPretty = isErc20AllowanceRow(props.row) ? props.row.tokenSymbol : props.row.collectionName ?? truncateAddress(props.row.collectionAddress);
+
+    return $t('evm_allowances.revoke_checkbox_aria_label', { spender: spenderPretty, token: tokenPretty });
+});
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -170,6 +182,17 @@ onMounted(async () => {
 
 <template>
 <q-tr>
+    <q-td key="revoke">
+        <div class="flex items-center">
+            <q-checkbox
+                :model-value="revokeChecked"
+                size="xs"
+                :aria-label="ariaLabelForRevokeCheckbox"
+                @click="() => $emit('revoke-toggled')"
+                @keydown.enter.space.prevent="() => $emit('revoke-toggled')"
+            />
+        </div>
+    </q-td>
     <q-td key="asset" class="c-allowances-table-row__asset-td">
         <img
             v-if="isErc20Row"
