@@ -62,7 +62,7 @@ const assetTextShort = computed(() => {
         prettyAmount = '1 '.concat(truncateText(props.row.tokenName, 12));
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
+        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, true, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ? truncateText(collectionName, 12) : truncateAddress(collectionAddress);
@@ -171,6 +171,15 @@ const ariaLabelForRevokeCheckbox = computed(() => {
     return $t('evm_allowances.revoke_checkbox_aria_label', { spender: spenderPretty, token: tokenPretty });
 });
 
+const ariaLabelForEditIcon = computed(() => {
+    const { spenderName, spenderAddress } = props.row;
+    const spenderPretty = spenderName || truncateAddress(spenderAddress);
+
+    const tokenPretty = isErc20AllowanceRow(props.row) ? props.row.tokenSymbol : props.row.collectionName ?? truncateAddress(props.row.collectionAddress);
+
+    return $t('evm_allowances.edit_allowance_aria_label', { spender: spenderPretty, token: tokenPretty });
+});
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -178,6 +187,10 @@ onMounted(async () => {
         erc721Nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, collectionAddress, tokenId, 'ERC721');
     }
 });
+
+function openEditAllowanceModal() {
+
+}
 </script>
 
 <template>
@@ -193,35 +206,37 @@ onMounted(async () => {
             />
         </div>
     </q-td>
-    <q-td key="asset" class="c-allowances-table-row__asset-td">
-        <img
-            v-if="isErc20Row"
-            :src="rowAsErc20Row.tokenLogo ?? tlosLogo"
-            :alt="$t('evm_allowances.asset_logo_alt', { symbol: rowAsErc20Row.tokenSymbol })"
-            height="24"
-            width="24"
-            :class="{
-                'c-allowances-table-row__asset-logo': true,
-                'c-allowances-table-row__asset-logo--gray': !rowAsErc20Row.tokenLogo,
-            }"
-        >
-        <NftViewer
-            v-else-if="erc721Nft && isSingleErc721Row"
-            :nft="erc721Nft"
-            :preview-mode="false"
-            :tile-mode="false"
-            :icon-size="24"
-        />
-        <NftCollectionStack
-            v-else
-            :collection="rowAsCollectionRow.collectionAddress"
-        />
+    <q-td key="asset">
+        <div class="c-allowances-table-row__flex-td">
+            <img
+                v-if="isErc20Row"
+                :src="rowAsErc20Row.tokenLogo ?? tlosLogo"
+                :alt="$t('evm_allowances.asset_logo_alt', { symbol: rowAsErc20Row.tokenSymbol })"
+                height="24"
+                width="24"
+                :class="{
+                    'c-allowances-table-row__asset-logo': true,
+                    'c-allowances-table-row__asset-logo--gray': !rowAsErc20Row.tokenLogo,
+                }"
+            >
+            <NftViewer
+                v-else-if="erc721Nft && isSingleErc721Row"
+                :nft="erc721Nft"
+                :preview-mode="false"
+                :tile-mode="false"
+                :icon-size="24"
+            />
+            <NftCollectionStack
+                v-else
+                :collection="rowAsCollectionRow.collectionAddress"
+            />
 
-        <ToolTip :text="assetTextFull" :hide-icon="true">
-            <span class="o-text--paragraph-bold u-text--default-contrast">
-                {{ assetTextShort }}
-            </span>
-        </ToolTip>
+            <ToolTip :text="assetTextFull" :hide-icon="true">
+                <span class="o-text--paragraph-bold u-text--default-contrast">
+                    {{ assetTextShort }}
+                </span>
+            </ToolTip>
+        </div>
     </q-td>
     <q-td key="value">
         <ToolTip v-if="fiatValueTextShort" :text="fiatValueTextFull" :hide-icon="true">
@@ -232,9 +247,22 @@ onMounted(async () => {
         </ToolTip>
     </q-td>
     <q-td key="allowance">
-        <ToolTip :text="allowanceTextFull" :hide-icon="true">
-            {{ allowanceTextShort }}
-        </ToolTip>
+        <div class="c-allowances-table-row__flex-td">
+            <ToolTip :text="allowanceTextFull" :hide-icon="true">
+                {{ allowanceTextShort }}
+            </ToolTip>
+
+            <q-icon
+                :aria-label="ariaLabelForEditIcon"
+                class="c-allowances-table-row__edit-icon"
+                name="o_edit"
+                size="xs"
+                color="primary"
+                tabindex="0"
+                @click="openEditAllowanceModal"
+                @keydown.enter.space.prevent="openEditAllowanceModal"
+            />
+        </div>
     </q-td>
     <q-td key="spender">
         <ExternalLink
@@ -256,7 +284,7 @@ onMounted(async () => {
 
 <style lang="scss">
 .c-allowances-table-row {
-    &__asset-td {
+    &__flex-td {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -269,6 +297,10 @@ onMounted(async () => {
         &--gray {
             filter: grayscale(100%) opacity(50%);
         }
+    }
+
+    &__edit-icon {
+        cursor: pointer;
     }
 }
 </style>

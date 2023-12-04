@@ -310,6 +310,7 @@ export default {
         you_own: 'You own {asset}',
         revoke_all_checkbox_aria_label: 'Toggle revoke selection for all allowances shown (revoke selected allowances by clicking Revoke Selected button)',
         revoke_checkbox_aria_label: 'Toggle revoke selection for {token} allowance for spender {spender} (revoke all selected allowances by clicking Revoke Selected button)',
+        edit_allowance_aria_label: 'Edit {token} allowance for spender {spender}',
     },
     notification:{
         success_title_trx: 'Success',
