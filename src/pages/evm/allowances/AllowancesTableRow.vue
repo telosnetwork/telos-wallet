@@ -5,7 +5,6 @@ import { formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
 import {
-    HUGE_ALLOWANCE_THRESHOLD,
     ShapedAllowanceRow,
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
@@ -123,8 +122,8 @@ const allowanceTextShort = computed(() => {
 
         const numberAllowed = Number(formatUnits(allowanceBn, props.row.tokenDecimals));
 
-        if (numberAllowed > HUGE_ALLOWANCE_THRESHOLD) {
-            return $t('global.huge');
+        if (allowanceBn.gt(props.row.tokenMaxSupply)) {
+            return $t('global.unlimited');
         }
 
         if (numberAllowed < TINY_ALLOWANCE_THRESHOLD && numberAllowed > 0) {

@@ -318,82 +318,96 @@ export const useAllowancesStore = defineStore(store_name, {
             this.__erc_1155_allowances = {};
         },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
-            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
-            const balanceInfo = useBalancesStore().currentBalances.find(balance => balance.contract === data.contract);
+            try {
+                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
+                const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+                const tokenContractInstance = await tokenContract?.getContractInstance();
+                const maxSupply = await tokenContractInstance?.totalSupply() as BigNumber | undefined;
+                const balanceInfo = useBalancesStore().currentBalances.find(balance => balance.contract === data.contract);
 
-            if (!spenderContract || !balanceInfo) {
+                if (!spenderContract || !balanceInfo || !maxSupply) {
+                    return null;
+                }
+
+                return {
+                    lastUpdated: data.updated,
+                    spenderAddress: data.spender,
+                    spenderName: spenderContract?.name,
+                    tokenName: balanceInfo.name,
+                    tokenAddress: data.contract,
+                    allowance: BigNumber.from(data.amount),
+                    balance: balanceInfo.balance,
+                    tokenDecimals: balanceInfo.decimals,
+                    tokenSymbol: balanceInfo.symbol,
+                    tokenMaxSupply: maxSupply,
+                    tokenPrice: Number(balanceInfo.price.str),
+                    tokenLogo: balanceInfo.logo,
+                };
+            } catch(e) {
+                console.error('Error shaping ERC20 allowance row', e);
                 return null;
             }
-
-            return {
-                lastUpdated: data.updated,
-                spenderAddress: data.spender,
-                spenderName: spenderContract?.name,
-                tokenName: balanceInfo.name,
-                tokenAddress: data.contract,
-                allowance: BigNumber.from(data.amount),
-                balance: balanceInfo.balance,
-                tokenDecimals: balanceInfo.decimals,
-                tokenSymbol: balanceInfo.symbol,
-                tokenPrice: Number(balanceInfo.price.str),
-                tokenLogo: balanceInfo.logo,
-            };
         },
         async shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection | null> {
-            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+            try {
+                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
 
-            const commonAttributes = {
-                lastUpdated: data.updated,
-                spenderAddress: data.operator,
-                spenderName: spenderContract?.name,
-                allowed: data.approved,
-            };
+                const commonAttributes = {
+                    lastUpdated: data.updated,
+                    spenderAddress: data.operator,
+                    spenderName: spenderContract?.name,
+                    allowed: data.approved,
+                };
 
-            if (data.single) {
-                const tokenId = data.tokenId as string;
-                const nftDetails = await useNftsStore().fetchNftDetails(CURRENT_CONTEXT, data.contract, tokenId);
+                if (data.single) {
+                    const tokenId = data.tokenId as string;
+                    const nftDetails = await useNftsStore().fetchNftDetails(CURRENT_CONTEXT, data.contract, tokenId);
 
-                return nftDetails ? {
+                    return nftDetails ? {
+                        ...commonAttributes,
+                        tokenId,
+                        tokenName: nftDetails.name,
+                        collectionAddress: nftDetails.contractAddress,
+                        collectionName: nftDetails.contractPrettyName,
+                    } : null;
+                }
+
+                const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+                const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
+
+                return collectionInfo ? {
                     ...commonAttributes,
-                    tokenId,
-                    tokenName: nftDetails.name,
-                    collectionAddress: nftDetails.contractAddress,
-                    collectionName: nftDetails.contractPrettyName,
+                    collectionAddress: collectionInfo.address,
+                    collectionName: collectionInfo.name,
+                    balance,
                 } : null;
-            }
-
-            const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-            const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
-
-            return collectionInfo ? {
-                ...commonAttributes,
-                collectionAddress: collectionInfo.address,
-                collectionName: collectionInfo.name,
-                balance,
-            } : null;
-
-        },
-        async shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection | null> {
-            const network = useChainStore().getChain(CURRENT_CONTEXT).settings.getNetwork();
-            const nftsStore = useNftsStore();
-
-            const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
-            const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-            await nftsStore.fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
-            const collectionNftIds = (nftsStore.__contracts[network][data.contract.toLowerCase()]?.list ?? []).map(nft => nft.id);
-
-            if (collectionNftIds.length === 0) {
-                console.error(`Collection ${data.contract} has no NFTs`);
-
+            } catch(e) {
+                console.error('Error shaping ERC721 allowance row', e);
                 return null;
             }
-
-            const balancePromises = collectionNftIds.map(async (tokenId) => {
-                const contractInstance = await collectionInfo?.getContractInstance();
-                return contractInstance?.balanceOf(data.owner, tokenId) as BigNumber;
-            });
-
+        },
+        async shapeErc1155AllowanceRow(data: IndexerErc1155AllowanceResult): Promise<ShapedAllowanceRowNftCollection | null> {
             try {
+                const network = useChainStore().getChain(CURRENT_CONTEXT).settings.getNetwork();
+                const nftsStore = useNftsStore();
+
+                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+                const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+                await nftsStore.fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
+                const collectionNftIds = (nftsStore.__contracts[network][data.contract.toLowerCase()]?.list ?? []).map(nft => nft.id);
+
+                if (collectionNftIds.length === 0) {
+                    console.error(`Collection ${data.contract} has no NFTs`);
+
+                    return null;
+                }
+
+                const balancePromises = collectionNftIds.map(async (tokenId) => {
+                    const contractInstance = await collectionInfo?.getContractInstance();
+                    return contractInstance?.balanceOf(data.owner, tokenId) as BigNumber;
+                });
+
+
                 const balancesOfAllIdsInCollection = await Promise.all(balancePromises);
                 const balance = balancesOfAllIdsInCollection.reduce((acc, balance) => acc.add(balance ?? 0), BigNumber.from(0));
 
@@ -406,8 +420,8 @@ export const useAllowancesStore = defineStore(store_name, {
                     collectionName: collectionInfo.name,
                     balance,
                 } : null;
-            } catch (e) {
-                console.error(`Error fetching ERC1155 balances for collection ${data.contract}`, e);
+            } catch(e) {
+                console.error('Error shaping ERC1155 allowance row', e);
                 return null;
             }
         },

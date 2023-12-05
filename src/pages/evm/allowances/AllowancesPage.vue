@@ -11,7 +11,6 @@ import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 import { CURRENT_CONTEXT, useAccountStore, useAllowancesStore } from 'src/antelope';
 import {
     AllowanceTableColumns,
-    HUGE_ALLOWANCE_THRESHOLD,
     Sort,
     isErc20AllowanceRow,
 } from 'src/antelope/types';
@@ -81,7 +80,7 @@ const shapedAllowanceRows = computed(() => {
         allowances = allowances.filter((row) => {
             const searchTextLower = searchText.value.toLowerCase();
             const localizedNone = $t('global.none').toLowerCase();
-            const localizedHuge = $t('global.huge').toLowerCase();
+            const localizedUnlimited = $t('global.unlimited').toLowerCase();
             const localizedAllowed = $t('global.allowed').toLowerCase();
             const localizedNotAllowed = $t('global.not_allowed').toLowerCase();
 
@@ -98,7 +97,7 @@ const shapedAllowanceRows = computed(() => {
                 allowanceMatches =
                     row.allowance.toString().includes(searchTextLower) ||
                     (row.allowance.toString() === '0' && (localizedNone.includes(searchTextLower) || localizedNotAllowed.includes(searchTextLower))) ||
-                    (Number(formatUnits(row.allowance, row.tokenDecimals)) > HUGE_ALLOWANCE_THRESHOLD && localizedHuge.includes(searchTextLower)) ||
+                    (row.allowance.gt(row.tokenMaxSupply) && localizedUnlimited.includes(searchTextLower)) ||
                     (row.allowance.toString() !== '0' && localizedAllowed.includes(searchTextLower));
 
             } else {

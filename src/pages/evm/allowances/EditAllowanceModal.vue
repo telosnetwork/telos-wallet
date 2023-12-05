@@ -4,7 +4,15 @@ import { useI18n } from 'vue-i18n';
 import { BigNumber } from 'ethers';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 
-import { HUGE_ALLOWANCE_THRESHOLD, ShapedAllowanceRow, ShapedAllowanceRowERC20, ShapedAllowanceRowNftCollection, ShapedAllowanceRowSingleERC721, isErc20AllowanceRow, isErc721SingleAllowanceRow } from 'src/antelope/types/Allowances';
+import {
+    MAX_UINT_256,
+    ShapedAllowanceRow,
+    ShapedAllowanceRowERC20,
+    ShapedAllowanceRowNftCollection,
+    ShapedAllowanceRowSingleERC721,
+    isErc20AllowanceRow,
+    isErc721SingleAllowanceRow,
+} from 'src/antelope/types/Allowances';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
@@ -13,7 +21,7 @@ import ToolTip from 'src/components/ToolTip.vue';
 
 enum Erc20AllowanceAmountOptions {
     none = 'none',
-    huge = 'huge',
+    unlimited = 'unlimited',
     custom = 'custom',
 }
 
@@ -30,6 +38,8 @@ const props = defineProps<{
 const emit = defineEmits(['close']);
 
 const { t: $t } = useI18n();
+
+// eztodo max value for custom erc20 allowance = uint256 max
 
 // data
 const erc20AllowanceAmountModel = ref<Erc20AllowanceAmountOptions>(Erc20AllowanceAmountOptions.none);
@@ -92,8 +102,8 @@ const enableConfirmButton = computed(() => {
 watch(erc20AllowanceAmountModel, (newAmount) => {
     if (newAmount === Erc20AllowanceAmountOptions.none) {
         newErc20AllowanceAmount.value = BigNumber.from(0);
-    } else if (newAmount === Erc20AllowanceAmountOptions.huge) {
-        newErc20AllowanceAmount.value = parseUnits(HUGE_ALLOWANCE_THRESHOLD.toString(), rowAsErc20Row.value.tokenDecimals);
+    } else if (newAmount === Erc20AllowanceAmountOptions.unlimited) {
+        newErc20AllowanceAmount.value = MAX_UINT_256;
     }
     // eztodo else if custom
 });
@@ -106,12 +116,11 @@ watch(nftAllowanceAmountModel, (newAllowed) => {
 onBeforeMount(() => {
     if (rowIsErc20Row.value) {
         const allowanceAmountBn = rowAsErc20Row.value.allowance;
-        const allowanceAmountAsNumber = Number(formatUnits(allowanceAmountBn.toString(), rowAsErc20Row.value.tokenDecimals));
 
         if (allowanceAmountBn.isZero()) {
             erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.none;
-        } else if (allowanceAmountAsNumber > HUGE_ALLOWANCE_THRESHOLD) {
-            erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.huge;
+        } else if (allowanceAmountBn.gt(rowAsErc20Row.value.tokenMaxSupply)) {
+            erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.unlimited;
         } else {
             erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.custom;
         }
@@ -151,10 +160,10 @@ onBeforeMount(() => {
                     <br>
                     <q-radio
                         v-model="erc20AllowanceAmountModel"
-                        :val="Erc20AllowanceAmountOptions.huge"
+                        :val="Erc20AllowanceAmountOptions.unlimited"
                     >
-                        <ToolTip :text="$t('evm_allowances.huge_allowance_option_tooltip', { symbol: rowAsErc20Row.tokenSymbol })">
-                            {{ $t('global.huge') }}
+                        <ToolTip :text="$t('evm_allowances.unlimited_allowance_option_tooltip', { symbol: rowAsErc20Row.tokenSymbol })">
+                            {{ $t('global.unlimited') }}
                         </ToolTip>
                     </q-radio>
                     <br>

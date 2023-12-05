@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers';
 
-// 1 Quadrillion. Any allowance above this amount is considered 'huge'
-export const HUGE_ALLOWANCE_THRESHOLD = 1000000000000000;
+// this is the largest possible uint256 value, which is used to represent 'infinite' allowances
+export const MAX_UINT_256 = BigNumber.from(2).pow(256).sub(1);
 
 // Any allowance below this amount is considered 'tiny'
 export const TINY_ALLOWANCE_THRESHOLD = 0.01;
@@ -28,7 +28,8 @@ export interface ShapedAllowanceRowERC20 extends AllowanceRow {
 
     tokenDecimals: number; // decimals for the token (e.g. 6 for USDT, 18 for TLOS/ETH)
     tokenSymbol: string; // e.g. TLOS, USDT, etc.
-    tokenPrice: number; // price of the token in USD (optional)
+    tokenMaxSupply: BigNumber; // max supply for the token
+    tokenPrice: number; // price of the token in USD (0 if not available)
     tokenLogo?: string; // path or URI for the token logo (optional)
 }
 
