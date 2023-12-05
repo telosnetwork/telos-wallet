@@ -20,14 +20,15 @@ import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
 import { Collectible } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
 import ToolTip from 'src/components/ToolTip.vue';
 import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
 import TextBadge from 'src/components/TextBadge.vue';
-import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
-import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import EditAllowanceModal from 'src/pages/evm/allowances/EditAllowanceModal.vue';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -49,6 +50,7 @@ const isCollectionRow = isNftCollectionAllowanceRow(props.row);
 
 // data
 const erc721Nft = ref<Collectible | null>(null);
+const showEditModal = ref(false);
 
 // computed
 const rowAsErc20Row = computed(() => props.row as ShapedAllowanceRowERC20);
@@ -187,10 +189,6 @@ onMounted(async () => {
         erc721Nft.value = await nftStore.fetchNftDetails(CURRENT_CONTEXT, collectionAddress, tokenId, 'ERC721');
     }
 });
-
-function openEditAllowanceModal() {
-
-}
 </script>
 
 <template>
@@ -259,10 +257,16 @@ function openEditAllowanceModal() {
                 size="xs"
                 color="primary"
                 tabindex="0"
-                @click="openEditAllowanceModal"
-                @keydown.enter.space.prevent="openEditAllowanceModal"
+                @click="showEditModal = true"
+                @keydown.enter.space.prevent="showEditModal = true"
             />
         </div>
+
+        <EditAllowanceModal
+            :row="row"
+            :showDialog="showEditModal"
+            @close="showEditModal = false"
+        />
     </q-td>
     <q-td key="spender">
         <ExternalLink
