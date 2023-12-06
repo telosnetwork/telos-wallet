@@ -239,7 +239,7 @@ onBeforeMount(() => {
     &__currency-input {
         margin-left: 40px;
         margin-top: 0;
-        max-width: 200px;
+        max-width: 260px;
     }
 }
 </style>

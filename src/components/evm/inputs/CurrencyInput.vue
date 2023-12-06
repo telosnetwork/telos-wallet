@@ -294,6 +294,9 @@ export default defineComponent({
             return `@ ${roundedConversionRate} ${this.secondaryCurrencyCode} / ${this.symbol}`;
         },
         secondaryToPrimaryConversionRate(): string {
+            if (!this.hasSwappableCurrency) {
+                return '';
+            }
             // this.secondaryCurrencyConversionFactor is for converting primary to secondary;
             // invert to convert secondary to primary
             return getFloatReciprocal(this.secondaryCurrencyConversionFactor);
@@ -527,6 +530,22 @@ export default defineComponent({
 
             this.setInputValue(newInputValue);
         },
+    },
+    mounted() {
+        if (!this.modelValue.isZero()) {
+            const inputValue = prettyPrintCurrency(
+                this.modelValue,
+                this.decimalsToDisplay,
+                this.locale,
+                false,
+                undefined,
+                undefined,
+                this.decimals,
+                true,
+            );
+
+            this.setInputValue(inputValue);
+        }
     },
     methods: {
         // this method sets the text in the input element, but is not responsible for emitting a new modelValue; these
