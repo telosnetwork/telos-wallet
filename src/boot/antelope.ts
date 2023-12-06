@@ -9,6 +9,7 @@ import {
     WalletConnectAuth,
     OreIdAuth,
     SafePalAuth,
+    MetaKeepAuth,
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
 import { App } from 'vue';
@@ -88,6 +89,7 @@ export default boot(({ app }) => {
         appId: process.env.OREID_APP_ID as string,
     };
     ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
+    ant.wallets.addEVMAuthenticator(new MetaKeepAuth());
 
     // autologin --
     ant.stores.account.autoLogin();

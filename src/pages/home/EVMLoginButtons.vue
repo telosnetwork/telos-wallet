@@ -2,10 +2,38 @@
 import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
 import { ComponentInternalInstance, PropType, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
-import { OreIdAuth } from 'src/antelope/wallets';
+import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
+import { AntelopeError } from 'src/antelope/types';
+
+import * as Buffer from 'buffer';
+
+interface GoogleOneTap {
+    accounts: {
+        id: {
+            initialize: (config: { client_id: string, callback: (notification: GoogleNotification) => void }) => void;
+            prompt: (callback: (notification: GoogleNotification) => void) => void;
+            renderButton: (element: HTMLElement, config: { theme: string, size: string }) => void;
+        }
+    }
+}
+interface GoogleNotification {
+    getMomentType: () => string;
+    isDisplayed: () => boolean;
+    isNotDisplayed: () => boolean;
+    isSkippedMoment: () => boolean;
+    isDismissedMoment: () => boolean;
+    getNotDisplayedReason: () => string;
+    getSkippedReason: () => string;
+    getDismissedReason: () => string;
+    credential: string;
+}
+
+let google: GoogleOneTap | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _window = (window as any);
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -76,6 +104,15 @@ export default defineComponent({
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
+        const setMetaKeepAuthenticator = async (email:string) => {
+            const name = 'MetaKeep';
+            const auth = ant.wallets.getAuthenticator(name);
+            if (auth) {
+                (auth as MetaKeepAuth).setEmail(email);
+                console.log('ANTES: ', auth);
+            }
+            setAuthenticator(name, CURRENT_CONTEXT);
+        };
         const setBraveAuthenticator = async () => {
             setAuthenticator('Brave', CURRENT_CONTEXT);
         };
@@ -88,6 +125,7 @@ export default defineComponent({
 
         const setAuthenticator = async(name: string, label: string) => {
             const auth = ant.wallets.getAuthenticator(name);
+            console.log('POSTA: ', auth);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -130,6 +168,126 @@ export default defineComponent({
             emit('update:modelValue', Menu.CLOUD);
         };
 
+        // --- Google One Tap (ini) -------------------------------
+        const onGoogleOneTap = () => {
+            setAuthenticator('Metakeep', CURRENT_CONTEXT);
+        };
+
+        const onGoogleOneTapSuccess = (response: any) => {
+            console.log('response: ', response);
+            console.log('response.payload: ', response.payload);
+            console.log('response.payload.email: ', response.payload.email);
+            setMetaKeepAuthenticator(response.payload.email);
+        };
+
+        const onGoogleOneTapError = (error: any) => {
+            console.error('-------------------------------');
+            console.error('google one tap error', error);
+            console.error('-------------------------------');
+        };
+
+        const installGoogleOneTapScript = () => {
+            if (google) {
+                return;
+            }
+            console.log('installGoogleOneTapScript()');
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+            _window.onGoogleLibraryLoad = () => {
+                oneTapInit();
+            };
+        };
+
+        const oneTapInit = () => {
+            console.log('oneTapInit()');
+            if(!google){
+                if (_window.google) {
+                    google = _window.google;
+                } else {
+                    // FIXME: use i18n
+                    throw new AntelopeError('Google One Tap library not loaded');
+                }
+            }
+            if (google) {
+                console.log('----------------- google -->', google);
+                google.accounts.id.initialize({
+                    client_id: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com',
+                    callback: oneTapCallback,
+                });
+                google.accounts.id.prompt((notification) => {
+                    const momentType = notification.getMomentType();
+                    if(notification.isDisplayed()) {
+                        setTimeout(()=>{
+                            handleOneTapMoment(momentType, 'displayed', 'displayed');
+                        }, 500);
+                    } else if(notification.isNotDisplayed()){
+                        handleOneTapMoment(momentType, 'notdisplayed', notification.getNotDisplayedReason());
+                    } else if(notification.isSkippedMoment()) {
+                        handleOneTapMoment(momentType, 'skipped', notification.getSkippedReason());
+                    } else if(notification.isDismissedMoment()) {
+                        handleOneTapMoment(momentType, 'dismissed', notification.getDismissedReason());
+                    }
+                });
+            }
+        };
+
+        const decodificarJWT = (token: string) => {
+            const parts = token.split('.');
+            const header = parts[0];
+            const payload = parts[1];
+
+            const dedodedHeader = Buffer.Buffer.from(header, 'base64').toString('utf8');
+            const decodedPayload = Buffer.Buffer.from(payload, 'base64').toString('utf8');
+
+            return {
+                header: JSON.parse(dedodedHeader),
+                payload: JSON.parse(decodedPayload),
+            };
+        };
+
+        const oneTapCallback = (response: GoogleNotification | null) => {
+            console.log('---------- oneTapCallback -------------->', response);
+            if (response) {
+                const credential = response.credential;
+                const decoded = decodificarJWT(credential);
+                onGoogleOneTapSuccess(decoded);
+            } else {
+                onGoogleOneTapError(response);
+            }
+        };
+
+        const handleOneTapMoment = (momentType: string, status: string, reason: string) => {
+            console.log('-- handleOneTapMoment -> ', momentType, status, reason);
+        };
+
+        watch(showTelosCloudMenu, (newValue) => {
+            console.log('showTelosCloudMenu changed', newValue);
+            if (newValue) {
+                setTimeout(() => {
+                    showGoogleOneTap();
+                }, 100);
+            }
+        });
+
+
+        const showGoogleOneTap = () => {
+            const btn = document.getElementById('google_btn');
+            if (google && btn) {
+                console.log('--- google.accounts.id.renderButton() ---');
+                google.accounts.id.renderButton(
+                    btn, { theme: 'outline', size: 'large' },
+                );
+            }
+        };
+
+        installGoogleOneTapScript();
+        showGoogleOneTap();
+        // --- Google One Tap (end) -------------------------------
+
+        console.log('EVMLoginButtons setup()');
 
         return {
             isLoading,
@@ -143,6 +301,7 @@ export default defineComponent({
             showWalletConnectButton,
             setOreIdAuthenticator,
             setMetamaskAuthenticator,
+            setMetaKeepAuthenticator,
             setBraveAuthenticator,
             setSafePalAuthenticator,
             setWalletConnectAuthenticator,
@@ -155,6 +314,9 @@ export default defineComponent({
             showMainMenu,
             showTelosCloudMenu,
             setCloudMenu,
+            onGoogleOneTapSuccess,
+            onGoogleOneTapError,
+            onGoogleOneTap,
         };
     },
 });
@@ -162,6 +324,7 @@ export default defineComponent({
 
 <template>
 <div class="c-evm-login-buttons">
+
     <!-- main menu -->
     <template v-if="showMainMenu">
 
@@ -284,6 +447,12 @@ export default defineComponent({
 
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
+
+        <div
+            id="google_btn"
+            data-client_id="639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com"
+        >
+        </div>
 
         <!-- Google OAuth Provider -->
         <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
