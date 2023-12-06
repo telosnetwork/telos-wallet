@@ -23,6 +23,8 @@ import {
     getFloatReciprocal,
 } from 'src/antelope/stores/utils/currency-utils';
 import ToolTip from 'components/ToolTip.vue';
+import { truncateText } from 'src/antelope/stores/utils/text-utils';
+import { debounce } from 'quasar';
 
 const platformStore = usePlatformStore();
 
@@ -95,7 +97,7 @@ export default defineComponent({
         },
         label: {
             type: String,
-            default: '',
+            required: true,
         },
         errorText: {
             type: String,
@@ -144,6 +146,8 @@ export default defineComponent({
         // cannot be accurately stored in a variable), leading to inequality where we would expect equality.
         // This rounding is accurate to 18 decimal places
         savedSecondaryValue: BigNumber.from(0),
+
+        debouncedResizeListener: null as null | (() => void),
     }),
     computed: {
         inputElement(): HTMLInputElement {
@@ -342,7 +346,6 @@ export default defineComponent({
 
             return `${amount} ${symbol} ${this.$t('global.available')}`;
         },
-
         primaryCurrencyDisplayPrecision() {
             // if the value represents fiat, show 2 decimals; else show this.decimalsToDisplay
             return this.decimals === 2 ? 2 : this.decimalsToDisplay;
@@ -547,6 +550,7 @@ export default defineComponent({
             this.setInputValue(inputValue);
         }
     },
+
     methods: {
         // this method sets the text in the input element, but is not responsible for emitting a new modelValue; these
         // may change independently of each other, like when the user swaps currencies
@@ -556,20 +560,6 @@ export default defineComponent({
             }
 
             this.inputElement.value = val;
-
-            // set the indent amount for the symbol label inside the input
-            // 1's are 7px, other numbers are 8px, separators like commas are 2px
-            const length = val.length;
-            const numberOfSeparators = (val.match(this.largeNumberSeparatorRegex)?.length || 0) + (val.match(this.decimalSeparatorRegex)?.length || 0);
-            const numberOfOnes = (val.match(/1/g) || []).length;
-            const numberOfOtherNumbers = length - numberOfSeparators - numberOfOnes;
-            const indent = Math.ceil((numberOfOtherNumbers * 8.5) + (numberOfSeparators * 2) + (numberOfOnes * 7));
-            const maxIndent = 252 - (8 * this.symbol.length); // 252 is the size of the input - padding
-
-            const leftIndent = indent > maxIndent ? maxIndent : indent;
-
-            const leftAmount = length === 0 ? '28px' : `${leftIndent + 24}px`;
-            this.$el.style.setProperty('--symbol-left', leftAmount);
         },
 
         // this method sets the caret position in the input element
@@ -933,7 +923,6 @@ export default defineComponent({
             }
         },
 
-
         // can be called from outside the component to show an error state for empty input, e.g. when submitting form
         // without filling out required fields. Has no effect unless the component is set to required
         showEmptyError() {
@@ -975,7 +964,7 @@ export default defineComponent({
         :id="`currency-input-label--${name}`"
         class="c-text-input__label-text"
     >
-        {{ label.concat(isRequired ? '*' : '') }}
+        {{ label.concat(` (${symbol})`).concat(isRequired ? '*' : '') }}
     </div>
 
     <div
@@ -993,10 +982,6 @@ export default defineComponent({
         <template v-else>
             {{ prettyMaxValue }}
         </template>
-    </div>
-
-    <div v-if="!loading" class="c-currency-input__symbol">
-        {{ swapCurrencies ? secondaryCurrencyCode : symbol }}
     </div>
 
     <input
@@ -1047,7 +1032,6 @@ export default defineComponent({
 
 <style lang="scss">
 .c-currency-input {
-    --symbol-left: 28px;
     $this: &;
 
     &--ios {
@@ -1097,15 +1081,6 @@ export default defineComponent({
         width: max-content;
         right: 0;
         text-align: right;
-    }
-
-    &__symbol {
-        font-size: 14px;
-        position: absolute;
-        top: 27.5px;
-        left: var(--symbol-left);
-        color: var(--text-low-contrast);
-        pointer-events: none;
     }
 
     &__amount-available {

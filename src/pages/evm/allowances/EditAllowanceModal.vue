@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber } from 'ethers';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
 
 import {
     MAX_UINT_256,
@@ -237,9 +236,12 @@ onBeforeMount(() => {
     }
 
     &__currency-input {
-        margin-left: 40px;
         margin-top: 0;
         max-width: 260px;
+
+        @include sm-and-up {
+            margin-left: 40px;
+        }
     }
 }
 </style>
