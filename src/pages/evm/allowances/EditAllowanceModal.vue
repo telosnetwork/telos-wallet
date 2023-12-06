@@ -13,11 +13,12 @@ import {
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
 } from 'src/antelope/types/Allowances';
-import { useChainStore } from 'src/antelope';
+import { useChainStore, useUserStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import ExternalLink from 'src/components/ExternalLink.vue';
 import ToolTip from 'src/components/ToolTip.vue';
+import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 
 enum Erc20AllowanceAmountOptions {
     none = 'none',
@@ -39,13 +40,16 @@ const emit = defineEmits(['close']);
 
 const { t: $t } = useI18n();
 
+const { fiatLocale } = useUserStore();
+
 // eztodo max value for custom erc20 allowance = uint256 max
 
 // data
 const erc20AllowanceAmountModel = ref<Erc20AllowanceAmountOptions>(Erc20AllowanceAmountOptions.none);
 const nftAllowanceAmountModel = ref<NftAllowanceAmountOptions>(NftAllowanceAmountOptions.allowed);
-const newErc20AllowanceAmount = ref<BigNumber>(BigNumber.from(0));
+const newErc20AllowanceAmount = ref(BigNumber.from(0));
 const newNftAllowanceIsAllowed = ref(false);
+const customErc20AllowanceModel = ref(BigNumber.from(0));
 
 // computed
 const rowIsErc20Row = computed(() => isErc20AllowanceRow(props.row));
@@ -112,6 +116,10 @@ watch(nftAllowanceAmountModel, (newAllowed) => {
     newNftAllowanceIsAllowed.value = newAllowed === NftAllowanceAmountOptions.allowed;
 });
 
+watch(customErc20AllowanceModel, (newAmount) => {
+    newErc20AllowanceAmount.value = newAmount;
+});
+
 // methods
 onBeforeMount(() => {
     if (rowIsErc20Row.value) {
@@ -122,6 +130,7 @@ onBeforeMount(() => {
         } else if (allowanceAmountBn.gt(rowAsErc20Row.value.tokenMaxSupply)) {
             erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.unlimited;
         } else {
+            customErc20AllowanceModel.value = rowAsErc20Row.value.allowance;
             erc20AllowanceAmountModel.value = Erc20AllowanceAmountOptions.custom;
         }
 
@@ -172,6 +181,17 @@ onBeforeMount(() => {
                         :val="Erc20AllowanceAmountOptions.custom"
                         :label="$t('global.custom')"
                     />
+                    <CurrencyInput
+                        v-model="customErc20AllowanceModel"
+                        :symbol="rowAsErc20Row.tokenSymbol"
+                        :decimals="rowAsErc20Row.tokenDecimals"
+                        :decimals-to-display="rowAsErc20Row.tokenDecimals"
+                        :locale="fiatLocale"
+                        :label="$t('evm_allowances.token_amount_input_label')"
+                        :disabled="erc20AllowanceAmountModel !== Erc20AllowanceAmountOptions.custom"
+                        name="custom-erc20-allowance-input"
+                        class="c-edit-allowance-modal__currency-input"
+                    />
                 </template>
                 <template v-else>
                     <q-radio
@@ -214,6 +234,12 @@ onBeforeMount(() => {
         padding: 16px;
         border-radius: 4px;
         margin-bottom: 24px;
+    }
+
+    &__currency-input {
+        margin-left: 40px;
+        margin-top: 0;
+        max-width: 200px;
     }
 }
 </style>
