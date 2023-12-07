@@ -430,6 +430,7 @@ export default {
             invalidChecksum: 'Invalid checksum, check the address',
             invalidAddress: 'Invalid address',
             lowercaseAddress: 'Address is lowercase, verify that it\'s correct',
+            tooLarge: 'The value is too large',
         },
         hints: {
             selectCountrie: 'Please select your country',

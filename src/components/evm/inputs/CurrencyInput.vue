@@ -25,6 +25,7 @@ import {
 import ToolTip from 'components/ToolTip.vue';
 import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import { debounce } from 'quasar';
+import { MAX_UINT_256 } from 'src/antelope/types';
 
 const platformStore = usePlatformStore();
 
@@ -273,6 +274,10 @@ export default defineComponent({
         visibleErrorText(): string {
             if (this.errorText) {
                 return this.errorText;
+            }
+
+            if (this.modelValue.gt(MAX_UINT_256)) {
+                return this.$t('forms.errors.tooLarge');
             }
 
             if (this.errorIfOverMax && this.maxValue && this.maxValue.lt(this.modelValue)) {

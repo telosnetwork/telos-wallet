@@ -49,6 +49,7 @@ const nftAllowanceAmountModel = ref<NftAllowanceAmountOptions>(NftAllowanceAmoun
 const newErc20AllowanceAmount = ref(BigNumber.from(0));
 const newNftAllowanceIsAllowed = ref(false);
 const customErc20AllowanceModel = ref(BigNumber.from(0));
+const currencyInput = ref<typeof CurrencyInput | null>(null);
 
 // computed
 const rowIsErc20Row = computed(() => isErc20AllowanceRow(props.row));
@@ -95,7 +96,7 @@ const tokenText = computed(() => {
 // disable the confirm button if the user hasn't changed anything
 const enableConfirmButton = computed(() => {
     if (rowIsErc20Row.value) {
-        return !newErc20AllowanceAmount.value.eq(rowAsErc20Row.value.allowance);
+        return !newErc20AllowanceAmount.value.eq(rowAsErc20Row.value.allowance) && newErc20AllowanceAmount.value.lte(MAX_UINT_256);
     }
 
     return newNftAllowanceIsAllowed.value !== rowAsNftRow.value.allowed;
@@ -189,6 +190,7 @@ function handleSubmit() {
                         :label="$t('global.custom')"
                     />
                     <CurrencyInput
+                        ref="currencyInput"
                         v-model="customErc20AllowanceModel"
                         :symbol="rowAsErc20Row.tokenSymbol"
                         :decimals="rowAsErc20Row.tokenDecimals"
@@ -246,6 +248,7 @@ function handleSubmit() {
 
     &__currency-input {
         margin-top: 0;
+        margin-bottom: 24px;
         max-width: 260px;
 
         @include sm-and-up {
