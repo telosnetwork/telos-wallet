@@ -107,8 +107,9 @@ watch(erc20AllowanceAmountModel, (newAmount) => {
         newErc20AllowanceAmount.value = BigNumber.from(0);
     } else if (newAmount === Erc20AllowanceAmountOptions.unlimited) {
         newErc20AllowanceAmount.value = MAX_UINT_256;
+    } else {
+        newErc20AllowanceAmount.value = customErc20AllowanceModel.value;
     }
-    // eztodo else if custom
 });
 
 watch(nftAllowanceAmountModel, (newAllowed) => {
@@ -139,10 +140,17 @@ onBeforeMount(() => {
         newNftAllowanceIsAllowed.value = rowAsNftRow.value.allowed;
     }
 });
+
+function handleSubmit() {
+    if (rowIsErc20Row.value) {
+        console.log('New allowance is ', newErc20AllowanceAmount.value.toString());
+    } else {
+        console.log('New allowed is ', newNftAllowanceIsAllowed.value);
+    }
+}
 </script>
 
 <template>
-<!-- eztodo aria labels and i18n -->
 <q-dialog :model-value="showDialog" @update:model-value="() => emit('close')">
     <q-card class="q-pa-md">
         <q-card-section>
@@ -220,6 +228,7 @@ onBeforeMount(() => {
                 :disable="!enableConfirmButton"
                 :label="$t('global.confirm')"
                 color="primary"
+                @click="handleSubmit"
             />
         </q-card-actions>
     </q-card>
