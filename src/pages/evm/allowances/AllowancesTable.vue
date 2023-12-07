@@ -86,13 +86,16 @@ const tableRows = computed(() => {
 });
 
 // watchers
-watch(props.rows, (newRows) => {
+watch(tableRows, (newRows) => {
     revokeCheckboxesModel.value = newRows.reduce((acc, row) => {
         const rowIsErc20 = isErc20AllowanceRow(row);
         const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
         acc[`${row.spenderAddress}-${tokenAddress}`] = false;
         return acc;
     }, {} as Record<string, boolean>);
+
+    revokeAllCheckboxChecked.value = false;
+    updateAllRevokeCheckboxes();
 }, { immediate: true });
 
 // methods
@@ -162,9 +165,11 @@ function getCheckboxModelForRow(row: ShapedAllowanceRow) {
 function toggleRevokeChecked(row: ShapedAllowanceRow) {
     const rowIsErc20 = isErc20AllowanceRow(row);
     const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
-    revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`] = !revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`];
+    const key = `${row.spenderAddress}-${tokenAddress}`;
 
-    if (!revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`]) {
+    revokeCheckboxesModel.value[key] = !revokeCheckboxesModel.value[key];
+
+    if (!revokeCheckboxesModel.value[key]) {
         revokeAllCheckboxChecked.value = false;
     }
 
