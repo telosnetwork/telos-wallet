@@ -48,7 +48,6 @@ const nftAllowanceAmountModel = ref<NftAllowanceAmountOptions>(NftAllowanceAmoun
 const newErc20AllowanceAmount = ref(BigNumber.from(0));
 const newNftAllowanceIsAllowed = ref(false);
 const customErc20AllowanceModel = ref(BigNumber.from(0));
-const currencyInput = ref<typeof CurrencyInput | null>(null);
 
 // computed
 const rowIsErc20Row = computed(() => isErc20AllowanceRow(props.row));
@@ -189,7 +188,6 @@ function handleSubmit() {
                         :label="$t('global.custom')"
                     />
                     <CurrencyInput
-                        ref="currencyInput"
                         v-model="customErc20AllowanceModel"
                         :symbol="rowAsErc20Row.tokenSymbol"
                         :decimals="rowAsErc20Row.tokenDecimals"
