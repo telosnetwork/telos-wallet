@@ -41,7 +41,6 @@ const { t: $t } = useI18n();
 
 const { fiatLocale } = useUserStore();
 
-// eztodo max value for custom erc20 allowance = uint256 max
 
 // data
 const erc20AllowanceAmountModel = ref<Erc20AllowanceAmountOptions>(Erc20AllowanceAmountOptions.none);
