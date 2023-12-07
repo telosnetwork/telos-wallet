@@ -333,7 +333,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 tokenName: tokenInfo.name,
                 tokenAddress: data.contract,
                 allowance: BigNumber.from(data.amount),
-                balance: balance,
+                balance,
                 tokenDecimals: tokenInfo.decimals,
                 tokenSymbol: tokenInfo.symbol,
                 tokenPrice: Number(tokenInfo.price.str),
