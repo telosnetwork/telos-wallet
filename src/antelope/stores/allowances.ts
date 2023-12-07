@@ -6,11 +6,11 @@ import { BigNumber } from 'ethers';
 import {
     CURRENT_CONTEXT,
     getAntelope,
-    useBalancesStore,
     useChainStore,
     useContractStore,
     useFeedbackStore,
     useNftsStore,
+    useTokensStore,
 } from 'src/antelope';
 import {
     IndexerAllowanceResponse,
@@ -207,9 +207,6 @@ export const useAllowancesStore = defineStore(store_name, {
             this.trace('fetchAllowancesForAccount', account);
             useFeedbackStore().setLoading('fetchAllowancesForAccount');
 
-            // ERC20 balances are needed for ERC20 allowance row data
-            await useBalancesStore().updateBalances(CURRENT_CONTEXT);
-
             const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
             const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
@@ -319,9 +316,13 @@ export const useAllowancesStore = defineStore(store_name, {
         },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
             const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
-            const balanceInfo = useBalancesStore().currentBalances.find(balance => balance.contract === data.contract);
+            const tokenInfo = useTokensStore().__tokens[CURRENT_CONTEXT].find(token => token.address.toLowerCase() === data.contract.toLowerCase());
 
-            if (!spenderContract || !balanceInfo) {
+            const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+            const tokenContractInstance = await tokenContract?.getContractInstance();
+            const balance = await tokenContractInstance?.balanceOf(data.owner);
+
+            if (!spenderContract || !balance || !tokenInfo) {
                 return null;
             }
 
@@ -329,14 +330,14 @@ export const useAllowancesStore = defineStore(store_name, {
                 lastUpdated: data.updated,
                 spenderAddress: data.spender,
                 spenderName: spenderContract?.name,
-                tokenName: balanceInfo.name,
+                tokenName: tokenInfo.name,
                 tokenAddress: data.contract,
                 allowance: BigNumber.from(data.amount),
-                balance: balanceInfo.balance,
-                tokenDecimals: balanceInfo.decimals,
-                tokenSymbol: balanceInfo.symbol,
-                tokenPrice: Number(balanceInfo.price.str),
-                tokenLogo: balanceInfo.logo,
+                balance: balance,
+                tokenDecimals: tokenInfo.decimals,
+                tokenSymbol: tokenInfo.symbol,
+                tokenPrice: Number(tokenInfo.price.str),
+                tokenLogo: tokenInfo.logo,
             };
         },
         async shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection | null> {
