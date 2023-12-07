@@ -383,6 +383,10 @@ export default defineComponent({
         enableMaxValTooltip() {
             return !this.isDisabled && !this.isReadonly && !this.$q.screen.lt.md;
         },
+        labelText() {
+            const symbol = this.currenciesAreSwapped ? this.secondaryCurrencyCode : this.symbol;
+            return this.label.concat(` (${symbol})`).concat(this.isRequired ? '*' : '');
+        },
     },
     watch: {
         // as a refresher on modelValue, note that components implementing v-model do not update their own
@@ -969,7 +973,7 @@ export default defineComponent({
         :id="`currency-input-label--${name}`"
         class="c-text-input__label-text"
     >
-        {{ label.concat(` (${symbol})`).concat(isRequired ? '*' : '') }}
+        {{ labelText }}
     </div>
 
     <div
