@@ -8,14 +8,9 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
     class="c-text-input__label-text"
     id="currency-input-label--test"
   >
-    TLOS / USD
+    TLOS / USD (TLOS)
   </div>
   <!--v-if-->
-  <div
-    class="c-currency-input__symbol"
-  >
-    TLOS
-  </div>
   <input
     aria-labelledby="currency-input-label--test"
     class="c-text-input__input"
@@ -59,20 +54,14 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 2`] = `
 <div
   class="c-currency-input c-text-input c-text-input--error-right"
-  style="--symbol-left: 31px;"
 >
   <div
     class="c-text-input__label-text"
     id="currency-input-label--test"
   >
-    TLOS / USD
+    TLOS / USD (TLOS)
   </div>
   <!--v-if-->
-  <div
-    class="c-currency-input__symbol"
-  >
-    TLOS
-  </div>
   <input
     aria-labelledby="currency-input-label--test"
     class="c-text-input__input"
@@ -116,20 +105,14 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 exports[`CurrencyInput.vue should emit the correct values when currencies are not swapped 3`] = `
 <div
   class="c-currency-input c-text-input c-text-input--error-right"
-  style="--symbol-left: 59px;"
 >
   <div
     class="c-text-input__label-text"
     id="currency-input-label--test"
   >
-    TLOS / USD
+    TLOS / USD (TLOS)
   </div>
   <!--v-if-->
-  <div
-    class="c-currency-input__symbol"
-  >
-    TLOS
-  </div>
   <input
     aria-labelledby="currency-input-label--test"
     class="c-text-input__input"
@@ -173,20 +156,14 @@ exports[`CurrencyInput.vue should emit the correct values when currencies are no
 exports[`CurrencyInput.vue should emit the correct values when currencies are swapped 1`] = `
 <div
   class="c-currency-input c-text-input c-text-input--error-right"
-  style="--symbol-left: 43px;"
 >
   <div
     class="c-text-input__label-text"
     id="currency-input-label--test-2"
   >
-    TLOS / USD
+    TLOS / USD (USD)
   </div>
   <!--v-if-->
-  <div
-    class="c-currency-input__symbol"
-  >
-    USD
-  </div>
   <input
     aria-labelledby="currency-input-label--test-2"
     class="c-text-input__input"
