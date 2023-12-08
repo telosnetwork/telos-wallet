@@ -183,6 +183,37 @@ async function handleSubmit() {
         }).finally(() => {
             dismiss();
         });
+    } else if (rowIsSingleErc721Row.value) {
+        const tx = await useAllowancesStore().updateSingleErc721Allowance(
+            userAddress.value,
+            props.row.spenderAddress,
+            rowAsSingleErc721Row.value.collectionAddress,
+            rowAsSingleErc721Row.value.tokenId,
+            newNftAllowanceIsAllowed.value,
+        );
+
+        const tokenText = `${rowAsSingleErc721Row.value.collectionName || truncateAddress(rowAsSingleErc721Row.value.collectionAddress)} #${rowAsSingleErc721Row.value.tokenId}`;
+
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t(
+                'notification.neutral_message_updating_single_erc721_allowance',
+                {
+                    tokenText,
+                    operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+                },
+            ),
+        );
+
+        tx?.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${explorerUrl}/tx/${tx.hash}`,
+            );
+            emit('close');
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            dismiss();
+        });
     } else {
         console.log('New allowed is ', newNftAllowanceIsAllowed.value);
     }
@@ -203,6 +234,9 @@ async function handleSubmit() {
                 <br>
                 <span class="o-text--paragraph-bold">{{ tokenText }}</span>
                 <br>
+                <span v-if="rowIsSingleErc721Row">
+                    {{ $t('evm_allowances.erc_721_single_allowance_blurb') }}
+                </span>
                 <br>
                 {{ $t('global.allowance') }}
                 <br>
