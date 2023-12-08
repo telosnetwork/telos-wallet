@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BigNumber } from 'ethers';
 
@@ -12,12 +12,20 @@ import {
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
 } from 'src/antelope/types/Allowances';
-import { useChainStore, useUserStore } from 'src/antelope';
+import {
+    getAntelope,
+    useAccountStore,
+    useAllowancesStore,
+    useChainStore,
+    useFeedbackStore,
+    useUserStore,
+} from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import ExternalLink from 'src/components/ExternalLink.vue';
 import ToolTip from 'src/components/ToolTip.vue';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 enum Erc20AllowanceAmountOptions {
     none = 'none',
@@ -39,6 +47,8 @@ const emit = defineEmits(['close']);
 
 const { t: $t } = useI18n();
 
+const ant = getAntelope();
+const explorerUrl = (useChainStore().currentChain.settings as EVMChainSettings).getExplorerUrl();
 const { fiatLocale } = useUserStore();
 
 
@@ -100,6 +110,10 @@ const enableConfirmButton = computed(() => {
     return newNftAllowanceIsAllowed.value !== rowAsNftRow.value.allowed;
 });
 
+const confirmButtonIsLoading = computed(() => useFeedbackStore().isLoading('updateErc20Allowance'));
+
+const userAddress = computed(() => useAccountStore().currentAccount.account);
+
 // watchers
 watch(erc20AllowanceAmountModel, (newAmount) => {
     if (newAmount === Erc20AllowanceAmountOptions.none) {
@@ -140,9 +154,35 @@ onBeforeMount(() => {
     }
 });
 
-function handleSubmit() {
+async function handleSubmit() {
     if (rowIsErc20Row.value) {
-        console.log('New allowance is ', newErc20AllowanceAmount.value.toString());
+        const tx = await useAllowancesStore().updateErc20Allowance(
+            userAddress.value,
+            props.row.spenderAddress,
+            rowAsErc20Row.value.tokenAddress,
+            newErc20AllowanceAmount.value,
+        );
+
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t(
+                'notification.neutral_message_updating_erc20_allowance',
+                {
+                    symbol: rowAsErc20Row.value.tokenSymbol,
+                    spender: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+                },
+            ),
+        );
+
+        tx?.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${explorerUrl}/tx/${tx.hash}`,
+            );
+            emit('close');
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            dismiss();
+        });
     } else {
         console.log('New allowed is ', newNftAllowanceIsAllowed.value);
     }
@@ -224,6 +264,7 @@ function handleSubmit() {
             />
 
             <q-btn
+                :loading="confirmButtonIsLoading"
                 :disable="!enableConfirmButton"
                 :label="$t('global.confirm')"
                 color="primary"

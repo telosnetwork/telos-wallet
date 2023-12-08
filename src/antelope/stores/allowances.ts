@@ -27,6 +27,7 @@ import {
     ShapedAllowanceRowSingleERC721,
     ShapedCollectionAllowanceRow,
     Sort,
+    TransactionResponse,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
     isIndexerAllowanceResponseErc1155,
@@ -291,6 +292,43 @@ export const useAllowancesStore = defineStore(store_name, {
             useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
 
             return Promise.resolve();
+        },
+        async updateErc20Allowance(
+            owner: string,
+            spender: string,
+            tokenContractAddress: string,
+            allowance: BigNumber,
+        ): Promise<TransactionResponse> {
+            this.trace('updateErc20Allowance', spender, tokenContractAddress, allowance);
+            useFeedbackStore().setLoading('updateErc20Allowance');
+
+            try {
+                const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, tokenContractAddress);
+                const tokenContractInstance = await tokenContract?.getContractInstance();
+
+                if (!tokenContractInstance) {
+                    // eztodo antelope error
+                    console.error('Error getting token contract instance');
+                    throw 'eztodo';
+                }
+
+                const tx = await tokenContractInstance.approve(spender, allowance);
+
+                tx.wait().then(() => {
+                    setTimeout(() => {
+                        this.fetchAllowancesForAccount(owner).then(() => {
+                            useFeedbackStore().unsetLoading('updateErc20Allowance');
+                        });
+                    }, 3000); // give the indexer time to update allowance data
+                });
+
+                return tx;
+            } catch(error) {
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
+                getAntelope().config.transactionErrorHandler(trxError, 'updateErc20Allowance');
+                useFeedbackStore().unsetLoading('updateErc20Allowance');
+                throw trxError;
+            }
         },
 
         // commits
