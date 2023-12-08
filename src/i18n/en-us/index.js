@@ -339,6 +339,7 @@ export default {
         neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
         neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
+        neutral_message_updating_erc20_allowance: 'Updating <b>{symbol}</b> allowance for <b>{spender}</b>',
         dont_show_message_again: 'Don\'t show me this message again',
     },
     resources: {
@@ -617,7 +618,8 @@ export default {
             error_unstakes_failed: 'An unknown error occurred when unstaking tokens',
             error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
             error_fetching_token_price: 'An unknown error occurred when fetching token price data',
-            error_transfer_nft: 'An error occured while transferring collectible',
+            error_transfer_nft: 'An error occurred while transferring collectible',
+            error_updating_allowance: 'An error occurred while updating allowance',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
