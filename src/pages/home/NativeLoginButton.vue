@@ -4,14 +4,18 @@ import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { OreIdAuthenticator } from 'ual-oreid';
+import { Menu } from '~/pages/home/MenuType';
+import { QSpinnerFacebook } from 'quasar';
 
 const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
 export default defineComponent({
     name: 'NativeLoginButton',
+    components: {
+        QSpinnerFacebook,
+    },
     data() {
         return {
-            showLogin: false,
             showAuth: false,
             authType: 'signin',
             error: null,
@@ -38,6 +42,12 @@ export default defineComponent({
             resLow: false,
         };
     },
+    props: {
+        modelValue: {
+            type: String,
+            default: 'main',
+        },
+    },
     computed: {
         ...mapGetters('account', [
             'isAuthenticated',
@@ -45,11 +55,22 @@ export default defineComponent({
             'loading',
             'isAutoLoading',
         ]),
+        // menu navitgaion
+        showMainMenu() {
+            return this.modelValue === Menu.MAIN;
+        },
+        showTelosCloudMenu() {
+            return this.modelValue === Menu.CLOUD;
+        },
     },
     mounted() {
         this.setDefaultNativeChain();
     },
     methods: {
+        // menu navitgaion
+        setCloudMenu() {
+            this.$emit('update:modelValue', Menu.CLOUD);
+        },
         // antelope methods
         setDefaultNativeChain() {
             const network = process.env.CHAIN_NAME || 'telos';
@@ -79,7 +100,6 @@ export default defineComponent({
         async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
-                this.showLogin = false;
                 await this.$router.push({ path: '/zero/balance' });
             } else {
                 this.error = error;
@@ -215,6 +235,9 @@ export default defineComponent({
 
             return wallet.getStyle().text;
         },
+        isLoading(wallet) {
+            return this.loading === wallet;
+        },
     },
     watch: {
         async isAuthenticated() {
@@ -228,124 +251,125 @@ export default defineComponent({
 </script>
 
 <template>
-<div>
-    <!-- Login Button -->
-    <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
-        <div class="q-mt-md q-mb-sm">
-            <q-btn
-                :label="$t('home.connect_with_wallet')"
-                class="purpleGradient q-px-md q-py-sm"
-                @click="showLogin = true"
-            />
-        </div>
+<div class="c-zero-login-buttons">
 
-        <!-- View any account -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                outline
-                :label="$t('home.view_any_account')"
-                class="q-px-md q-py-sm"
-                @click="loginAsJustViewer()"
-            />
-        </div>
+    <!-- main menu -->
+    <template v-if="showMainMenu">
 
-        <!-- Signup Button -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                outline
-                :label="$t('home.create_new_account')"
-                class="q-px-md q-py-sm"
-                @click="signUp"
-            />
-        </div>
-    </div>
+        <!-- Login Button -->
+        <template v-if="!isAuthenticated">
 
-    <div v-else class="q-px-md flex justify-center column">
-        <p class="q-mb-lg logged-in"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
-
-        <q-btn
-            text-color="white"
-            outline
-            :label="$t('home.view_wallet')"
-            class="q-px-md q-py-sm q-mb-lg"
-            @click="$router.push('/zero/balance')"
-        />
-
-        <q-btn
-            text-color="white"
-            outline
-            :label="$t('home.logout')"
-            class="q-px-md q-py-sm"
-            @click="logout"
-        />
-    </div>
-
-    <!-- Show Login -->
-    <q-dialog v-model="showLogin">
-        <div class="column showLoginPopup q-pa-lg popupCard">
-            <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
-            <q-list class="" dark separator>
-                <q-item
-                    v-for="(wallet, idx) in $ual.authenticators"
-                    :key="wallet.getStyle().text"
-                    v-ripple
-                    class="q-my-sm"
-                >
-                    <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
-                        <img :src="getWalletIcon(wallet)" width="30" >
-                    </q-item-section>
-                    <q-item-section class="cursor-pointer" @click="onLogin(idx)">
-                        {{ getWalletName(wallet) }}
-                    </q-item-section>
-                    <q-item-section class="flex" avatar>
-                        <q-spinner
-                            v-if="loading === wallet.getStyle().text"
-                            :color="wallet.getStyle().textColor"
-                            size="2em"
-                        />
-                        <q-btn
-                            v-else
-                            :color="wallet.getStyle().textColor"
-                            icon="get_app"
-                            target="_blank"
-                            dense
-                            flat
-                            size="12px"
-                            @click="openUrl(wallet.getOnboardingLink())"
+            <!-- Google OAuth Provider -->
+            <div class="c-zero-login-buttons__option c-zero-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+                <div class="c-zero-login-buttons__cloud-btn-container">
+                    <div class="c-zero-login-buttons__cloud-btn-line-title">
+                        <img
+                            width="24"
+                            class="c-zero-login-buttons__icon c-zero-login-buttons__icon--cloud"
+                            src="~assets/icon--telos-cloud.svg"
                         >
-                            <q-tooltip>
-                                {{$t('login.get_app')}}
-                            </q-tooltip>
-                        </q-btn>
-                    </q-item-section>
-                </q-item>
-            </q-list>
+                        <span>{{ $t('home.login_with_social_media') }}</span>
+                    </div>
+                    <div class="c-zero-login-buttons__cloud-btn-line-icons">
+                        <img
+                            width="12"
+                            class="c-zero-login-buttons__icon c-zero-login-buttons__icon--social"
+                            src="~assets/icon--google.svg"
+                        >
+                        <img
+                            width="12"
+                            class="c-zero-login-buttons__icon c-zero-login-buttons__icon--social"
+                            src="~assets/icon--facebook.svg"
+                        >
+                        <img
+                            width="12"
+                            class="c-zero-login-buttons__icon c-zero-login-buttons__icon--social"
+                            src="~assets/icon--twitter.svg"
+                        >
+                    </div>
+                </div>
+            </div>
 
-            <!-- Close Button -->
-            <q-btn
-                v-close-popup
-                size="md"
-                no-caps
-                rounded
-                flat
-                class="self-center flex-center"
-                label="Close"
-                :style="`display:flex;`"
-                @click="close"
-            />
-            <q-item
-                v-if="error"
-                :active="!!error"
-                active-class="bg-red-1 text-grey-8"
+            <!-- Authenticator buttons -->
+            <template
+                v-for="(wallet, idx) in $ual.authenticators"
+                :key="idx"
             >
-                <q-item-section>
-                    {{ error }}
-                </q-item-section>
-            </q-item>
+                <div
+                    class="c-evm-login-buttons__option"
+                    @click="onLogin(idx)"
+                >
+                    <template v-if="isLoading(wallet.getStyle().text)">
+                        <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+                    </template>
+                    <template v-else>
+                        <img
+                            :src="getWalletIcon(wallet)"
+                            width="24"
+                            class="c-evm-login-buttons__icon"
+                        >
+                        {{ getWalletName(wallet) }}
+                    </template>
+                </div>
+            </template>
+
+        </template>
+        <div v-else class="q-px-md flex justify-center column">
+            <p class="q-mb-lg logged-in"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
+
+            <q-btn
+                text-color="white"
+                outline
+                :label="$t('home.view_wallet')"
+                class="q-px-md q-py-sm q-mb-lg"
+                @click="$router.push('/zero/balance')"
+            />
+
+            <q-btn
+                text-color="white"
+                outline
+                :label="$t('home.logout')"
+                class="q-px-md q-py-sm"
+                @click="logout"
+            />
         </div>
-    </q-dialog>
+    </template>
+
+    <!-- telos cloud menu -->
+    <template v-if="showTelosCloudMenu">
+
+        <div class="c-zero-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
+
+        <!-- Google OAuth Provider -->
+        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
+            <img
+                width="24"
+                class="c-zero-login-buttons__icon c-zero-login-buttons__icon--disabled"
+                src="~assets/icon--google.svg"
+            >
+            {{ $t('home.sign_with_google') }}
+        </div>
+
+        <!-- Facebook OAuth Provider -->
+        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
+            <img
+                width="24"
+                class="c-zero-login-buttons__icon c-zero-login-buttons__icon--disabled"
+                src="~assets/icon--facebook.svg"
+            >
+            {{ $t('home.sign_with_facebook') }}
+        </div>
+
+        <!-- X OAuth Provider -->
+        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
+            <img
+                width="24"
+                class="c-zero-login-buttons__icon c-zero-login-buttons__icon--disabled"
+                src="~assets/icon--twitter.svg"
+            >
+            {{ $t('home.sign_with_x') }}
+        </div>
+    </template>
 
     <!-- RAM low dialog -->
     <q-dialog v-model="resLow" persistent>
@@ -395,16 +419,119 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 
-.showLoginPopup {
-    width: 30rem;
-    height: auto;
-    margin-bottom: 5rem;
-}
 
 .logged-in{
     color: white;
     font-size: 16px !important;
     margin-bottom: 2rem;
+}
+
+
+.c-zero-login-buttons {
+    $self: &;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+
+    &__loading{
+        width: 100%;
+        text-align: center;
+        color: $white;
+    }
+
+    &__header{
+        display: inline-block;
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    &__icon {
+        margin-top: -1px;
+        transition: all 0.3s;
+        &--disabled {
+            opacity: 0.5;
+        }
+    }
+
+    &__cloud-btn-container {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__cloud-btn-line-icons {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__cloud-btn-line-title {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__sub-title {
+        color: $white;
+    }
+
+    &__option {
+        display: flex;
+        gap: 8px;
+
+        width: 224px;
+        height: 54px;
+        color: $white;
+        outline-color: $white;
+        outline-width: 1px;
+        outline-style: solid;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 14px;
+        cursor: pointer;
+
+        &:hover:not(&--disabled) {
+            color: $white;
+            outline-color: $white;
+            outline-width: 2px;
+        }
+
+        &:not(:hover) #{$self}__icon {
+            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+                opacity: 0.8;
+
+                @include mobile-only {
+                    opacity: 1;
+                }
+            }
+        }
+
+        &--telos-cloud {
+            height: max-content;
+            &:not(:hover) {
+                outline-width: 0;
+                @include gradient_border();
+            }
+        }
+
+        &--disabled {
+            color: #9289b1;
+            outline-color: #9289b1;
+            cursor: not-allowed;
+        }
+    }
 }
 
 
