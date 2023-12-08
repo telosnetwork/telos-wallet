@@ -330,6 +330,48 @@ export const useAllowancesStore = defineStore(store_name, {
                 throw trxError;
             }
         },
+        async updateSingleErc721Allowance(
+            owner: string,
+            operator: string,
+            nftContractAddress: string,
+            tokenId: string,
+            allowed: boolean,
+        ) {
+            this.trace('updateSingleErc721Allowance', operator, nftContractAddress, allowed);
+            useFeedbackStore().setLoading('updateErc20Allowance');
+
+            try {
+                const nftContract = await useContractStore().getContract(CURRENT_CONTEXT, nftContractAddress);
+                const nftContractInstance = await nftContract?.getContractInstance();
+
+                if (!nftContractInstance) {
+                    // eztodo antelope error
+                    console.error('Error getting token contract instance');
+                    throw 'eztodo';
+                }
+
+                // note: there can only be one operator for a single ERC721 token ID
+                // to revoke an allowance, the approve method is called with an operator address of '0x0'
+                const newOperator = allowed ? operator : '0x0';
+
+                const tx = await nftContractInstance.approve(newOperator, tokenId);
+
+                tx.wait().then(() => {
+                    setTimeout(() => {
+                        this.fetchAllowancesForAccount(owner).then(() => {
+                            useFeedbackStore().unsetLoading('updateSingleErc721Allowance');
+                        });
+                    }, 3000); // give the indexer time to update allowance data
+                });
+
+                return tx;
+            } catch (error) {
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
+                getAntelope().config.transactionErrorHandler(trxError, 'updateSingleErc721Allowance');
+                useFeedbackStore().unsetLoading('updateSingleErc721Allowance');
+                throw trxError;
+            }
+        },
 
         // commits
         setErc20Allowances(label: Label, allowances: ShapedAllowanceRowERC20[]) {

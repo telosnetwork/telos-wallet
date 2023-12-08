@@ -320,6 +320,7 @@ export default {
         entire_collection: 'Entire Collection',
         unlimited_allowance_option_tooltip: 'Technically there is no \'unlimited\' allowance; this is actually equivalent to (2^256 - 1) {symbol}',
         token_amount_input_label: 'Token Amount',
+        erc_721_single_allowance_blurb: 'Note: there may only be up to one approved spender (or \'operator\') for this type of collectible (ERC-721). Approving a new spender will revoke the previous approval.',
     },
     notification:{
         success_title_trx: 'Success',
@@ -342,6 +343,7 @@ export default {
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
         neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
         neutral_message_updating_erc20_allowance: 'Updating <b>{symbol}</b> allowance for <b>{spender}</b>',
+        neutral_message_updating_single_erc721_allowance: 'Updating <b>{tokenText}</b> allowance for <b>{operator}</b>',
         dont_show_message_again: 'Don\'t show me this message again',
     },
     resources: {
