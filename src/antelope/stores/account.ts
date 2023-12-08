@@ -20,6 +20,7 @@ import { createInitFunction, createTraceFunction } from 'src/antelope/stores/fee
 import { initFuelUserWrapper } from 'src/api/fuel';
 import {
     CURRENT_CONTEXT,
+    useAllowancesStore,
     useBalancesStore,
     useFeedbackStore,
     useHistoryStore,
@@ -213,6 +214,7 @@ export const useAccountStore = defineStore(store_name, {
             useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
+            useAllowancesStore().clearAllowances();
 
             try {
                 localStorage.removeItem('network');

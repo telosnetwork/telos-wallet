@@ -27,6 +27,7 @@ const erc20AllowanceRow2: ShapedAllowanceRowERC20 = {
     tokenName: 'USD Coin (Multichain)',
     tokenAddress: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
     tokenDecimals: 6,
+    tokenPrice: 0.99,
     balance: BigNumber.from('7396'.concat('0'.repeat(6))), // 7,396 USDC
     allowance: BigNumber.from('10928365'.concat('0'.repeat(6))), // 10,928,365 USDC
     spenderAddress: '0x'.concat('1'.repeat(40)),
@@ -40,6 +41,7 @@ const erc20AllowanceRow3: ShapedAllowanceRowERC20 = {
     tokenName: 'Yowza Coin',
     tokenAddress: '0x'.concat('1'.repeat(40)),
     tokenDecimals: 12,
+    tokenPrice: 0,
     balance: BigNumber.from('832576762'.concat('0'.repeat(12))), // 832,576,762 YOWZA
     allowance: BigNumber.from('8096346703467341346'.concat('0'.repeat(12))), // 8,096,346,703,467,341,346 YOWZA
     spenderAddress: '0x'.concat('1'.repeat(40)),
@@ -66,6 +68,7 @@ const erc20AllowanceRowHuge: ShapedAllowanceRowERC20 = {
     tokenName: 'Tether (Multichain)',
     tokenAddress: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73',
     tokenDecimals: 6,
+    tokenPrice: 1.01,
     balance: BigNumber.from('654'.concat('0'.repeat(6))), // 654 USDT
     allowance: BigNumber.from('1000000000000000'.concat('0'.repeat(6))), // huge (1Q USDT)
     spenderAddress: '0x'.concat('2'.repeat(40)),

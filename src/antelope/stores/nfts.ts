@@ -221,6 +221,13 @@ export const useNftsStore = defineStore(store_name, {
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
                 if (this.__contracts[network][contractLower]) {
+                    if (this.__contracts[network][contractLower].loading) {
+                        let waitCount = 0;
+                        while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+
                     const nft = this.__contracts[network][contractLower].list.find(
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
@@ -250,7 +257,7 @@ export const useNftsStore = defineStore(store_name, {
                 } else {
                     if (!chain.settings.isNative()) {
                         // this means we have the indexer down
-                        // we have the contract and the addres so we try to fetch the NFT from the contract
+                        // we have the contract and the address so we try to fetch the NFT from the contract
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
@@ -277,40 +284,47 @@ export const useNftsStore = defineStore(store_name, {
 
         async fetchNftsFromCollection(label: Label, contract: string): Promise<Collectible[] | null> {
             this.trace('fetchNftsFromCollection', label, contract);
+            const contractLower = contract.toLowerCase();
             const feedbackStore = useFeedbackStore();
             const chain = useChainStore().getChain(label);
             const network = chain.settings.getNetwork();
 
-            if (this.__contracts[network] && this.__contracts[network][contract.toLowerCase()]) {
-                return Promise.resolve(this.__contracts[network][contract].list);
+            if (this.__contracts[network] && this.__contracts[network][contractLower]) {
+                if (this.__contracts[network][contractLower].loading) {
+                    let waitCount = 0;
+                    while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                }
+                return Promise.resolve(this.__contracts[network][contractLower].list);
             }
 
             if (!this.__contracts[network]) {
                 this.__contracts[network] = {};
             }
 
-            if (!this.__contracts[network][contract]) {
-                this.__contracts[network][contract] = {
+            if (!this.__contracts[network][contractLower]) {
+                this.__contracts[network][contractLower] = {
                     contract,
                     list: [],
                     loading: true,
                 };
             }
 
-            this.__contracts[network][contract].loading = true;
+            this.__contracts[network][contractLower].loading = true;
 
             feedbackStore.setLoading('fetchNftsFromCollection');
             try {
                 const nfts = await chain.settings.getNftsForCollection(contract, { limit: 10000 });
-                this.__contracts[network][contract].list = nfts;
+                this.__contracts[network][contractLower].list = nfts;
 
                 return nfts;
             } catch {
-                this.__contracts[network][contract].list = [];
+                this.__contracts[network][contractLower].list = [];
                 throw new AntelopeError('antelope.nfts.error_fetching_collection_nfts');
             } finally {
                 feedbackStore.unsetLoading('fetchNftsFromCollection');
-                this.__contracts[network][contract].loading = false;
+                this.__contracts[network][contractLower].loading = false;
             }
         },
 

@@ -10,6 +10,7 @@ import {
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
     ShapedAllowanceRowSingleERC721,
+    TINY_ALLOWANCE_THRESHOLD,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
     isNftCollectionAllowanceRow,
@@ -17,7 +18,7 @@ import {
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/antelope';
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
-import { NFTClass } from 'src/antelope/types';
+import { Collectible } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 import ToolTip from 'src/components/ToolTip.vue';
@@ -26,6 +27,7 @@ import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
 import TextBadge from 'src/components/TextBadge.vue';
 import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
@@ -43,7 +45,7 @@ const isSingleErc721Row = isErc721SingleAllowanceRow(props.row);
 const isCollectionRow = isNftCollectionAllowanceRow(props.row);
 
 // data
-const erc721Nft = ref<NFTClass | null>(null);
+const erc721Nft = ref<Collectible | null>(null);
 
 // computed
 const rowAsErc20Row = computed(() => props.row as ShapedAllowanceRowERC20);
@@ -57,7 +59,7 @@ const assetTextShort = computed(() => {
         prettyAmount = '1 '.concat(truncateText(props.row.tokenName, 12));
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, true, tokenSymbol, false, tokenDecimals, true);
+        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ? truncateText(collectionName, 12) : truncateAddress(collectionAddress);
@@ -74,14 +76,14 @@ const assetTextFull = computed(() => {
         prettyAmount = '1 '.concat(props.row.tokenName);
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, false);
+        prettyAmount = prettyPrintCurrency(balance, WEI_PRECISION, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ?? collectionAddress;
         prettyAmount = prettyPrintCurrency(balance, 0, fiatLocale, false, collectionNamePretty, false, 0, false);
     }
 
-    return prettyAmount;
+    return $t('evm_allowances.you_own', { asset: prettyAmount });
 });
 
 const fiatValueTextShort = computed(() => {
@@ -103,27 +105,28 @@ const fiatValueTextFull = computed(() => {
     const balance = Number(formatUnits(props.row.balance, props.row.tokenDecimals));
     const fiatValue = balance * props.row.tokenPrice;
 
-    return prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency);
+    return `1 ${props.row.tokenSymbol} = ${prettyPrintCurrency(fiatValue, 2, fiatLocale, false, fiatCurrency)}`;
 });
 
 const allowanceTextShort = computed(() => {
     if (isErc20Row) {
-        if (props.row.allowance instanceof BigNumber) {
-            const allowance = props.row.allowance.div(BigNumber.from(10).pow(props.row.tokenDecimals));
+        const allowanceBn = props.row.allowance;
 
-            if (allowance.gte(HUGE_ALLOWANCE_THRESHOLD)) {
-                return $t('global.huge');
-            }
-
-            if (allowance.eq(0)) {
-                return $t('global.none');
-            }
-            const numberAllowed = Number(formatUnits(props.row.allowance, props.row.tokenDecimals));
-
-            return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
+        if (allowanceBn.eq(0)) {
+            return $t('global.none');
         }
 
-        return $t('global.none');
+        const numberAllowed = Number(formatUnits(allowanceBn, props.row.tokenDecimals));
+
+        if (numberAllowed > HUGE_ALLOWANCE_THRESHOLD) {
+            return $t('global.huge');
+        }
+
+        if (numberAllowed < TINY_ALLOWANCE_THRESHOLD && numberAllowed > 0) {
+            return $t('global.less_than', { amount: TINY_ALLOWANCE_THRESHOLD });
+        }
+
+        return prettyPrintCurrency(numberAllowed, 2, fiatLocale, true);
     }
 
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
@@ -132,7 +135,7 @@ const allowanceTextShort = computed(() => {
 const allowanceTextFull = computed(() => {
     if (isErc20Row) {
         const allowance = props.row.allowance ?? BigNumber.from(0);
-        return prettyPrintCurrency(allowance, 4, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
+        return prettyPrintCurrency(allowance, WEI_PRECISION, fiatLocale, false, props.row.tokenSymbol, false, props.row.tokenDecimals, true);
     }
 
     return props.row.allowed ? $t('global.allowed') : $t('global.not_allowed');
@@ -212,7 +215,7 @@ onMounted(async () => {
     </q-td>
     <q-td key="spender">
         <ExternalLink
-            :text="row.spenderName ?? row.spenderAddress"
+            :text="row.spenderName || row.spenderAddress"
             :url="spenderUrl"
             :purpose="$t('evm_allowances.spender_link_label')"
         />

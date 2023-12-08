@@ -1,7 +1,10 @@
 import { BigNumber } from 'ethers';
 
 // 1 Quadrillion. Any allowance above this amount is considered 'huge'
-export const HUGE_ALLOWANCE_THRESHOLD = BigNumber.from('1000000000000000');
+export const HUGE_ALLOWANCE_THRESHOLD = 1000000000000000;
+
+// Any allowance below this amount is considered 'tiny'
+export const TINY_ALLOWANCE_THRESHOLD = 0.01;
 
 // some notes about allowances:
 // 1. ERC721 tokens can be approved for a single token (e.g. approve) or for all tokens in a collection (e.g. setApprovalForAll)
@@ -18,14 +21,14 @@ export interface ShapedAllowanceRowERC20 extends AllowanceRow {
     tokenAddress: string; // address for the token contract
 
     // allowance amount, expressed in the token's smallest unit, e.g. 6 decimals for USDT or wei for TLOS/ETH
-    allowance?: BigNumber;
+    allowance: BigNumber;
 
     // balance amount expressed in the token's smallest unit, e.g. 6 decimals for USDT or wei for TLOS/ETH
     balance: BigNumber;
 
     tokenDecimals: number; // decimals for the token (e.g. 6 for USDT, 18 for TLOS/ETH)
     tokenSymbol: string; // e.g. TLOS, USDT, etc.
-    tokenPrice?: number; // price of the token in USD (optional)
+    tokenPrice: number; // price of the token in USD (optional)
     tokenLogo?: string; // path or URI for the token logo (optional)
 }
 
@@ -49,6 +52,7 @@ export interface ShapedAllowanceRowSingleERC721 extends AllowanceRow {
 }
 
 export type ShapedAllowanceRow = ShapedAllowanceRowERC20 | ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721;
+export type ShapedCollectionAllowanceRow = ShapedAllowanceRowNftCollection | ShapedAllowanceRowSingleERC721;
 
 // type guards for shaped allowance rows
 export function isErc20AllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowERC20 {
@@ -63,4 +67,13 @@ export function isErc721SingleAllowanceRow(row: ShapedAllowanceRow): row is Shap
 
 export function isNftCollectionAllowanceRow(row: ShapedAllowanceRow): row is ShapedAllowanceRowNftCollection {
     return !(isErc20AllowanceRow(row) || isErc721SingleAllowanceRow(row));
+}
+
+export enum AllowanceTableColumns {
+    asset = 'asset',
+    value = 'value',
+    allowance = 'allowance',
+    spender = 'spender',
+    type = 'type',
+    updated = 'updated',
 }
