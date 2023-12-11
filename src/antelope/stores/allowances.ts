@@ -338,7 +338,7 @@ export const useAllowancesStore = defineStore(store_name, {
             allowed: boolean,
         ) {
             this.trace('updateSingleErc721Allowance', operator, nftContractAddress, allowed);
-            useFeedbackStore().setLoading('updateErc20Allowance');
+            useFeedbackStore().setLoading('updateSingleErc721Allowance');
 
             try {
                 const nftContract = await useContractStore().getContract(CURRENT_CONTEXT, nftContractAddress);
@@ -369,6 +369,44 @@ export const useAllowancesStore = defineStore(store_name, {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
                 getAntelope().config.transactionErrorHandler(trxError, 'updateSingleErc721Allowance');
                 useFeedbackStore().unsetLoading('updateSingleErc721Allowance');
+                throw trxError;
+            }
+        },
+        // this method is used for both ERC721 and ERC1155 collections
+        async updateNftCollectionAllowance(
+            owner: string,
+            operator: string,
+            nftContractAddress: string,
+            allowed: boolean,
+        ) {
+            this.trace('updateNftCollectionAllowance', operator, nftContractAddress, allowed);
+            useFeedbackStore().setLoading('updateNftCollectionAllowance');
+
+            try {
+                const nftContract = await useContractStore().getContract(CURRENT_CONTEXT, nftContractAddress);
+                const nftContractInstance = await nftContract?.getContractInstance();
+
+                if (!nftContractInstance) {
+                    // eztodo antelope error
+                    console.error('Error getting token contract instance');
+                    throw 'eztodo';
+                }
+
+                const tx = await nftContractInstance.setApprovalForAll(operator, allowed);
+
+                tx.wait().then(() => {
+                    setTimeout(() => {
+                        this.fetchAllowancesForAccount(owner).then(() => {
+                            useFeedbackStore().unsetLoading('updateNftCollectionAllowance');
+                        });
+                    }, 3000); // give the indexer time to update allowance data
+                });
+
+                return tx;
+            } catch (error) {
+                const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
+                getAntelope().config.transactionErrorHandler(trxError, 'updateNftCollectionAllowance');
+                useFeedbackStore().unsetLoading('updateNftCollectionAllowance');
                 throw trxError;
             }
         },
