@@ -341,7 +341,7 @@ export default {
         neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
         neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
         neutral_message_updating_erc20_allowance: 'Updating <b>{symbol}</b> allowance for <b>{spender}</b>',
-        neutral_message_updating_single_erc721_allowance: 'Updating <b>{tokenText}</b> allowance for <b>{operator}</b>',
+        neutral_message_updating_nft_allowance: 'Updating <b>{tokenText}</b> allowance for <b>{operator}</b>',
         dont_show_message_again: 'Don\'t show me this message again',
     },
     resources: {

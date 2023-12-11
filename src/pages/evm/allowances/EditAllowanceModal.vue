@@ -110,7 +110,11 @@ const enableConfirmButton = computed(() => {
     return newNftAllowanceIsAllowed.value !== rowAsNftRow.value.allowed;
 });
 
-const confirmButtonIsLoading = computed(() => useFeedbackStore().isLoading('updateErc20Allowance'));
+const confirmButtonIsLoading = computed(() =>
+    useFeedbackStore().isLoading('updateErc20Allowance') ||
+    useFeedbackStore().isLoading('updateSingleErc721Allowance') ||
+    useFeedbackStore().isLoading('updateNftCollectionAllowance'),
+);
 
 const userAddress = computed(() => useAccountStore().currentAccount.account);
 
@@ -196,7 +200,7 @@ async function handleSubmit() {
 
         const dismiss = ant.config.notifyNeutralMessageHandler(
             $t(
-                'notification.neutral_message_updating_single_erc721_allowance',
+                'notification.neutral_message_updating_nft_allowance',
                 {
                     tokenText,
                     operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
@@ -215,7 +219,35 @@ async function handleSubmit() {
             dismiss();
         });
     } else {
-        console.log('New allowed is ', newNftAllowanceIsAllowed.value);
+        const tx = await useAllowancesStore().updateNftCollectionAllowance(
+            userAddress.value,
+            props.row.spenderAddress,
+            rowAsNftRow.value.collectionAddress,
+            newNftAllowanceIsAllowed.value,
+        );
+
+        const tokenText = rowAsNftRow.value.collectionName || truncateAddress(rowAsNftRow.value.collectionAddress);
+
+        const dismiss = ant.config.notifyNeutralMessageHandler(
+            $t(
+                'notification.neutral_message_updating_nft_allowance',
+                {
+                    tokenText,
+                    operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+                },
+            ),
+        );
+
+        tx?.wait().then(() => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${explorerUrl}/tx/${tx.hash}`,
+            );
+            emit('close');
+        }).catch((err) => {
+            console.error(err);
+        }).finally(() => {
+            dismiss();
+        });
     }
 }
 </script>
