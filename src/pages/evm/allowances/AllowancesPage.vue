@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { formatUnits } from 'ethers/lib/utils';
 
 import AppPage from 'components/evm/AppPage.vue';
 import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.vue';
@@ -44,7 +43,9 @@ const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
 });
 const searchText = ref('');
 const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
-const selectedRows = ref<Record<string, boolean>>({});
+const selectedRows = ref<string[]>([]); // rows are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}${ isSingleErc721 ? `-${tokenId}` : ''}`
+const showRevokeInProgressModal = ref(false);
+const cancelBatchRevoke = ref<(() => void) | null>(null);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
@@ -124,13 +125,7 @@ const shapedAllowanceRows = computed(() => {
     return allowances;
 });
 
-const enableRevokeButton = computed(() => {
-    const selectedRowsKeys = Object.keys(selectedRows.value);
-    const selectedRowsValues = Object.values(selectedRows.value);
-    debugger;
-
-    return selectedRowsKeys.length > 0 && selectedRowsValues.some(isSelected => isSelected);
-});
+const enableRevokeButton = computed(() => selectedRows.value.length > 0);
 
 // watchers
 watch(userAddress, (address) => {
@@ -171,13 +166,43 @@ function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTabl
     };
 }
 
+// eztodo make approvals on new team account
+
 function handleSelectedRowsChange(newSelectedRows: Record<string, boolean>) {
-    // rows are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}`
-    selectedRows.value = newSelectedRows;
+    const selectedRowsTemp: string[] = [];
+
+    Object.keys(newSelectedRows).forEach((key) => {
+        if (newSelectedRows[key]) {
+            selectedRowsTemp.push(key);
+        }
+    });
+    selectedRows.value = selectedRowsTemp;
 }
 
 function handleRevokeSelectedClicked() {
-    console.log('revoke selected clicked');
+    showRevokeInProgressModal.value = true;
+
+    function handleRevokeCompleted(completed: number, remaining: number) {
+        console.log('completed:', completed);
+        console.log('remaining:', remaining);
+        // eztodo use this for text in the modal like "X of Y allowances revoked"
+    }
+
+    const {
+        promise,
+        cancelToken,
+    } = useAllowancesStore().batchRevokeAllowances(selectedRows.value, userAddress.value, handleRevokeCompleted);
+
+    cancelBatchRevoke.value = () => {
+        cancelToken.cancel();
+        showRevokeInProgressModal.value = false;
+    };
+
+    promise.finally(() => {
+        showRevokeInProgressModal.value = false;
+        cancelBatchRevoke.value = null;
+        // eztodo reset revoking counters
+    });
 }
 </script>
 
@@ -185,7 +210,7 @@ function handleRevokeSelectedClicked() {
 <AppPage>
     <template v-slot:header>
         <h1 class="u-text--high-contrast">
-            {{ $t('global.revoke') }}
+            {{ $t('nav.allowances') }}
         </h1>
     </template>
 
@@ -218,6 +243,28 @@ function handleRevokeSelectedClicked() {
             @selected-rows-changed="handleSelectedRowsChange"
         />
     </div>
+
+    <q-dialog v-model="showRevokeInProgressModal" persistent>
+        <!-- eztodo i18n -->
+        <q-card>
+            <q-card-section>
+                <div class="text-h6">
+                    Revoke in progress
+                </div>
+                <div class="text-subtitle2">
+                    Please wait while we revoke the selected allowances. You will need to approve the transactions in your wallet as they come up.
+                </div>
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn
+                    color="primary"
+                    :label="$t('global.cancel')"
+                    @click="cancelBatchRevoke?.()"
+                />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
 </AppPage>
 </template>
 

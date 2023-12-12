@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { AllowanceTableColumns, ShapedAllowanceRow, isErc20AllowanceRow } from 'src/antelope/types/Allowances';
+import { AllowanceTableColumns, ShapedAllowanceRow, isErc20AllowanceRow, isErc721SingleAllowanceRow } from 'src/antelope/types/Allowances';
 import { useUserStore } from 'src/antelope';
 import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 
@@ -169,9 +169,16 @@ function getCheckboxModelForRow(row: ShapedAllowanceRow) {
 
 function toggleRevokeChecked(row: ShapedAllowanceRow) {
     const rowIsErc20 = isErc20AllowanceRow(row);
-    const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
-    const key = `${row.spenderAddress}-${tokenAddress}`;
+    const rowIsSingleErc721Row = isErc721SingleAllowanceRow(row);
 
+    const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
+    let key = `${row.spenderAddress}-${tokenAddress}`;
+
+    if (rowIsSingleErc721Row) {
+        key += `-${row.tokenId}`;
+    }
+
+    // rows are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}${ isSingleErc721 ? `-${tokenId}` : ''}`
     revokeCheckboxesModel.value[key] = !revokeCheckboxesModel.value[key];
 
     if (!revokeCheckboxesModel.value[key]) {
