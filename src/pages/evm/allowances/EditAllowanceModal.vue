@@ -26,6 +26,7 @@ import ExternalLink from 'src/components/ExternalLink.vue';
 import ToolTip from 'src/components/ToolTip.vue';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { TransactionResponse } from 'src/antelope/types/EvmTransaction';
 
 enum Erc20AllowanceAmountOptions {
     none = 'none',
@@ -159,36 +160,26 @@ onBeforeMount(() => {
 });
 
 async function handleSubmit() {
+    let tx: TransactionResponse;
+    let neutralMessageText: string;
+
     if (rowIsErc20Row.value) {
-        const tx = await useAllowancesStore().updateErc20Allowance(
+        tx = await useAllowancesStore().updateErc20Allowance(
             userAddress.value,
             props.row.spenderAddress,
             rowAsErc20Row.value.tokenAddress,
             newErc20AllowanceAmount.value,
         );
 
-        const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t(
-                'notification.neutral_message_updating_erc20_allowance',
-                {
-                    symbol: rowAsErc20Row.value.tokenSymbol,
-                    spender: props.row.spenderName || truncateAddress(props.row.spenderAddress),
-                },
-            ),
+        neutralMessageText = $t(
+            'notification.neutral_message_updating_erc20_allowance',
+            {
+                symbol: rowAsErc20Row.value.tokenSymbol,
+                spender: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+            },
         );
-
-        tx?.wait().then(() => {
-            ant.config.notifySuccessfulTrxHandler(
-                `${explorerUrl}/tx/${tx.hash}`,
-            );
-            emit('close');
-        }).catch((err) => {
-            console.error(err);
-        }).finally(() => {
-            dismiss();
-        });
     } else if (rowIsSingleErc721Row.value) {
-        const tx = await useAllowancesStore().updateSingleErc721Allowance(
+        tx = await useAllowancesStore().updateSingleErc721Allowance(
             userAddress.value,
             props.row.spenderAddress,
             rowAsSingleErc721Row.value.collectionAddress,
@@ -198,28 +189,15 @@ async function handleSubmit() {
 
         const tokenText = `${rowAsSingleErc721Row.value.collectionName || truncateAddress(rowAsSingleErc721Row.value.collectionAddress)} #${rowAsSingleErc721Row.value.tokenId}`;
 
-        const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t(
-                'notification.neutral_message_updating_nft_allowance',
-                {
-                    tokenText,
-                    operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
-                },
-            ),
+        neutralMessageText = $t(
+            'notification.neutral_message_updating_nft_allowance',
+            {
+                tokenText,
+                operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+            },
         );
-
-        tx?.wait().then(() => {
-            ant.config.notifySuccessfulTrxHandler(
-                `${explorerUrl}/tx/${tx.hash}`,
-            );
-            emit('close');
-        }).catch((err) => {
-            console.error(err);
-        }).finally(() => {
-            dismiss();
-        });
     } else {
-        const tx = await useAllowancesStore().updateNftCollectionAllowance(
+        tx = await useAllowancesStore().updateNftCollectionAllowance(
             userAddress.value,
             props.row.spenderAddress,
             rowAsNftRow.value.collectionAddress,
@@ -228,27 +206,27 @@ async function handleSubmit() {
 
         const tokenText = rowAsNftRow.value.collectionName || truncateAddress(rowAsNftRow.value.collectionAddress);
 
-        const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t(
-                'notification.neutral_message_updating_nft_allowance',
-                {
-                    tokenText,
-                    operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
-                },
-            ),
+        neutralMessageText = $t(
+            'notification.neutral_message_updating_nft_allowance',
+            {
+                tokenText,
+                operator: props.row.spenderName || truncateAddress(props.row.spenderAddress),
+            },
         );
-
-        tx?.wait().then(() => {
-            ant.config.notifySuccessfulTrxHandler(
-                `${explorerUrl}/tx/${tx.hash}`,
-            );
-            emit('close');
-        }).catch((err) => {
-            console.error(err);
-        }).finally(() => {
-            dismiss();
-        });
     }
+
+    const dismiss = ant.config.notifyNeutralMessageHandler(neutralMessageText);
+
+    tx.wait().then(() => {
+        ant.config.notifySuccessfulTrxHandler(
+            `${explorerUrl}/tx/${tx.hash}`,
+        );
+        emit('close');
+    }).catch((err) => {
+        console.error(err);
+    }).finally(() => {
+        dismiss();
+    });
 }
 </script>
 

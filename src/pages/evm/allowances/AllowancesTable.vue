@@ -96,6 +96,7 @@ watch(tableRows, (newRows) => {
 
     revokeAllCheckboxChecked.value = false;
     updateAllRevokeCheckboxes();
+    pagination.value.rowsNumber = props.rows.length;
 }, { immediate: true });
 
 // methods
