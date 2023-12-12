@@ -13,6 +13,7 @@ import {
     useTokensStore,
 } from 'src/antelope';
 import {
+    AntelopeError,
     IndexerAllowanceResponse,
     IndexerAllowanceResponseErc1155,
     IndexerAllowanceResponseErc20,
@@ -30,9 +31,6 @@ import {
     TransactionResponse,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
-    isIndexerAllowanceResponseErc1155,
-    isIndexerAllowanceResponseErc20,
-    isIndexerAllowanceResponseErc721,
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -233,23 +231,20 @@ export const useAllowancesStore = defineStore(store_name, {
             const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
             const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
             const erc1155AllowancesPromise = chainSettings.fetchErc1155Allowances(account, { limit: ALLOWANCES_LIMIT });
-            const settledAllowancePromises = await Promise.allSettled([erc20AllowancesPromise, erc721AllowancesPromise, erc1155AllowancesPromise]);
 
-            const fulfilledPromises: PromiseFulfilledResult<IndexerAllowanceResponse>[] = [];
-            const rejectedPromises: PromiseRejectedResult[] = [];
+            let allowancesResults: IndexerAllowanceResponse[];
 
-            settledAllowancePromises.forEach((promise) => {
-                if (promise.status === 'fulfilled') {
-                    fulfilledPromises.push(promise as PromiseFulfilledResult<IndexerAllowanceResponse>);
-                } else {
-                    rejectedPromises.push(promise as PromiseRejectedResult);
-                    console.error('Error fetching allowances', promise.reason);
-                }
-            });
+            try {
+                allowancesResults = await Promise.all([erc20AllowancesPromise, erc721AllowancesPromise, erc1155AllowancesPromise]);
+            } catch (e) {
+                console.error('Error fetching allowances', e);
+                useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
+                throw new AntelopeError('antelope.allowances.error_fetching_allowances');
+            }
 
-            const erc20AllowancesData   = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc20(value))?.value as IndexerAllowanceResponseErc20 | undefined)?.results ?? [];
-            const erc721AllowancesData  = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc721(value))?.value as IndexerAllowanceResponseErc721 | undefined)?.results ?? [];
-            const erc1155AllowancesData = (fulfilledPromises.find(({ value }) => isIndexerAllowanceResponseErc1155(value))?.value as IndexerAllowanceResponseErc1155 | undefined)?.results ?? [];
+            const erc20AllowancesData   = (allowancesResults[0] as IndexerAllowanceResponseErc20)?.results ?? [];
+            const erc721AllowancesData  = (allowancesResults[1] as IndexerAllowanceResponseErc721)?.results ?? [];
+            const erc1155AllowancesData = (allowancesResults[2] as IndexerAllowanceResponseErc1155)?.results ?? [];
 
             const shapedErc20AllowanceRowPromises   = Promise.allSettled(erc20AllowancesData.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData)));
             const shapedErc721AllowanceRowPromises  = Promise.allSettled(erc721AllowancesData.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData)));
