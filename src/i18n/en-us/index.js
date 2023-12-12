@@ -667,6 +667,9 @@ export default {
         nfts: {
             error_fetching_collection_nfts: 'An unknown error occurred while fetching collection NFTs',
         },
+        allowances: {
+            error_fetching_allowances: 'An unknown error occurred while fetching allowances',
+        },
         words: {
             seconds: 'seconds',
             minutes: 'minutes',

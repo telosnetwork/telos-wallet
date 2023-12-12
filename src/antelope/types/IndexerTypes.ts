@@ -209,15 +209,3 @@ export interface IndexerAllowanceResponseErc1155 {
 }
 
 export type IndexerAllowanceResponse = IndexerAllowanceResponseErc20 | IndexerAllowanceResponseErc721 | IndexerAllowanceResponseErc1155;
-
-export function isIndexerAllowanceResponseErc20(response: IndexerAllowanceResponse): response is IndexerAllowanceResponseErc20 {
-    return (response as IndexerAllowanceResponseErc20).results.some(result => result.spender);
-}
-
-export function isIndexerAllowanceResponseErc721(response: IndexerAllowanceResponse): response is IndexerAllowanceResponseErc721 {
-    return (response as IndexerAllowanceResponseErc721).results.some(result => result.hasOwnProperty('single') || result.hasOwnProperty('tokenId'));
-}
-
-export function isIndexerAllowanceResponseErc1155(response: IndexerAllowanceResponse): response is IndexerAllowanceResponseErc1155 {
-    return !isIndexerAllowanceResponseErc20(response) && !isIndexerAllowanceResponseErc721(response);
-}

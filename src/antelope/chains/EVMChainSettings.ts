@@ -728,6 +728,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const params = {
             ...filter,
             type: 'erc20',
+            all: true,
         };
         const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
         return response.data as IndexerAllowanceResponseErc20;
@@ -737,6 +738,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const params = {
             ...filter,
             type: 'erc721',
+            all: true,
         };
         const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
         return response.data as IndexerAllowanceResponseErc721;
@@ -746,6 +748,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
         const params = {
             ...filter,
             type: 'erc1155',
+            all: true,
         };
         const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
         return response.data as IndexerAllowanceResponseErc1155;
