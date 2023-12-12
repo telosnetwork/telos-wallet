@@ -44,6 +44,7 @@ const sort = ref<{ descending: boolean; sortBy: AllowanceTableColumns }>({
 });
 const searchText = ref('');
 const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const selectedRows = ref<Record<string, boolean>>({});
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
@@ -123,6 +124,14 @@ const shapedAllowanceRows = computed(() => {
     return allowances;
 });
 
+const enableRevokeButton = computed(() => {
+    const selectedRowsKeys = Object.keys(selectedRows.value);
+    const selectedRowsValues = Object.values(selectedRows.value);
+    debugger;
+
+    return selectedRowsKeys.length > 0 && selectedRowsValues.some(isSelected => isSelected);
+});
+
 // watchers
 watch(userAddress, (address) => {
     if (address) {
@@ -161,6 +170,15 @@ function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTabl
         sortBy: newSort.sortBy,
     };
 }
+
+function handleSelectedRowsChange(newSelectedRows: Record<string, boolean>) {
+    // rows are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}`
+    selectedRows.value = newSelectedRows;
+}
+
+function handleRevokeSelectedClicked() {
+    console.log('revoke selected clicked');
+}
 </script>
 
 <template>
@@ -179,9 +197,10 @@ function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTabl
         />
 
         <AllowancesPageControls
-            :enable-revoke-button="false"
+            :enable-revoke-button="enableRevokeButton"
             @search-updated="handleSearchUpdated"
             @include-cancelled-updated="handleIncludeCancelledUpdated"
+            @revoke-selected="handleRevokeSelectedClicked"
         />
 
         <div v-if="loading" class="q-mt-lg">
@@ -192,7 +211,12 @@ function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTabl
                 type="rect"
             />
         </div>
-        <AllowancesTable v-else :rows="shapedAllowanceRows" @sortChanged="handleSortChanged"/>
+        <AllowancesTable
+            v-else
+            :rows="shapedAllowanceRows"
+            @sort-changed="handleSortChanged"
+            @selected-rows-changed="handleSelectedRowsChange"
+        />
     </div>
 </AppPage>
 </template>
