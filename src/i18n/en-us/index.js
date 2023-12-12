@@ -165,7 +165,6 @@ export default {
         owners: 'Owners',
         quantity: 'Quantity',
         required_field: 'This field is required',
-        revoke: 'Revoke',
         rows_per_page: 'Rows per page',
         search: 'Search',
         sign_out: 'Disconnect',

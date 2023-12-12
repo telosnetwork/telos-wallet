@@ -68,6 +68,7 @@ export const useAllowancesStore = defineStore(store_name, {
             .concat(state.__erc_721_allowances[label] ?? [])
             .concat(state.__erc_1155_allowances[label] ?? []),
         nonErc20Allowances: state => (label: Label): ShapedCollectionAllowanceRow[] => ((state.__erc_1155_allowances[label] ?? []) as ShapedCollectionAllowanceRow[]).concat(state.__erc_721_allowances[label] ?? []),
+        singleErc721Allowances: state => (label: Label): ShapedAllowanceRowSingleERC721[] => (state.__erc_721_allowances[label] ?? []).filter(allowance => isErc721SingleAllowanceRow(allowance)) as ShapedAllowanceRowSingleERC721[],
         allowancesSortedByAssetQuantity: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => useAllowancesStore().allowances(label).sort((a, b) => {
             let quantityA: number;
             let quantityB: number;
@@ -185,6 +186,25 @@ export const useAllowancesStore = defineStore(store_name, {
         allowancesSortedByLastUpdated: () => (label: Label, order: Sort, includeCancelled: boolean): ShapedAllowanceRow[] => useAllowancesStore().allowances(label)
             .sort((a, b) => order === Sort.ascending ? a.lastUpdated - b.lastUpdated : b.lastUpdated - a.lastUpdated)
             .filter(row => filterCancelledAllowances(includeCancelled, row)),
+        getAllowance: () => (label: Label, spenderAddress: string, tokenAddress: string, tokenId?: string): ShapedAllowanceRow | undefined => {
+            const allowanceStore = useAllowancesStore();
+            if (tokenId) {
+                return allowanceStore.singleErc721Allowances(label).find(allowance =>
+                    allowance.spenderAddress === spenderAddress &&
+                    allowance.collectionAddress === tokenAddress &&
+                    allowance.tokenId === tokenId,
+                );
+            }
+
+            return allowanceStore.allowances(label).find((allowance) => {
+                const spenderAddressMatches = allowance.spenderAddress === spenderAddress;
+                if (isErc20AllowanceRow(allowance)) {
+                    return spenderAddressMatches && allowance.tokenAddress === tokenAddress;
+                }
+
+                return spenderAddressMatches && allowance.collectionAddress === tokenAddress;
+            });
+        },
     },
     actions: {
         trace: createTraceFunction(store_name),
@@ -409,6 +429,92 @@ export const useAllowancesStore = defineStore(store_name, {
                 useFeedbackStore().unsetLoading('updateNftCollectionAllowance');
                 throw trxError;
             }
+        },
+        batchRevokeAllowances(
+            allowanceIdentifiers: string[],
+            owner: string,
+            revokeCompletedHandler: (completed: number, remaining: number) => void,
+        ): {
+            promise: Promise<void>,
+            cancelToken: { isCancelled: boolean, cancel: () => void },
+        } {
+            // allowanceIdentifiers are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}${ isSingleErc721 ? `-${tokenId}` : ''}`
+            const allowanceIdentifiersAreValid = allowanceIdentifiers.every((allowanceIdentifier) => {
+                const [spenderAddress, tokenAddress] = allowanceIdentifier.split('-');
+
+                return spenderAddress && tokenAddress;
+            });
+
+            if (!allowanceIdentifiersAreValid) {
+                throw new Error('Invalid allowance identifiers');
+            }
+
+            const cancelToken = {
+                isCancelled: false,
+                cancel() {
+                    this.isCancelled = true;
+                },
+            };
+
+            // A helper function to execute tasks in succession
+            async function revokeAllowancesSequentially(identifiers: string[]) {
+                // eztodo proper error handling
+
+                for (const [index, allowanceIdentifier] of identifiers.entries()) {
+                    if (cancelToken.isCancelled) {
+                        throw new Error('Operation cancelled');
+                    }
+
+                    const [spenderAddress, tokenAddress, tokenId] = allowanceIdentifier.split('-');
+                    const allowanceInfo = useAllowancesStore().getAllowance(CURRENT_CONTEXT, spenderAddress, tokenAddress, tokenId || undefined);
+
+                    if (!allowanceInfo) {
+                        throw new Error('Allowance not found');
+                    }
+
+                    const isErc20Allowance = isErc20AllowanceRow(allowanceInfo);
+                    const isSingleErc721Allowance = isErc721SingleAllowanceRow(allowanceInfo);
+
+                    try {
+                        if (isErc20Allowance) {
+                            await useAllowancesStore().updateErc20Allowance(
+                                owner,
+                                allowanceInfo.spenderAddress,
+                                allowanceInfo.tokenAddress,
+                                BigNumber.from(0),
+                            );
+                        } else if (isSingleErc721Allowance) {
+                            await useAllowancesStore().updateSingleErc721Allowance(
+                                owner,
+                                allowanceInfo.spenderAddress,
+                                allowanceInfo.collectionAddress,
+                                allowanceInfo.tokenId,
+                                false,
+                            );
+                        } else {
+                            await useAllowancesStore().updateNftCollectionAllowance(
+                                owner,
+                                allowanceInfo.spenderAddress,
+                                allowanceInfo.collectionAddress,
+                                false,
+                            );
+                        }
+
+                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
+                    } catch (error) {
+                        console.error('Error cancelling allowance', error);
+                        throw error;
+                    }
+                }
+
+                return Promise.resolve();
+            }
+
+            // Return the cancel token and the promise representing the task completion
+            return {
+                cancelToken,
+                promise: revokeAllowancesSequentially(allowanceIdentifiers),
+            };
         },
 
         // commits
