@@ -22,7 +22,7 @@ const includeCancelledLabel = computed(
 
 // methods
 function handleRevokeSelected() {
-    console.log('Revoke selected');
+    emit('revoke-selected');
 }
 </script>
 

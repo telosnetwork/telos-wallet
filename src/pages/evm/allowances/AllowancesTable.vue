@@ -13,7 +13,7 @@ const props = defineProps<{
     rows: ShapedAllowanceRow[];
 }>();
 
-const emit = defineEmits(['sortChanged']);
+const emit = defineEmits(['sortChanged', 'selectedRowsChanged']);
 
 const { t: $t } = useI18n();
 const { fiatLocale, fiatCurrency } = useUserStore();
@@ -98,6 +98,10 @@ watch(tableRows, (newRows) => {
     updateAllRevokeCheckboxes();
     pagination.value.rowsNumber = props.rows.length;
 }, { immediate: true });
+
+watch(revokeCheckboxesModel, () => {
+    emit('selectedRowsChanged', revokeCheckboxesModel.value);
+}, { deep: true });
 
 // methods
 function getAriaLabelForTh(columnName: AllowanceTableColumns) {
