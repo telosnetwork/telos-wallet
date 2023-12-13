@@ -433,6 +433,9 @@ export const useAllowancesStore = defineStore(store_name, {
             promise: Promise<void>,
             cancelToken: { isCancelled: boolean, cancel: () => void },
         } {
+            this.trace('batchRevokeAllowances', allowanceIdentifiers, owner);
+            useFeedbackStore().setLoading('batchRevokeAllowances');
+
             // allowanceIdentifiers are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}${ isSingleErc721 ? `-${tokenId}` : ''}`
             const allowanceIdentifiersAreValid = allowanceIdentifiers.every((allowanceIdentifier) => {
                 const [spenderAddress, tokenAddress] = allowanceIdentifier.split('-');
@@ -441,6 +444,7 @@ export const useAllowancesStore = defineStore(store_name, {
             });
 
             if (!allowanceIdentifiersAreValid) {
+                useFeedbackStore().unsetLoading('batchRevokeAllowances');
                 throw new Error('Invalid allowance identifiers');
             }
 
@@ -457,6 +461,7 @@ export const useAllowancesStore = defineStore(store_name, {
 
                 for (const [index, allowanceIdentifier] of identifiers.entries()) {
                     if (cancelToken.isCancelled) {
+                        useFeedbackStore().unsetLoading('batchRevokeAllowances');
                         throw new Error('Operation cancelled');
                     }
 
@@ -464,6 +469,7 @@ export const useAllowancesStore = defineStore(store_name, {
                     const allowanceInfo = useAllowancesStore().getAllowance(CURRENT_CONTEXT, spenderAddress, tokenAddress, tokenId || undefined);
 
                     if (!allowanceInfo) {
+                        useFeedbackStore().unsetLoading('batchRevokeAllowances');
                         throw new Error('Allowance not found');
                     }
 
@@ -497,11 +503,13 @@ export const useAllowancesStore = defineStore(store_name, {
 
                         revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
                     } catch (error) {
+                        useFeedbackStore().unsetLoading('batchRevokeAllowances');
                         console.error('Error cancelling allowance', error);
                         throw error;
                     }
                 }
 
+                useFeedbackStore().unsetLoading('batchRevokeAllowances');
                 return Promise.resolve();
             }
 
