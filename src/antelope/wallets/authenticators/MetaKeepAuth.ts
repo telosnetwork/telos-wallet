@@ -79,11 +79,17 @@ export class MetaKeepAuth extends InjectedProviderAuth {
 
         useFeedbackStore().unsetLoading(`${this.getName()}.login`);
 
+        localStorage.setItem('metakeep', JSON.stringify({
+            email: this.accountEmail,
+            account: this.accountAddress,
+        }));
+
         return this.accountAddress as addressString;
     }
 
     async logout(): Promise<void> {
         this.trace('logout');
+        localStorage.removeItem('metakeep');
         return Promise.resolve();
     }
 

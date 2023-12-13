@@ -24,6 +24,7 @@ const TESTNET = {
     CHAIN_NAME: 'telos-testnet',
     OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
     OREID_APP_ID_NATIVE: 't_a61e9926d5204387a9ac113dfce7cbc5',
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92',
 };
 
 const MAINNET = {
@@ -39,6 +40,7 @@ const MAINNET = {
     CHAIN_NAME: 'telos',
     OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
     OREID_APP_ID_NATIVE: 'p_751f87258d5b40998b55c626d612fd4e',
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92',
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;

@@ -632,7 +632,8 @@ export default {
 
         this.coinLoadedAll = true;
         this.tokenInterval = setInterval(async () => {
-            this.updateBalances();
+            // FIXME: restore this
+            // this.updateBalances();
             window.time = Date.now() / 1000;
         }, 5000);
     },

@@ -6,34 +6,7 @@ import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
-import { AntelopeError } from 'src/antelope/types';
-
-import * as Buffer from 'buffer';
-
-interface GoogleOneTap {
-    accounts: {
-        id: {
-            initialize: (config: { client_id: string, callback: (notification: GoogleNotification) => void }) => void;
-            prompt: (callback: (notification: GoogleNotification) => void) => void;
-            renderButton: (element: HTMLElement, config: { theme: string, size: string }) => void;
-        }
-    }
-}
-interface GoogleNotification {
-    getMomentType: () => string;
-    isDisplayed: () => boolean;
-    isNotDisplayed: () => boolean;
-    isSkippedMoment: () => boolean;
-    isDismissedMoment: () => boolean;
-    getNotDisplayedReason: () => string;
-    getSkippedReason: () => string;
-    getDismissedReason: () => string;
-    credential: string;
-}
-
-let google: GoogleOneTap | null = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const _window = (window as any);
+import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -168,126 +141,21 @@ export default defineComponent({
             emit('update:modelValue', Menu.CLOUD);
         };
 
-        // --- Google One Tap (ini) -------------------------------
-        const onGoogleOneTap = () => {
-            setAuthenticator('Metakeep', CURRENT_CONTEXT);
-        };
-
-        const onGoogleOneTapSuccess = (response: any) => {
-            console.log('response: ', response);
-            console.log('response.payload: ', response.payload);
-            console.log('response.payload.email: ', response.payload.email);
-            setMetaKeepAuthenticator(response.payload.email);
-        };
-
-        const onGoogleOneTapError = (error: any) => {
-            console.error('-------------------------------');
-            console.error('google one tap error', error);
-            console.error('-------------------------------');
-        };
-
-        const installGoogleOneTapScript = () => {
-            if (google) {
-                return;
-            }
-            console.log('installGoogleOneTapScript()');
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            document.body.appendChild(script);
-            _window.onGoogleLibraryLoad = () => {
-                oneTapInit();
-            };
-        };
-
-        const oneTapInit = () => {
-            console.log('oneTapInit()');
-            if(!google){
-                if (_window.google) {
-                    google = _window.google;
-                } else {
-                    // FIXME: use i18n
-                    throw new AntelopeError('Google One Tap library not loaded');
-                }
-            }
-            if (google) {
-                console.log('----------------- google -->', google);
-                google.accounts.id.initialize({
-                    client_id: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com',
-                    callback: oneTapCallback,
-                });
-                google.accounts.id.prompt((notification) => {
-                    const momentType = notification.getMomentType();
-                    if(notification.isDisplayed()) {
-                        setTimeout(()=>{
-                            handleOneTapMoment(momentType, 'displayed', 'displayed');
-                        }, 500);
-                    } else if(notification.isNotDisplayed()){
-                        handleOneTapMoment(momentType, 'notdisplayed', notification.getNotDisplayedReason());
-                    } else if(notification.isSkippedMoment()) {
-                        handleOneTapMoment(momentType, 'skipped', notification.getSkippedReason());
-                    } else if(notification.isDismissedMoment()) {
-                        handleOneTapMoment(momentType, 'dismissed', notification.getDismissedReason());
-                    }
-                });
-            }
-        };
-
-        const decodificarJWT = (token: string) => {
-            const parts = token.split('.');
-            const header = parts[0];
-            const payload = parts[1];
-
-            const dedodedHeader = Buffer.Buffer.from(header, 'base64').toString('utf8');
-            const decodedPayload = Buffer.Buffer.from(payload, 'base64').toString('utf8');
-
-            return {
-                header: JSON.parse(dedodedHeader),
-                payload: JSON.parse(decodedPayload),
-            };
-        };
-
-        const oneTapCallback = (response: GoogleNotification | null) => {
-            console.log('---------- oneTapCallback -------------->', response);
-            if (response) {
-                const credential = response.credential;
-                const decoded = decodificarJWT(credential);
-                onGoogleOneTapSuccess(decoded);
-            } else {
-                onGoogleOneTapError(response);
-            }
-        };
-
-        const handleOneTapMoment = (momentType: string, status: string, reason: string) => {
-            console.log('-- handleOneTapMoment -> ', momentType, status, reason);
-        };
-
         watch(showTelosCloudMenu, (newValue) => {
-            console.log('showTelosCloudMenu changed', newValue);
             if (newValue) {
-                setTimeout(() => {
-                    showGoogleOneTap();
-                }, 100);
+                googleCtrl.renderButton('google_btn');
             }
         });
 
-
-        const showGoogleOneTap = () => {
-            const btn = document.getElementById('google_btn');
-            if (google && btn) {
-                console.log('--- google.accounts.id.renderButton() ---');
-                google.accounts.id.renderButton(
-                    btn, { theme: 'outline', size: 'large' },
-                );
-            }
-        };
-
-        installGoogleOneTapScript();
-        showGoogleOneTap();
-        // --- Google One Tap (end) -------------------------------
-
-        console.log('EVMLoginButtons setup()');
+        console.log('googleCtrl.onSuccessfulLogin.subscribe()');
+        const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
+            next: (email) => {
+                console.log('googleCtrl.onSuccessfulLogin.next()', email);
+                if (email) {
+                    setMetaKeepAuthenticator(email);
+                }
+            },
+        });
 
         return {
             isLoading,
@@ -314,10 +182,12 @@ export default defineComponent({
             showMainMenu,
             showTelosCloudMenu,
             setCloudMenu,
-            onGoogleOneTapSuccess,
-            onGoogleOneTapError,
-            onGoogleOneTap,
+            googleSubscription,
         };
+    },
+    unmounted() {
+        console.log('EVM: this.googleSubscription.unsubscribe();'); // FIXME: remove this line
+        this.googleSubscription?.unsubscribe();
     },
 });
 </script>
@@ -452,10 +322,11 @@ export default defineComponent({
             id="google_btn"
             data-client_id="639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com"
         >
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
 
-        <!-- Google OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
+        <!-- Google OAuth Provider (ORE ID) -->
+        <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
             <template v-if="isLoadingOreId('google')">
                 <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
@@ -467,7 +338,7 @@ export default defineComponent({
                 >
                 {{ $t('home.sign_with_google') }}
             </template>
-        </div>
+        </div-->
 
         <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
 
@@ -519,6 +390,7 @@ export default defineComponent({
     &__loading{
         width: 100%;
         text-align: center;
+        color: $white;
     }
 
     &__header{

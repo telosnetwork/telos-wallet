@@ -145,6 +145,8 @@ export const useAccountStore = defineStore(store_name, {
                     localStorage.setItem('isNative', 'true');
                     localStorage.setItem('autoLogin', authenticator.getName());
 
+                    console.log('---------------------------------');
+
                     success = true;
                     this.fetchAccountDataFor(CURRENT_CONTEXT, nativeAccount);
                     getAntelope().events.onLoggedIn.next(nativeAccount);

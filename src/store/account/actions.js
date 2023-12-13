@@ -53,6 +53,7 @@ export const memoryAutoLogin = async function ({
     rootState,
 }) {
     const account = localStorage.getItem('account');
+    console.log('memoryAutoLogin() account: ', account, 'rootState.account.accountName:', rootState.account.accountName);
     if (account) {
         if (!rootState.account.accountName) {
             await dispatch('autoLogin', location.pathname);

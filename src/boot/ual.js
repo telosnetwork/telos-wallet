@@ -6,6 +6,7 @@ import { CleosAuthenticator } from '@telosnetwork/ual-cleos';
 import { WebPopup } from 'oreid-webpopup';
 import { OreIdAuthenticator, AuthProvider } from 'ual-oreid';
 import { Dialog, Notify, copyToClipboard } from 'quasar';
+import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
 
 
 export default boot(async ({ app, store }) => {
@@ -154,6 +155,10 @@ export default boot(async ({ app, store }) => {
             plugins: { popup: WebPopup() },
         },
         AuthProvider.Google),
+        new MetakeepAuthenticator([chain], {
+            appName: process.env.APP_NAME,
+            appId: process.env.METAKEEP_APP_ID_NATIVE,
+        }),
     ];
 
     const ual = new UAL([chain], 'ual', authenticators);

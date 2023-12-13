@@ -12,6 +12,7 @@ import {
     MetaKeepAuth,
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
+import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 
@@ -54,6 +55,8 @@ export default boot(({ app }) => {
             if (window.location.pathname !== '/') {
                 (await getRouter(app)).push({ path: '/' });
             }
+            // we also need to clear Google One Tap Controller
+            googleCtrl.logout();
         },
     });
 
@@ -96,7 +99,8 @@ export default boot(({ app }) => {
 
     // constants --
     ant.config.setIndexerHealthThresholdSeconds(10);
-    ant.config.setIndexerHealthCheckInterval(5000);
+    // ant.config.setIndexerHealthCheckInterval(5000);
+    ant.config.setIndexerHealthCheckInterval(500000); // FIXME:
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to
