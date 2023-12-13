@@ -46,6 +46,8 @@ const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const selectedRows = ref<string[]>([]); // rows are keyed like: `${row.spenderAddress}-${tokenAddress/collectionAddress}${ isSingleErc721 ? `-${tokenId}` : ''}`
 const showRevokeInProgressModal = ref(false);
 const cancelBatchRevoke = ref<(() => void) | null>(null);
+const cancelBatchRevokeButtonLoading = ref(false);
+const batchRevokeAllowancesRemaining = ref(0);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
@@ -166,8 +168,6 @@ function handleSortChanged(newSort: { descending: boolean, sortBy: AllowanceTabl
     };
 }
 
-// eztodo make approvals on new team account
-
 function handleSelectedRowsChange(newSelectedRows: Record<string, boolean>) {
     const selectedRowsTemp: string[] = [];
 
@@ -181,11 +181,14 @@ function handleSelectedRowsChange(newSelectedRows: Record<string, boolean>) {
 
 function handleRevokeSelectedClicked() {
     showRevokeInProgressModal.value = true;
+    batchRevokeAllowancesRemaining.value = selectedRows.value.length;
 
     function handleRevokeCompleted(completed: number, remaining: number) {
         console.log('completed:', completed);
         console.log('remaining:', remaining);
-        // eztodo use this for text in the modal like "X of Y allowances revoked"
+        console.log('\n\n');
+
+        batchRevokeAllowancesRemaining.value = remaining;
     }
 
     const {
@@ -198,10 +201,19 @@ function handleRevokeSelectedClicked() {
         showRevokeInProgressModal.value = false;
     };
 
+    // eztodo close modal when user cancels from metamask
+
     promise.finally(() => {
-        showRevokeInProgressModal.value = false;
-        cancelBatchRevoke.value = null;
-        // eztodo reset revoking counters
+        cancelBatchRevokeButtonLoading.value = true;
+
+        setTimeout(() => {
+            useAllowancesStore().fetchAllowancesForAccount(userAddress.value).then(() => {
+                cancelBatchRevokeButtonLoading.value = false;
+                showRevokeInProgressModal.value = false;
+                cancelBatchRevoke.value = null;
+                batchRevokeAllowancesRemaining.value = 0;
+            });
+        }, 3000); // give the indexer a chance to catch up
     });
 }
 </script>
@@ -249,7 +261,7 @@ function handleRevokeSelectedClicked() {
         <q-card>
             <q-card-section>
                 <div class="text-h6">
-                    Revoke in progress
+                    Revoking {{ selectedRows.length }} allowances ({{ batchRevokeAllowancesRemaining }} remaining)
                 </div>
                 <div class="text-subtitle2">
                     Please wait while we revoke the selected allowances. You will need to approve the transactions in your wallet as they come up.
