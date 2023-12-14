@@ -260,11 +260,8 @@ async function handleSubmit() {
                     <q-radio
                         v-model="erc20AllowanceAmountModel"
                         :val="Erc20AllowanceAmountOptions.unlimited"
-                    >
-                        <ToolTip :text="$t('evm_allowances.unlimited_allowance_option_tooltip', { symbol: rowAsErc20Row.tokenSymbol })">
-                            {{ $t('global.unlimited') }}
-                        </ToolTip>
-                    </q-radio>
+                        :label="$t('global.unlimited')"
+                    />
                     <br>
                     <q-radio
                         v-model="erc20AllowanceAmountModel"
