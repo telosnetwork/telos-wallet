@@ -317,7 +317,7 @@ export default {
         edit_modal_description: 'Define new token allowance for spender',
         entire_collection: 'Entire Collection',
         token_amount_input_label: 'Token Amount',
-        erc_721_single_allowance_blurb: 'Note: there may only be up to one approved spender (or \'operator\') for this type of collectible (ERC-721). Approving a new spender will revoke the previous approval.',
+        erc_721_single_allowance_blurb: 'Note: there may only be up to one approved spender for this type of collectible (ERC-721). Making a change here will revoke the previous approval.',
     },
     notification:{
         success_title_trx: 'Success',
