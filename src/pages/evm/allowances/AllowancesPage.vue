@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import {
+    ref,
+    computed,
+    watch,
+    onMounted,
+    onBeforeUnmount,
+    nextTick,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
@@ -212,8 +219,11 @@ function handleRevokeSelectedClicked() {
             useAllowancesStore().fetchAllowancesForAccount(userAddress.value).finally(() => {
                 cancelBatchRevokeButtonLoading.value = false;
                 showRevokeInProgressModal.value = false;
-                cancelBatchRevoke.value = null;
-                batchRevokeAllowancesRemaining.value = 0;
+
+                nextTick(() => {
+                    cancelBatchRevoke.value = null;
+                    batchRevokeAllowancesRemaining.value = 0;
+                });
             });
         }, 3000); // give the indexer a chance to catch up
     });
@@ -259,19 +269,24 @@ function handleRevokeSelectedClicked() {
     </div>
 
     <q-dialog v-model="showRevokeInProgressModal" persistent>
-        <!-- eztodo i18n -->
         <q-card>
             <q-card-section>
-                <div class="text-h6">
-                    Revoking {{ selectedRows.length }} allowances ({{ batchRevokeAllowancesRemaining }} remaining)
-                </div>
-                <div class="text-subtitle2">
-                    Please wait while we revoke the selected allowances. You will need to approve the transactions in your wallet as they come up.
-                </div>
+                <h5 class="o-text--header-5">
+                    {{
+                        $t(
+                            'evm_allowances.revoking_allowances_title',
+                            { total: selectedRows.length, remaining: batchRevokeAllowancesRemaining },
+                        )
+                    }}
+                </h5>
+                <p>
+                    {{ $t('evm_allowances.revoking_allowances_description') }}
+                </p>
             </q-card-section>
 
             <q-card-actions align="right">
                 <q-btn
+                    :loading="cancelBatchRevokeButtonLoading"
                     color="primary"
                     :label="$t('global.cancel')"
                     @click="cancelBatchRevoke?.()"
