@@ -207,7 +207,7 @@ function handleRevokeSelectedClicked() {
         cancelBatchRevokeButtonLoading.value = true;
 
         setTimeout(() => {
-            useAllowancesStore().fetchAllowancesForAccount(userAddress.value).then(() => {
+            useAllowancesStore().fetchAllowancesForAccount(userAddress.value).finally(() => {
                 cancelBatchRevokeButtonLoading.value = false;
                 showRevokeInProgressModal.value = false;
                 cancelBatchRevoke.value = null;
