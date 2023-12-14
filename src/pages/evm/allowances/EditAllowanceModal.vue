@@ -221,10 +221,11 @@ async function handleSubmit() {
         ant.config.notifySuccessfulTrxHandler(
             `${explorerUrl}/tx/${tx.hash}`,
         );
-        emit('close');
     }).catch((err) => {
+        ant.config.notifyErrorHandler(err);
         console.error(err);
     }).finally(() => {
+        emit('close');
         dismiss();
     });
 }
@@ -244,9 +245,11 @@ async function handleSubmit() {
                 <br>
                 <span class="o-text--paragraph-bold">{{ tokenText }}</span>
                 <br>
-                <span v-if="rowIsSingleErc721Row">
+                <template v-if="rowIsSingleErc721Row">
+                    <br>
                     {{ $t('evm_allowances.erc_721_single_allowance_blurb') }}
-                </span>
+                    <br>
+                </template>
                 <br>
                 {{ $t('global.allowance') }}
                 <br>

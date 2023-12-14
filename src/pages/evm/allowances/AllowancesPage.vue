@@ -202,6 +202,8 @@ function handleRevokeSelectedClicked() {
     };
 
     // eztodo close modal when user cancels from metamask
+    // eztodo handle row already cancelled
+    // eztodo set cancel button loading while waiting for tx?
 
     promise.finally(() => {
         cancelBatchRevokeButtonLoading.value = true;

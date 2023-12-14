@@ -586,7 +586,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 };
 
                 if (data.single) {
-                    const tokenId = data.tokenId as string;
+                    const tokenId = String(data.tokenId);
                     const nftDetails = await useNftsStore().fetchNftDetails(CURRENT_CONTEXT, data.contract, tokenId);
 
                     return nftDetails ? {
