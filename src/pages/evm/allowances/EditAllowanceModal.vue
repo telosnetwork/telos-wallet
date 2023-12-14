@@ -177,9 +177,7 @@ function handleSubmit() {
                         v-model="erc20AllowanceAmountModel"
                         :val="Erc20AllowanceAmountOptions.unlimited"
                     >
-                        <ToolTip :text="$t('evm_allowances.unlimited_allowance_option_tooltip', { symbol: rowAsErc20Row.tokenSymbol })">
-                            {{ $t('global.unlimited') }}
-                        </ToolTip>
+                        {{ $t('global.unlimited') }}
                     </q-radio>
                     <br>
                     <q-radio

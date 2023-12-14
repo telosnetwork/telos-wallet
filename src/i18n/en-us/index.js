@@ -318,7 +318,6 @@ export default {
         edit_allowance_aria_label: 'Edit {token} allowance for spender {spender}',
         edit_modal_description: 'Define new token allowance for spender',
         entire_collection: 'Entire Collection',
-        unlimited_allowance_option_tooltip: 'Technically there is no \'unlimited\' allowance; this is actually equivalent to (2^256 - 1) {symbol}',
         token_amount_input_label: 'Token Amount',
     },
     notification:{
