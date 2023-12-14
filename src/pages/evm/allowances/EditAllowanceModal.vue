@@ -176,9 +176,8 @@ function handleSubmit() {
                     <q-radio
                         v-model="erc20AllowanceAmountModel"
                         :val="Erc20AllowanceAmountOptions.unlimited"
-                    >
-                        {{ $t('global.unlimited') }}
-                    </q-radio>
+                        :label="$t('global.unlimited')"
+                    />
                     <br>
                     <q-radio
                         v-model="erc20AllowanceAmountModel"
