@@ -34,6 +34,7 @@ import {
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { ZERO_ADDRESS } from 'src/antelope/chains/chain-constants';
 
 const store_name = 'allowances';
 
@@ -366,8 +367,8 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
 
                 // note: there can only be one operator for a single ERC721 token ID
-                // to revoke an allowance, the approve method is called with an operator address of '0x0'
-                const newOperator = allowed ? operator : '0x0';
+                // to revoke an allowance, the approve method is called with an operator address of '0x0000...0000'
+                const newOperator = allowed ? operator : ZERO_ADDRESS;
 
                 const tx = await nftContractInstance.approve(newOperator, tokenId);
 
@@ -575,6 +576,12 @@ export const useAllowancesStore = defineStore(store_name, {
             }
         },
         async shapeErc721AllowanceRow(data: IndexerErc721AllowanceResult): Promise<ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection | null> {
+            // if the operator is the zero address, it means the allowance has been revoked;
+            // we should hide it from the UI rather than showing it with operator '0x0000...0000'
+            if (data.operator === ZERO_ADDRESS) {
+                return null;
+            }
+
             try {
                 const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
 
