@@ -179,7 +179,7 @@ export interface IndexerErc721AllowanceResult extends IndexerAllowanceResult {
     approved: boolean; // whether the user has approved the spender
     operator: string; // address of the spender contract
 
-    tokenId?: string; // only present if single === true
+    tokenId?: string | number; // only present if single === true
 }
 
 export interface IndexerErc1155AllowanceResult extends IndexerAllowanceResult {
