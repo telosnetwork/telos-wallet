@@ -15,3 +15,5 @@ export const TELOS_ANALYTICS_EVENT_IDS = {
     loginFailedWalletConnect: '9V4IV1BV',
     loginSuccessfulWalletConnect: '2EG2OR3H',
 };
+
+export const ZERO_ADDRESS = '0x'.concat('0'.repeat(40));

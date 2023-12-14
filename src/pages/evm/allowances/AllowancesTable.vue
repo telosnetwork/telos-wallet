@@ -89,8 +89,11 @@ const tableRows = computed(() => {
 watch(tableRows, (newRows) => {
     revokeCheckboxesModel.value = newRows.reduce((acc, row) => {
         const rowIsErc20 = isErc20AllowanceRow(row);
+        const rowIsSingleErc721 = isErc721SingleAllowanceRow(row);
         const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
-        acc[`${row.spenderAddress}-${tokenAddress}`] = false;
+        const tokenId = rowIsSingleErc721 ? `-${row.tokenId}` : '';
+
+        acc[`${row.spenderAddress}-${tokenAddress}${tokenId}`] = false;
         return acc;
     }, {} as Record<string, boolean>);
 
@@ -137,6 +140,15 @@ function getAriaLabelForTh(columnName: AllowanceTableColumns) {
         $t('global.sort_by_ascending', { column: columnDescription });
 }
 
+function getKeyForRow(row: ShapedAllowanceRow) {
+    const rowIsErc20 = isErc20AllowanceRow(row);
+    const rowIsSingleErc721 = isErc721SingleAllowanceRow(row);
+    const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
+    const tokenId = rowIsSingleErc721 ? `-${row.tokenId}` : '';
+
+    return `${row.spenderAddress}-${tokenAddress}${tokenId}`;
+}
+
 // normally, we would use the q-table's @request event to handle sorting. However, the table was failing to react to changes
 // in the sort object. This is a workaround.
 function handleThClick(columnName: AllowanceTableColumns) {
@@ -163,8 +175,11 @@ function updateAllRevokeCheckboxes() {
 
 function getCheckboxModelForRow(row: ShapedAllowanceRow) {
     const rowIsErc20 = isErc20AllowanceRow(row);
+    const rowIsSingleErc721 = isErc721SingleAllowanceRow(row);
     const tokenAddress = rowIsErc20 ? row.tokenAddress : row.collectionAddress;
-    return revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}`];
+    const tokenId = rowIsSingleErc721 ? `-${row.tokenId}` : '';
+
+    return revokeCheckboxesModel.value[`${row.spenderAddress}-${tokenAddress}${tokenId}`];
 }
 
 function toggleRevokeChecked(row: ShapedAllowanceRow) {
@@ -241,7 +256,7 @@ function toggleRevokeChecked(row: ShapedAllowanceRow) {
 
     <template v-slot:body="props">
         <AllowancesTableRow
-            :key="props.row.collectionAddress"
+            :key="getKeyForRow(props.row)"
             :row="props.row"
             :revokeChecked="getCheckboxModelForRow(props.row)"
             @revoke-toggled="toggleRevokeChecked(props.row)"
