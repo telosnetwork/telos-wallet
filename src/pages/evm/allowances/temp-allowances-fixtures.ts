@@ -9,6 +9,8 @@ import {
     ShapedAllowanceRowNftCollection,
 } from 'src/antelope/types/Allowances';
 
+const maxSupply = BigNumber.from('123456789012345678901234567890');
+
 const erc20AllowanceRow: ShapedAllowanceRowERC20 = {
     tokenName: 'Telos',
     tokenAddress: NativeCurrencyAddress,
@@ -21,6 +23,7 @@ const erc20AllowanceRow: ShapedAllowanceRowERC20 = {
     tokenPrice: 0.06,
     tokenLogo: 'https://raw.githubusercontent.com/telosnetwork/images/master/logos_2021/Symbol%202.svg',
     spenderName: 'Super Spenderz',
+    tokenMaxSupply: maxSupply,
 };
 
 const erc20AllowanceRow2: ShapedAllowanceRowERC20 = {
@@ -35,6 +38,7 @@ const erc20AllowanceRow2: ShapedAllowanceRowERC20 = {
     tokenSymbol: 'USDC',
     tokenLogo: 'https://ipfs.io/ipfs/QmXfzKRvjZz3u5JRgC4v5mGVbm9ahrUiB4DgzHBsnWbTMM',
     spenderName: 'Super Spenderz',
+    tokenMaxSupply: maxSupply,
 };
 
 const erc20AllowanceRow3: ShapedAllowanceRowERC20 = {
@@ -48,6 +52,7 @@ const erc20AllowanceRow3: ShapedAllowanceRowERC20 = {
     lastUpdated: (new Date('June 7, 2022 13:05')).getTime(),
     tokenSymbol: 'YOWZA',
     spenderName: 'Super Spenderz',
+    tokenMaxSupply: maxSupply,
 };
 
 const erc20AllowanceRowNoAllowance: ShapedAllowanceRowERC20 = {
@@ -62,6 +67,7 @@ const erc20AllowanceRowNoAllowance: ShapedAllowanceRowERC20 = {
     tokenLogo: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
     spenderName: 'Ultra Spenderz',
     tokenPrice: 1,
+    tokenMaxSupply: maxSupply,
 };
 
 const erc20AllowanceRowHuge: ShapedAllowanceRowERC20 = {
@@ -75,6 +81,7 @@ const erc20AllowanceRowHuge: ShapedAllowanceRowERC20 = {
     lastUpdated: (new Date('November 7, 2018 10:24')).getTime(),
     tokenLogo: 'https://raw.githubusercontent.com/elkfinance/tokens/main/logos/avax/0xc7198437980c041c805A1EDcbA50c1Ce5db95118/logo.png',
     tokenSymbol: 'USDT',
+    tokenMaxSupply: maxSupply,
 };
 
 const erc721AllowanceRowSingleVideo: ShapedAllowanceRowSingleERC721 = {

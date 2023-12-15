@@ -5,7 +5,6 @@ import { formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
 import {
-    HUGE_ALLOWANCE_THRESHOLD,
     ShapedAllowanceRow,
     ShapedAllowanceRowERC20,
     ShapedAllowanceRowNftCollection,
@@ -20,20 +19,24 @@ import { CURRENT_CONTEXT, useChainStore, useNftsStore, useUserStore } from 'src/
 import { truncateAddress, truncateText } from 'src/antelope/stores/utils/text-utils';
 import { Collectible } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
 import ToolTip from 'src/components/ToolTip.vue';
 import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import NftCollectionStack from 'src/components/evm/nfts/NftCollectionStack.vue';
 import ExternalLink from 'src/components/ExternalLink.vue';
 import TextBadge from 'src/components/TextBadge.vue';
-import { DEFAULT_DATE_FORMAT, getFormattedDate, prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
-import { WEI_PRECISION } from 'src/antelope/stores/utils';
+import EditAllowanceModal from 'src/pages/evm/allowances/EditAllowanceModal.vue';
 
 const tlosLogo = require('src/assets/logo--tlos.svg');
 
 const props = defineProps<{
     row: ShapedAllowanceRow;
+    revokeChecked: boolean;
 }>();
+
+const emit = defineEmits(['revoke-toggled']);
 
 const { t: $t } = useI18n();
 const nftStore = useNftsStore();
@@ -46,6 +49,7 @@ const isCollectionRow = isNftCollectionAllowanceRow(props.row);
 
 // data
 const erc721Nft = ref<Collectible | null>(null);
+const showEditModal = ref(false);
 
 // computed
 const rowAsErc20Row = computed(() => props.row as ShapedAllowanceRowERC20);
@@ -59,7 +63,7 @@ const assetTextShort = computed(() => {
         prettyAmount = '1 '.concat(truncateText(props.row.tokenName, 12));
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
-        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
+        prettyAmount = prettyPrintCurrency(balance, 4, fiatLocale, true, tokenSymbol, false, tokenDecimals, true);
     } else {
         const { balance, collectionName, collectionAddress } = props.row;
         const collectionNamePretty = collectionName ? truncateText(collectionName, 12) : truncateAddress(collectionAddress);
@@ -118,8 +122,8 @@ const allowanceTextShort = computed(() => {
 
         const numberAllowed = Number(formatUnits(allowanceBn, props.row.tokenDecimals));
 
-        if (numberAllowed > HUGE_ALLOWANCE_THRESHOLD) {
-            return $t('global.huge');
+        if (allowanceBn.gt(props.row.tokenMaxSupply)) {
+            return $t('global.unlimited');
         }
 
         if (numberAllowed < TINY_ALLOWANCE_THRESHOLD && numberAllowed > 0) {
@@ -159,6 +163,24 @@ const updatedTextPretty = computed(() => {
 });
 const updatedTextFull = computed(() => getFormattedDate(props.row.lastUpdated / 1000, DEFAULT_DATE_FORMAT, true));
 
+const ariaLabelForRevokeCheckbox = computed(() => {
+    const { spenderName, spenderAddress } = props.row;
+    const spenderPretty = spenderName || truncateAddress(spenderAddress);
+
+    const tokenPretty = isErc20AllowanceRow(props.row) ? props.row.tokenSymbol : props.row.collectionName ?? truncateAddress(props.row.collectionAddress);
+
+    return $t('evm_allowances.revoke_checkbox_aria_label', { spender: spenderPretty, token: tokenPretty });
+});
+
+const ariaLabelForEditIcon = computed(() => {
+    const { spenderName, spenderAddress } = props.row;
+    const spenderPretty = spenderName || truncateAddress(spenderAddress);
+
+    const tokenPretty = isErc20AllowanceRow(props.row) ? props.row.tokenSymbol : props.row.collectionName ?? truncateAddress(props.row.collectionAddress);
+
+    return $t('evm_allowances.edit_allowance_aria_label', { spender: spenderPretty, token: tokenPretty });
+});
+
 // methods
 onMounted(async () => {
     if (isSingleErc721Row) {
@@ -170,35 +192,48 @@ onMounted(async () => {
 
 <template>
 <q-tr>
-    <q-td key="asset" class="c-allowances-table-row__asset-td">
-        <img
-            v-if="isErc20Row"
-            :src="rowAsErc20Row.tokenLogo ?? tlosLogo"
-            :alt="$t('evm_allowances.asset_logo_alt', { symbol: rowAsErc20Row.tokenSymbol })"
-            height="24"
-            width="24"
-            :class="{
-                'c-allowances-table-row__asset-logo': true,
-                'c-allowances-table-row__asset-logo--gray': !rowAsErc20Row.tokenLogo,
-            }"
-        >
-        <NftViewer
-            v-else-if="erc721Nft && isSingleErc721Row"
-            :nft="erc721Nft"
-            :preview-mode="false"
-            :tile-mode="false"
-            :icon-size="24"
-        />
-        <NftCollectionStack
-            v-else
-            :collection="rowAsCollectionRow.collectionAddress"
-        />
+    <q-td key="revoke">
+        <div class="flex items-center">
+            <q-checkbox
+                :model-value="revokeChecked"
+                size="xs"
+                :aria-label="ariaLabelForRevokeCheckbox"
+                @click="() => $emit('revoke-toggled')"
+                @keydown.enter.space.prevent="() => $emit('revoke-toggled')"
+            />
+        </div>
+    </q-td>
+    <q-td key="asset">
+        <div class="c-allowances-table-row__flex-td">
+            <img
+                v-if="isErc20Row"
+                :src="rowAsErc20Row.tokenLogo ?? tlosLogo"
+                :alt="$t('evm_allowances.asset_logo_alt', { symbol: rowAsErc20Row.tokenSymbol })"
+                height="24"
+                width="24"
+                :class="{
+                    'c-allowances-table-row__asset-logo': true,
+                    'c-allowances-table-row__asset-logo--gray': !rowAsErc20Row.tokenLogo,
+                }"
+            >
+            <NftViewer
+                v-else-if="erc721Nft && isSingleErc721Row"
+                :nft="erc721Nft"
+                :preview-mode="false"
+                :tile-mode="false"
+                :icon-size="24"
+            />
+            <NftCollectionStack
+                v-else
+                :collection="rowAsCollectionRow.collectionAddress"
+            />
 
-        <ToolTip :text="assetTextFull" :hide-icon="true">
-            <span class="o-text--paragraph-bold u-text--default-contrast">
-                {{ assetTextShort }}
-            </span>
-        </ToolTip>
+            <ToolTip :text="assetTextFull" :hide-icon="true">
+                <span class="o-text--paragraph-bold u-text--default-contrast">
+                    {{ assetTextShort }}
+                </span>
+            </ToolTip>
+        </div>
     </q-td>
     <q-td key="value">
         <ToolTip v-if="fiatValueTextShort" :text="fiatValueTextFull" :hide-icon="true">
@@ -209,9 +244,28 @@ onMounted(async () => {
         </ToolTip>
     </q-td>
     <q-td key="allowance">
-        <ToolTip :text="allowanceTextFull" :hide-icon="true">
-            {{ allowanceTextShort }}
-        </ToolTip>
+        <div class="c-allowances-table-row__flex-td">
+            <ToolTip :text="allowanceTextFull" :hide-icon="true">
+                {{ allowanceTextShort }}
+            </ToolTip>
+
+            <q-icon
+                :aria-label="ariaLabelForEditIcon"
+                class="c-allowances-table-row__edit-icon"
+                name="o_edit"
+                size="xs"
+                color="primary"
+                tabindex="0"
+                @click="showEditModal = true"
+                @keydown.enter.space.prevent="showEditModal = true"
+            />
+        </div>
+
+        <EditAllowanceModal
+            :row="row"
+            :showDialog="showEditModal"
+            @close="showEditModal = false"
+        />
     </q-td>
     <q-td key="spender">
         <ExternalLink
@@ -233,7 +287,7 @@ onMounted(async () => {
 
 <style lang="scss">
 .c-allowances-table-row {
-    &__asset-td {
+    &__flex-td {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -246,6 +300,10 @@ onMounted(async () => {
         &--gray {
             filter: grayscale(100%) opacity(50%);
         }
+    }
+
+    &__edit-icon {
+        cursor: pointer;
     }
 }
 </style>
