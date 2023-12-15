@@ -36,6 +36,11 @@ export interface NFTsCollection {
     contract: Address;
     list: Collectible[];
     loading: boolean;
+
+    // this is to prevent the scenario where we fetch a single NFT from a collection, add it to the contracts `list`
+    // and then in future checks we assume that the entire collection has been fetched (as we have at least one item in the list)
+    //
+    entireCollectionFetched: boolean;
 }
 
 export interface UserNftFilter {
@@ -220,14 +225,15 @@ export const useNftsStore = defineStore(store_name, {
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
-                if (this.__contracts[network][contractLower]) {
-                    if (this.__contracts[network][contractLower].loading) {
-                        let waitCount = 0;
-                        while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                        }
-                    }
 
+                if (this.__contracts[network]?.[contractLower]?.loading) {
+                    let waitCount = 0;
+                    while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                }
+
+                if (this.__contracts[network]?.[contractLower]?.entireCollectionFetched) {
                     const nft = this.__contracts[network][contractLower].list.find(
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
@@ -239,6 +245,7 @@ export const useNftsStore = defineStore(store_name, {
                         contract: contractLower,
                         list: [],
                         loading: false,
+                        entireCollectionFetched: false,
                     };
                 }
 
@@ -289,13 +296,14 @@ export const useNftsStore = defineStore(store_name, {
             const chain = useChainStore().getChain(label);
             const network = chain.settings.getNetwork();
 
-            if (this.__contracts[network] && this.__contracts[network][contractLower]) {
-                if (this.__contracts[network][contractLower].loading) {
-                    let waitCount = 0;
-                    while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
+            if (this.__contracts[network]?.[contractLower]?.loading) {
+                let waitCount = 0;
+                while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
                 }
+            }
+
+            if (this.__contracts[network]?.[contractLower]?.entireCollectionFetched) {
                 return Promise.resolve(this.__contracts[network][contractLower].list);
             }
 
@@ -308,6 +316,7 @@ export const useNftsStore = defineStore(store_name, {
                     contract,
                     list: [],
                     loading: true,
+                    entireCollectionFetched: false,
                 };
             }
 
@@ -317,6 +326,7 @@ export const useNftsStore = defineStore(store_name, {
             try {
                 const nfts = await chain.settings.getNftsForCollection(contract, { limit: 10000 });
                 this.__contracts[network][contractLower].list = nfts;
+                this.__contracts[network][contractLower].entireCollectionFetched = true;
 
                 return nfts;
             } catch {
