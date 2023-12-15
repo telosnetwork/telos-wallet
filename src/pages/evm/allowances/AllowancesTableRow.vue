@@ -77,7 +77,7 @@ const assetTextFull = computed(() => {
     let prettyAmount: string;
 
     if (isSingleErc721Row) {
-        prettyAmount = '1 '.concat(props.row.tokenName);
+        prettyAmount = `1 ${props.row.tokenName} (${props.row.collectionName ?? truncateAddress(props.row.collectionAddress)} #${props.row.tokenId})`;
     } else if (isErc20Row) {
         const { balance, tokenSymbol, tokenDecimals } = props.row;
         prettyAmount = prettyPrintCurrency(balance, WEI_PRECISION, fiatLocale, false, tokenSymbol, false, tokenDecimals, true);
