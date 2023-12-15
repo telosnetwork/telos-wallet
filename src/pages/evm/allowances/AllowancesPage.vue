@@ -208,8 +208,6 @@ function handleRevokeSelectedClicked() {
         showRevokeInProgressModal.value = false;
     };
 
-    // eztodo handle row already cancelled
-
     promise.finally(() => {
         cancelBatchRevokeButtonLoading.value = true;
 

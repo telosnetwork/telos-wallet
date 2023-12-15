@@ -323,9 +323,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 const tokenContractInstance = await tokenContract?.getContractInstance();
 
                 if (!tokenContractInstance) {
-                    // eztodo antelope error
-                    console.error('Error getting token contract instance');
-                    throw 'eztodo';
+                    throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
 
                 const tx = await tokenContractInstance.approve(spender, allowance);
@@ -361,9 +359,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 const nftContractInstance = await nftContract?.getContractInstance();
 
                 if (!nftContractInstance) {
-                    // eztodo antelope error
-                    console.error('Error getting token contract instance');
-                    throw 'eztodo';
+                    throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
 
                 // note: there can only be one operator for a single ERC721 token ID
@@ -403,9 +399,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 const nftContractInstance = await nftContract?.getContractInstance();
 
                 if (!nftContractInstance) {
-                    // eztodo antelope error
-                    console.error('Error getting token contract instance');
-                    throw 'eztodo';
+                    throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
 
                 const tx = await nftContractInstance.setApprovalForAll(operator, allowed);
@@ -458,12 +452,10 @@ export const useAllowancesStore = defineStore(store_name, {
 
             // A helper function to execute tasks in succession
             async function revokeAllowancesSequentially(identifiers: string[]) {
-                // eztodo proper error handling
-
                 for (const [index, allowanceIdentifier] of identifiers.entries()) {
                     if (cancelToken.isCancelled) {
                         useFeedbackStore().unsetLoading('batchRevokeAllowances');
-                        throw new Error('Operation cancelled');
+                        throw new Error('Operation cancelled by user');
                     }
 
                     const [spenderAddress, tokenAddress, tokenId] = allowanceIdentifier.split('-');
@@ -472,6 +464,15 @@ export const useAllowancesStore = defineStore(store_name, {
                     if (!allowanceInfo) {
                         useFeedbackStore().unsetLoading('batchRevokeAllowances');
                         throw new Error('Allowance not found');
+                    }
+
+                    // if the allowance is already 0 or cancelled, skip it
+                    if (isErc20AllowanceRow(allowanceInfo) && allowanceInfo.allowance.eq(0)) {
+                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
+                        continue;
+                    } else if (isErc721SingleAllowanceRow(allowanceInfo) && !allowanceInfo.allowed) {
+                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
+                        continue;
                     }
 
                     const isErc20Allowance = isErc20AllowanceRow(allowanceInfo);
