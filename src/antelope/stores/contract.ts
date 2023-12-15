@@ -191,7 +191,6 @@ export const useContractStore = defineStore(store_name, {
                 return this.__contracts[network].cached[addressLower];
             }
 
-            // eztodo check when not logged in
             const provider = await getAntelope().wallets.getWeb3Provider();
 
             async function checkIsContract(address: string) {
