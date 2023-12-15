@@ -27,7 +27,6 @@ export default {
     home: {
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
-        telos_cloud_discontinued: 'Telos Cloud Wallet will be discontinued. It is crucial for you to transfer your assets out of your Telos Cloud Wallet Accounts before December 15th.',
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
@@ -676,7 +675,7 @@ export default {
     },
     temporal: {
         telos_cloud_discontinued_title: 'Important',
-        telos_cloud_discontinued_message_title: 'Telos Cloud Wallet will be discontinued',
-        telos_cloud_discontinued_message_body: 'It is crucial for you to transfer your assets out of your Telos Cloud Wallet Accounts before December 31st.',
+        telos_cloud_discontinued_message_title: 'Attention Users: Telos Cloud Wallet account option will be discontinued.',
+        telos_cloud_discontinued_message_body:'The Telos Cloud Wallet (ORE ID via Google) account option to connect and sign transactions will be discontinued after December 31st. If you use the Telos Cloud Wallet to access your account, please transfer your assets to another wallet before this deadline. <strong> This change does <i>not</i> impact users accessing their accounts via Metamask, WalletConnect, Anchor, or other sign-in methods.</strong>',
     },
 };
