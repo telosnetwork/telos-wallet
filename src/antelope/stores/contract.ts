@@ -192,8 +192,7 @@ export const useContractStore = defineStore(store_name, {
             }
 
             // eztodo check when not logged in
-            const authenticator = useAccountStore().getAuthenticator(label) as EVMAuthenticator;
-            const provider = await authenticator.web3Provider();
+            const provider = await getAntelope().wallets.getWeb3Provider();
 
             async function checkIsContract(address: string) {
                 const code = await provider.getCode(address);
@@ -209,8 +208,7 @@ export const useContractStore = defineStore(store_name, {
             const isContract = this.__accounts[network]?.includes(addressLower) || await checkIsContract(address);
 
             if (!isContract) {
-                console.log(address);
-
+                // address is an account, not a contract
                 return null;
             }
 
