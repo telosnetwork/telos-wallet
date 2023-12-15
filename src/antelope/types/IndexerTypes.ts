@@ -48,6 +48,7 @@ interface IndexerNftResult {
 // results from the /contract/{address}/nfts endpoint
 export interface IndexerCollectionNftResult extends IndexerNftResult {
     supply?: number; // present only for ERC1155
+    owner?: string; // present only for ERC721
 }
 
 // results from the /account/{address}/nfts endpoint

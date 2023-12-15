@@ -382,6 +382,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.supply,
+            owner: nftResponse.owner,
         }));
 
         // we fix the supportedInterfaces property if it is undefined in the response but present in the request
