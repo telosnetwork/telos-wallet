@@ -69,6 +69,10 @@ export interface ContractStoreState {
             processing: Record<string, Promise<EvmContract | null>>
         },
     }
+    // addresses which have been checked and are known not to be contract addresses
+    __accounts: {
+        [network: string]: string[],
+    },
 }
 
 const store_name = 'contract';
@@ -185,6 +189,29 @@ export const useContractStore = defineStore(store_name, {
             ) {
                 this.trace('getContract', 'returning cached contract', address, [this.__contracts[network].cached[addressLower]]);
                 return this.__contracts[network].cached[addressLower];
+            }
+
+            // eztodo check when not logged in
+            const authenticator = useAccountStore().getAuthenticator(label) as EVMAuthenticator;
+            const provider = await authenticator.web3Provider();
+
+            async function checkIsContract(address: string) {
+                const code = await provider.getCode(address);
+                const _this = useContractStore();
+                if (!_this.__accounts[network]) {
+                    _this.__accounts[network] = [];
+                }
+
+                _this.__accounts[network].push(addressLower);
+                return code !== '0x';
+            }
+
+            const isContract = this.__accounts[network]?.includes(addressLower) || await checkIsContract(address);
+
+            if (!isContract) {
+                console.log(address);
+
+                return null;
             }
 
             // if we have the metadata, we can create the contract and return it
@@ -563,4 +590,5 @@ export const useContractStore = defineStore(store_name, {
 const contractInitialState: ContractStoreState = {
     __contracts: {},
     __factory: new EvmContractFactory(),
+    __accounts: {},
 };

@@ -552,7 +552,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 const maxSupply = await tokenContractInstance?.totalSupply() as BigNumber | undefined;
                 const balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
 
-                if (!spenderContract || !balance || !tokenInfo || !maxSupply) {
+                if (!balance || !tokenInfo || !maxSupply) {
                     return null;
                 }
 
@@ -583,12 +583,12 @@ export const useAllowancesStore = defineStore(store_name, {
             }
 
             try {
-                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+                const operatorContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
 
                 const commonAttributes = {
                     lastUpdated: data.updated,
                     spenderAddress: data.operator,
-                    spenderName: spenderContract?.name,
+                    spenderName: operatorContract?.name,
                     allowed: data.approved,
                 };
 
@@ -624,7 +624,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 const network = useChainStore().getChain(CURRENT_CONTEXT).settings.getNetwork();
                 const nftsStore = useNftsStore();
 
-                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
+                const operatorContract = await useContractStore().getContract(CURRENT_CONTEXT, data.operator);
                 const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
                 await nftsStore.fetchNftsFromCollection(CURRENT_CONTEXT, data.contract);
                 const collectionNftIds = (nftsStore.__contracts[network][data.contract.toLowerCase()]?.list ?? []).map(nft => nft.id);
@@ -647,7 +647,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 return collectionInfo ? {
                     lastUpdated: data.updated,
                     spenderAddress: data.operator,
-                    spenderName: spenderContract?.name,
+                    spenderName: operatorContract?.name,
                     allowed: data.approved,
                     collectionAddress: collectionInfo.address,
                     collectionName: collectionInfo.name,
