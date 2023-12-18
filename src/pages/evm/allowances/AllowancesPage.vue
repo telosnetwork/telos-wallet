@@ -191,10 +191,6 @@ function handleRevokeSelectedClicked() {
     batchRevokeAllowancesRemaining.value = selectedRows.value.length;
 
     function handleRevokeCompleted(completed: number, remaining: number) {
-        console.log('completed:', completed);
-        console.log('remaining:', remaining);
-        console.log('\n\n');
-
         batchRevokeAllowancesRemaining.value = remaining;
     }
 

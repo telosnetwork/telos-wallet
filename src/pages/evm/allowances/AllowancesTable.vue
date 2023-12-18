@@ -2,7 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { AllowanceTableColumns, ShapedAllowanceRow, isErc20AllowanceRow, isErc721SingleAllowanceRow } from 'src/antelope/types/Allowances';
+import {
+    AllowanceTableColumns,
+    ShapedAllowanceRow,
+    isErc20AllowanceRow,
+    isErc721SingleAllowanceRow,
+} from 'src/antelope/types/Allowances';
 import { useUserStore } from 'src/antelope';
 import { getCurrencySymbol } from 'src/antelope/stores/utils/currency-utils';
 

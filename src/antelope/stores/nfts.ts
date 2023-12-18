@@ -37,9 +37,8 @@ export interface NFTsCollection {
     list: Collectible[];
     loading: boolean;
 
-    // this is to prevent the scenario where we fetch a single NFT from a collection, add it to the contracts `list`
+    // this is to prevent the scenario where we fetch a single NFT from a collection, add it to a contract's `list`
     // and then in future checks we assume that the entire collection has been fetched (as we have at least one item in the list)
-    //
     entireCollectionFetched: boolean;
 }
 
