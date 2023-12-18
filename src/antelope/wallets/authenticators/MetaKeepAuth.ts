@@ -154,13 +154,11 @@ export class MetaKeepAuth extends InjectedProviderAuth {
         }
     }
 
-    // returns the associated account address acording to the label
+    // returns the associated account address according to the label
     getAccountAddress(): addressString {
-        // return this.userChainAccount?.chainAccount as addressString;
         return this.accountAddress as addressString;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleCatchError(error: Error): AntelopeError {
         this.trace('handleCatchError', error.message);
         if (

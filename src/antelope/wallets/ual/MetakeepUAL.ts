@@ -13,8 +13,6 @@ import axios from 'axios';
 import { APIClient, NameType, PackedTransaction, Serializer, Transaction } from '@greymass/eosio';
 import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 
-const Logo = 'data:image/svg+xml,%3C%3Fxml version=\'1.0\' %3F%3E%3Csvg height=\'24\' version=\'1.1\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:cc=\'http://creativecommons.org/ns%23\' xmlns:dc=\'http://purl.org/dc/elements/1.1/\' xmlns:rdf=\'http://www.w3.org/1999/02/22-rdf-syntax-ns%23\'%3E%3Cg transform=\'translate(0 -1028.4)\'%3E%3Cpath d=\'m3 1030.4c-1.1046 0-2 0.9-2 2v7 2 7c0 1.1 0.8954 2 2 2h9 9c1.105 0 2-0.9 2-2v-7-2-7c0-1.1-0.895-2-2-2h-9-9z\' fill=\'%232c3e50\'/%3E%3Cpath d=\'m3 1049.4c-1.1046 0-2-0.9-2-2v-7-2-3h22v3 2 7c0 1.1-0.895 2-2 2h-9-9z\' fill=\'%2334495e\'/%3E%3Cpath d=\'m4 1032.9v1.1l2 2.4-2 2.3v1.1l3-3.4-3-3.5z\' fill=\'%23ecf0f1\'/%3E%3Cpath d=\'m3 2c-1.1046 0-2 0.8954-2 2v7 2 3h22v-3-2-7c0-1.1046-0.895-2-2-2h-9-9z\' fill=\'%2334495e\' transform=\'translate(0 1028.4)\'/%3E%3Cpath d=\'m4 5.125v1.125l3 1.75-3 1.75v1.125l5-2.875-5-2.875zm5 4.875v1h5v-1h-5z\' fill=\'%23ecf0f1\' transform=\'translate(0 1028.4)\'/%3E%3C/g%3E%3C/svg%3E';
-
 export interface MetakeepUALOptions {
     appId: string;
     appName: string;
@@ -71,7 +69,7 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     async init() {
-        //this.users = await this.login();
+        //
     }
 
     setEmail(email: string): void {
@@ -125,7 +123,7 @@ export class MetakeepAuthenticator extends Authenticator {
     getStyle() {
         return {
             // An icon displayed to app users when selecting their authentication method
-            icon: Logo,
+            icon: 'no-icon',
             // Name displayed to app users
             text: 'metakeep',
             // Background color displayed to app users who select your authenticator

@@ -44,6 +44,7 @@ export default defineComponent({
             resLow: false,
             googleSubscription: null,
             showGoogleLoading: false,
+            googleCtrl: googleCtrl,
         };
     },
     props: {
