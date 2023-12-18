@@ -6,6 +6,7 @@ import { BigNumber } from 'ethers';
 import {
     CURRENT_CONTEXT,
     getAntelope,
+    useAccountStore,
     useChainStore,
     useContractStore,
     useFeedbackStore,
@@ -36,6 +37,9 @@ import {
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { ZERO_ADDRESS } from 'src/antelope/chains/chain-constants';
+import { WriteContractResult } from '@wagmi/core';
+import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
+import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
 
 const store_name = 'allowances';
 
@@ -320,24 +324,20 @@ export const useAllowancesStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateErc20Allowance');
 
             try {
-                const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, tokenContractAddress);
-                const tokenContractInstance = await tokenContract?.getContractInstance();
+                const authenticator = useAccountStore().getEVMAuthenticator(CURRENT_CONTEXT);
 
-                if (!tokenContractInstance) {
-                    throw new AntelopeError('antelope.utils.error_contract_instance');
-                }
+                const tx = await authenticator.updateErc20Allowance(spender, tokenContractAddress, allowance) as TransactionResponse;
+                const account = useAccountStore().loggedAccount as EvmAccountModel;
 
-                const tx = await tokenContractInstance.approve(spender, allowance) as TransactionResponse;
+                const returnTx = this.subscribeForTransactionReceipt(account, tx);
 
-                tx.wait().then(() => {
-                    setTimeout(() => {
-                        this.fetchAllowancesForAccount(owner).then(() => {
-                            useFeedbackStore().unsetLoading('updateErc20Allowance');
-                        });
-                    }, 3000); // give the indexer time to update allowance data
+                returnTx.then((r) => {
+                    r.wait().finally(() => {
+                        useFeedbackStore().unsetLoading('updateErc20Allowance');
+                    });
                 });
 
-                return tx;
+                return returnTx;
             } catch(error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
                 getAntelope().config.transactionErrorHandler(trxError, 'updateErc20Allowance');
@@ -481,7 +481,7 @@ export const useAllowancesStore = defineStore(store_name, {
                         continue;
                     }
 
-                    let tx: TransactionResponse;
+                    let tx: TransactionResponse | WriteContractResult;
 
                     try {
                         if (isErc20Allowance) {
@@ -508,7 +508,8 @@ export const useAllowancesStore = defineStore(store_name, {
                             );
                         }
 
-                        await tx.wait();
+                        const { newResponse } = await subscribeForTransactionReceipt(useAccountStore().loggedAccount as AccountModel, tx);
+                        await newResponse.wait();
 
                         revokeCompletedHandler(tx, identifiers.length - (index + 1));
                     } catch (error) {
@@ -666,6 +667,18 @@ export const useAllowancesStore = defineStore(store_name, {
                 console.error('Error shaping ERC1155 allowance row', e);
                 return null;
             }
+        },
+        async subscribeForTransactionReceipt(account: AccountModel, response: TransactionResponse): Promise<TransactionResponse> {
+            this.trace('subscribeForTransactionReceipt', account.account, response.hash);
+            return subscribeForTransactionReceipt(account, response).then(({ newResponse, receipt }) => {
+                newResponse.wait().then(() => {
+                    this.trace('subscribeForTransactionReceipt', newResponse.hash, 'receipt:', receipt.status, receipt);
+                    setTimeout(() => {
+                        useAllowancesStore().fetchAllowancesForAccount(account.account);
+                    }, 3000); // give the indexer time to update allowance data
+                });
+                return newResponse;
+            });
         },
     },
 });

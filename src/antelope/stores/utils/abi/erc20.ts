@@ -223,4 +223,29 @@ export const erc20Abi = [
         'name': 'Approval',
         'type': 'event',
     },
-]  as EvmABI;
+] as EvmABI;
+
+export const erc20AbiApprove = [{
+    'inputs': [
+        {
+            'internalType': 'address',
+            'name': 'spender',
+            'type': 'address',
+        },
+        {
+            'internalType': 'uint256',
+            'name': 'amount',
+            'type': 'uint256',
+        },
+    ],
+    'name': 'approve',
+    'outputs': [
+        {
+            'internalType': 'bool',
+            'name': '',
+            'type': 'bool',
+        },
+    ],
+    'stateMutability': 'nonpayable',
+    'type': 'function',
+}] as EvmABI;

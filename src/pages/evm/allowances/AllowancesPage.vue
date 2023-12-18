@@ -8,6 +8,7 @@ import {
     nextTick,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { WriteContractResult } from '@wagmi/core';
 
 import AppPage from 'components/evm/AppPage.vue';
 import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.vue';
