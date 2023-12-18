@@ -31,6 +31,7 @@ import {
     TransactionResponse,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
+    isNftCollectionAllowanceRow,
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -326,7 +327,7 @@ export const useAllowancesStore = defineStore(store_name, {
                     throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
 
-                const tx = await tokenContractInstance.approve(spender, allowance);
+                const tx = await tokenContractInstance.approve(spender, allowance) as TransactionResponse;
 
                 tx.wait().then(() => {
                     setTimeout(() => {
@@ -350,7 +351,7 @@ export const useAllowancesStore = defineStore(store_name, {
             nftContractAddress: string,
             tokenId: string,
             allowed: boolean,
-        ) {
+        ): Promise<TransactionResponse> {
             this.trace('updateSingleErc721Allowance', operator, nftContractAddress, allowed);
             useFeedbackStore().setLoading('updateSingleErc721Allowance');
 
@@ -366,7 +367,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 // to revoke an allowance, the approve method is called with an operator address of '0x0000...0000'
                 const newOperator = allowed ? operator : ZERO_ADDRESS;
 
-                const tx = await nftContractInstance.approve(newOperator, tokenId);
+                const tx = await nftContractInstance.approve(newOperator, tokenId) as TransactionResponse;
 
                 tx.wait().then(() => {
                     setTimeout(() => {
@@ -390,7 +391,7 @@ export const useAllowancesStore = defineStore(store_name, {
             operator: string,
             nftContractAddress: string,
             allowed: boolean,
-        ) {
+        ): Promise<TransactionResponse> {
             this.trace('updateNftCollectionAllowance', operator, nftContractAddress, allowed);
             useFeedbackStore().setLoading('updateNftCollectionAllowance');
 
@@ -402,7 +403,7 @@ export const useAllowancesStore = defineStore(store_name, {
                     throw new AntelopeError('antelope.utils.error_contract_instance');
                 }
 
-                const tx = await nftContractInstance.setApprovalForAll(operator, allowed);
+                const tx = await nftContractInstance.setApprovalForAll(operator, allowed) as TransactionResponse;
 
                 tx.wait().then(() => {
                     setTimeout(() => {
@@ -423,7 +424,7 @@ export const useAllowancesStore = defineStore(store_name, {
         batchRevokeAllowances(
             allowanceIdentifiers: string[],
             owner: string,
-            revokeCompletedHandler: (completed: number, remaining: number) => void,
+            revokeCompletedHandler: (tx: TransactionResponse | null, remaining: number) => void,
         ): {
             promise: Promise<void>,
             cancelToken: { isCancelled: boolean, cancel: () => void },
@@ -466,28 +467,32 @@ export const useAllowancesStore = defineStore(store_name, {
                         throw new Error('Allowance not found');
                     }
 
-                    // if the allowance is already 0 or cancelled, skip it
-                    if (isErc20AllowanceRow(allowanceInfo) && allowanceInfo.allowance.eq(0)) {
-                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
-                        continue;
-                    } else if (isErc721SingleAllowanceRow(allowanceInfo) && !allowanceInfo.allowed) {
-                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
+                    const isErc20Allowance = isErc20AllowanceRow(allowanceInfo);
+                    const isSingleErc721Allowance = isErc721SingleAllowanceRow(allowanceInfo);
+                    const isCollectionAllowance = isNftCollectionAllowanceRow(allowanceInfo);
+
+                    const isAlreadyRevoked =
+                        (isErc20Allowance && allowanceInfo.allowance.eq(0)) ||
+                        ((isSingleErc721Allowance || isCollectionAllowance) && !allowanceInfo.allowed);
+
+                    // if the allowance is already revoked, skip it
+                    if (isAlreadyRevoked) {
+                        revokeCompletedHandler(null, identifiers.length - (index + 1));
                         continue;
                     }
 
-                    const isErc20Allowance = isErc20AllowanceRow(allowanceInfo);
-                    const isSingleErc721Allowance = isErc721SingleAllowanceRow(allowanceInfo);
+                    let tx: TransactionResponse;
 
                     try {
                         if (isErc20Allowance) {
-                            await useAllowancesStore().updateErc20Allowance(
+                            tx = await useAllowancesStore().updateErc20Allowance(
                                 owner,
                                 allowanceInfo.spenderAddress,
                                 allowanceInfo.tokenAddress,
                                 BigNumber.from(0),
                             );
                         } else if (isSingleErc721Allowance) {
-                            await useAllowancesStore().updateSingleErc721Allowance(
+                            tx = await useAllowancesStore().updateSingleErc721Allowance(
                                 owner,
                                 allowanceInfo.spenderAddress,
                                 allowanceInfo.collectionAddress,
@@ -495,7 +500,7 @@ export const useAllowancesStore = defineStore(store_name, {
                                 false,
                             );
                         } else {
-                            await useAllowancesStore().updateNftCollectionAllowance(
+                            tx = await useAllowancesStore().updateNftCollectionAllowance(
                                 owner,
                                 allowanceInfo.spenderAddress,
                                 allowanceInfo.collectionAddress,
@@ -503,7 +508,9 @@ export const useAllowancesStore = defineStore(store_name, {
                             );
                         }
 
-                        revokeCompletedHandler(index + 1, identifiers.length - (index + 1));
+                        await tx.wait();
+
+                        revokeCompletedHandler(tx, identifiers.length - (index + 1));
                     } catch (error) {
                         useFeedbackStore().unsetLoading('batchRevokeAllowances');
                         console.error('Error cancelling allowance', error);
@@ -512,6 +519,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
 
                 useFeedbackStore().unsetLoading('batchRevokeAllowances');
+
                 return Promise.resolve();
             }
 
