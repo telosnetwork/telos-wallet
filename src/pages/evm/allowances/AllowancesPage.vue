@@ -14,15 +14,25 @@ import AllowancesPageControls from 'pages/evm/allowances/AllowancesPageControls.
 import AllowancesTable from 'pages/evm/allowances/AllowancesTable.vue';
 import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
-import { CURRENT_CONTEXT, useAccountStore, useAllowancesStore } from 'src/antelope';
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useAllowancesStore,
+    useChainStore,
+} from 'src/antelope';
 import {
     AllowanceTableColumns,
     Sort,
+    TransactionResponse,
     isErc20AllowanceRow,
 } from 'src/antelope/types';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
 const { t: $t } = useI18n();
+const ant = getAntelope();
 const allowanceStore = useAllowancesStore();
+const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const asideHeader = $t('evm_allowances.aside_header');
 
@@ -55,6 +65,7 @@ const showRevokeInProgressModal = ref(false);
 const cancelBatchRevoke = ref<(() => void) | null>(null);
 const cancelBatchRevokeButtonLoading = ref(false);
 const batchRevokeAllowancesRemaining = ref(0);
+const numberOfAllowancesToBatchRevoke = ref(0);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
@@ -187,10 +198,19 @@ function handleSelectedRowsChange(newSelectedRows: Record<string, boolean>) {
 }
 
 function handleRevokeSelectedClicked() {
+    numberOfAllowancesToBatchRevoke.value = selectedRows.value.length;
     showRevokeInProgressModal.value = true;
     batchRevokeAllowancesRemaining.value = selectedRows.value.length;
 
-    function handleRevokeCompleted(completed: number, remaining: number) {
+    function handleRevokeCompleted(tx: TransactionResponse | null, remaining: number) {
+        tx?.wait().then((receipt) => {
+            ant.config.notifySuccessfulTrxHandler(
+                `${chainSettings.getExplorerUrl()}/tx/${tx.hash}`,
+            );
+        }).catch((err) => {
+            console.error(err);
+        });
+
         batchRevokeAllowancesRemaining.value = remaining;
     }
 
@@ -215,6 +235,7 @@ function handleRevokeSelectedClicked() {
                 nextTick(() => {
                     cancelBatchRevoke.value = null;
                     batchRevokeAllowancesRemaining.value = 0;
+                    numberOfAllowancesToBatchRevoke.value = 0;
                 });
             });
         }, 3000); // give the indexer a chance to catch up
@@ -263,16 +284,21 @@ function handleRevokeSelectedClicked() {
     <q-dialog v-model="showRevokeInProgressModal" persistent>
         <q-card>
             <q-card-section>
-                <h5 class="o-text--header-5">
+                <h5 class="o-text--header-5 flex items-center q-mb-md">
                     {{
                         $t(
                             'evm_allowances.revoking_allowances_title',
-                            { total: selectedRows.length, remaining: batchRevokeAllowancesRemaining },
+                            { total: numberOfAllowancesToBatchRevoke, remaining: batchRevokeAllowancesRemaining },
                         )
                     }}
+                    &nbsp;
+                    <q-spinner color="primary" />
                 </h5>
-                <p>
+                <p class="q-mb-md">
                     {{ $t('evm_allowances.revoking_allowances_description') }}
+                </p>
+                <p>
+                    {{ $t('evm_allowances.revoking_allowances_cancel_note') }}
                 </p>
             </q-card-section>
 
