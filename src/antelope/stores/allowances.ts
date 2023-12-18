@@ -356,28 +356,24 @@ export const useAllowancesStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateSingleErc721Allowance');
 
             try {
-                const nftContract = await useContractStore().getContract(CURRENT_CONTEXT, nftContractAddress);
-                const nftContractInstance = await nftContract?.getContractInstance();
-
-                if (!nftContractInstance) {
-                    throw new AntelopeError('antelope.utils.error_contract_instance');
-                }
-
                 // note: there can only be one operator for a single ERC721 token ID
                 // to revoke an allowance, the approve method is called with an operator address of '0x0000...0000'
                 const newOperator = allowed ? operator : ZERO_ADDRESS;
+                const authenticator = useAccountStore().getEVMAuthenticator(CURRENT_CONTEXT);
 
-                const tx = await nftContractInstance.approve(newOperator, tokenId) as TransactionResponse;
+                const tx = await authenticator.updateSingleErc721Allowance(newOperator, nftContractAddress, tokenId) as TransactionResponse;
 
-                tx.wait().then(() => {
-                    setTimeout(() => {
-                        this.fetchAllowancesForAccount(owner).then(() => {
-                            useFeedbackStore().unsetLoading('updateSingleErc721Allowance');
-                        });
-                    }, 3000); // give the indexer time to update allowance data
+                const account = useAccountStore().loggedAccount as EvmAccountModel;
+
+                const returnTx = this.subscribeForTransactionReceipt(account, tx);
+
+                returnTx.then((r) => {
+                    r.wait().finally(() => {
+                        useFeedbackStore().unsetLoading('updateSingleErc721Allowance');
+                    });
                 });
 
-                return tx;
+                return returnTx;
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
                 getAntelope().config.transactionErrorHandler(trxError, 'updateSingleErc721Allowance');
