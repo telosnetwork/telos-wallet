@@ -51,7 +51,9 @@ function handleRevokeSelected() {
     </q-btn>
 </div>
 
+<!-- https://github.com/telosnetwork/telos-wallet/issues/719 -->
 <q-toggle
+    v-if="false"
     v-model="includeCancelled"
     :label="includeCancelledLabel"
     color="primary"
