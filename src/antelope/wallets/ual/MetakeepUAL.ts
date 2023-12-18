@@ -307,6 +307,7 @@ class MetakeepUser extends User {
         this.rpc = rpc;
         this.api = api;
         this.eosioCore = new APIClient({ url: rpc.endpoint });
+        console.log('this.api', this.api);
     }
 
     setReasonCallback(callback: (transaction: any) => string) {

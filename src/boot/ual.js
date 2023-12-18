@@ -158,8 +158,11 @@ export default boot(async ({ app, store }) => {
         new MetakeepAuthenticator([chain], {
             appName: process.env.APP_NAME,
             appId: process.env.METAKEEP_APP_ID_NATIVE,
+            api: process.env.TELOS_API_ENDPOINT,
         }),
     ];
+
+    console.log();
 
     const ual = new UAL([chain], 'ual', authenticators);
     store['$ual'] = ual;
