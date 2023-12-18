@@ -82,7 +82,6 @@ export default defineComponent({
             const auth = ant.wallets.getAuthenticator(name);
             if (auth) {
                 (auth as MetaKeepAuth).setEmail(email);
-                console.log('ANTES: ', auth);
             }
             setAuthenticator(name, CURRENT_CONTEXT);
         };
@@ -98,7 +97,6 @@ export default defineComponent({
 
         const setAuthenticator = async(name: string, label: string) => {
             const auth = ant.wallets.getAuthenticator(name);
-            console.log('POSTA: ', auth);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -147,11 +145,11 @@ export default defineComponent({
             }
         });
 
-        console.log('googleCtrl.onSuccessfulLogin.subscribe()');
+        const showGoogleLoading = ref(false);
         const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
             next: (email) => {
-                console.log('googleCtrl.onSuccessfulLogin.next()', email);
                 if (email) {
+                    showGoogleLoading.value = true;
                     setMetaKeepAuthenticator(email);
                 }
             },
@@ -178,15 +176,15 @@ export default defineComponent({
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
             isTodayBeforeTelosCloudDown,
-            // menu navigation
             showMainMenu,
             showTelosCloudMenu,
             setCloudMenu,
             googleSubscription,
+            showGoogleLoading,
+            googleCtrl,
         };
     },
     unmounted() {
-        console.log('EVM: this.googleSubscription.unsubscribe();'); // FIXME: remove this line
         this.googleSubscription?.unsubscribe();
     },
 });
@@ -318,27 +316,16 @@ export default defineComponent({
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
 
+        <div v-if="showGoogleLoading" >
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+        </div>
         <div
+            v-else
             id="google_btn"
-            data-client_id="639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com"
+            :data-client_id="googleCtrl.clientId"
         >
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
-
-        <!-- Google OAuth Provider (ORE ID) -->
-        <!--div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
-            <template v-if="isLoadingOreId('google')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon"
-                    src="~assets/icon--google.svg"
-                >
-                {{ $t('home.sign_with_google') }}
-            </template>
-        </div-->
 
         <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
 

@@ -10,6 +10,7 @@ import {
     OreIdAuth,
     SafePalAuth,
     MetaKeepAuth,
+    MetakeepOptions,
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
@@ -92,15 +93,18 @@ export default boot(({ app }) => {
         appId: process.env.OREID_APP_ID as string,
     };
     ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
-    ant.wallets.addEVMAuthenticator(new MetaKeepAuth());
+    const metakeepOptions: MetakeepOptions = {
+        appName: process.env.APP_NAME as string,
+        appId: process.env.METAKEEP_APP_ID_EVM as string,
+    };
+    ant.wallets.addEVMAuthenticator(new MetaKeepAuth(metakeepOptions));
 
     // autologin --
     ant.stores.account.autoLogin();
 
     // constants --
     ant.config.setIndexerHealthThresholdSeconds(10);
-    // ant.config.setIndexerHealthCheckInterval(5000);
-    ant.config.setIndexerHealthCheckInterval(500000); // FIXME:
+    ant.config.setIndexerHealthCheckInterval(5000);
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to

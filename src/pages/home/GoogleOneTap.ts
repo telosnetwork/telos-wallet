@@ -55,6 +55,7 @@ class GoogleOneTapController {
     onSuccessfulLogin = new BehaviorSubject<string | null>(null);
     onError = new BehaviorSubject<string | null>(null);
     onMoment = new Subject<{type: string, status:string, reason:string}>();
+    clientId = process.env.GOOGLE_APP_ID as string;
 
     buttonConfig = { theme: 'outline', size: 'large' }; // default config
 
@@ -81,13 +82,12 @@ class GoogleOneTapController {
             if (_window.google) {
                 google = _window.google;
             } else {
-                // FIXME: use i18n
                 throw new AntelopeError('Google One Tap library not loaded');
             }
         }
         if (google) {
             google.accounts.id.initialize({
-                client_id: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com',
+                client_id: this.clientId,
                 callback: (response: GoogleNotification | null) => {
                     if (response) {
                         const credential = response.credential;
@@ -97,23 +97,7 @@ class GoogleOneTapController {
                         this.handleOneTapError(JSON.stringify(response));
                     }
                 },
-            });/*
-            console.log(' --------- notification ----------', 'esto se ve una sola vez?');
-            google.accounts.id.prompt((notification) => {
-                console.log('notification', notification);
-                const momentType = notification.getMomentType();
-                if(notification.isDisplayed()) {
-                    setTimeout(()=>{
-                        this.handleOneTapMoment(momentType, 'displayed', 'displayed');
-                    }, 500);
-                } else if(notification.isNotDisplayed()){
-                    this.handleOneTapMoment(momentType, 'notdisplayed', notification.getNotDisplayedReason());
-                } else if(notification.isSkippedMoment()) {
-                    this.handleOneTapMoment(momentType, 'skipped', notification.getSkippedReason());
-                } else if(notification.isDismissedMoment()) {
-                    this.handleOneTapMoment(momentType, 'dismissed', notification.getDismissedReason());
-                }
-            });*/
+            });
         }
     }
 
@@ -152,12 +136,10 @@ class GoogleOneTapController {
     }
 
     handleOneTapMoment(type: string, status: string, reason: string) {
-        console.log('handleOneTapMoment', type, status, reason);
         this.onMoment.next({ type, status, reason });
     }
 
     handleOneTapSuccess(response: SuccessResponse) {
-        console.log('handleOneTapSuccess this.onSuccessfulLogin.next(response.payload.email);', response);
         this.onSuccessfulLogin.next(response.payload.email);
     }
 
@@ -169,14 +151,10 @@ class GoogleOneTapController {
     logout() {
         if (google) {
             google.accounts.id.disableAutoSelect();
-            console.log('logout this.onSuccessfulLogin.next(null);');
             this.onSuccessfulLogin.next(null);
         }
     }
 
 }
 
-
 export const googleCtrl = new GoogleOneTapController();
-
-// renderGoogleOneTap();

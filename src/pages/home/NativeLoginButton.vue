@@ -43,6 +43,7 @@ export default defineComponent({
             buyAmount: 1, // 1 TLOS
             resLow: false,
             googleSubscription: null,
+            showGoogleLoading: false,
         };
     },
     props: {
@@ -67,12 +68,14 @@ export default defineComponent({
         },
     },
     mounted() {
+        this.showGoogleLoading = false;
         this.setDefaultNativeChain();
 
         this.googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
             next: (email) => {
                 if (this.googleSubscription) {
                     if (email) {
+                        this.showGoogleLoading = true;
                         this.loginWithMetaKeep(email);
                     }
                 }
@@ -108,8 +111,7 @@ export default defineComponent({
             'setLoadingWallet',
         ]),
         async loginWithMetaKeep(email) {
-            console.log('ZERO: loginWithMetaKeep()', email);  // FIXME: remove this line
-            const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('metakeep_native');
+            const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('metakeep.ual');
             const auth = this.$ual.authenticators[idx];
             auth.setEmail(email);
             this.onLogin(idx);
@@ -370,9 +372,13 @@ export default defineComponent({
 
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
+        <div v-if="showGoogleLoading">
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+        </div>
         <div
+            v-else
             id="google_btn"
-            data-client_id="639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com"
+            :data-client_id="googleCtrl.clientId"
         >
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>

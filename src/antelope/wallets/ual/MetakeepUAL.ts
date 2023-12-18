@@ -10,18 +10,22 @@ import { JsonRpc } from 'eosjs';
 import { SignTransactionResponse } from 'universal-authenticator-library/dist/interfaces';
 import { MetaKeep } from 'metakeep';
 import axios from 'axios';
-import { APIClient, Serializer } from '@greymass/eosio';
+import { APIClient, NameType, PackedTransaction, Serializer, Transaction } from '@greymass/eosio';
+import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 
 const Logo = 'data:image/svg+xml,%3C%3Fxml version=\'1.0\' %3F%3E%3Csvg height=\'24\' version=\'1.1\' width=\'24\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:cc=\'http://creativecommons.org/ns%23\' xmlns:dc=\'http://purl.org/dc/elements/1.1/\' xmlns:rdf=\'http://www.w3.org/1999/02/22-rdf-syntax-ns%23\'%3E%3Cg transform=\'translate(0 -1028.4)\'%3E%3Cpath d=\'m3 1030.4c-1.1046 0-2 0.9-2 2v7 2 7c0 1.1 0.8954 2 2 2h9 9c1.105 0 2-0.9 2-2v-7-2-7c0-1.1-0.895-2-2-2h-9-9z\' fill=\'%232c3e50\'/%3E%3Cpath d=\'m3 1049.4c-1.1046 0-2-0.9-2-2v-7-2-3h22v3 2 7c0 1.1-0.895 2-2 2h-9-9z\' fill=\'%2334495e\'/%3E%3Cpath d=\'m4 1032.9v1.1l2 2.4-2 2.3v1.1l3-3.4-3-3.5z\' fill=\'%23ecf0f1\'/%3E%3Cpath d=\'m3 2c-1.1046 0-2 0.8954-2 2v7 2 3h22v-3-2-7c0-1.1046-0.895-2-2-2h-9-9z\' fill=\'%2334495e\' transform=\'translate(0 1028.4)\'/%3E%3Cpath d=\'m4 5.125v1.125l3 1.75-3 1.75v1.125l5-2.875-5-2.875zm5 4.875v1h5v-1h-5z\' fill=\'%23ecf0f1\' transform=\'translate(0 1028.4)\'/%3E%3C/g%3E%3C/svg%3E';
 
-export interface MetakeepOptions {
+export interface MetakeepUALOptions {
     appId: string;
     appName: string;
     rpc?: JsonRpc;
+    api: string;
+    reasonCallback?: (transaction: any) => string;
 }
 let metakeep: MetaKeep | null = null;
-// credentials
-interface MetakeepData {
+
+// This interface is used to store the data in the local cache
+export interface MetakeepData {
     [email:string]: {
         [chainId:string]: {
             accounts: string[];
@@ -34,15 +38,15 @@ interface MetakeepData {
     }
 }
 
-
 export class MetakeepAuthenticator extends Authenticator {
     private chainId: string;
     private rpc: JsonRpc;
+    private api: string;
     private accountEmail: string;
-    private cache: MetakeepData = {};
     private appId: string;
+    private loading = false;
 
-    constructor(chains: Chain[], options: MetakeepOptions) {
+    constructor(chains: Chain[], options: MetakeepUALOptions) {
         super(chains, options);
         this.chainId = chains[0].chainId;
         const [chain] = chains;
@@ -57,27 +61,13 @@ export class MetakeepAuthenticator extends Authenticator {
             throw new Error('MetakeepAuthenticator: Missing appId');
         }
         this.appId = options.appId;
+        this.api = options.api;
         this.chains = chains;
-        this.accountEmail = '';
-        try {
-            this.accountEmail = window.localStorage.getItem('metakeep.logged') ?? '';
-        } catch (error) {
-            console.error('error', error);
-        }
-
-        try {
-            this.cache = JSON.parse(window.localStorage.getItem('metakeep.data') || '{}');
-        } catch (error) {
-            console.error('error', error);
-        }
+        this.accountEmail = metakeepCache.getLogged() ?? '';
     }
 
     saveCache() {
-        try {
-            window.localStorage.setItem('metakeep.data', JSON.stringify(this.cache));
-        } catch (error) {
-            console.error('error', error);
-        }
+        metakeepCache.saveCache();
     }
 
     async init() {
@@ -86,7 +76,7 @@ export class MetakeepAuthenticator extends Authenticator {
 
     setEmail(email: string): void {
         this.accountEmail = email;
-        window.localStorage.setItem('metakeep.logged', email);
+        metakeepCache.setLogged(email);
     }
 
     /**
@@ -104,7 +94,7 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     getName() {
-        return 'metakeep_native';
+        return 'metakeep.ual';
     }
 
     /**
@@ -112,7 +102,7 @@ export class MetakeepAuthenticator extends Authenticator {
      * if it is not found by the UAL Authenticator.
      */
     getOnboardingLink() {
-        return 'https://developers.eos.io/manuals/eos/latest/cleos/index';
+        return '';
     }
 
     /**
@@ -126,7 +116,7 @@ export class MetakeepAuthenticator extends Authenticator {
      * Returns true if the authenticator is loading while initializing its internal state.
      */
     isLoading() {
-        return false;
+        return this.loading;
     }
 
     /**
@@ -172,14 +162,13 @@ export class MetakeepAuthenticator extends Authenticator {
 
 
     async createAccount(publicKey: string): Promise<string> {
-        return axios.post(`${this.rpc.endpoint}/v1/accounts/random`, {
+        return axios.post(`${this.api}/v1/accounts/random`, {
             ownerKey: publicKey,
             activeKey: publicKey,
         }).then(response => response.data.accountName);
     }
 
     resolveAccountName() {
-        console.log('resolveAccountName() ');
         return new Promise<string>(async (resolve, reject) => {
             let accountName = '';
             if (!metakeep) {
@@ -188,45 +177,31 @@ export class MetakeepAuthenticator extends Authenticator {
             if (this.accountEmail === '') {
                 return reject(new Error('No account email'));
             }
+
             // we check if we have the account name in the cache
-            console.log('resolveAccountName() ', this.cache);
-            const data = this.cache[this.accountEmail];
-            if (data) {
-                accountName = data[this.chainId]?.accounts[0];
-                if (accountName) {
-                    console.log('resolveAccountName() from cache -->', accountName);
-                    resolve(accountName);
-                    return;
-                }
+            const accountNames = metakeepCache.getAccountNames(this.accountEmail, this.chainId);
+            if (accountNames.length > 0) {
+                resolve(accountNames[0]);
             }
 
             // if not, we fetch all the accounts for the email
-            console.log('resolveAccountName() getting credentials...');
             const credentials = await metakeep.getWallet();
             const publicKey = credentials.wallet.eosAddress;
 
-            this.cache[this.accountEmail] = {
-                [this.chainId]: {
-                    accounts: [],
-                    wallet: credentials.wallet,
-                },
-            };
-
-            console.log('resolveAccountName() ', this.cache);
+            metakeepCache.addCredentials(this.accountEmail, credentials.wallet);
 
             try {
                 // we try to get the account name from the public key
                 const response = await axios.post(`${this.rpc.endpoint}/v1/history/get_key_accounts`, {
                     public_key: publicKey,
                 });
-                console.log('resolveAccountName() get_key_accounts: ', response);
                 const accountExists = response?.data?.account_names.length>0;
                 if (accountExists) {
                     accountName = response.data.account_names[0];
                 } else {
                     accountName = await this.createAccount(publicKey);
                 }
-                this.cache[this.accountEmail][this.chainId].accounts.push(accountName);
+                metakeepCache.addAccountName(this.accountEmail, this.chainId, accountName);
                 this.saveCache();
                 return resolve(accountName);
             } catch (error) {
@@ -244,11 +219,10 @@ export class MetakeepAuthenticator extends Authenticator {
     login: () => Promise<[User]> = async () => {
         console.error('login');
         if (this.accountEmail === '') {
-            console.error('No account email');
             throw new Error('No account email');
         }
 
-        console.log('Tenemos mail: ', this.accountEmail);
+        this.loading = true;
 
         metakeep = new MetaKeep({
             // App id to configure UI
@@ -260,21 +234,24 @@ export class MetakeepAuthenticator extends Authenticator {
         });
 
         const accountName = await this.resolveAccountName();
-        const publicKey = this.cache[this.accountEmail][this.chainId].wallet.eosAddress;
+        const publicKey = metakeepCache.getEosAddress(this.accountEmail);
 
         try {
             const permission = 'active';
-            return [
-                new MetakeepUser({
-                    accountName,
-                    permission,
-                    publicKey,
-                    chainId: this.chainId,
-                    rpc: this.rpc,
-                }),
-            ];
+            this.loading = false;
+            const userInstance = new MetakeepUser({
+                accountName,
+                permission,
+                publicKey,
+                chainId: this.chainId,
+                rpc: this.rpc,
+                api: this.api,
+            });
+
+            return [userInstance];
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
+            this.loading = false;
             throw new UALError(err.messsage, UALErrorType.Login, err, 'MetakeepAuthenticator');
         }
     };
@@ -284,11 +261,7 @@ export class MetakeepAuthenticator extends Authenticator {
      * Authenticator app's patterns.
      */
     logout = async (): Promise<void> => {
-        window.localStorage.removeItem('accountEmail');
-        window.localStorage.removeItem('accountName');
-        window.localStorage.removeItem('permission');
-        window.localStorage.removeItem('publicKey');
-        window.localStorage.removeItem('metakeep.logged');
+        metakeepCache.setLogged(null);
         return;
     };
 
@@ -308,19 +281,25 @@ class MetakeepUser extends User {
     private accountName: string;
     private permission: string;
     private chainId: string;
+    private reasonCallback?: (transaction: any) => string;
+
     rpc: JsonRpc;
+    protected eosioCore: APIClient;
+    protected api: string;
     constructor({
         accountName,
         permission,
         publicKey,
         chainId,
         rpc,
+        api,
     }: {
             accountName: string,
             permission: string,
             publicKey: string,
             chainId: string,
             rpc: JsonRpc,
+            api: string,
     }) {
         super();
         this.keys = [publicKey];
@@ -328,72 +307,120 @@ class MetakeepUser extends User {
         this.permission = permission;
         this.chainId = chainId;
         this.rpc = rpc;
+        this.api = api;
+        this.eosioCore = new APIClient({ url: rpc.endpoint });
     }
 
-    protected eosioCore: APIClient = new APIClient({ url: 'https://testnet.telos.net' });
-
-
-    async serializeActionData(account: string, name: string, data: unknown): Promise<string> {
-        const { abi } = await this.eosioCore.v1.chain.get_abi(account);
-        if (!abi) {
-            throw new Error(`No ABI for ${account}`);
-        }
-
-        const { hexString } = Serializer.encode({ object: data, abi, type: name });
-        return hexString;
+    setReasonCallback(callback: (transaction: any) => string) {
+        this.reasonCallback = callback;
     }
-
 
     /**
     * @param transaction    The transaction to be signed (a object that matches the RpcAPI structure).
     */
-    signTransaction = async (transaction: any): Promise<SignTransactionResponse> => {
-        console.log('transaction', transaction);
+    signTransaction = async (originalTransaction: any): Promise<SignTransactionResponse> => {
         if (!metakeep) {
             throw new Error('metakeep is not initialized');
         }
 
-        const info = await this.eosioCore.v1.chain.get_info();
-        const ref_block_num = info.last_irreversible_block_num.toNumber();
-        const block = await this.eosioCore.v1.chain.get_block(info.last_irreversible_block_num);
-        const ref_block_prefix = block.ref_block_prefix.toNumber();
-        const action = transaction.actions[0];
+        try {
+            // expire time in seconds
+            const expireSeconds = 120;
 
-        const serializedData = await this.serializeActionData(action.account, action.name, action.data);
-        action.data = serializedData;
+            // Retrieve transaction headers
+            const info = await this.eosioCore.v1.chain.get_info();
+            const header = info.getTransactionHeader(expireSeconds);
 
-        const expiration = new Date(Date.now() + 120000).toISOString().split('.')[0];
+            // collect all contract abis
+            const abi_promises = originalTransaction.actions.map((a: { account: NameType; }) =>
+                this.eosioCore.v1.chain.get_abi(a.account),
+            );
+            const responses = await Promise.all(abi_promises);
+            const abis = responses.map(x => x.abi);
+            const abis_and_names = originalTransaction.actions.map((x: { account: any; }, i: number) => ({
+                contract: x.account,
+                abi: abis[i],
+            }));
 
-        const complete_transaction = {
-            'transactionObject': {
-                'rawTransaction': {
-                    'expiration': expiration,
-                    'ref_block_num': ref_block_num,
-                    'ref_block_prefix': ref_block_prefix,
-                    'max_net_usage_words': 0,
-                    'max_cpu_usage_ms': 0,
-                    'delay_sec': 0,
-                    'context_free_actions': [],
-                    'actions': [action],
-                    'transaction_extensions': [],
+            // create complete well formed transaction
+            const transaction = Transaction.from(
+                {
+                    ...header,
+                    actions: originalTransaction.actions,
                 },
-                'extraSigningData': {
-                    // If chainId is part of the signature generation,
-                    // send it inside extraSigningData field.
-                    'chainId': '1eaa0824707c8c16bd25145493bf062aecddfeb56c736f6ba6397f3195f33c9f', // TESTNET
+                abis_and_names,
+            );
+
+            const expiration = transaction.expiration.toString();
+            const ref_block_num = transaction.ref_block_num.toNumber();
+            const ref_block_prefix = transaction.ref_block_prefix.toNumber();
+
+            // convert actions to JSON
+            const actions = transaction.actions.map(a => ({
+                account: a.account.toJSON(),
+                name: a.name.toJSON(),
+                authorization: a.authorization.map((x: { actor: any; permission: any; }) => ({
+                    actor: x.actor.toJSON(),
+                    permission: x.permission.toJSON(),
+                })),
+                data: a.data.toJSON(),
+            }));
+
+            // compose the complete transaction
+            const complete_transaction = {
+                rawTransaction: {
+                    expiration: expiration,
+                    ref_block_num: ref_block_num,
+                    ref_block_prefix: ref_block_prefix,
+                    max_net_usage_words: 0,
+                    max_cpu_usage_ms: 0,
+                    delay_sec: 0,
+                    context_free_actions: [],
+                    actions: actions,
+                    transaction_extensions: [],
                 },
-            },
-            'reason': 'test',
-        };
+                extraSigningData: {
+                    chainId: this.chainId,
+                },
+            };
 
-        console.log('await metakeep.signTransactio()...', complete_transaction);
-        const response = await metakeep.signTransaction(complete_transaction, 'TESTING_REASONS');
+            // sign the transaction with metakeep
+            const reason = this.reasonCallback ? this.reasonCallback(originalTransaction) : 'sign this transaction';
+            const response = await metakeep.signTransaction(complete_transaction, reason);
+            const signature = response.signature;
 
+            // Pack the transaction for transport
+            const packedTransaction = PackedTransaction.from({
+                signatures: [signature],
+                packed_context_free_data: '',
+                packed_trx: Serializer.encode({ object: transaction }),
+            });
 
-        console.log('response', response);
+            // Broadcast the signed transaction to the blockchain
+            const pushResponse = await this.eosioCore.v1.chain.push_transaction(
+                packedTransaction,
+            );
 
-        return this.returnEosjsTransaction(false, {});
-    };
+            // we compose the final response
+            const finalResponse/*: SignTransactionResponse*/ = {
+                wasBroadcast: true,
+                transactionId: pushResponse.transaction_id,
+                status: pushResponse.processed.receipt.status,
+                transaction: packedTransaction,
+            };
+
+            return Promise.resolve(finalResponse);
+
+        } catch (e: any) {
+            if (e.status) {
+                throw new Error(e.status);
+            } else if (e.message) {
+                throw new Error(e.message);
+            } else {
+                throw new Error('Unknown error');
+            }
+        }
+    }
 
     /**
      * @param publicKey     The public key to use for signing.

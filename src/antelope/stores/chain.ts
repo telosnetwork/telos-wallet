@@ -217,7 +217,9 @@ export const useChainStore = defineStore(store_name, {
                     return new Promise((resolve) => {
                         const sub = getAntelope().events.onAccountChanged.subscribe((result) => {
                             if (result.label === label) {
-                                sub.unsubscribe();
+                                setTimeout(() => {
+                                    sub.unsubscribe();
+                                }, 0);
                                 if (result.account) {
                                     // we need the user to be logged because the way of getting the staked ratio is by
                                     // executing an action from contract and that internally attempts retrieve the account from the provided signer

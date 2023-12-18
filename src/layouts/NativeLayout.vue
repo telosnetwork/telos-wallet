@@ -4,6 +4,7 @@ import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/native/NavBar.vue';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import { getAntelope } from 'src/antelope';
+import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 
 const pagesData = [
     {
@@ -114,6 +115,7 @@ export default {
         logOut() {
             this.resetTokens();
             this.logout();
+            googleCtrl.logout();
         },
         resetTokens() {
             this.coins = [];

@@ -530,7 +530,7 @@ export default {
         },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
-            error_login: 'Error in login proccess',
+            error_login: 'Error in login process',
             error_add_chain_rejected: 'User has rejected the request to add the chain',
             error_connect_rejected: 'User has rejected the request to connect to the chain',
             error_add_chain: 'Error in adding chain',
@@ -562,7 +562,9 @@ export default {
             error_unstakes_failed: 'An unknown error occurred when unstaking tokens',
             error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
             error_fetching_token_price: 'An unknown error occurred when fetching token price data',
-            error_transfer_nft: 'An error occured while transferring collectible',
+            error_transfer_nft: 'An error occurred while transferring collectible',
+            error_metakeep_web3_provider: 'An error occurred while initializing Metakeep Web3 provider',
+            error_metakeep_app_id: 'App ID not provided for Metakeep',
         },
         history: {
             error_fetching_transactions: 'Unexpected error fetching transactions. Please refresh the page to try again.',
