@@ -8,7 +8,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
-import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw, erc1155Abi, erc20AbiApprove } from 'src/antelope/types';
+import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw, erc1155Abi, erc20AbiApprove, erc721ApproveAbi } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
 
@@ -388,6 +388,29 @@ export abstract class EVMAuthenticator {
             [
                 spender,
                 allowance.toHexString(),
+            ],
+        ).catch((error) => {
+            throw this.handleCatchError(error as never);
+        });
+    }
+
+    /**
+    * This method creates a Transaction to update an ERC721 allowance by calling the approve function
+    * @returns transaction response
+    */
+    async updateSingleErc721Allowance(
+        operator: string,
+        nftContractAddress: string,
+        tokenId: string,
+    ): Promise<EvmTransactionResponse | WriteContractResult> {
+        this.trace('updateSingleErc721Allowance', operator, nftContractAddress, tokenId);
+
+        return this.signCustomTransaction(
+            nftContractAddress,
+            erc721ApproveAbi,
+            [
+                operator,
+                tokenId,
             ],
         ).catch((error) => {
             throw this.handleCatchError(error as never);
