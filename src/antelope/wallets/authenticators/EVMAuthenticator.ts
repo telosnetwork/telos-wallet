@@ -8,6 +8,7 @@ import { useChainStore } from 'src/antelope/stores/chain';
 import { useEVMStore } from 'src/antelope/stores/evm';
 import { createTraceFunction, isTracingAll, useFeedbackStore } from 'src/antelope/stores/feedback';
 import { usePlatformStore } from 'src/antelope/stores/platform';
+import { setApprovalForAllAbi } from 'src/antelope/stores/utils/abi/setApprovalForAllAbi';
 import { AntelopeError, NftTokenInterface, ERC1155_TYPE, ERC721_TYPE, EvmABI, EvmABIEntry, EvmFunctionParam, EvmTransactionResponse, ExceptionError, TokenClass, addressString, erc20Abi, erc721Abi, escrowAbiWithdraw, stlosAbiDeposit, stlosAbiWithdraw, wtlosAbiDeposit, wtlosAbiWithdraw, erc1155Abi, erc20AbiApprove, erc721ApproveAbi } from 'src/antelope/types';
 
 export abstract class EVMAuthenticator {
@@ -373,6 +374,10 @@ export abstract class EVMAuthenticator {
 
     /**
      * This method creates a Transaction to update an ERC20 allowance by calling the approve function
+     * @param spender address of the spender
+     * @param tokenContractAddress address of the ERC20 token contract
+     * @param allowance amount of tokens to allow
+     *
      * @returns transaction response
      */
     async updateErc20Allowance(
@@ -396,6 +401,10 @@ export abstract class EVMAuthenticator {
 
     /**
     * This method creates a Transaction to update an ERC721 allowance by calling the approve function
+    * @param operator address of the operator
+    * @param nftContractAddress address of the ERC721 token contract
+    * @param tokenId id of the token to set allowance for
+    *
     * @returns transaction response
     */
     async updateSingleErc721Allowance(
@@ -411,6 +420,34 @@ export abstract class EVMAuthenticator {
             [
                 operator,
                 tokenId,
+            ],
+        ).catch((error) => {
+            throw this.handleCatchError(error as never);
+        });
+    }
+
+    /**
+    * This method creates a Transaction to update an NFT collection (ERC721 or ERC1155) allowance
+    * by calling the setApprovalForAll function
+    * @param operator address of the operator
+    * @param nftContractAddress address of the ERC721 token contract
+    * @param allowed boolean to set allowance
+    *
+    * @returns transaction response
+    */
+    async updateNftCollectionAllowance(
+        operator: string,
+        nftContractAddress: string,
+        allowed: boolean,
+    ): Promise<EvmTransactionResponse | WriteContractResult> {
+        this.trace('updateNftCollectionAllowance', operator, nftContractAddress, allowed);
+
+        return this.signCustomTransaction(
+            nftContractAddress,
+            setApprovalForAllAbi,
+            [
+                operator,
+                allowed,
             ],
         ).catch((error) => {
             throw this.handleCatchError(error as never);
