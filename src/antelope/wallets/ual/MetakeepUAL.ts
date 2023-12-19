@@ -21,6 +21,7 @@ export interface MetakeepUALOptions {
     reasonCallback?: (transaction: any) => string;
 }
 let metakeep: MetaKeep | null = null;
+const metakeep_name = 'metakeep.ual';
 
 // This interface is used to store the data in the local cache
 export interface MetakeepData {
@@ -92,7 +93,7 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     getName() {
-        return 'metakeep.ual';
+        return metakeep_name;
     }
 
     /**
@@ -125,7 +126,7 @@ export class MetakeepAuthenticator extends Authenticator {
             // An icon displayed to app users when selecting their authentication method
             icon: 'no-icon',
             // Name displayed to app users
-            text: 'metakeep',
+            text: metakeep_name,
             // Background color displayed to app users who select your authenticator
             background: '#030238',
             // Color of text used on top the `backgound` property above

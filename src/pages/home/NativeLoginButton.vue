@@ -17,7 +17,6 @@ export default defineComponent({
     },
     data() {
         return {
-            showLogin: false,
             showAuth: false,
             authType: 'signin',
             error: null,
@@ -66,6 +65,16 @@ export default defineComponent({
         },
         showTelosCloudMenu() {
             return this.modelValue === Menu.CLOUD;
+        },
+        newAccountAlreadyCreated() {
+            const emails = metakeepCache.getMails();
+            if (emails.length > 0) {
+                const ethPubKey = metakeepCache.getEthAddress(emails[0]);
+                if (ethPubKey) {
+                    return true;
+                }
+            }
+            return false;
         },
     },
     mounted() {
@@ -117,6 +126,10 @@ export default defineComponent({
             auth.setEmail(email);
             this.onLogin(idx);
         },
+        async loginAsOreId() {
+            const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('ual-oreid');
+            this.onLogin(idx);
+        },
         async loginAsJustViewer() {
             let idx = this.$ual.authenticators.map(a => a.getName()).indexOf('cleos');
             this.onLogin(idx, true);
@@ -127,7 +140,6 @@ export default defineComponent({
         async onLogin(idx, justViewer = false) {
             const error = await this.login({ idx, justViewer });
             if (!error) {
-                this.showLogin = false;
                 await this.$router.push({ path: '/zero/balance' });
             } else {
                 this.error = error;
@@ -263,6 +275,12 @@ export default defineComponent({
 
             return wallet.getStyle().text;
         },
+        isLoading(wallet) {
+            return this.loading === wallet;
+        },
+        isLoadingOreId() {
+            return this.loading === 'ual-oreid';
+        },
     },
     watch: {
         async isAuthenticated() {
@@ -287,7 +305,7 @@ export default defineComponent({
     <template v-if="showMainMenu">
 
         <!-- Login Button -->
-        <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
+        <template v-if="!isAuthenticated">
 
             <!-- Google OAuth Provider -->
             <div class="c-zero-login-buttons__option c-zero-login-buttons__option--telos-cloud" @click="setCloudMenu()">
@@ -320,36 +338,33 @@ export default defineComponent({
                 </div>
             </div>
 
-            <div class="q-mt-md q-mb-sm">
-                <q-btn
-                    :label="$t('home.connect_with_wallet')"
-                    class="purpleGradient q-px-md q-py-sm"
-                    @click="showLogin = true"
-                />
-            </div>
+            <!-- Authenticator buttons -->
+            <template
+                v-for="(wallet, idx) in $ual.authenticators"
+                :key="idx"
+            >
+                <div
+                    v-if="wallet.getName() !== 'metakeep.ual' && wallet.getName() !== 'ual-oreid'"
+                    class="c-zero-login-buttons__option"
+                    @click="onLogin(idx)"
+                >
+                    <template v-if="isLoading(wallet.getStyle().text)">
+                        <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
+                    </template>
+                    <template v-else>
+                        <img
+                            :src="getWalletIcon(wallet)"
+                            width="24"
+                            class="c-zero-login-buttons__icon"
+                        >
+                        {{ getWalletName(wallet) }} {{  wallet.getName()  }}
+                    </template>
+                </div>
+            </template>
 
-            <!-- View any account -->
-            <div class="q-mt-md">
-                <q-btn
-                    text-color="white"
-                    outline
-                    :label="$t('home.view_any_account')"
-                    class="q-px-md q-py-sm"
-                    @click="loginAsJustViewer()"
-                />
-            </div>
+        </template>
 
-            <!-- Signup Button -->
-            <div class="q-mt-md">
-                <q-btn
-                    text-color="white"
-                    outline
-                    :label="$t('home.create_new_account')"
-                    class="q-px-md q-py-sm"
-                    @click="signUp"
-                />
-            </div>
-        </div>
+        <!-- if authenticated -->
         <div v-else class="q-px-md flex justify-center column">
             <p class="q-mb-lg logged-in"> {{ $t( 'home.logged_as', {account: accountName}) }}</p>
 
@@ -371,21 +386,40 @@ export default defineComponent({
         </div>
     </template>
 
+
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
         <div v-if="showGoogleLoading">
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
         <div
             v-else
             id="google_btn"
             :data-client_id="googleCtrl.clientId"
         >
-            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
-        <div class="c-zero-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
 
-        <!-- Facebook OAuth Provider -->
+        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
+
+        <!-- Google OAuth Provider -->
+        <!-- Google old OreId Authenticator -->
+        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2" @click="loginAsOreId()">
+            <template v-if="isLoading('metakeep.ual')">
+                <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    width="24"
+                    class="c-zero-login-buttons__icon"
+                    src="~assets/icon--google.svg"
+                >
+                {{ $t('home.sign_with_google') }}
+            </template>
+        </div>
+
+        <!--
+        < !-- Facebook OAuth Provider -- >
         <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
             <img
                 width="24"
@@ -395,7 +429,7 @@ export default defineComponent({
             {{ $t('home.sign_with_facebook') }}
         </div>
 
-        <!-- X OAuth Provider -->
+        < !-- X OAuth Provider -- >
         <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
             <img
                 width="24"
@@ -404,72 +438,8 @@ export default defineComponent({
             >
             {{ $t('home.sign_with_x') }}
         </div>
+        -->
     </template>
-
-    <!-- Show Login -->
-    <q-dialog v-model="showLogin">
-        <div class="column showLoginPopup q-pa-lg popupCard">
-            <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
-            <q-list class="" dark separator>
-                <q-item
-                    v-for="(wallet, idx) in $ual.authenticators"
-                    :key="wallet.getStyle().text"
-                    v-ripple
-                    class="q-my-sm"
-                >
-                    <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
-                        <img :src="getWalletIcon(wallet)" width="30" >
-                    </q-item-section>
-                    <q-item-section class="cursor-pointer" @click="onLogin(idx)">
-                        {{ getWalletName(wallet) }}
-                    </q-item-section>
-                    <q-item-section class="flex" avatar>
-                        <q-spinner
-                            v-if="loading === wallet.getStyle().text"
-                            :color="wallet.getStyle().textColor"
-                            size="2em"
-                        />
-                        <q-btn
-                            v-else
-                            :color="wallet.getStyle().textColor"
-                            icon="get_app"
-                            target="_blank"
-                            dense
-                            flat
-                            size="12px"
-                            @click="openUrl(wallet.getOnboardingLink())"
-                        >
-                            <q-tooltip>
-                                {{$t('login.get_app')}}
-                            </q-tooltip>
-                        </q-btn>
-                    </q-item-section>
-                </q-item>
-            </q-list>
-
-            <!-- Close Button -->
-            <q-btn
-                v-close-popup
-                size="md"
-                no-caps
-                rounded
-                flat
-                class="self-center flex-center"
-                label="Close"
-                :style="`display:flex;`"
-                @click="close"
-            />
-            <q-item
-                v-if="error"
-                :active="!!error"
-                active-class="bg-red-1 text-grey-8"
-            >
-                <q-item-section>
-                    {{ error }}
-                </q-item-section>
-            </q-item>
-        </div>
-    </q-dialog>
 
     <!-- RAM low dialog -->
     <q-dialog v-model="resLow" persistent>
@@ -519,11 +489,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 
-.showLoginPopup {
-    width: 30rem;
-    height: auto;
-    margin-bottom: 5rem;
-}
 
 .logged-in{
     color: white;

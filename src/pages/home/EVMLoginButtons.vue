@@ -7,6 +7,7 @@ import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
+import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -155,6 +156,17 @@ export default defineComponent({
             },
         });
 
+        const newAccountAlreadyCreated = computed(() => {
+            const emails = metakeepCache.getMails();
+            if (emails.length > 0) {
+                const ethPubKey = metakeepCache.getEthAddress(emails[0]);
+                if (ethPubKey) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         return {
             isLoading,
             isLoadingOreId,
@@ -182,6 +194,7 @@ export default defineComponent({
             googleSubscription,
             showGoogleLoading,
             googleCtrl,
+            newAccountAlreadyCreated,
         };
     },
     unmounted() {
@@ -316,6 +329,13 @@ export default defineComponent({
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
 
+        <div class="c-evm-login-buttons__title">{{
+            newAccountAlreadyCreated ?
+                $t('temporal.welcome_new_telos_cloud_title_part_2') :
+                $t('temporal.welcome_new_telos_cloud_title_part_1')
+        }}</div>
+        <div class="c-evm-login-buttons__sub-title">{{ $t('temporal.welcome_new_telos_cloud') }}</div>
+
         <div v-if="showGoogleLoading" >
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
@@ -327,35 +347,33 @@ export default defineComponent({
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
 
-        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
+        <div class="c-evm-login-buttons__title q-mt-md">{{ $t('temporal.warn_old_telos_cloud_users_title') }}</div>
 
-        <!-- Facebook OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
+        <div class="c-evm-login-buttons__sub-title">{{
+            newAccountAlreadyCreated ?
+                $t('temporal.warn_old_telos_cloud_users_part_2') :
+                $t('temporal.warn_old_telos_cloud_users_part_1')
+        }}</div>
+
+        <!-- Google old OreId Authenticator -->
+        <div
+            :class="{
+                'c-evm-login-buttons__option': true,
+                'c-evm-login-buttons__option--web2': true,
+                'c-evm-login-buttons__option--disabled': !newAccountAlreadyCreated,
+            }"
+            @click="setOreIdAuthenticator('google')"
+        >
+            <template v-if="isLoadingOreId('google')">
                 <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <img
                     width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--facebook.svg"
+                    class="c-evm-login-buttons__icon"
+                    src="~assets/icon--google.svg"
                 >
-                {{ $t('home.sign_with_facebook') }}
-            </template>
-        </div>
-
-        <!-- X OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--twitter.svg"
-                >
-                {{ $t('home.sign_with_x') }}
+                {{ $t('home.sign_with_google') }}
             </template>
         </div>
 
@@ -419,6 +437,12 @@ export default defineComponent({
         justify-content: flex-start;
         align-items: center;
         gap: 8px;
+    }
+
+    &__title {
+        @include text--header-4;
+        color: $white;
+        text-align: center;
     }
 
     &__sub-title {

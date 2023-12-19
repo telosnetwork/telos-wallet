@@ -618,5 +618,17 @@ export default {
         telos_cloud_discontinued_title: 'Important',
         telos_cloud_discontinued_message_title: 'Attention Users: Telos Cloud Wallet account option will be discontinued.',
         telos_cloud_discontinued_message_body:'The Telos Cloud Wallet (ORE ID via Google) account option to connect and sign transactions will be discontinued after December 31st. If you use the Telos Cloud Wallet to access your account, please transfer your assets to another wallet before this deadline. <strong> This change does <i>not</i> impact users accessing their accounts via Metamask, WalletConnect, Anchor, or other sign-in methods.</strong>',
+        welcome_new_telos_cloud_title_part_1: 'New Telos Cloud Wallet',
+        welcome_new_telos_cloud_title_part_2: 'Welcome back',
+        welcome_new_telos_cloud: 'If you are new to Telos Cloud Wallet, please sign in with your Google account to create a new Telos account.',
+        warn_old_telos_cloud_users_title: 'Attention Old Users',
+        warn_old_telos_cloud_users_part_1: 'If you are an old Telos Cloud Wallet user, you need to log in with the Google above first, button to create your brand-new account. Then log out and come back here to start the migration.',
+        warn_old_telos_cloud_users_part_2: 'If you are an old Telos Cloud Wallet user, now you can start migrating all your assets to your new account. Please click the button below to start the migration.',
+
+        you_need_to_migrate_title: 'You need to migrate your assets',
+        you_need_to_migrate_sub_title: 'The access to this account will be discontinued, therefore you need to migrate your assets to a new account.',
+        you_need_to_migrate_nfts_first: 'You should start transfer all your collectibles to your new account first, and then continue with your tokens.',
+        you_need_to_migrate_all_tokens: 'You should start transfer all your tokens to your new account. Leave the TLOS tokens for the end.',
+
     },
 };

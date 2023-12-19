@@ -73,6 +73,10 @@ class MetakeepCache {
         }
     }
 
+    public getMails(): string[] {
+        return Object.keys(this.cache);
+    }
+
     public getEosAddress(email: string): string {
         this.assertCache(email);
         return this.cache[email]?.wallet?.eosAddress ?? '';
