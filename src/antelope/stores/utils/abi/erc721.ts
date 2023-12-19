@@ -365,5 +365,5 @@ export const erc721ApproveAbi = [{
     'outputs': [],
     'stateMutability': 'nonpayable',
     'type': 'function',
-}] as unknown as EvmABI; // eztodo fix this
+}] as unknown as EvmABI;
 

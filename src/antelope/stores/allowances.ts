@@ -392,24 +392,20 @@ export const useAllowancesStore = defineStore(store_name, {
             useFeedbackStore().setLoading('updateNftCollectionAllowance');
 
             try {
-                const nftContract = await useContractStore().getContract(CURRENT_CONTEXT, nftContractAddress);
-                const nftContractInstance = await nftContract?.getContractInstance();
+                const authenticator = useAccountStore().getEVMAuthenticator(CURRENT_CONTEXT);
+                const tx = await authenticator.updateNftCollectionAllowance(operator, nftContractAddress, allowed) as TransactionResponse;
 
-                if (!nftContractInstance) {
-                    throw new AntelopeError('antelope.utils.error_contract_instance');
-                }
+                const account = useAccountStore().loggedAccount as EvmAccountModel;
 
-                const tx = await nftContractInstance.setApprovalForAll(operator, allowed) as TransactionResponse;
+                const returnTx = this.subscribeForTransactionReceipt(account, tx);
 
-                tx.wait().then(() => {
-                    setTimeout(() => {
-                        this.fetchAllowancesForAccount(owner).then(() => {
-                            useFeedbackStore().unsetLoading('updateNftCollectionAllowance');
-                        });
-                    }, 3000); // give the indexer time to update allowance data
+                returnTx.then((r) => {
+                    r.wait().finally(() => {
+                        useFeedbackStore().unsetLoading('updateNftCollectionAllowance');
+                    });
                 });
 
-                return tx;
+                return returnTx;
             } catch (error) {
                 const trxError = getAntelope().config.transactionError('antelope.evm.error_updating_allowance', error);
                 getAntelope().config.transactionErrorHandler(trxError, 'updateNftCollectionAllowance');
