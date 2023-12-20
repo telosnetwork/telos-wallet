@@ -160,7 +160,7 @@ export class MetakeepAuthenticator extends Authenticator {
 
 
     async createAccount(publicKey: string): Promise<string> {
-        return axios.post(`${this.api}/v1/accounts/random`, {
+        return axios.post(`${this.api}/accounts/random`, {
             ownerKey: publicKey,
             activeKey: publicKey,
         }).then(response => response.data.accountName);
