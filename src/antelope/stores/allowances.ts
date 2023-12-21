@@ -194,19 +194,19 @@ export const useAllowancesStore = defineStore(store_name, {
             const allowanceStore = useAllowancesStore();
             if (tokenId) {
                 return allowanceStore.singleErc721Allowances(label).find(allowance =>
-                    allowance.spenderAddress === spenderAddress &&
-                    allowance.collectionAddress === tokenAddress &&
-                    allowance.tokenId === tokenId,
+                    allowance.spenderAddress.toLowerCase() === spenderAddress.toLowerCase() &&
+                    allowance.collectionAddress.toLowerCase() === tokenAddress.toLowerCase() &&
+                    allowance.tokenId.toLowerCase() === tokenId.toLowerCase(),
                 );
             }
 
             return allowanceStore.allowances(label).find((allowance) => {
-                const spenderAddressMatches = allowance.spenderAddress === spenderAddress;
+                const spenderAddressMatches = allowance.spenderAddress.toLowerCase() === spenderAddress.toLowerCase();
                 if (isErc20AllowanceRow(allowance)) {
-                    return spenderAddressMatches && allowance.tokenAddress === tokenAddress;
+                    return spenderAddressMatches && allowance.tokenAddress.toLowerCase() === tokenAddress.toLowerCase();
                 }
 
-                return spenderAddressMatches && allowance.collectionAddress === tokenAddress;
+                return spenderAddressMatches && allowance.collectionAddress.toLowerCase() === tokenAddress.toLowerCase();
             });
         },
     },
