@@ -158,7 +158,7 @@ export default boot(async ({ app, store }) => {
         new MetakeepAuthenticator([chain], {
             appName: process.env.APP_NAME,
             appId: process.env.METAKEEP_APP_ID_NATIVE,
-            api: process.env.TELOS_API_ENDPOINT,
+            accountCreateAPI: `${process.env.TELOS_API_ENDPOINT}/accounts/create4google`,
         }),
     ];
 

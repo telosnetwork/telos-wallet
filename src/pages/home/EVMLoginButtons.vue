@@ -6,7 +6,7 @@ import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
-import { googleCtrl } from 'src/pages/home/GoogleOneTap';
+import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -77,11 +77,11 @@ export default defineComponent({
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
-        const setMetaKeepAuthenticator = async (email:string) => {
+        const setMetaKeepAuthenticator = async (data:GoogleCredentials) => {
             const name = 'MetaKeep';
             const auth = ant.wallets.getAuthenticator(name);
             if (auth) {
-                (auth as MetaKeepAuth).setEmail(email);
+                (auth as MetaKeepAuth).setEmail(data.email);
             }
             setAuthenticator(name, CURRENT_CONTEXT);
         };
@@ -147,10 +147,10 @@ export default defineComponent({
 
         const showGoogleLoading = ref(false);
         const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
-            next: (email) => {
-                if (email) {
+            next: (data) => {
+                if (data) {
                     showGoogleLoading.value = true;
-                    setMetaKeepAuthenticator(email);
+                    setMetaKeepAuthenticator(data);
                 }
             },
         });

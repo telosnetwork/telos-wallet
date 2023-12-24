@@ -3,6 +3,11 @@ import { AntelopeError } from 'src/antelope/types';
 import * as Buffer from 'buffer';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+export interface GoogleCredentials {
+    email: string;
+    jwt: string;
+}
+
 interface GoogleOneTap {
     accounts: {
         id: {
@@ -52,7 +57,7 @@ const _window = (window as any);
 
 class GoogleOneTapController {
 
-    onSuccessfulLogin = new BehaviorSubject<string | null>(null);
+    onSuccessfulLogin = new BehaviorSubject<GoogleCredentials | null>(null);
     onError = new BehaviorSubject<string | null>(null);
     onMoment = new Subject<{type: string, status:string, reason:string}>();
     clientId = process.env.GOOGLE_APP_ID as string;
@@ -90,9 +95,9 @@ class GoogleOneTapController {
                 client_id: this.clientId,
                 callback: (response: GoogleNotification | null) => {
                     if (response) {
-                        const credential = response.credential;
-                        const decoded = this.decodeJWT(credential);
-                        this.handleOneTapSuccess(decoded);
+                        const jwt = response.credential;
+                        const decoded = this.decodeJWT(jwt);
+                        this.handleOneTapSuccess(decoded, jwt);
                     } else {
                         this.handleOneTapError(JSON.stringify(response));
                     }
@@ -101,8 +106,8 @@ class GoogleOneTapController {
         }
     }
 
-    decodeJWT(token: string) {
-        const parts = token.split('.');
+    decodeJWT(jwt: string) {
+        const parts = jwt.split('.');
         const header = parts[0];
         const payload = parts[1];
 
@@ -139,8 +144,9 @@ class GoogleOneTapController {
         this.onMoment.next({ type, status, reason });
     }
 
-    handleOneTapSuccess(response: SuccessResponse) {
-        this.onSuccessfulLogin.next(response.payload.email);
+    handleOneTapSuccess(response: SuccessResponse, jwt: string) {
+        const email = response.payload.email;
+        this.onSuccessfulLogin.next({ email, jwt });
     }
 
     handleOneTapError (error: string) {
