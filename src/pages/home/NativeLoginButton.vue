@@ -82,11 +82,11 @@ export default defineComponent({
         this.setDefaultNativeChain();
 
         this.googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
-            next: (email) => {
+            next: (data) => {
                 if (this.googleSubscription) {
-                    if (email) {
+                    if (data) {
                         this.showGoogleLoading = true;
-                        this.loginWithMetaKeep(email);
+                        this.loginWithMetaKeep(data);
                     }
                 }
             },
@@ -120,10 +120,10 @@ export default defineComponent({
             'getAccountProfile',
             'setLoadingWallet',
         ]),
-        async loginWithMetaKeep(email) {
+        async loginWithMetaKeep(credentials) {
             const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('metakeep.ual');
             const auth = this.$ual.authenticators[idx];
-            auth.setEmail(email);
+            auth.setUserCredentials(credentials);
             this.onLogin(idx);
         },
         async loginAsOreId() {

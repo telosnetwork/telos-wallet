@@ -13,11 +13,16 @@ import axios from 'axios';
 import { APIClient, NameType, PackedTransaction, Serializer, Transaction } from '@greymass/eosio';
 import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 
+export interface UserCredentials {
+    email: string;
+    jwt: string;
+}
+
 export interface MetakeepUALOptions {
     appId: string;
     appName: string;
     rpc?: JsonRpc;
-    api: string;
+    accountCreateAPI: string;
     reasonCallback?: (transaction: any) => string;
 }
 let metakeep: MetaKeep | null = null;
@@ -40,10 +45,10 @@ export interface MetakeepData {
 export class MetakeepAuthenticator extends Authenticator {
     private chainId: string;
     private rpc: JsonRpc;
-    private api: string;
-    private accountEmail: string;
+    private accountCreateAPI: string;
     private appId: string;
     private loading = false;
+    private userCredentials: UserCredentials = { email: '', jwt: '' };
 
     constructor(chains: Chain[], options: MetakeepUALOptions) {
         super(chains, options);
@@ -60,9 +65,12 @@ export class MetakeepAuthenticator extends Authenticator {
             throw new Error('MetakeepAuthenticator: Missing appId');
         }
         this.appId = options.appId;
-        this.api = options.api;
+        this.accountCreateAPI = options.accountCreateAPI;
         this.chains = chains;
-        this.accountEmail = metakeepCache.getLogged() ?? '';
+        this.userCredentials = {
+            email: metakeepCache.getLogged() ?? '',
+            jwt: '',
+        };
     }
 
     saveCache() {
@@ -73,9 +81,9 @@ export class MetakeepAuthenticator extends Authenticator {
         //
     }
 
-    setEmail(email: string): void {
-        this.accountEmail = email;
-        metakeepCache.setLogged(email);
+    setUserCredentials(credentials: UserCredentials): void {
+        this.userCredentials = credentials;
+        metakeepCache.setLogged(credentials.email);
     }
 
     /**
@@ -159,11 +167,11 @@ export class MetakeepAuthenticator extends Authenticator {
         return false;
     }
 
-
     async createAccount(publicKey: string): Promise<string> {
-        return axios.post(`${this.api}/v1/accounts/random`, {
+        return axios.post(this.accountCreateAPI, {
             ownerKey: publicKey,
             activeKey: publicKey,
+            jwt: this.userCredentials.jwt,
         }).then(response => response.data.accountName);
     }
 
@@ -173,12 +181,12 @@ export class MetakeepAuthenticator extends Authenticator {
             if (!metakeep) {
                 return reject(new Error('metakeep is not initialized'));
             }
-            if (this.accountEmail === '') {
+            if (this.userCredentials.email === '') {
                 return reject(new Error('No account email'));
             }
 
             // we check if we have the account name in the cache
-            const accountNames = metakeepCache.getAccountNames(this.accountEmail, this.chainId);
+            const accountNames = metakeepCache.getAccountNames(this.userCredentials.email, this.chainId);
             if (accountNames.length > 0) {
                 resolve(accountNames[0]);
             }
@@ -187,7 +195,7 @@ export class MetakeepAuthenticator extends Authenticator {
             const credentials = await metakeep.getWallet();
             const publicKey = credentials.wallet.eosAddress;
 
-            metakeepCache.addCredentials(this.accountEmail, credentials.wallet);
+            metakeepCache.addCredentials(this.userCredentials.email, credentials.wallet);
 
             try {
                 // we try to get the account name from the public key
@@ -200,7 +208,8 @@ export class MetakeepAuthenticator extends Authenticator {
                 } else {
                     accountName = await this.createAccount(publicKey);
                 }
-                metakeepCache.addAccountName(this.accountEmail, this.chainId, accountName);
+
+                metakeepCache.addAccountName(this.userCredentials.email, this.chainId, accountName);
                 this.saveCache();
                 return resolve(accountName);
             } catch (error) {
@@ -217,7 +226,7 @@ export class MetakeepAuthenticator extends Authenticator {
      */
     login: () => Promise<[User]> = async () => {
         console.error('login');
-        if (this.accountEmail === '') {
+        if (this.userCredentials.email === '') {
             throw new Error('No account email');
         }
 
@@ -228,12 +237,12 @@ export class MetakeepAuthenticator extends Authenticator {
             appId: this.appId,
             // Signed in user's email address
             user: {
-                email: this.accountEmail,
+                email: this.userCredentials.email,
             },
         });
 
         const accountName = await this.resolveAccountName();
-        const publicKey = metakeepCache.getEosAddress(this.accountEmail);
+        const publicKey = metakeepCache.getEosAddress(this.userCredentials.email);
 
         try {
             const permission = 'active';
@@ -244,7 +253,7 @@ export class MetakeepAuthenticator extends Authenticator {
                 publicKey,
                 chainId: this.chainId,
                 rpc: this.rpc,
-                api: this.api,
+                accountCreateAPI: this.accountCreateAPI,
             });
 
             return [userInstance];
@@ -284,21 +293,21 @@ class MetakeepUser extends User {
 
     rpc: JsonRpc;
     protected eosioCore: APIClient;
-    protected api: string;
+    protected accountCreateAPI: string;
     constructor({
         accountName,
         permission,
         publicKey,
         chainId,
         rpc,
-        api,
+        accountCreateAPI,
     }: {
             accountName: string,
             permission: string,
             publicKey: string,
             chainId: string,
             rpc: JsonRpc,
-            api: string,
+            accountCreateAPI: string,
     }) {
         super();
         this.keys = [publicKey];
@@ -306,9 +315,9 @@ class MetakeepUser extends User {
         this.permission = permission;
         this.chainId = chainId;
         this.rpc = rpc;
-        this.api = api;
+        this.accountCreateAPI = accountCreateAPI;
         this.eosioCore = new APIClient({ url: rpc.endpoint });
-        console.log('this.api', this.api);
+        console.log('this.api', this.accountCreateAPI);
     }
 
     setReasonCallback(callback: (transaction: any) => string) {
