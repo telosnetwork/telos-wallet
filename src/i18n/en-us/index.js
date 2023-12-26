@@ -320,7 +320,7 @@ export default {
         erc_721_single_allowance_blurb: 'Note: there may only be up to one approved spender for this type of collectible (ERC-721). Making a change here will revoke the previous approval.',
         revoking_allowances_title: 'Revoking {total} allowances ({remaining} remaining)',
         revoking_allowances_description: 'Please wait while we revoke the selected allowances. You will need to approve each transaction in your wallet.',
-        revoking_allowances_cancel_note: "Note: clicking 'Cancel' will not cancel transactions which have already been approved. Any pending transaction(s) must be cancelled in your wallet.",
+        revoking_allowances_cancel_note: 'Note: clicking \'Cancel\' will not cancel transactions which have already been approved. Any pending transaction(s) must be cancelled in your wallet.',
     },
     notification:{
         success_title_trx: 'Success',
