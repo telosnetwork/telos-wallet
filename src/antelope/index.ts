@@ -10,6 +10,7 @@ import { ChainModel } from 'src/antelope/stores/chain';
 
 import {
     useAccountStore,
+    useAllowancesStore,
     useBalancesStore,
     useChainStore,
     useContractStore,
@@ -90,20 +91,21 @@ export class Antelope {
 
     get stores() {
         return {
-            user: useUserStore(),
-            chain: useChainStore(),
             account: useAccountStore(),
+            allowances: useAllowancesStore(),
+            balances: useBalancesStore(),
+            chain: useChainStore(),
+            contract: useContractStore(),
+            evm: useEVMStore(),
+            feedback: useFeedbackStore(),
+            history: useHistoryStore(),
+            nfts: useNftsStore(),
+            platform: usePlatformStore(),
             profile: useProfileStore(),
             resources: useResourcesStore(),
             rex: useRexStore(),
             tokens: useTokensStore(),
-            contract: useContractStore(),
-            balances: useBalancesStore(),
-            history: useHistoryStore(),
-            feedback: useFeedbackStore(),
-            platform: usePlatformStore(),
-            evm: useEVMStore(),
-            nfts: useNftsStore(),
+            user: useUserStore(),
         };
     }
 
@@ -128,19 +130,20 @@ export const installAntelope = (app: App) => {
 };
 
 export { useAccountStore } from 'src/antelope/stores/account';
+export { useAllowancesStore } from 'src/antelope/stores/allowances';
+export { useBalancesStore } from 'src/antelope/stores/balances';
 export { useChainStore } from 'src/antelope/stores/chain';
-export { useUserStore } from 'src/antelope/stores/user';
+export { useContractStore } from 'src/antelope/stores/contract';
+export { useEVMStore } from 'src/antelope/stores/evm';
+export { useFeedbackStore } from 'src/antelope/stores/feedback';
+export { useHistoryStore } from 'src/antelope/stores/history';
+export { useNftsStore } from 'src/antelope/stores/nfts';
+export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useProfileStore } from 'src/antelope/stores/profile';
 export { useResourcesStore } from 'src/antelope/stores/resources';
 export { useRexStore } from 'src/antelope/stores/rex';
 export { useTokensStore } from 'src/antelope/stores/tokens';
-export { useContractStore } from 'src/antelope/stores/contract';
-export { useBalancesStore } from 'src/antelope/stores/balances';
-export { useHistoryStore } from 'src/antelope/stores/history';
-export { useFeedbackStore } from 'src/antelope/stores/feedback';
-export { usePlatformStore } from 'src/antelope/stores/platform';
-export { useEVMStore } from 'src/antelope/stores/evm';
-export { useNftsStore } from 'src/antelope/stores/nfts';
+export { useUserStore } from 'src/antelope/stores/user';
 
 // this constant is used for a temporal workaround for the multi-context issue
 // https://github.com/telosnetwork/telos-wallet/issues/582

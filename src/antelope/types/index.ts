@@ -1,6 +1,7 @@
 // interfaces for antelope
 export * from 'src/antelope/types/ABIv1';
 export * from 'src/antelope/types/Actions';
+export * from 'src/antelope/types/Allowances';
 export * from 'src/antelope/types/AntelopeError';
 export * from 'src/antelope/types/Api';
 export * from 'src/antelope/types/ChainInfo';

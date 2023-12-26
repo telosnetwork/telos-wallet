@@ -1,5 +1,9 @@
 import { NftTokenInterface } from 'src/antelope/types/NFTClass';
 
+export enum Sort {
+    ascending = 'asc',
+    descending = 'desc',
+}
 
 export interface HyperionAbiSignatureFilter {
     type?: string;
@@ -65,4 +69,11 @@ export interface IndexerCollectionNftsFilter extends IndexerPaginationFilter {
     tokenId?: string; // only query results for a specific token ID
     includeTokenIdSupply?: boolean;
     type?: NftTokenInterface;
+}
+
+export interface IndexerAllowanceFilter extends IndexerPaginationFilter {
+    contract?: string; // contract address
+    sort?: 'DESC' | 'ASC'; // sort by allowance amount (DESC or ASC)
+    includeAbi?: boolean; // indicate whether to include abi
+    includePagination?: boolean; // indicate whether to include pagination
 }

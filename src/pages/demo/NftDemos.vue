@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 import NftTile from 'pages/evm/nfts/NftTile.vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import { Collectible, Erc1155Nft, Erc721Nft, NFTContractClass } from 'src/antelope/types';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 
@@ -69,6 +69,7 @@ const fakeErc1155Nft = new Erc1155Nft({
         ['0x'.concat('7'.repeat(40))]: 12,
     },
     mediaType: 'image',
+    supply: 1,
 }, fakeErc1155NftContract);
 
 const nfts = [
