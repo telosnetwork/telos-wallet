@@ -1,16 +1,16 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+import { ethers } from 'ethers';
 
 import InlineSvg from 'vue-inline-svg';
 
 import { CURRENT_CONTEXT, useChainStore, useUserStore } from 'src/antelope';
-
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { EvmRexDeposit } from 'src/antelope/types';
-import ToolTip from 'components/ToolTip.vue';
 import { prettyPrintCurrency } from 'src/antelope/stores/utils/currency-utils';
-import { ethers } from 'ethers';
-import { getFormatedDate } from 'src/antelope/stores/utils';
+import { DEFAULT_DATE_FORMAT, getFormattedDate } from 'src/antelope/stores/utils/date-utils';
+
+import ToolTip from 'components/ToolTip.vue';
 
 const userStore = useUserStore();
 const chainStore = useChainStore();
@@ -41,7 +41,7 @@ export default defineComponent({
             return this.withdrawal.until.toNumber();
         },
         longDate(): string {
-            return getFormatedDate(this.epoch, 'MMM d, yyyy hh:mm a', false);
+            return getFormattedDate(this.epoch, DEFAULT_DATE_FORMAT, false);
         },
         isWithdrawable(): boolean {
             return this.epoch <= this.now / 1000;

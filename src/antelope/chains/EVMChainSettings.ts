@@ -27,13 +27,17 @@ import {
     IndexerAccountNftsFilter,
     IndexerAccountNftsResponse,
     GenericIndexerNft,
-    IndexerNftContract,
+    IndexerContract,
     NftRawData,
     IndexerCollectionNftsResponse,
     Erc721Nft,
     getErc721Owner,
     Erc1155Nft,
     AntelopeError,
+    IndexerAllowanceFilter,
+    IndexerAllowanceResponseErc20,
+    IndexerAllowanceResponseErc721,
+    IndexerAllowanceResponseErc1155,
     getErc1155OwnersFromIndexer,
 } from 'src/antelope/types';
 import EvmContract from 'src/antelope/stores/utils/contracts/EvmContract';
@@ -378,12 +382,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
             imageCache: nftResponse.imageCache,
             tokenUri: nftResponse.tokenUri,
             supply: nftResponse.supply,
+            owner: nftResponse.owner,
         }));
 
         // we fix the supportedInterfaces property if it is undefined in the response but present in the request
         Object.values(response.contracts).forEach((contract) => {
-            contract.supportedInterfaces = contract.supportedInterfaces ||
-                params.type ? [params.type?.toLowerCase() as string] : undefined;
+            contract.supportedInterfaces = contract.supportedInterfaces || (params.type ? [params.type.toLowerCase()] : undefined);
         });
 
         this.processNftContractsCalldata(response.contracts);
@@ -431,7 +435,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     // ensure NFT contract calldata is an object
-    processNftContractsCalldata(contracts: Record<string, IndexerNftContract>) {
+    processNftContractsCalldata(contracts: Record<string, IndexerContract>) {
         for (const contract of Object.values(contracts)) {
             try {
                 contract.calldata = typeof contract.calldata === 'string' ? JSON.parse(contract.calldata) : contract.calldata;
@@ -444,7 +448,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     // shape the raw data from the indexer into a format that can be used to construct NFTs
     shapeNftRawData(
         raw: GenericIndexerNft[],
-        contracts: Record<string, IndexerNftContract>,
+        contracts: Record<string, IndexerContract>,
     ): NftRawData[] {
         const shaped = [] as NftRawData[];
         for (const item_source of raw) {
@@ -717,5 +721,37 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error('type of response.result', typeof response.result, [response.result]);
             return response.result as EvmBlockData;
         });
+    }
+
+    // allowances
+
+    async fetchErc20Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc20> {
+        const params = {
+            ...filter,
+            type: 'erc20',
+            all: true,
+        };
+        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc20;
+    }
+
+    async fetchErc721Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc721> {
+        const params = {
+            ...filter,
+            type: 'erc721',
+            all: true,
+        };
+        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc721;
+    }
+
+    async fetchErc1155Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc1155> {
+        const params = {
+            ...filter,
+            type: 'erc1155',
+            all: true,
+        };
+        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
+        return response.data as IndexerAllowanceResponseErc1155;
     }
 }

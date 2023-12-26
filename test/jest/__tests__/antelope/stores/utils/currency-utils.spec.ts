@@ -192,6 +192,11 @@ describe('prettyPrintCurrency', () => {
         expect(
             prettyPrintCurrency(BigNumber.from(100), 2, 'en-US', false, 'USD', false, 2, false),
         ).toBe('$1.00');
+
+        // ensure 0 decimals is handled correctly
+        expect(
+            prettyPrintCurrency(BigNumber.from(100), 2, 'en-US', false, '', false, 0, true),
+        ).toBe('100');
     });
 });
 
