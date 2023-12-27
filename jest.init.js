@@ -4,7 +4,9 @@ import { QBtn } from 'quasar';
 
 config.global.mocks = {
     $t: str => str,
+    $warningNotification: jest.fn(),
 };
+
 
 config.global.components = {
     'q-btn': QBtn,

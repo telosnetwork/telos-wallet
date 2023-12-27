@@ -59,10 +59,6 @@ const ContractStore = { ...ContractActions, ...ContractGetters };
 
 const useContractStore = jest.fn().mockImplementation(() => ContractStore);
 
-jest.mock('src/antelope/stores/Contract', () => ({
-    useContractStore,
-}));
-
 export {
     ContractStore,
     useContractStore,
