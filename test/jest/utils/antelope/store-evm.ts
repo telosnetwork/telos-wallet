@@ -73,10 +73,6 @@ const EVMStore = { ...EVMActions, ...EVMGetters };
 
 const useEVMStore = jest.fn().mockImplementation(() => EVMStore);
 
-jest.mock('src/antelope/stores/evm', () => ({
-    useEVMStore,
-}));
-
 export {
     EVMStore,
     useEVMStore,

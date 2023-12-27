@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { AccountModel } from 'src/antelope/stores/account';
 import { TokenBalance, TokenClass, TokenSourceInfo } from 'src/antelope/types/TokenClass';
 
 // BALANCE ---
-const BALANCE_SYSTEM_TOKEN   = ethers.BigNumber.from('123'.concat('4'.repeat(18)));
-const BALANCE_WRAPPED_TOKEN  = ethers.BigNumber.from('321'.concat('5'.repeat(18)));
-const BALANCE_STAKED_TOKEN   = ethers.BigNumber.from('456'.concat('7'.repeat(18)));
-const BALANCE_A_TOKEN        = ethers.BigNumber.from('789'.concat('8'.repeat(18)));
-const BALANCE_B_TOKEN        = ethers.BigNumber.from('987'.concat('9'.repeat(18)));
+const BALANCE_SYSTEM_TOKEN   = BigNumber.from('123'.concat('4'.repeat(18)));
+const BALANCE_WRAPPED_TOKEN  = BigNumber.from('321'.concat('5'.repeat(18)));
+const BALANCE_STAKED_TOKEN   = BigNumber.from('456'.concat('7'.repeat(18)));
+const BALANCE_A_TOKEN        = BigNumber.from('789'.concat('8'.repeat(18)));
+const BALANCE_B_TOKEN        = BigNumber.from('987'.concat('9'.repeat(18)));
 
 // ADDRESS ---
 const ADDRESS_SYSTEM_TOKEN   = '0x5e734c1C5c3eE6aEeB7cD7b1c2d2bE7Ee0Ee0Ee0';
@@ -79,7 +79,7 @@ const BalancesMapping = {
     [ADDRESS_STAKED_TOKEN]: BALANCE_STAKED_TOKEN,
     [ADDRESS_A_TOKEN]: BALANCE_A_TOKEN,
     [ADDRESS_B_TOKEN]: BALANCE_B_TOKEN,
-} as Record<string, ethers.BigNumber>;
+} as Record<string, BigNumber>;
 
 
 const EvmAuthenticator = {
@@ -105,8 +105,8 @@ const MockData = {
         id: CHAIN_ID,
         display: TEST_NETWORK_NAME,
         hyperionEndpoint: ENDPOINT_URL,
-        stakedRatio: ethers.BigNumber.from('0600000000000000000'),
-        unstakedRatio: ethers.BigNumber.from('1200000000000000000'),
+        stakedRatio: BigNumber.from('0600000000000000000'),
+        unstakedRatio: BigNumber.from('1200000000000000000'),
     },
     Network: TEST_NETWORK,
     RpcEndpoint: ENDPOINT,
