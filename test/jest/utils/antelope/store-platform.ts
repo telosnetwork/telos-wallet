@@ -29,10 +29,6 @@ const PlatformStore = { ...PlatformGetters, ...PlatformActions };
 
 const usePlatformStore = jest.fn().mockImplementation(() => PlatformStore);
 
-jest.mock('src/antelope/stores/platform', () => ({
-    usePlatformStore,
-}));
-
 export {
     PlatformStore,
     PlatformGetters,

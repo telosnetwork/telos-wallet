@@ -19,11 +19,6 @@ const createTraceFunction = jest.fn().mockImplementation(() => jest.fn());
 
 const isTracingAll = jest.fn().mockImplementation(() => false);
 
-jest.mock('src/antelope/stores/feedback', () => ({
-    useFeedbackStore,
-    createTraceFunction,
-    isTracingAll,
-}));
 
 export {
     FeedbackStore,
