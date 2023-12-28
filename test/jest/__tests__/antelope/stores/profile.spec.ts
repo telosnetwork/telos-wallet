@@ -1,4 +1,4 @@
-import { setActivePinia, createPinia } from 'pinia';
+import { setActivePinia, createPinia, Store } from 'pinia';
 
 // Mockups
 jest.mock('src/antelope/stores/feedback', () => ({
@@ -9,7 +9,8 @@ jest.mock('src/antelope/stores/feedback', () => ({
 import { useProfileStore } from 'src/antelope/stores/profile';
 
 describe('Profile Store', () => {
-    let store: any;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    let store: Store;
 
     beforeEach(() => {
         jest.clearAllMocks();
