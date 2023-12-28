@@ -1,9 +1,3 @@
-import { useChainStore } from 'test/jest/utils/antelope/store-chain';
-import { useAccountStore } from 'test/jest/utils/antelope/store-account';
-import { useEVMStore } from 'test/jest/utils/antelope/store-evm';
-import { useFeedbackStore } from 'test/jest/utils/antelope/store-feedback';
-import { usePlatformStore } from 'test/jest/utils/antelope/store-platform';
-
 // -------- Core --------
 export const getAntelope = jest.fn().mockImplementation(() => ({
     events: {
@@ -29,18 +23,6 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
 }));
 
 export const CURRENT_CONTEXT = 'current';
-
-/*
-jest.mock('src/antelope', () => ({
-    useChainStore,
-    useAccountStore,
-    useEVMStore,
-    useFeedbackStore,
-    usePlatformStore,
-    getAntelope,
-    CURRENT_CONTEXT,
-}));
-*/
 
 jest.mock('src/antelope/config', () => ({
     errorToString: jest.fn().mockImplementation(e => e),
