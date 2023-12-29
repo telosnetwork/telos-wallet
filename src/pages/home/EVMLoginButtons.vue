@@ -14,13 +14,13 @@ import {
     defineComponent,
     getCurrentInstance,
     ref,
+    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
-import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { migration } from 'src/antelope/migration';
 
