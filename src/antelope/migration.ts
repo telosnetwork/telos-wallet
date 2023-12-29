@@ -10,6 +10,8 @@ import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 const nftsStore = useNftsStore();
 const balanceStore = useBalancesStore();
 
+export const isTodayBeforeTelosCloudDown = new Date().getTime() < new Date('2023-12-31').getTime();
+
 // ----- EVM ------
 const ethPubKey = () => {
     const emails = metakeepCache.getMails();
@@ -27,7 +29,7 @@ const authenticator      = () => useAccountStore().getAccount(CURRENT_CONTEXT).a
 const currentAuthName    = () => authenticator()?.getName() || '';
 const hasNfts            = () => nftsStore.loggedInventory?.length > 0;
 const hasAssets          = () => hasAnyTokenBalance() || hasNfts();
-const isMigrationNeeded  = () => currentAuthName() === 'OreId' && ethPubKey() !== '' && hasAssets();
+const isMigrationNeeded  = () => currentAuthName() === 'OreId' && ethPubKey() !== '' && hasAssets() && isTodayBeforeTelosCloudDown;
 
 const evm = {
     hasNfts,
@@ -51,7 +53,7 @@ const accountNameZero = () => {
 };
 
 const currentAuthNameZero = () => localStorage.getItem('autoLogin');
-const isMigrationNeededZero = () => currentAuthNameZero() === 'ual-oreid' && accountNameZero() !== '';
+const isMigrationNeededZero = () => currentAuthNameZero() === 'ual-oreid' && accountNameZero() !== '' && isTodayBeforeTelosCloudDown;
 
 const zero = {
     accountName: accountNameZero,
