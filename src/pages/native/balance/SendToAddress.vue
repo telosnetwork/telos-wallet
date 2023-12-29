@@ -2,6 +2,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import SendConfirm from '~/pages/native/balance/SendConfirm';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
+import { migration } from 'src/antelope/migration';
+import { getAntelope } from 'src/antelope';
 
 export default {
     props: ['showSendToAddressDlg', 'selectedCoin', 'sendAmount'],
@@ -146,6 +148,34 @@ export default {
         );
     },
     watch: {
+        // -- migration --
+        showDlg: async function (val) {
+            if (val) {
+                if (migration.zero.isMigrationNeeded()) {
+                    const ant = getAntelope();
+                    this.toAddress = migration.zero.accountName();
+                    ant.config.notifyRememberInfoHandler(
+                        this.$t('temporal.assisted_migration_title'),
+                        [{
+                            tag: 'p',
+                            class: 'c-notify__message--paragraph',
+                            text: this.$t('temporal.assisted_migration_msg_1'),
+                        }, {
+                            tag: 'p',
+                            class: 'c-notify__message--subtitle c-notify__message--center',
+                            text: this.toAddress,
+                        }, {
+                            tag: 'p',
+                            class: '',
+                            text: this.$t('temporal.assisted_migration_msg_2'),
+                        }],
+                        '',
+                        'telos-cloud-migration-zero-transfer',
+                    );
+                }
+            }
+        },
+        // --------------
         showSendToAddressDlg: async function (val, oldVal) {
             if (val) {
                 this.toAddress = this.$root.qrcode_accountName || '';

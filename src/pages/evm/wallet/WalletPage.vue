@@ -5,10 +5,10 @@ import { TokenBalance } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { CURRENT_CONTEXT, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore, useNftsStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
-// import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 import { useI18n } from 'vue-i18n';
+import { migration } from 'src/antelope/migration';
 
 const route = useRoute();
 const { t: $t } = useI18n();
@@ -25,7 +25,6 @@ const totalFiatAmount = ref(0);
 const allBalances = computed(() => useBalancesStore().currentBalances);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
-// watchers
 watch(allBalances, (newBalances: TokenBalance[]) => {
     let newFiatBalance = 0;
     for (let balance of newBalances){
@@ -34,7 +33,6 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
         }
     }
     totalFiatAmount.value = newFiatBalance;
-
 }, { deep: true, immediate: true });
 
 watch(accountStore, (newAccountStoreState) => {
@@ -53,44 +51,29 @@ watch(accountStore, (newAccountStoreState) => {
 }, { immediate: true });
 
 
-// -------- migration functions ------------
-/*
-const metakeepAlreadyCreated = computed(() => {
-    const emails = metakeepCache.getMails();
-    if (emails.length > 0) {
-        const ethPubKey = metakeepCache.getEthAddress(emails[0]);
-        if (ethPubKey) {
-            return ethPubKey;
-        }
+// -- migration --
+const migrationNotified = ref(false);
+watch(allBalances, () => {
+    if (migration.evm.isMigrationNeeded() && !migrationNotified.value) {
+        const ant = getAntelope();
+        migrationNotified.value = true;
+        ant.config.notifyRememberInfoHandler(
+            $t('temporal.you_need_to_migrate_title'),
+            [{
+                tag: 'p',
+                class: 'c-notify__message--subtitle',
+                text: $t('temporal.you_need_to_migrate_sub_title'),
+            }, {
+                tag: 'p',
+                class: '',
+                text: $t('temporal.you_need_to_migrate_nfts_first'),
+            }],
+            '',
+            'telos-cloud-migration-msg',
+        );
     }
-    return '';
-});
-
-const nftsStore = useNftsStore();
-const balanceStore = useBalancesStore();
-const nfts = computed(() => nftsStore.loggedInventory);
-const balances = computed(() => balanceStore.loggedBalances);
-const authenticator = useAccountStore().getAccount(CURRENT_CONTEXT).authenticator;
-console.log('authenticator', authenticator);
-const currentAuthName = authenticator?.getName() || '';
-if (currentAuthName === 'metakeep' && metakeepAlreadyCreated.value !== '') {
-    // we need to notify the user that he needs to migrate his assets
-    getAntelope().config.notifyRememberInfoHandler(
-        $t('temporal.you_need_to_migrate_title'),
-        [{
-            tag: 'p',
-            class: 'c-notify__message--subtitle',
-            text: $t('temporal.you_need_to_migrate_sub_title'),
-        }, {
-            tag: 'p',
-            class: '',
-            text: nfts.value.length > 0 ? $t('temporal.you_need_to_migrate_nfts_first') : $t('temporal.you_need_to_migrate_all_tokens'),
-        }],
-        '',
-        'telos-cloud-discontinued',
-    );
-}
-*/
+}, { deep: true, immediate: true });
+//------------
 
 </script>
 

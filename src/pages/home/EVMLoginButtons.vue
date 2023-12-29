@@ -8,6 +8,7 @@ import InlineSvg from 'vue-inline-svg';
 import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
 import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
+import { migration } from 'src/antelope/migration';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -152,20 +153,12 @@ export default defineComponent({
                 if (data) {
                     showGoogleLoading.value = true;
                     setMetaKeepAuthenticator(data);
+                    ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: data.email }));
                 }
             },
         });
 
-        const newAccountAlreadyCreated = computed(() => {
-            const emails = metakeepCache.getMails();
-            if (emails.length > 0) {
-                const ethPubKey = metakeepCache.getEthAddress(emails[0]);
-                if (ethPubKey) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        const newAccountAlreadyCreated = computed(() => migration.evm.ethPubKey() !== '');
 
         return {
             isLoading,
@@ -362,7 +355,7 @@ export default defineComponent({
                 'c-evm-login-buttons__option--web2': true,
                 'c-evm-login-buttons__option--disabled': !newAccountAlreadyCreated,
             }"
-            @click="setOreIdAuthenticator('google')"
+            @click="newAccountAlreadyCreated ? setOreIdAuthenticator('google') : null"
         >
             <template v-if="isLoadingOreId('google')">
                 <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>

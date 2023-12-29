@@ -24,6 +24,7 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import UserInfo from 'components/evm/UserInfo.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 import IntegerInput from 'src/components/evm/inputs/IntegerInput.vue';
+import { migration } from 'src/antelope/migration';
 
 
 const props = defineProps<{
@@ -106,6 +107,34 @@ async function startTransfer() {
         transferLoading.value = false;
     }
 }
+
+// -- migration --
+if (migration.evm.isMigrationNeeded()) {
+    address.value = migration.evm.ethPubKey();
+    addressIsValid = true;
+    const truncated = truncateAddress(address.value);
+    const ant = getAntelope();
+    ant.config.notifyRememberInfoHandler(
+        $t('temporal.assisted_migration_title'),
+        [{
+            tag: 'p',
+            class: 'c-notify__message--paragraph',
+            text: $t('temporal.assisted_migration_msg_1'),
+        }, {
+            tag: 'p',
+            class: 'c-notify__message--subtitle c-notify__message--center',
+            text: truncated,
+        }, {
+            tag: 'p',
+            class: '',
+            text: $t('temporal.assisted_migration_msg_2'),
+        }],
+        '',
+        'telos-cloud-migration-nft-transfer',
+    );
+}
+//---------------
+
 </script>
 
 <template>

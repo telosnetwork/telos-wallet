@@ -23,18 +23,20 @@ const LOCAL_STORAGE_KEY_LOGGED = 'metakeep.logged';
 class MetakeepCache {
     private cache: MetakeepCacheData = {};
     private logged: string | null = null;
+    public mails: string[] = [];
 
     constructor() {
         this.loadCache();
     }
 
-    private loadCache() {
+    public loadCache() {
         try {
             const cachedData = window.localStorage.getItem(LOCAL_STORAGE_KEY_DATA);
             if (cachedData) {
                 this.cache = JSON.parse(cachedData);
             }
             this.logged = window.localStorage.getItem(LOCAL_STORAGE_KEY_LOGGED);
+            this.mails = Object.keys(this.cache);
         } catch (error) {
             console.error('Error loading Metakeep cache:', error);
         }

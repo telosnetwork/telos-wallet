@@ -105,6 +105,15 @@
             font-weight: bold;
             margin-bottom: 1rem;
         }
+        &--bold {
+            font-weight: bold;
+        }
+        &--center {
+            text-align: center;
+        }
+        &--paragraph {
+            margin-bottom: 1rem;
+        }
     }
     &__action-btn {
         color: var(--text-color, #000);

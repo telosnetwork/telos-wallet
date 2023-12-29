@@ -123,7 +123,9 @@ export default {
         },
     },
     async mounted() {
-        await this.memoryAutoLogin();
+        if (!this.isUserAuthenticated) {
+            await this.memoryAutoLogin();
+        }
         this.loadUserProfile();
         this.checkPath();
     },

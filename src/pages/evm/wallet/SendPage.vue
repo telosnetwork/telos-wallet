@@ -9,6 +9,8 @@ import { BigNumber, ethers } from 'ethers';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { migration } from 'src/antelope/migration';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
@@ -18,6 +20,7 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
+
 
 export default defineComponent({
     name: 'SendPage',
@@ -173,6 +176,32 @@ export default defineComponent({
     },
     created() {
         this.clearTokenTransferConfigs();
+
+        // -- migration --
+        if (migration.evm.isMigrationNeeded()) {
+            this.address = migration.evm.ethPubKey();
+            const truncated = truncateAddress(this.address);
+            this.addressIsValid = true;
+            ant.config.notifyRememberInfoHandler(
+                this.$t('temporal.assisted_migration_title'),
+                [{
+                    tag: 'p',
+                    class: 'c-notify__message--paragraph',
+                    text: this.$t('temporal.assisted_migration_msg_1'),
+                }, {
+                    tag: 'p',
+                    class: 'c-notify__message--subtitle c-notify__message--center',
+                    text: truncated,
+                }, {
+                    tag: 'p',
+                    class: '',
+                    text: this.$t('temporal.assisted_migration_msg_2'),
+                }],
+                '',
+                'telos-cloud-migration-token-transfer',
+            );
+        }
+        // -------------
     },
     unmounted() {
         this.clearTokenTransferConfigs();

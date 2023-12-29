@@ -172,6 +172,7 @@ export class MetakeepAuthenticator extends Authenticator {
             ownerKey: publicKey,
             activeKey: publicKey,
             jwt: this.userCredentials.jwt,
+            // suggestedName: 'somevalidname', // we are not using this optional parameter for now
         }).then(response => response.data.accountName);
     }
 
@@ -317,7 +318,6 @@ class MetakeepUser extends User {
         this.rpc = rpc;
         this.accountCreateAPI = accountCreateAPI;
         this.eosioCore = new APIClient({ url: rpc.endpoint });
-        console.log('this.api', this.accountCreateAPI);
     }
 
     setReasonCallback(callback: (transaction: any) => string) {

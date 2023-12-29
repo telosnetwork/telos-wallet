@@ -69,6 +69,10 @@ export interface ContractStoreState {
             processing: Record<string, Promise<EvmContract | null>>
         },
     }
+    // addresses which have been checked and are known not to be contract addresses
+    __accounts: {
+        [network: string]: string[],
+    },
 }
 
 const store_name = 'contract';
@@ -187,6 +191,13 @@ export const useContractStore = defineStore(store_name, {
                 return this.__contracts[network].cached[addressLower];
             }
 
+            const isContract = await this.addressIsContract(network, address);
+
+            if (!isContract) {
+                // address is an account, not a contract
+                return null;
+            }
+
             // if we have the metadata, we can create the contract and return it
             if (typeof this.__contracts[network].metadata[addressLower] !== 'undefined') {
                 const metadata = this.__contracts[network].metadata[addressLower] as EvmContractFactoryData;
@@ -258,7 +269,7 @@ export const useContractStore = defineStore(store_name, {
 
                     if (metadata && creationInfo) {
                         this.trace('fetchContractUsingHyperion', 'returning verified contract', address, metadata, creationInfo);
-                        return resolve(this.createAndStoreVerifiedContract(label, addressLower, metadata, creationInfo, suspectedToken));
+                        return resolve(await this.createAndStoreVerifiedContract(label, addressLower, metadata, creationInfo, suspectedToken));
                     }
 
                     const tokenContract = await this.createAndStoreContractFromTokenList(label, address, suspectedToken, creationInfo);
@@ -275,7 +286,7 @@ export const useContractStore = defineStore(store_name, {
 
                     if (creationInfo) {
                         this.trace('fetchContractUsingHyperion', 'returning empty contract', address, creationInfo);
-                        return resolve(this.createAndStoreEmptyContract(label, addressLower, creationInfo));
+                        return resolve(await this.createAndStoreEmptyContract(label, addressLower, creationInfo));
                     } else {
                         // We mark this address as not existing so we don't query it again
                         this.trace('fetchContractUsingHyperion', 'returning null', address);
@@ -417,10 +428,10 @@ export const useContractStore = defineStore(store_name, {
             metadata: EvmContractMetadata,
             creationInfo: EvmContractCreationInfo,
             suspectedType: string,
-        ): Promise<EvmContract> {
+        ): Promise<EvmContract | null> {
             this.trace('createAndStoreVerifiedContract', label, address, [metadata], [creationInfo], suspectedType);
             const token = await this.getToken(label, address, suspectedType) ?? undefined;
-            return this.createAndStoreContract(label, address, {
+            return await this.createAndStoreContract(label, address, {
                 name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
                 address,
                 abi: metadata.output?.abi,
@@ -442,9 +453,9 @@ export const useContractStore = defineStore(store_name, {
             label: string,
             address:string,
             creationInfo: EvmContractCreationInfo | null,
-        ): Promise<EvmContract> {
+        ): Promise<EvmContract | null> {
             this.trace('createAndStoreEmptyContract', label, address, [creationInfo]);
-            return this.createAndStoreContract(label, address, {
+            return await this.createAndStoreContract(label, address, {
                 name: `0x${address.slice(0, 16)}...`,
                 address,
                 creationInfo,
@@ -513,7 +524,7 @@ export const useContractStore = defineStore(store_name, {
         },
 
         // commits -----
-        createAndStoreContract(label: string, address: string, metadata: EvmContractFactoryData): EvmContract {
+        async createAndStoreContract(label: string, address: string, metadata: EvmContractFactoryData): Promise<EvmContract | null> {
             const network = useChainStore().getChain(label).settings.getNetwork();
             this.trace('createAndStoreContract', label, network, address, [metadata]);
             if (!address) {
@@ -522,6 +533,14 @@ export const useContractStore = defineStore(store_name, {
             if (!label) {
                 throw new AntelopeError('antelope.contracts.error_label_required');
             }
+
+            const isContract = await this.addressIsContract(network, address);
+
+            if (!isContract) {
+                // address is an account, not a contract
+                return null;
+            }
+
             const index = address.toString().toLowerCase();
 
             // If:
@@ -557,10 +576,33 @@ export const useContractStore = defineStore(store_name, {
             const index = address.toString().toLowerCase();
             this.__contracts[network].cached[index] = null;
         },
+
+        async addressIsContract(network: string, address: string) {
+            const addressLower = address.toLowerCase();
+            if (!this.__accounts[network]) {
+                this.__accounts[network] = [];
+            }
+
+            if (this.__accounts[network].includes(addressLower)) {
+                return false;
+            }
+
+            const provider = await getAntelope().wallets.getWeb3Provider();
+            const code = await provider.getCode(address);
+
+            const isContract = code !== '0x';
+
+            if (!isContract && !this.__accounts[network].includes(addressLower)) {
+                this.__accounts[network].push(addressLower);
+            }
+
+            return isContract;
+        },
     },
 });
 
 const contractInitialState: ContractStoreState = {
     __contracts: {},
     __factory: new EvmContractFactory(),
+    __accounts: {},
 };

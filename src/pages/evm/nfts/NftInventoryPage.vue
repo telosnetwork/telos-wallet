@@ -6,11 +6,11 @@ import { useI18n } from 'vue-i18n';
 
 import AppPage from 'components/evm/AppPage.vue';
 import NftTile from 'pages/evm/nfts/NftTile.vue';
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useChainStore } from 'src/antelope';
 import { Collectible, Erc1155Nft } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
@@ -19,6 +19,7 @@ import { truncateText } from 'src/antelope/stores/utils/text-utils';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import TableControls from 'components/evm/TableControls.vue';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
+import { migration } from 'src/antelope/migration';
 
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
@@ -315,6 +316,26 @@ onMounted(async () => {
 onUnmounted(() => {
     clearInterval(timer);
 });
+
+// -- migration --
+const migrationNotified = ref(false);
+watch(nftsToShow, (nfts) => {
+    if (migration.evm.isMigrationNeeded() && nftsToShow.value.length > 0 && !migrationNotified.value) {
+        migrationNotified.value = true;
+        const ant = getAntelope();
+        ant.config.notifyRememberInfoHandler(
+            $t('temporal.you_need_to_migrate_title'),
+            [{
+                tag: 'p',
+                class: '',
+                text: $t('temporal.you_need_to_migrate_nfts_first'),
+            }],
+            '',
+            'telos-cloud-migration-nfts',
+        );
+    }
+});
+// --------------
 
 </script>
 

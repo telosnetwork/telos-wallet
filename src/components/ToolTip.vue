@@ -78,6 +78,7 @@ function setTooltipVisibility(enable: boolean) {
     width: 24px;
     justify-content: center;
     align-items: center;
+    gap: 4px;
 
     &--dynamic-size {
         width: unset;

@@ -7,6 +7,7 @@ import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { OreIdAuthenticator } from 'ual-oreid';
 import { Menu } from '~/pages/home/MenuType';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
+import { migration } from 'src/antelope/migration';
 
 const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
@@ -67,14 +68,7 @@ export default defineComponent({
             return this.modelValue === Menu.CLOUD;
         },
         newAccountAlreadyCreated() {
-            const emails = metakeepCache.getMails();
-            if (emails.length > 0) {
-                const ethPubKey = metakeepCache.getEthAddress(emails[0]);
-                if (ethPubKey) {
-                    return true;
-                }
-            }
-            return false;
+            return migration.zero.accountName() !== '';
         },
     },
     mounted() {
@@ -386,9 +380,17 @@ export default defineComponent({
         </div>
     </template>
 
-
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
+
+        <div class="c-zero-login-buttons__title">{{
+            newAccountAlreadyCreated ?
+                $t('temporal.welcome_new_telos_cloud_title_part_2') :
+                $t('temporal.welcome_new_telos_cloud_title_part_1')
+        }}</div>
+        <div class="c-zero-login-buttons__sub-title">{{ $t('temporal.welcome_new_telos_cloud') }}</div>
+
+
         <div v-if="showGoogleLoading">
             <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
@@ -400,12 +402,23 @@ export default defineComponent({
             <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
 
-        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
+        <div class="c-zero-login-buttons__title q-mt-md">{{ $t('temporal.warn_old_telos_cloud_users_title') }}</div>
 
-        <!-- Google OAuth Provider -->
-        <!-- Google old OreId Authenticator -->
-        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2" @click="loginAsOreId()">
-            <template v-if="isLoading('metakeep.ual')">
+        <div class="c-zero-login-buttons__sub-title">{{
+            newAccountAlreadyCreated ?
+                $t('temporal.warn_old_telos_cloud_users_part_2') :
+                $t('temporal.warn_old_telos_cloud_users_part_1')
+        }}</div>
+
+        <div
+            :class="{
+                'c-zero-login-buttons__option': true,
+                'c-zero-login-buttons__option--web2': true,
+                'c-zero-login-buttons__option--disabled': !newAccountAlreadyCreated,
+            }"
+            @click="newAccountAlreadyCreated ? loginAsOreId() : null"
+        >
+            <template v-if="isLoadingOreId()">
                 <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
@@ -418,27 +431,6 @@ export default defineComponent({
             </template>
         </div>
 
-        <!--
-        < !-- Facebook OAuth Provider -- >
-        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
-            <img
-                width="24"
-                class="c-zero-login-buttons__icon c-zero-login-buttons__icon--disabled"
-                src="~assets/icon--facebook.svg"
-            >
-            {{ $t('home.sign_with_facebook') }}
-        </div>
-
-        < !-- X OAuth Provider -- >
-        <div class="c-zero-login-buttons__option c-zero-login-buttons__option--web2 c-zero-login-buttons__option--disabled">
-            <img
-                width="24"
-                class="c-zero-login-buttons__icon c-zero-login-buttons__icon--disabled"
-                src="~assets/icon--twitter.svg"
-            >
-            {{ $t('home.sign_with_x') }}
-        </div>
-        -->
     </template>
 
     <!-- RAM low dialog -->
@@ -550,6 +542,12 @@ export default defineComponent({
         justify-content: flex-start;
         align-items: center;
         gap: 8px;
+    }
+
+    &__title {
+        @include text--header-4;
+        color: $white;
+        text-align: center;
     }
 
     &__sub-title {

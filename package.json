@@ -1,6 +1,6 @@
 {
   "name": "telos-web-wallet",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "description": "A Web Wallet for Telos",
   "productName": "Telos Web Wallet",
   "private": true,
@@ -47,7 +47,6 @@
     "quasar": "2",
     "rxjs": "^7.8.0",
     "ual-anchor": "^1.1.2",
-    "ual-ledger": "^0.3.0",
     "ual-oreid": "^1.0.0",
     "ual-wombat": "^0.3.3",
     "universal-authenticator-library": "^0.3.0",

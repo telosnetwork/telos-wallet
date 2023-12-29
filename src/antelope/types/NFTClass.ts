@@ -3,7 +3,7 @@
 import {
     GenericIndexerNft,
     INVALID_METADATA,
-    IndexerNftContract,
+    IndexerContract,
     IndexerNftItemAttribute,
     IndexerNftMetadata,
     IndexerTokenHoldersResponse,
@@ -190,8 +190,8 @@ export async function constructNft(
 // NFT classes ------------------
 
 export class NFTContractClass {
-    indexer: IndexerNftContract;
-    constructor(source: IndexerNftContract) {
+    indexer: IndexerContract;
+    constructor(source: IndexerContract) {
         this.indexer = source;
     }
 

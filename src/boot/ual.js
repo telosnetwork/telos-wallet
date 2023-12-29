@@ -162,8 +162,6 @@ export default boot(async ({ app, store }) => {
         }),
     ];
 
-    console.log();
-
     const ual = new UAL([chain], 'ual', authenticators);
     store['$ual'] = ual;
     app.config.globalProperties.$ual = ual;
