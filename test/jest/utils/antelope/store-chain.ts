@@ -94,10 +94,6 @@ const ChainStore = { ...ChainGetters, ...ChainActions };
 
 const useChainStore = jest.fn().mockImplementation(() => ChainStore);
 
-jest.mock('src/antelope/stores/chain', () => ({
-    useChainStore,
-}));
-
 export {
     ChainStore,
     ChainGetters,

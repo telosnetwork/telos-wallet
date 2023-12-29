@@ -92,10 +92,6 @@ const AccountStore = { ...AccountGetters, ...AccountActions };
 
 const useAccountStore = jest.fn().mockImplementation(() => AccountStore);
 
-jest.mock('src/antelope/stores/account', () => ({
-    useAccountStore,
-}));
-
 export {
     MockData,
     useAccountStore,

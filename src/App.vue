@@ -1,6 +1,5 @@
 <script lang="ts">
 import { getAntelope, useChainStore } from 'src/antelope';
-import { ComplexMessage } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { TELOS_CHAIN_IDS } from 'src/antelope/chains/chain-constants';
 import packageInfo from '../package.json';

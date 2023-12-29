@@ -24,7 +24,6 @@ import {
     EvmABI,
     addressString,
     AntelopeError,
-
 } from 'src/antelope/types';
 import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';

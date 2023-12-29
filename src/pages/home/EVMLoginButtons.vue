@@ -1,6 +1,20 @@
 <script lang="ts">
-import { CURRENT_CONTEXT, getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore, usePlatformStore } from 'src/antelope';
-import { ComponentInternalInstance, PropType, computed, defineComponent, getCurrentInstance, ref, watch } from 'vue';
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useChainStore,
+    useFeedbackStore,
+    usePlatformStore,
+} from 'src/antelope';
+import {
+    ComponentInternalInstance,
+    PropType,
+    computed,
+    defineComponent,
+    getCurrentInstance,
+    ref,
+} from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
