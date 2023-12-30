@@ -149,11 +149,6 @@ export default boot(async ({ app, store }) => {
             loginHandler,
             signHandler,
         }),
-        new OreIdAuthenticator([chain], {
-            appId: process.env.OREID_APP_ID_NATIVE,
-            plugins: { popup: WebPopup() },
-        },
-        AuthProvider.Google),
     ];
 
     const ual = new UAL([chain], 'ual', authenticators);
