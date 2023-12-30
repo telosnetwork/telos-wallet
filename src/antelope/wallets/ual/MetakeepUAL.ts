@@ -432,6 +432,8 @@ class MetakeepUser extends User {
     }
 
     /**
+     * Note: this method is not implemented yet
+     *
      * @param publicKey     The public key to use for signing.
      * @param data                The data to be signed.
      * @param helpText        Help text to explain the need for arbitrary data to be signed.
@@ -439,7 +441,7 @@ class MetakeepUser extends User {
      * @returns                     The signature
      */
     signArbitrary = async (): Promise<string> => {
-        throw new Error('cleos does not support signing arbitrary data');
+        throw new Error('MetakeepUAL: signArbitrary not supported (yet)');
     };
 
     /**
