@@ -700,7 +700,7 @@ export default {
                 <!-- Account Amount -->
                 <div class="full-width items-center balance-div row">
                     <div class="full-width"></div>
-                    <div class="full-width">
+                    <div class="full-width balance-text">
                         <label
                             class="text-white items-center"
                             :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
@@ -709,6 +709,10 @@ export default {
                                 displayAmount.toFixed(2).slice(-2)
                             }}
                         </label>
+                        <div>
+                            <q-icon name="o_info" size="sm" />
+                            <q-tooltip>{{ $t('balance.balance_fiat_tooltip') }}</q-tooltip>
+                        </div>
                     </div>
                 </div>
 
@@ -977,6 +981,13 @@ export default {
   background-color: #00000000;
   display: inline-flex;
   justify-content: space-between;
+}
+
+.balance-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
 
 .balanceBtn {

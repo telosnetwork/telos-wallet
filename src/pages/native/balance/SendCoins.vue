@@ -21,7 +21,23 @@ export default {
             ));
         },
         availableCoins() {
-            return this.coins.filter(coin => coin.amount > 0);
+            let filteredCoins = this.coins.filter(coin => coin.amount > 0);
+
+            if (filteredCoins.findIndex(coin => coin.symbol === 'TLOS' && coin.account === 'eosio.token') === -1) {
+                filteredCoins = [{
+                    name: 'Telos',
+                    symbol: 'TLOS',
+                    amount: 0,
+                    price: 0,
+                    icon: 'telos',
+                    network: 'eos',
+                }, ...filteredCoins];
+            }
+
+            return filteredCoins;
+        },
+        showEmptyTelos() {
+            return this.availableCoins.findIndex(coin => coin.symbol === 'TLOS' && coin.account === 'eosio.token') === -1;
         },
         showDlg: {
             get() {
@@ -34,6 +50,9 @@ export default {
     },
     methods: {
         selectCoin(coin) {
+            if (this.showEmptyTelos) {
+                return;
+            }
             this.$emit('update:showSendAmountDlg', true);
             this.$emit('update:selectedCoin', coin);
         },

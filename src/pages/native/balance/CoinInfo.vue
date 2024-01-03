@@ -19,6 +19,7 @@ export default {
         'suggestTokens',
     ],
     computed: {
+        ...mapGetters('account', ['data']),
         availableCoins() {
             return this.coins.filter(
                 coin =>
@@ -42,6 +43,17 @@ export default {
         },
         withdrawEvm() {
             this.$emit('update:showWithdrawEVMDlg', true);
+        },
+        coinIsTelosNative(coin) {
+            return coin.symbol === 'TLOS' && coin.account === 'eosio.token' && coin.network !== 'tevm';
+        },
+        formatLiquidBalance(balance) {
+            const [amount, symbol] = balance.split(' ');
+            return `${this.getFixed(amount, 4)} ${symbol}`;
+        },
+        getLiquidBalance(balance) {
+            const [amount] = balance.split(' ');
+            return Number(amount);
         },
     },
 };
@@ -98,11 +110,7 @@ export default {
                     <img src="~assets/icons/networkArrows.svg" >
                 </q-btn>
                 <q-btn
-                    v-if="
-                        coin.symbol === 'TLOS' &&
-                            coin.account === 'eosio.token' &&
-                            coin.network !== 'tevm'
-                    "
+                    v-if="coinIsTelosNative(coin)"
                     class="tevmBtn"
                     flat
                     rounded
@@ -115,23 +123,38 @@ export default {
             </div>
             <q-item-section>
                 <div class="text-white text-right display-grid">
-                    <label class="text-subtitle1 text-weight-small text-white h-20">{{
-                        `${getFixed(
-                            !coin.totalAmount ? coin.amount : coin.totalAmount,
-                            8
-                        )} ${coin.symbol}`
-                    }}</label>
+                    <label class="text-subtitle1 text-weight-small text-white h-20">
+                        <template v-if="coinIsTelosNative(coin) && data">
+                            {{ formatLiquidBalance(data.core_liquid_balance) }}
+                        </template>
+                        <template v-else>
+                            {{
+                                `${getFixed(
+                                    !coin.totalAmount ? coin.amount : coin.totalAmount,
+                                    8
+                                )} ${coin.symbol}`
+                            }}
+                        </template>
+                    </label>
                     <label
                         v-if="coin.price !== 0"
                         class="text-caption text-grey-6"
-                    >${{
-                        getFixed(
-                            !coin.totalAmount
-                                ? coin.amount * coin.price
-                                : coin.totalAmount * coin.price,
-                            2
-                        )
-                    }}</label>
+                    >
+                        $
+                        <template v-if="coinIsTelosNative(coin) && data">
+                            {{ getFixed(coin.price * getLiquidBalance(data.core_liquid_balance), 2) }}
+                        </template>
+                        <template v-else>
+                            {{
+                                getFixed(
+                                    !coin.totalAmount
+                                        ? coin.amount * coin.price
+                                        : coin.totalAmount * coin.price,
+                                    2
+                                )
+                            }}
+                        </template>
+                    </label>
                 </div>
             </q-item-section>
         </div>
