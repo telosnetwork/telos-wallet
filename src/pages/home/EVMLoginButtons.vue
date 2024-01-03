@@ -17,12 +17,10 @@ import {
     watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
-import { MetaKeepAuth, OreIdAuth } from 'src/antelope/wallets';
+import { MetaKeepAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
-import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
 import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
-import { migration } from 'src/antelope/migration';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -81,15 +79,6 @@ export default defineComponent({
             window.open('https://www.safepal.com/en/download', '_blank');
         };
 
-        const setOreIdAuthenticator = async (provider: string) => {
-            const name = 'OreId';
-            const auth = ant.wallets.getAuthenticator(name);
-            if (auth) {
-                (auth as OreIdAuth).setProvider(provider);
-                selectedOAuthProvider.value = provider;
-            }
-            setAuthenticator(name, CURRENT_CONTEXT);
-        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', CURRENT_CONTEXT);
         };
@@ -143,9 +132,6 @@ export default defineComponent({
         };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
-        const isLoadingOreId = (provider: string) =>
-            selectedOAuthProvider.value === provider &&
-            useFeedbackStore().isLoading('OreId.login');
 
         // menu navitgaion
         const showMainMenu = computed(() => props.modelValue === Menu.MAIN);
@@ -172,11 +158,8 @@ export default defineComponent({
             },
         });
 
-        const newAccountAlreadyCreated = computed(() => migration.evm.ethPubKey() !== '');
-
         return {
             isLoading,
-            isLoadingOreId,
             supportsMetamask,
             supportsBrave,
             supportsSafePal,
@@ -184,7 +167,6 @@ export default defineComponent({
             showBraveButton,
             showSafePalButton,
             showWalletConnectButton,
-            setOreIdAuthenticator,
             setMetamaskAuthenticator,
             setMetaKeepAuthenticator,
             setBraveAuthenticator,
@@ -194,14 +176,12 @@ export default defineComponent({
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
-            isTodayBeforeTelosCloudDown,
             showMainMenu,
             showTelosCloudMenu,
             setCloudMenu,
             googleSubscription,
             showGoogleLoading,
             googleCtrl,
-            newAccountAlreadyCreated,
         };
     },
     unmounted() {
@@ -216,8 +196,8 @@ export default defineComponent({
     <!-- main menu -->
     <template v-if="showMainMenu">
 
-        <!-- Google OAuth Provider -->
-        <div v-if="isTodayBeforeTelosCloudDown" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+        <!-- Telos Cloud Button -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
             <div class="c-evm-login-buttons__cloud-btn-container">
                 <div class="c-evm-login-buttons__cloud-btn-line-title">
                     <img
@@ -225,7 +205,7 @@ export default defineComponent({
                         class="c-evm-login-buttons__icon c-evm-login-buttons__icon--cloud"
                         src="~assets/icon--telos-cloud.svg"
                     >
-                    <span>{{ $t('home.login_with_social_media') }}</span>
+                    <span>{{ $t('home.telos_cloud_wallet') }}</span>
                 </div>
                 <div class="c-evm-login-buttons__cloud-btn-line-icons">
                     <img
@@ -336,12 +316,7 @@ export default defineComponent({
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
 
-        <div class="c-evm-login-buttons__title">{{
-            newAccountAlreadyCreated ?
-                $t('temporal.welcome_new_telos_cloud_title_part_2') :
-                $t('temporal.welcome_new_telos_cloud_title_part_1')
-        }}</div>
-        <div class="c-evm-login-buttons__sub-title">{{ $t('temporal.welcome_new_telos_cloud') }}</div>
+        <div class="c-evm-login-buttons__title q-mb-md">{{ $t('home.login_with_social_media') }}</div>
 
         <div v-if="showGoogleLoading" >
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
@@ -352,36 +327,6 @@ export default defineComponent({
             :data-client_id="googleCtrl.clientId"
         >
             <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-        </div>
-
-        <div class="c-evm-login-buttons__title q-mt-md">{{ $t('temporal.warn_old_telos_cloud_users_title') }}</div>
-
-        <div class="c-evm-login-buttons__sub-title">{{
-            newAccountAlreadyCreated ?
-                $t('temporal.warn_old_telos_cloud_users_part_2') :
-                $t('temporal.warn_old_telos_cloud_users_part_1')
-        }}</div>
-
-        <!-- Google old OreId Authenticator -->
-        <div
-            :class="{
-                'c-evm-login-buttons__option': true,
-                'c-evm-login-buttons__option--web2': true,
-                'c-evm-login-buttons__option--disabled': !newAccountAlreadyCreated,
-            }"
-            @click="newAccountAlreadyCreated ? setOreIdAuthenticator('google') : null"
-        >
-            <template v-if="isLoadingOreId('google')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon"
-                    src="~assets/icon--google.svg"
-                >
-                {{ $t('home.sign_with_google') }}
-            </template>
         </div>
 
     </template>
@@ -479,7 +424,7 @@ export default defineComponent({
         }
 
         &:not(:hover) #{$self}__icon {
-            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+            &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.8;
 
                 @include mobile-only {

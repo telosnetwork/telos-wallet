@@ -10,8 +10,6 @@ export const TELOS_ANALYTICS_EVENT_IDS = {
     loginFailedMetamask: 'ZFGE6TFS',
     loginSuccessfulSafepal: 'LKCBKDU2',
     loginFailedSafepal: '6PSIWGNV',
-    loginSuccessfulOreId: 'MSXMDDNK',
-    loginFailedOreId: 'UFX3JYRJ',
     loginFailedWalletConnect: '9V4IV1BV',
     loginSuccessfulWalletConnect: '2EG2OR3H',
 };

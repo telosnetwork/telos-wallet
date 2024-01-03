@@ -42,20 +42,6 @@ jest.mock('src/antelope', () => {
     };
 });
 
-/*
-We need to add a mock for the following import:
-import { migration } from 'src/antelope/migration';
-
-We need to mock ONLY the evm.ethPubKe method, so we can test the following computed property:
-const newAccountAlreadyCreated = computed(() => migration.evm.ethPubKey() !== '');
-*/
-
-jest.mock('src/antelope/migration', () => {
-    evm: {
-        ethPubKey: () => '';
-    }
-});
-
 describe('EVMLoginButtons.vue', () => {
     describe('Component name', () => {
         it('should have the correct name', () => {

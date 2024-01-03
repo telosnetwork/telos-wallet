@@ -39,7 +39,6 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
-import { OreIdAuthenticator } from 'ual-oreid';
 
 
 export interface LoginNativeActionData {
@@ -123,8 +122,7 @@ export const useAccountStore = defineStore(store_name, {
                 await authenticator.init();
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
-                    // OreId has it's own authorization service, only init fuel service for other ual users
-                    const ualUser = ualUsers[0] instanceof OreIdAuthenticator ? ualUsers[0] : await initFuelUserWrapper(ualUsers[0]);
+                    const ualUser = await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
                     const account = await ualUser.getAccountName();

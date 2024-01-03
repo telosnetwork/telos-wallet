@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { initFuelUserWrapper } from 'src/api/fuel';
-import { OreUser } from 'ual-oreid';
 
 export const login = async function(
     { commit, dispatch },
@@ -21,8 +20,7 @@ export const login = async function(
         commit('setJustViewer', justViewer);
         const users = await authenticator.login(account);
         if (users.length) {
-            // OreId has it's own authorization service, only init fuel service for other ual users
-            this.$ualUser = users[0] instanceof OreUser ? users[0] : await initFuelUserWrapper(users[0]);
+            this.$ualUser = await initFuelUserWrapper(users[0]);
             const accountName = await this.$ualUser.getAccountName();
             this.$type = 'ual';
             this.$idx = idx;

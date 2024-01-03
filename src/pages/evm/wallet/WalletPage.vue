@@ -8,7 +8,6 @@ import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
 import { CURRENT_CONTEXT, getAntelope, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore, useNftsStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
 import { useI18n } from 'vue-i18n';
-import { migration } from 'src/antelope/migration';
 
 const route = useRoute();
 const { t: $t } = useI18n();
@@ -49,31 +48,6 @@ watch(accountStore, (newAccountStoreState) => {
         historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
     }
 }, { immediate: true });
-
-
-// -- migration --
-const migrationNotified = ref(false);
-watch(allBalances, () => {
-    if (migration.evm.isMigrationNeeded() && !migrationNotified.value) {
-        const ant = getAntelope();
-        migrationNotified.value = true;
-        ant.config.notifyRememberInfoHandler(
-            $t('temporal.you_need_to_migrate_title'),
-            [{
-                tag: 'p',
-                class: 'c-notify__message--subtitle',
-                text: $t('temporal.you_need_to_migrate_sub_title'),
-            }, {
-                tag: 'p',
-                class: '',
-                text: $t('temporal.you_need_to_migrate_nfts_first'),
-            }],
-            '',
-            'telos-cloud-migration-msg',
-        );
-    }
-}, { deep: true, immediate: true });
-//------------
 
 </script>
 

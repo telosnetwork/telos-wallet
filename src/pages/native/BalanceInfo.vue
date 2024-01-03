@@ -14,7 +14,6 @@ import DepositEVM from '~/pages/native/balance/DepositEVM';
 import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
-import { migration } from 'src/antelope/migration';
 import { getAntelope } from 'src/antelope';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
@@ -86,7 +85,6 @@ export default {
             showRexStakeDlg: false,
             tEVMWithdrawing: false,
             avatar: '',
-            migrationNotified: false,
         };
     },
     computed: {
@@ -228,8 +226,6 @@ export default {
                     precision,
                 });
             });
-
-            this.performMigrationCheck();
         },
         async loadPrices() {
             const tlosUsdDataPoints = await this.$store.$api.getTableRows({
@@ -389,8 +385,6 @@ export default {
             };
             this.coins = this.coins.sort(sortCoin(this.suggestTokens));
             this.$emit('update:loadedCoins', this.coins);
-
-            this.performMigrationCheck();
         },
         async loadNftTokenItems() {
             for (const account of this.nftAccounts) {
@@ -594,30 +588,7 @@ export default {
             this.setEvmState();
             await this.loadNftTokenItems();
             this.loadNftTokenTags();
-            this.performMigrationCheck();
         },
-        // -- migration --
-        performMigrationCheck() {
-            if (migration.zero.isMigrationNeeded() && !this.migrationNotified) {
-                const ant = getAntelope();
-                this.migrationNotified = true;
-                ant.config.notifyRememberInfoHandler(
-                    this.$t('temporal.you_need_to_migrate_title'),
-                    [{
-                        tag: 'p',
-                        class: 'c-notify__message--subtitle',
-                        text: this.$t('temporal.you_need_to_migrate_sub_title'),
-                    }, {
-                        tag: 'p',
-                        class: '',
-                        text: this.$t('temporal.you_need_to_migrate_all_tokens'),
-                    }],
-                    '',
-                    'telos-cloud-migration-msg-zero',
-                );
-            }
-        },
-        // -------------
     },
     created: async function () {
         this.interval = setInterval(() => {

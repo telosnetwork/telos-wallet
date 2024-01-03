@@ -4,10 +4,8 @@ import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { OreIdAuthenticator } from 'ual-oreid';
 import { Menu } from '~/pages/home/MenuType';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
-import { migration } from 'src/antelope/migration';
 
 const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
@@ -67,9 +65,6 @@ export default defineComponent({
         showTelosCloudMenu() {
             return this.modelValue === Menu.CLOUD;
         },
-        newAccountAlreadyCreated() {
-            return migration.zero.accountName() !== '';
-        },
     },
     mounted() {
         this.showGoogleLoading = false;
@@ -118,10 +113,6 @@ export default defineComponent({
             const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('metakeep.ual');
             const auth = this.$ual.authenticators[idx];
             auth.setUserCredentials(credentials);
-            this.onLogin(idx);
-        },
-        async loginAsOreId() {
-            const idx = this.$ual.authenticators.map(a => a.getName()).indexOf('ual-oreid');
             this.onLogin(idx);
         },
         async loginAsJustViewer() {
@@ -256,24 +247,13 @@ export default defineComponent({
             this.resLow = this.ramLow || this.cpuLow || this.netLow;
         },
         getWalletIcon(wallet) {
-            if (wallet instanceof OreIdAuthenticator) {
-                return telosLogo;
-            }
-
             return wallet.getStyle().icon;
         },
         getWalletName(wallet) {
-            if (wallet instanceof OreIdAuthenticator) {
-                return this.$t('home.login_with_social_media');
-            }
-
             return wallet.getStyle().text;
         },
         isLoading(wallet) {
             return this.loading === wallet;
-        },
-        isLoadingOreId() {
-            return this.loading === 'ual-oreid';
         },
     },
     watch: {
@@ -310,7 +290,7 @@ export default defineComponent({
                             class="c-zero-login-buttons__icon c-zero-login-buttons__icon--cloud"
                             src="~assets/icon--telos-cloud.svg"
                         >
-                        <span>{{ $t('home.login_with_social_media') }}</span>
+                        <span>{{ $t('home.telos_cloud_wallet') }}</span>
                     </div>
                     <div class="c-zero-login-buttons__cloud-btn-line-icons">
                         <img
@@ -338,7 +318,7 @@ export default defineComponent({
                 :key="idx"
             >
                 <div
-                    v-if="wallet.getName() !== 'metakeep.ual' && wallet.getName() !== 'ual-oreid'"
+                    v-if="wallet.getName() !== 'metakeep.ual'"
                     class="c-zero-login-buttons__option"
                     @click="onLogin(idx)"
                 >
@@ -383,13 +363,7 @@ export default defineComponent({
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
 
-        <div class="c-zero-login-buttons__title">{{
-            newAccountAlreadyCreated ?
-                $t('temporal.welcome_new_telos_cloud_title_part_2') :
-                $t('temporal.welcome_new_telos_cloud_title_part_1')
-        }}</div>
-        <div class="c-zero-login-buttons__sub-title">{{ $t('temporal.welcome_new_telos_cloud') }}</div>
-
+        <div class="c-zero-login-buttons__title q-mb-md">{{ $t('home.login_with_social_media') }}</div>
 
         <div v-if="showGoogleLoading">
             <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
@@ -400,35 +374,6 @@ export default defineComponent({
             :data-client_id="googleCtrl.clientId"
         >
             <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
-        </div>
-
-        <div class="c-zero-login-buttons__title q-mt-md">{{ $t('temporal.warn_old_telos_cloud_users_title') }}</div>
-
-        <div class="c-zero-login-buttons__sub-title">{{
-            newAccountAlreadyCreated ?
-                $t('temporal.warn_old_telos_cloud_users_part_2') :
-                $t('temporal.warn_old_telos_cloud_users_part_1')
-        }}</div>
-
-        <div
-            :class="{
-                'c-zero-login-buttons__option': true,
-                'c-zero-login-buttons__option--web2': true,
-                'c-zero-login-buttons__option--disabled': !newAccountAlreadyCreated,
-            }"
-            @click="newAccountAlreadyCreated ? loginAsOreId() : null"
-        >
-            <template v-if="isLoadingOreId()">
-                <div class="c-zero-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-zero-login-buttons__icon"
-                    src="~assets/icon--google.svg"
-                >
-                {{ $t('home.sign_with_google') }}
-            </template>
         </div>
 
     </template>
@@ -577,7 +522,7 @@ export default defineComponent({
         }
 
         &:not(:hover) #{$self}__icon {
-            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+            &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.8;
 
                 @include mobile-only {
