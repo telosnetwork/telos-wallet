@@ -294,7 +294,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
     abstract hasIndexerSupport(): boolean;
-    abstract trackAnalyticsEvent(params: Record<string, unknown>): void;
+    abstract trackAnalyticsEvent(eventName: string): void;
 
     async getApy(): Promise<string> {
         const response = await this.api.get('apy/evm');
