@@ -17,7 +17,7 @@ import {
 } from '@web3modal/ethereum';
 import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
-import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
+import { TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { useContractStore } from 'src/antelope/stores/contract';
 import { useFeedbackStore } from 'src/antelope/stores/feedback';
@@ -106,19 +106,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 'login',
                 'trackAnalyticsEvent -> login successful',
                 'WalletConnect',
-                TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect,
+                TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulWalletConnect,
             );
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulWalletConnect },
-            );
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulWalletConnect);
             this.trace(
                 'login',
                 'trackAnalyticsEvent -> generic login successful',
-                TELOS_ANALYTICS_EVENT_IDS.loginSuccessful,
+                TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful,
             );
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-            );
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
 
             return address;
         } catch (e) {
@@ -128,12 +124,10 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 'walletConnectLogin',
                 'trackAnalyticsEvent -> login failed',
                 'WalletConnect',
-                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+                TELOS_ANALYTICS_EVENT_NAMES.loginFailedWalletConnect,
             );
             const chainSettings = this.getChainSettings();
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
-            );
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginFailedWalletConnect);
             throw new AntelopeError('antelope.evm.error_login');
         } finally {
             useFeedbackStore().unsetLoading(`${this.getName()}.login`);
@@ -152,11 +146,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
                 'login',
                 'trackAnalyticsEvent -> login started',
                 'WalletConnect',
-                TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+                TELOS_ANALYTICS_EVENT_NAMES.loginStarted,
             );
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-            );
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
             return this.walletConnectLogin(network);
         } else {
             return new Promise(async (resolve) => {
@@ -170,11 +162,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
                             'login',
                             'trackAnalyticsEvent -> login started',
                             'WalletConnect',
-                            TELOS_ANALYTICS_EVENT_IDS.loginStarted,
+                            TELOS_ANALYTICS_EVENT_NAMES.loginStarted,
                         );
-                        chainSettings.trackAnalyticsEvent(
-                            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-                        );
+                        chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
                     }
 
                     if (newState.open === false) {
@@ -185,11 +175,9 @@ export class WalletConnectAuth extends EVMAuthenticator {
                                 'login',
                                 'trackAnalyticsEvent -> login failed',
                                 'WalletConnect',
-                                TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect,
+                                TELOS_ANALYTICS_EVENT_NAMES.loginFailedWalletConnect,
                             );
-                            chainSettings.trackAnalyticsEvent(
-                                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedWalletConnect },
-                            );
+                            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginFailedWalletConnect);
                         }
 
                         // this prevents multiple subscribers from being attached to the web3Modal

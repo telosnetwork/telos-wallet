@@ -12,8 +12,9 @@ import {
     addressString,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
-import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
+import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
 import { MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
+import { BraveAuthName } from 'src/antelope/wallets/authenticators/BraveAuth';
 
 export abstract class InjectedProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
@@ -32,31 +33,27 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         useFeedbackStore().setLoading(`${this.getName()}.login`);
 
         this.trace('login', 'trackAnalyticsEvent -> login started');
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-        );
+        chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
 
         const response = await super.login(network).then((res) => {
             if (TELOS_NETWORK_NAMES.includes(network)) {
-                let successfulLoginEventId = '';
+                let successfulLoginEventName = '';
 
                 if (authName === MetamaskAuthName) {
-                    successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulMetamask;
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulMetamask;
                 } else if (authName === SafePalAuthName) {
-                    successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulSafepal;
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulSafepal;
+                } else if (authName === BraveAuthName) {
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulBrave;
                 }
 
-                if (successfulLoginEventId) {
-                    this.trace('login', 'trackAnalyticsEvent -> login succeeded', authName, successfulLoginEventId);
-                    chainSettings.trackAnalyticsEvent(
-                        { id: successfulLoginEventId },
-                    );
+                if (successfulLoginEventName) {
+                    this.trace('login', 'trackAnalyticsEvent -> login succeeded', authName, successfulLoginEventName);
+                    chainSettings.trackAnalyticsEvent(successfulLoginEventName);
                 }
 
-                this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
-                chainSettings.trackAnalyticsEvent(
-                    { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-                );
+                this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', authName, TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
+                chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
             }
 
             return res;
@@ -69,16 +66,16 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
                 let failedLoginEventId = '';
 
                 if (authName === MetamaskAuthName) {
-                    failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedMetamask;
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedMetamask;
                 } else if (authName === SafePalAuthName) {
-                    failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedSafepal;
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedSafepal;
+                } else if (authName === BraveAuthName) {
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedBrave;
                 }
 
                 if (failedLoginEventId) {
                     this.trace('login', 'trackAnalyticsEvent -> login failed', authName, failedLoginEventId);
-                    chainSettings.trackAnalyticsEvent(
-                        { id: failedLoginEventId },
-                    );
+                    chainSettings.trackAnalyticsEvent(failedLoginEventId);
                 }
             }
         }).finally(() => {
