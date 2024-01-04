@@ -5,7 +5,7 @@ import { TELOS_CHAIN_IDS } from 'src/antelope/chains/chain-constants';
 import packageInfo from '../package.json';
 import { defineComponent } from 'vue';
 
-export const isTodayBeforeTelosCloudDown = new Date().getTime() < new Date('2023-12-31').getTime();
+export const isTodayBeforeTelosCloudDown = new Date().getTime() < new Date('2024-12-31').getTime();
 
 export default defineComponent({
     name: 'App',
