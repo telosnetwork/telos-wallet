@@ -230,36 +230,32 @@ export default defineComponent({
 <template>
 <div>
     <!-- Login Button -->
-    <div v-if="!isAuthenticated" class="q-px-md flex justify-center">
-        <div class="q-mt-md q-mb-sm">
-            <q-btn
-                :label="$t('home.connect_with_wallet')"
-                class="purpleGradient q-px-md q-py-sm"
-                @click="showLogin = true"
-            />
-        </div>
+    <div v-if="!isAuthenticated" class="c-native-login__buttons-container">
+        <q-btn
+            text-color="white"
+            outline
+            :label="$t('home.connect_with_wallet')"
+            class="c-native-login__button"
+            @click="showLogin = true"
+        />
 
         <!-- View any account -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                outline
-                :label="$t('home.view_any_account')"
-                class="q-px-md q-py-sm"
-                @click="loginAsJustViewer()"
-            />
-        </div>
+        <q-btn
+            text-color="white"
+            outline
+            :label="$t('home.view_any_account')"
+            class="c-native-login__button"
+            @click="loginAsJustViewer()"
+        />
 
         <!-- Signup Button -->
-        <div class="q-mt-md">
-            <q-btn
-                text-color="white"
-                outline
-                :label="$t('home.create_new_account')"
-                class="q-px-md q-py-sm"
-                @click="signUp"
-            />
-        </div>
+        <q-btn
+            text-color="white"
+            outline
+            :label="$t('home.create_new_account')"
+            class="c-native-login__button"
+            @click="signUp"
+        />
     </div>
 
     <div v-else class="q-px-md flex justify-center column">
@@ -393,7 +389,35 @@ export default defineComponent({
 </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
+.c-native-login {
+    &__buttons-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+
+        // quasar override
+        .q-focus-helper {
+            display: none;
+        }
+    }
+
+    &__button {
+        height: 54px;
+        border-radius: 4px;
+        width: 224px;
+
+        &:hover,
+        &:focus {
+            // quasar override
+            &::before {
+                border-width: 2px;
+            }
+        }
+    }
+}
 
 .showLoginPopup {
     width: 30rem;
