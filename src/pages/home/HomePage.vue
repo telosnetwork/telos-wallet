@@ -137,8 +137,8 @@ onMounted(() => {
 .c-home {
     position: relative;
     background: var(--site-gradient);
-    min-height: 100vh;
-    display: flex;
+    width: 100%;
+    padding-top: 64px;
 
     &__page-container {
         // override inline style of unknown origin (do not delete)
@@ -146,32 +146,28 @@ onMounted(() => {
     }
 
     &__container {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        padding-top: 32px;
-        align-items: stretch;
-        justify-content: space-between;
+        min-height: calc(100svh - 64px);
+        position: relative;
+        padding-bottom: 88px;
     }
 
     &__logo-container {
-        flex-grow: 1;
-        align-self: center;
         display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 48px;
     }
 
     &__logo {
-        width: 220px;
+        width: 180px;
     }
 
     &__button-container {
-        align-self: center;
         border-radius: 4px;
         padding: 24px;
         background-color: rgba(white, 0.1);
         max-width: 320px;
+        margin: 0 auto 48px;
     }
 
     &__network-toggle-container {
@@ -216,7 +212,6 @@ onMounted(() => {
         justify-content: center;
         gap: 4px;
 
-        margin-top: 24px;
         color: white;
     }
 
@@ -230,26 +225,18 @@ onMounted(() => {
         }
     }
 
-    // guarantees wallet connect on top of footer
     &__footer {
-        position: relative;
+        position: absolute;
+        bottom: 0;
     }
+
     &__connect-wallet {
         z-index: $z-index--connect-wallet-popup;
     }
 
-    @media only screen and (max-height: 850px) {
-        .c-home {
-            &__container{
-                min-height: unset;
-            }
-            &__logo{
-                margin-top: unset;
-                margin-bottom: 2rem;
-            }
-            &__button-container{
-                margin-top: 2rem;
-            }
+    @include md-and-up {
+        &__logo-container {
+            margin-bottom: 128px;
         }
     }
 }
