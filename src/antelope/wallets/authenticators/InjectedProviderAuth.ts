@@ -13,8 +13,7 @@ import {
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
 import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
-import { MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
-import { BraveAuthName } from 'src/antelope/wallets/authenticators/BraveAuth';
+import { BraveAuthName, MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
 
 export abstract class InjectedProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
