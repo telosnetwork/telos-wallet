@@ -217,7 +217,7 @@ export default defineComponent({
     <template v-if="showMainMenu">
 
         <!-- Google OAuth Provider -->
-        <div v-if="isTodayBeforeTelosCloudDown" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
             <div class="c-evm-login-buttons__cloud-btn-container">
                 <div class="c-evm-login-buttons__cloud-btn-line-title">
                     <img
