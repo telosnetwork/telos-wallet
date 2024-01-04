@@ -109,7 +109,7 @@ onMounted(() => {
 
                     <q-toolbar class="c-home__footer-second-line bg-dark flex-center">
                         <a
-                            href="https://www.telos.net/terms-of-service"
+                            href="https://www.telos.net/terms-and-conditions"
                             target="_blank"
                             class="c-home__external-link-text"
                         >
