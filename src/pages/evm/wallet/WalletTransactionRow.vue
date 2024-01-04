@@ -254,9 +254,8 @@ export default defineComponent({
 
             <template v-if="$q.screen.gt.xs">
                 <div>
-                    trx:
                     <ExternalLink
-                        :text="transaction.id"
+                        :text="$t('global.more_info')"
                         :url="transactionUrl"
                         :purpose="$t('evm_wallet.aria_link_to_transaction')"
                     />
