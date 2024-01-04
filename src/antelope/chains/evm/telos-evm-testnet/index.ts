@@ -149,7 +149,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getBuyMoreOfTokenLink(): string {
-        return 'https://www.telos.net/#buy-tlos-simplex';
+        return 'https://telos.net/ecosystem?category=Exchanges';
     }
 
     getSystemTokens(): TokenClass[] {
