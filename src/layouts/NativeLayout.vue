@@ -113,7 +113,7 @@ export default {
         },
         logOut() {
             this.resetTokens();
-            this.logout();
+            this.logout(true);
         },
         resetTokens() {
             this.coins = [];
