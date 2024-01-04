@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useAccountStore, getAntelope, useChainStore } from 'src/antelope';
-import InlineSvg from 'vue-inline-svg';
 
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
@@ -27,13 +26,6 @@ export default defineComponent({
             type: Boolean,
             default: true,
         },
-        showUserMenu: {
-            type: Boolean,
-            default: true,
-        },
-    },
-    components: {
-        InlineSvg,
     },
     methods: {
         copyAddress() {
@@ -43,21 +35,8 @@ export default defineComponent({
                 ant.config.notifySuccessCopyHandler();
             }
         },
-        logout() {
-            accountStore.logout();
-        },
         toggleDarkMode() {
             this.$q.dark.toggle();
-        },
-        gotoTeloscan() {
-            const network =  this.account.network;
-            const explorerUrl =  chainStore.getExplorerUrl(network);
-            if (explorerUrl) {
-                window.open(explorerUrl + '/address/' + this.account?.account, '_blank');
-                return;
-            } else {
-                ant.config.notifyFailureMessage(this.$t('settings.no_explorer', { network: this.account.network }));
-            }
         },
     },
     computed: {
@@ -88,54 +67,6 @@ export default defineComponent({
         :aria-label="$t('nav.copy_address')"
         @click="copyAddress"
     />
-    <q-btn
-        v-if="showUserMenu"
-        flat
-        dense
-        icon="more_vert"
-        class="c-user-info__menu-btn"
-        :aria-label="$t('nav.overflow_menu')"
-    >
-        <q-menu anchor="bottom end" self="top right" :offset="[0, 16]">
-            <ul class="c-user-info__menu-items" role="menu">
-                <li
-                    class="c-user-info__menu-item"
-                    role="menuitem"
-                    tabindex="0"
-                    @click="gotoTeloscan()"
-                    @keypress.space.enter="gotoTeloscan()"
-                >
-                    <div class="c-user-info__icon-wrapper">
-                        <img
-                            src="/branding/telos-scan.png"
-                            class="c-user-info__icon c-user-info__icon--acorn"
-                            height="24"
-                            width="24"
-                            aria-hidden="true"
-                        >
-                    </div>
-                    <h5>{{ $t('nav.teloscan') }}</h5>
-                    <q-icon size="xs" name="o_launch" class="c-user-info__menu-item-min-icon" />
-                </li>
-                <li
-                    class="c-user-info__menu-item"
-                    role="menuitem"
-                    tabindex="1"
-                    @click="logout"
-                    @keypress.space.enter="logout"
-                >
-                    <div class="c-user-info__icon-wrapper"><InlineSvg
-                        :src="require('src/assets/icon--logout.svg')"
-                        class="c-user-info__icon"
-                        height="24"
-                        width="24"
-                        aria-hidden="true"
-                    /></div>
-                    <h5>{{ $t('global.sign_out') }}</h5>
-                </li>
-            </ul>
-        </q-menu>
-    </q-btn>
 </div>
 </template>
 
