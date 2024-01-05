@@ -3,7 +3,6 @@ import { mapGetters } from 'vuex';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
-const TSWAPS_URL = 'https://tswaps.com/swap';
 
 export default {
     components: {
@@ -49,9 +48,6 @@ export default {
                 );
             });
         },
-        convertEnabled() {
-            return true;
-        },
     },
     methods: {
         async loadMoreHistory(index, done) {
@@ -79,9 +75,6 @@ export default {
         buy() {
             window.open(GETTING_STARTED_URL);
             //this.$emit("update:showBuyAmountDlg", true);
-        },
-        convert() {
-            window.open(TSWAPS_URL);
         },
         sell() {
             // this.$emit('update:showShareAddressDlg', true);
@@ -307,22 +300,6 @@ export default {
                                 <div class="column">
                                     <img src="~assets/coin/Purchase.svg" >
                                     {{$t('components.buy')}}
-                                </div>
-                            </q-btn>
-
-                            <q-btn
-                                v-if="convertEnabled"
-                                class=""
-                                flat
-                                dense
-                                stack
-                                size="md"
-                                no-caps
-                                @click="convert"
-                            >
-                                <div class="column">
-                                    <img src="~assets/coin/Convert.svg" >
-                                    {{$t('components.convert')}}
                                 </div>
                             </q-btn>
 
