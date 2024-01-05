@@ -26,7 +26,7 @@ export default boot(async ({ app, store }) => {
         if (localStorage.getItem('autoLogin') === 'cleos') {
             accountName = localStorage.getItem('account');
         } else {
-            await new Promise((resolve) => {
+            await new Promise((resolve, reject) => {
                 Dialog.create({
                     class: 'cleos-auth-dialog',
                     color: 'primary',
@@ -43,11 +43,13 @@ export default boot(async ({ app, store }) => {
                         accountName = data !== '' ? data : 'eosio';
                     })
                     .onCancel(() => {
-                        throw 'Cancelled!';
+                        reject('cancelled');
                     })
                     .onDismiss(() => {
                         resolve(true);
                     });
+            }).catch((e) => {
+                throw e;
             });
             if (store.state.account.justViewer) {
                 permission = 'active';
@@ -73,7 +75,7 @@ export default boot(async ({ app, store }) => {
                             permission = data;
                         })
                         .onCancel(() => {
-                            throw 'Cancelled!';
+                            throw 'cancelled';
                         })
                         .onDismiss(() => {
                             resolve(true);
@@ -133,7 +135,7 @@ export default boot(async ({ app, store }) => {
                         });
                 })
                 .onCancel(() => {
-                    throw 'Cancelled!';
+                    throw 'cancelled';
                 })
                 .onDismiss(() => {
                     resolve(true);
