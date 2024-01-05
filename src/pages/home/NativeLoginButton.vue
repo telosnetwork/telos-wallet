@@ -87,7 +87,9 @@ export default defineComponent({
                     this.$router.push({ path: '/zero/balance' });
                 }
             } catch (e) {
-                this.$errorNotification(e);
+                if (e.message !== 'User canceled request (Modal closed)') {
+                    this.$errorNotification(e);
+                }
             }
         },
         openUrl(url) {
@@ -249,7 +251,7 @@ export default defineComponent({
                 <QSpinnerFacebook />
             </div>
             <template v-else>
-                <img :src="getWalletIcon(wallet)" width="24" >
+                <img :src="getWalletIcon(wallet)" width="24" class="c-native-login__ual-logo">
                 {{ getWalletName(wallet) }}
             </template>
         </div>
@@ -346,6 +348,8 @@ export default defineComponent({
 <style lang="scss">
 
 .c-native-login {
+    $this: &;
+
     &__buttons-container {
         display: flex;
         flex-direction: column;
@@ -356,6 +360,14 @@ export default defineComponent({
     &__loading {
         width: 100%;
         text-align: center;
+    }
+
+    &__ual-logo {
+        opacity: 0.8;
+
+        @include mobile-only {
+            opacity: 1;
+        }
     }
 
     &__button {
@@ -378,6 +390,10 @@ export default defineComponent({
         &:focus {
             outline-color: $white;
             outline-width: 2px;
+
+            #{$this}__ual-logo {
+                opacity: 1;
+            }
         }
 
         &--centered {
