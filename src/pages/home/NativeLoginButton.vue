@@ -4,17 +4,20 @@ import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 import { defineComponent } from 'vue';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { OreIdAuthenticator } from 'ual-oreid';
+import { QSpinnerFacebook } from 'quasar';
+
 
 const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
 export default defineComponent({
     name: 'NativeLoginButton',
+    components: {
+        QSpinnerFacebook,
+    },
     data() {
         return {
-            showLogin: false,
             showAuth: false,
             authType: 'signin',
-            error: null,
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -77,12 +80,14 @@ export default defineComponent({
             this.openUrl('https://app.telos.net/accounts/add');
         },
         async onLogin(idx, justViewer = false) {
-            const error = await this.login({ idx, justViewer });
-            if (!error) {
-                this.showLogin = false;
-                await this.$router.push({ path: '/zero/balance' });
-            } else {
-                this.error = error;
+            try {
+                await this.login({ idx, justViewer });
+                const account = localStorage.getItem('account');
+                if (account) {
+                    this.$router.push({ path: '/zero/balance' });
+                }
+            } catch (e) {
+                this.$errorNotification(e);
             }
         },
         openUrl(url) {
@@ -231,31 +236,45 @@ export default defineComponent({
 <div>
     <!-- Login Button -->
     <div v-if="!isAuthenticated" class="c-native-login__buttons-container">
-        <q-btn
-            text-color="white"
-            outline
-            :label="$t('home.connect_with_wallet')"
+        <div
+            v-for="(wallet, idx) in $ual.authenticators"
+            :key="wallet.getStyle().text"
             class="c-native-login__button"
-            @click="showLogin = true"
-        />
+            tabindex="0"
+            aria-role="button"
+            @keyup.enter="onLogin(idx)"
+            @click="onLogin(idx)"
+        >
+            <div v-if="loading === wallet.getStyle().text" class="c-native-login__loading">
+                <QSpinnerFacebook />
+            </div>
+            <template v-else>
+                <img :src="getWalletIcon(wallet)" width="24" >
+                {{ getWalletName(wallet) }}
+            </template>
+        </div>
 
-        <!-- View any account -->
-        <q-btn
-            text-color="white"
-            outline
-            :label="$t('home.view_any_account')"
-            class="c-native-login__button"
-            @click="loginAsJustViewer()"
-        />
+        <hr class="c-native-login__hr">
 
-        <!-- Signup Button -->
-        <q-btn
-            text-color="white"
-            outline
-            :label="$t('home.create_new_account')"
+        <div
             class="c-native-login__button"
+            tabindex="0"
+            aria-role="button"
+            @keyup.enter="loginAsJustViewer"
+            @click="loginAsJustViewer"
+        >
+            {{ $t('home.view_any_account') }}
+        </div>
+
+        <div
+            class="c-native-login__button"
+            tabindex="0"
+            aria-role="button"
+            @keyup.enter="signUp"
             @click="signUp"
-        />
+        >
+            {{ $t('home.create_new_account') }}
+        </div>
     </div>
 
     <div v-else class="q-px-md flex justify-center column">
@@ -277,71 +296,6 @@ export default defineComponent({
             @click="logout"
         />
     </div>
-
-    <!-- Show Login -->
-    <q-dialog v-model="showLogin">
-        <div class="column showLoginPopup q-pa-lg popupCard">
-            <div class="text-subtitle1">{{$t('login.connect_wallet')}}</div>
-            <q-list class="" dark separator>
-                <q-item
-                    v-for="(wallet, idx) in $ual.authenticators"
-                    :key="wallet.getStyle().text"
-                    v-ripple
-                    class="q-my-sm"
-                >
-                    <q-item-section class="cursor-pointer" avatar @click="onLogin(idx)">
-                        <img :src="getWalletIcon(wallet)" width="30" >
-                    </q-item-section>
-                    <q-item-section class="cursor-pointer" @click="onLogin(idx)">
-                        {{ getWalletName(wallet) }}
-                    </q-item-section>
-                    <q-item-section class="flex" avatar>
-                        <q-spinner
-                            v-if="loading === wallet.getStyle().text"
-                            :color="wallet.getStyle().textColor"
-                            size="2em"
-                        />
-                        <q-btn
-                            v-else
-                            :color="wallet.getStyle().textColor"
-                            icon="get_app"
-                            target="_blank"
-                            dense
-                            flat
-                            size="12px"
-                            @click="openUrl(wallet.getOnboardingLink())"
-                        >
-                            <q-tooltip>
-                                {{$t('login.get_app')}}
-                            </q-tooltip>
-                        </q-btn>
-                    </q-item-section>
-                </q-item>
-            </q-list>
-
-            <!-- Close Button -->
-            <q-btn
-                v-close-popup
-                size="md"
-                no-caps
-                rounded
-                flat
-                class="self-center flex-center"
-                label="Close"
-                :style="`display:flex;`"
-                @click="close"
-            />
-            <q-item
-                v-if="error"
-                :active="!!error"
-                active-class="bg-red-1 text-grey-8"
-            >
-                <q-item-section>
-                    {{ error }}
-                </q-item-section>
-            </q-item>
-        </div>
-    </q-dialog>
 
     <!-- RAM low dialog -->
     <q-dialog v-model="resLow" persistent>
@@ -397,32 +351,39 @@ export default defineComponent({
         flex-direction: column;
         align-items: center;
         gap: 14px;
+    }
 
-        // quasar override
-        .q-focus-helper {
-            display: none;
-        }
+    &__loading {
+        width: 100%;
+        text-align: center;
     }
 
     &__button {
-        height: 54px;
-        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         width: 224px;
+        height: 54px;
+        color: $white;
+        outline-color: $white;
+        outline-width: 1px;
+        outline-style: solid;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 14px;
+        cursor: pointer;
 
         &:hover,
         &:focus {
-            // quasar override
-            &::before {
-                border-width: 2px;
-            }
+            outline-color: $white;
+            outline-width: 2px;
         }
     }
-}
 
-.showLoginPopup {
-    width: 30rem;
-    height: auto;
-    margin-bottom: 5rem;
+    &__hr {
+        width: 224px;
+    }
 }
 
 .logged-in{
