@@ -40,9 +40,14 @@ export const login = async function(
         const error =
             (authenticator.getError() && authenticator.getError().message) ||
             e.message ||
-            e.reason;
-        commit('general/setErrorMsg', error, { root: true });
-        console.error('Login error: ', error);
+            e.reason ||
+            e.cause;
+        if (error !== 'cancelled') {
+            commit('general/setErrorMsg', error, { root: true });
+            throw e;
+        } else {
+            console.log('Login cancelled');
+        }
     } finally {
         commit('setLoadingWallet');
     }
