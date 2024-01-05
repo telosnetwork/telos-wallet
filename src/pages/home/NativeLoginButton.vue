@@ -257,7 +257,7 @@ export default defineComponent({
         <hr class="c-native-login__hr">
 
         <div
-            class="c-native-login__button"
+            class="c-native-login__button c-native-login__button--centered"
             tabindex="0"
             aria-role="button"
             @keyup.enter="loginAsJustViewer"
@@ -267,7 +267,7 @@ export default defineComponent({
         </div>
 
         <div
-            class="c-native-login__button"
+            class="c-native-login__button c-native-login__button--centered"
             tabindex="0"
             aria-role="button"
             @keyup.enter="signUp"
@@ -378,6 +378,10 @@ export default defineComponent({
         &:focus {
             outline-color: $white;
             outline-width: 2px;
+        }
+
+        &--centered {
+            justify-content: center;
         }
     }
 
