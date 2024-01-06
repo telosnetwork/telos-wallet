@@ -144,8 +144,8 @@ export default boot(async ({ app, store }) => {
     }
 
     const authenticators = [
-        new Wombat([chain], { appName: process.env.APP_NAME }),
         new Anchor([chain], { appName: process.env.APP_NAME }),
+        new Wombat([chain], { appName: process.env.APP_NAME }),
         new CleosAuthenticator([chain], {
             appName: process.env.APP_NAME,
             loginHandler,
