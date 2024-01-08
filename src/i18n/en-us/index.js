@@ -488,6 +488,8 @@ export default {
         dont_send_to_exchanges: 'DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS ' +
         'WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN METAMASK ' +
         'ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.',
+        evm_address_disclaimer: 'THIS ADDRESS IS ONLY FOR SENDING \'TLOS\' ON THE TELOS EVM. DO NOT SEND ANY OTHER TOKEN TO THIS ADDRESS. DO NOT SEND ANY TOKEN FROM ANOTHER NETWORK. THERE ARE NO PRIVATE KEYS AND FUNDS WILL BE LOST FOREVER. IF YOU HAVE ANY QUESTIONS, PLEASE ASK IN COMMUNITY CHAT BEFORE PROCEEDING.',
+        evm_disclaimer_confirmation: 'I Understand',
         create_evm_for: 'Create EVM address for {account}',
         created_evm_for: 'EVM address created for {account}',
         cant_deposit_more: 'Cannot deposit more than native TLOS balance: {balance}',

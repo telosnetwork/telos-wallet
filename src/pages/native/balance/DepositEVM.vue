@@ -85,40 +85,6 @@ export default {
                 this.recipientAddressExists = false;
             }
         },
-        // async generateAddress(){
-        //     const accountInfo = await this.$store.$api.getAccount(this.accountName);
-
-        //     if (accountInfo.ram_quota - accountInfo.ram_usage <= MINIMUM_RAM_BYTES){ // If account (often newly created account) does not have sufficient RAM, notify user
-        //         this.$errorNotification(this.$t('resources.insufficient_ram'));
-        //         return;
-        //     }
-        //     const actions = [];
-        //     if (!this.evmAddress) {
-        //         actions.push({
-        //             account: 'eosio.evm',
-        //             name: 'create',
-        //             data: {
-        //                 account: this.accountName.toLowerCase(),
-        //                 data: 'create',
-        //             },
-        //         });
-        //     }
-        //     try {
-        //         const transaction = await this.$store.$api.signTransaction(
-        //             actions,
-        //             this.$t('components.create_evm_for', { account: this.accountName }),
-        //         );
-        //         await this.setEvmState();
-        //         this.$successNotification(this.$t('components.created_evm_for', { account: this.accountName }));
-        //         this.depositAmount = '0';
-        //         this.depositOwnAddress = false;
-        //         this.recipientAddress = this.evmAddress;
-        //         this.recipientAddressExists = true;
-
-        //     } catch (error) {
-        //         this.$errorNotification(error);
-        //     }
-        // },
         async deposit() {
             let amount = parseFloat(this.depositAmount);
             if (amount > parseFloat(this.nativeTLOSBalance)) {
