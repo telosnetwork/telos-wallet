@@ -1,6 +1,5 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-const MINIMUM_RAM_BYTES = 1000;
 
 export default {
     name: 'WithdrawEVM',
@@ -9,13 +8,12 @@ export default {
     data() {
         return {
             depositAmount: '0',
-            depositOwnAddress: false,
             recipientAddress: '',
             recipientAddressExists: true,
         };
     },
     computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName', 'evmAddress']),
+        ...mapGetters('account', ['isAuthenticated', 'accountName']),
         showDlg: {
             get() {
                 return this.showDepositEVMDlg;
@@ -86,40 +84,6 @@ export default {
                 this.recipientAddressExists = false;
             }
         },
-        async generateAddress(){
-            const accountInfo = await this.$store.$api.getAccount(this.accountName);
-
-            if (accountInfo.ram_quota - accountInfo.ram_usage <= MINIMUM_RAM_BYTES){ // If account (often newly created account) does not have sufficient RAM, notify user
-                this.$errorNotification(this.$t('resources.insufficient_ram'));
-                return;
-            }
-            const actions = [];
-            if (!this.evmAddress) {
-                actions.push({
-                    account: 'eosio.evm',
-                    name: 'create',
-                    data: {
-                        account: this.accountName.toLowerCase(),
-                        data: 'create',
-                    },
-                });
-            }
-            try {
-                const transaction = await this.$store.$api.signTransaction(
-                    actions,
-                    this.$t('components.create_evm_for', { account: this.accountName }),
-                );
-                await this.setEvmState();
-                this.$successNotification(this.$t('components.created_evm_for', { account: this.accountName }));
-                this.depositAmount = '0';
-                this.depositOwnAddress = false;
-                this.recipientAddress = this.evmAddress;
-                this.recipientAddressExists = true;
-
-            } catch (error) {
-                this.$errorNotification(error);
-            }
-        },
         async deposit() {
             let amount = parseFloat(this.depositAmount);
             if (amount > parseFloat(this.nativeTLOSBalance)) {
@@ -163,7 +127,6 @@ export default {
                 this.$emit('updateBalances');
 
                 this.depositAmount = '0';
-                this.depositOwnAddress = false;
                 this.recipientAddress = '';
                 this.recipientAddressExists = true;
                 this.showDlg = false;
@@ -179,9 +142,6 @@ export default {
             if (this.showDlg) {
                 this.$emit('addEvmNetwork');
             };
-            if (this.evmAddress){
-                this.recipientAddress = this.evmAddress;
-            }
         },
     },
 };
@@ -267,15 +227,7 @@ export default {
                     @click="deposit"
                 />
             </div>
-            <div v-if="!recipientAddress && !evmAddress" class="row justify-center">
-                <q-btn
-                    class="purpleGradient depositBtn"
-                    no-caps
-                    rounded
-                    label="Generate Linked EVM address"
-                    @click="generateAddress"
-                />
-            </div>
+
             <div class="row justify-center">
                 <div
                     class="lightBlue depositAddressToggle q-mt-xs"
@@ -285,20 +237,6 @@ export default {
                 </div>
             </div>
             <div class="row justify-center q-mt-md">
-                <div v-if="!evmAddress && depositOwnAddress" class="note">
-                    {{$t('components.first_deposit')}}
-                </div>
-                <div
-                    v-if="
-                        !recipientAddressExists &&
-                            !depositOwnAddress &&
-                            recipientAddress != ''
-                    "
-                    class="note"
-                >
-                    {{$t('components.address_not_exist')}}
-                </div>
-
                 <q-card-section class="q-pt-sm text-warning">
                     {{$t('components.dont_send_to_exchanges')}}
                 </q-card-section>
