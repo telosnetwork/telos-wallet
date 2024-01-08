@@ -37,7 +37,7 @@ export default {
         },
         displayEvmAddress() {
 
-            this.ant.config.notifyFailureWithAction(this.$t('components.evm_address_disclaimer'), {
+            this.ant.config.notifyWarningWithAction(this.$t('components.evm_address_disclaimer'), {
                 label: this.ant.config.localizationHandler(this.$t('components.evm_disclaimer_confirmation')),
                 handler: () => {
                     // user confirms they understand the single use-case for the generated evm address
