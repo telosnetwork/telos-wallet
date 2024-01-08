@@ -1,6 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { getAntelope } from 'src/antelope';
+const MINIMUM_RAM_BYTES = 1000;
 
 export default {
     name: 'WithdrawEVM',
@@ -110,7 +111,6 @@ export default {
             }
         },
     },
-    watch: {},
 };
 </script>
 
@@ -167,8 +167,10 @@ export default {
                 <div
                     class="note"
                 >
-                    {{$t('components.address_not_exist')}}
+                    {{$t('components.evm_address_not_found')}}
                 </div>
+            </div>
+            <div v-if="!evmAddress" class="row justify-center">
                 <q-btn
                     class="purpleGradient generateAccountBtn"
                     no-caps
@@ -191,11 +193,11 @@ export default {
                         TLOS
                     </label>
                 </div>
-                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance }}</div>
+                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance || '0' }}</div>
             </div>
             <div class="row justify-center q-mt-md q-mb-lg">
                 <q-btn
-                    :disabled="!(parseFloat(withdrawAmount) > 0)"
+                    :disabled="!(evmTLOSBalance > 0) && !evmAddress"
                     class="purpleGradient withdrawBtn"
                     no-caps
                     rounded

@@ -1,6 +1,5 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-const MINIMUM_RAM_BYTES = 1000;
 
 export default {
     name: 'WithdrawEVM',
