@@ -483,8 +483,6 @@ export default {
         withdraw_1: 'Withdraw your TLOS from the EVM,',
         withdraw_2: 'fast, free and instant.',
         add_evm_network: 'Add EVM Network',
-        first_deposit: 'NOTE: This is your first deposit so an additional “create” action ' +
-        'will be included',
         address_not_exist: 'NOTE: The recipient address does not exist so an additional “create” ' +
         'action will be included',
         dont_send_to_exchanges: 'DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS ' +
