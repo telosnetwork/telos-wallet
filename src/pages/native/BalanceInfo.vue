@@ -104,6 +104,9 @@ export default {
                 )
                 .reduce((a, b) => a + b, 0);
         },
+        telosBalance() {
+            return this.coins.find(coin => coin.symbol === 'TLOS' && coin.account === 'eosio.token').totalAmount;
+        },
         availableHeight() {
             return (
                 window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0)
@@ -713,6 +716,9 @@ export default {
                             <q-icon name="o_info" size="sm" />
                             <q-tooltip>{{ $t('balance.balance_fiat_tooltip') }}</q-tooltip>
                         </div>
+                    </div>
+                    <div v-if="typeof telosBalance === 'number'"  class="full-width">
+                        {{ getFixed(telosBalance, 4) }} TLOS
                     </div>
                 </div>
 
