@@ -1,5 +1,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { getAntelope } from 'src/antelope';
+const MINIMUM_RAM_BYTES = 1000;
 
 export default {
     name: 'WithdrawEVM',
@@ -8,10 +10,12 @@ export default {
     data() {
         return {
             withdrawAmount: '0',
+            displayAddress: false,
+            ant : getAntelope(),
         };
     },
     computed: {
-        ...mapGetters('account', ['isAuthenticated', 'accountName']),
+        ...mapGetters('account', ['isAuthenticated', 'accountName', 'evmAddress']),
         showDlg: {
             get() {
                 return this.showWithdrawEVMDlg;
@@ -30,6 +34,49 @@ export default {
                 this.withdrawAmount = '0';
             } else {
                 this.withdrawAmount = Number(this.withdrawAmount).toString();
+            }
+        },
+        displayEvmAddress() {
+
+            this.ant.config.notifyWarningWithAction(this.$t('components.evm_address_disclaimer'), {
+                label: this.ant.config.localizationHandler(this.$t('components.evm_disclaimer_confirmation')),
+                handler: () => {
+                    // user confirms they understand the single use-case for the generated evm address
+                    this.displayAddress = true;
+                },
+            });
+        },
+        copyAddress() {
+            navigator.clipboard.writeText(this.evmAddress);
+            this.ant.config.notifySuccessCopyHandler();
+        },
+        async generateAddress(){
+            const accountInfo = await this.$store.$api.getAccount(this.accountName);
+
+            if (accountInfo.ram_quota - accountInfo.ram_usage <= MINIMUM_RAM_BYTES){ // If account (often newly created account) does not have sufficient RAM, notify user
+                this.$errorNotification(this.$t('resources.insufficient_ram'));
+                return;
+            }
+            const actions = [];
+            if (!this.evmAddress) {
+                actions.push({
+                    account: 'eosio.evm',
+                    name: 'create',
+                    data: {
+                        account: this.accountName.toLowerCase(),
+                        data: 'create',
+                    },
+                });
+            }
+            try {
+                const transaction = await this.$store.$api.signTransaction(
+                    actions,
+                    this.$t('components.create_evm_for', { account: this.accountName }),
+                );
+                await this.setEvmState();
+                this.$successNotification(this.$t('components.created_evm_for', { account: this.accountName }));
+            } catch (error) {
+                this.$errorNotification(error);
             }
         },
         async withdraw() {
@@ -64,7 +111,6 @@ export default {
             }
         },
     },
-    watch: {},
 };
 </script>
 
@@ -96,6 +142,43 @@ export default {
             <div class="text-center text-subtitle2 text-grey-4">
                 {{$t('components.withdraw_1')}}<br >{{$t('components.withdraw_2')}}
             </div>
+            <div
+                v-if="displayAddress"
+            >
+                <q-btn
+                    class="purpleGradient addressCopyBtn"
+                    no-caps
+                    rounded
+                    icon="content_copy"
+                    :label="evmAddress"
+                    @click="copyAddress"
+                />
+            </div>
+            <div v-if="evmAddress && !displayAddress">
+                <q-btn
+                    class="purpleGradient generateAccountBtn"
+                    no-caps
+                    rounded
+                    label="Display Linked EVM Address"
+                    @click="displayEvmAddress"
+                />
+            </div>
+            <div v-if="!evmAddress" class="row justify-center">
+                <div
+                    class="note"
+                >
+                    {{$t('components.evm_address_not_found')}}
+                </div>
+            </div>
+            <div v-if="!evmAddress" class="row justify-center">
+                <q-btn
+                    class="purpleGradient generateAccountBtn"
+                    no-caps
+                    rounded
+                    label="Generate Linked EVM address"
+                    @click="generateAddress"
+                />
+            </div>
             <div class="text-center q-mt-md">
                 <div class="inputAmount row items-center ">
                     <input
@@ -110,11 +193,11 @@ export default {
                         TLOS
                     </label>
                 </div>
-                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance }}</div>
+                <div class="" @click="withdrawAmount=evmTLOSBalance">Max: {{ evmTLOSBalance || '0' }}</div>
             </div>
             <div class="row justify-center q-mt-md q-mb-lg">
                 <q-btn
-                    :disabled="!(parseFloat(withdrawAmount) > 0)"
+                    :disabled="!(evmTLOSBalance > 0) && !evmAddress"
                     class="purpleGradient withdrawBtn"
                     no-caps
                     rounded
@@ -136,4 +219,19 @@ export default {
     flex-basis: 15rem;
     height: 3rem;
 }
+.generateAccountBtn, .addressCopyBtn {
+  flex-basis: 15rem;
+  height: 3rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.addressCopyBtn{
+    font-size: 18px;
+    word-break: break-all;
+    height: fit-content;
+}
+
 </style>
+
+
