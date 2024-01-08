@@ -178,59 +178,6 @@ export default defineComponent({
 <div class="c-evm-login-buttons">
     <!-- main menu -->
     <template v-if="showMainMenu">
-
-        <!-- Google OAuth Provider -->
-        <div v-if="isTodayBeforeTelosCloudDown" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
-            <div class="c-evm-login-buttons__cloud-btn-container">
-                <div class="c-evm-login-buttons__cloud-btn-line-title">
-                    <img
-                        width="24"
-                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--cloud"
-                        src="~assets/icon--telos-cloud.svg"
-                    >
-                    <span>{{ $t('home.login_with_social_media') }}</span>
-                </div>
-                <div class="c-evm-login-buttons__cloud-btn-line-icons">
-                    <img
-                        width="12"
-                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
-                        src="~assets/icon--google.svg"
-                    >
-                    <img
-                        width="12"
-                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
-                        src="~assets/icon--facebook.svg"
-                    >
-                    <img
-                        width="12"
-                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
-                        src="~assets/icon--twitter.svg"
-                    >
-                </div>
-            </div>
-        </div>
-
-        <!-- Brave Authenticator button -->
-        <div
-            v-if="showBraveButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
-        >
-            <template v-if="isLoading('Brave.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <InlineSvg
-                    :src="require('src/assets/evm/brave_lion.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
-            </template>
-        </div>
-
         <!-- Metamask Authenticator button -->
         <div
             v-if="showMetamaskButton"
@@ -249,27 +196,6 @@ export default defineComponent({
                     aria-hidden="true"
                 />
                 {{ supportsMetamask ? $t('home.metamask') : $t('home.install_metamask') }}
-            </template>
-        </div>
-
-        <!-- Safepal Authenticator button -->
-        <div
-            v-if="showSafePalButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
-        >
-            <template v-if="isLoading('SafePal.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <InlineSvg
-                    :src="require('src/assets/evm/safepal.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
             </template>
         </div>
 
@@ -294,6 +220,47 @@ export default defineComponent({
             </template>
         </div>
 
+        <!-- Safepal Authenticator button -->
+        <div
+            v-if="showSafePalButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
+        >
+            <template v-if="isLoading('SafePal.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/safepal.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+            </template>
+        </div>
+
+        <!-- Brave Authenticator button -->
+        <div
+            v-if="showBraveButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
+        >
+            <template v-if="isLoading('Brave.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/brave_lion.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
+            </template>
+        </div>
     </template>
 
     <!-- telos cloud menu -->
@@ -347,8 +314,6 @@ export default defineComponent({
         </div>
 
     </template>
-
-
 </div>
 </template>
 

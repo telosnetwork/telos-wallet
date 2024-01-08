@@ -15,8 +15,7 @@ import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 
-const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
-const TSWAPS_URL = 'https://tswaps.com/swap';
+const GETTING_STARTED_URL = 'https://telos.net/ecosystem?category=Exchanges';
 
 export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],
@@ -183,9 +182,6 @@ export default {
         clickPurchase() {
             this.selectedCoin = this.coins.find(coin => coin.symbol === 'TLOS');
             window.open(GETTING_STARTED_URL);
-        },
-        clickExchange() {
-            window.open(TSWAPS_URL);
         },
         handlePan({ evt, ...info }) {
             this.coinViewHeight -= info.delta.y;
@@ -745,10 +741,6 @@ export default {
 
                 <!-- Convert and Purchace -->
                 <div class="row justify-between q-mb-md">
-                    <div class="convertBtn" @click="clickExchange()">
-                        <img src="~assets/coin/Convert.svg" class="q-mr-xs" >
-                        {{$t('balance.convert')}}
-                    </div>
                     <div class="purchaceBtn" @click="clickPurchase()">
                         {{$t('balance.purchase')}}
                         <img src="~assets/coin/Purchase.svg" class="q-ml-xs" >

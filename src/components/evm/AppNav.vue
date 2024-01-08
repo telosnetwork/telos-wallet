@@ -147,6 +147,10 @@ export default defineComponent({
             const network = this.loggedAccount.network;
             window.open(chainStore.getEcosystemUrl(network), '_blank');
         },
+        goToExplorer() {
+            const network = this.loggedAccount.network;
+            window.open(chainStore.getExplorerUrl(network), '_blank');
+        },
     },
 });
 </script>
@@ -252,25 +256,6 @@ export default defineComponent({
                 />
                 {{ $t('nav.wallet') }}
             </li>
-            <li
-                class="c-app-nav__menu-item"
-                role="menuitem"
-                :tabindex="menuItemTabIndex"
-                @click="goTo('evm-nft-inventory')"
-                @keypress.space.enter="goTo('evm-nft-inventory')"
-            >
-                <InlineSvg
-                    :src="require('src/assets/icon--nft.svg')"
-                    :class="{
-                        'c-app-nav__icon': true,
-                        'c-app-nav__icon--current-route': $route.name === 'evm-nft-inventory',
-                    }"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ $t('nav.nfts') }}
-            </li>
 
             <li
                 class="c-app-nav__menu-item"
@@ -300,6 +285,26 @@ export default defineComponent({
                     />
                     <b> {{ prettyPrintApy }}</b>
                 </span>
+            </li>
+
+            <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-nft-inventory')"
+                @keypress.space.enter="goTo('evm-nft-inventory')"
+            >
+                <InlineSvg
+                    :src="require('src/assets/icon--nft.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-nft-inventory',
+                    }"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ $t('nav.nfts') }}
             </li>
 
             <li
@@ -372,6 +377,16 @@ export default defineComponent({
                 @keypress.space.enter="gotoEcosystem()"
             >
                 {{ $t('nav.ecosystem') }}
+                <q-icon size="16px" name="launch" />
+            </li>
+            <li
+                class="c-app-nav__menu-link"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goToExplorer()"
+                @keypress.space.enter="goToExplorer()"
+            >
+                {{ $t('nav.teloscan') }}
                 <q-icon size="16px" name="launch" />
             </li>
         </ul>
