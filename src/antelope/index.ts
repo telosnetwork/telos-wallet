@@ -115,6 +115,11 @@ export class Antelope {
         return events;
     }
 
+    // shortcut to get debug config
+    get debug() {
+        return this.config.debug;
+    }
+
     extractStoreState(store: Store) {
         const state = store.$state;
         const result: Record<string, unknown> = {};
