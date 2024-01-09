@@ -572,6 +572,7 @@ export default {
         'LOSS OF FUNDS. THIS PRIVATE KEY IS NOT AVAILABLE.',
         i_understand: 'I Understand',
         copied_ok: 'Copied it to the clipboard successfully',
+        balance_fiat_tooltip: 'Total includes non-liquid TLOS, such as TLOS staked to resources',
     },
     dapps: {
         title: 'Telos Native dApps',
