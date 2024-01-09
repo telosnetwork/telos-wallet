@@ -35,12 +35,14 @@ export class AntelopeDebug {
         }
     }
     allowDebugMode(allow: boolean) {
+        console.log(`allowDebugMode(${allow})`);
         this.__debugModeAllowed = allow;
     }
     isDebugging() {
         return this.__debugMode && this.__debugModeAllowed;
     }
     setDebugMode(debug: boolean) {
+        console.log(`setDebugMode(${debug})`);
         if (!this.__debugModeAllowed) {
             this.__debugMode = false;
             return 'debug mode not allowed';
