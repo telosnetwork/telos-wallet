@@ -62,7 +62,6 @@ export default defineComponent({
             class="c-receive-page__user-info"
             :displayFullAddress="true"
             :showCopyBtn="!isMobile"
-            :showUserMenu="false"
             :account="loggedAccount"
         />
 

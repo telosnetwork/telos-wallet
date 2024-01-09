@@ -40,9 +40,14 @@ export const login = async function(
         const error =
             (authenticator.getError() && authenticator.getError().message) ||
             e.message ||
-            e.reason;
-        commit('general/setErrorMsg', error, { root: true });
-        console.error('Login error: ', error);
+            e.reason ||
+            e.cause;
+        if (error !== 'cancelled') {
+            commit('general/setErrorMsg', error, { root: true });
+            throw e;
+        } else {
+            console.log('Login cancelled');
+        }
     } finally {
         commit('setLoadingWallet');
     }
@@ -87,7 +92,7 @@ const getAuthenticator = function(ual, wlt = null) {
     };
 };
 
-export const logout = async function({ commit }) {
+export const logout = async function({ commit }, telosZeroLogout = false) {
     const { authenticator } = getAuthenticator(this.$ual);
     try {
         authenticator && (await authenticator.logout());
@@ -106,7 +111,7 @@ export const logout = async function({ commit }) {
     commit('setEvmBalance', null);
 
     if (this.$router.currentRoute.path !== '/') {
-        this.$router.push({ path: '/' });
+        this.$router.push({ path: '/', query: { login: telosZeroLogout ? 'zero' : '' } });
     }
 };
 

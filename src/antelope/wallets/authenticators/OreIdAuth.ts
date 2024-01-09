@@ -11,10 +11,10 @@ import {
     addressString,
     EvmTransactionResponse,
 } from 'src/antelope/types';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { useFeedbackStore } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { RpcEndpoint } from 'universal-authenticator-library';
-import { TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
+import { TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
 
 const name = 'OreId';
 export const OreIdAuthName = name;
@@ -64,14 +64,10 @@ export class OreIdAuth extends EVMAuthenticator {
         this.trace('login', network);
         const chainSettings = this.getChainSettings();
         const trackSuccessfulLogin = () => {
-            this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-            );
-            this.trace('login', 'trackAnalyticsEvent -> login succeeded', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId);
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulOreId },
-            );
+            this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
+            this.trace('login', 'trackAnalyticsEvent -> login succeeded', this.getName(), TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulOreId);
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulOreId);
         };
 
         useFeedbackStore().setLoading(`${this.getName()}.login`);
@@ -93,18 +89,14 @@ export class OreIdAuth extends EVMAuthenticator {
             this.trace('login', 'userChainAccount', this.userChainAccount);
             // track the login start for auto-login procceess
             this.trace('login', 'trackAnalyticsEvent -> login started');
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-            );
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
             // then track the successful login
             trackSuccessfulLogin();
             return chainAccount;
         }
 
         this.trace('login', 'trackAnalyticsEvent -> login started');
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-        );
+        chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
 
         // launch the login flow
         await oreId.popup.auth({ provider: this.provider as AuthProvider });
@@ -118,10 +110,8 @@ export class OreIdAuth extends EVMAuthenticator {
             const appName = this.options.appName;
             const networkName = useChainStore().getNetworkSettings(network).getDisplay();
 
-            this.trace('login', 'trackAnalyticsEvent -> login failed', this.getName(), TELOS_ANALYTICS_EVENT_IDS.loginFailedOreId);
-            chainSettings.trackAnalyticsEvent(
-                { id: TELOS_ANALYTICS_EVENT_IDS.loginFailedOreId },
-            );
+            this.trace('login', 'trackAnalyticsEvent -> login failed', this.getName(), TELOS_ANALYTICS_EVENT_NAMES.loginFailedOreId);
+            chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginFailedOreId);
 
             throw new AntelopeError('antelope.wallets.error_oreid_no_chain_account', {
                 networkName,

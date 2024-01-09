@@ -330,6 +330,9 @@ export class TokenBalance {
     get isNative(): boolean {
         return this.token.isNative;
     }
+    get price(): TokenPrice {
+        return this.token.price;
+    }
 
     toString(): string {
         return this._balanceStr;

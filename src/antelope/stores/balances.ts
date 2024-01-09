@@ -24,19 +24,10 @@ import {
     EvmABI,
     addressString,
     AntelopeError,
-
 } from 'src/antelope/types';
 import { createTraceFunction } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import {
-    getAntelope,
-    useAccountStore,
-    useFeedbackStore,
-    useChainStore,
-    CURRENT_CONTEXT,
-    useContractStore,
-} from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
@@ -52,6 +43,16 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useFeedbackStore,
+    useChainStore,
+    useContractStore,
+} from 'src/antelope';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -72,6 +73,7 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const balanceStore = useBalancesStore();
+            console.log('--------------------------------', getAntelope().events.onAccountChanged.pipe);
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({

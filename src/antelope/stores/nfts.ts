@@ -14,15 +14,23 @@ import {
     IndexerPaginationFilter,
     TransactionResponse,
     addressString,
+    AntelopeError,
 } from 'src/antelope/types';
-
-import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
 import { toRaw } from 'vue';
 import { EvmAccountModel, useAccountStore } from 'src/antelope/stores/account';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { createTraceFunction, errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useFeedbackStore,
+    useChainStore,
+    useEVMStore,
+} from 'src/antelope';
 
 export interface NFTsInventory {
     owner: Address;
@@ -34,6 +42,10 @@ export interface NFTsCollection {
     contract: Address;
     list: Collectible[];
     loading: boolean;
+
+    // this is to prevent the scenario where we fetch a single NFT from a collection, add it to a contract's `list`
+    // and then in future checks we assume that the entire collection has been fetched (as we have at least one item in the list)
+    entireCollectionFetched: boolean;
 }
 
 export interface UserNftFilter {
@@ -217,7 +229,15 @@ export const useNftsStore = defineStore(store_name, {
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
-                if (this.__contracts[network][contractLower]) {
+
+                if (this.__contracts[network]?.[contractLower]?.loading) {
+                    let waitCount = 0;
+                    while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                }
+
+                if (this.__contracts[network]?.[contractLower]?.entireCollectionFetched) {
                     const nft = this.__contracts[network][contractLower].list.find(
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
@@ -229,6 +249,7 @@ export const useNftsStore = defineStore(store_name, {
                         contract: contractLower,
                         list: [],
                         loading: false,
+                        entireCollectionFetched: false,
                     };
                 }
 
@@ -247,7 +268,7 @@ export const useNftsStore = defineStore(store_name, {
                 } else {
                     if (!chain.settings.isNative()) {
                         // this means we have the indexer down
-                        // we have the contract and the addres so we try to fetch the NFT from the contract
+                        // we have the contract and the address so we try to fetch the NFT from the contract
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
@@ -270,6 +291,55 @@ export const useNftsStore = defineStore(store_name, {
             }
 
             return promise;
+        },
+
+        async fetchNftsFromCollection(label: Label, contract: string): Promise<Collectible[] | null> {
+            this.trace('fetchNftsFromCollection', label, contract);
+            const contractLower = contract.toLowerCase();
+            const feedbackStore = useFeedbackStore();
+            const chain = useChainStore().getChain(label);
+            const network = chain.settings.getNetwork();
+
+            if (this.__contracts[network]?.[contractLower]?.loading) {
+                let waitCount = 0;
+                while (this.__contracts[network][contractLower].loading && waitCount++ < 600) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            if (this.__contracts[network]?.[contractLower]?.entireCollectionFetched) {
+                return Promise.resolve(this.__contracts[network][contractLower].list);
+            }
+
+            if (!this.__contracts[network]) {
+                this.__contracts[network] = {};
+            }
+
+            if (!this.__contracts[network][contractLower]) {
+                this.__contracts[network][contractLower] = {
+                    contract,
+                    list: [],
+                    loading: true,
+                    entireCollectionFetched: false,
+                };
+            }
+
+            this.__contracts[network][contractLower].loading = true;
+
+            feedbackStore.setLoading('fetchNftsFromCollection');
+            try {
+                const nfts = await chain.settings.getNftsForCollection(contract, { limit: 10000 });
+                this.__contracts[network][contractLower].list = nfts;
+                this.__contracts[network][contractLower].entireCollectionFetched = true;
+
+                return nfts;
+            } catch {
+                this.__contracts[network][contractLower].list = [];
+                throw new AntelopeError('antelope.nfts.error_fetching_collection_nfts');
+            } finally {
+                feedbackStore.unsetLoading('fetchNftsFromCollection');
+                this.__contracts[network][contractLower].loading = false;
+            }
         },
 
         clearUserFilter() {

@@ -5,7 +5,7 @@ export const INVALID_METADATA = '___INVALID_METADATA___'; // string given by ind
 interface IndexerNftResponse {
     success: boolean;
     contracts: {
-        [address: string]: IndexerNftContract;
+        [address: string]: IndexerContract;
     };
 }
 
@@ -48,6 +48,7 @@ interface IndexerNftResult {
 // results from the /contract/{address}/nfts endpoint
 export interface IndexerCollectionNftResult extends IndexerNftResult {
     supply?: number; // present only for ERC1155
+    owner?: string; // present only for ERC721
 }
 
 // results from the /account/{address}/nfts endpoint
@@ -73,7 +74,7 @@ export interface GenericIndexerNft {
     owner?: string; // present only for ERC721
 }
 
-export interface IndexerNftContract {
+export interface IndexerContract {
     symbol: string;
     creator: string;
     address: string;
@@ -152,7 +153,7 @@ export interface IndexerHealthResponse {
 
 export interface IndexerTokenHoldersResponse {
     contracts: {
-        [address: string]: IndexerNftContract;
+        [address: string]: IndexerContract;
     };
     results: {
         address: string; // holder address
@@ -161,3 +162,51 @@ export interface IndexerTokenHoldersResponse {
         updated: number; // ms since epoch
     }[];
 }
+
+// Allowances
+interface IndexerAllowanceResult {
+    owner: string; // address of the token owner;
+    contract: string; // address of the token contract
+    updated: number; // timestamp of the last time the allowance was updated - ms since epoch
+}
+
+export interface IndexerErc20AllowanceResult extends IndexerAllowanceResult {
+    amount: string; // string representation of a number; the amount of tokens the owner has approved for the spender in the token's smallest unit
+    spender: string; // address of the spender contract
+}
+
+export interface IndexerErc721AllowanceResult extends IndexerAllowanceResult {
+    single: false; // whether the allowance is for a single token or for the entire collection
+    approved: boolean; // whether the user has approved the spender
+    operator: string; // address of the spender contract
+
+    tokenId?: string | number; // only present if single === true
+}
+
+export interface IndexerErc1155AllowanceResult extends IndexerAllowanceResult {
+    approved: boolean; // whether the user has approved the spender
+    operator: string; // address of the spender contract
+}
+
+export interface IndexerAllowanceResponseErc20 {
+    contracts: {
+        [address: string]: IndexerContract;
+    }
+    results: IndexerErc20AllowanceResult[],
+}
+
+export interface IndexerAllowanceResponseErc721 {
+    contracts: {
+        [address: string]: IndexerContract;
+    }
+    results: IndexerErc721AllowanceResult[],
+}
+
+export interface IndexerAllowanceResponseErc1155 {
+    contracts: {
+        [address: string]: IndexerContract;
+    }
+    results: IndexerErc1155AllowanceResult[],
+}
+
+export type IndexerAllowanceResponse = IndexerAllowanceResponseErc20 | IndexerAllowanceResponseErc721 | IndexerAllowanceResponseErc1155;

@@ -6,7 +6,7 @@ import { Collectible } from 'src/antelope/types';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
-import NftViewer from 'pages/evm/nfts/NftViewer.vue';
+import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 import ToolTip from 'components/ToolTip.vue';
 import { abbreviateNumber, getShapedNftName } from 'src/antelope/stores/utils/text-utils';

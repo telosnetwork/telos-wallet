@@ -15,7 +15,12 @@
 import { defineStore } from 'pinia';
 import { createTraceFunction, errorToString } from 'src/antelope/config';
 import { AccountModel } from 'src/antelope/stores/account';
-import { getAntelope, useFeedbackStore } from 'src/antelope';
+
+// dependencies --
+import {
+    getAntelope,
+    useFeedbackStore,
+} from 'src/antelope';
 
 export type AccountList = Array<AccountId>;
 

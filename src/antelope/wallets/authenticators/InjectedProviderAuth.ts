@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { useEVMStore, useFeedbackStore } from 'src/antelope';
+import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import {
     AntelopeError,
     EthereumProvider,
@@ -12,8 +12,8 @@ import {
     addressString,
 } from 'src/antelope/types';
 import { EVMAuthenticator } from 'src/antelope/wallets';
-import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_IDS } from 'src/antelope/chains/chain-constants';
-import { MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
+import { TELOS_NETWORK_NAMES, TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
+import { BraveAuthName, MetamaskAuthName, SafePalAuthName } from 'src/antelope/wallets';
 
 export abstract class InjectedProviderAuth extends EVMAuthenticator {
     onReady = new BehaviorSubject<boolean>(false);
@@ -21,8 +21,94 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     // this is just a dummy label to identify the authenticator base class
     constructor(label: string) {
         super(label);
-        useEVMStore().initInjectedProvider(this);
+        this.initInjectedProvider(this);
     }
+
+    async initInjectedProvider(authenticator: InjectedProviderAuth): Promise<void> {
+        this.trace('initInjectedProvider', authenticator.getName(), [authenticator.getProvider()]);
+        const provider: EthereumProvider | null = authenticator.getProvider();
+        const ant = getAntelope();
+
+        if (provider && !provider.__initialized) {
+            this.trace('initInjectedProvider', authenticator.getName(), 'initializing provider');
+            // ensure this provider actually has the correct methods
+            // Check consistency of the provider
+            const methods = ['request', 'on'];
+            const candidate = provider as unknown as Record<string, unknown>;
+            for (const method of methods) {
+                if (typeof candidate[method] !== 'function') {
+                    console.warn(`MetamaskAuth.getProvider: method ${method} not found`);
+                    throw new AntelopeError('antelope.evm.error_invalid_provider');
+                }
+            }
+
+            // this handler activates only when the user comes back from switching to the wrong network on the wallet
+            // It checks if the user is on the correct network and if not, it shows a notification with a button to switch
+            const checkNetworkHandler = async () => {
+                window.removeEventListener('focus', checkNetworkHandler);
+                if (useAccountStore().loggedAccount) {
+                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                    if (await authenticator.isConnectedToCorrectChain()) {
+                        this.trace('checkNetworkHandler', 'correct network');
+                    } else {
+                        const networkName = useChainStore().loggedChain.settings.getDisplay();
+                        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                        ant.config.notifyFailureWithAction(errorMessage, {
+                            label: ant.config.localizationHandler('evm_wallet.switch'),
+                            handler: () => {
+                                authenticator.ensureCorrectChain();
+                            },
+                        });
+                    }
+                }
+            };
+
+            provider.on('chainChanged', (value) => {
+                const newNetwork = value as string;
+                this.trace('provider.chainChanged', newNetwork);
+                window.removeEventListener('focus', checkNetworkHandler);
+                if (useAccountStore().loggedAccount) {
+                    window.addEventListener('focus', checkNetworkHandler);
+                }
+            });
+
+            provider.on('accountsChanged', async (value) => {
+                const accounts = value as string[];
+                const network = useChainStore().currentChain.settings.getNetwork();
+                this.trace('provider.accountsChanged', ...accounts);
+
+                if (accounts.length > 0) {
+                    // If we are here one of two possible things had happened:
+                    // 1. The user has just logged in to the wallet
+                    // 2. The user has switched the account in the wallet
+
+                    // if we are in case 1, then we are in the middle of the login process and we don't need to do anything
+                    // We can tell because the account store has no logged account
+
+                    // But if we are in case 2 and have a logged account, we need to re-login the account using the same authenticator
+                    // overwriting the previous logged account, which in turn will trigger all account data to be reloaded
+                    if (useAccountStore().loggedAccount) {
+                        // if the user is already authenticated we try to re login the account using the same authenticator
+                        const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                        if (!authenticator) {
+                            console.error('Inconsistency: logged account authenticator is null', authenticator);
+                        } else {
+                            useAccountStore().loginEVM({ authenticator,  network });
+                        }
+                    }
+                } else {
+                    // the user has disconnected the all the accounts from the wallet so we logout
+                    useAccountStore().logout();
+                }
+            });
+
+            // This initialized property is not part of the standard provider, it's just a flag to know if we already initialized the provider
+            provider.__initialized = true;
+            useEVMStore().addInjectedProvider(authenticator);
+        }
+        authenticator.onReady.next(true);
+    }
+
 
     async login(network: string): Promise<addressString | null> {
         const chainSettings = this.getChainSettings();
@@ -32,31 +118,27 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
         useFeedbackStore().setLoading(`${this.getName()}.login`);
 
         this.trace('login', 'trackAnalyticsEvent -> login started');
-        chainSettings.trackAnalyticsEvent(
-            { id: TELOS_ANALYTICS_EVENT_IDS.loginStarted },
-        );
+        chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginStarted);
 
         const response = await super.login(network).then((res) => {
             if (TELOS_NETWORK_NAMES.includes(network)) {
-                let successfulLoginEventId = '';
+                let successfulLoginEventName = '';
 
                 if (authName === MetamaskAuthName) {
-                    successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulMetamask;
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulMetamask;
                 } else if (authName === SafePalAuthName) {
-                    successfulLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginSuccessfulSafepal;
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulSafepal;
+                } else if (authName === BraveAuthName) {
+                    successfulLoginEventName = TELOS_ANALYTICS_EVENT_NAMES.loginSuccessfulBrave;
                 }
 
-                if (successfulLoginEventId) {
-                    this.trace('login', 'trackAnalyticsEvent -> login succeeded', authName, successfulLoginEventId);
-                    chainSettings.trackAnalyticsEvent(
-                        { id: successfulLoginEventId },
-                    );
+                if (successfulLoginEventName) {
+                    this.trace('login', 'trackAnalyticsEvent -> login succeeded', authName, successfulLoginEventName);
+                    chainSettings.trackAnalyticsEvent(successfulLoginEventName);
                 }
 
-                this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', TELOS_ANALYTICS_EVENT_IDS.loginSuccessful);
-                chainSettings.trackAnalyticsEvent(
-                    { id: TELOS_ANALYTICS_EVENT_IDS.loginSuccessful },
-                );
+                this.trace('login', 'trackAnalyticsEvent -> generic login succeeded', authName, TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
+                chainSettings.trackAnalyticsEvent(TELOS_ANALYTICS_EVENT_NAMES.loginSuccessful);
             }
 
             return res;
@@ -69,16 +151,16 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
                 let failedLoginEventId = '';
 
                 if (authName === MetamaskAuthName) {
-                    failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedMetamask;
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedMetamask;
                 } else if (authName === SafePalAuthName) {
-                    failedLoginEventId = TELOS_ANALYTICS_EVENT_IDS.loginFailedSafepal;
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedSafepal;
+                } else if (authName === BraveAuthName) {
+                    failedLoginEventId = TELOS_ANALYTICS_EVENT_NAMES.loginFailedBrave;
                 }
 
                 if (failedLoginEventId) {
                     this.trace('login', 'trackAnalyticsEvent -> login failed', authName, failedLoginEventId);
-                    chainSettings.trackAnalyticsEvent(
-                        { id: failedLoginEventId },
-                    );
+                    chainSettings.trackAnalyticsEvent(failedLoginEventId);
                 }
             }
         }).finally(() => {

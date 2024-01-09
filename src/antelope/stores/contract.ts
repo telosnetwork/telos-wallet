@@ -14,12 +14,6 @@
 
 import { defineStore } from 'pinia';
 import {
-    useAccountStore,
-    useChainStore,
-    useEVMStore,
-    getAntelope,
-} from 'src/antelope';
-import {
     AntelopeError,
     erc1155Abi,
     erc20Abi,
@@ -39,21 +33,20 @@ import EvmContract, { Erc20Transfer } from 'src/antelope/stores/utils/contracts/
 import EvmContractFactory from 'src/antelope/stores/utils/contracts/EvmContractFactory';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { getTopicHash, toChecksumAddress, TRANSFER_SIGNATURES } from 'src/antelope/stores/utils';
-import { EVMAuthenticator } from 'src/antelope/wallets';
 import { ethers } from 'ethers';
 import { toRaw } from 'vue';
 
+// dependencies --
+import {
+    getAntelope,
+    useChainStore,
+    useEVMStore,
+} from 'src/antelope';
+
 const LOCAL_SORAGE_CONTRACTS_KEY = 'antelope.contracts';
 
-const createManager = (authenticator?: EVMAuthenticator):EvmContractManagerI => ({
-    getSigner: async () => {
-        if (!authenticator) {
-            return null;
-        }
-        const provider = await authenticator.web3Provider();
-        const account = useAccountStore().getAccount(authenticator.label).account;
-        return provider.getSigner(account);
-    },
+const createManager = (signer?: ethers.Signer):EvmContractManagerI => ({
+    getSigner: async () => signer ?? null,
     getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
@@ -68,6 +61,10 @@ export interface ContractStoreState {
             processing: Record<string, Promise<EvmContract | null>>
         },
     }
+    // addresses which have been checked and are known not to be contract addresses
+    __accounts: {
+        [network: string]: string[],
+    },
 }
 
 const store_name = 'contract';
@@ -151,9 +148,10 @@ export const useContractStore = defineStore(store_name, {
          * @param label identifier for the chain
          * @param address address of the contract
          * @param suspectedToken if you know the contract is a token, you can pass the type here to speed up the process
+         * @param signer if you want to use a specific signer, you can pass it here. Otherwise the contract will only query read-only functions
          * @returns the contract or null if it doesn't exist
          */
-        async getContract(label: string, address:string, suspectedToken = ''): Promise<EvmContract | null> {
+        async getContract(label: string, address:string, suspectedToken = '', signer?: ethers.Signer): Promise<EvmContract | null> {
             this.trace('getContract', label, address, suspectedToken);
             const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
             const network = chainSettings.getNetwork();
@@ -185,13 +183,20 @@ export const useContractStore = defineStore(store_name, {
                 return this.__contracts[network].cached[addressLower];
             }
 
+            const isContract = await this.addressIsContract(network, address);
+
+            if (!isContract) {
+                // address is an account, not a contract
+                return null;
+            }
+
             // if we have the metadata, we can create the contract and return it
             if (typeof this.__contracts[network].metadata[addressLower] !== 'undefined') {
                 const metadata = this.__contracts[network].metadata[addressLower] as EvmContractFactoryData;
                 // we ensure the contract hast the proper list of supported interfaces
                 metadata.supportedInterfaces = metadata.supportedInterfaces || (suspectedToken ? [suspectedToken] : undefined);
                 this.trace('getContract', 'returning cached metadata', address, [metadata]);
-                return this.createAndStoreContract(label, addressLower, metadata);
+                return this.createAndStoreContract(label, addressLower, metadata, signer);
             }
 
             // maybe we already starting processing it, return the promise
@@ -206,18 +211,18 @@ export const useContractStore = defineStore(store_name, {
             if (chainSettings.isIndexerHealthy()) {
                 try {
                     // we have a healthy indexer, let's get it from there first
-                    return await this.fetchContractUsingIndexer(label, address, suspectedToken);
+                    return await this.fetchContractUsingIndexer(label, address, suspectedToken, signer);
                 } catch (e) {
                     console.warn('Indexer did not worked, falling back to hyperion');
-                    return await this.fetchContractUsingHyperion(label, address, suspectedToken);
+                    return await this.fetchContractUsingHyperion(label, address, suspectedToken, signer);
                 }
             } else {
                 // we don't have a healthy indexer, let's get it from hyperion
-                return await this.fetchContractUsingHyperion(label, address, suspectedToken);
+                return await this.fetchContractUsingHyperion(label, address, suspectedToken, signer);
             }
         },
 
-        async fetchContractUsingIndexer(label: string, address:string, suspectedToken = ''): Promise<EvmContract | null> {
+        async fetchContractUsingIndexer(label: string, address:string, suspectedToken = '', signer?: ethers.Signer): Promise<EvmContract | null> {
             this.trace('fetchContractUsingIndexer', label, address, suspectedToken);
             const network = useChainStore().getChain(label).settings.getNetwork();
             const addressLower = address.toLowerCase();
@@ -236,7 +241,7 @@ export const useContractStore = defineStore(store_name, {
                     console.warn(`Could not retrieve contract ${address}: ${e}`);
                     throw new AntelopeError('antelope.contracts.error_retrieving_contract', { address });
                 }
-                const contract = this.createAndStoreContract(label, address, metadata);
+                const contract = this.createAndStoreContract(label, address, metadata, signer);
                 resolve(contract);
             });
 
@@ -244,7 +249,7 @@ export const useContractStore = defineStore(store_name, {
             return this.__contracts[network].processing[addressLower];
         },
 
-        async fetchContractUsingHyperion(label: string, address:string, suspectedToken = ''): Promise<EvmContract | null> {
+        async fetchContractUsingHyperion(label: string, address:string, suspectedToken = '', signer?: ethers.Signer): Promise<EvmContract | null> {
             this.trace('fetchContractUsingHyperion', label, address, suspectedToken);
             const addressLower = address.toLowerCase();
             const network = useChainStore().getChain(label).settings.getNetwork();
@@ -256,16 +261,16 @@ export const useContractStore = defineStore(store_name, {
 
                     if (metadata && creationInfo) {
                         this.trace('fetchContractUsingHyperion', 'returning verified contract', address, metadata, creationInfo);
-                        return resolve(this.createAndStoreVerifiedContract(label, addressLower, metadata, creationInfo, suspectedToken));
+                        return resolve(await this.createAndStoreVerifiedContract(label, addressLower, metadata, creationInfo, suspectedToken, signer));
                     }
 
-                    const tokenContract = await this.createAndStoreContractFromTokenList(label, address, suspectedToken, creationInfo);
+                    const tokenContract = await this.createAndStoreContractFromTokenList(label, address, suspectedToken, creationInfo, signer);
                     if (tokenContract) {
                         this.trace('fetchContractUsingHyperion', 'returning contract from token list', address, tokenContract);
                         return resolve(tokenContract);
                     }
 
-                    const suspectedTokenContract = await this.createAndStoreContractFromSuspectedType(label, address, suspectedToken, creationInfo);
+                    const suspectedTokenContract = await this.createAndStoreContractFromSuspectedType(label, address, suspectedToken, creationInfo, signer);
                     if (suspectedTokenContract) {
                         this.trace('fetchContractUsingHyperion', 'returning contract from suspected type', address, suspectedTokenContract);
                         return resolve(suspectedTokenContract);
@@ -273,7 +278,7 @@ export const useContractStore = defineStore(store_name, {
 
                     if (creationInfo) {
                         this.trace('fetchContractUsingHyperion', 'returning empty contract', address, creationInfo);
-                        return resolve(this.createAndStoreEmptyContract(label, addressLower, creationInfo));
+                        return resolve(await this.createAndStoreEmptyContract(label, addressLower, creationInfo, signer));
                     } else {
                         // We mark this address as not existing so we don't query it again
                         this.trace('fetchContractUsingHyperion', 'returning null', address);
@@ -407,6 +412,7 @@ export const useContractStore = defineStore(store_name, {
          * @param metadata verified metadata of the contract
          * @param creationInfo creation info of the contract
          * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
+         * @param signer signer to use for the contract if any
          * @returns the contract
          */
         async createAndStoreVerifiedContract(
@@ -415,10 +421,11 @@ export const useContractStore = defineStore(store_name, {
             metadata: EvmContractMetadata,
             creationInfo: EvmContractCreationInfo,
             suspectedType: string,
-        ): Promise<EvmContract> {
+            signer?: ethers.Signer,
+        ): Promise<EvmContract | null> {
             this.trace('createAndStoreVerifiedContract', label, address, [metadata], [creationInfo], suspectedType);
             const token = await this.getToken(label, address, suspectedType) ?? undefined;
-            return this.createAndStoreContract(label, address, {
+            return await this.createAndStoreContract(label, address, {
                 name: Object.values(metadata.settings?.compilationTarget ?? {})[0],
                 address,
                 abi: metadata.output?.abi,
@@ -426,7 +433,8 @@ export const useContractStore = defineStore(store_name, {
                 creationInfo,
                 verified: true,
                 supportedInterfaces: [token?.type ?? 'none'],
-            } as EvmContractFactoryData);
+            } as EvmContractFactoryData,
+            signer);
         },
 
         /**
@@ -434,20 +442,23 @@ export const useContractStore = defineStore(store_name, {
          * @param label identifies the chain
          * @param address address of the contract
          * @param creationInfo creation info of the contract
+         * @param signer signer to use for the contract if any
          * @returns the contract
          */
         async createAndStoreEmptyContract(
             label: string,
             address:string,
             creationInfo: EvmContractCreationInfo | null,
-        ): Promise<EvmContract> {
+            signer?: ethers.Signer,
+        ): Promise<EvmContract | null> {
             this.trace('createAndStoreEmptyContract', label, address, [creationInfo]);
-            return this.createAndStoreContract(label, address, {
+            return await this.createAndStoreContract(label, address, {
                 name: `0x${address.slice(0, 16)}...`,
                 address,
                 creationInfo,
                 supportedInterfaces: undefined,
-            } as EvmContractFactoryData);
+            } as EvmContractFactoryData,
+            signer);
         },
 
         /**
@@ -457,6 +468,7 @@ export const useContractStore = defineStore(store_name, {
          * @param address address of the contract
          * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
          * @param creationInfo creation info of the contract
+         * @param signer signer to use for the contract if any
          * @returns the contract or null if the address is not in the token list
          */
         async createAndStoreContractFromTokenList(
@@ -464,6 +476,7 @@ export const useContractStore = defineStore(store_name, {
             address:string,
             suspectedType:string,
             creationInfo:EvmContractCreationInfo | null,
+            signer?: ethers.Signer,
         ): Promise<EvmContract | null> {
             const token = await this.getToken(label, address, suspectedType);
             if (token) {
@@ -475,7 +488,8 @@ export const useContractStore = defineStore(store_name, {
                     abi,
                     token,
                     supportedInterfaces: [token.type],
-                } as EvmContractFactoryData);
+                } as EvmContractFactoryData,
+                signer);
             } else {
                 return null;
             }
@@ -488,6 +502,7 @@ export const useContractStore = defineStore(store_name, {
          * @param address address of the contract
          * @param suspectedType type of the contract. It can be 'erc20', 'erc721' or 'erc1155'
          * @param creationInfo creation info of the contract
+         * @param signer signer to use for the contract if any
          * @returns the contract or null if the type is not supported
          */
         async createAndStoreContractFromSuspectedType(
@@ -495,6 +510,7 @@ export const useContractStore = defineStore(store_name, {
             address:string,
             suspectedType:string,
             creationInfo:EvmContractCreationInfo | null,
+            signer?: ethers.Signer,
         ): Promise<EvmContract | null> {
             const abi = this.getTokenABI(suspectedType);
             if (abi) {
@@ -504,14 +520,15 @@ export const useContractStore = defineStore(store_name, {
                     creationInfo,
                     abi,
                     supportedInterfaces: [suspectedType],
-                } as EvmContractFactoryData);
+                } as EvmContractFactoryData,
+                signer);
             } else {
                 return null;
             }
         },
 
         // commits -----
-        createAndStoreContract(label: string, address: string, metadata: EvmContractFactoryData): EvmContract {
+        async createAndStoreContract(label: string, address: string, metadata: EvmContractFactoryData, signer?: ethers.Signer): Promise<EvmContract | null> {
             const network = useChainStore().getChain(label).settings.getNetwork();
             this.trace('createAndStoreContract', label, network, address, [metadata]);
             if (!address) {
@@ -520,6 +537,14 @@ export const useContractStore = defineStore(store_name, {
             if (!label) {
                 throw new AntelopeError('antelope.contracts.error_label_required');
             }
+
+            const isContract = await this.addressIsContract(network, address);
+
+            if (!isContract) {
+                // address is an account, not a contract
+                return null;
+            }
+
             const index = address.toString().toLowerCase();
 
             // If:
@@ -532,7 +557,7 @@ export const useContractStore = defineStore(store_name, {
                 || (metadata.abi ?? []).length > 0 && (metadata.abi ?? []).length > (this.__contracts[network].cached[index]?.abi?.length ?? 0)
             ) {
                 // This manager provides the signer and the web3 provider
-                metadata.manager = createManager(useAccountStore().getAuthenticator(label) as EVMAuthenticator);
+                metadata.manager = createManager(signer);
 
                 // we create the contract using the factory
                 const contract = this.__factory.buildContract(metadata);
@@ -555,10 +580,33 @@ export const useContractStore = defineStore(store_name, {
             const index = address.toString().toLowerCase();
             this.__contracts[network].cached[index] = null;
         },
+
+        async addressIsContract(network: string, address: string) {
+            const addressLower = address.toLowerCase();
+            if (!this.__accounts[network]) {
+                this.__accounts[network] = [];
+            }
+
+            if (this.__accounts[network].includes(addressLower)) {
+                return false;
+            }
+
+            const provider = await getAntelope().wallets.getWeb3Provider();
+            const code = await provider.getCode(address);
+
+            const isContract = code !== '0x';
+
+            if (!isContract && !this.__accounts[network].includes(addressLower)) {
+                this.__accounts[network].push(addressLower);
+            }
+
+            return isContract;
+        },
     },
 });
 
 const contractInitialState: ContractStoreState = {
     __contracts: {},
     __factory: new EvmContractFactory(),
+    __accounts: {},
 };

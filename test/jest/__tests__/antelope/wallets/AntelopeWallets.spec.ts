@@ -10,10 +10,11 @@ import {
     useFeedbackStore,
 } from 'test/jest/utils/antelope/store-feedback';
 
-// Mocking the createTraceFunction
-jest.mock('src/antelope/stores/feedback', () => ({
-    useFeedbackStore,
-}));
+// FIXME: remove this commented mock
+// // Mocking the createTraceFunction
+// jest.mock('src/antelope/stores/feedback', () => ({
+//     useFeedbackStore,
+// }));
 
 import {
     createTraceFunction,
@@ -41,6 +42,7 @@ import {
 jest.mock('src/antelope', () => ({
     useChainStore: useChainStore,
     CURRENT_CONTEXT: 'mockedCurrentContext',
+    useFeedbackStore: useFeedbackStore,
 }));
 
 // Import the real artifact to test

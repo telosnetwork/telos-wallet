@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useQuasar } from 'quasar';
 
+import CollapsibleAside from 'components/evm/CollapsibleAside.vue';
 
 interface SidebarProps {
     header: string;
@@ -14,47 +15,19 @@ const props = defineProps<{
     sidebarContent: SidebarProps;
 }>();
 
-// data
-const expansionItemModel = ref(false);
-
 // computed
-const isStacked = computed(() => $q.screen.lt.lg);
 const isLarge = computed(() => $q.screen.gt.md);
-
-// methods
-function handleExpansionItemUpdate() {
-    if (!isStacked.value) {
-        expansionItemModel.value = true;
-    } else {
-        expansionItemModel.value = !expansionItemModel.value;
-    }
-}
 </script>
 
 <template>
 <div class="c-sidebar-page q-mb-xl">
-    <aside class="c-sidebar-page__sidebar-container">
-        <q-expansion-item
-            :model-value="expansionItemModel || isLarge"
-            :label="sidebarContent.header"
-            :toggle-aria-label="$t('global.toggle', { text: sidebarContent.header })"
-            :expand-icon="isStacked ? 'expand_more' : 'none'"
-            class="c-sidebar-page__expansion-item"
-            @update:model-value="handleExpansionItemUpdate"
-        >
-            <q-card>
-                <q-card-section>
-                    <span
-                        v-for="(content, index) in sidebarContent.content"
-                        :key="`text-fragment-${index}`"
-                        :class="{ 'o-text--paragraph-bold': content.bold }"
-                    >
-                        {{ content.text }}
-                    </span>
-                </q-card-section>
-            </q-card>
-        </q-expansion-item>
-    </aside>
+    <CollapsibleAside
+        :header="sidebarContent.header"
+        :content="sidebarContent.content"
+        :always-open="isLarge"
+        class="c-sidebar-page__sidebar-container"
+    />
+
     <div class="c-sidebar-page__body-container">
         <slot></slot>
     </div>
@@ -97,43 +70,6 @@ function handleExpansionItemUpdate() {
 
         @include lg-and-up {
             margin: unset;
-        }
-    }
-
-    &__expansion-item {
-        border-radius: 4px;
-        border: 1px solid var(--accent-color-3);
-        margin-bottom: 8px;
-        height: fit-content;
-
-        @include sm-and-up {
-            width: 350px;
-            max-width: 100%;
-        }
-
-        // quasiar overrides
-        .q-item__label {
-            @include text--header-4;
-        }
-
-        .q-item.q-item-type {
-            position: relative;
-
-            @include lg-and-up {
-                pointer-events: none;
-            }
-
-            &::after {
-                content: ' ';
-                margin: auto;
-                position: absolute;
-                right: 0;
-                bottom: 8px;
-                left: 0;
-                width: calc(100% - 30px);
-                height: 1px;
-                background-color: var(--accent-color-4);
-            }
         }
     }
 }

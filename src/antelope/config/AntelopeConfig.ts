@@ -50,6 +50,7 @@ export class AntelopeConfig {
     private __notify_success_copy_handler: () => void = alert;
     private __notify_failure_message_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
     private __notify_failure_action_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
+    private __notify_warning_action_handler: (message: string, payload?: AntelopeErrorPayload) => void = alert;
     private __notify_disconnected_handler: () => void = alert;
     private __notify_neutral_message_handler: (message: string) => (() => void) = () => (() => void 0);
     private __notify_remember_info_handler: (title: string, message: string | ComplexMessage[], payload: string, key: string) => (() => void) = () => (() => void 0);
@@ -116,13 +117,14 @@ export class AntelopeConfig {
     // Vue.App holder --
     private __app: App | null = null;
 
-    constructor(public debug: AntelopeDebug) {
+    constructor(
+        public debug: AntelopeDebug,
+    ) {
         //
     }
 
     init(app: App) {
         this.__app = app;
-        this.debug.init();
     }
 
     get app() {
@@ -167,6 +169,10 @@ export class AntelopeConfig {
 
     get notifyFailureWithAction() {
         return this.__notify_failure_action_handler;
+    }
+
+    get notifyWarningWithAction() {
+        return this.__notify_warning_action_handler;
     }
 
     get notifyDisconnectedHandler() {
@@ -239,6 +245,10 @@ export class AntelopeConfig {
         this.__notify_failure_action_handler = handler;
     }
 
+    public setNotifyWarningWithAction(handler: (message: string, payload?: AntelopeErrorPayload) => void) {
+        this.__notify_warning_action_handler = handler;
+    }
+
     public setNotifyDisconnectedHandler(handler: () => void) {
         this.__notify_disconnected_handler = handler;
     }
@@ -277,3 +287,4 @@ export class AntelopeConfig {
     }
 
 }
+

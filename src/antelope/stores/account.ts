@@ -17,14 +17,6 @@ import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
 import { initFuelUserWrapper } from 'src/api/fuel';
-import {
-    CURRENT_CONTEXT,
-    useBalancesStore,
-    useFeedbackStore,
-    useHistoryStore,
-    useNftsStore,
-} from 'src/antelope';
-import { getAntelope, useChainStore } from 'src/antelope';
 import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
@@ -38,6 +30,18 @@ import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
 import { OreIdAuthenticator } from 'ual-oreid';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useChainStore,
+    useAllowancesStore,
+    useBalancesStore,
+    useFeedbackStore,
+    useHistoryStore,
+    useNftsStore,
+} from 'src/antelope';
 
 
 export interface LoginNativeActionData {
@@ -81,7 +85,6 @@ export interface EvmAccountModel extends AccountModel {
     associatedNative: string;
     authenticator: EVMAuthenticator;
 }
-
 
 export interface AccountState {
     // accounts mapped by label
@@ -211,6 +214,7 @@ export const useAccountStore = defineStore(store_name, {
             useHistoryStore().clearEvmNftTransfers();
             useBalancesStore().clearBalances();
             useNftsStore().clearNFTs();
+            useAllowancesStore().clearAllowances();
 
             try {
                 localStorage.removeItem('network');

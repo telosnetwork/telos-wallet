@@ -15,9 +15,6 @@
 
 import { defineStore } from 'pinia';
 import {
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
-import {
     Label,
     EvmTransaction,
     AntelopeError,
@@ -35,19 +32,22 @@ import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { toRaw } from 'vue';
 import { BigNumber } from 'ethers';
-import {
-    CURRENT_CONTEXT,
-    getAntelope,
-    useContractStore,
-    useNftsStore,
-    useTokensStore,
-    useUserStore,
-} from '..';
 import { formatUnits } from 'ethers/lib/utils';
 import { getGasInTlos, WEI_PRECISION } from 'src/antelope/stores/utils';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { createTraceFunction } from 'src/antelope/config';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useContractStore,
+    useNftsStore,
+    useFeedbackStore,
+    useTokensStore,
+    useUserStore,
+} from 'src/antelope';
 
 export const transfers_filter_limit = 10000;
 

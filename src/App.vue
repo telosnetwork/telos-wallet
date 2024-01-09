@@ -54,23 +54,6 @@ export default defineComponent({
             script.defer = true;
             document.body.appendChild(script);
         }
-
-        if (isTodayBeforeTelosCloudDown) {
-            getAntelope().config.notifyRememberInfoHandler(
-                this.$t('temporal.telos_cloud_discontinued_title'),
-                [{
-                    tag: 'p',
-                    class: 'c-notify__message--subtitle',
-                    text: this.$t('temporal.telos_cloud_discontinued_message_title'),
-                }, {
-                    tag: 'p',
-                    class: '',
-                    text: this.$t('temporal.telos_cloud_discontinued_message_body'),
-                }],
-                '',
-                'telos-cloud-discontinued',
-            );
-        }
     },
 });
 </script>
