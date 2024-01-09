@@ -39,6 +39,7 @@ export class AntelopeDebug {
         this.__debugModeAllowed = allow;
     }
     isDebugging() {
+        console.log(`isDebugging() -> ${this.__debugMode && this.__debugModeAllowed}`);
         return this.__debugMode && this.__debugModeAllowed;
     }
     setDebugMode(debug: boolean) {
@@ -123,6 +124,7 @@ export class AntelopeDebug {
      */
     isAllowedToTrace(store: string, action: string) {
         if (!this.isDebugging()) {
+            console.log(`isAllowedToTrace(${store}, ${action}) -> false`);
             return false;
         }
         const keyAction = `${action.toLowerCase()}`;
@@ -137,6 +139,7 @@ export class AntelopeDebug {
         if (this.__filtered.has(keyStore)) {
             return false;
         }
+        console.log(`isAllowedToTrace(${store}, ${action}) -> true`);
         return true;
     }
 
