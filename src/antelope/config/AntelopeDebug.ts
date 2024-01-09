@@ -55,6 +55,12 @@ export class AntelopeDebug {
             return 'debug mode disabled';
         }
     }
+    turnOn() {
+        return this.setDebugMode(true);
+    }
+    turnOff() {
+        return this.setDebugMode(false);
+    }
 
     /**
      * this function publishes the antelope API to the window object
@@ -96,12 +102,12 @@ export class AntelopeDebug {
      * This function put the debugger in a mode where every call to the trace function will be printed in the console
      * but also put as a turned off key in the localStorage. This helps to auto filter all update processes functions
      */
-    startFiltering() {
+    filterStart() {
         this.__filteringMode = true;
         return 'filtering mode started';
     }
 
-    finishFiltering() {
+    filterEnd() {
         this.__filteringMode = false;
         this.saveDebugConfig();
         return 'filtering mode finished';
