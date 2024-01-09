@@ -125,6 +125,7 @@ export class AntelopeConfig {
 
     init(app: App) {
         this.__app = app;
+        this.debug.init();
     }
 
     get app() {

@@ -133,7 +133,8 @@ export const useNftsStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const self = useNftsStore();
-            getAntelope().events.onAccountChanged.subscribe({
+            const ant = getAntelope();
+            ant.events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
                     if (label) {
                         self.__inventory[label] = {
@@ -143,6 +144,9 @@ export const useNftsStore = defineStore(store_name, {
                         };
                     }
                 },
+            });
+            ant.events.onClear.subscribe(({ label }) => {
+                self.clearNFTs(label);
             });
         },
         async updateNFTsForAccount(label: string, account: string) {
@@ -409,9 +413,13 @@ export const useNftsStore = defineStore(store_name, {
         setUserFilter(filter: UserNftFilter) {
             this.__user_filter = filter;
         },
-        clearNFTs() {
+        clearNFTs(label: Label) {
             this.trace('clearNFTs');
-            this.__inventory = {};
+            this.__inventory[label] = {
+                owner: '',
+                list: [],
+                loading: false,
+            };
             this.setUserFilter({});
             this.setPaginationFilter({
                 offset: 0,

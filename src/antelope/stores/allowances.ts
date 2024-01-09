@@ -216,8 +216,8 @@ export const useAllowancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const allowancesStore = useAllowancesStore();
-
-            getAntelope().events.onAccountChanged.pipe(
+            const ant = getAntelope();
+            ant.events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: ({ label, account }) => {
@@ -225,6 +225,10 @@ export const useAllowancesStore = defineStore(store_name, {
                         allowancesStore.fetchAllowancesForAccount(account?.account);
                     }
                 },
+            });
+
+            ant.events.onClear.subscribe(({ label }) => {
+                allowancesStore.clearAllowances(label);
             });
         },
 
@@ -537,13 +541,12 @@ export const useAllowancesStore = defineStore(store_name, {
             this.trace('setErc1155Allowances', allowances);
             this.__erc_1155_allowances[label] = allowances;
         },
-
         // utils
-        clearAllowances() {
-            this.trace('clearAllowances');
-            this.__erc_20_allowances = {};
-            this.__erc_721_allowances = {};
-            this.__erc_1155_allowances = {};
+        clearAllowances(label: Label) {
+            this.trace('clearAllowances', label);
+            this.__erc_20_allowances[label] = [];
+            this.__erc_721_allowances[label] = [];
+            this.__erc_1155_allowances[label] = [];
         },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
             try {

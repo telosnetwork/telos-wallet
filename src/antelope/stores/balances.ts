@@ -73,7 +73,8 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const balanceStore = useBalancesStore();
-            getAntelope().events.onAccountChanged.pipe(
+            const ant = getAntelope();
+            ant.events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
@@ -89,6 +90,8 @@ export const useBalancesStore = defineStore(store_name, {
                     await balanceStore.updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
                 }
             }, 10000);
+
+            ant.events.onClear.subscribe(({ label }) => balanceStore.clearBalances(label));
         },
         async updateBalances(label: string) {
             this.trace('updateBalances', label);
@@ -512,9 +515,9 @@ export const useBalancesStore = defineStore(store_name, {
 
             this.__wagmiTokenTransferConfig[label] = config;
         },
-        clearBalances() {
-            this.trace('clearBalances');
-            this.__balances = {};
+        clearBalances(label: Label) {
+            this.trace('clearBalances', label);
+            this.__balances[label] = [];
         },
     },
 });

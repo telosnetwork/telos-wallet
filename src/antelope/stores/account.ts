@@ -36,11 +36,7 @@ import {
     CURRENT_CONTEXT,
     getAntelope,
     useChainStore,
-    useAllowancesStore,
-    useBalancesStore,
     useFeedbackStore,
-    useHistoryStore,
-    useNftsStore,
 } from 'src/antelope';
 
 
@@ -159,10 +155,8 @@ export const useAccountStore = defineStore(store_name, {
 
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
+            const label = authenticator.label;
+            getAntelope().events.onClear.next({ label });
 
             let success = false;
             try {
@@ -210,20 +204,22 @@ export const useAccountStore = defineStore(store_name, {
 
         async logout() {
             this.trace('logout');
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
-            useAllowancesStore().clearAllowances();
 
             try {
+
+                const logged = this.__accounts[CURRENT_CONTEXT];
+                const { authenticator } = logged;
+
+                if (authenticator instanceof EVMAuthenticator) {
+                    const label = authenticator.label;
+                    getAntelope().events.onClear.next({ label });
+                }
+
                 localStorage.removeItem('network');
                 localStorage.removeItem('account');
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                const logged = this.__accounts[CURRENT_CONTEXT];
-                const { authenticator } = logged;
                 try {
                     authenticator && (await authenticator.logout());
                 } catch (error) {

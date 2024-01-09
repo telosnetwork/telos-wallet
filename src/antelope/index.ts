@@ -35,6 +35,7 @@ declare module '@vue/runtime-core' {
 }
 
 const events = {
+    onClear: new Subject<{label:string}>(),
     onLoggedIn: new Subject<AccountModel>(),
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),

@@ -98,14 +98,19 @@ export const useHistoryStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const self = useHistoryStore();
-            self.clearEvmNftTransfers();
-            self.clearEvmTransactions();
-            getAntelope().events.onAccountChanged.subscribe({
+            const ant = getAntelope();
+            self.clearEvmNftTransfers(CURRENT_CONTEXT);
+            self.clearEvmTransactions(CURRENT_CONTEXT);
+            ant.events.onAccountChanged.subscribe({
                 next: ({ account }) => {
                     if (account) {
                         self.setEVMTransactionsFilter({ address: account.account });
                     }
                 },
+            });
+            ant.events.onClear.subscribe(({ label }) => {
+                self.clearEvmTransactions(label);
+                self.clearEvmNftTransfers(label);
             });
         },
         // actions ---
@@ -240,7 +245,7 @@ export const useHistoryStore = defineStore(store_name, {
 
                 this.setEvmNftTransfers(label, transfers);
             } catch (error) {
-                this.clearEvmNftTransfers();
+                this.clearEvmNftTransfers(label);
                 throw new AntelopeError('antelope.history.error_fetching_nft_transfers');
             } finally {
                 nftTransfersUpdated = (new Date()).getTime();
@@ -448,29 +453,29 @@ export const useHistoryStore = defineStore(store_name, {
             this.trace('setEvmTransactionsRowCount', count);
             this.__total_evm_transaction_count[label] = count;
         },
-        clearEvmTransactions() {
-            this.trace('clearEvmTransactions');
+        clearEvmTransactions(label: Label) {
+            this.trace('clearEvmTransactions', label);
 
             this.setEVMTransactionsFilter({ address: '' });
             this.__evm_transactions = {
-                [CURRENT_CONTEXT]: {
+                [label]: {
                     transactions: [],
                 },
             };
             this.__shaped_evm_transaction_rows = {
-                [CURRENT_CONTEXT]: [],
+                [label]: [],
             };
             this.__total_evm_transaction_count = {
-                [CURRENT_CONTEXT]: 0,
+                [label]: 0,
             };
         },
         setEvmNftTransfers(label: Label, transfers: Map<string, EvmTransfer[]>): void {
             this.trace('setEvmNftTransfers', transfers);
             this.__evm_nft_transfers[label] = transfers;
         },
-        clearEvmNftTransfers(): void {
-            this.trace('clearEvmNftTransfers');
-            this.__evm_nft_transfers = { [CURRENT_CONTEXT]: new Map() };
+        clearEvmNftTransfers(label: Label): void {
+            this.trace('clearEvmNftTransfers', label);
+            this.__evm_nft_transfers = { [label]: new Map() };
         },
     },
 });
