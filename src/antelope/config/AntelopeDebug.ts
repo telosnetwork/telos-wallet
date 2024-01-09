@@ -35,20 +35,19 @@ export class AntelopeDebug {
         }
     }
     allowDebugMode(allow: boolean) {
-        console.log(`allowDebugMode(${allow})`);
         this.__debugModeAllowed = allow;
+        if (this.__debugMode) {
+            this.setDebugMode(true);
+        }
     }
     isDebugging() {
-        console.log(`isDebugging() -> ${this.__debugMode && this.__debugModeAllowed}`);
         return this.__debugMode && this.__debugModeAllowed;
     }
     setDebugMode(debug: boolean) {
-        console.log(`setDebugMode(${debug})`);
+        this.__debugMode = debug;
         if (!this.__debugModeAllowed) {
-            this.__debugMode = false;
             return 'debug mode not allowed';
         }
-        this.__debugMode = debug;
         this.saveDebugConfig();
         if (this.isDebugging()) {
             this.publishAntelopeAPItoWindow();
@@ -124,7 +123,6 @@ export class AntelopeDebug {
      */
     isAllowedToTrace(store: string, action: string) {
         if (!this.isDebugging()) {
-            console.log(`isAllowedToTrace(${store}, ${action}) -> false`);
             return false;
         }
         const keyAction = `${action.toLowerCase()}`;
@@ -139,7 +137,6 @@ export class AntelopeDebug {
         if (this.__filtered.has(keyStore)) {
             return false;
         }
-        console.log(`isAllowedToTrace(${store}, ${action}) -> true`);
         return true;
     }
 

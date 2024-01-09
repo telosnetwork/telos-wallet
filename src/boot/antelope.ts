@@ -101,7 +101,6 @@ export default boot(({ app }) => {
     const weAreNotInProduction = process.env.NODE_ENV !== 'production';
     const weAreInLocalhost = document.location.hostname === 'localhost';
     const weAreInNetlify = document.location.hostname.includes('netlify');
-    console.log('weAreNotInProduction:', weAreNotInProduction, 'weAreInLocalhost:', weAreInLocalhost, 'weAreInNetlify:', weAreInNetlify);
     ant.config.debug.allowDebugMode(weAreNotInProduction || weAreInLocalhost || weAreInNetlify);
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
