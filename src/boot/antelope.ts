@@ -98,10 +98,14 @@ export default boot(({ app }) => {
     ant.config.setIndexerHealthCheckInterval(5000);
 
     // We only allow debug mode if we are not in production or in a sensitive environment
+    const weAreNotInProduction = process.env.NODE_ENV !== 'production';
+    const weAreInLocalhost = document.location.hostname === 'localhost';
+    const weAreInNetlify = document.location.hostname.includes('netlify');
+    console.log('weAreNotInProduction:', weAreNotInProduction, 'weAreInLocalhost:', weAreInLocalhost, 'weAreInNetlify:', weAreInNetlify);
     ant.config.debug.allowDebugMode(
-        process.env.NODE_ENV !== 'production' ||
-        document.location.hostname === 'localhost' ||
-        document.location.hostname.includes('netlify') ||
+        weAreNotInProduction ||
+        weAreInLocalhost ||
+        weAreInNetlify ||
         true, // this is temporal for the demo
     );
 
