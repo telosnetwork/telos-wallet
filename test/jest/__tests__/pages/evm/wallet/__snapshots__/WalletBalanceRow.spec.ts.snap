@@ -12,7 +12,7 @@ exports[`WalletBalanceRow.vue should render correctly on desktop devices (Staked
       aria-hidden="true"
       class="c-wallet-balance-row__logo"
       height="40"
-      src="https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png"
+      src="https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png"
       width="40"
     />
     <div>
@@ -621,7 +621,7 @@ exports[`WalletBalanceRow.vue should render the right overflow items when the to
       aria-hidden="true"
       class="c-wallet-balance-row__logo"
       height="40"
-      src="https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png"
+      src="https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png"
       width="40"
     />
     <div>

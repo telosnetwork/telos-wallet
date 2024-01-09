@@ -39,7 +39,7 @@ const W_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
