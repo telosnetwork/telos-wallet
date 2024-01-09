@@ -73,7 +73,6 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const balanceStore = useBalancesStore();
-            console.log('--------------------------------', getAntelope().events.onAccountChanged.pipe);
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
