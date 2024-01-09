@@ -9,6 +9,24 @@ const AntelopeMock = {
                 subscribe: onEventSubscribe,
             })),
         },
+        onClear: {
+            subscribe: onEventSubscribe,
+        },
+        onLoggedIn: {
+            subscribe: onEventSubscribe,
+        },
+        onLoggedOut: {
+            subscribe: onEventSubscribe,
+        },
+        onNetworkChanged: {
+            subscribe: onEventSubscribe,
+        },
+        onChainIndexerReady: {
+            subscribe: onEventSubscribe,
+        },
+        onErrorMessage: {
+            subscribe: onEventSubscribe,
+        },
     },
     config: {
         errorToStringHandler: jest.fn(),

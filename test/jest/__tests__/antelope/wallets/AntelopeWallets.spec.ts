@@ -10,12 +10,6 @@ import {
     useFeedbackStore,
 } from 'test/jest/utils/antelope/store-feedback';
 
-// FIXME: remove this commented mock
-// // Mocking the createTraceFunction
-// jest.mock('src/antelope/stores/feedback', () => ({
-//     useFeedbackStore,
-// }));
-
 import {
     createTraceFunction,
 } from 'test/jest/utils/antelope/debug';
