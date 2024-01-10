@@ -1,14 +1,9 @@
-
-
-// creamos una clase llamada AntelopeDebug que nos permita almacenar el estado de estar
-
 import { ethers } from 'ethers';
 import { getAntelope } from 'src/antelope';
 
 export const localStorageKey = 'antelope.debug';
 export const localStorageKeyTurnedOff = 'antelope.debug.turnedOff';
 
-// en debugMode o no y que permita o anule las funciones que se ejecutan en modo debug
 export class AntelopeDebug {
     private __debugModeAllowed = false; // this is set to false only on production and sensitive environments
     private __debugMode = false; // this represents the current state of the debug mode, can be set to true only if __debugModeAllowed is true

@@ -3,7 +3,6 @@ import { setActivePinia, createPinia } from 'pinia';
 
 import {
     useFeedbackStore,
-    FeedbackActions,
     MockData,
     useChainStore,
     getAntelope,
