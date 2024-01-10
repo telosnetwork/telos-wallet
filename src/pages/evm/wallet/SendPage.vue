@@ -245,8 +245,8 @@ export default defineComponent({
                     const chain_settings = ant.stores.chain.loggedEvmChain?.settings;
                     if(chain_settings) {
                         // we send the notification before the transaction is mined
-                        const quantity = `${formatWei(amount, token.decimals, WEI_PRECISION)} ${token.symbol}`;
-                        const address = to.substring(0, 6) + '...' + to.substring(to.length - 4, to.length);
+                        const quantity = `<b>${formatWei(amount, token.decimals, WEI_PRECISION)} ${token.symbol}</b>`;
+                        const address = `<b>${to.substring(0, 6)}...${to.substring(to.length - 4)}</b>`;
                         const dismiss = ant.config.notifyNeutralMessageHandler(
                             this.$t('notification.neutral_message_sending', { quantity, address }),
                         );

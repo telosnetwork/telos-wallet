@@ -74,7 +74,7 @@ onMounted(() => {
 
 async function startTransfer() {
     transferLoading.value = true;
-    const nameString = `${props.nft.contractPrettyName || props.nft.contractAddress} #${props.nft.id}`;
+    const nameString = `<b>${props.nft.contractPrettyName || props.nft.contractAddress} #${props.nft.id}</b>`;
     try {
         const trx = await nftStore.transferNft(
             CURRENT_CONTEXT,
@@ -85,8 +85,9 @@ async function startTransfer() {
             address.value as addressString,
             quantityToTransfer.value,
         );
+        const truncatedAddress = `<b>${truncateAddress(address.value as addressString)}</b>`;
         const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t('notification.neutral_message_sending', { quantity: nameString, address: truncateAddress(address.value) }),
+            $t('notification.neutral_message_sending', { quantity: nameString, address: truncatedAddress }),
         );
         trx.wait().then(() => {
             ant.config.notifySuccessfulTrxHandler(

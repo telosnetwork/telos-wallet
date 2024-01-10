@@ -17,30 +17,30 @@ export default defineComponent({
         // InProgress -----
         notifyInProgress_sending() {
             console.debug('notifyInProgress_sending()');
-            const quantity = '123.0427 TLOS';
-            const address = '0x8a7C...3b0F';
+            const quantity = '<b>123.0427 TLOS</b>';
+            const address = '<b>0x8a7C...3b0F</b>';
             (this as any).$notifyNeutralMessage(
                 this.$t('notification.neutral_message_sending', { quantity, address }),
             );
         },
         notifyInProgress_staking() {
             console.debug('notifyInProgress_staking()');
-            const quantity = '123.0427 TLOS';
+            const quantity = '<b>123.0427 TLOS</b>';
             (this as any).$notifyNeutralMessage(
                 this.$t('notification.neutral_message_staking', { quantity }),
             );
         },
         notifyInProgress_unstaking() {
             console.debug('notifyInProgress_unstaking()');
-            const quantity = '123.0427 TLOS';
+            const quantity = '<b>123.0427 TLOS</b>';
             (this as any).$notifyNeutralMessage(
                 this.$t('notification.neutral_message_unstaking', { quantity }),
             );
         },
         notifyInProgress_revoking() {
             console.debug('notifyInProgress_revoking()');
-            const symbol = 'ETH';
-            const address = '0x8a7C...3b0F';
+            const symbol = '<b>ETH</b>';
+            const address = '<b>0x8a7C...3b0F</b>';
             (this as any).$notifyNeutralMessage(
                 this.$t('notification.neutral_message_revoking', { symbol, address }),
             );
@@ -50,8 +50,8 @@ export default defineComponent({
             (this as any).$notifySuccessTransaction('https://www.teloscan.io/tx/0x4ee306e0046f3adb37d2943e1954835cbaa85a21e57046c5229b7fbb7f504e94');
         },
         notifySuccess_revoking() {
-            const address = '0x8a7C...3b0F';
-            const symbol = 'ETH';
+            const address = '<b>0x8a7C...3b0F</b>';
+            const symbol = '<b>ETH</b>';
             (this as any).$notifySuccessMessage(
                 this.$t('notification.success_message_revoking', { address, symbol }),
             );

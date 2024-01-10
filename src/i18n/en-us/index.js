@@ -4,16 +4,17 @@ export default {
         reject: 'Reject',
         remember_my_decision: 'Remember my decision',
         greymass_dialog_title: 'Resource Warning!',
-        greymass_fuel_message:
-            'Your account doesn\'t have sufficient resources (CPU, NET, or RAM) to pay for your next transaction. ' +
-            'Don\'t worry! Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", allowing you to continue for free.<br/><br/>' +
-            'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account',
-        greymass_fuel_message_fees:
-            'Your account doesn\'t have sufficient resources (CPU, NET, or RAM) to pay for your next transaction and it can not be processed without fees. ' +
-            'Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", reducing cost significantly.<br/><br/>' +
-            'Please confirm fees below to proceed.<br/><br/>' +
-            '<div><center><h5><b>{fees}</b></h5></center><div><br/>' +
-            'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. Please <a src="https://wallet.telos.net/" target="_blank">click here</a> to proceed and power up your account',
+        greymass_fuel_message_1: 'Your account doesn\'t have sufficient resources (CPU, NET, or RAM) to pay for your next transaction. ' +
+            'Don\'t worry! Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", allowing you to continue for free.',
+        greymass_fuel_message_2: 'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. ',
+        greymass_fuel_message_fees_1: 'Your account doesn\'t have sufficient resources (CPU, NET, or RAM) to pay for your next transaction and it can not be processed without fees. ' +
+            'Telos has partnered with Greymass to proceed with your transaction using "Greymass Fuel", reducing cost significantly.',
+        greymass_fuel_message_fees_2: 'Please confirm fees below to proceed.',
+        greymass_fuel_message_fees_3: '{fees}',
+        greymass_fuel_message_fees_4: 'We recommend powering up your account with at least 0.5 TLOS in CPU and NET each and purchasing RAM, as this service is not supported on all dAPPs in our ecosystem. ',
+        greymass_fuel_message_please: 'Please ',
+        greymass_fuel_message_click_here: 'click here',
+        greymass_fuel_message_to_proceed: ' to proceed and power up your account.',
     },
     navbar: {
         wallet: 'Wallet',
@@ -269,7 +270,7 @@ export default {
         success_title_trx: 'Success',
         success_title_copied: 'Copied',
         success_message_trx: 'Your transaction has been processed. For detailed information, click the link below.',
-        success_message_revoking: 'Revoking <b>{symbol}</b> allowance for <b>{address}</b> was successful.',
+        success_message_revoking: 'Revoking {symbol} allowance for {address} was successful.',
         success_message_copied: 'Your account name has been copied to the clipboard.',
         success_see_trx_label: 'See Transaction',
         dismiss_label: 'Dismiss',
@@ -278,13 +279,13 @@ export default {
         error_message_disconnect: 'We\'re sorry, it looks like you\'re not connected to the internet. Please check your network connection and try again.',
         error_see_details_label: 'See Details',
         error_details_title: 'Error Details',
-        neutral_message_sending: 'Sending <b>{quantity}</b> to <b>{address}</b>',
-        neutral_message_staking: 'Staking <b>{quantity} {symbol}</b>',
-        neutral_message_unstaking: 'Unstaking <b>{quantity} {symbol}</b>',
-        neutral_message_revoking: 'Revoking  <b>{symbol}</b> allowance for <b>{address}</b>',
-        neutral_message_wrapping: 'Wrapping <b>{quantity} {symbol}</b>',
-        neutral_message_unwrapping: 'Unwrapping <b>{quantity} {symbol}</b>',
-        neutral_message_withdrawing: 'Withdrawing <b>{quantity} {symbol}</b>',
+        neutral_message_sending: 'Sending {quantity} to {address}',
+        neutral_message_staking: 'Staking {quantity} {symbol}',
+        neutral_message_unstaking: 'Unstaking {quantity} {symbol}',
+        neutral_message_revoking: 'Revoking  {symbol} allowance for {address}',
+        neutral_message_wrapping: 'Wrapping {quantity} {symbol}',
+        neutral_message_unwrapping: 'Unwrapping {quantity} {symbol}',
+        neutral_message_withdrawing: 'Withdrawing {quantity} {symbol}',
         dont_show_message_again: 'Don\'t show me this message again',
     },
     resources: {

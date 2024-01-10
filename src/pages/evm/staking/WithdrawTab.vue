@@ -63,7 +63,7 @@ const handleWithdrawClick = async () => {
         const formattedAmount = formatWei(withdrawableBalanceBn.value, systemTokenDecimals, 4);
 
         const dismiss = ant.config.notifyNeutralMessageHandler(
-            $t('notification.neutral_message_withdrawing', { quantity: formattedAmount, symbol: systemTokenSymbol }),
+            $t('notification.neutral_message_withdrawing', { quantity: `<b>${formattedAmount}</b>`, symbol: `<b>${systemTokenSymbol}</b>` }),
         );
 
         tx.wait().then(() => {

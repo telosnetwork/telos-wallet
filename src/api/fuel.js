@@ -312,16 +312,23 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
         };
 
         // this are the normal texts for random wallet.
-        const cancel/*: string | boolean*/ = GreymassFuelService.globals.$t('api.reject');
-        const ok = GreymassFuelService.globals.$t('api.confirm');
-        let message = GreymassFuelService.globals.$t('api.greymass_fuel_message');
+        const $t = GreymassFuelService.globals.$t;
+        const cancel/*: string | boolean*/ = $t('api.reject');
+        const ok = $t('api.confirm');
+        let message = $t('api.greymass_fuel_message_1') + '<br/><br/>' + $t('api.greymass_fuel_message_2');
 
         if (typeof fees === 'string') {
-            message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
+            message =
+                $t('api.greymass_fuel_message_fees_1') +
+                '<br/><br/>' +
+                $t('api.greymass_fuel_message_fees_2') +
+                '<br/><br/>' +
+                '<div><center><h5><b>' + fees + '</b></h5></center><div><br/>' +
+                $t('api.greymass_fuel_message_fees_4');
         }
 
         Dialog.create({
-            title: GreymassFuelService.globals.$t('api.greymass_dialog_title'),
+            title: $t('api.greymass_dialog_title'),
             message,
             html: true,
             cancel,
@@ -339,7 +346,7 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
                 },
                 items: [
                     {
-                        label: GreymassFuelService.globals.$t('api.remember_my_decision'),
+                        label: $t('api.remember_my_decision'),
                         value: 'remember',
                         color: 'primary' },
                 ],

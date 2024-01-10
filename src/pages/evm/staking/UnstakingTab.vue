@@ -116,7 +116,7 @@ async function handleCtaClick() {
             const formattedAmount = formatWei(outputModelValue.value, systemTokenDecimals, displayDecimals);
 
             const dismiss = ant.config.notifyNeutralMessageHandler(
-                $t('notification.neutral_message_unstaking', { quantity: formattedAmount, symbol: systemTokenSymbol }),
+                $t('notification.neutral_message_unstaking', { quantity: `<b>${formattedAmount}</b>`, symbol: `<b>${systemTokenSymbol}</b>` }),
             );
 
             tx.wait().then(() => {
