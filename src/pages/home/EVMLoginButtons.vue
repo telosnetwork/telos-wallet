@@ -5,7 +5,6 @@ import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
-import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -130,6 +129,7 @@ export default defineComponent({
             emit('update:modelValue', Menu.CLOUD);
         };
 
+        const showTelosCloudButton = false;
 
         return {
             isLoading,
@@ -150,7 +150,7 @@ export default defineComponent({
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
-            isTodayBeforeTelosCloudDown,
+            showTelosCloudButton,
             // menu navigation
             showMainMenu,
             showTelosCloudMenu,
@@ -166,7 +166,7 @@ export default defineComponent({
     <template v-if="showMainMenu">
 
         <!-- Google OAuth Provider -->
-        <div v-if="isTodayBeforeTelosCloudDown" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+        <div v-if="showTelosCloudButton" class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
             <div class="c-evm-login-buttons__cloud-btn-container">
                 <div class="c-evm-login-buttons__cloud-btn-line-title">
                     <img
