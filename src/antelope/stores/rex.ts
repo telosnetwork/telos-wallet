@@ -8,20 +8,24 @@
 import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
-import {
-    isTracingAll,
-    createTraceFunction,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
 import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useContractStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+import { createTraceFunction } from 'src/antelope/config';
 import { prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useFeedbackStore,
+    useBalancesStore,
+    useChainStore,
+    useContractStore,
+} from 'src/antelope';
 
 export interface RexModel {
     withdrawable: ethers.BigNumber;
@@ -66,7 +70,6 @@ export const useRexStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({

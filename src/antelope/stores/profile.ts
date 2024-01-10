@@ -6,7 +6,7 @@
 
 
 import { defineStore } from 'pinia';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
+import { createTraceFunction } from 'src/antelope/config';
 
 
 export interface ProfileState {
@@ -21,7 +21,6 @@ export const useProfileStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
     },
 });
 

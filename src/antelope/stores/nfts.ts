@@ -16,15 +16,21 @@ import {
     addressString,
     AntelopeError,
 } from 'src/antelope/types';
-
-import { useFeedbackStore, getAntelope, useChainStore, useEVMStore, CURRENT_CONTEXT } from 'src/antelope';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { toRaw } from 'vue';
 import { EvmAccountModel, useAccountStore } from 'src/antelope/stores/account';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useFeedbackStore,
+    useChainStore,
+    useEVMStore,
+} from 'src/antelope';
 
 export interface NFTsInventory {
     owner: Address;
@@ -127,8 +133,8 @@ export const useNftsStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const self = useNftsStore();
-            useFeedbackStore().setDebug(store_name, isTracingAll());
-            getAntelope().events.onAccountChanged.subscribe({
+            const ant = getAntelope();
+            ant.events.onAccountChanged.subscribe({
                 next: async ({ label, account }) => {
                     if (label) {
                         self.__inventory[label] = {
@@ -138,6 +144,9 @@ export const useNftsStore = defineStore(store_name, {
                         };
                     }
                 },
+            });
+            ant.events.onClear.subscribe(({ label }) => {
+                self.clearNFTs(label);
             });
         },
         async updateNFTsForAccount(label: string, account: string) {
@@ -404,9 +413,13 @@ export const useNftsStore = defineStore(store_name, {
         setUserFilter(filter: UserNftFilter) {
             this.__user_filter = filter;
         },
-        clearNFTs() {
+        clearNFTs(label: Label) {
             this.trace('clearNFTs');
-            this.__inventory = {};
+            this.__inventory[label] = {
+                owner: '',
+                list: [],
+                loading: false,
+            };
             this.setUserFilter({});
             this.setPaginationFilter({
                 offset: 0,

@@ -158,6 +158,14 @@ onMounted(() => {
         margin-bottom: 48px;
     }
 
+    &__logo-container {
+        flex-grow: 1;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
     &__logo {
         width: 180px;
     }

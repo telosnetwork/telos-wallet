@@ -19,9 +19,11 @@ import { Web3Modal, Web3ModalConfig } from '@web3modal/html';
 import { BigNumber, ethers } from 'ethers';
 import { TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';
 import { useChainStore } from 'src/antelope/stores/chain';
-import { useContractStore } from 'src/antelope/stores/contract';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
-import { usePlatformStore } from 'src/antelope/stores/platform';
+import {
+    useContractStore,
+    useFeedbackStore,
+    usePlatformStore,
+} from 'src/antelope';
 import {
     AntelopeError,
     EvmABI,

@@ -11,7 +11,7 @@ import {
     addressString,
     EvmTransactionResponse,
 } from 'src/antelope/types';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { useFeedbackStore } from 'src/antelope';
 import { useChainStore } from 'src/antelope/stores/chain';
 import { RpcEndpoint } from 'universal-authenticator-library';
 import { TELOS_ANALYTICS_EVENT_NAMES } from 'src/antelope/chains/chain-constants';

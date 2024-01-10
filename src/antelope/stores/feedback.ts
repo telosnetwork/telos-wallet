@@ -25,29 +25,7 @@
 import { defineStore } from 'pinia';
 import { getAntelope } from 'src/antelope';
 import { toRaw } from 'vue';
-
-
-// auxiliary tracing functions
-export const createTraceFunction = (store_name: string) => function(action: string, ...args: unknown[]) {
-    if (useFeedbackStore().isDebugging(store_name)) {
-        const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-        const eventName = `${titlecase(store_name)}.${action}()`;
-        console.debug(eventName, [...args]);
-    }
-};
-
-
-// only if we are NOT in production mode search in the url for the trace flag
-// to turn on the Antelope trace mode
-let trace = false;
-if (document.location.hostname !== 'wallet.telos.net') {
-    const urlParams = new URLSearchParams(window.location.search);
-    trace = urlParams.get('trace') === 'true';
-}
-export const isTracingAll = () => trace;
-export const createInitFunction = (store_name: string, debug?: boolean) => function() {
-    useFeedbackStore().setDebug(store_name, debug ?? isTracingAll());
-};
+import { createTraceFunction } from 'src/antelope/config';
 
 // -------------------------------------------
 
@@ -64,8 +42,6 @@ export interface FeedbackState {
     __errors: Map<string, string>;
     // progress is a map of processes name and progress value
     __processes: Map<string, FeedbackProggress>;
-    // debug flags for each store
-    __debug: Map<string, boolean>;
 }
 
 const store_name = 'feedback';
@@ -82,7 +58,6 @@ export const useFeedbackStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
         // Loading ----
         setLoading(name: string) {
             if (!this.__loading.includes(name)) {
@@ -112,13 +87,6 @@ export const useFeedbackStore = defineStore(store_name, {
         unsetProgress(name: string) {
             this.__processes.delete(name);
         },
-        // Debug mode ----
-        setDebug(store_name: string, value: boolean) {
-            this.__debug.set(store_name, value);
-        },
-        isDebugging(store_name: string) {
-            return this.__debug.get(store_name) || false;
-        },
     },
 });
 
@@ -126,7 +94,6 @@ const feedbackiInitialState: FeedbackState = {
     __loading: [],
     __errors: new Map(),
     __processes: new Map(),
-    __debug: new Map(),
 };
 
 
