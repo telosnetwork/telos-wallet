@@ -104,7 +104,7 @@ const newChainModel = (network: string, isNative: boolean): ChainModel => {
 export interface ChainState {
     // chains mapped by label
     __chains: { [label: Label]: ChainModel };
-    // notwork settings
+    // network settings
     __networks: { [network: string]: ChainSettings };
 }
 
