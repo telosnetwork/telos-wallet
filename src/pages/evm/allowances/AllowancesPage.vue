@@ -253,18 +253,20 @@ function handleRevokeSelectedClicked() {
     </template>
 
     <div class="c-allowances-page__body">
-        <CollapsibleAside
-            :header="asideHeader"
-            :content="asideContent"
-            class="q-mb-lg"
-        />
+        <template v-if="loading || shapedAllowanceRows.length > 0">
+            <CollapsibleAside
+                :header="asideHeader"
+                :content="asideContent"
+                class="q-mb-lg"
+            />
 
-        <AllowancesPageControls
-            :enable-revoke-button="enableRevokeButton"
-            @search-updated="handleSearchUpdated"
-            @include-cancelled-updated="handleIncludeCancelledUpdated"
-            @revoke-selected="handleRevokeSelectedClicked"
-        />
+            <AllowancesPageControls
+                :enable-revoke-button="enableRevokeButton"
+                @search-updated="handleSearchUpdated"
+                @include-cancelled-updated="handleIncludeCancelledUpdated"
+                @revoke-selected="handleRevokeSelectedClicked"
+            />
+        </template>
 
         <div v-if="loading" class="q-mt-lg">
             <q-skeleton
@@ -273,6 +275,11 @@ function handleRevokeSelectedClicked() {
                 class="c-allowances-page__skeleton-row"
                 type="rect"
             />
+        </div>
+        <div v-else-if="!loading && shapedAllowanceRows.length === 0">
+            <h2 class="c-allowances-page__empty-title">
+                {{ $t('evm_allowances.no_allowances') }}
+            </h2>
         </div>
         <AllowancesTable
             v-else
@@ -318,6 +325,11 @@ function handleRevokeSelectedClicked() {
 
 <style lang="scss">
 .c-allowances-page {
+    &__empty-title {
+        text-align: center;
+        margin-top: 32px;
+    }
+
     &__body {
         max-width: 1000px;
         margin: auto;

@@ -321,6 +321,7 @@ export default {
         revoking_allowances_title: 'Revoking {total} allowance(s) ({remaining} remaining)',
         revoking_allowances_description: 'Please wait while we revoke the selected allowance(s). You will need to approve each transaction in your wallet.',
         revoking_allowances_cancel_note: 'Note: clicking \'Cancel\' will not cancel transactions which have already been approved. Any pending transaction(s) must be cancelled in your wallet.',
+        no_allowances: 'You don\'t have any approvals yet',
     },
     notification:{
         success_title_trx: 'Success',
