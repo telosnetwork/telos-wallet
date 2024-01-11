@@ -28,6 +28,10 @@ function setTab(login: TabReference): void {
     }
 }
 
+function test() {
+    myUndefinedFunction();
+}
+
 onMounted(() => {
     if (walletOption.value){
         tab.value = walletOption.value as TabReference;
@@ -37,6 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
+<button @click="test">click me</button>
 <q-layout>
     <q-page-container class="c-home__page-container">
         <div class="c-home">
