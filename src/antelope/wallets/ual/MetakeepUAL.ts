@@ -177,7 +177,6 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     resolveAccountName() {
-        console.log('resolveAccountName() let\'s resolve account name');
         return new Promise<string>(async (resolve, reject) => {
             let accountName = '';
             if (!metakeep) {
@@ -201,7 +200,6 @@ export class MetakeepAuthenticator extends Authenticator {
 
             try {
                 // we try to get the account name from the public key
-                console.log('resolveAccountName() we try to get the account name from the public key....');
                 const response = await axios.post(`${this.rpc.endpoint}/v1/history/get_key_accounts`, {
                     public_key: publicKey,
                 });
