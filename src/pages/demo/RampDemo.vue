@@ -24,6 +24,7 @@ const widgetParams = {
     hostLogoUrl: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png',
     hostApiKey: '55wtuyuew2zyawyxnw2gv6aubuypn4vq7mbwfxz9',
     url: 'https://app.demo.ramp.network',
+    webhookStatusUrl: 'https://webhook.site/80681c73-5359-4fae-ac3b-7f409242f634',
 };
 
 const RAMP_MOBILE_BREAKPOINT = 895; // arbitrary breakpoint used by Ramp SDK
