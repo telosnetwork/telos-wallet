@@ -33,6 +33,8 @@ let embeddedRampSdkInstance: RampInstantSDK | null = null;
 
 // data
 const isMobile = ref(false);
+const purchaseId = ref('');
+const purchaseToken = ref('');
 
 // embedded widget will be re-instantiated when the window is resized, resulting in multiple embedded widgets.
 // to prevent this, we use a key to force the embedded widget container to re-render with a new id
@@ -57,6 +59,8 @@ function showRampSdkOverlay() {
             chainSettings.trackAnalyticsEvent('Ramp - Closed Widget');
         } else if (event.type === RampInstantEventTypes.PURCHASE_CREATED) {
             chainSettings.trackAnalyticsEvent('Ramp - Purchase Created');
+            purchaseId.value = event.payload.purchase.id;
+            purchaseToken.value = event.payload.purchaseViewToken;
         }
     }).show();
 }
@@ -85,6 +89,8 @@ function showRampSdkEmbedded() {
                 resizeHandler();
             } else if (event.type === RampInstantEventTypes.PURCHASE_CREATED) {
                 chainSettings.trackAnalyticsEvent('Ramp - Purchase Created');
+                purchaseId.value = event.payload.purchase.id;
+                purchaseToken.value = event.payload.purchaseViewToken;
             }
         }).show();
     });
@@ -104,6 +110,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+<template v-if="purchaseId && purchaseToken">
+    Purchase initiated.<br>
+    Purchase ID: {{ purchaseId }}<br>
+    Purchase token: {{ purchaseToken }}<br><br>
+</template>
+
 <h1 class="q-mb-md">Overlay</h1>
 <button class="q-mb-xl" @click="showRampSdkOverlay">Show Ramp Overlay</button>
 
