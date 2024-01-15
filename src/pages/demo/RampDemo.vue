@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RampInstantSDK, RampInstantEvents, RampInstantEventTypes } from '@ramp-network/ramp-instant-sdk';
+import { RampInstantSDK, RampInstantEvents, RampInstantEventTypes, RampInstantWidgetVariantTypes } from '@ramp-network/ramp-instant-sdk';
 import { useChainStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 
@@ -10,6 +10,7 @@ const widgetParams = {
     hostLogoUrl: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png',
     hostApiKey: '55wtuyuew2zyawyxnw2gv6aubuypn4vq7mbwfxz9',
     url: 'https://app.demo.ramp.network',
+    variant: 'auto' as RampInstantWidgetVariantTypes,
 };
 
 function showRampSdk() {
