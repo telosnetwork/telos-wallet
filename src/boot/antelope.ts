@@ -97,6 +97,12 @@ export default boot(({ app }) => {
     ant.config.setIndexerHealthThresholdSeconds(10);
     ant.config.setIndexerHealthCheckInterval(5000);
 
+    // We only allow debug mode if we are not in production or in a sensitive environment
+    const weAreNotInProduction = process.env.NODE_ENV !== 'production';
+    const weAreInLocalhost = document.location.hostname === 'localhost';
+    const weAreInNetlify = document.location.hostname.includes('netlify');
+    ant.config.debug.allowDebugMode(weAreNotInProduction || weAreInLocalhost || weAreInNetlify);
+
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to
     const network = new URLSearchParams(window.location.search).get('network');

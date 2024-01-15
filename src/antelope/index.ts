@@ -1,31 +1,31 @@
-import { App } from 'vue';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { App, toRaw } from 'vue';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig, chainNetworkNames } from 'src/antelope/config/';
+import { AntelopeConfig, AntelopeDebug, chainNetworkNames } from 'src/antelope/config';
 import installPinia from 'src/antelope/stores';
 
-import { AccountModel } from 'src/antelope/stores/account';
 import { ChainModel } from 'src/antelope/stores/chain';
 
-import {
-    useAccountStore,
-    useAllowancesStore,
-    useBalancesStore,
-    useChainStore,
-    useContractStore,
-    useEVMStore,
-    useFeedbackStore,
-    useHistoryStore,
-    useNftsStore,
-    usePlatformStore,
-    useProfileStore,
-    useResourcesStore,
-    useRexStore,
-    useTokensStore,
-    useUserStore,
-} from 'src/antelope';
 import { AntelopeWallets } from 'src/antelope/wallets';
+import { AccountModel } from 'src/antelope/stores/account';
+
+import { useFeedbackStore } from 'src/antelope/stores/feedback';
+import { usePlatformStore } from 'src/antelope/stores/platform';
+import { useProfileStore } from 'src/antelope/stores/profile';
+import { useResourcesStore } from 'src/antelope/stores/resources';
+import { useUserStore } from 'src/antelope/stores/user';
+import { useChainStore } from 'src/antelope/stores/chain';
+import { useContractStore } from 'src/antelope/stores/contract';
+import { useEVMStore } from 'src/antelope/stores/evm';
+import { useTokensStore } from 'src/antelope/stores/tokens';
+import { useNftsStore } from 'src/antelope/stores/nfts';
+import { useAccountStore } from 'src/antelope/stores/account';
+import { useAllowancesStore } from 'src/antelope/stores/allowances';
+import { useBalancesStore } from 'src/antelope/stores/balances';
+import { useHistoryStore } from 'src/antelope/stores/history';
+import { useRexStore } from 'src/antelope/stores/rex';
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
@@ -35,6 +35,7 @@ declare module '@vue/runtime-core' {
 }
 
 const events = {
+    onClear: new Subject<{label:string}>(),
     onLoggedIn: new Subject<AccountModel>(),
     onLoggedOut: new Subject<void>(),
     onNetworkChanged: new Subject<{label:string, chain:ChainModel}>(),
@@ -113,9 +114,44 @@ export class Antelope {
     get events() {
         return events;
     }
+
+    // shortcut to get debug config
+    get debug() {
+        return this.config.debug;
+    }
+
+    extractStoreState(store: Store) {
+        const state = store.$state;
+        const result: Record<string, unknown> = {};
+        Object.keys(state).forEach((key) => {
+            const value = toRaw((state as any)[key] as never);
+            if (key.substring(0, 2) === '__') {
+                result[key] = value;
+            }
+        });
+        return result;
+    }
+
+    /**
+     * This function prints the state of the store in the console
+     */
+    print() {
+        if (this.config.debug.isDebugging()) {
+            console.log('--- Antelope lib ---');
+            console.log('Config: ', [this.config]);
+            console.log('Wallets:', [this.wallets]);
+            console.log('   --- Stores ---   ');
+            const stores = this.stores;
+            Object.keys(stores).forEach((key) => {
+                const titlecase = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+                const eventName = `${titlecase(key)}:`;
+                console.log(eventName.padEnd(10, ' '), [this.extractStoreState((stores as any)[key])]);
+            });
+        }
+    }
 }
 
-const antelope = new Antelope(new AntelopeConfig(), new AntelopeWallets());
+const antelope = new Antelope(new AntelopeConfig(new AntelopeDebug()), new AntelopeWallets());
 export const getAntelope = () => antelope;
 export const installAntelope = (app: App) => {
     if (app.config.globalProperties.$antelope) {
@@ -129,21 +165,28 @@ export const installAntelope = (app: App) => {
     return antelope;
 };
 
-export { useAccountStore } from 'src/antelope/stores/account';
-export { useAllowancesStore } from 'src/antelope/stores/allowances';
-export { useBalancesStore } from 'src/antelope/stores/balances';
-export { useChainStore } from 'src/antelope/stores/chain';
-export { useContractStore } from 'src/antelope/stores/contract';
-export { useEVMStore } from 'src/antelope/stores/evm';
+
+
+
+
+
+
 export { useFeedbackStore } from 'src/antelope/stores/feedback';
-export { useHistoryStore } from 'src/antelope/stores/history';
-export { useNftsStore } from 'src/antelope/stores/nfts';
 export { usePlatformStore } from 'src/antelope/stores/platform';
 export { useProfileStore } from 'src/antelope/stores/profile';
 export { useResourcesStore } from 'src/antelope/stores/resources';
-export { useRexStore } from 'src/antelope/stores/rex';
-export { useTokensStore } from 'src/antelope/stores/tokens';
 export { useUserStore } from 'src/antelope/stores/user';
+export { useChainStore } from 'src/antelope/stores/chain';
+export { useContractStore } from 'src/antelope/stores/contract';
+export { useEVMStore } from 'src/antelope/stores/evm';
+export { useTokensStore } from 'src/antelope/stores/tokens';
+export { useNftsStore } from 'src/antelope/stores/nfts';
+export { useAccountStore } from 'src/antelope/stores/account';
+export { useAllowancesStore } from 'src/antelope/stores/allowances';
+export { useBalancesStore } from 'src/antelope/stores/balances';
+export { useHistoryStore } from 'src/antelope/stores/history';
+export { useRexStore } from 'src/antelope/stores/rex';
+
 
 // this constant is used for a temporal workaround for the multi-context issue
 // https://github.com/telosnetwork/telos-wallet/issues/582

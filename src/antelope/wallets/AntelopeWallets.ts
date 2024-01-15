@@ -1,6 +1,3 @@
-import { isTracingAll } from 'src/antelope/stores/feedback';
-import { useFeedbackStore } from 'src/antelope/stores/feedback';
-import { createTraceFunction } from 'src/antelope/stores/feedback';
 import { EVMAuthenticator } from 'src/antelope/wallets/authenticators/EVMAuthenticator';
 import { useAccountStore } from 'src/antelope/stores/account';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
@@ -8,19 +5,20 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import { ethers } from 'ethers';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { AntelopeError } from 'src/antelope/types';
+import { AntelopeDebugTraceType, createTraceFunction } from 'src/antelope/config';
 
 const name = 'AntelopeWallets';
 
 export class AntelopeWallets {
 
-    private trace: (message: string, ...args: unknown[]) => void;
+    private trace: AntelopeDebugTraceType;
     private authenticators: Map<string, EVMAuthenticator> = new Map();
     constructor() {
         this.trace = createTraceFunction(name);
     }
 
     init() {
-        useFeedbackStore().setDebug(name, isTracingAll());
+        this.trace('init');
     }
 
     addEVMAuthenticator(authenticator: EVMAuthenticator) {

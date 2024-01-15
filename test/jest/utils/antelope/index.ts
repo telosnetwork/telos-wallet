@@ -1,16 +1,39 @@
 // -------- Core --------
-export const getAntelope = jest.fn().mockImplementation(() => ({
+
+const onEventSubscribe = jest.fn();
+const AntelopeMock = {
     events: {
         onAccountChanged: {
-            subscribe: jest.fn(),
+            subscribe: onEventSubscribe,
             pipe: jest.fn().mockImplementation(() => ({
-                subscribe: jest.fn(),
+                subscribe: onEventSubscribe,
             })),
+        },
+        onClear: {
+            subscribe: onEventSubscribe,
+        },
+        onLoggedIn: {
+            subscribe: onEventSubscribe,
+        },
+        onLoggedOut: {
+            subscribe: onEventSubscribe,
+        },
+        onNetworkChanged: {
+            subscribe: onEventSubscribe,
+        },
+        onChainIndexerReady: {
+            subscribe: onEventSubscribe,
+        },
+        onErrorMessage: {
+            subscribe: onEventSubscribe,
         },
     },
     config: {
         errorToStringHandler: jest.fn(),
         transactionError: jest.fn(),
+        debug: {
+            trace: jest.fn(),
+        },
     },
     wallets: {
         getAuthenticator: () => ({
@@ -20,14 +43,12 @@ export const getAntelope = jest.fn().mockImplementation(() => ({
             }),
         }),
     },
-}));
+};
+export const getAntelope = jest.fn().mockImplementation(() => AntelopeMock);
 
 export const CURRENT_CONTEXT = 'current';
 
-jest.mock('src/antelope/config', () => ({
-    errorToString: jest.fn().mockImplementation(e => e),
-}));
-
+export * from 'test/jest/utils/antelope/debug';
 export * from 'test/jest/utils/antelope/mockData';
 export * from 'test/jest/utils/antelope/store-account';
 export * from 'test/jest/utils/antelope/store-contract';

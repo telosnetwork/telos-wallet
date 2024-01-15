@@ -15,11 +15,7 @@
 
 
 import { defineStore } from 'pinia';
-import {
-    useFeedbackStore,
-} from 'src/antelope';
-import { errorToString } from 'src/antelope/config';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 
 export interface PlatformState {
     __is_browser: boolean;
@@ -42,7 +38,6 @@ export const usePlatformStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             const platform = usePlatformStore();
 
             // detect brave browser

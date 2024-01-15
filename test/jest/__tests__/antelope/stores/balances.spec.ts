@@ -3,7 +3,6 @@ import { setActivePinia, createPinia } from 'pinia';
 
 import {
     useFeedbackStore,
-    FeedbackActions,
     MockData,
     useChainStore,
     getAntelope,
@@ -60,14 +59,12 @@ describe('Antelope Balance Store', () => {
     });
 
     describe('Initializing the store', () => {
-        test('should initialize the store', () => {
-            expect(useFeedbackStore).not.toHaveBeenCalled();
-            expect(FeedbackActions.setDebug).not.toHaveBeenCalled();
-
+        test('should subscribe to the onAccountChanged event', () => {
+            expect(getAntelope().events.onAccountChanged.pipe).not.toHaveBeenCalled();
+            expect(getAntelope().events.onAccountChanged.pipe().subscribe).not.toHaveBeenCalled();
             store.init();
-
-            expect(useFeedbackStore).toHaveBeenCalled();
-            expect(FeedbackActions.setDebug).toHaveBeenCalled();
+            expect(getAntelope().events.onAccountChanged.pipe).toHaveBeenCalled();
+            expect(getAntelope().events.onAccountChanged.pipe().subscribe).toHaveBeenCalled();
         });
     });
 

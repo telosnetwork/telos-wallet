@@ -16,18 +16,8 @@
 import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
-import {
-    CURRENT_CONTEXT,
-    useAllowancesStore,
-    useBalancesStore,
-    useFeedbackStore,
-    useHistoryStore,
-    useNftsStore,
-} from 'src/antelope';
-import { getAntelope, useChainStore } from 'src/antelope';
-import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
     Action,
@@ -40,6 +30,14 @@ import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
 import { OreIdAuthenticator } from 'ual-oreid';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useChainStore,
+    useFeedbackStore,
+} from 'src/antelope';
 
 
 export interface LoginNativeActionData {
@@ -84,7 +82,6 @@ export interface EvmAccountModel extends AccountModel {
     authenticator: EVMAuthenticator;
 }
 
-
 export interface AccountState {
     // accounts mapped by label
     __accounts: { [label: Label]: AccountModel };
@@ -115,7 +112,6 @@ export const useAccountStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
         async loginNative({ authenticator, network }: LoginNativeActionData): Promise<boolean> {
             this.trace('loginNative', authenticator, network);
             let success = false;
@@ -159,10 +155,8 @@ export const useAccountStore = defineStore(store_name, {
 
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
+            const label = authenticator.label;
+            getAntelope().events.onClear.next({ label });
 
             let success = false;
             try {
@@ -210,20 +204,22 @@ export const useAccountStore = defineStore(store_name, {
 
         async logout() {
             this.trace('logout');
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
-            useAllowancesStore().clearAllowances();
 
             try {
+
+                const logged = this.__accounts[CURRENT_CONTEXT];
+                const { authenticator } = logged;
+
+                if (authenticator instanceof EVMAuthenticator) {
+                    const label = authenticator.label;
+                    getAntelope().events.onClear.next({ label });
+                }
+
                 localStorage.removeItem('network');
                 localStorage.removeItem('account');
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                const logged = this.__accounts[CURRENT_CONTEXT];
-                const { authenticator } = logged;
                 try {
                     authenticator && (await authenticator.logout());
                 } catch (error) {
