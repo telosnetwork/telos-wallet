@@ -135,6 +135,14 @@ const routes = [
                 name: 'demos.indexer',
                 component: () => import('pages/demo/IndexerDemos.vue'),
             },
+            {
+                path: 'ramp-demo',
+                name: 'demos.ramp-demo',
+                component: () => import('pages/demo/RampDemo.vue'),
+                meta: {
+                    requiresAuth: false,
+                },
+            },
         ],
     },
 
