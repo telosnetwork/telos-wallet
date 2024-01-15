@@ -20,7 +20,6 @@ import { initFuelUserWrapper } from 'src/api/fuel';
 import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
-    Action,
     Label,
     NativeTransactionResponse,
     addressString,
