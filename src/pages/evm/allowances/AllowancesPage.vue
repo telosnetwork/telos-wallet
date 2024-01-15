@@ -70,6 +70,7 @@ const numberOfAllowancesToBatchRevoke = ref(0);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
+const showEmptyState = computed(() => !loading.value && shapedAllowanceRows.value.length === 0);
 const shapedAllowanceRows = computed(() => {
     const {
         asset,
@@ -253,20 +254,20 @@ function handleRevokeSelectedClicked() {
     </template>
 
     <div class="c-allowances-page__body">
-        <template v-if="loading || shapedAllowanceRows.length > 0">
-            <CollapsibleAside
-                :header="asideHeader"
-                :content="asideContent"
-                class="q-mb-lg"
-            />
+        <CollapsibleAside
+            :header="asideHeader"
+            :content="asideContent"
+            :center-on-desktop="showEmptyState"
+            class="q-mb-lg"
+        />
 
-            <AllowancesPageControls
-                :enable-revoke-button="enableRevokeButton"
-                @search-updated="handleSearchUpdated"
-                @include-cancelled-updated="handleIncludeCancelledUpdated"
-                @revoke-selected="handleRevokeSelectedClicked"
-            />
-        </template>
+        <AllowancesPageControls
+            v-if="!showEmptyState"
+            :enable-revoke-button="enableRevokeButton"
+            @search-updated="handleSearchUpdated"
+            @include-cancelled-updated="handleIncludeCancelledUpdated"
+            @revoke-selected="handleRevokeSelectedClicked"
+        />
 
         <div v-if="loading" class="q-mt-lg">
             <q-skeleton
@@ -276,7 +277,7 @@ function handleRevokeSelectedClicked() {
                 type="rect"
             />
         </div>
-        <div v-else-if="!loading && shapedAllowanceRows.length === 0">
+        <div v-else-if="showEmptyState">
             <h2 class="c-allowances-page__empty-title">
                 {{ $t('evm_allowances.no_allowances') }}
             </h2>
