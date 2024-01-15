@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
+import { RampInstantSDK, RampInstantEvents, RampInstantEventTypes } from '@ramp-network/ramp-instant-sdk';
+import { useChainStore } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+
+const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
 const widgetParams = {
     hostAppName: 'Telos Demo',
@@ -9,8 +13,15 @@ const widgetParams = {
 };
 
 function showRampSdk() {
-    new RampInstantSDK(widgetParams).on('*', (event: unknown) => {
+    chainSettings.trackAnalyticsEvent('Ramp - Opened Widget');
+    new RampInstantSDK(widgetParams).on('*', (event: RampInstantEvents) => {
         console.log(event);
+
+        if (event.type === RampInstantEventTypes.WIDGET_CLOSE) {
+            chainSettings.trackAnalyticsEvent('Ramp - Closed Widget');
+        } else if (event.type === RampInstantEventTypes.PURCHASE_CREATED) {
+            chainSettings.trackAnalyticsEvent('Ramp - Purchase Created');
+        }
     }).show();
 }
 </script>
