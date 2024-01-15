@@ -8,15 +8,15 @@ import { jest } from '@jest/globals';
 
 import {
     useFeedbackStore,
-    createTraceFunction,
-    isTracingAll,
 } from 'test/jest/utils/antelope/store-feedback';
 
-// Mocking the createTraceFunction
-jest.mock('src/antelope/stores/feedback', () => ({
-    useFeedbackStore,
+import {
     createTraceFunction,
-    isTracingAll,
+} from 'test/jest/utils/antelope/debug';
+
+// Mocking the createTraceFunction
+jest.mock('src/antelope/config', () => ({
+    createTraceFunction,
 }));
 
 import {
@@ -36,6 +36,7 @@ import {
 jest.mock('src/antelope', () => ({
     useChainStore: useChainStore,
     CURRENT_CONTEXT: 'mockedCurrentContext',
+    useFeedbackStore: useFeedbackStore,
 }));
 
 // Import the real artifact to test
@@ -51,22 +52,6 @@ describe('AntelopeWallets', () => {
         wallets = new AntelopeWallets();
     });
 
-    /*
-    // Code to test: 
-    export class AntelopeWallets {
-
-        private trace: (message: string, ...args: unknown[]) => void;
-        private authenticators: Map<string, EVMAuthenticator> = new Map();
-        constructor() {
-            this.trace = createTraceFunction(name);
-        }
-
-        init() {
-            useFeedbackStore().setDebug(name, isTracingAll());
-        }
-    }
-    */
-
     describe('Initial state', () => {
         it('should have the correct initial state', () => {
             // trace should be a function
@@ -75,14 +60,6 @@ describe('AntelopeWallets', () => {
             // authenticators should be an empty Map
             expect(wallets['authenticators']).toBeInstanceOf(Map);
             expect(wallets['authenticators'].size).toBe(0);
-        });
-    });
-
-    describe('init function', () => {
-        it('should initialize the feedback store', () => {
-            const setDebugSpy = jest.spyOn(useFeedbackStore(), 'setDebug');
-            wallets.init();
-            expect(setDebugSpy).toHaveBeenCalledWith('AntelopeWallets', false);
         });
     });
 

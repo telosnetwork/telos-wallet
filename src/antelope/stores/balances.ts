@@ -25,17 +25,9 @@ import {
     addressString,
     AntelopeError,
 } from 'src/antelope/types';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createTraceFunction } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import {
-    getAntelope,
-    useAccountStore,
-    useFeedbackStore,
-    useChainStore,
-    CURRENT_CONTEXT,
-    useContractStore,
-} from 'src/antelope';
 import { formatWei } from 'src/antelope/stores/utils';
 import { BigNumber, ethers } from 'ethers';
 import { toRaw } from 'vue';
@@ -51,6 +43,16 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { filter } from 'rxjs';
 import { convertCurrency } from 'src/antelope/stores/utils/currency-utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useFeedbackStore,
+    useChainStore,
+    useContractStore,
+} from 'src/antelope';
 
 export interface BalancesState {
     __balances:  { [label: Label]: TokenBalance[] };
@@ -71,8 +73,8 @@ export const useBalancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const balanceStore = useBalancesStore();
-            useFeedbackStore().setDebug(store_name, isTracingAll());
-            getAntelope().events.onAccountChanged.pipe(
+            const ant = getAntelope();
+            ant.events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
@@ -88,6 +90,8 @@ export const useBalancesStore = defineStore(store_name, {
                     await balanceStore.updateBalancesForAccount(CURRENT_CONTEXT, useAccountStore().loggedAccount);
                 }
             }, 10000);
+
+            ant.events.onClear.subscribe(({ label }) => balanceStore.clearBalances(label));
         },
         async updateBalances(label: string) {
             this.trace('updateBalances', label);
@@ -477,7 +481,7 @@ export const useBalancesStore = defineStore(store_name, {
             }
         },
         updateBalance(label: string, balance: TokenBalance): void {
-            this.trace('updateBalance', label, balance);
+            this.trace('updateBalance', label, balance.str, balance.token.symbol);
             const index = this.__balances[label].findIndex(b => b.token.id === balance.token.id);
             if (index >= 0) {
                 if (
@@ -511,9 +515,9 @@ export const useBalancesStore = defineStore(store_name, {
 
             this.__wagmiTokenTransferConfig[label] = config;
         },
-        clearBalances() {
-            this.trace('clearBalances');
-            this.__balances = {};
+        clearBalances(label: Label) {
+            this.trace('clearBalances', label);
+            this.__balances[label] = [];
         },
     },
 });

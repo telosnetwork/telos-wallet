@@ -39,7 +39,7 @@ const W_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png',
+    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
@@ -59,7 +59,7 @@ const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
-declare const fathom: { trackGoal: (eventId: string, value: 0) => void };
+declare const fathom: { trackEvent: (eventName: string) => void };
 
 export default class TelosEVMTestnet extends EVMChainSettings {
     isTestnet() {
@@ -149,7 +149,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getBuyMoreOfTokenLink(): string {
-        return 'https://www.telos.net/#buy-tlos-simplex';
+        return 'https://telos.net/ecosystem?category=Exchanges';
     }
 
     getSystemTokens(): TokenClass[] {
@@ -164,13 +164,12 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return true;
     }
 
-    trackAnalyticsEvent(params: Record<string, unknown>): void {
+    trackAnalyticsEvent(eventName: string): void {
         if (typeof fathom === 'undefined') {
-            console.warn(`Failed to track event with ID ${params.id}: Fathom Analytics not loaded`);
+            console.warn(`Failed to track event with name '${eventName}': Fathom Analytics not loaded`);
             return;
         }
 
-        const id = params.id as string;
-        fathom.trackGoal(id, 0);
+        fathom.trackEvent(eventName);
     }
 }

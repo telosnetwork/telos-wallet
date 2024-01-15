@@ -16,8 +16,7 @@ import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 import { getAntelope } from 'src/antelope';
 
-const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
-const TSWAPS_URL = 'https://tswaps.com/swap';
+const GETTING_STARTED_URL = 'https://telos.net/ecosystem?category=Exchanges';
 
 export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],
@@ -106,6 +105,9 @@ export default {
                 )
                 .reduce((a, b) => a + b, 0);
         },
+        telosBalance() {
+            return this.coins.find(coin => coin.symbol === 'TLOS' && coin.account === 'eosio.token').totalAmount;
+        },
         availableHeight() {
             return (
                 window.innerHeight - (this.isAuthenticated ? this.footerHeight : 0)
@@ -184,9 +186,6 @@ export default {
         clickPurchase() {
             this.selectedCoin = this.coins.find(coin => coin.symbol === 'TLOS');
             window.open(GETTING_STARTED_URL);
-        },
-        clickExchange() {
-            window.open(TSWAPS_URL);
         },
         handlePan({ evt, ...info }) {
             this.coinViewHeight -= info.delta.y;
@@ -705,7 +704,7 @@ export default {
                 <!-- Account Amount -->
                 <div class="full-width items-center balance-div row">
                     <div class="full-width"></div>
-                    <div class="full-width">
+                    <div class="full-width balance-text">
                         <label
                             class="text-white items-center"
                             :style="`font-size: ${balanceTextSize}px; font-weight: 200; font-size: 50px; white-space: nowrap;`"
@@ -714,6 +713,13 @@ export default {
                                 displayAmount.toFixed(2).slice(-2)
                             }}
                         </label>
+                        <div>
+                            <q-icon name="o_info" size="sm" />
+                            <q-tooltip>{{ $t('balance.balance_fiat_tooltip') }}</q-tooltip>
+                        </div>
+                    </div>
+                    <div v-if="typeof telosBalance === 'number'"  class="full-width">
+                        {{ getFixed(telosBalance, 4) }} TLOS
                     </div>
                 </div>
 
@@ -742,10 +748,6 @@ export default {
 
                 <!-- Convert and Purchace -->
                 <div class="row justify-between q-mb-md">
-                    <div class="convertBtn" @click="clickExchange()">
-                        <img src="~assets/coin/Convert.svg" class="q-mr-xs" >
-                        {{$t('balance.convert')}}
-                    </div>
                     <div class="purchaceBtn" @click="clickPurchase()">
                         {{$t('balance.purchase')}}
                         <img src="~assets/coin/Purchase.svg" class="q-ml-xs" >
@@ -986,6 +988,13 @@ export default {
   background-color: #00000000;
   display: inline-flex;
   justify-content: space-between;
+}
+
+.balance-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
 
 .balanceBtn {

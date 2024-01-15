@@ -3,7 +3,7 @@ import { initFuelUserWrapper } from 'src/api/fuel';
 
 export const login = async function(
     { commit, dispatch },
-    { idx, account, returnUrl, justViewer },
+    { idx, account, memoryAutoLogin, network, justViewer },
 ) {
     const authenticator = this.$ual.authenticators[idx];
     try {
@@ -27,7 +27,8 @@ export const login = async function(
             commit('setAccountName', accountName);
             localStorage.setItem('autoLogin', authenticator.getName());
             localStorage.setItem('account', accountName);
-            localStorage.setItem('returning', true);
+            localStorage.setItem('isNative', true);
+            localStorage.setItem('network', network);
             if (this.$router.currentRoute.path === '/') {
                 await this.$router.push({ path: '/zero/balance' });
             }
@@ -38,9 +39,14 @@ export const login = async function(
         const error =
             (authenticator.getError() && authenticator.getError().message) ||
             e.message ||
-            e.reason;
-        commit('general/setErrorMsg', error, { root: true });
-        console.error('Login error: ', error);
+            e.reason ||
+            e.cause;
+        if (error !== 'cancelled') {
+            commit('general/setErrorMsg', error, { root: true });
+            throw e;
+        } else {
+            console.log('Login cancelled');
+        }
     } finally {
         commit('setLoadingWallet');
     }
@@ -58,15 +64,18 @@ export const memoryAutoLogin = async function ({
     } else {
         return null;
     }
+    return null;
 };
 
 export const autoLogin = async function({ dispatch, commit }, returnUrl) {
     const { authenticator, idx } = getAuthenticator(this.$ual);
     if (authenticator) {
         commit('setAutoLogin', true);
+        const network = localStorage.getItem('network');
         await dispatch('login', {
             idx,
             returnUrl,
+            network,
             account: localStorage.getItem('account'),
         });
         this.$idx = idx;
@@ -85,7 +94,7 @@ const getAuthenticator = function(ual, wlt = null) {
     };
 };
 
-export const logout = async function({ commit }) {
+export const logout = async function({ commit }, telosZeroLogout = false) {
     const { authenticator } = getAuthenticator(this.$ual);
     try {
         authenticator && (await authenticator.logout());
@@ -104,7 +113,7 @@ export const logout = async function({ commit }) {
     commit('setEvmBalance', null);
 
     if (this.$router.currentRoute.path !== '/') {
-        this.$router.push({ path: '/' });
+        this.$router.push({ path: '/', query: { login: telosZeroLogout ? 'zero' : '' } });
     }
 };
 

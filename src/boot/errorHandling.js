@@ -67,6 +67,7 @@ const crossIcon = require('src/assets/icon--cross.svg');
 const infoIcon  = require('src/assets/icon--info.svg');
 const checkIcon = require('src/assets/icon--check.svg');
 const discoIcon = require('src/assets/icon--disconnected.svg');
+const warningIcon = require('src/assets/icon--warning.svg');
 
 const html = `
     <div class="c-notify__container c-notify__container--{type} c-notify__container--{random}">
@@ -257,6 +258,16 @@ const notifyFailureWithAction = function(message, payload) {
     );
 };
 
+const notifyWarningWithAction = function(message, payload) {
+    return notifyMessage.bind(this)(
+        'error',
+        warningIcon,
+        this.$t('notification.warning_title').toUpperCase(),
+        message,
+        new NotificationAction(payload),
+    );
+};
+
 const notifyDisconnected = function() {
     return notifyMessage.bind(this)(
         'error',
@@ -331,6 +342,7 @@ export default boot(({ app, store }) => {
     app.config.globalProperties.$notifySuccessCopy        = notifySuccessCopy.bind(store);
     app.config.globalProperties.$notifyFailure            = notifyFailure.bind(store);
     app.config.globalProperties.$notifyFailureWithAction  = notifyFailureWithAction.bind(store);
+    app.config.globalProperties.$notifyWarningWithAction  = notifyWarningWithAction.bind(store);
     app.config.globalProperties.$notifyDisconnected       = notifyDisconnected.bind(store);
     app.config.globalProperties.$notifyNeutralMessage     = notifyNeutralMessage.bind(store);
     app.config.globalProperties.$notifyRememberInfo       = notifyRememberInfo.bind(store);
@@ -339,6 +351,7 @@ export default boot(({ app, store }) => {
     store['$notifySuccessCopy']                           = app.config.globalProperties.$notifySuccessCopy;
     store['$notifyFailure']                               = app.config.globalProperties.$notifyFailure;
     store['$notifyFailureWithAction']                     = app.config.globalProperties.$notifyFailureWithAction;
+    store['$notifyWarningWithAction']                     = app.config.globalProperties.$notifyWarningWithAction;
     store['$notifyDisconnected']                          = app.config.globalProperties.$notifyDisconnected;
     store['$notifyNeutralMessage']                        = app.config.globalProperties.$notifyNeutralMessage;
     store['$notifyRememberInfo']                          = app.config.globalProperties.$notifyRememberInfo;

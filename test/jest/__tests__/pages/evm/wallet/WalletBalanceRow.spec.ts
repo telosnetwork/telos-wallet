@@ -30,7 +30,7 @@ const fakeWrappedToken = new TokenClass({
     network: 'NETWORK',
     decimals: 18,
     address: fakeWtlosContractAddress,
-    logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+    logoURI: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png',
 } as TokenSourceInfo);
 
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
@@ -106,7 +106,7 @@ describe('WalletBalanceRow.vue', () => {
                     address: fakeStlosContractAddress,
                     symbol: 'STLOS',
                     name: 'Staked TLOS',
-                    logoURI: 'https://raw.githubusercontent.com/telosnetwork/teloscan/master/public/stlos-logo.png',
+                    logoURI: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png',
                     decimals: 18,
                     balance: '3642.0243',
                     fullBalance: '3642.024318091460206147',

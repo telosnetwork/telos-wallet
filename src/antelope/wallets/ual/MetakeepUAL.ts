@@ -147,7 +147,7 @@ export class MetakeepAuthenticator extends Authenticator {
      * ie. If your Authenticator App does not support mobile, it returns false when running in a mobile browser.
      */
     shouldRender() {
-        return false;
+        return true;
     }
 
     /**
@@ -177,6 +177,7 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     resolveAccountName() {
+        console.log('resolveAccountName() let\'s resolve account name');
         return new Promise<string>(async (resolve, reject) => {
             let accountName = '';
             if (!metakeep) {
@@ -200,6 +201,7 @@ export class MetakeepAuthenticator extends Authenticator {
 
             try {
                 // we try to get the account name from the public key
+                console.log('resolveAccountName() we try to get the account name from the public key....');
                 const response = await axios.post(`${this.rpc.endpoint}/v1/history/get_key_accounts`, {
                     public_key: publicKey,
                 });
@@ -226,7 +228,6 @@ export class MetakeepAuthenticator extends Authenticator {
      * @param accountName    The account name of the user for Authenticators that do not store accounts (optional)
      */
     login: () => Promise<[User]> = async () => {
-        console.error('login');
         if (this.userCredentials.email === '') {
             throw new Error('No account email');
         }

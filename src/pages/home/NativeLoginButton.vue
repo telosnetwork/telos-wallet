@@ -7,6 +7,7 @@ import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Menu } from '~/pages/home/MenuType';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 
+
 const telosLogo = require('src/assets/logo--telos-cloud-wallet.svg');
 
 export default defineComponent({
@@ -18,7 +19,6 @@ export default defineComponent({
         return {
             showAuth: false,
             authType: 'signin',
-            error: null,
             authInterval: null,
             close: false,
             ramPrice: 0,
@@ -123,11 +123,17 @@ export default defineComponent({
             this.openUrl('https://app.telos.net/accounts/add');
         },
         async onLogin(idx, justViewer = false) {
-            const error = await this.login({ idx, justViewer });
-            if (!error) {
-                await this.$router.push({ path: '/zero/balance' });
-            } else {
-                this.error = error;
+            const network = useChainStore().currentChain.settings.getNetwork();
+            try {
+                await this.login({ idx, justViewer, network });
+                const account = localStorage.getItem('account');
+                if (account) {
+                    this.$router.push({ path: '/zero/balance' });
+                }
+            } catch (e) {
+                if (e.message !== 'User canceled request (Modal closed)') {
+                    this.$errorNotification(e);
+                }
             }
         },
         openUrl(url) {
@@ -281,7 +287,7 @@ export default defineComponent({
         <!-- Login Button -->
         <template v-if="!isAuthenticated">
 
-            <!-- Google OAuth Provider -->
+            <!-- Telos Cloud Button -->
             <div class="c-zero-login-buttons__option c-zero-login-buttons__option--telos-cloud" @click="setCloudMenu()">
                 <div class="c-zero-login-buttons__cloud-btn-container">
                     <div class="c-zero-login-buttons__cloud-btn-line-title">
@@ -329,12 +335,34 @@ export default defineComponent({
                         <img
                             :src="getWalletIcon(wallet)"
                             width="24"
-                            class="c-zero-login-buttons__icon"
+                            class="c-zero-login-buttons__ual-logo"
                         >
                         {{ getWalletName(wallet) }} {{  wallet.getName()  }}
                     </template>
                 </div>
             </template>
+
+            <hr class="c-zero-login-buttons__hr">
+
+            <div
+                class="c-zero-login-buttons__option c-zero-login-buttons__option--centered"
+                tabindex="0"
+                aria-role="button"
+                @keyup.enter="loginAsJustViewer"
+                @click="loginAsJustViewer"
+            >
+                {{ $t('home.view_any_account') }}
+            </div>
+
+            <div
+                class="c-zero-login-buttons__option c-zero-login-buttons__option--centered"
+                tabindex="0"
+                aria-role="button"
+                @keyup.enter="signUp"
+                @click="signUp"
+            >
+                {{ $t('home.create_new_account') }}
+            </div>
 
         </template>
 
@@ -377,62 +405,16 @@ export default defineComponent({
         </div>
 
     </template>
-
-    <!-- RAM low dialog -->
-    <q-dialog v-model="resLow" persistent>
-        <q-card class="popupCard">
-            <div class="popupHeading">
-                <div>
-                    <q-btn
-                        v-close-popup
-                        round
-                        flat
-                        dense
-                        class="text-grey-6"
-                        icon="close"
-                    />
-                </div>
-                <div class="text-subtitle1 text-weight-medium text-center ">
-                    {{$t('login.resources_low')}}
-                </div>
-                <div ></div>
-            </div>
-            <div class="text-center">
-                <div class="q-pb-md">
-                    {{$t('login.recommend_bying')}}
-                </div>
-                <div class="">{{$t('login.proceed_q')}}</div>
-                <div class="text-center q-gutter-x-sm q-pt-sm">
-                    <q-btn
-                        v-close-popup
-                        no-caps
-                        rounded
-                        class="purpleGradient"
-                        label="Deny"
-                    />
-                    <q-btn
-                        no-caps
-                        rounded
-                        label="Approve"
-                        class="purpleGradient"
-                        @click="buyResources()"
-                    />
-                </div>
-            </div>
-        </q-card>
-    </q-dialog>
 </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
-
-.logged-in{
+.logged-in {
     color: white;
     font-size: 16px !important;
     margin-bottom: 2rem;
 }
-
 
 .c-zero-login-buttons {
     $self: &;
@@ -499,6 +481,14 @@ export default defineComponent({
         color: $white;
     }
 
+    &__ual-logo {
+        opacity: 0.8;
+
+        @include mobile-only {
+            opacity: 1;
+        }
+    }
+
     &__option {
         display: flex;
         gap: 8px;
@@ -515,10 +505,15 @@ export default defineComponent({
         padding: 14px;
         cursor: pointer;
 
-        &:hover:not(&--disabled) {
+        &:hover:not(&--disabled),
+        &:focus:not(&--disabled) {
             color: $white;
             outline-color: $white;
             outline-width: 2px;
+
+            #{$self}__ual-logo {
+                opacity: 1;
+            }
         }
 
         &:not(:hover) #{$self}__icon {
@@ -544,6 +539,10 @@ export default defineComponent({
             outline-color: #9289b1;
             cursor: not-allowed;
         }
+    }
+
+    &__hr {
+        width: 224px;
     }
 }
 

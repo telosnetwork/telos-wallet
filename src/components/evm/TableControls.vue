@@ -93,7 +93,7 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
             @keypress.space.enter.prevent="showRowsPerPageDropdown = !showRowsPerPageDropdown"
         >
             <q-popup-proxy ref="rowsPerPagePopup" transition-show="scale" transition-hide="scale">
-                <q-list>
+                <q-list class="c-table-controls__rows-per-page-list">
                     <q-item v-for="size in rowsPerPageOptions" :key="size" class="cursor-pointer">
                         <q-item-section
                             tabindex="0"
@@ -178,6 +178,10 @@ function changePageNumber(direction: 'next' | 'prev' | 'first' | 'last') {
         @media only screen and (min-width: $breakpoint-md-min) {
             margin: unset;
         }
+    }
+
+    &__rows-per-page-list {
+        background: $white;
     }
 }
 </style>

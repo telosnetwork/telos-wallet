@@ -74,6 +74,7 @@ export class MetaKeepAuth extends InjectedProviderAuth {
     }
 
     async assertMetakeepSDKReady(): Promise<void> {
+        this.trace('assertMetakeepSDKReady', metakeep);
         if (!metakeep) {
             const chainSettings = (useChainStore().getChain(CURRENT_CONTEXT).settings as EVMChainSettings);
             const endpoint = chainSettings.getRPCEndpoint();

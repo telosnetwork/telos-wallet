@@ -26,6 +26,6 @@ export interface ChainSettings {
     getSystemTokens(): TokenClass[];
     getNftsForAccount(address: string, filter: IndexerAccountNftsFilter): Promise<Collectible[]>;
     getNftsForCollection(contract: string, filter: IndexerCollectionNftsFilter): Promise<Collectible[]>;
-    trackAnalyticsEvent(params: Record<string, unknown>): void;
+    trackAnalyticsEvent(eventName: string): void;
     getApy(): Promise<string>;
 }

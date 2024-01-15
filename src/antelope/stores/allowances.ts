@@ -4,16 +4,6 @@ import { formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
 import {
-    CURRENT_CONTEXT,
-    getAntelope,
-    useAccountStore,
-    useChainStore,
-    useContractStore,
-    useFeedbackStore,
-    useNftsStore,
-    useTokensStore,
-} from 'src/antelope';
-import {
     AntelopeError,
     IndexerAllowanceResponse,
     IndexerAllowanceResponseErc1155,
@@ -34,12 +24,24 @@ import {
     isErc721SingleAllowanceRow,
     isNftCollectionAllowanceRow,
 } from 'src/antelope/types';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
+import { createTraceFunction } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { ZERO_ADDRESS } from 'src/antelope/chains/chain-constants';
 import { WriteContractResult } from '@wagmi/core';
 import { AccountModel, EvmAccountModel } from 'src/antelope/stores/account';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useAccountStore,
+    useChainStore,
+    useContractStore,
+    useFeedbackStore,
+    useNftsStore,
+    useTokensStore,
+} from 'src/antelope';
 
 const store_name = 'allowances';
 
@@ -214,9 +216,8 @@ export const useAllowancesStore = defineStore(store_name, {
         trace: createTraceFunction(store_name),
         init: () => {
             const allowancesStore = useAllowancesStore();
-            useFeedbackStore().setDebug(store_name, isTracingAll());
-
-            getAntelope().events.onAccountChanged.pipe(
+            const ant = getAntelope();
+            ant.events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: ({ label, account }) => {
@@ -224,6 +225,10 @@ export const useAllowancesStore = defineStore(store_name, {
                         allowancesStore.fetchAllowancesForAccount(account?.account);
                     }
                 },
+            });
+
+            ant.events.onClear.subscribe(({ label }) => {
+                allowancesStore.clearAllowances(label);
             });
         },
 
@@ -233,6 +238,11 @@ export const useAllowancesStore = defineStore(store_name, {
             useFeedbackStore().setLoading('fetchAllowancesForAccount');
 
             const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
+            if (chainSettings.isNative()) {
+                this.trace('fetchAllowancesForAccount', 'Native chain does not have allowances');
+                return;
+            }
 
             const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
             const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
@@ -536,13 +546,12 @@ export const useAllowancesStore = defineStore(store_name, {
             this.trace('setErc1155Allowances', allowances);
             this.__erc_1155_allowances[label] = allowances;
         },
-
         // utils
-        clearAllowances() {
-            this.trace('clearAllowances');
-            this.__erc_20_allowances = {};
-            this.__erc_721_allowances = {};
-            this.__erc_1155_allowances = {};
+        clearAllowances(label: Label) {
+            this.trace('clearAllowances', label);
+            this.__erc_20_allowances[label] = [];
+            this.__erc_721_allowances[label] = [];
+            this.__erc_1155_allowances[label] = [];
         },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
             try {

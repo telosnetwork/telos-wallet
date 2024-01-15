@@ -345,6 +345,7 @@ export default {
         neutral_message_updating_erc20_allowance: 'Updating <b>{symbol}</b> allowance for <b>{spender}</b>',
         neutral_message_updating_nft_allowance: 'Updating <b>{tokenText}</b> allowance for <b>{operator}</b>',
         dont_show_message_again: 'Don\'t show me this message again',
+        warning_title: 'Warning!',
     },
     resources: {
         title: 'Network Resources',
@@ -483,13 +484,14 @@ export default {
         withdraw_1: 'Withdraw your TLOS from the EVM,',
         withdraw_2: 'fast, free and instant.',
         add_evm_network: 'Add EVM Network',
-        first_deposit: 'NOTE: This is your first deposit so an additional “create” action ' +
-        'will be included',
         address_not_exist: 'NOTE: The recipient address does not exist so an additional “create” ' +
         'action will be included',
         dont_send_to_exchanges: 'DO NOT SEND TO EXCHANGE ADDRESS (e.g. KuCoin, Gate.io etc.). THIS ' +
         'WILL RESULT IN A LOSS OF FUNDS. RATHER SEND TO YOUR OWN METAMASK ' +
         'ADDRESS THEN TRANSFER TO THE EXCHANGE ADDRESS.',
+        evm_address_not_found: 'No linked Telos EVM address found, click below to generate one.',
+        evm_address_disclaimer: 'THIS ADDRESS IS ONLY FOR SENDING \'TLOS\' ON THE TELOS EVM. DO NOT SEND ANY OTHER TOKEN TO THIS ADDRESS. DO NOT SEND ANY TOKEN FROM ANOTHER NETWORK. THERE ARE NO PRIVATE KEYS AND FUNDS WILL BE LOST FOREVER.',
+        evm_disclaimer_confirmation: 'I Understand',
         create_evm_for: 'Create EVM address for {account}',
         created_evm_for: 'EVM address created for {account}',
         cant_deposit_more: 'Cannot deposit more than native TLOS balance: {balance}',
@@ -570,6 +572,7 @@ export default {
         'LOSS OF FUNDS. THIS PRIVATE KEY IS NOT AVAILABLE.',
         i_understand: 'I Understand',
         copied_ok: 'Copied it to the clipboard successfully',
+        balance_fiat_tooltip: 'Total includes non-liquid TLOS, such as TLOS staked to resources',
     },
     dapps: {
         title: 'Telos Native dApps',

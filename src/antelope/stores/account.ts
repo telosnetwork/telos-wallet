@@ -16,18 +16,8 @@
 import { Authenticator, User } from 'universal-authenticator-library';
 import { defineStore } from 'pinia';
 import { API } from '@greymass/eosio';
-import { createInitFunction, createTraceFunction } from 'src/antelope/stores/feedback';
 import { initFuelUserWrapper } from 'src/api/fuel';
-import {
-    CURRENT_CONTEXT,
-    useAllowancesStore,
-    useBalancesStore,
-    useFeedbackStore,
-    useHistoryStore,
-    useNftsStore,
-} from 'src/antelope';
-import { getAntelope, useChainStore } from 'src/antelope';
-import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
     Action,
@@ -39,6 +29,14 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useChainStore,
+    useFeedbackStore,
+} from 'src/antelope';
 
 
 export interface LoginNativeActionData {
@@ -83,7 +81,6 @@ export interface EvmAccountModel extends AccountModel {
     authenticator: EVMAuthenticator;
 }
 
-
 export interface AccountState {
     // accounts mapped by label
     __accounts: { [label: Label]: AccountModel };
@@ -114,7 +111,6 @@ export const useAccountStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        init: createInitFunction(store_name),
         async loginNative({ authenticator, network }: LoginNativeActionData): Promise<boolean> {
             this.trace('loginNative', authenticator, network);
             let success = false;
@@ -157,10 +153,8 @@ export const useAccountStore = defineStore(store_name, {
 
         async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
+            const label = authenticator.label;
+            getAntelope().events.onClear.next({ label });
 
             let success = false;
             try {
@@ -208,20 +202,22 @@ export const useAccountStore = defineStore(store_name, {
 
         async logout() {
             this.trace('logout');
-            useHistoryStore().clearEvmTransactions();
-            useHistoryStore().clearEvmNftTransfers();
-            useBalancesStore().clearBalances();
-            useNftsStore().clearNFTs();
-            useAllowancesStore().clearAllowances();
 
             try {
+
+                const logged = this.__accounts[CURRENT_CONTEXT];
+                const { authenticator } = logged;
+
+                if (authenticator instanceof EVMAuthenticator) {
+                    const label = authenticator.label;
+                    getAntelope().events.onClear.next({ label });
+                }
+
                 localStorage.removeItem('network');
                 localStorage.removeItem('account');
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 
-                const logged = this.__accounts[CURRENT_CONTEXT];
-                const { authenticator } = logged;
                 try {
                     authenticator && (await authenticator.logout());
                 } catch (error) {
@@ -246,8 +242,10 @@ export const useAccountStore = defineStore(store_name, {
                 const account = localStorage.getItem('account');
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
-                this.trace('autoLogin', account, isNative, autoLogin);
+                this.trace('autoLogin', account, network, autoLogin, isNative, this.__accounts[label]);
                 if (account && network && autoLogin && !this.__accounts[label]) {
+                    // Ensure we are working with the correct network
+                    useChainStore().setChain(label, network);
                     if (isNative) {
                         const authenticators = getAntelope().config.authenticatorsGetter();
                         const authenticator = authenticators.find(
@@ -272,6 +270,8 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     }
+                } else {
+                    this.trace('autoLogin', 'canceled!', account, network, autoLogin, !this.__accounts[label]);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -299,23 +299,12 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('sendAction', account, data, name, actor, permission);
             try {
                 useFeedbackStore().setLoading('account.sendAction');
-                console.error('Account.sendAction() not implemented', account, data, name, actor, permission);
                 return Promise.resolve({ hash: '0x0' } as NativeTransactionResponse);
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw error;
             } finally {
                 useFeedbackStore().unsetLoading('account.sendAction');
-            }
-        },
-
-        async sendTransaction(actions: Action[]) {
-            this.trace('sendTransaction', actions);
-            try {
-                useFeedbackStore().setLoading('account.sendTransaction');
-                console.error('Account.sendTransaction() not implemented', actions);
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
             }
         },
 

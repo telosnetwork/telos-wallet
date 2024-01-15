@@ -9,15 +9,22 @@ import {
     TokenClass,
     TokenPrice,
 } from 'src/antelope/types';
-import { getAntelope, useFeedbackStore, useChainStore, CURRENT_CONTEXT } from 'src/antelope';
 import { toRaw } from 'vue';
-import { errorToString } from 'src/antelope/config';
+import { createTraceFunction, errorToString } from 'src/antelope/config';
 import { filter } from 'rxjs';
-import { createTraceFunction, isTracingAll } from 'src/antelope/stores/feedback';
 import { ChainModel } from 'src/antelope/stores/chain';
 import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { getTokenPriceDataFromIndexer } from 'src/api/price';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
+
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useFeedbackStore,
+    useChainStore,
+} from 'src/antelope';
+
 
 export interface TokensState {
     __tokens:  { [label: Label]: TokenClass[] };
@@ -50,7 +57,6 @@ export const useTokensStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onNetworkChanged.pipe(
                 filter(e => e.label === CURRENT_CONTEXT),
             ).subscribe({

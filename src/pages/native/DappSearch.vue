@@ -14,10 +14,9 @@ export default {
         ...mapGetters('account', ['isAuthenticated', 'accountName']),
         searchDapps() {
             return this.dapps.filter(dapp => (
-                dapp.name.toLowerCase().includes(this.searchDappName.toLowerCase()) ||
-          dapp.category
-              .toLowerCase()
-              .includes(this.searchDappName.toLowerCase())
+                (dapp.name.toLowerCase().includes(this.searchDappName.toLowerCase()) ||
+                dapp.category.toLowerCase().includes(this.searchDappName.toLowerCase())) &&
+                dapp.name !== 'AreaX NFT'
             ));
         },
     },

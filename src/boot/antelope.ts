@@ -2,6 +2,7 @@ import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { boot } from 'quasar/wrappers';
 import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
+import { AccountModel } from 'src/antelope/stores/account';
 import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
@@ -35,6 +36,7 @@ export default boot(({ app }) => {
     ant.config.setNotifySuccessCopyHandler(app.config.globalProperties.$notifySuccessCopy);
     ant.config.setNotifyFailureMessage(app.config.globalProperties.$notifyFailure);
     ant.config.setNotifyFailureWithAction(app.config.globalProperties.$notifyFailureWithAction);
+    ant.config.setNotifyWarningWithAction(app.config.globalProperties.$notifyWarningWithAction);
     ant.config.setNotifyDisconnectedHandler(app.config.globalProperties.$notifyDisconnected);
     ant.config.setNotifyNeutralMessageHandler(app.config.globalProperties.$notifyNeutralMessage);
     ant.config.setNotifyRememberInfoHandler(app.config.globalProperties.$notifyRememberInfo);
@@ -43,10 +45,19 @@ export default boot(({ app }) => {
 
     // we need to wait 1000 milisec to ensure app.config.globalProperties?.$router is not null
     ant.events.onLoggedIn.subscribe({
-        next: async () => {
-            if (window.location.pathname === '/') {
-                (await getRouter(app)).push({ path: '/evm/wallet?tab=balance' });
+        next: async (account: AccountModel) => {
+            if (account.isNative) {
+                if (!window.location.pathname.startsWith('/zero')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/zero/balance' });
+                }
+            } else {
+                if (!window.location.pathname.startsWith('/evm')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/evm/wallet?tab=balance' });
+                }
             }
+
         },
     });
     ant.events.onLoggedOut.subscribe({
@@ -98,6 +109,12 @@ export default boot(({ app }) => {
     // constants --
     ant.config.setIndexerHealthThresholdSeconds(10);
     ant.config.setIndexerHealthCheckInterval(5000);
+
+    // We only allow debug mode if we are not in production or in a sensitive environment
+    const weAreNotInProduction = process.env.NODE_ENV !== 'production';
+    const weAreInLocalhost = document.location.hostname === 'localhost';
+    const weAreInNetlify = document.location.hostname.includes('netlify');
+    ant.config.debug.allowDebugMode(weAreNotInProduction || weAreInLocalhost || weAreInNetlify);
 
     // Finally, we check if the url has the network parameter and if so, we connect to that network
     // Otherwise we just let the store decide which network to connect to

@@ -8,20 +8,24 @@
 import { ethers } from 'ethers';
 import { defineStore } from 'pinia';
 import { filter } from 'rxjs';
-import {
-    isTracingAll,
-    createTraceFunction,
-    useFeedbackStore,
-} from 'src/antelope/stores/feedback';
 import { AntelopeError, EvmRexDeposit, Label, TransactionResponse } from 'src/antelope/types';
 import { toRaw } from 'vue';
 import { AccountModel, useAccountStore } from 'src/antelope/stores/account';
-import { CURRENT_CONTEXT, getAntelope, useBalancesStore, useChainStore, useContractStore } from 'src/antelope';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { WEI_PRECISION } from 'src/antelope/stores/utils';
 import { subscribeForTransactionReceipt } from 'src/antelope/stores/utils/trx-utils';
+import { createTraceFunction } from 'src/antelope/config';
 import { prettyTimePeriod } from 'src/antelope/stores/utils/date-utils';
 
+// dependencies --
+import {
+    CURRENT_CONTEXT,
+    getAntelope,
+    useFeedbackStore,
+    useBalancesStore,
+    useChainStore,
+    useContractStore,
+} from 'src/antelope';
 
 export interface RexModel {
     withdrawable: ethers.BigNumber;
@@ -66,7 +70,6 @@ export const useRexStore = defineStore(store_name, {
     actions: {
         trace: createTraceFunction(store_name),
         init: () => {
-            useFeedbackStore().setDebug(store_name, isTracingAll());
             getAntelope().events.onAccountChanged.pipe(
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
@@ -114,14 +117,26 @@ export const useRexStore = defineStore(store_name, {
             return this.getContractInstance(label, address);
         },
         /**
+         * This method should be called to check if the REX system is available for a given context.
+         * @param label identifies the context (network on this case) for the data
+         * @returns true if the REX system is available for the given context
+         */
+        isNetworkEVM(label: string) {
+            return !useChainStore().getChain(label).settings.isNative();
+        },
+        /**
          * This method queries the total amount of staked tokens in the system and maintains it in the store.
          * @param label identifies the context (network on this case) for the data
          */
         async updateTotalStaking(label: string) {
             this.trace('updateTotalStaking', label);
-            const contract = await this.getStakedSystemContractInstance(label);
-            const totalStaking = await contract.totalAssets();
-            this.setTotalStaking(label, totalStaking);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getStakedSystemContractInstance(label);
+                const totalStaking = await contract.totalAssets();
+                this.setTotalStaking(label, totalStaking);
+            } else {
+                this.trace('updateTotalStaking', label, 'not supported for native chains yet');
+            }
         },
 
         /**
@@ -130,9 +145,13 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateUnstakingPeriod(label: string) {
             this.trace('updateUnstakingPeriod', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const period = await contract.lockDuration();
-            this.setUnstakingPeriod(label, period.toNumber());
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const period = await contract.lockDuration();
+                this.setUnstakingPeriod(label, period.toNumber());
+            } else {
+                this.trace('updateUnstakingPeriod', label, 'not supported for native chains yet');
+            }
         },
 
         /**
@@ -175,10 +194,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateWithdrawable(label: string) {
             this.trace('updateWithdrawable', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const withdrawable = await contract.maxWithdraw(address);
-            this.setWithdrawable(label, withdrawable);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const withdrawable = await contract.maxWithdraw(address);
+                this.setWithdrawable(label, withdrawable);
+            } else {
+                this.trace('updateWithdrawable', label, 'not supported for native chains yet');
+            }
         },
         /**
          * This method queries the deposits for a given account and maintains it in the store.
@@ -188,10 +211,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateDeposits(label: string) {
             this.trace('updateDeposits', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const deposits = await contract.depositsOf(address);
-            this.setDeposits(label, deposits);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const deposits = await contract.depositsOf(address);
+                this.setDeposits(label, deposits);
+            } else {
+                console.error('updateDeposits', label, 'not supported for native chains yet');
+            }
         },
         /**
          * This method queries the balance for a given account and maintains it in the store.
@@ -200,10 +227,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateBalance(label: string) {
             this.trace('updateBalance', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const balance = await contract.balanceOf(address);
-            this.setBalance(label, balance);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const balance = await contract.balanceOf(address);
+                this.setBalance(label, balance);
+            } else {
+                console.error('updateBalance', label, 'not supported for native chains yet');
+            }
         },
         /**
          * utility function to get the number of decimals for the staked system token

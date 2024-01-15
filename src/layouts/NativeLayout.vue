@@ -112,10 +112,10 @@ export default {
             );
             this.accountHistory = actionHistory.data.actions || [];
         },
-        logOut() {
+        performLogOut() {
             this.resetTokens();
-            this.logout();
             googleCtrl.logout();
+            this.logout(true);
         },
         resetTokens() {
             this.coins = [];
@@ -127,7 +127,7 @@ export default {
             await this.memoryAutoLogin();
         }
         this.loadUserProfile();
-        this.checkPath();
+        /// this.checkPath();
     },
 };
 </script>
@@ -157,7 +157,7 @@ export default {
     <div class="videoOverlay" ></div>
     <div class="videoOverlay shadedOverlay" ></div>
 
-    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
+    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="performLogOut"/>
     <q-page-container
         :class="`pageContainer ${isUserAuthenticated ? 'authenticated' : ''}`"
     >

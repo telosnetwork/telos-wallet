@@ -124,7 +124,6 @@ async function startTransfer() {
                         :displayFullAddress="false"
                         :showAddress="true"
                         :showCopyBtn="false"
-                        :showUserMenu="false"
                         :lightweight="true"
                         :account="loggedAccount"
                     />

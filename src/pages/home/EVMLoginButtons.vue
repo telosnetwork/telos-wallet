@@ -39,6 +39,20 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const ant = getAntelope();
+
+        // set chain
+        const chainStore = useChainStore();
+        if (!process.env.CHAIN_NAME) {
+            console.error('No chain name specified in environment config; the application will not run correctly');
+        } else {
+            const chainNetworkNames: Record<string, string> = {
+                'telos': 'telos-evm',
+                'telos-testnet': 'telos-evm-testnet',
+            };
+            const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+            chainStore.setChain(CURRENT_CONTEXT, network);
+        }
+
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
@@ -269,27 +283,6 @@ export default defineComponent({
             </template>
         </div>
 
-        <!-- Safepal Authenticator button -->
-        <div
-            v-if="showSafePalButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
-        >
-            <template v-if="isLoading('SafePal.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <InlineSvg
-                    :src="require('src/assets/evm/safepal.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
-            </template>
-        </div>
-
         <!-- WalletConnect Authenticator button -->
         <div
             v-if="showWalletConnectButton"
@@ -311,6 +304,47 @@ export default defineComponent({
             </template>
         </div>
 
+        <!-- Safepal Authenticator button -->
+        <div
+            v-if="showSafePalButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
+        >
+            <template v-if="isLoading('SafePal.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/safepal.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsSafePal ? $t('home.safepal') : $t('home.install_safepal') }}
+            </template>
+        </div>
+
+        <!-- Brave Authenticator button -->
+        <div
+            v-if="showBraveButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
+        >
+            <template v-if="isLoading('Brave.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/brave_lion.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
+            </template>
+        </div>
     </template>
 
     <!-- telos cloud menu -->
@@ -330,8 +364,6 @@ export default defineComponent({
         </div>
 
     </template>
-
-
 </div>
 </template>
 
