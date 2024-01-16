@@ -190,6 +190,7 @@ export class MetakeepAuthenticator extends Authenticator {
             const accountNames = metakeepCache.getAccountNames(this.userCredentials.email, this.chainId);
             if (accountNames.length > 0) {
                 resolve(accountNames[0]);
+                return;
             }
 
             // if not, we fetch all the accounts for the email
@@ -204,7 +205,8 @@ export class MetakeepAuthenticator extends Authenticator {
                     public_key: publicKey,
                 });
                 const accountExists = response?.data?.account_names.length>0;
-                if (accountExists) {
+                // if (accountExists) { // FIXME: repair the code
+                if (accountExists || false) {
                     accountName = response.data.account_names[0];
                 } else {
                     accountName = await this.createAccount(publicKey);
