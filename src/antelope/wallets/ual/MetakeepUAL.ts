@@ -205,10 +205,12 @@ export class MetakeepAuthenticator extends Authenticator {
                     public_key: publicKey,
                 });
                 const accountExists = response?.data?.account_names.length>0;
+                console.log('accountExists: ', accountExists, 'pero la descartamos');
                 // if (accountExists) { // FIXME: repair the code
-                if (accountExists || false) {
+                if (accountExists && false) {
                     accountName = response.data.account_names[0];
                 } else {
+                    console.log('vamos a crear la cuenta');
                     accountName = await this.createAccount(publicKey);
                 }
 
