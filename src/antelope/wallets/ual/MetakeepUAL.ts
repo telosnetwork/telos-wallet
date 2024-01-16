@@ -206,8 +206,7 @@ export class MetakeepAuthenticator extends Authenticator {
                 });
                 const accountExists = response?.data?.account_names.length>0;
                 console.log('accountExists: ', accountExists, 'pero la descartamos');
-                // if (accountExists) { // FIXME: repair the code
-                if (accountExists && false) {
+                if (accountExists) {
                     accountName = response.data.account_names[0];
                 } else {
                     console.log('vamos a crear la cuenta');
