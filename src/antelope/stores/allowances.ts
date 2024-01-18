@@ -239,6 +239,11 @@ export const useAllowancesStore = defineStore(store_name, {
 
             const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
 
+            if (chainSettings.isNative()) {
+                this.trace('fetchAllowancesForAccount', 'Native chain does not have allowances');
+                return;
+            }
+
             const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
             const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
             const erc1155AllowancesPromise = chainSettings.fetchErc1155Allowances(account, { limit: ALLOWANCES_LIMIT });

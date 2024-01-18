@@ -5,11 +5,12 @@ import { TokenBalance } from 'src/antelope/types';
 import AppPage from 'components/evm/AppPage.vue';
 import WalletPageHeader from 'pages/evm/wallet/WalletPageHeader.vue';
 import WalletBalanceRow from 'pages/evm/wallet/WalletBalanceRow.vue';
-import { CURRENT_CONTEXT, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useAccountStore, useBalancesStore, useFeedbackStore, useHistoryStore, useNftsStore } from 'src/antelope';
 import WalletTransactionsTab from 'pages/evm/wallet/WalletTransactionsTab.vue';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
-
+const { t: $t } = useI18n();
 const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
 const feedback = useFeedbackStore();
@@ -23,7 +24,6 @@ const totalFiatAmount = ref(0);
 const allBalances = computed(() => useBalancesStore().currentBalances);
 const loading = computed(() => feedback.isLoading('updateBalancesForAccount'));
 
-// watchers
 watch(allBalances, (newBalances: TokenBalance[]) => {
     let newFiatBalance = 0;
     for (let balance of newBalances){
@@ -32,7 +32,6 @@ watch(allBalances, (newBalances: TokenBalance[]) => {
         }
     }
     totalFiatAmount.value = newFiatBalance;
-
 }, { deep: true, immediate: true });
 
 watch(accountStore, (newAccountStoreState) => {
@@ -49,7 +48,6 @@ watch(accountStore, (newAccountStoreState) => {
         historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
     }
 }, { immediate: true });
-
 
 </script>
 
