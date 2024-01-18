@@ -42,20 +42,10 @@ export class AntelopeWallets {
             // we try first the best solution which is taking the provider from the current authenticator
             const authenticator = account.authenticator as EVMAuthenticator;
             const provider = authenticator.web3Provider();
+            this.trace('getWeb3Provider authenticator.web3Provider() Success! (account.authenticator)', provider);
             return provider;
         } catch(e1) {
             this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e1);
-        }
-
-        // we try to build a web3 provider from a local injected provider it it exists
-        try {
-            if (window.ethereum) {
-                const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-                await web3Provider.ready;
-                return web3Provider;
-            }
-        } catch(e2) {
-            this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e2);
         }
 
         try {
@@ -64,6 +54,7 @@ export class AntelopeWallets {
             const jsonRpcProvider = new ethers.providers.JsonRpcProvider(url);
             await jsonRpcProvider.ready;
             const web3Provider = jsonRpcProvider as ethers.providers.Web3Provider;
+            this.trace('getWeb3Provider authenticator.web3Provider() Success! (jsonRpcProvider)', web3Provider);
             return web3Provider;
         } catch (e3) {
             this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e3);

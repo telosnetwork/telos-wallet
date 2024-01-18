@@ -88,7 +88,10 @@ onMounted(() => {
                         </q-btn>
                     </div>
 
-                    <NativeLoginButton v-if="tab === 'zero'" />
+                    <NativeLoginButton
+                        v-if="tab === 'zero'"
+                        v-model="currentMenu"
+                    />
 
                     <EVMLoginButtons
                         v-else-if="tab === 'evm'"

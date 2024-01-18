@@ -180,23 +180,31 @@ export const useChainStore = defineStore(store_name, {
         },
         async updateStakedRatio(label: string): Promise<void> {
             // first we need the contract instance to be able to execute queries
-            this.trace('actualUpdateStakedRatio', label);
-            useFeedbackStore().setLoading('actualUpdateStakedRatio');
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const sysToken = chain_settings.getSystemToken();
-            const stkToken = chain_settings.getStakedSystemToken();
+            this.trace('updateStakedRatio', label);
+            const chain = this.getChain(label);
+            try {
+                useFeedbackStore().setLoading('updateStakedRatio');
+                if (!chain.settings.isNative()) {
+                    const chain_settings = chain.settings as EVMChainSettings;
+                    const sysToken = chain_settings.getSystemToken();
+                    const stkToken = chain_settings.getStakedSystemToken();
 
-            const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
-            const provider = await getAntelope().wallets.getWeb3Provider();
-            const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
-            // Now we preview a deposit of 1 SYS to get the ratio
-            const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
-            const stakedRatio = await contractInstance.previewDeposit(oneSys.toString());
-            const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
-            // Finally we update the store
-            this.setStakedRatio(label, stakedRatio);
-            this.setUnstakedRatio(label, unstakedRatio);
-            useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
+                    const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
+                    const provider = await getAntelope().wallets.getWeb3Provider();
+                    const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
+                    // Now we preview a deposit of 1 SYS to get the ratio
+                    const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
+                    const stakedRatio = await contractInstance.previewDeposit(oneSys.toString());
+                    const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
+                    // Finally we update the store
+                    this.setStakedRatio(label, stakedRatio);
+                    this.setUnstakedRatio(label, unstakedRatio);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                useFeedbackStore().unsetLoading('updateStakedRatio');
+            }
         },
         async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
@@ -206,6 +214,8 @@ export const useChainStore = defineStore(store_name, {
                 if (!chain.settings.isNative()) {
                     const wei = await (chain.settings as EVMChainSettings).getGasPrice();
                     (chain as EvmChainModel).gasPrice = wei;
+                } else {
+                    this.trace('updateGasPrice', label, 'Native chain has no gas costs');
                 }
             } catch (error) {
                 console.error(error);
@@ -237,7 +247,6 @@ export const useChainStore = defineStore(store_name, {
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
                     this.__chains[label] = newChainModel(network, settings[network].isNative());
-                    this.trace('setChain', label, network, '--> void this.updateChainData(label);');
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },
@@ -248,16 +257,43 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         setStakedRatio(label: string, ratio: ethers.BigNumber) {
-            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
-            this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
-            (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
+            this.trace('setStakedRatio', label, ratio.toString());
+            const chain = this.getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
+                    this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
+                    (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
+                } else {
+                    this.trace('setStakedRatio', label, 'Native chain has no staked ratio');
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_token_list');
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokenList');
+            }
+
         },
         setUnstakedRatio(label: string, ratio: ethers.BigNumber) {
-            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
-            this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
-            (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
+            this.trace('setUnstakedRatio', label, ratio.toString());
+            const chain = this.getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
+                    this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
+                    (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
+                } else {
+                    this.trace('setUnstakedRatio', label, 'Native chain has no unstaked ratio');
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_token_list');
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokenList');
+            }
         },
     },
 });

@@ -14,12 +14,13 @@ import {
     defineComponent,
     getCurrentInstance,
     ref,
+    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
-import { OreIdAuth } from 'src/antelope/wallets';
+import { MetaKeepAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
-import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
+import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -38,6 +39,20 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const ant = getAntelope();
+
+        // set chain
+        const chainStore = useChainStore();
+        if (!process.env.CHAIN_NAME) {
+            console.error('No chain name specified in environment config; the application will not run correctly');
+        } else {
+            const chainNetworkNames: Record<string, string> = {
+                'telos': 'telos-evm',
+                'telos-testnet': 'telos-evm-testnet',
+            };
+            const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+            chainStore.setChain(CURRENT_CONTEXT, network);
+        }
+
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
@@ -78,17 +93,16 @@ export default defineComponent({
             window.open('https://www.safepal.com/en/download', '_blank');
         };
 
-        const setOreIdAuthenticator = async (provider: string) => {
-            const name = 'OreId';
-            const auth = ant.wallets.getAuthenticator(name);
-            if (auth) {
-                (auth as OreIdAuth).setProvider(provider);
-                selectedOAuthProvider.value = provider;
-            }
-            setAuthenticator(name, CURRENT_CONTEXT);
-        };
         const setMetamaskAuthenticator = async () => {
             setAuthenticator('Metamask', CURRENT_CONTEXT);
+        };
+        const setMetaKeepAuthenticator = async (data:GoogleCredentials) => {
+            const name = 'MetaKeep';
+            const auth = ant.wallets.getAuthenticator(name);
+            if (auth) {
+                (auth as MetaKeepAuth).setEmail(data.email);
+            }
+            setAuthenticator(name, CURRENT_CONTEXT);
         };
         const setBraveAuthenticator = async () => {
             setAuthenticator('Brave', CURRENT_CONTEXT);
@@ -132,9 +146,6 @@ export default defineComponent({
         };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
-        const isLoadingOreId = (provider: string) =>
-            selectedOAuthProvider.value === provider &&
-            useFeedbackStore().isLoading('OreId.login');
 
         // menu navitgaion
         const showMainMenu = computed(() => props.modelValue === Menu.MAIN);
@@ -144,10 +155,25 @@ export default defineComponent({
             emit('update:modelValue', Menu.CLOUD);
         };
 
+        watch(showTelosCloudMenu, (newValue) => {
+            if (newValue) {
+                googleCtrl.renderButton('google_btn');
+            }
+        });
+
+        const showGoogleLoading = ref(false);
+        const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
+            next: (data) => {
+                if (data) {
+                    showGoogleLoading.value = true;
+                    setMetaKeepAuthenticator(data);
+                    ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: data.email }));
+                }
+            },
+        });
 
         return {
             isLoading,
-            isLoadingOreId,
             supportsMetamask,
             supportsBrave,
             supportsSafePal,
@@ -155,8 +181,8 @@ export default defineComponent({
             showBraveButton,
             showSafePalButton,
             showWalletConnectButton,
-            setOreIdAuthenticator,
             setMetamaskAuthenticator,
+            setMetaKeepAuthenticator,
             setBraveAuthenticator,
             setSafePalAuthenticator,
             setWalletConnectAuthenticator,
@@ -164,20 +190,78 @@ export default defineComponent({
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
-            isTodayBeforeTelosCloudDown,
-            // menu navigation
             showMainMenu,
             showTelosCloudMenu,
             setCloudMenu,
+            googleSubscription,
+            showGoogleLoading,
+            googleCtrl,
         };
+    },
+    unmounted() {
+        this.googleSubscription?.unsubscribe();
     },
 });
 </script>
 
 <template>
 <div class="c-evm-login-buttons">
+
     <!-- main menu -->
     <template v-if="showMainMenu">
+
+        <!-- Telos Cloud Button -->
+        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--telos-cloud" @click="setCloudMenu()">
+            <div class="c-evm-login-buttons__cloud-btn-container">
+                <div class="c-evm-login-buttons__cloud-btn-line-title">
+                    <img
+                        width="24"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--cloud"
+                        src="~assets/icon--telos-cloud.svg"
+                    >
+                    <span>{{ $t('home.telos_cloud_wallet') }}</span>
+                </div>
+                <div class="c-evm-login-buttons__cloud-btn-line-icons">
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--google.svg"
+                    >
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--facebook.svg"
+                    >
+                    <img
+                        width="12"
+                        class="c-evm-login-buttons__icon c-evm-login-buttons__icon--social"
+                        src="~assets/icon--twitter.svg"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Brave Authenticator button -->
+        <div
+            v-if="showBraveButton"
+            class="c-evm-login-buttons__option"
+            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
+        >
+            <template v-if="isLoading('Brave.login')">
+                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/brave_lion.svg')"
+                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
+            </template>
+        </div>
+
         <!-- Metamask Authenticator button -->
         <div
             v-if="showMetamaskButton"
@@ -266,51 +350,17 @@ export default defineComponent({
     <!-- telos cloud menu -->
     <template v-if="showTelosCloudMenu">
 
-        <!-- Google OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
-            <template v-if="isLoadingOreId('google')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon"
-                    src="~assets/icon--google.svg"
-                >
-                {{ $t('home.sign_with_google') }}
-            </template>
+        <div class="c-evm-login-buttons__title q-mb-md">{{ $t('home.login_with_social_media') }}</div>
+
+        <div v-if="showGoogleLoading" >
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
-
-        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
-
-        <!-- Facebook OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--facebook.svg"
-                >
-                {{ $t('home.sign_with_facebook') }}
-            </template>
-        </div>
-
-        <!-- X OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--twitter.svg"
-                >
-                {{ $t('home.sign_with_x') }}
-            </template>
+        <div
+            v-else
+            id="google_btn"
+            :data-client_id="googleCtrl.clientId"
+        >
+            <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
         </div>
 
     </template>
@@ -329,6 +379,7 @@ export default defineComponent({
     &__loading{
         width: 100%;
         text-align: center;
+        color: $white;
     }
 
     &__header{
@@ -372,6 +423,12 @@ export default defineComponent({
         gap: 8px;
     }
 
+    &__title {
+        @include text--header-4;
+        color: $white;
+        text-align: center;
+    }
+
     &__sub-title {
         color: $white;
     }
@@ -399,7 +456,7 @@ export default defineComponent({
         }
 
         &:not(:hover) #{$self}__icon {
-            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+            &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.8;
 
                 @include mobile-only {

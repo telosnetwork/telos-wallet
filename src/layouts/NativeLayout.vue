@@ -4,6 +4,7 @@ import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/native/NavBar.vue';
 import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
 import { getAntelope } from 'src/antelope';
+import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 
 const pagesData = [
     {
@@ -111,8 +112,9 @@ export default {
             );
             this.accountHistory = actionHistory.data.actions || [];
         },
-        logOut() {
+        performLogOut() {
             this.resetTokens();
+            googleCtrl.logout();
             this.logout(true);
         },
         resetTokens() {
@@ -121,9 +123,11 @@ export default {
         },
     },
     async mounted() {
-        await this.memoryAutoLogin();
+        if (!this.isUserAuthenticated) {
+            await this.memoryAutoLogin();
+        }
         this.loadUserProfile();
-        this.checkPath();
+        /// this.checkPath();
     },
 };
 </script>
@@ -153,7 +157,7 @@ export default {
     <div class="videoOverlay" ></div>
     <div class="videoOverlay shadedOverlay" ></div>
 
-    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="logOut"/>
+    <NavBar v-if="isUserAuthenticated" v-model:balanceTab="balanceTab" @logOut="performLogOut"/>
     <q-page-container
         :class="`pageContainer ${isUserAuthenticated ? 'authenticated' : ''}`"
     >
