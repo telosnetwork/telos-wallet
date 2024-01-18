@@ -31,6 +31,7 @@ export default {
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
         telos_cloud_wallet: 'Telos Cloud Wallet',
+        telos_cloud_login: 'Telos Cloud Login',
         sign_with_google: 'Sign with Google',
         sign_with_facebook: 'Sign with Facebook',
         sign_with_x: 'Sign with X',
