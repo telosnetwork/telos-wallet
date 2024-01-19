@@ -151,9 +151,32 @@ export default defineComponent({
             const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
             return ualAuthenticators[idx];
         };
+        const selectedZeroAccount = ref('');
+        const availableZeroAccounts = ref([] as string[]);
+        let whenAccountSelected = Promise.resolve(selectedZeroAccount.value);
+        const setSelectedName = ref<(name: string) => void>((name: string) => {});
+        const selectAccount = (accounts: string[]) => new Promise<string>(async (resolveAccountSelected) => {
+            console.log('selectAccount ---->', accounts);
+            if (accounts.length === 1) {
+                resolveAccountSelected(accounts[0]);
+            } else {
+                // we create a new Promise and save its resolve in a variable
+                whenAccountSelected = new Promise((resolve) => {
+                    setSelectedName.value = resolve;
+                });
+                // enable account selection
+                availableZeroAccounts.value = accounts;
+                // wait for the promise to resolve
+                selectedZeroAccount.value = await whenAccountSelected;
+                // take the name of the selected account and pass it to the resolve of the original promise
+                resolveAccountSelected(selectedZeroAccount.value);
+            }
+        });
         const setMetakeepZero = (credentials:GoogleCredentials) => {
+            console.log('--- setMetakeepZero --');
             const name = 'metakeep.ual';
             const auth = getZeroAuthenticator(name) as MetakeepAuthenticator;
+            // auth.setAccountSelector({ selectAccount });
             auth.setUserCredentials(credentials);
             const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
             loginTelosZero(idx);
@@ -227,6 +250,9 @@ export default defineComponent({
             loginTelosZero,
             setCleosViewerZero,
             redirectToNewAccountWebsite,
+            availableZeroAccounts,
+            selectedZeroAccount,
+            setSelectedName,
         };
     },
     unmounted() {
@@ -239,7 +265,14 @@ export default defineComponent({
 <div class="c-login-buttons">
 
     <!-- Telos Cloud Button -->
-    <div class="c-login-buttons__option c-login-buttons__option--telos-cloud">
+    <div
+        class="c-login-buttons__option c-login-buttons__option--telos-cloud"
+        :class="{
+            'c-login-buttons__option': true,
+            'c-login-buttons__option--telos-cloud': true,
+            'c-login-buttons__option--telos-cloud--gradient': availableZeroAccounts.length > 0
+        }"
+    >
         <div class="c-login-buttons__cloud-btn-container">
             <div class="c-login-buttons__cloud-btn-line-title">
                 <img
@@ -250,8 +283,17 @@ export default defineComponent({
                 <span>{{ $t('home.telos_cloud_login') }}</span>
             </div>
 
+            <div v-if="availableZeroAccounts.length > 0" class="c-login-buttons__zero-accounts-title">availabe accounts</div>
+            <div v-if="availableZeroAccounts.length > 0" class="c-login-buttons__zero-accounts">
+                <div
+                    v-for="account in availableZeroAccounts"
+                    :key="account"
+                    class="c-login-buttons__option c-login-buttons__option--zero-account"
+                    @click="setSelectedName(account)"
+                > {{ account }} </div>
+            </div>
             <!-- Google One Tap render button -->
-            <div v-if="showGoogleLoading" class="c-login-buttons__google-loading">
+            <div v-else-if="showGoogleLoading" class="c-login-buttons__google-loading">
                 <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </div>
             <div
@@ -425,6 +467,7 @@ export default defineComponent({
 
 <style lang="scss">
 .c-login-buttons {
+    color: $white;
     $self: &;
     display: flex;
     flex-direction: column;
@@ -435,7 +478,7 @@ export default defineComponent({
     &__loading{
         width: 100%;
         text-align: center;
-        color: $white;
+        // color: $white;
     }
 
     &__header{
@@ -481,12 +524,23 @@ export default defineComponent({
 
     &__title {
         @include text--header-4;
-        color: $white;
+        // color: $white;
         text-align: center;
     }
 
-    &__sub-title {
-        color: $white;
+    &__zero-accounts-title {
+        padding: 5px;
+        @include text--small;
+        text-align: center;
+    }
+
+    &__zero-accounts {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
     }
 
     &__option {
@@ -495,7 +549,7 @@ export default defineComponent({
 
         width: 224px;
         height: 54px;
-        color: $white;
+        // color: $white;
         outline-color: $white;
         outline-width: 1px;
         outline-style: solid;
@@ -506,7 +560,7 @@ export default defineComponent({
         cursor: pointer;
 
         &:hover:not(&--disabled) {
-            color: $white;
+            // color: $white;
             outline-color: $white;
             outline-width: 2px;
         }
@@ -527,12 +581,24 @@ export default defineComponent({
                 outline-width: 0;
                 @include gradient_border();
             }
+            &--gradient:hover {
+                outline-width: 0px;
+                @include gradient_border();
+            }
         }
 
         &--disabled {
             color: #9289b1;
             outline-color: #9289b1;
             cursor: not-allowed;
+        }
+
+        &--zero-account {
+            height: 32px;
+            width: calc(100% - 16px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     }
 
