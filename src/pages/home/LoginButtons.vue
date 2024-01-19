@@ -470,13 +470,15 @@ export default defineComponent({
 
 <style lang="scss">
 .c-login-buttons {
+    $width: 255px;
+    $gap: 15px;
     color: $white;
     $self: &;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 14px;
+    gap: $gap;
 
     &__loading{
         width: 100%;
@@ -521,7 +523,7 @@ export default defineComponent({
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
-        gap: 8px;
+        gap: $gap;
     }
 
     &__title {
@@ -546,9 +548,9 @@ export default defineComponent({
 
     &__option {
         display: flex;
-        gap: 8px;
+        gap: $gap;
 
-        width: 224px;
+        width: $width;
         height: 54px;
         outline-color: $white;
         outline-width: 1px;
@@ -602,7 +604,7 @@ export default defineComponent({
     }
 
     &__hr {
-        width: 224px;
+        width: $width;
     }
 }
 </style>
