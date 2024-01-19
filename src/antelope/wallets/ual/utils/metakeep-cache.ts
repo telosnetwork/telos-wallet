@@ -104,6 +104,16 @@ class MetakeepCache {
     }
 
     // setters --------------
+    public setSelectedAccountName(email: string, chainId: string, accountName: string) {
+        this.assertCache(email, chainId);
+        const index = this.cache[email].chains[chainId].accounts.indexOf(accountName);
+        if (index !== -1) {
+            this.cache[email].chains[chainId].accounts.splice(index, 1);
+        }
+        this.cache[email].chains[chainId].accounts.unshift(accountName);
+        this.saveCache();
+    }
+
     public addAccountName(email: string, chainId: string, accountName: string) {
         this.assertCache(email, chainId);
         if (!this.cache[email].chains[chainId].accounts.includes(accountName)) {

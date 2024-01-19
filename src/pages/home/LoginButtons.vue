@@ -156,7 +156,6 @@ export default defineComponent({
         let whenAccountSelected = Promise.resolve(selectedZeroAccount.value);
         const setSelectedName = ref<(name: string) => void>((name: string) => {});
         const selectAccount = (accounts: string[]) => new Promise<string>(async (resolveAccountSelected) => {
-            console.log('selectAccount ---->', accounts);
             if (accounts.length === 1) {
                 resolveAccountSelected(accounts[0]);
             } else {
@@ -165,7 +164,7 @@ export default defineComponent({
                     setSelectedName.value = resolve;
                 });
                 // enable account selection
-                availableZeroAccounts.value = accounts;
+                availableZeroAccounts.value = [...accounts];
                 // wait for the promise to resolve
                 selectedZeroAccount.value = await whenAccountSelected;
                 // take the name of the selected account and pass it to the resolve of the original promise
@@ -173,10 +172,9 @@ export default defineComponent({
             }
         });
         const setMetakeepZero = (credentials:GoogleCredentials) => {
-            console.log('--- setMetakeepZero --');
             const name = 'metakeep.ual';
             const auth = getZeroAuthenticator(name) as MetakeepAuthenticator;
-            // auth.setAccountSelector({ selectAccount });
+            auth.setAccountSelector({ selectAccount });
             auth.setUserCredentials(credentials);
             const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
             loginTelosZero(idx);
@@ -283,8 +281,13 @@ export default defineComponent({
                 <span>{{ $t('home.telos_cloud_login') }}</span>
             </div>
 
-            <div v-if="availableZeroAccounts.length > 0" class="c-login-buttons__zero-accounts-title">availabe accounts</div>
-            <div v-if="availableZeroAccounts.length > 0" class="c-login-buttons__zero-accounts">
+            <div v-if="selectedZeroAccount !== ''" class="c-login-buttons__zero-accounts-title">
+                {{ selectedZeroAccount }}
+            </div>
+            <div v-if="availableZeroAccounts.length > 0 && selectedZeroAccount === ''" class="c-login-buttons__zero-accounts-title">
+                {{ $t('home.available_accounts') }}
+            </div>
+            <div v-if="availableZeroAccounts.length > 0 && selectedZeroAccount === ''" class="c-login-buttons__zero-accounts">
                 <div
                     v-for="account in availableZeroAccounts"
                     :key="account"
@@ -478,7 +481,6 @@ export default defineComponent({
     &__loading{
         width: 100%;
         text-align: center;
-        // color: $white;
     }
 
     &__header{
@@ -524,7 +526,6 @@ export default defineComponent({
 
     &__title {
         @include text--header-4;
-        // color: $white;
         text-align: center;
     }
 
@@ -549,7 +550,6 @@ export default defineComponent({
 
         width: 224px;
         height: 54px;
-        // color: $white;
         outline-color: $white;
         outline-width: 1px;
         outline-style: solid;
@@ -560,7 +560,6 @@ export default defineComponent({
         cursor: pointer;
 
         &:hover:not(&--disabled) {
-            // color: $white;
             outline-color: $white;
             outline-width: 2px;
         }
@@ -582,7 +581,7 @@ export default defineComponent({
                 @include gradient_border();
             }
             &--gradient:hover {
-                outline-width: 0px;
+                outline-width: 0px !important;
                 @include gradient_border();
             }
         }

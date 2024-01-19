@@ -46,7 +46,6 @@ const metakeepDefaultAccountSelector: MetakeepAccountSelector = {
     selectAccount: (accounts: string[]) => Promise.resolve(accounts[0]),
 };
 
-console.log('metakeepDefaultAccountSelector', metakeepDefaultAccountSelector);
 
 export interface MetakeepAccountSelector {
     selectAccount: (accounts: string[]) => Promise<string>;
@@ -83,6 +82,10 @@ export class MetakeepAuthenticator extends Authenticator {
             email: metakeepCache.getLogged() ?? '',
             jwt: '',
         };
+    }
+
+    resetAccountSelector() {
+        this.accountSelector = metakeepDefaultAccountSelector;
     }
 
     setAccountSelector(accountSelector: MetakeepAccountSelector) {
@@ -184,7 +187,6 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     async createAccount(publicKey: string): Promise<string> {
-        console.log('createAccount()');
         return axios.post(this.accountCreateAPI, {
             ownerKey: publicKey,
             activeKey: publicKey,
@@ -194,7 +196,6 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     resolveAccountName() {
-        console.log('resolveAccountName()');
         return new Promise<string>(async (resolve, reject) => {
             let accountName = '';
             if (!metakeep) {
@@ -206,25 +207,22 @@ export class MetakeepAuthenticator extends Authenticator {
 
             // we check if we have the account name in the cache
             const accountNames = metakeepCache.getAccountNames(this.userCredentials.email, this.chainId);
-            console.log('resolveAccountName() accountNames: ', accountNames);
             if (accountNames.length > 0) {
                 if (accountNames.length > 1) {
                     // if we have more than one account, we ask the user to select one using this callback
-                    console.log('resolveAccountName() accountNames.length > 1: ', accountNames);
                     const selectedAccount = await this.accountSelector.selectAccount(accountNames);
+                    this.resetAccountSelector();
+                    metakeepCache.setSelectedAccountName(this.userCredentials.email, this.chainId, selectedAccount);
                     return resolve(selectedAccount);
                 } else {
-                    console.log('resolveAccountName() accountNames[0]: ', accountNames[0]);
-                    resolve(accountNames[0]);
+                    return resolve(accountNames[0]);
                 }
-                return;
             }
 
             // if not, we fetch all the accounts for the email
             const credentials = await metakeep.getWallet();
             const publicKey = credentials.wallet.eosAddress;
 
-            console.log('resolveAccountName() publicKey: ', publicKey);
 
             metakeepCache.addCredentials(this.userCredentials.email, credentials.wallet);
 
@@ -234,17 +232,25 @@ export class MetakeepAuthenticator extends Authenticator {
                     public_key: publicKey,
                 });
                 const accountExists = response?.data?.account_names.length>0;
-                console.log('resolveAccountName() accountExists: ', accountExists);
-                console.log('resolveAccountName() response?.data?.account_names: ', response?.data?.account_names);
+                let names:string[] = [];
 
-                console.error('FIXME', accountExists);
-                if (accountExists && false) {
-                    //accountName = response.data.account_names[0];
+                if (accountExists) {
+                    names = response.data.account_names;
+                    names.forEach(name => metakeepCache.addAccountName(this.userCredentials.email, this.chainId, name));
+                    if (names.length > 1) {
+                        // if we have more than one account, we ask the user to select one using this callback
+                        accountName = await this.accountSelector.selectAccount(names);
+                        this.resetAccountSelector();
+                    } else {
+                        accountName = names[0];
+                    }
+                    metakeepCache.setSelectedAccountName(this.userCredentials.email, this.chainId, accountName);
                 } else {
                     accountName = await this.createAccount(publicKey);
+                    metakeepCache.addAccountName(this.userCredentials.email, this.chainId, accountName);
+                    names = [accountName];
                 }
 
-                metakeepCache.addAccountName(this.userCredentials.email, this.chainId, accountName);
                 this.saveCache();
                 return resolve(accountName);
             } catch (error) {

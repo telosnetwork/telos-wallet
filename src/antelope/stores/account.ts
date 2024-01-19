@@ -114,9 +114,12 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('loginZero', authenticator, network);
             let success = false;
             try {
+                this.trace('loginZero', 'authenticator.init()...');
                 await authenticator.init();
+                this.trace('loginZero', 'authenticator.login()...');
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
+                    this.trace('loginZero', 'authenticator.login() OK! ualUsers:', ualUsers);
                     const ualUser = await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
