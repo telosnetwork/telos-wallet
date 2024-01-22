@@ -19,12 +19,14 @@ import { MetaKeepAuth } from 'src/antelope/wallets';
 import InlineSvg from 'vue-inline-svg';
 import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
+import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 
 export default defineComponent({
     name: 'LoginButtons',
     components: {
         QSpinnerFacebook,
         InlineSvg,
+        BaseTextInput,
     },
     props: {
         chain: {
@@ -220,6 +222,13 @@ export default defineComponent({
             }
         }, 100);
 
+        const accountNameModel = ref('');
+        const accountNameIsLoading = ref(false);
+        const accountNameHasError = ref(false);
+        const accountNameHasWarning = ref(false);
+        const accountNameIsSuccessful = ref(true);
+        const accountNameWarningText = ref('');
+        const accountNameErrorMessage = ref('');
 
         return {
             isLoading,
@@ -251,6 +260,13 @@ export default defineComponent({
             availableZeroAccounts,
             selectedZeroAccount,
             setSelectedName,
+            accountNameModel,
+            accountNameIsLoading,
+            accountNameHasError,
+            accountNameHasWarning,
+            accountNameIsSuccessful,
+            accountNameWarningText,
+            accountNameErrorMessage,
         };
     },
     unmounted() {
@@ -281,6 +297,39 @@ export default defineComponent({
                 <span>{{ $t('home.telos_cloud_login') }}</span>
             </div>
 
+            <div class="c-login-buttons__zero-accounts-title">
+                {{ $t('home.enter_account_name') }}
+            </div>
+
+            <div class="c-login-buttons__account-name-input-container">
+                <BaseTextInput
+                    v-model="accountNameModel"
+                    :loading="accountNameIsLoading"
+                    :error="accountNameHasError"
+                    :warning="accountNameHasWarning"
+                    :success="accountNameIsSuccessful"
+                    :warning-text="accountNameWarningText"
+                    :error-message="accountNameErrorMessage"
+                    required="true"
+                    label="Account name"
+                    class="c-login-buttons__account-name-input"
+                />
+
+                <div class="c-login-buttons__account-name-buttons">
+                    <q-btn
+                        color="warning"
+                        :label="$t('home.random')"
+                    />
+
+                    <q-btn
+                        color="primary"
+                        :label="$t('home.continue')"
+                    />
+                </div>
+            </div>
+
+
+            <!-- -- >
             <div v-if="selectedZeroAccount !== ''" class="c-login-buttons__zero-accounts-title">
                 {{ selectedZeroAccount }}
             </div>
@@ -295,7 +344,7 @@ export default defineComponent({
                     @click="setSelectedName(account)"
                 > {{ account }} </div>
             </div>
-            <!-- Google One Tap render button -->
+            < !-- Google One Tap render button -- >
             <div v-else-if="showGoogleLoading" class="c-login-buttons__google-loading">
                 <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </div>
@@ -307,6 +356,7 @@ export default defineComponent({
             >
                 <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </div>
+            < !-- -->
 
         </div>
     </div>
@@ -605,6 +655,20 @@ export default defineComponent({
 
     &__hr {
         width: $width;
+    }
+
+    &__account-name-input-container {
+        background-color: rgba(255, 255, 255, 1);
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    &__account-name-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
     }
 }
 </style>

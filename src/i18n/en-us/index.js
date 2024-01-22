@@ -60,6 +60,9 @@ export default {
         oauth_facebook: 'Facebook',
         oauth_twitter: 'Twitter',
         oauth_email: 'Email',
+        random: 'Random',
+        continue: 'Continue',
+        enter_account_name: 'Enter Account Name',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
