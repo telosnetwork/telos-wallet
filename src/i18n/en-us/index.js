@@ -63,6 +63,7 @@ export default {
         random: 'Random',
         continue: 'Continue',
         enter_account_name: 'Enter Account Name',
+        account_name: 'Account Name',
     },
     nav: {
         copy_address: 'Copy address to clipboard',

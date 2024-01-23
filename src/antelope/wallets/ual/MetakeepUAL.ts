@@ -46,9 +46,16 @@ const metakeepDefaultAccountSelector: MetakeepAccountSelector = {
     selectAccount: (accounts: string[]) => Promise.resolve(accounts[0]),
 };
 
+const metakeepDefaultAccountNameSelector: MetakeepNameAccountSelector = {
+    selectAccountName: () => Promise.resolve(''),
+};
 
 export interface MetakeepAccountSelector {
     selectAccount: (accounts: string[]) => Promise<string>;
+}
+
+export interface MetakeepNameAccountSelector {
+    selectAccountName: () => Promise<string>;
 }
 
 export class MetakeepAuthenticator extends Authenticator {
@@ -60,6 +67,7 @@ export class MetakeepAuthenticator extends Authenticator {
     private userCredentials: UserCredentials = { email: '', jwt: '' };
 
     private accountSelector: MetakeepAccountSelector = metakeepDefaultAccountSelector;
+    private accountNameSelector: MetakeepNameAccountSelector = metakeepDefaultAccountNameSelector;
 
     constructor(chains: Chain[], options: MetakeepUALOptions) {
         super(chains, options);
@@ -90,6 +98,10 @@ export class MetakeepAuthenticator extends Authenticator {
 
     setAccountSelector(accountSelector: MetakeepAccountSelector) {
         this.accountSelector = accountSelector;
+    }
+
+    setAccountNameSelector(accountNameSelector: MetakeepNameAccountSelector) {
+        this.accountNameSelector = accountNameSelector;
     }
 
     saveCache() {
@@ -187,12 +199,19 @@ export class MetakeepAuthenticator extends Authenticator {
     }
 
     async createAccount(publicKey: string): Promise<string> {
-        return axios.post(this.accountCreateAPI, {
-            ownerKey: publicKey,
-            activeKey: publicKey,
-            jwt: this.userCredentials.jwt,
-            // suggestedName: 'somevalidname', // we are not using this optional parameter for now
-        }).then(response => response.data.accountName);
+        const suggestedName = await this.accountNameSelector.selectAccountName();
+        console.log('suggestedName', suggestedName, publicKey);
+        // simulate 3 seconds of delay
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        return suggestedName;
+        // FIXME: restore this code
+        // return axios.post(this.accountCreateAPI, {
+        //     ownerKey: publicKey,
+        //     activeKey: publicKey,
+        //     jwt: this.userCredentials.jwt,
+        //     suggestedName: suggestedName,
+        // }).then(response => response.data.accountName);
     }
 
     resolveAccountName() {
@@ -231,7 +250,8 @@ export class MetakeepAuthenticator extends Authenticator {
                 const response = await axios.post(`${this.rpc.endpoint}/v1/history/get_key_accounts`, {
                     public_key: publicKey,
                 });
-                const accountExists = response?.data?.account_names.length>0;
+                // const accountExists = false; // FIXME: remove this line
+                const accountExists = response?.data?.account_names.length>0; // FIXME: restore this line
                 let names:string[] = [];
 
                 if (accountExists) {

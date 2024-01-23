@@ -13,6 +13,7 @@ import {
     defineComponent,
     getCurrentInstance,
     ref,
+    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import { MetaKeepAuth } from 'src/antelope/wallets';
@@ -20,6 +21,7 @@ import InlineSvg from 'vue-inline-svg';
 import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
+import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 
 export default defineComponent({
     name: 'LoginButtons',
@@ -153,10 +155,17 @@ export default defineComponent({
             const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
             return ualAuthenticators[idx];
         };
+        // Intermediate interactive steps to select or create name account for Telos Zero.
         const selectedZeroAccount = ref('');
         const availableZeroAccounts = ref([] as string[]);
+        // This promise is used to block the flow until the user selects an account
         let whenAccountSelected = Promise.resolve(selectedZeroAccount.value);
         const setSelectedName = ref<(name: string) => void>((name: string) => {});
+        const requestAccountSelection = computed(() =>
+            // there are available accounts and no account is selected
+            availableZeroAccounts.value.length > 0 &&
+            selectedZeroAccount.value === '',
+        );
         const selectAccount = (accounts: string[]) => new Promise<string>(async (resolveAccountSelected) => {
             if (accounts.length === 1) {
                 resolveAccountSelected(accounts[0]);
@@ -173,10 +182,26 @@ export default defineComponent({
                 resolveAccountSelected(selectedZeroAccount.value);
             }
         });
+        const requestNameSelection = ref(false);
+        const selectAccountName = () => new Promise<string>(async (resolveAccountNameSelected) => {
+            // we create a new Promise and save its resolve in a variable
+            whenAccountSelected = new Promise((resolve) => {
+                setSelectedName.value = resolve;
+            });
+            // enable account selection
+            requestNameSelection.value = true;
+            // wait for the promise to resolve
+            selectedZeroAccount.value = await whenAccountSelected;
+            // disable account selection
+            requestNameSelection.value = false;
+            // take the name of the selected account and pass it to the resolve of the original promise
+            resolveAccountNameSelected(selectedZeroAccount.value);
+        });
         const setMetakeepZero = (credentials:GoogleCredentials) => {
             const name = 'metakeep.ual';
             const auth = getZeroAuthenticator(name) as MetakeepAuthenticator;
             auth.setAccountSelector({ selectAccount });
+            auth.setAccountNameSelector({ selectAccountName });
             auth.setUserCredentials(credentials);
             const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
             loginTelosZero(idx);
@@ -203,6 +228,11 @@ export default defineComponent({
         };
 
         const showGoogleLoading = ref(false);
+        const showGoogleBtn = computed(() =>
+            !requestAccountSelection.value &&
+            !requestNameSelection.value &&
+            selectedZeroAccount.value === '',
+        );
         const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
             next: (data) => {
                 if (data) {
@@ -226,9 +256,68 @@ export default defineComponent({
         const accountNameIsLoading = ref(false);
         const accountNameHasError = ref(false);
         const accountNameHasWarning = ref(false);
-        const accountNameIsSuccessful = ref(true);
+        const accountNameIsSuccessful = ref(false);
         const accountNameWarningText = ref('');
         const accountNameErrorMessage = ref('');
+
+        watch(accountNameModel, async (newVal) => {
+            const settings = chainStore.currentChain.settings;
+            accountNameIsLoading.value = false;
+            accountNameHasError.value = false;
+            accountNameHasWarning.value = false;
+            accountNameIsSuccessful.value = false;
+            accountNameWarningText.value = '';
+            accountNameErrorMessage.value = '';
+
+            if (!settings.isNative()) {
+                return;
+            }
+            const nativeSettings = settings as NativeChainSettings;
+            if (newVal.length === 0) {
+                return;
+            }
+
+            // let's check if the name has only valid characters
+            const validChars = 'abcdefghijklmnopqrstuvwxyz12345';
+            for (let i = 0; i < newVal.length; i++) {
+                const char = newVal[i];
+                if (char === '.') {
+                    accountNameHasError.value = true;
+                    accountNameErrorMessage.value = 'Name cannot contain dots';
+                    return;
+                }
+                if (!validChars.includes(char)) {
+                    accountNameHasError.value = true;
+                    accountNameErrorMessage.value = `ivalid character '${char}'`;
+                    return;
+                }
+            }
+
+            // let's check if the name has 12 characters
+            if (newVal.length !== 12) {
+                accountNameHasError.value = true;
+                accountNameErrorMessage.value = `${newVal.length} of 12 characters`;
+                return;
+            }
+
+            accountNameIsLoading.value = true;
+            const isAvailable = await nativeSettings.isAccountNameAvailable(newVal);
+            accountNameIsLoading.value = false;
+            if (isAvailable) {
+                accountNameHasError.value = false;
+                accountNameHasWarning.value = false;
+                accountNameIsSuccessful.value = true;
+                accountNameWarningText.value = '';
+                accountNameErrorMessage.value = '';
+            } else {
+                accountNameHasError.value = true;
+                accountNameHasWarning.value = false;
+                accountNameIsSuccessful.value = false;
+                accountNameWarningText.value = '';
+                accountNameErrorMessage.value = 'Name is taken';
+            }
+        });
+
 
         return {
             isLoading,
@@ -250,6 +339,7 @@ export default defineComponent({
             redirectToSafepalDownload,
             googleSubscription,
             showGoogleLoading,
+            showGoogleBtn,
             googleCtrl,
             showEVMButtons,
             showZeroButtons,
@@ -267,6 +357,8 @@ export default defineComponent({
             accountNameIsSuccessful,
             accountNameWarningText,
             accountNameErrorMessage,
+            requestAccountSelection,
+            requestNameSelection,
         };
     },
     unmounted() {
@@ -297,11 +389,18 @@ export default defineComponent({
                 <span>{{ $t('home.telos_cloud_login') }}</span>
             </div>
 
-            <div class="c-login-buttons__zero-accounts-title">
-                {{ $t('home.enter_account_name') }}
+            <!-- there'sa selected name. Show it-->
+            <div v-if="selectedZeroAccount !== ''" class="c-login-buttons__zero-accounts-title">
+                <!-- we show a spinner also -->
+                <QSpinnerFacebook class="c-login-buttons__zero-account-loading" />
+                {{ selectedZeroAccount }}
             </div>
 
-            <div class="c-login-buttons__account-name-input-container">
+            <!-- Allow the user to enter the name of the account to be created -->
+            <div v-if="requestNameSelection" class="c-login-buttons__zero-accounts-title">
+                {{ $t('home.enter_account_name') }}
+            </div>
+            <div v-if="requestNameSelection" class="c-login-buttons__account-name-input-container">
                 <BaseTextInput
                     v-model="accountNameModel"
                     :loading="accountNameIsLoading"
@@ -311,32 +410,25 @@ export default defineComponent({
                     :warning-text="accountNameWarningText"
                     :error-message="accountNameErrorMessage"
                     required="true"
-                    label="Account name"
+                    :label="$t('home.account_name')"
                     class="c-login-buttons__account-name-input"
                 />
 
                 <div class="c-login-buttons__account-name-buttons">
                     <q-btn
-                        color="warning"
-                        :label="$t('home.random')"
-                    />
-
-                    <q-btn
                         color="primary"
                         :label="$t('home.continue')"
+                        :disable="!accountNameIsSuccessful"
+                        @click="accountNameIsSuccessful ? setSelectedName(accountNameModel) : null"
                     />
                 </div>
             </div>
 
-
-            <!-- -- >
-            <div v-if="selectedZeroAccount !== ''" class="c-login-buttons__zero-accounts-title">
-                {{ selectedZeroAccount }}
-            </div>
-            <div v-if="availableZeroAccounts.length > 0 && selectedZeroAccount === ''" class="c-login-buttons__zero-accounts-title">
+            <!-- Allow the user to select one of many available accounts -->
+            <div v-if="requestAccountSelection" class="c-login-buttons__zero-accounts-title">
                 {{ $t('home.available_accounts') }}
             </div>
-            <div v-if="availableZeroAccounts.length > 0 && selectedZeroAccount === ''" class="c-login-buttons__zero-accounts">
+            <div v-if="requestAccountSelection" class="c-login-buttons__zero-accounts">
                 <div
                     v-for="account in availableZeroAccounts"
                     :key="account"
@@ -344,19 +436,21 @@ export default defineComponent({
                     @click="setSelectedName(account)"
                 > {{ account }} </div>
             </div>
-            < !-- Google One Tap render button -- >
-            <div v-else-if="showGoogleLoading" class="c-login-buttons__google-loading">
-                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
-            </div>
-            <div
-                v-else
-                id="google_btn"
-                :data-client_id="googleCtrl.clientId"
-                class="c-login-buttons__google-btn"
-            >
-                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
-            </div>
-            < !-- -->
+
+            <!-- Google One Tap render button -->
+            <template v-if="showGoogleBtn">
+                <div v-if="showGoogleLoading" class="c-login-buttons__google-loading">
+                    <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+                </div>
+                <div
+                    v-else
+                    id="google_btn"
+                    :data-client_id="googleCtrl.clientId"
+                    class="c-login-buttons__google-btn"
+                >
+                    <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+                </div>
+            </template>
 
         </div>
     </div>
@@ -587,6 +681,11 @@ export default defineComponent({
         text-align: center;
     }
 
+    &__zero-account-loading {
+        margin-right: 1px;
+        margin-top: -3px;
+    }
+
     &__zero-accounts {
         width: 100%;
         display: flex;
@@ -666,9 +765,22 @@ export default defineComponent({
     &__account-name-buttons {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
         gap: 8px;
+    }
+
+    &__account-name-button {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        background-color: transparent;
+        cursor: pointer;
     }
 }
 </style>
