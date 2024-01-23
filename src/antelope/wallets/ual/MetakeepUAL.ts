@@ -200,18 +200,17 @@ export class MetakeepAuthenticator extends Authenticator {
 
     async createAccount(publicKey: string): Promise<string> {
         const suggestedName = await this.accountNameSelector.selectAccountName();
-        console.log('suggestedName', suggestedName, publicKey);
-        // simulate 3 seconds of delay
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        return suggestedName;
+        // console.log('suggestedName', suggestedName, publicKey);
+        // // simulate 3 seconds of delay
+        // await new Promise(resolve => setTimeout(resolve, 3000));
+        // return suggestedName;
         // FIXME: restore this code
-        // return axios.post(this.accountCreateAPI, {
-        //     ownerKey: publicKey,
-        //     activeKey: publicKey,
-        //     jwt: this.userCredentials.jwt,
-        //     suggestedName: suggestedName,
-        // }).then(response => response.data.accountName);
+        return axios.post(this.accountCreateAPI, {
+            ownerKey: publicKey,
+            activeKey: publicKey,
+            jwt: this.userCredentials.jwt,
+            suggestedName: suggestedName,
+        }).then(response => response.data.accountName);
     }
 
     resolveAccountName() {
@@ -250,8 +249,8 @@ export class MetakeepAuthenticator extends Authenticator {
                 const response = await axios.post(`${this.rpc.endpoint}/v1/history/get_key_accounts`, {
                     public_key: publicKey,
                 });
-                // const accountExists = false; // FIXME: remove this line
-                const accountExists = response?.data?.account_names.length>0; // FIXME: restore this line
+                const accountExists = false; // FIXME: remove this line
+                // const accountExists = response?.data?.account_names.length>0; // FIXME: restore this line
                 let names:string[] = [];
 
                 if (accountExists) {
