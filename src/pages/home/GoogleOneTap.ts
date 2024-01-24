@@ -137,7 +137,7 @@ class GoogleOneTapController {
                     btn, this.buttonConfig,
                 );
             }
-        }, 1000);
+        }, 100);
     }
 
     handleOneTapMoment(type: string, status: string, reason: string) {

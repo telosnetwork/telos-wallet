@@ -44,8 +44,13 @@ export default defineComponent({
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
-        const showEVMButtons = computed(() => props.chain === 'evm');
-        const showZeroButtons = computed(() => props.chain === 'zero');
+        const showEVMButtons = computed(() =>
+            props.chain === 'evm');
+        const showZeroButtons = computed(() =>
+            props.chain === 'zero' &&
+            !requestNameSelection.value  &&
+            !requestAccountSelection.value &&
+            selectedZeroAccount.value === '');
 
         // EVM Login -----------------------------------------------------------
         const supportsMetamask = computed(() => {
@@ -73,8 +78,6 @@ export default defineComponent({
             const e = window.ethereum as unknown as { [key:string]: boolean };
             return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
         });
-
-        const selectedOAuthProvider = ref('');
 
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
@@ -245,10 +248,25 @@ export default defineComponent({
 
         // we check the div is present before trying to render the google button
         const googleBtnLoop = setInterval(() => {
+            // loop until div#google_btn is rendered
             const googleBtn = document.getElementById('google_btn');
             if (googleBtn !== null) {
-                googleCtrl.renderButton('google_btn');
+                // we found it, so we stop the first loop
                 clearInterval(googleBtnLoop);
+
+                // Now we call the button render function
+                googleCtrl.renderButton('google_btn');
+
+                // Now we start a second loop waiting for the div#google_btn_content to be replaced by the actual google btn
+                const googleBtnRenderSecondLoop = setInterval(() => {
+                    const googleBtnContent = document.getElementById('google_btn_content');
+                    if (googleBtnContent === null) {
+                        clearInterval(googleBtnRenderSecondLoop);
+                    } else {
+                        // if after a whole second it didn't render we call it again
+                        googleCtrl.renderButton('google_btn');
+                    }
+                }, 1000);
             }
         }, 100);
 
@@ -260,7 +278,10 @@ export default defineComponent({
         const accountNameWarningText = ref('');
         const accountNameErrorMessage = ref('');
 
+        const accountTriesCount = ref(0);
         watch(accountNameModel, async (newVal) => {
+            accountTriesCount.value += 1;
+            const currentCount = accountTriesCount.value;
             const settings = chainStore.currentChain.settings;
             accountNameIsLoading.value = false;
             accountNameHasError.value = false;
@@ -268,6 +289,7 @@ export default defineComponent({
             accountNameIsSuccessful.value = false;
             accountNameWarningText.value = '';
             accountNameErrorMessage.value = '';
+            console.log(`----- ${accountNameModel.value}(${currentCount}) --------`);
 
             if (!settings.isNative()) {
                 return;
@@ -284,11 +306,13 @@ export default defineComponent({
                 if (char === '.') {
                     accountNameHasError.value = true;
                     accountNameErrorMessage.value = 'Name cannot contain dots';
+                    console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
                     return;
                 }
                 if (!validChars.includes(char)) {
                     accountNameHasError.value = true;
-                    accountNameErrorMessage.value = `ivalid character '${char}'`;
+                    accountNameErrorMessage.value = `invalid character '${char}'`;
+                    console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
                     return;
                 }
             }
@@ -297,11 +321,17 @@ export default defineComponent({
             if (newVal.length !== 12) {
                 accountNameHasError.value = true;
                 accountNameErrorMessage.value = `${newVal.length} of 12 characters`;
+                console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
                 return;
             }
 
             accountNameIsLoading.value = true;
             const isAvailable = await nativeSettings.isAccountNameAvailable(newVal);
+            if (currentCount < accountTriesCount.value) {
+                console.log(`(${currentCount}) nos vamos porque el contador es: ${accountTriesCount.value}`);
+                return;
+            }
+
             accountNameIsLoading.value = false;
             if (isAvailable) {
                 accountNameHasError.value = false;
@@ -309,12 +339,14 @@ export default defineComponent({
                 accountNameIsSuccessful.value = true;
                 accountNameWarningText.value = '';
                 accountNameErrorMessage.value = '';
+                console.log(`(${currentCount}) is good!`);
             } else {
                 accountNameHasError.value = true;
                 accountNameHasWarning.value = false;
                 accountNameIsSuccessful.value = false;
                 accountNameWarningText.value = '';
                 accountNameErrorMessage.value = 'Name is taken';
+                console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
             }
         });
 
@@ -448,12 +480,17 @@ export default defineComponent({
                     :data-client_id="googleCtrl.clientId"
                     class="c-login-buttons__google-btn"
                 >
-                    <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+                    <div id="google_btn_content" class="c-login-buttons__loading"><QSpinnerFacebook /></div>
                 </div>
             </template>
 
         </div>
     </div>
+
+    <template v-if="requestNameSelection || requestAccountSelection">
+        <div v-if="requestNameSelection" class="c-login-buttons__zero-accounts-title"> {{ $t('home.name_selection_text') }}</div>
+        <div v-if="requestAccountSelection" class="c-login-buttons__zero-accounts-title"> {{ $t('home.account_selection_text') }}</div>
+    </template>
 
     <template v-if="showEVMButtons">
         <!-- Brave Authenticator button -->
