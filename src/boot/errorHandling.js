@@ -58,6 +58,7 @@ class NotificationAction {
         this.label     = payload.label;
         this.class     = payload.class;
         this.handler   = payload.handler;
+        this.onDismiss = payload.onDismiss;
         this.iconRight = payload.iconRight;
         this.color     = payload.color;
     }
@@ -142,11 +143,14 @@ const notifyMessage = function(type, icon, title, message, payload, remember = '
         class: 'c-notify__action-btn c-notify__action-btn--hide',
     };
 
+    let onDismiss = null;
+
     // adding buttons
     if (typeof payload === 'string' && type === 'success') {
         actions.push(link_btn);
     } else if (typeof payload === 'object' && payload instanceof NotificationAction) {
         actions.push(action_btn);
+        onDismiss = payload.onDismiss;
     } else if (typeof payload === 'object' && type === 'error') {
         actions.push(details_btn);
     } else {
@@ -206,6 +210,7 @@ const notifyMessage = function(type, icon, title, message, payload, remember = '
         html: true,
         classes: 'c-notify',
         actions,
+        onDismiss,
     });
 };
 

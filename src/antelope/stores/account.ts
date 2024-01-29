@@ -293,6 +293,38 @@ export const useAccountStore = defineStore(store_name, {
             }
         },
 
+        async assertNetworkConnection(label: string): Promise<boolean> {
+            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                return new Promise<boolean>((resolve) => {
+                    const ant = getAntelope();
+                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                    const networkName = useChainStore().loggedChain.settings.getDisplay();
+                    const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
+                    let userClickedSwitch = false;
+                    ant.config.notifyFailureWithAction(errorMessage, {
+                        label: ant.config.localizationHandler('evm_wallet.switch'),
+                        handler: async () => {
+                            userClickedSwitch = true;
+                            await authenticator.ensureCorrectChain();
+                            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                                resolve(false);
+                            } else {
+                                resolve(true);
+                            }
+                        },
+                        onDismiss: () => {
+                            console.log('onDismiss()');
+                            if (!userClickedSwitch) {
+                                resolve(false);
+                            }
+                        },
+                    });
+                });
+            } else {
+                return true;
+            }
+        },
+
         async sendAction({ account, data, name, actor, permission }: SendActionData): Promise<NativeTransactionResponse> {
             this.trace('sendAction', account, data, name, actor, permission);
             try {

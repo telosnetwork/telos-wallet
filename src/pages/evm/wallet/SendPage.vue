@@ -221,18 +221,8 @@ export default defineComponent({
 
             // before sending the transaction, we check if the user is connected to the correct network
             const label = CURRENT_CONTEXT;
-            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
-                const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
-                const networkName = useChainStore().loggedChain.settings.getDisplay();
-                const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-                ant.config.notifyFailureWithAction(errorMessage, {
-                    label: ant.config.localizationHandler('evm_wallet.switch'),
-                    handler: async () => {
-                        // we force the useer to manually re enter the amount which triggers updateTokenTransferConfig
-                        this.amount = ethers.constants.Zero;
-                        await authenticator.ensureCorrectChain();
-                    },
-                });
+            if (!await useAccountStore().assertNetworkConnection(label)) {
+                this.amount = ethers.constants.Zero;
                 return;
             }
 
