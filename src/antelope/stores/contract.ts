@@ -45,9 +45,9 @@ import {
 
 const LOCAL_SORAGE_CONTRACTS_KEY = 'antelope.contracts';
 
-const createManager = (signer?: ethers.Signer):EvmContractManagerI => ({
+const createManager = (label: string, signer?: ethers.Signer):EvmContractManagerI => ({
     getSigner: async () => signer ?? null,
-    getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(),
+    getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(label),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
 });
@@ -183,7 +183,7 @@ export const useContractStore = defineStore(store_name, {
                 return this.__contracts[network].cached[addressLower];
             }
 
-            const isContract = await this.addressIsContract(network, address);
+            const isContract = await this.addressIsContract(label, address);
 
             if (!isContract) {
                 // address is an account, not a contract
@@ -538,7 +538,7 @@ export const useContractStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.contracts.error_label_required');
             }
 
-            const isContract = await this.addressIsContract(network, address);
+            const isContract = await this.addressIsContract(label, address);
 
             if (!isContract) {
                 // address is an account, not a contract
@@ -557,7 +557,7 @@ export const useContractStore = defineStore(store_name, {
                 || (metadata.abi ?? []).length > 0 && (metadata.abi ?? []).length > (this.__contracts[network].cached[index]?.abi?.length ?? 0)
             ) {
                 // This manager provides the signer and the web3 provider
-                metadata.manager = createManager(signer);
+                metadata.manager = createManager(label, signer);
 
                 // we create the contract using the factory
                 const contract = this.__factory.buildContract(metadata);
@@ -581,7 +581,8 @@ export const useContractStore = defineStore(store_name, {
             this.__contracts[network].cached[index] = null;
         },
 
-        async addressIsContract(network: string, address: string) {
+        async addressIsContract(label: string, address: string) {
+            const network = useChainStore().getChain(label).settings.getNetwork();
             const addressLower = address.toLowerCase();
             if (!this.__accounts[network]) {
                 this.__accounts[network] = [];
@@ -591,7 +592,7 @@ export const useContractStore = defineStore(store_name, {
                 return false;
             }
 
-            const provider = await getAntelope().wallets.getWeb3Provider();
+            const provider = await getAntelope().wallets.getWeb3Provider(label);
             const code = await provider.getCode(address);
 
             const isContract = code !== '0x';

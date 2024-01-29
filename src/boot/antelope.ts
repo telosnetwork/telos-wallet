@@ -3,6 +3,7 @@ import { Web3ModalConfig } from '@web3modal/html';
 import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
 import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
+import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
@@ -109,5 +110,9 @@ export default boot(({ app }) => {
     if (network) {
         ant.stores.chain.setChain(CURRENT_CONTEXT, network);
     }
+
+    // We simulate the indexer being down for testing purposes
+    (ant.stores.chain.currentChain.settings as EVMChainSettings).simulateIndexerDown(true);
+
 
 });

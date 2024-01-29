@@ -110,7 +110,7 @@ export abstract class EVMAuthenticator {
     async getSystemTokenBalance(address: addressString | string): Promise<ethers.BigNumber> {
         this.trace('getSystemTokenBalance', address);
         try {
-            const provider = await this.web3Provider();
+            const provider = await getAntelope().wallets.getWeb3Provider(this.label);
             if (provider) {
                 return provider.getBalance(address);
             } else {
@@ -132,7 +132,7 @@ export abstract class EVMAuthenticator {
     async getERC20TokenBalance(address: addressString | string, token: addressString): Promise<ethers.BigNumber> {
         this.trace('getERC20TokenBalance', [address, token]);
         try {
-            const provider = await this.web3Provider();
+            const provider = await getAntelope().wallets.getWeb3Provider(this.label);
             if (provider) {
                 const erc20Contract = new ethers.Contract(token, erc20Abi, provider);
                 const balance = await erc20Contract.balanceOf(address);
