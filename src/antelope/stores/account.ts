@@ -305,11 +305,19 @@ export const useAccountStore = defineStore(store_name, {
                         label: ant.config.localizationHandler('evm_wallet.switch'),
                         handler: async () => {
                             userClickedSwitch = true;
-                            await authenticator.ensureCorrectChain();
-                            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                            try {
+                                await authenticator.ensureCorrectChain();
+                                if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                                    resolve(false);
+                                } else {
+                                    resolve(true);
+                                }
+                            } catch (error) {
+                                const message = (error as Error).message;
+                                if (message === 'antelope.evm.error_switch_chain_rejected') {
+                                    ant.config.notifyNeutralMessageHandler(message);
+                                }
                                 resolve(false);
-                            } else {
-                                resolve(true);
                             }
                         },
                         onDismiss: () => {
