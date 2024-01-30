@@ -55,7 +55,7 @@ export default defineComponent({
         // EVM Login -----------------------------------------------------------
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value;
         });
 
         const supportsSafePal = computed(() => {
@@ -144,7 +144,7 @@ export default defineComponent({
 
         // Telos Zero Login ----------------------------------------------------
         const ualAuthenticators = ant.config.authenticatorsGetter();
-        const loginTelosZero = (idx:number, justViewer:Boolean = false) => {
+        const loginTelosZero = (idx:number, justViewer:boolean = false) => {
             if (justViewer) {
                 localStorage.setItem('justViewer', 'true');
             } else {
@@ -289,7 +289,6 @@ export default defineComponent({
             accountNameIsSuccessful.value = false;
             accountNameWarningText.value = '';
             accountNameErrorMessage.value = '';
-            console.log(`----- ${accountNameModel.value}(${currentCount}) --------`);
 
             if (!settings.isNative()) {
                 return;
@@ -305,14 +304,12 @@ export default defineComponent({
                 const char = newVal[i];
                 if (char === '.') {
                     accountNameHasError.value = true;
-                    accountNameErrorMessage.value = 'Name cannot contain dots';
-                    console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
+                    accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_no_dots');
                     return;
                 }
                 if (!validChars.includes(char)) {
                     accountNameHasError.value = true;
-                    accountNameErrorMessage.value = `invalid character '${char}'`;
-                    console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
+                    accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_invalid_character', { char });
                     return;
                 }
             }
@@ -320,15 +317,13 @@ export default defineComponent({
             // let's check if the name has 12 characters
             if (newVal.length !== 12) {
                 accountNameHasError.value = true;
-                accountNameErrorMessage.value = `${newVal.length} of 12 characters`;
-                console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
+                accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_invalid_length', { length: newVal.length });
                 return;
             }
 
             accountNameIsLoading.value = true;
             const isAvailable = await nativeSettings.isAccountNameAvailable(newVal);
             if (currentCount < accountTriesCount.value) {
-                console.log(`(${currentCount}) nos vamos porque el contador es: ${accountTriesCount.value}`);
                 return;
             }
 
@@ -339,14 +334,13 @@ export default defineComponent({
                 accountNameIsSuccessful.value = true;
                 accountNameWarningText.value = '';
                 accountNameErrorMessage.value = '';
-                console.log(`(${currentCount}) is good!`);
             } else {
                 accountNameHasError.value = true;
                 accountNameHasWarning.value = false;
                 accountNameIsSuccessful.value = false;
                 accountNameWarningText.value = '';
-                accountNameErrorMessage.value = 'Name is taken';
-                console.log(`(${currentCount})`, '- error:', accountNameErrorMessage.value);
+                // accountNameErrorMessage.value = 'Name is taken';
+                accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_taken');
             }
         });
 
@@ -421,7 +415,7 @@ export default defineComponent({
                 <span>{{ $t('home.telos_cloud_login') }}</span>
             </div>
 
-            <!-- there'sa selected name. Show it-->
+            <!-- there's a selected name. Show it-->
             <div v-if="selectedZeroAccount !== ''" class="c-login-buttons__zero-accounts-title">
                 <!-- we show a spinner also -->
                 <QSpinnerFacebook class="c-login-buttons__zero-account-loading" />
@@ -430,7 +424,7 @@ export default defineComponent({
 
             <!-- Allow the user to enter the name of the account to be created -->
             <div v-if="requestNameSelection" class="c-login-buttons__zero-accounts-title">
-                {{ $t('home.enter_account_name') }}
+                {{ $t('home.create_new_account') }}
             </div>
             <div v-if="requestNameSelection" class="c-login-buttons__account-name-input-container">
                 <BaseTextInput
@@ -577,26 +571,6 @@ export default defineComponent({
             </template>
         </div>
 
-        <!-- Brave Authenticator button -->
-        <div
-            v-if="showBraveButton"
-            class="c-login-buttons__option"
-            @click="supportsBrave ? setBraveEVM() : notifyEnableBrave()"
-        >
-            <template v-if="isLoading('Brave.login')">
-                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <InlineSvg
-                    :src="require('src/assets/evm/brave_lion.svg')"
-                    class="c-login-buttons__icon c-login-buttons__icon--brave"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
-            </template>
-        </div>
     </template>
 
     <template v-if="showZeroButtons">
@@ -619,7 +593,7 @@ export default defineComponent({
                         width="24"
                         class="c-login-buttons__ual-logo"
                     >
-                    {{ wallet.getStyle().text }} {{  wallet.getName()  }}
+                    {{ wallet.getStyle().text }}
                 </template>
             </div>
         </template>

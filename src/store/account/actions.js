@@ -45,7 +45,7 @@ export const login = async function(
             commit('general/setErrorMsg', error, { root: true });
             throw e;
         } else {
-            console.log('Login cancelled');
+            console.debug('Login cancelled');
         }
     } finally {
         commit('setLoadingWallet');
