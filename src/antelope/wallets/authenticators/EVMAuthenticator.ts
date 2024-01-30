@@ -67,6 +67,28 @@ export abstract class EVMAuthenticator {
         }
     }
 
+    /**
+     * This method MUST be implemented on the derived class to perform any auto login action if needed.
+     * @param network network to connect to
+     * @param account account address being auto logged in
+     * @returns the account address of the user
+     */
+    async autoLogin(network: string, account: string): Promise<addressString> {
+        this.trace('login', network, account);
+        const chain = useChainStore();
+        try {
+            chain.setChain(CURRENT_CONTEXT, network);
+            return account as addressString;
+        } catch (error) {
+            if ((error as unknown as ExceptionError).code === 4001) {
+                throw new AntelopeError('antelope.evm.error_connect_rejected');
+            } else {
+                console.error('Error:', error);
+                throw new AntelopeError('antelope.evm.error_login');
+            }
+        }
+    }
+
     async ensureCorrectChain(): Promise<ethers.providers.Web3Provider> {
         this.trace('ensureCorrectChain');
         if (usePlatformStore().isMobile) {
