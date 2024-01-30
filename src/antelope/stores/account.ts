@@ -313,7 +313,6 @@ export const useAccountStore = defineStore(store_name, {
                             }
                         },
                         onDismiss: () => {
-                            console.log('onDismiss()');
                             if (!userClickedSwitch) {
                                 resolve(false);
                             }
