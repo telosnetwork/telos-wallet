@@ -304,12 +304,12 @@ export default defineComponent({
                 const char = newVal[i];
                 if (char === '.') {
                     accountNameHasError.value = true;
-                    accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_no_dots');
+                    accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_no_dots');
                     return;
                 }
                 if (!validChars.includes(char)) {
                     accountNameHasError.value = true;
-                    accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_invalid_character', { char });
+                    accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_invalid_character', { char });
                     return;
                 }
             }
@@ -317,7 +317,7 @@ export default defineComponent({
             // let's check if the name has 12 characters
             if (newVal.length !== 12) {
                 accountNameHasError.value = true;
-                accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_invalid_length', { length: newVal.length });
+                accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_invalid_length', { length: newVal.length });
                 return;
             }
 
@@ -340,7 +340,7 @@ export default defineComponent({
                 accountNameIsSuccessful.value = false;
                 accountNameWarningText.value = '';
                 // accountNameErrorMessage.value = 'Name is taken';
-                accountNameErrorMessage.value = globalProps.$t('home.account_name_feedback_taken');
+                accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_taken');
             }
         });
 
