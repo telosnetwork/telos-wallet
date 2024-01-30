@@ -295,37 +295,23 @@ export const useAccountStore = defineStore(store_name, {
 
         async assertNetworkConnection(label: string): Promise<boolean> {
             if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
-                return new Promise<boolean>((resolve) => {
+                return new Promise<boolean>(async (resolve) => {
                     const ant = getAntelope();
                     const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
-                    const networkName = useChainStore().loggedChain.settings.getDisplay();
-                    const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-                    let userClickedSwitch = false;
-                    ant.config.notifyFailureWithAction(errorMessage, {
-                        label: ant.config.localizationHandler('evm_wallet.switch'),
-                        handler: async () => {
-                            userClickedSwitch = true;
-                            try {
-                                await authenticator.ensureCorrectChain();
-                                if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
-                                    resolve(false);
-                                } else {
-                                    resolve(true);
-                                }
-                            } catch (error) {
-                                const message = (error as Error).message;
-                                if (message === 'antelope.evm.error_switch_chain_rejected') {
-                                    ant.config.notifyNeutralMessageHandler(message);
-                                }
-                                resolve(false);
-                            }
-                        },
-                        onDismiss: () => {
-                            if (!userClickedSwitch) {
-                                resolve(false);
-                            }
-                        },
-                    });
+                    try {
+                        await authenticator.ensureCorrectChain();
+                        if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                            resolve(false);
+                        } else {
+                            resolve(true);
+                        }
+                    } catch (error) {
+                        const message = (error as Error).message;
+                        if (message === 'antelope.evm.error_switch_chain_rejected') {
+                            ant.config.notifyNeutralMessageHandler(message);
+                        }
+                        resolve(false);
+                    }
                 });
             } else {
                 return true;
