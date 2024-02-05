@@ -22,6 +22,7 @@ import { GoogleCredentials, googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
+import { words } from 'src/pages/home/words';
 
 export default defineComponent({
     name: 'LoginButtons',
@@ -217,6 +218,39 @@ export default defineComponent({
             window.open('https://app.telos.net/accounts/add');
         };
 
+        function randomizeAccountName() {
+            const validNumbers = ['1', '2', '3', '4', '5'];
+            accountNameModel.value = '';
+
+            let accountName = '';
+            let word1 = '';
+            let word2 = '';
+            let number = '';
+            let totalLength = 0;
+            while(accountNameModel.value === '') {
+                word1 = words[Math.floor(Math.random() * words.length)];
+                word2 = words[Math.floor(Math.random() * words.length)];
+                totalLength = word1.length + word2.length;
+                if (totalLength > 12) {
+                    continue;
+                }
+                if (totalLength === 12) {
+                    accountName = word1 + word2;
+                    accountNameModel.value = accountName;
+                    break;
+                }
+                if (totalLength < 12) {
+                    number = '';
+                    while (totalLength + number.length < 12) {
+                        number += validNumbers[Math.floor(Math.random() * validNumbers.length)];
+                    }
+                    accountName = word1 + number + word2;
+                    accountNameModel.value = accountName;
+                    break;
+                }
+            }
+        }
+
         // Telos Cloud login ----------------------------------------------------
         const performTelosCloudLogin = (data: GoogleCredentials) => {
             if (!data) {
@@ -375,6 +409,7 @@ export default defineComponent({
             redirectToNewAccountWebsite,
             availableZeroAccounts,
             selectedZeroAccount,
+            randomizeAccountName,
             setSelectedName,
             accountNameModel,
             accountNameIsLoading,
@@ -441,6 +476,11 @@ export default defineComponent({
                 />
 
                 <div class="c-login-buttons__account-name-buttons">
+                    <q-btn
+                        color="secondary"
+                        :label="$t('home.random')"
+                        @click="randomizeAccountName()"
+                    />
                     <q-btn
                         color="primary"
                         :label="$t('home.continue')"
