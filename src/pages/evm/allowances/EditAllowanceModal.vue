@@ -18,6 +18,7 @@ import {
     isErc721SingleAllowanceRow,
 } from 'src/antelope/types/Allowances';
 import {
+    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useAllowancesStore,
@@ -167,6 +168,10 @@ onBeforeMount(() => {
 async function handleSubmit() {
     let tx: TransactionResponse;
     let neutralMessageText: string;
+
+    if (!await useAccountStore().assertNetworkConnection(CURRENT_CONTEXT)) {
+        return;
+    }
 
     if (rowIsErc20Row.value) {
         tx = await useAllowancesStore().updateErc20Allowance(
