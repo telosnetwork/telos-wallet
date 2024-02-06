@@ -200,8 +200,6 @@ export class MetakeepAuthenticator extends Authenticator {
 
     async createAccount(publicKey: string): Promise<string> {
         const suggestedName = await this.accountNameSelector.selectAccountName();
-        // console.log('publicKey', publicKey);
-        // return suggestedName;
         return axios.post(this.accountCreateAPI, {
             ownerKey: publicKey,
             activeKey: publicKey,
@@ -237,7 +235,6 @@ export class MetakeepAuthenticator extends Authenticator {
             // if not, we fetch all the accounts for the email
             const credentials = await metakeep.getWallet();
             const publicKey = credentials.wallet.eosAddress;
-            console.log('publicKey', publicKey);
 
             metakeepCache.addCredentials(this.userCredentials.email, credentials.wallet);
 
@@ -462,17 +459,11 @@ class MetakeepUser extends User {
                 },
             };
 
-            console.log('MetakeepUAL -- originalTransaction:', originalTransaction);
-            console.log('MetakeepUAL -- complete_transaction:', complete_transaction);
-
             // sign the transaction with metakeep
             const reason = this.reasonCallback ? this.reasonCallback(originalTransaction) : 'sign this transaction';
-            console.log('MetakeepUAL -- metakeep.signTransaction()...');
             const response = await metakeep.signTransaction(complete_transaction, reason);
             const signature = response.signature;
 
-            console.log('MetakeepUAL -- reason:', reason);
-            console.log('MetakeepUAL -- signature:', signature);
 
             // Pack the transaction for transport
             const packedTransaction = PackedTransaction.from({
@@ -482,7 +473,6 @@ class MetakeepUser extends User {
             });
 
             if (options.broadcast === false) {
-                console.log('MetakeepUAL -- NO BROADCAST');
                 return Promise.resolve({
                     wasBroadcast: false,
                     transactionId: '',
@@ -490,7 +480,6 @@ class MetakeepUser extends User {
                     transaction: packedTransaction,
                 });
             }
-            console.log('MetakeepUAL -- BROADCAST????', options);
             // Broadcast the signed transaction to the blockchain
             const pushResponse = await this.eosioCore.v1.chain.push_transaction(
                 packedTransaction,

@@ -12,13 +12,6 @@ import {
 } from '@greymass/eosio';
 import { Dialog } from 'quasar';
 
-// This function is for debugging purposes
-const trace = (a, b, c, d) => {
-    if (true) {
-        console.log(a, b, c, d);
-    }
-};
-
 // this simulates the getChain function from OBE
 const getChain = () => ({
     getHyperionEndpoint: () => (process.env.HYPERION_ENDPOINT),
@@ -73,11 +66,9 @@ class FuelUserWrapper extends User {
         originalTransaction/*: AnyTransaction*/,
         originalconfig, /*: SignTransactionConfig*/
     )/*: Promise<SignTransactionResponse>*/ {
-        console.log('GreyMassFuel.signTransaction() originalTransaction:', originalTransaction);
         try {
             // if fuel service disabled, send tx using generic ual user method
             if (!this.fuelServiceEnabled) {
-                console.log('GreyMassFuel - fuel service disabled');
                 return this.user.signTransaction(originalTransaction, originalconfig);
             }
 
@@ -118,7 +109,6 @@ class FuelUserWrapper extends User {
             });
 
             // Submit the transaction to the resource provider endpoint
-            console.log('GreyMassFuel.signTransaction() fetching...');
             const cosigned = await fetch(resourceProviderEndpoint, {
                 body: JSON.stringify({
                     signer,
@@ -130,7 +120,6 @@ class FuelUserWrapper extends User {
             // Interpret the resulting JSON
             const rpResponse = await cosigned.json(); /*as ResourceProviderResponse*/
 
-            console.log('GreyMassFuel - resource provider response code', rpResponse.code);
             switch (rpResponse.code) {
             case 402: {
             // Resource Provider provided signature in exchange for a fee
@@ -164,14 +153,12 @@ class FuelUserWrapper extends User {
                 }
 
                 modifiedTransaction.signatures = [...data.signatures];
-                console.log('GreyMassFuel.signTransaction() userUAL.signTransaction() { broadcast: false }');
                 // Sign the modified transaction
                 const locallySigned/*: SignedTransactionResponse*/ =
                 await this.user.signTransaction(
                     modifiedTransaction,
                     Object.assign(originalconfig, { broadcast: false }),
                 ); /* as SignedTransactionResponse*/
-                console.log('GreyMassFuel.signTransaction() userUAL.signTransaction() locallySigned:', locallySigned);
 
                 // When using CleosAuthenticator the transaction returns empty
                 if (!locallySigned.transaction.signatures) {
@@ -187,7 +174,6 @@ class FuelUserWrapper extends User {
                 ];
 
                 // Broadcast the signed transaction to the blockchain
-                console.log(`GreyMassFuel.signTransaction() Broadcasting the transaction with the ${modifiedTransaction.signatures.length} signatures`);
                 const pushResponse = await client.v1.chain.push_transaction(
                     modifiedTransaction,
                 );
@@ -204,7 +190,6 @@ class FuelUserWrapper extends User {
             }
             case 400: {
             // Resource Provider refused to sign the transaction, aborting
-                console.log('GreyMassFuel.signTransaction() there is no need to Fuel in this transaction');
                 break;
             }
             default:
