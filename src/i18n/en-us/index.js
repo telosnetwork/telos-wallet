@@ -63,7 +63,7 @@ export default {
         random: 'Random',
         continue: 'Continue',
         account_name: 'Account Name',
-        name_selection_text: 'A new account will be created for you. Choose a name with twelve characters long using only lowercase letters or numbers from 1 to 5.',
+        name_selection_text: 'Account name needs to be twelve characters long and can only consist of lowercase letters and numerical characters from 1 to 5.',
         account_selection_text: 'Choose one of your accounts to log in',
     },
     nav: {
