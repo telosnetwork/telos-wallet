@@ -3,7 +3,7 @@ import { App, toRaw } from 'vue';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Store } from 'pinia';
 
-import { AntelopeConfig, AntelopeDebug, chainNetworkNames } from 'src/antelope/config';
+import { AntelopeConfig, AntelopeDebug } from 'src/antelope/config';
 import installPinia from 'src/antelope/stores';
 
 import { ChainModel } from 'src/antelope/stores/chain';
@@ -74,17 +74,6 @@ export class Antelope {
                 store.init();
             }
         });
-
-        const chainStore = useChainStore();
-
-        if (!chainStore.currentChain) {
-            if (!process.env.CHAIN_NAME) {
-                console.error('No chain name specified in environment config; the application will not run correctly');
-            } else {
-                const network: string = chainNetworkNames[process.env.CHAIN_NAME];
-                chainStore.setChain(CURRENT_CONTEXT, network);
-            }
-        }
 
         // Initializing store
         stores.user.loadUsers();

@@ -3,9 +3,8 @@ import { UAL } from 'universal-authenticator-library';
 import { Anchor } from 'ual-anchor';
 import { Wombat } from 'ual-wombat';
 import { CleosAuthenticator } from '@telosnetwork/ual-cleos';
-import { WebPopup } from 'oreid-webpopup';
-import { OreIdAuthenticator, AuthProvider } from 'ual-oreid';
 import { Dialog, Notify, copyToClipboard } from 'quasar';
+import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
 
 
 export default boot(async ({ app, store }) => {
@@ -150,6 +149,11 @@ export default boot(async ({ app, store }) => {
             appName: process.env.APP_NAME,
             loginHandler,
             signHandler,
+        }),
+        new MetakeepAuthenticator([chain], {
+            appName: process.env.APP_NAME,
+            appId: process.env.METAKEEP_APP_ID_NATIVE,
+            accountCreateAPI: `${process.env.TELOS_API_ENDPOINT}/accounts/create4google`,
         }),
     ];
 

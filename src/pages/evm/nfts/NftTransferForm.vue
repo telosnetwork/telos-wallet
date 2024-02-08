@@ -25,7 +25,6 @@ import UserInfo from 'components/evm/UserInfo.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 import IntegerInput from 'src/components/evm/inputs/IntegerInput.vue';
 
-
 const props = defineProps<{
     nft: Collectible;
 }>();
@@ -106,6 +105,7 @@ async function startTransfer() {
         transferLoading.value = false;
     }
 }
+
 </script>
 
 <template>
