@@ -15,7 +15,7 @@ import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 
-const GETTING_STARTED_URL = 'https://telos.net/ecosystem?category=Exchanges';
+const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
 export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],
