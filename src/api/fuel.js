@@ -135,7 +135,7 @@ class FuelUserWrapper extends User {
                 const [, returnedTransaction] = data.request;
                 const modifiedTransaction/*: SignedTransaction*/ = returnedTransaction;
 
-                // Ensure the modifed transaction is what the application expects
+                // Ensure the modified transaction is what the application expects
                 // These validation methods will throw an exception if invalid data exists
                 const fees/*: string | null*/ = validateTransaction(
                     signer,
@@ -148,7 +148,7 @@ class FuelUserWrapper extends User {
                 try {
                     await confirmWithUser(this.user, fees);
                 } catch (e) {
-                    // The user refuseed to use the service
+                    // The user refused to use the service
                     break;
                 }
 
@@ -167,7 +167,7 @@ class FuelUserWrapper extends User {
                     );
                 }
 
-                // Merge signatures from the user and the cosigned responsetab
+                // Merge signatures from the user and the cosigned response tab
                 modifiedTransaction.signatures = [
                     ...locallySigned.transaction.signatures,
                     ...data.signatures,
@@ -208,7 +208,7 @@ class FuelUserWrapper extends User {
         }
     }
 
-    // since this is a wrapper is also wraps the posible requestPermission hidden property
+    // since this is a wrapper is also wraps the possible requestPermission hidden property
     get requestPermission() {
         return this.user.requestPermission || 'active';
     }
@@ -233,7 +233,7 @@ export async function initFuelUserWrapper(user) {
     return fuelUserWrapper;
 }
 
-// Auxiliar functions to validate with the user the use of the service
+// Auxiliary functions to validate with the user the use of the service
 /*
 interface Preference {
   remember?: boolean;
@@ -353,7 +353,7 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     });
 }
 
-// Auxiliar functions to validate modified transaction returned by the resourse provider
+// Auxiliary functions to validate modified transaction returned by the resource provider
 
 // Validate the transaction
 function validateTransaction(
@@ -363,14 +363,11 @@ function validateTransaction(
     costs, /*: CostsType | null = null*/
 )/*: string | null*/ {
 
-    return null;
+    // Ensure the first action is the `greymassnoop:noop`
+    validateNoop(modifiedTransaction);
 
-// FIXME: restore original code
-//    // Ensure the first action is the `greymassnoop:noop`
-//    validateNoop(modifiedTransaction);
-//
-//    // Ensure the actions within the transaction match what was provided
-//    return validateActions(signer, modifiedTransaction, transaction, costs);
+    // Ensure the actions within the transaction match what was provided
+    return validateActions(signer, modifiedTransaction, transaction, costs);
 }
 
 // Validate the actions of the modified transaction vs the original transaction
@@ -381,7 +378,7 @@ function validateActions(
     costs, /*: CostsType | null*/
 )/*: string | null*/ {
     // Determine how many actions we expect to have been added to the transaction based on the costs
-    const expectedNewActions = determineExpectedActionsLength(costs);
+    const expectedNewActions = determineExpectedActionsLength(costs, modifiedTransaction);
 
     // Ensure the proper number of actions was returned
     validateActionsLength(expectedNewActions, modifiedTransaction, transaction);
@@ -396,17 +393,22 @@ function validateActions(
 }
 
 // Validate the number of actions is the number expected
-function determineExpectedActionsLength(costs/*: CostsType | null*/) {
+function determineExpectedActionsLength(costs/*: CostsType | null*/, modifiedTransaction/*: Transaction*/) {
     // By default, 1 new action is appended (noop)
     let expectedNewActions = 1;
+
+    // if the second action is a ram purchase, 1 new action is added (the ram purchase)
+    if (
+        modifiedTransaction.actions.length > 1 &&
+        modifiedTransaction.actions[1].account.toString() === 'eosio' &&
+        ['buyram', 'buyrambytes'].includes(modifiedTransaction.actions[1].name.toString())
+    ) {
+        expectedNewActions += 1;
+    }
 
     // If there are costs associated with this transaction, 1 new actions is added (the fee)
     if (costs) {
         expectedNewActions += 1;
-        // If there is a RAM cost associated with this transaction, 1 new actio is added (the ram purchase)
-        if (costs.ram !== '0.0000 TLOS') {
-            expectedNewActions += 1;
-        }
     }
 
     return expectedNewActions;
@@ -426,26 +428,22 @@ function validateActionsContent(
         transaction,
     );
 
-    // If a fee has been added, ensure the fee is set properly
-    if (expectedNewActions > 1) {
-        let totalFee/*: null | number*/ = null;
-        totalFee = validateActionsFeeContent(signer, modifiedTransaction);
-        // If a ram purchase has been added, ensure the purchase was set properly
-        if (expectedNewActions > 2) {
-            validateActionsRamContent(signer, modifiedTransaction);
-        }
-        return `${new Number(totalFee).toFixed(4)} TLOS`;
-    } else {
-        return null;
-    }
+    // If a ram purchase was expected, ensure it is valid
+    // if (expectedNewActions > 1) {
+    //     validateActionsRamContent(signer, modifiedTransaction);
+    // }
+    return null;
 }
 /*
 interface AuxTransactionData {
   [key: string]: string;
 }
 */
-function descerialize(data/*: unknown*/)/*: AuxTransactionData*/ {
-    return data/* as AuxTransactionData*/;
+function descerialize(data/*: string*/)/*: AuxTransactionData*/ {
+    // we use the Serializer to decode the data string
+    const deserialized = Serializer.decode(data);
+    console.log('deserialized:', deserialized);
+    return deserialized;
 }
 
 // Ensure the transaction fee transfer is valid
@@ -461,8 +459,8 @@ function validateActionsFeeContent(
     }
     if (
         feeAction.account.toString() !== 'eosio.token' ||
-    feeAction.name.toString() !== 'transfer' ||
-    data.to.toString() !== 'fuel.gm'
+        feeAction.name.toString() !== 'transfer' ||
+        data.to.toString() !== 'fuel.gm'
     ) {
         throw new Error('Fee action was deemed invalid.');
     }
@@ -474,15 +472,15 @@ function validateActionsRamContent(
     signer/*: PermissionLevel*/,
     modifiedTransaction, /*: Transaction*/
 )/*: number*/ {
-    const ramAction = modifiedTransaction.actions[2];
+    const ramAction = modifiedTransaction.actions[1];
     const data = descerialize(ramAction.data);
     const amount = parseFloat(data.quant?.split(' ')[0]);
 
     if (
         ramAction.account.toString() !== 'eosio' ||
-    !['buyram', 'buyrambytes'].includes(String(ramAction.name)) ||
-    data.payer.toString() !== 'greymassfuel' ||
-    data.receiver.toString() !== signer.actor.toString()
+        !['buyram', 'buyrambytes'].includes(String(ramAction.name)) ||
+        data.payer.toString() !== 'greymassfuel' ||
+        data.receiver.toString() !== signer.actor.toString()
     ) {
         throw new Error('RAM action was deemed invalid.');
     }
@@ -496,7 +494,7 @@ function validateActionsOriginalContent(
     transaction, /*: Transaction*/
 ) {
     for (const [i] of modifiedTransaction.actions.entries()) {
-    // Skip the expected new actions
+        // Skip the expected new actions
         if (i < expectedNewActions) {
             continue;
         }
@@ -504,25 +502,25 @@ function validateActionsOriginalContent(
         const original = transaction.actions[i - expectedNewActions];
         const action = modifiedTransaction.actions[i];
         const matchesAccount =
-      action.account.toString() === original.account.toString();
+            action.account.toString() === original.account.toString();
         const matchesAction = action.name.toString() === original.name.toString();
         const matchesLength =
-      action.authorization.length === original.authorization.length;
+            action.authorization.length === original.authorization.length;
         const matchesActor =
-      action.authorization[0].actor.toString() ===
-      original.authorization[0].actor.toString();
+            action.authorization[0].actor.toString() ===
+            original.authorization[0].actor.toString();
         const matchesPermission =
-      action.authorization[0].permission.toString() ===
-      original.authorization[0].permission.toString();
+            action.authorization[0].permission.toString() ===
+            original.authorization[0].permission.toString();
         const matchesData = action.data.toString() === original.data.toString();
         if (
             !action ||
-      !matchesAccount ||
-      !matchesAction ||
-      !matchesLength ||
-      !matchesActor ||
-      !matchesPermission ||
-      !matchesData
+            !matchesAccount ||
+            !matchesAction ||
+            !matchesLength ||
+            !matchesActor ||
+            !matchesPermission ||
+            !matchesData
         ) {
             const { account, name } = original;
             throw new Error(
@@ -540,7 +538,7 @@ function validateActionsLength(
 ) {
     if (
         modifiedTransaction.actions.length !==
-    transaction.actions.length + expectedNewActions
+        transaction.actions.length + expectedNewActions
     ) {
         throw new Error('Transaction returned contains additional actions.');
     }
@@ -557,13 +555,13 @@ function validateNoop(modifiedTransaction/*: Transaction*/) {
     const [firstAuthorization] = firstAction.authorization;
     if (
         firstAction.account.toString() !== expectedCosignerContract.toString() ||
-    firstAction.name.toString() !== expectedCosignerAction.toString() ||
-    firstAuthorization.actor.toString() !==
-      expectedCosignerAccountName.toString() ||
-    firstAuthorization.permission.toString() !==
-      expectedCosignerAccountPermission.toString() ||
-    (JSON.stringify(firstAction.data) !== '""' &&
-      JSON.stringify(firstAction.data) !== '{}')
+        firstAction.name.toString() !== expectedCosignerAction.toString() ||
+        firstAuthorization.actor.toString() !==
+        expectedCosignerAccountName.toString() ||
+        firstAuthorization.permission.toString() !==
+        expectedCosignerAccountPermission.toString() ||
+        (JSON.stringify(firstAction.data) !== '""' &&
+        JSON.stringify(firstAction.data) !== '{}')
     ) {
         throw new Error(
             `First action within transaction response is not valid noop (${expectedCosignerContract.toString()}:${expectedCosignerAction.toString()} signed by ${expectedCosignerAccountName.toString()}:${expectedCosignerAccountPermission.toString()}).`,

@@ -373,7 +373,6 @@ export default defineComponent({
                 accountNameHasWarning.value = false;
                 accountNameIsSuccessful.value = false;
                 accountNameWarningText.value = '';
-                // accountNameErrorMessage.value = 'Name is taken';
                 accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_taken');
             }
         });
