@@ -290,7 +290,7 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     // Try and see if the user already answer (remembered)
         if (
             GreymassFuelService.preferences[username] &&
-      GreymassFuelService.preferences[username].remember
+            GreymassFuelService.preferences[username].remember
         ) {
             // ok, the user did. What's the answer?
             if (GreymassFuelService.preferences[username].approve) {
@@ -313,40 +313,43 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
         // this are the normal texts for random wallet.
         const cancel/*: string | boolean*/ = GreymassFuelService.globals.$t('api.reject');
         const ok = GreymassFuelService.globals.$t('api.confirm');
-        let message = GreymassFuelService.globals.$t('api.greymass_fuel_message');
 
         if (typeof fees === 'string') {
-            message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
+            // Only if there's some feed to charge the user wi show the confirmation Dialog
+            const message = GreymassFuelService.globals.$t('api.greymass_fuel_message_fees', { fees });
+            Dialog.create({
+                title: GreymassFuelService.globals.$t('api.greymass_dialog_title'),
+                message,
+                html: true,
+                cancel,
+                ok,
+                persistent: true,
+                class: 'text-black',
+                options: {
+                    type: 'checkbox',
+                    model: mymodel,
+                    isValid: (model/*: string | string[]*/) => {
+                        GreymassFuelService.setPreferences(username, {
+                            remember: model.length === 1,
+                        });
+                        return true;
+                    },
+                    items: [
+                        {
+                            label: GreymassFuelService.globals.$t('api.remember_my_decision'),
+                            value: 'remember',
+                            color: 'primary' },
+                    ],
+                },
+            })
+            // all answers should save the preferences
+                .onOk(() => handler(true))
+                .onCancel(() => handler(false));
+        } else {
+            // otherwise we go ahead without asking
+            handler(true);
         }
 
-        Dialog.create({
-            title: GreymassFuelService.globals.$t('api.greymass_dialog_title'),
-            message,
-            html: true,
-            cancel,
-            ok,
-            persistent: true,
-            class: 'text-black',
-            options: {
-                type: 'checkbox',
-                model: mymodel,
-                isValid: (model/*: string | string[]*/) => {
-                    GreymassFuelService.setPreferences(username, {
-                        remember: model.length === 1,
-                    });
-                    return true;
-                },
-                items: [
-                    {
-                        label: GreymassFuelService.globals.$t('api.remember_my_decision'),
-                        value: 'remember',
-                        color: 'primary' },
-                ],
-            },
-        })
-        // all answers should save the preferences
-            .onOk(() => handler(true))
-            .onCancel(() => handler(false));
     });
 }
 
