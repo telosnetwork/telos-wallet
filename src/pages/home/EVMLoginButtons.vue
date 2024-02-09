@@ -59,7 +59,7 @@ export default defineComponent({
 
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value;
         });
 
         const supportsSafePal = computed(() => {

@@ -23,7 +23,6 @@ const TESTNET = {
     NETWORK_CHAIN_ID:
     '1eaa0824707c8c16bd25145493bf062aecddfeb56c736f6ba6397f3195f33c9f',
     TELOS_API_ENDPOINT: 'https://api-dev.telos.net/v1',
-    // TELOS_API_ENDPOINT: 'http://localhost:9999/v1',
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',

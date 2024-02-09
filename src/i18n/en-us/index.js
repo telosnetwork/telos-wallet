@@ -60,6 +60,11 @@ export default {
         oauth_facebook: 'Facebook',
         oauth_twitter: 'Twitter',
         oauth_email: 'Email',
+        random: 'Random',
+        continue: 'Continue',
+        account_name: 'Account Name',
+        name_selection_text: 'A new account will be created for you. Choose a name with twelve characters long using only lowercase letters or numbers from 1 to 5.',
+        account_selection_text: 'Choose one of your accounts to log in',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -366,6 +371,10 @@ export default {
         resources_low: 'Your resources are low',
         recommend_bying: 'We recommend you buy more for 1 TLOS',
         proceed_q: 'Proceed?',
+        account_name_feedback_no_dots: 'Account name cannot contain dots',
+        account_name_feedback_invalid_character: 'invalid character  \'{char}\'',
+        account_name_feedback_invalid_length: '{length} of 12 characters',
+        account_name_feedback_taken: 'Account name is taken',
     },
     streaming: {
         title: 'Live Streaming Example',
