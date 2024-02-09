@@ -38,7 +38,7 @@ import {
 } from 'src/antelope';
 
 
-export interface LoginNativeActionData {
+export interface loginZeroActionData {
     authenticator: Authenticator,
     network: string,
 }
@@ -110,8 +110,8 @@ export const useAccountStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        async loginNative({ authenticator, network }: LoginNativeActionData): Promise<boolean> {
-            this.trace('loginNative', authenticator, network);
+        async loginZero({ authenticator, network }: loginZeroActionData): Promise<boolean> {
+            this.trace('loginZero', authenticator, network);
             let success = false;
             try {
                 await authenticator.init();
@@ -254,7 +254,7 @@ export const useAccountStore = defineStore(store_name, {
                             console.error(authenticators.map(a => a.getName()).join(', '));
                             throw new Error('antelope.account.error_auto_login');
                         }
-                        this.loginNative({
+                        this.loginZero({
                             authenticator,
                             network,
                         });

@@ -205,11 +205,9 @@ export class MetakeepAuthenticator extends Authenticator {
                     public_key: publicKey,
                 });
                 const accountExists = response?.data?.account_names.length>0;
-                console.log('accountExists: ', accountExists, 'pero la descartamos');
                 if (accountExists) {
                     accountName = response.data.account_names[0];
                 } else {
-                    console.log('vamos a crear la cuenta');
                     accountName = await this.createAccount(publicKey);
                 }
 
@@ -326,6 +324,16 @@ class MetakeepUser extends User {
         this.reasonCallback = callback;
     }
 
+    handleCatchError(error: any): Error {
+        if (
+            (error as unknown as {status:string}).status === 'USER_REQUEST_DENIED'
+        ) {
+            return new Error('antelope.evm.error_transaction_canceled');
+        } else {
+            return new Error('antelope.evm.error_send_transaction');
+        }
+    }
+
     /**
     * @param transaction    The transaction to be signed (a object that matches the RpcAPI structure).
     */
@@ -423,13 +431,7 @@ class MetakeepUser extends User {
             return Promise.resolve(finalResponse);
 
         } catch (e: any) {
-            if (e.status) {
-                throw new Error(e.status);
-            } else if (e.message) {
-                throw new Error(e.message);
-            } else {
-                throw new Error('Unknown error');
-            }
+            throw this.handleCatchError(e);
         }
     }
 
