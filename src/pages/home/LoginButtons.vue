@@ -373,11 +373,23 @@ export default defineComponent({
                 accountNameHasWarning.value = false;
                 accountNameIsSuccessful.value = false;
                 accountNameWarningText.value = '';
-                // accountNameErrorMessage.value = 'Name is taken';
                 accountNameErrorMessage.value = globalProps.$t('login.account_name_feedback_taken');
             }
         });
 
+
+        // FIXME: remove this lines ---------------------
+        // this line forces the account name form situation
+        // selectAccountName();
+        // // this lines ensure that you are on the correct chain/tab
+        // console.log('props.chain', props.chain);
+        // setTimeout(() => {
+        //     console.log('props.chain', props.chain);
+        //     if (props.chain !== 'zero') {
+        //         window.location.href = '/?login=zero';
+        //     }
+        // }, 200);
+        // ----------------------------------------------
 
         return {
             isLoading,
