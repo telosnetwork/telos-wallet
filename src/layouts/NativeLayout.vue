@@ -127,7 +127,6 @@ export default {
             await this.memoryAutoLogin();
         }
         this.loadUserProfile();
-        /// this.checkPath();
     },
 };
 </script>
