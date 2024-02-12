@@ -14,6 +14,7 @@ import DepositEVM from '~/pages/native/balance/DepositEVM';
 import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
+import { getAntelope } from 'src/antelope';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
