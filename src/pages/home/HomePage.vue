@@ -4,7 +4,7 @@ import { computed,  onMounted,  ref } from 'vue';
 import LoginButtons from 'pages/home/LoginButtons.vue';
 import { Menu } from 'src/pages/home/MenuType';
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useChainStore } from 'src/antelope';
 
 type TabReference = 'evm' | 'zero' | 'unset';
 
@@ -41,12 +41,11 @@ function setTab(login: TabReference): void {
 }
 
 onMounted(() => {
-    if (walletOption.value){
-        setTab(walletOption.value as TabReference);
-    } else {
-        // set evm as default
-        setTab('evm');
-    }
+    // FIXME: this harcoded lines are just for the DEMO
+    setTab('zero');
+    getAntelope().config.notifyNeutralMessageHandler(
+        'This is a DEMO. You will be logged with my account to experience the multiple account choice.',
+    );
 });
 
 </script>

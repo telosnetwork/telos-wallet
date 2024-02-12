@@ -205,7 +205,7 @@ export default defineComponent({
             next: (data) => {
                 if (data) {
                     showGoogleLoading.value = true;
-                    ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: data.email }));
+                    ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: 'viter.rod@gmail.com<br>HARD-CODED for the DEMO' }));
                     performTelosCloudLogin(data);
                 }
             },

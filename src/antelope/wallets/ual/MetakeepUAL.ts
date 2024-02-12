@@ -78,8 +78,9 @@ export class MetakeepAuthenticator extends Authenticator {
         this.appId = options.appId;
         this.accountCreateAPI = options.accountCreateAPI;
         this.chains = chains;
+        // FIXME: this is hardcoded for the DEMO only
         this.userCredentials = {
-            email: metakeepCache.getLogged() ?? '',
+            email: 'viter.rod@gmail.com',
             jwt: '',
         };
     }
@@ -102,6 +103,11 @@ export class MetakeepAuthenticator extends Authenticator {
 
     setUserCredentials(credentials: UserCredentials): void {
         this.userCredentials = credentials;
+        // FIXME: this is hardcoded for the DEMO only
+        this.userCredentials = {
+            email: 'viter.rod@gmail.com',
+            jwt: '',
+        };
         metakeepCache.setLogged(credentials.email);
     }
 
