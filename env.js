@@ -9,10 +9,6 @@ const sharedEnv = {
     IMGUR_CLIENT_ID: 'b6f46df9d1da9d9',
     EVM_CONTRACT: 'eosio.evm',
     PROJECT_ID: '2392473d6d98499c7138cd2d705a791f',
-    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92',
-    METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0',
-    // GOOGLE_APP_ID: '56634824599-ff3iu788c32c3s7ec65cs4bieop9gpgv.apps.googleusercontent.com', // official App id
-    GOOGLE_APP_ID: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com', // Viter's app id
 };
 
 const TESTNET = {
@@ -26,6 +22,9 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
+    GOOGLE_APP_ID: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com', // Viter's app id
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id
+    METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id
 };
 
 const MAINNET = {
@@ -39,6 +38,9 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
+    GOOGLE_APP_ID: '56634824599-ff3iu788c32c3s7ec65cs4bieop9gpgv.apps.googleusercontent.com', // official App id
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id - TODO: WE NEED TO CHANGE THIS
+    METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id - TODO: WE NEED TO CHANGE THIS
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;
