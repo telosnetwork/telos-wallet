@@ -41,7 +41,7 @@ function setTab(login: TabReference): void {
 }
 
 onMounted(() => {
-    if (walletOption.value){
+    if (walletOption.value && walletOption.value !== 'unset') {
         setTab(walletOption.value as TabReference);
     } else {
         // set evm as default
