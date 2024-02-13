@@ -10,8 +10,6 @@ export const TELOS_ANALYTICS_EVENT_NAMES = {
     loginFailedMetamask: 'Login Failed - Metamask',
     loginSuccessfulSafepal: 'Login Successful - Safepal',
     loginFailedSafepal: 'Login Failed - Safepal',
-    loginSuccessfulOreId: 'Login Successful - OreId',
-    loginFailedOreId: 'Login Failed - OreId',
     loginFailedWalletConnect: 'Login Failed - WalletConnect',
     loginSuccessfulWalletConnect: 'Login Successful - WalletConnect',
     loginSuccessfulBrave: 'Login Successful - Brave',

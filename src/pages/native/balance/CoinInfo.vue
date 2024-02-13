@@ -48,11 +48,11 @@ export default {
             return coin.symbol === 'TLOS' && coin.account === 'eosio.token' && coin.network !== 'tevm';
         },
         formatLiquidBalance(balance) {
-            const [amount, symbol] = balance.split(' ');
+            const [amount, symbol] = balance?.split(' ') ?? ['0', 'TLOS'];
             return `${this.getFixed(amount, 4)} ${symbol}`;
         },
         getLiquidBalance(balance) {
-            const [amount] = balance.split(' ');
+            const [amount] = balance?.split(' ') ?? ['0'];
             return Number(amount);
         },
     },

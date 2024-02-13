@@ -9,6 +9,7 @@ const sharedEnv = {
     IMGUR_CLIENT_ID: 'b6f46df9d1da9d9',
     EVM_CONTRACT: 'eosio.evm',
     PROJECT_ID: '2392473d6d98499c7138cd2d705a791f',
+    GOOGLE_APP_ID: '56634824599-ff3iu788c32c3s7ec65cs4bieop9gpgv.apps.googleusercontent.com', // official App id
 };
 
 const TESTNET = {
@@ -22,8 +23,9 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
-    OREID_APP_ID: 't_75a4d9233ec441d18c4221e92b379197',
-    OREID_APP_ID_NATIVE: 't_a61e9926d5204387a9ac113dfce7cbc5',
+    DEFAULT_NETWORK: 'telos-evm-testnet',
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id
+    METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id
 };
 
 const MAINNET = {
@@ -37,8 +39,9 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
-    OREID_APP_ID: 'p_e5b81fcc20a04339993b0cc80df7e3fd',
-    OREID_APP_ID_NATIVE: 'p_751f87258d5b40998b55c626d612fd4e',
+    DEFAULT_NETWORK: 'telos-evm',
+    METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id - TODO: WE NEED TO CHANGE THIS
+    METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id - TODO: WE NEED TO CHANGE THIS
 };
 
 const env = process.env.NETWORK === 'mainnet' ? MAINNET : TESTNET;

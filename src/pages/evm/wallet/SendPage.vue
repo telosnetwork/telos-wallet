@@ -9,6 +9,7 @@ import { BigNumber, ethers } from 'ethers';
 import CurrencyInput from 'components/evm/inputs/CurrencyInput.vue';
 import AddressInput from 'components/evm/inputs/AddressInput.vue';
 import { EVMAuthenticator } from 'src/antelope/wallets';
+import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 
 
 const GAS_LIMIT_FOR_SYSTEM_TOKEN_TRANSFER = 26250;
@@ -18,6 +19,7 @@ const ant = getAntelope();
 const userStore = useUserStore();
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
+
 
 export default defineComponent({
     name: 'SendPage',

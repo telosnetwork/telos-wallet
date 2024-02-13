@@ -12,6 +12,7 @@ import { useI18n } from 'vue-i18n';
 
 import {
     CURRENT_CONTEXT,
+    getAntelope,
     useAccountStore,
     useChainStore,
 } from 'src/antelope';
@@ -44,6 +45,7 @@ const { t: $t } = useI18n();
 const nftStore = useNftsStore();
 const chainStore = useChainStore();
 const accountStore = useAccountStore();
+
 
 const chainSettings = chainStore.currentChain.settings as EVMChainSettings;
 const explorerUrl = chainSettings.getExplorerUrl();

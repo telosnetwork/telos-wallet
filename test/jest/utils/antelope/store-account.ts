@@ -21,7 +21,7 @@ const getAuthenticator = jest.fn().mockImplementation(() => null);
 const getEVMAuthenticator = jest.fn().mockImplementation(() => MockData.EvmAuthenticator);
 const getNativeAuthenticator = jest.fn().mockImplementation(() => null);
 
-const loginNative = jest.fn().mockImplementation(() => ({
+const loginZero = jest.fn().mockImplementation(() => ({
     then: jest.fn().mockImplementation((cb: any) => cb()),
 }));
 const loginEVM = jest.fn().mockImplementation(() => ({
@@ -76,7 +76,7 @@ const AccountActions = {
     getAuthenticator,
     getEVMAuthenticator,
     getNativeAuthenticator,
-    loginNative,
+    loginZero,
     loginEVM,
     logout,
     autoLogin,

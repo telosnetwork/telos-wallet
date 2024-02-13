@@ -411,6 +411,16 @@ export default abstract class NativeChainSettings implements ChainSettings {
         return this.eosioCore.v1.chain.get_account(address);
     }
 
+    async isAccountNameAvailable(accountName: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.eosioCore.v1.chain.get_account(accountName).then(() => {
+                resolve(false);
+            }).catch(() => {
+                resolve(true);
+            });
+        });
+    }
+
     async getKeyAccounts(key: string): Promise<KeyAccounts> {
         return (await this.eosioCore.v1.history.get_key_accounts(key)) as unknown as KeyAccounts;
     }

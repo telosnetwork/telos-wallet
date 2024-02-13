@@ -1,10 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { initFuelUserWrapper } from 'src/api/fuel';
-import { OreUser } from 'ual-oreid';
 
 export const login = async function(
     { commit, dispatch },
-    { idx, account, returnUrl, justViewer },
+    { idx, account, memoryAutoLogin, network, justViewer },
 ) {
     const authenticator = this.$ual.authenticators[idx];
     try {
@@ -21,15 +20,15 @@ export const login = async function(
         commit('setJustViewer', justViewer);
         const users = await authenticator.login(account);
         if (users.length) {
-            // OreId has it's own authorization service, only init fuel service for other ual users
-            this.$ualUser = users[0] instanceof OreUser ? users[0] : await initFuelUserWrapper(users[0]);
+            this.$ualUser = await initFuelUserWrapper(users[0]);
             const accountName = await this.$ualUser.getAccountName();
             this.$type = 'ual';
             this.$idx = idx;
             commit('setAccountName', accountName);
             localStorage.setItem('autoLogin', authenticator.getName());
             localStorage.setItem('account', accountName);
-            localStorage.setItem('returning', true);
+            localStorage.setItem('isNative', true);
+            localStorage.setItem('network', network);
             if (this.$router.currentRoute.path === '/') {
                 await this.$router.push({ path: '/zero/balance' });
             }
@@ -46,7 +45,7 @@ export const login = async function(
             commit('general/setErrorMsg', error, { root: true });
             throw e;
         } else {
-            console.log('Login cancelled');
+            console.debug('Login cancelled');
         }
     } finally {
         commit('setLoadingWallet');
@@ -65,15 +64,18 @@ export const memoryAutoLogin = async function ({
     } else {
         return null;
     }
+    return null;
 };
 
 export const autoLogin = async function({ dispatch, commit }, returnUrl) {
     const { authenticator, idx } = getAuthenticator(this.$ual);
     if (authenticator) {
         commit('setAutoLogin', true);
+        const network = localStorage.getItem('network');
         await dispatch('login', {
             idx,
             returnUrl,
+            network,
             account: localStorage.getItem('account'),
         });
         this.$idx = idx;

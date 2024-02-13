@@ -10,7 +10,7 @@ import NftViewer from 'src/components/evm/nfts/NftViewer.vue';
 import ExternalLink from 'components/ExternalLink.vue';
 
 import { useNftsStore } from 'src/antelope/stores/nfts';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useChainStore } from 'src/antelope';
 import { Collectible, Erc1155Nft } from 'src/antelope/types';
 import { useAccountStore } from 'src/antelope';
 
