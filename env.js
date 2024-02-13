@@ -23,6 +23,7 @@ const TESTNET = {
     HYPERION_ENDPOINT: 'https://testnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer-test.telos.net',
     CHAIN_NAME: 'telos-testnet',
+    DEFAULT_NETWORK: 'telos-evm-testnet',
     METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id
     METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id
 };
@@ -38,6 +39,7 @@ const MAINNET = {
     HYPERION_ENDPOINT: 'https://mainnet.telos.net',
     NETWORK_EXPLORER: 'https://explorer.telos.net',
     CHAIN_NAME: 'telos',
+    DEFAULT_NETWORK: 'telos-evm',
     METAKEEP_APP_ID_NATIVE: 'ad5e05fb-280a-41ae-b186-5a2654567b92', // Viter's app id - TODO: WE NEED TO CHANGE THIS
     METAKEEP_APP_ID_EVM: 'd190c88f-1bb5-4e16-bc48-96dbf33b77e0', // Viter's app id - TODO: WE NEED TO CHANGE THIS
 };

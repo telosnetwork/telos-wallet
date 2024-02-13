@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import EVMLoginButtons from 'src/pages/home/EVMLoginButtons.vue';
+import LoginButtons from 'src/pages/home/LoginButtons.vue';
 import {
     MockData,
     useChainStore,
@@ -9,7 +9,7 @@ import {
 } from 'test/jest/utils/antelope';
 
 const WARNING_MESSAGE = 'warning-message';
-const mountComponent = () => shallowMount(EVMLoginButtons, {
+const mountComponent = () => shallowMount(LoginButtons, {
     mocks: {
         $t :  () => WARNING_MESSAGE,
         $warningNotification: jest.fn(),
@@ -42,10 +42,10 @@ jest.mock('src/antelope', () => {
     };
 });
 
-describe('EVMLoginButtons.vue', () => {
+describe('LoginButtons.vue', () => {
     describe('Component name', () => {
         it('should have the correct name', () => {
-            expect(EVMLoginButtons.name).toBe('EVMLoginButtons');
+            expect(LoginButtons.name).toBe('LoginButtons');
         });
     });
 

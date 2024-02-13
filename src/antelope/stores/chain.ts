@@ -67,12 +67,14 @@ export const settings: { [key: string]: ChainSettings } = {
 };
 
 export interface ChainModel {
+    lastUpdate: number;
     apy: string;
     settings: ChainSettings;
     tokens: TokenClass[];
 }
 
 export interface EvmChainModel {
+    lastUpdate: number;
     apy: string;
     stakeRatio: ethers.BigNumber;
     unstakeRatio: ethers.BigNumber;
@@ -82,6 +84,7 @@ export interface EvmChainModel {
 }
 
 export interface NativeChainModel {
+    lastUpdate: number;
     apy: string;
     settings: NativeChainSettings;
     tokens: TokenClass[];
@@ -89,6 +92,7 @@ export interface NativeChainModel {
 
 const newChainModel = (network: string, isNative: boolean): ChainModel => {
     const model = {
+        lastUpdate: 0,
         apy: '',
         stakeRatio: ethers.constants.Zero,
         unstakeRatio: ethers.constants.Zero,
@@ -116,7 +120,7 @@ export const useChainStore = defineStore(store_name, {
         loggedChain: state => state.__chains[CURRENT_CONTEXT],
         currentChain: state => state.__chains[CURRENT_CONTEXT],
         loggedEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
-        currentEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        currentEvmChain: state => state.__chains[CURRENT_CONTEXT]?.settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
         loggedNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         currentNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
@@ -136,12 +140,22 @@ export const useChainStore = defineStore(store_name, {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
-                await Promise.all([
-                    this.updateSettings(label),
-                    this.updateApy(label),
-                    this.updateGasPrice(label),
-                    this.updateStakedRatio(label),
-                ]);
+                const chain = this.getChain(label);
+                const now = Date.now();
+                const tolerance = 1000 * 10; // 10 seconds
+                const isUpToDate = now - chain.lastUpdate < tolerance;
+                if (isUpToDate) {
+                    // This avoid to update the chain data if the user switches from one chain to another and back
+                    this.trace('updateChainData', label, '-> already up to date');
+                } else {
+                    this.setChainLastUpdate(label, Date.now());
+                    await Promise.all([
+                        this.updateSettings(label),
+                        this.updateApy(label),
+                        this.updateGasPrice(label),
+                        this.updateStakedRatio(label),
+                    ]);
+                }
             } catch (error) {
                 console.error(error);
                 throw new Error('antelope.chain.error_update_data');
@@ -294,6 +308,10 @@ export const useChainStore = defineStore(store_name, {
             } finally {
                 useFeedbackStore().unsetLoading('updateTokenList');
             }
+        },
+        setChainLastUpdate(label: string, timestamp: number) {
+            this.trace('setChainLastUpdate', label, timestamp);
+            this.__chains[label].lastUpdate = timestamp;
         },
     },
 });

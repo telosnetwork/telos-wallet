@@ -2,7 +2,7 @@
 
 import { mapGetters, mapActions } from 'vuex';
 import navBar from 'components/native/NavBar.vue';
-import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
+import LoginButtons from 'pages/home/LoginButtons.vue';
 import { getAntelope } from 'src/antelope';
 import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 
@@ -32,7 +32,7 @@ const pagesData = [
 
 export default {
     name: 'NativeLayout',
-    components: { NavBar: navBar, NativeLoginButton },
+    components: { NavBar: navBar, LoginButtons },
     data() {
         return {
             avatar: null,
@@ -133,7 +133,7 @@ export default {
 
 <template>
 <q-layout view="hHh Lpr fFf" class="c-native-layout">
-    <NativeLoginButton v-if="isUserAuthenticated" class="login-button"/>
+    <LoginButtons v-if="isUserAuthenticated" class="login-button" chain="zero"/>
     <div class="videoWrapper">
         <video
             id="bgvid"
