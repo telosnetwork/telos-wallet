@@ -133,7 +133,7 @@ export default {
 
 <template>
 <q-layout view="hHh Lpr fFf" class="c-native-layout">
-    <LoginButtons v-if="isUserAuthenticated" class="login-button" chain="zero"/>
+    <LoginButtons v-if="!isUserAuthenticated" class="login-button" chain="zero"/>
     <div class="videoWrapper">
         <video
             id="bgvid"

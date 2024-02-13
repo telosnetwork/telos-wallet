@@ -57,6 +57,7 @@ const _window = (window as any);
 
 class GoogleOneTapController {
 
+    private _logged = false;
     onSuccessfulLogin = new BehaviorSubject<GoogleCredentials | null>(null);
     onError = new BehaviorSubject<string | null>(null);
     onMoment = new Subject<{type: string, status:string, reason:string}>();
@@ -66,6 +67,10 @@ class GoogleOneTapController {
 
     constructor() {
         this.installGoogleOneTapScript();
+    }
+
+    get logged() {
+        return this._logged;
     }
 
     installGoogleOneTapScript() {
@@ -146,6 +151,7 @@ class GoogleOneTapController {
 
     handleOneTapSuccess(response: SuccessResponse, jwt: string) {
         const email = response.payload.email;
+        this._logged = true;
         this.onSuccessfulLogin.next({ email, jwt });
     }
 
@@ -157,6 +163,7 @@ class GoogleOneTapController {
     logout() {
         if (google) {
             google.accounts.id.disableAutoSelect();
+            this._logged = false;
             this.onSuccessfulLogin.next(null);
         }
     }

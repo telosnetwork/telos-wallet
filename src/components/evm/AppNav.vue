@@ -413,7 +413,7 @@ export default defineComponent({
                 @click="closeLoginMenu()"
             />
         </div>
-        <LoginButtons chain="evm"/>
+        <LoginButtons v-if="showWalletOptions" chain="evm"/>
     </div>
 </q-dialog>
 

@@ -135,9 +135,11 @@ class FuelUserWrapper extends User {
                 const [, returnedTransaction] = data.request;
                 const modifiedTransaction/*: SignedTransaction*/ = returnedTransaction;
 
+                const fee/*: string | null*/ = data.fee;
+
                 // Ensure the modified transaction is what the application expects
                 // These validation methods will throw an exception if invalid data exists
-                const fees/*: string | null*/ = validateTransaction(
+                validateTransaction(
                     signer,
                     modifiedTransaction,
                     transaction,
@@ -146,7 +148,7 @@ class FuelUserWrapper extends User {
 
                 // validate with the user whether to use the service at all
                 try {
-                    await confirmWithUser(this.user, fees);
+                    await confirmWithUser(this.user, fee);
                 } catch (e) {
                     // The user refused to use the service
                     break;
@@ -285,7 +287,6 @@ async function confirmWithUser(user/*: User*/, fees/*: string | null*/) {
     let mymodel/*: string[]*/ = [];
     mymodel = [];
 
-
     return new Promise((resolve, reject) => {
     // Try and see if the user already answer (remembered)
         if (
@@ -399,6 +400,7 @@ function determineExpectedActionsLength(costs/*: CostsType | null*/, modifiedTra
 
     // if the second action is a ram purchase, 1 new action is added (the ram purchase)
     if (
+        costs === null &&
         modifiedTransaction.actions.length > 1 &&
         modifiedTransaction.actions[1].account.toString() === 'eosio' &&
         ['buyram', 'buyrambytes'].includes(modifiedTransaction.actions[1].name.toString())
@@ -406,9 +408,13 @@ function determineExpectedActionsLength(costs/*: CostsType | null*/, modifiedTra
         expectedNewActions += 1;
     }
 
-    // If there are costs associated with this transaction, 1 new actions is added (the fee)
+    // If there are costs associated with this transaction, 1 new actions is added (the fee transfer) as second action
     if (costs) {
         expectedNewActions += 1;
+        // If there is a RAM cost associated with this transaction, 1 new action is added (the ram purchase) (buyrambytes or buyram)
+        if (costs.ram !== '0.0000 TLOS') {
+            expectedNewActions += 1;
+        }
     }
 
     return expectedNewActions;
@@ -442,7 +448,6 @@ interface AuxTransactionData {
 function descerialize(data/*: string*/)/*: AuxTransactionData*/ {
     // we use the Serializer to decode the data string
     const deserialized = Serializer.decode(data);
-    console.log('deserialized:', deserialized);
     return deserialized;
 }
 

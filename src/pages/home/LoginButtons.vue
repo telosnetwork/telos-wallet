@@ -23,6 +23,7 @@ import { MetakeepAuthenticator } from 'src/antelope/wallets/ual/MetakeepUAL';
 import BaseTextInput from 'components/evm/inputs/BaseTextInput.vue';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { words } from 'src/pages/home/words';
+import { Subscription } from 'rxjs';
 
 export default defineComponent({
     name: 'LoginButtons',
@@ -270,15 +271,19 @@ export default defineComponent({
             !requestNameSelection.value &&
             selectedZeroAccount.value === '',
         );
-        const googleSubscription = googleCtrl.onSuccessfulLogin.subscribe({
-            next: (data) => {
-                if (data) {
-                    showGoogleLoading.value = true;
-                    ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: data.email }));
-                    performTelosCloudLogin(data);
-                }
-            },
-        });
+
+        const googleSubscription = ref<Subscription | null>(null);
+        if (!googleCtrl.logged) {
+            googleSubscription.value = googleCtrl.onSuccessfulLogin.subscribe({
+                next: (data) => {
+                    if (data) {
+                        showGoogleLoading.value = true;
+                        ant.config.notifyNeutralMessageHandler(globalProps.$t('antelope.account.logging_in_as', { account: data.email }));
+                        performTelosCloudLogin(data);
+                    }
+                },
+            });
+        }
 
         // we check the div is present before trying to render the google button
         const googleBtnLoop = setInterval(() => {

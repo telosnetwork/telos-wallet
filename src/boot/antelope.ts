@@ -124,7 +124,6 @@ export default boot(({ app }) => {
     } else if (typeof process.env.DEFAULT_NETWORK === 'string') {
         // if we have a default network, we connect to it (this can be changed dynamically later on)
         const defaultNetwork = process.env.DEFAULT_NETWORK;
-        console.log('setChain: ', defaultNetwork);
         ant.stores.chain.setChain(CURRENT_CONTEXT, defaultNetwork);
     }
 
