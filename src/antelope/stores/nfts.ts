@@ -230,6 +230,7 @@ export const useNftsStore = defineStore(store_name, {
                     tokenId,
                     type,
                 };
+                this.trace('fetchNftDetails', 'filter:', new_filter);
 
                 // If we already have a contract for that network and contract, we search for the NFT in that list first
                 this.__contracts[network] = this.__contracts[network] || {};
@@ -246,6 +247,7 @@ export const useNftsStore = defineStore(store_name, {
                         nft => nft.contractAddress.toLowerCase() === contract.toLowerCase() && nft.id === tokenId,
                     );
                     if (nft) {
+                        this.trace('fetchNftDetails', 'found in cache:', nft);
                         return nft;
                     }
                 } else {
@@ -260,6 +262,7 @@ export const useNftsStore = defineStore(store_name, {
                 // we don't have the NFT on any cache, we fetch it from the indexer
                 useFeedbackStore().setLoading('updateNFTsForAccount');
                 if (chain.settings.isNative() || (chain.settings as EVMChainSettings).hasIndexerSupport()) {
+                    this.trace('fetchNftDetails', 'fetching from indexer');
                     promise = chain.settings.getNftsForCollection(contract, new_filter).then((nfts) => {
                         const contractLower = contract.toLowerCase();
 
@@ -273,6 +276,7 @@ export const useNftsStore = defineStore(store_name, {
                     if (!chain.settings.isNative()) {
                         // this means we have the indexer down
                         // we have the contract and the address so we try to fetch the NFT from the contract
+                        this.trace('fetchNftDetails', 'indexer down, fetching from contract');
                         useEVMStore().getNFT(
                             contract,
                             tokenId,
