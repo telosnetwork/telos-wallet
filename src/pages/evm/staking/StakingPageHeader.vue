@@ -13,7 +13,6 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-const label = 'current';
 const { t: $t } = useI18n();
 const userStore = useUserStore();
 const balancesStore = useBalancesStore();
@@ -29,7 +28,7 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
-const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
+const unstakedRatio = computed(() => chainStore.getUnstakedRatio(CURRENT_CONTEXT));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
     if (stakedTokenBalanceBn.value && !unstakedRatio.value.isZero()) {
