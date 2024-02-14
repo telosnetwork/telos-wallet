@@ -47,10 +47,16 @@ export async function extractNftMetadata(
         // We need to look at the metadata
         // we iterate over the metadata properties
         for (const property in metadata) {
-            const value = metadata[property];
+            let value = metadata[property];
+
             if (!value) {
                 continue;
             }
+
+            if (typeof value === 'string' && value.startsWith('ipfs://')) {
+                value = ((value as string) ?? '').replace('ipfs://', IPFS_GATEWAY);
+            }
+
             // if the value is a string and contains a valid url of a known media format, use it.
             // image formats: .gif, .avif, .apng, .jpeg, .jpg, .jfif, .pjpeg, .pjp, .png, .svg, .webp
             if (
