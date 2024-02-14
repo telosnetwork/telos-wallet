@@ -12,6 +12,9 @@ export class AntelopeWallets {
 
     private trace: AntelopeDebugTraceType;
     private authenticators: Map<string, EVMAuthenticator> = new Map();
+    private web3Provider: ethers.providers.Web3Provider | null = null;
+    private web3ProviderInitializationPromise: Promise<ethers.providers.Web3Provider> | null = null;
+
     constructor() {
         this.trace = createTraceFunction(name);
     }
@@ -36,16 +39,34 @@ export class AntelopeWallets {
 
     async getWeb3Provider(label = CURRENT_CONTEXT): Promise<ethers.providers.Web3Provider> {
         this.trace('getWeb3Provider');
-        try {
-            const p:RpcEndpoint = this.getChainSettings(label).getRPCEndpoint();
-            const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
-            const jsonRpcProvider = new ethers.providers.JsonRpcProvider(url);
-            await jsonRpcProvider.ready;
-            const web3Provider = jsonRpcProvider as ethers.providers.Web3Provider;
-            return web3Provider;
-        } catch (e) {
-            this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e);
-            throw new AntelopeError('antelope.evn.error_no_provider');
+
+        // If a provider instance already exists, return it immediately.
+        if (this.web3Provider) {
+            return this.web3Provider;
         }
+
+        // If an initialization is already underway, wait for it to complete.
+        if (this.web3ProviderInitializationPromise) {
+            return this.web3ProviderInitializationPromise;
+        }
+
+        // Start the initialization.
+        this.web3ProviderInitializationPromise = (async () => {
+            try {
+                const p: RpcEndpoint = this.getChainSettings(label).getRPCEndpoint();
+                const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+                const jsonRpcProvider = new ethers.providers.JsonRpcProvider(url);
+                await jsonRpcProvider.ready;
+                this.web3Provider = jsonRpcProvider as ethers.providers.Web3Provider;
+                return this.web3Provider;
+            } catch (e) {
+                this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e);
+                this.web3ProviderInitializationPromise = null; // Reset to allow retries.
+                throw new AntelopeError('antelope.evn.error_no_provider');
+            }
+        })();
+
+        return this.web3ProviderInitializationPromise;
     }
+
 }
