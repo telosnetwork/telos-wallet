@@ -11,6 +11,8 @@ const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
 const feedbackStore = useFeedbackStore();
 
+const rowsPerPageOptions = [5, 10, 20, 50, 100];
+
 export default defineComponent({
     name: 'WalletTransactionsTab',
     components: {
@@ -76,19 +78,59 @@ export default defineComponent({
             // also reload txs if the user switches accounts
             this.getTransactions();
         },
-        pagination(newPagination, oldPagination) {
-            if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
-                this.rowsPerPageUpdating = true;
-            }
-            this.getTransactions().finally(() => {
-                this.rowsPerPageUpdating = false;
-            });
+        pagination: {
+            handler(newPagination, oldPagination) {
+                if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
+                    this.rowsPerPageUpdating = true;
+                }
+
+                const { rowsPerPage, page } = newPagination;
+                this.$router.replace({
+                    name: 'evm-wallet',
+                    query: {
+                        ...this.$route.query,
+                        rowsPerPage,
+                        page,
+                    },
+                });
+            },
+            // immediate: true,
+            deep: true,
         },
         totalRows: {
             immediate: true,
             handler(newValue) {
-                this.pagination.rowsNumber = newValue;
+                if (this.pagination.rowsNumber === 0) {
+                    // this means we just arrived the page, so we got to take the page and rowsPerPage from the url
+                    const page = +(this.$route.query.page ?? 1);
+                    const rowsPerPage = +(this.$route.query.rowsPerPage ?? 5);
+                    const rowsNumber = newValue;
+                    this.pagination = {
+                        page,
+                        rowsPerPage,
+                        rowsCurrentPage: rowsPerPage,
+                        rowsNumber,
+                    };
+                } else {
+                    this.pagination.rowsNumber = newValue;
+                }
             },
+        },
+        $route(newRoute) {
+            if (newRoute.name !== 'evm-wallet' || newRoute.query.tab !== 'transactions') {
+                return;
+            }
+
+            this.pagination = {
+                page: +(newRoute.query.page ?? 1),
+                rowsPerPage: +(newRoute.query.rowsPerPage ?? 5),
+                rowsCurrentPage: this.pagination.rowsPerPage,
+                rowsNumber: this.pagination.rowsNumber,
+            };
+
+            this.getTransactions().finally(() => {
+                this.rowsPerPageUpdating = false;
+            });
         },
     },
     created() {
@@ -109,6 +151,7 @@ export default defineComponent({
     },
     methods: {
         async getTransactions() {
+
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
 
