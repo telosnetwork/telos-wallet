@@ -16,6 +16,10 @@ import { CURRENT_CONTEXT, useAccountStore, useChainStore } from 'src/antelope';
 import { AxiosInstance } from 'axios';
 import { Contract, ethers } from 'ethers';
 import { AntelopeError } from 'src/antelope/types';
+import { createTraceFunction } from 'src/antelope/config';
+
+// This function is used to trace the execution of the code
+const trace = createTraceFunction('NFTClass');
 
 export interface NftAttribute {
     label: string;
@@ -106,6 +110,7 @@ export async function constructNft(
     contractStore: ReturnType<typeof useContractStore>,
     nftStore: ReturnType<typeof useNftsStore>,
 ): Promise<Erc721Nft | Erc1155Nft> {
+    trace('constructNft', { contract, indexerData, chainSettings, contractStore, nftStore });
     const network = chainSettings.getNetwork();
 
     const isErc721 = contract.supportedInterfaces.includes('erc721');
@@ -118,6 +123,7 @@ export async function constructNft(
     const cachedNft = nftStore.__contracts[network]?.[contract.address]?.list.find(nft => nft.id === indexerData.tokenId);
 
     if (cachedNft) {
+        trace('constructNft', 'contract found in cache');
         await cachedNft.updateOwnerData();
         return cachedNft;
     }
@@ -146,6 +152,7 @@ export async function constructNft(
     indexerData.metadata.image = ((indexerData.metadata.image as string) ?? '').replace('ipfs://', IPFS_GATEWAY);
 
     const { image, mediaType, mediaSource } = await extractNftMetadata(indexerData.imageCache ?? '', indexerData.tokenUri ?? '', indexerData.metadata ?? {});
+    trace('constructNft', 'extracted metadata:', { image, mediaType, mediaSource });
     const commonData: NftPrecursorData = {
         name: (indexerData.metadata?.name ?? '') as string,
         id: indexerData.tokenId,
@@ -166,6 +173,7 @@ export async function constructNft(
         const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address, 'erc721'))?.getContractInstance();
 
         if (!contractInstance) {
+            console.error('Error getting contract instance');
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
 
@@ -286,6 +294,7 @@ export class Erc721Nft extends NFT {
     }
 
     async updateOwnerData(): Promise<void> {
+        trace('Erc721Nft.updateOwnerData', { contract: this.contract, id: this.id });
         const contract = await useContractStore().getContract(CURRENT_CONTEXT, this.contractAddress);
         const contractInstance = await contract?.getContractInstance();
 
