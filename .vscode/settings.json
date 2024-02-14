@@ -3,5 +3,14 @@
   "vetur.format.enable": false,
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
   
-  "vetur.experimental.templateInterpolationService": true
+  "vetur.experimental.templateInterpolationService": true,
+
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.validate.enable": true,
+  "typescript.tsserver.trace": "verbose",
+  "javascript.suggest.paths": true,
+  "javascript.autoClosingTags": true,
+  "typescript.suggest.paths": true,
+  "typescript.suggest.autoImports": true
+
 }
