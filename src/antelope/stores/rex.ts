@@ -74,7 +74,7 @@ export const useRexStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    if (label === 'current') {
+                    if (label === CURRENT_CONTEXT) {
                         await useRexStore().updateRexDataForAccount(label, toRaw(account));
                     }
                 },

@@ -43,8 +43,8 @@ export class AntelopeWallets {
             await jsonRpcProvider.ready;
             const web3Provider = jsonRpcProvider as ethers.providers.Web3Provider;
             return web3Provider;
-        } catch (e3) {
-            this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e3);
+        } catch (e) {
+            this.trace('getWeb3Provider authenticator.web3Provider() Failed!', e);
             throw new AntelopeError('antelope.evn.error_no_provider');
         }
     }
