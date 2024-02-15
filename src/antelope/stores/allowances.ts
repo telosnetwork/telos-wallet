@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { filter } from 'rxjs';
 import { formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
@@ -36,6 +35,7 @@ import {
     CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
+    useBalancesStore,
     useChainStore,
     useContractStore,
     useFeedbackStore,
@@ -545,9 +545,14 @@ export const useAllowancesStore = defineStore(store_name, {
                 const tokenInfo = useTokensStore().__tokens[CURRENT_CONTEXT].find(token => token.address.toLowerCase() === data.contract.toLowerCase());
 
                 const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-                const tokenContractInstance = await tokenContract?.getContractInstance();
-                const maxSupply = await tokenContractInstance?.totalSupply() as BigNumber | undefined;
-                const balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
+
+                const maxSupply = await tokenContract?.getMaxSupply();
+                const balancesStore = useBalancesStore();
+                let balance = balancesStore.__balances[CURRENT_CONTEXT]?.find(balance => balance.token.address.toLowerCase() === data.contract.toLowerCase())?.amount;
+                if (!balance) {
+                    const tokenContractInstance = await tokenContract?.getContractInstance();
+                    balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
+                }
 
                 if (!balance || !tokenInfo || !maxSupply) {
                     return null;
