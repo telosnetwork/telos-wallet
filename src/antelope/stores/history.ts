@@ -53,6 +53,7 @@ export const transfers_filter_limit = 10000;
 
 export interface HistoryState {
     __evm_filter: IndexerTransactionsFilter;
+    __evm_last_filter_used: IndexerTransactionsFilter | null;
     __evm_transactions: {
         [label: Label]: {
             transactions: EvmTransaction[],
@@ -146,30 +147,37 @@ export const useHistoryStore = defineStore(store_name, {
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
                 }
 
-                const transactionsResponse = await chainSettings.getEVMTransactions(toRaw(this.__evm_filter));
-                const contracts = transactionsResponse.contracts;
-                const transactions = transactionsResponse.results;
+                const lastFilterUsedStr = JSON.stringify(this.__evm_last_filter_used);
+                const currentFilterStr = JSON.stringify(this.__evm_filter);
+                if (lastFilterUsedStr !== currentFilterStr) {
+                    this.__evm_last_filter_used = { ... toRaw(this.__evm_filter) };
 
-                this.setEvmTransactionsRowCount(label, transactionsResponse.total_count);
+                    const transactionsResponse = await chainSettings.getEVMTransactions(toRaw(this.__evm_filter));
+                    const contracts = transactionsResponse.contracts;
+                    const transactions = transactionsResponse.results;
 
-                const contractAddresses = Object.keys(contracts);
-                const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
-                contractAddresses.forEach((address: string) => {
-                    const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
-                    parsedContracts[address] = {
-                        ...contracts[address],
-                        ...extraInfo,
-                    };
-                });
+                    this.setEvmTransactionsRowCount(label, transactionsResponse.total_count);
 
-                // cache contracts
-                contractAddresses.forEach((address) => {
-                    contractStore.createAndStoreContract(label, address, parsedContracts[address]);
-                });
+                    const contractAddresses = Object.keys(contracts);
+                    const parsedContracts: Record<string, ParsedIndexerAccountTransactionsContract> = {};
+                    contractAddresses.forEach((address: string) => {
+                        const extraInfo = JSON.parse(contracts[address]?.calldata ?? '{}');
+                        parsedContracts[address] = {
+                            ...contracts[address],
+                            ...extraInfo,
+                        };
+                    });
 
-                this.setEVMTransactions(label, transactions);
+                    // cache contracts
+                    contractAddresses.forEach((address) => {
+                        contractStore.createAndStoreContract(label, address, parsedContracts[address]);
+                    });
 
-                await this.shapeTransactions(label, transactions);
+                    this.setEVMTransactions(label, transactions);
+
+                    await this.shapeTransactions(label, transactions);
+                } else {
+                }
             } catch (error) {
                 console.error(error);
                 throw new AntelopeError('antelope.history.error_fetching_transactions');
@@ -488,6 +496,7 @@ const historyInitialState: HistoryState = {
     __evm_filter: {
         address: '',
     },
+    __evm_last_filter_used: null,
     __shaped_evm_transaction_rows: {
     },
     __evm_transactions_pagination_data: {},
