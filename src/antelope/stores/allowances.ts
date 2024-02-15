@@ -554,8 +554,10 @@ export const useAllowancesStore = defineStore(store_name, {
                 )?.amount;
 
                 if (!balance) {
-                    const tokenContractInstance = await tokenContract?.getContractInstance();
-                    balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
+                    const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                    const balanceString = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results[0].balance;
+
+                    balance = BigNumber.from(balanceString);
                 }
 
                 if (!balance || !tokenInfo || !maxSupply) {
