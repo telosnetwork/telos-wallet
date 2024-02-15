@@ -26,6 +26,7 @@ export default class EvmContract {
     private readonly _manager?: EvmContractManagerI;
     private readonly _token?: TokenSourceInfo | null;
 
+    private contractInstance?: ethers.Contract;
     private _verified?: boolean;
 
     constructor({
@@ -137,6 +138,11 @@ export default class EvmContract {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
+
+        if (this.contractInstance) {
+            return this.contractInstance;
+        }
+
         const signer = await this._manager?.getSigner();
         let provider;
 
@@ -145,6 +151,7 @@ export default class EvmContract {
         }
 
         const contract = new ethers.Contract(this.address, this.abi, signer ?? provider ?? undefined);
+        this.contractInstance = contract;
 
         return contract;
     }

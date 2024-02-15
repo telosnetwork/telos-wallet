@@ -217,15 +217,6 @@ export const useAllowancesStore = defineStore(store_name, {
         init: () => {
             const allowancesStore = useAllowancesStore();
             const ant = getAntelope();
-            ant.events.onAccountChanged.pipe(
-                filter(({ label, account }) => !!label && !!account),
-            ).subscribe({
-                next: ({ label, account }) => {
-                    if (label === CURRENT_CONTEXT && account?.account) {
-                        allowancesStore.fetchAllowancesForAccount(account?.account);
-                    }
-                },
-            });
 
             ant.events.onClear.subscribe(({ label }) => {
                 allowancesStore.clearAllowances(label);
