@@ -42,12 +42,7 @@ export default defineComponent({
             const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
             const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
             const actionsInProgress = txLoading || transfersLoading;
-            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete && !this.rowsPerPageUpdating;
-
-            // don't show the loading state if we're on the first page and transactions are already present
-            // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
-            // or 2. the user is on the first page and we are re-fetching transactions on an interval
-            return actionsInProgress && !hideLoadingState;
+            return actionsInProgress;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -85,7 +80,6 @@ export default defineComponent({
                 }
 
                 const { rowsPerPage, page } = newPagination;
-                console.log('watch(pagination) - We replace route: ', { rowsPerPage, page });
                 this.$router.replace({
                     name: 'evm-wallet',
                     query: {
@@ -112,10 +106,10 @@ export default defineComponent({
                         rowsCurrentPage: rowsPerPage,
                         rowsNumber,
                     };
-                    console.log('watch(totalRows) - We set pagination: ', { rowsPerPage, page });
                 } else {
                     this.pagination.rowsNumber = newValue;
                 }
+
             },
         },
         $route(newRoute) {
@@ -130,7 +124,6 @@ export default defineComponent({
                 rowsNumber: this.pagination.rowsNumber,
             };
 
-            console.log('watch($route) - We set pagination: ', this.pagination);
 
             this.getTransactions().finally(() => {
                 this.rowsPerPageUpdating = false;
@@ -156,7 +149,6 @@ export default defineComponent({
     methods: {
         async getTransactions() {
 
-            console.log('getTransactions() - pagination: ', this.pagination);
 
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
