@@ -546,9 +546,13 @@ export const useAllowancesStore = defineStore(store_name, {
 
                 const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
 
-                const maxSupply = await tokenContract?.getMaxSupply();
+                const maxSupply = tokenContract?.maxSupply;
+
                 const balancesStore = useBalancesStore();
-                let balance = balancesStore.__balances[CURRENT_CONTEXT]?.find(balance => balance.token.address.toLowerCase() === data.contract.toLowerCase())?.amount;
+                let balance = balancesStore.__balances[CURRENT_CONTEXT]?.find(
+                    balance => balance.token.address.toLowerCase() === data.contract.toLowerCase(),
+                )?.amount;
+
                 if (!balance) {
                     const tokenContractInstance = await tokenContract?.getContractInstance();
                     balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
