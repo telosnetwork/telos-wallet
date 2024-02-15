@@ -1,4 +1,4 @@
-import { ContractInterface, ethers } from 'ethers';
+import { BigNumber, ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
     AntelopeError, EvmContractCalldata,
@@ -27,6 +27,7 @@ export default class EvmContract {
     private readonly _token?: TokenSourceInfo | null;
 
     private contractInstance?: ethers.Contract;
+    private maxSupply?: BigNumber;
     private _verified?: boolean;
 
     constructor({
@@ -235,6 +236,16 @@ export default class EvmContract {
         } else {
             throw new AntelopeError('antelope.utils.error_parsing_log_event', log);
         }
+    }
+
+    async getMaxSupply() {
+        if (this.maxSupply) {
+            return this.maxSupply;
+        }
+
+        const maxSupply = (await this.getContractInstance()).totalSupply();
+        this.maxSupply = maxSupply;
+        return maxSupply;
     }
 }
 
