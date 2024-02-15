@@ -85,6 +85,7 @@ export default defineComponent({
                 }
 
                 const { rowsPerPage, page } = newPagination;
+                console.log('watch(pagination) - We replace route: ', { rowsPerPage, page });
                 this.$router.replace({
                     name: 'evm-wallet',
                     query: {
@@ -111,6 +112,7 @@ export default defineComponent({
                         rowsCurrentPage: rowsPerPage,
                         rowsNumber,
                     };
+                    console.log('watch(totalRows) - We set pagination: ', { rowsPerPage, page });
                 } else {
                     this.pagination.rowsNumber = newValue;
                 }
@@ -127,6 +129,8 @@ export default defineComponent({
                 rowsCurrentPage: this.pagination.rowsPerPage,
                 rowsNumber: this.pagination.rowsNumber,
             };
+
+            console.log('watch($route) - We set pagination: ', this.pagination);
 
             this.getTransactions().finally(() => {
                 this.rowsPerPageUpdating = false;
@@ -151,6 +155,8 @@ export default defineComponent({
     },
     methods: {
         async getTransactions() {
+
+            console.log('getTransactions() - pagination: ', this.pagination);
 
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
