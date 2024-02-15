@@ -239,6 +239,10 @@ export default class EvmContract {
     }
 
     async getMaxSupply() {
+        if (!this.isToken()) {
+            return 0;
+        }
+
         if (this.maxSupply) {
             return this.maxSupply;
         }
