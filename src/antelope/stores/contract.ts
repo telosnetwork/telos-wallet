@@ -609,10 +609,8 @@ export const useContractStore = defineStore(store_name, {
 
 
             this.__accounts[network].processing[addressLower] = new Promise(async (resolve) => {
-                const provider = await getAntelope().wallets.getWeb3Provider();
-                const code = await provider.getCode(address);
-
-                const isContract = code !== '0x';
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const isContract = (await indexer.get(`/v1/contract/${addressLower}`)).data.results.length > 0;
 
                 if (!isContract && !this.__accounts[network].addresses.includes(addressLower)) {
                     this.__accounts[network].addresses.push(addressLower);
