@@ -81,7 +81,6 @@ export default defineComponent({
 
                 const { rowsPerPage, page } = newPagination;
 
-                console.log(this.loading, this.shapedTransactions.length, 'watch(pagination)', toRaw(newPagination));
                 this.$router.replace({
                     name: 'evm-wallet',
                     query: {
@@ -111,7 +110,6 @@ export default defineComponent({
                 } else {
                     this.pagination.rowsNumber = newValue;
                 }
-                console.log(this.loading, this.shapedTransactions.length, 'watch(totalRows)', newValue, toRaw(this.pagination));
             },
         },
         $route(newRoute) {
@@ -126,7 +124,6 @@ export default defineComponent({
                 rowsNumber: this.pagination.rowsNumber,
             };
 
-            console.log(this.loading, this.shapedTransactions.length, 'watch($route)', toRaw(this.pagination));
             this.getTransactions().finally(() => {
                 this.rowsPerPageUpdating = false;
             });
@@ -166,7 +163,6 @@ export default defineComponent({
                 this.pagination.rowsCurrentPage = this.pagination.rowsPerPage;
             }
 
-            console.log(this.loading, this.shapedTransactions.length, 'getTransactions()', toRaw(this.pagination));
 
             if (this.address) {
                 historyStore.setEVMTransactionsFilter({
@@ -176,11 +172,9 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
-                    console.log(this.loading, this.shapedTransactions.length, 'getTransactions() --> fetchEVMTransactionsForAccount() ...');
                     await historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
                     this.initialLoadComplete = true;
-                    console.log(this.loading, this.shapedTransactions.length, 'getTransactions() --> fetchEVMTransactionsForAccount() done', toRaw(this.pagination));
                 } catch (e) {
                     if (e instanceof AntelopeError) {
                         getAntelope().config.notifyFailureMessage(e.message, e.payload);
