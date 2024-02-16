@@ -164,6 +164,8 @@ export default defineComponent({
                 this.pagination.rowsCurrentPage = this.pagination.rowsPerPage;
             }
 
+            console.log(this.loading, this.shapedTransactions.length, 'getTransactions()', toRaw(this.pagination));
+
             if (this.address) {
                 historyStore.setEVMTransactionsFilter({
                     address: this.address,
@@ -172,9 +174,11 @@ export default defineComponent({
                     includeAbi: true,
                 });
                 try {
+                    console.log(this.loading, this.shapedTransactions.length, 'getTransactions() --> fetchEVMTransactionsForAccount() ...');
                     await historyStore.fetchEVMTransactionsForAccount(CURRENT_CONTEXT);
                     this.pagination.rowsNumber = historyStore.getEvmTransactionsRowCount(CURRENT_CONTEXT);
                     this.initialLoadComplete = true;
+                    console.log(this.loading, this.shapedTransactions.length, 'getTransactions() --> fetchEVMTransactionsForAccount() done', toRaw(this.pagination));
                 } catch (e) {
                     if (e instanceof AntelopeError) {
                         getAntelope().config.notifyFailureMessage(e.message, e.payload);
