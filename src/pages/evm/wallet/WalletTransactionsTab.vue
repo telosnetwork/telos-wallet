@@ -137,6 +137,8 @@ export default defineComponent({
             this.initialLoadComplete = true;
         }
 
+        this.getTransactions();
+
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
                 this.getTransactions();
