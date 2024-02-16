@@ -82,6 +82,7 @@ const store_name = 'history';
 // (e.g. when loading the balances tab, which prefetches transactions, and quickly switching to the transactions tab)
 let fetchAccoutTransactionsIsRunning = false;
 let shouldRefetchAccoutTransactions = false;
+let counter = 0;
 
 let nftTransfersUpdated : number | null = null; // the time in milliseconds since epoch when the NFT transfers were last updated
 
@@ -120,12 +121,16 @@ export const useHistoryStore = defineStore(store_name, {
         async fetchEVMTransactionsForAccount(label: Label = CURRENT_CONTEXT) {
             this.trace('fetchEVMTransactionsForAccount', label);
             const feedbackStore = useFeedbackStore();
+            const local_counter = counter++;
+            console.log(local_counter, 'fetchEVMTransactionsForAccount() 1 called');
 
             if (!fetchAccoutTransactionsIsRunning) {
                 feedbackStore.setLoading('history.fetchEVMTransactionsForAccount');
                 fetchAccoutTransactionsIsRunning = true;
+                console.log(local_counter, 'fetchEVMTransactionsForAccount() 2 - running');
             } else {
                 shouldRefetchAccoutTransactions = true;
+                console.log(local_counter, 'fetchEVMTransactionsForAccount() 3 - queued');
                 return;
             }
 
@@ -144,7 +149,9 @@ export const useHistoryStore = defineStore(store_name, {
                     this.__evm_nft_transfers[label].size === 0 ||
                     (nftTransfersUpdated && !dateIsWithinXMinutes(nftTransfersUpdated, 3))
                 ) {
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 4 - fetching NFT transfers...');
                     await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 5 - done');
                 }
 
                 const lastFilterUsedStr = JSON.stringify(this.__evm_last_filter_used);
@@ -152,9 +159,11 @@ export const useHistoryStore = defineStore(store_name, {
                 if (lastFilterUsedStr !== currentFilterStr) {
                     this.__evm_last_filter_used = { ... toRaw(this.__evm_filter) };
 
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 6 - fetching transactions...');
                     const transactionsResponse = await chainSettings.getEVMTransactions(toRaw(this.__evm_filter));
                     const contracts = transactionsResponse.contracts;
                     const transactions = transactionsResponse.results;
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 7 - done');
 
                     this.setEvmTransactionsRowCount(label, transactionsResponse.total_count);
 
@@ -175,20 +184,27 @@ export const useHistoryStore = defineStore(store_name, {
 
                     this.setEVMTransactions(label, transactions);
 
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 8 - shaping transactions...');
                     await this.shapeTransactions(label, transactions);
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 9 - done');
                 } else {
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 10 - no need to fetch transactions');
                 }
             } catch (error) {
                 console.error(error);
                 throw new AntelopeError('antelope.history.error_fetching_transactions');
             } finally {
                 fetchAccoutTransactionsIsRunning = false;
+                console.log(local_counter, 'fetchEVMTransactionsForAccount() 11 - stop running');
 
                 if (shouldRefetchAccoutTransactions) {
+                    console.log(local_counter, 'fetchEVMTransactionsForAccount() 12 - refetching...');
                     await this.fetchEVMTransactionsForAccount(label);
                 } else {
                     feedbackStore.unsetLoading('history.fetchEVMTransactionsForAccount');
                 }
+
+                console.log(local_counter, 'fetchEVMTransactionsForAccount() 13 - FINISHED');
             }
         },
 

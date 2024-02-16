@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, toRaw } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
@@ -80,6 +80,8 @@ export default defineComponent({
                 }
 
                 const { rowsPerPage, page } = newPagination;
+
+                console.log(this.loading, this.shapedTransactions.length, 'watch(pagination)', toRaw(newPagination));
                 this.$router.replace({
                     name: 'evm-wallet',
                     query: {
@@ -109,7 +111,7 @@ export default defineComponent({
                 } else {
                     this.pagination.rowsNumber = newValue;
                 }
-
+                console.log(this.loading, this.shapedTransactions.length, 'watch(totalRows)', newValue, toRaw(this.pagination));
             },
         },
         $route(newRoute) {
@@ -124,7 +126,7 @@ export default defineComponent({
                 rowsNumber: this.pagination.rowsNumber,
             };
 
-
+            console.log(this.loading, this.shapedTransactions.length, 'watch($route)', toRaw(this.pagination));
             this.getTransactions().finally(() => {
                 this.rowsPerPageUpdating = false;
             });
