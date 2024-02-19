@@ -176,7 +176,6 @@ export const useHistoryStore = defineStore(store_name, {
                     this.setEVMTransactions(label, transactions);
 
                     await this.shapeTransactions(label, transactions);
-                } else {
                 }
             } catch (error) {
                 console.error(error);
