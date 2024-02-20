@@ -2,7 +2,7 @@
 
 import { BigNumber, ethers } from 'ethers';
 import { BehaviorSubject, filter, map } from 'rxjs';
-import { getAntelope, useAccountStore, useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
+import { useAccountStore, useChainStore, useEVMStore, useFeedbackStore } from 'src/antelope';
 import {
     AntelopeError,
     EthereumProvider,
@@ -27,7 +27,6 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
     async initInjectedProvider(authenticator: InjectedProviderAuth): Promise<void> {
         this.trace('initInjectedProvider', authenticator.getName(), [authenticator.getProvider()]);
         const provider: EthereumProvider | null = authenticator.getProvider();
-        const ant = getAntelope();
 
         if (provider && !provider.__initialized) {
             this.trace('initInjectedProvider', authenticator.getName(), 'initializing provider');
@@ -41,36 +40,6 @@ export abstract class InjectedProviderAuth extends EVMAuthenticator {
                     throw new AntelopeError('antelope.evm.error_invalid_provider');
                 }
             }
-
-            // this handler activates only when the user comes back from switching to the wrong network on the wallet
-            // It checks if the user is on the correct network and if not, it shows a notification with a button to switch
-            const checkNetworkHandler = async () => {
-                window.removeEventListener('focus', checkNetworkHandler);
-                if (useAccountStore().loggedAccount) {
-                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
-                    if (await authenticator.isConnectedToCorrectChain()) {
-                        this.trace('checkNetworkHandler', 'correct network');
-                    } else {
-                        const networkName = useChainStore().loggedChain.settings.getDisplay();
-                        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-                        ant.config.notifyFailureWithAction(errorMessage, {
-                            label: ant.config.localizationHandler('evm_wallet.switch'),
-                            handler: () => {
-                                authenticator.ensureCorrectChain();
-                            },
-                        });
-                    }
-                }
-            };
-
-            provider.on('chainChanged', (value) => {
-                const newNetwork = value as string;
-                this.trace('provider.chainChanged', newNetwork);
-                window.removeEventListener('focus', checkNetworkHandler);
-                if (useAccountStore().loggedAccount) {
-                    window.addEventListener('focus', checkNetworkHandler);
-                }
-            });
 
             provider.on('accountsChanged', async (value) => {
                 const accounts = value as string[];
