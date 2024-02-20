@@ -13,7 +13,6 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-const label = 'current';
 const { t: $t } = useI18n();
 const userStore = useUserStore();
 const balancesStore = useBalancesStore();
@@ -29,7 +28,7 @@ const stakedToken = chainSettings.getStakedSystemToken();
 
 
 // First cell: Staked
-const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
+const unstakedRatio = computed(() => chainStore.getUnstakedRatio(CURRENT_CONTEXT));
 const isStakedLoading = computed(() => stakedTokenBalanceBn.value === undefined || unstakedRatio.value.isZero());
 const stakedExpressedInSystemBalanceBn = computed(() => {
     if (stakedTokenBalanceBn.value && !unstakedRatio.value.isZero()) {
@@ -48,7 +47,7 @@ const stakedFiatValueBn = computed(() => {
     }
 });
 const stakedTokenBalanceBn = computed(() => {
-    const balances = balancesStore.getBalances(label);
+    const balances = balancesStore.getBalances(CURRENT_CONTEXT);
     const stakedTokenBalance = balances.find(balance => balance.token.symbol === stakedToken.symbol)?.amount;
     if (stakedTokenBalance) {
         return stakedTokenBalance;
@@ -57,7 +56,7 @@ const stakedTokenBalanceBn = computed(() => {
     }
 });
 const systemTokenPrice = computed(() => {
-    const balances = balancesStore.getBalances(label);
+    const balances = balancesStore.getBalances(CURRENT_CONTEXT);
     const systemTokenPriceBalance = balances.find(balance => balance.token.symbol === systemToken.symbol)?.token.price.value;
     if (systemTokenPriceBalance) {
         return systemTokenPriceBalance;
@@ -68,7 +67,7 @@ const systemTokenPrice = computed(() => {
 
 // Second cell: Unstaking
 const unstakingBalanceBn = computed(() => {
-    const rexData = useRexStore().getRexData(label);
+    const rexData = useRexStore().getRexData(CURRENT_CONTEXT);
     if (rexData) {
         const totalBalance = rexData.balance;
         const withdrawableBalance = rexData.withdrawable;
@@ -92,7 +91,7 @@ const unstakingFiatValueBn = computed(() => {
 const isUnstakingLoading = computed(() => unstakingBalanceBn.value === undefined);
 
 // Third cell: Withdrawable
-const withdrawableBalanceBn = computed(() => useRexStore().getRexData(label)?.withdrawable);
+const withdrawableBalanceBn = computed(() => useRexStore().getRexData(CURRENT_CONTEXT)?.withdrawable);
 const withdrawableFiatValueBn = computed(() => {
     if (withdrawableBalanceBn.value && systemTokenPrice.value && !systemTokenPrice.value.isZero()) {
         const ratioNumber = ethers.utils.formatUnits(systemTokenPrice.value, systemToken.price.decimals);
@@ -118,7 +117,7 @@ const unlockPeriod = computed(() => rexStore.getUnstakingPeriodString(CURRENT_CO
 const unlockPeriodLoading = computed(() => unlockPeriod.value === '--');
 
 const tvlAmountBn = computed(() => {
-    const totalStaking = useRexStore().getRexData(label)?.totalStaking;
+    const totalStaking = useRexStore().getRexData(CURRENT_CONTEXT)?.totalStaking;
     if (totalStaking) {
         return totalStaking;
     } else {
@@ -189,21 +188,21 @@ const intervalTimer = setInterval(() => {
     if (isStakedLoading.value) {
         // if staked balance is still undefined we force the balances update
         if (stakedTokenBalanceBn.value === undefined) {
-            balancesStore.updateBalances(label);
+            balancesStore.updateBalances(CURRENT_CONTEXT);
         }
         // if unstaked ratio is still zero we force the chain update
         if (unstakedRatio.value.isZero()) {
-            chainStore.updateStakedRatio(label);
+            chainStore.updateStakedRatio(CURRENT_CONTEXT);
         }
     }
     // is unstaking still loading?
     if (isUnstakingLoading.value || isWithdrawableLoading.value || unlockPeriodLoading.value) {
         // we need to update rex data
-        useRexStore().updateRexData(label);
+        useRexStore().updateRexData(CURRENT_CONTEXT);
     }
     if (apyisLoading.value) {
         // force apy update
-        chainStore.updateApy(label);
+        chainStore.updateApy(CURRENT_CONTEXT);
     }
 
     if (

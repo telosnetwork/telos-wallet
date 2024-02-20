@@ -1,4 +1,4 @@
-import { ContractInterface, ethers } from 'ethers';
+import { BigNumber, ContractInterface, ethers } from 'ethers';
 import { markRaw } from 'vue';
 import {
     AntelopeError, EvmContractCalldata,
@@ -13,6 +13,7 @@ import {
     TRANSFER_SIGNATURES,
 } from 'src/antelope/types';
 import { Interface } from 'ethers/lib/utils';
+import { parseUnits } from 'ethers/lib/utils';
 
 
 export default class EvmContract {
@@ -26,6 +27,7 @@ export default class EvmContract {
     private readonly _manager?: EvmContractManagerI;
     private readonly _token?: TokenSourceInfo | null;
 
+    private _contractInstance?: ethers.Contract;
     private _verified?: boolean;
 
     constructor({
@@ -117,6 +119,14 @@ export default class EvmContract {
         return this._token;
     }
 
+    get maxSupply() {
+        if (!this.isToken() || !this._properties?.supply || !this._properties?.decimals) {
+            return BigNumber.from(0);
+        }
+
+        return parseUnits(this._properties.supply, this._properties.decimals);
+    }
+
     isNonFungible() {
         return (this._supportedInterfaces.includes('erc721'));
     }
@@ -137,6 +147,11 @@ export default class EvmContract {
         if (!this.abi){
             throw new AntelopeError('antelope.utils.error_contract_instance');
         }
+
+        if (this._contractInstance) {
+            return this._contractInstance;
+        }
+
         const signer = await this._manager?.getSigner();
         let provider;
 
@@ -145,6 +160,7 @@ export default class EvmContract {
         }
 
         const contract = new ethers.Contract(this.address, this.abi, signer ?? provider ?? undefined);
+        this._contractInstance = contract;
 
         return contract;
     }

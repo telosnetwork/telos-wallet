@@ -61,9 +61,13 @@ export interface ContractStoreState {
             processing: Record<string, Promise<EvmContract | null>>
         },
     }
-    // addresses which have been checked and are known not to be contract addresses
     __accounts: {
-        [network: string]: string[],
+        [network: string]: {
+            // addresses which are being checked to see if they are account (non-contract) addresses
+            processing: Record<string, Promise<boolean>>,
+            // addresses which have been checked and are known not to be contract addresses
+            addresses: string[],
+        },
     },
 }
 
@@ -584,24 +588,41 @@ export const useContractStore = defineStore(store_name, {
         async addressIsContract(label: string, address: string) {
             const network = useChainStore().getChain(label).settings.getNetwork();
             const addressLower = address.toLowerCase();
-            if (!this.__accounts[network]) {
-                this.__accounts[network] = [];
+
+            if (this.__contracts[network]?.cached[addressLower] || this.__contracts[network]?.metadata[addressLower]) {
+                return true;
             }
 
-            if (this.__accounts[network].includes(addressLower)) {
+            if (!this.__accounts[network]) {
+                this.__accounts[network] = {
+                    processing: {},
+                    addresses: [],
+                };
+            }
+
+            if (this.__accounts[network].addresses.includes(addressLower)) {
                 return false;
             }
 
-            const provider = await getAntelope().wallets.getWeb3Provider(label);
-            const code = await provider.getCode(address);
-
-            const isContract = code !== '0x';
-
-            if (!isContract && !this.__accounts[network].includes(addressLower)) {
-                this.__accounts[network].push(addressLower);
+            if (!!this.__accounts[network].processing[addressLower]) {
+                return this.__accounts[network].processing[addressLower];
             }
 
-            return isContract;
+            this.__accounts[network].processing[addressLower] = new Promise(async (resolve) => {
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const isContract = (await indexer.get(`/v1/contract/${addressLower}`)).data.results.length > 0;
+
+                if (!isContract && !this.__accounts[network].addresses.includes(addressLower)) {
+                    this.__accounts[network].addresses.push(addressLower);
+                }
+
+                resolve(isContract);
+            });
+
+            return this.__accounts[network].processing[addressLower].then((isContract) => {
+                delete this.__accounts[network].processing[addressLower];
+                return isContract;
+            });
         },
     },
 });

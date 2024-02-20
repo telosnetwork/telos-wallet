@@ -149,7 +149,7 @@ export default class TelosEVMTestnet extends EVMChainSettings {
     }
 
     getBuyMoreOfTokenLink(): string {
-        return 'https://telos.net/ecosystem?category=Exchanges';
+        return 'https://app.telos.net/testnet/evm-faucet';
     }
 
     getSystemTokens(): TokenClass[] {

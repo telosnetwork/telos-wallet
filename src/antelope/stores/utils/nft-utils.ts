@@ -47,15 +47,18 @@ export async function extractNftMetadata(
         // We need to look at the metadata
         // we iterate over the metadata properties
         for (const property in metadata) {
-            const value = metadata[property];
-            if (!value) {
+            const _value = metadata[property];
+
+            if (typeof _value !== 'string') {
                 continue;
             }
+
+            const value = _value.replace('ipfs://', IPFS_GATEWAY) as string;
+
             // if the value is a string and contains a valid url of a known media format, use it.
             // image formats: .gif, .avif, .apng, .jpeg, .jpg, .jfif, .pjpeg, .pjp, .png, .svg, .webp
             if (
                 !image &&  // if we already have a preview, we don't need to keep looking
-                typeof value === 'string' &&
                 urlIsPicture(value)
             ) {
                 image = value;
@@ -63,7 +66,6 @@ export async function extractNftMetadata(
             // audio formats: .mp3, .wav, .aac, .webm
             if (
                 !mediaSource &&  // if we already have a source, we don't need to keep looking
-                typeof value === 'string' &&
                 await urlIsAudio(value)
             ) {
                 mediaType = NFTSourceTypes.AUDIO;
@@ -72,7 +74,6 @@ export async function extractNftMetadata(
             // video formats: .mp4, .webm, .ogg
             if (
                 !mediaSource &&  // if we already have a source, we don't need to keep looking
-                typeof value === 'string' &&
                 await urlIsVideo(value)
             ) {
                 mediaType = NFTSourceTypes.VIDEO;
@@ -81,7 +82,7 @@ export async function extractNftMetadata(
 
             const regex = /^data:(image|audio|video)\/\w+;base64,[\w+/=]+$/;
 
-            const match = typeof value === 'string' && value.match(regex);
+            const match = value.match(regex);
 
             if (match) {
                 const contentType = match[1];

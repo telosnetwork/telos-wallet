@@ -19,8 +19,6 @@ import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
 import { formatWei } from 'src/antelope/stores/utils';
 
-const label = 'current';
-
 const { t: $t } = useI18n();
 const uiDecimals = 2;
 const ant = getAntelope();
@@ -44,7 +42,7 @@ const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals))
 const inputModelValue = ref(ethers.constants.Zero);
 
 // computed
-const unstakedRatio = computed(() => chainStore.getUnstakedRatio(label));
+const unstakedRatio = computed(() => chainStore.getUnstakedRatio(CURRENT_CONTEXT));
 const outputModelValue = computed(() => {
     if (unstakedRatio.value.isZero()) {
         return ethers.constants.Zero;
