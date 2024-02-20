@@ -48,6 +48,7 @@ export interface LoginNativeActionData {
 export interface LoginEVMActionData {
     authenticator: EVMAuthenticator
     network: string,
+    autoLogAccount?: string,
 }
 
 export interface SendActionData {
@@ -153,14 +154,14 @@ export const useAccountStore = defineStore(store_name, {
             return success;
         },
 
-        async loginEVM({ authenticator, network }: LoginEVMActionData): Promise<boolean> {
+        async loginEVM({ authenticator, network, autoLogAccount }: LoginEVMActionData): Promise<boolean> {
             this.trace('loginEVM', network);
             const label = authenticator.label;
             getAntelope().events.onClear.next({ label });
 
             let success = false;
             try {
-                const rawAddress = await authenticator.login(network);
+                const rawAddress = autoLogAccount ? await authenticator.autoLogin(network, autoLogAccount) : await authenticator.login(network);
                 this.trace('loginEVM', 'authenticator finished with address', rawAddress);
 
                 if (rawAddress) {
@@ -242,6 +243,7 @@ export const useAccountStore = defineStore(store_name, {
                 useFeedbackStore().setLoading('account.autoLogin');
                 const network = localStorage.getItem('network');
                 const account = localStorage.getItem('account');
+                const rawAddress = localStorage.getItem('rawAddress');
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
                 this.trace('autoLogin', account, isNative, autoLogin);
@@ -265,9 +267,11 @@ export const useAccountStore = defineStore(store_name, {
                             console.error(getAntelope().wallets);
                             throw new Error('antelope.account.error_auto_login');
                         }
+                        const autoLogAccount = rawAddress ?? account;
                         return this.loginEVM({
                             authenticator,
                             network,
+                            autoLogAccount,
                         });
                     }
                 }
@@ -290,6 +294,31 @@ export const useAccountStore = defineStore(store_name, {
                 return Promise.resolve(false);
             } finally {
                 useFeedbackStore().unsetLoading('account.isConnectedToCorrectNetwork');
+            }
+        },
+
+        async assertNetworkConnection(label: string): Promise<boolean> {
+            if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                return new Promise<boolean>(async (resolve) => {
+                    const ant = getAntelope();
+                    const authenticator = useAccountStore().loggedAccount.authenticator as EVMAuthenticator;
+                    try {
+                        await authenticator.ensureCorrectChain();
+                        if (!await useAccountStore().isConnectedToCorrectNetwork(label)) {
+                            resolve(false);
+                        } else {
+                            resolve(true);
+                        }
+                    } catch (error) {
+                        const message = (error as Error).message;
+                        if (message === 'antelope.evm.error_switch_chain_rejected') {
+                            ant.config.notifyNeutralMessageHandler(message);
+                        }
+                        resolve(false);
+                    }
+                });
+            } else {
+                return true;
             }
         },
 

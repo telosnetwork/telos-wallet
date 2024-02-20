@@ -19,7 +19,6 @@ import ConversionRateBadge from 'src/components/ConversionRateBadge.vue';
 import CurrencyInput from 'src/components/evm/inputs/CurrencyInput.vue';
 import { WEI_PRECISION, formatWei } from 'src/antelope/stores/utils';
 
-const label = 'current';
 
 const { t: $t } = useI18n();
 const uiDecimals = 2;
@@ -43,7 +42,7 @@ const oneEth = ethers.BigNumber.from('1'.concat('0'.repeat(systemTokenDecimals))
 const inputModelValue = ref(ethers.constants.Zero);
 const estimatedGas = ref(ethers.constants.Zero);
 // computed
-const stakedRatio = computed(() => chainStore.getStakedRatio(label));
+const stakedRatio = computed(() => chainStore.getStakedRatio(CURRENT_CONTEXT));
 const outputModelValue = computed(() => {
     if (stakedRatio.value.isZero()) {
         return ethers.constants.Zero;
@@ -118,14 +117,7 @@ onBeforeMount(() => {
 
 async function handleCtaClick() {
     const label = CURRENT_CONTEXT;
-    if (!await accountStore.isConnectedToCorrectNetwork(label)) {
-        const networkName = useChainStore().loggedChain.settings.getDisplay();
-        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-
-        ant.config.notifyFailureWithAction(errorMessage, {
-            label: ant.config.localizationHandler('evm_wallet.switch'),
-        });
-
+    if (!await useAccountStore().assertNetworkConnection(label)) {
         return;
     }
 

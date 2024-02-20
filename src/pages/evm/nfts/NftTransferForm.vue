@@ -73,11 +73,15 @@ onMounted(() => {
 });
 
 async function startTransfer() {
+    const label = CURRENT_CONTEXT;
     transferLoading.value = true;
     const nameString = `${props.nft.contractPrettyName || props.nft.contractAddress} #${props.nft.id}`;
     try {
+        if (!await useAccountStore().assertNetworkConnection(label)) {
+            return;
+        }
         const trx = await nftStore.transferNft(
-            CURRENT_CONTEXT,
+            label,
             contractAddress,
             nftId,
             nftType.value,

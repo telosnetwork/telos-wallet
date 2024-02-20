@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, toRaw } from 'vue';
 import WalletTransactionRow from 'pages/evm/wallet/WalletTransactionRow.vue';
 
 import TableControls from 'components/evm/TableControls.vue';
@@ -10,6 +10,8 @@ import { AntelopeError } from 'src/antelope/types';
 const historyStore = useHistoryStore();
 const accountStore = useAccountStore();
 const feedbackStore = useFeedbackStore();
+
+const rowsPerPageOptions = [5, 10, 20, 50, 100];
 
 export default defineComponent({
     name: 'WalletTransactionsTab',
@@ -40,12 +42,7 @@ export default defineComponent({
             const txLoading = feedbackStore.isLoading('history.fetchEVMTransactionsForAccount');
             const transfersLoading = feedbackStore.isLoading('history.fetchEvmNftTransfersForAccount');
             const actionsInProgress = txLoading || transfersLoading;
-            const hideLoadingState = this.pagination.page === 1 && this.initialLoadComplete && !this.rowsPerPageUpdating;
-
-            // don't show the loading state if we're on the first page and transactions are already present
-            // this covers two scenarios, 1. the user came to the page from the balances page, meaning we prefetched transactions
-            // or 2. the user is on the first page and we are re-fetching transactions on an interval
-            return actionsInProgress && !hideLoadingState;
+            return actionsInProgress;
         },
         address() {
             return accountStore.loggedEvmAccount?.address ?? '';
@@ -76,25 +73,67 @@ export default defineComponent({
             // also reload txs if the user switches accounts
             this.getTransactions();
         },
-        pagination(newPagination, oldPagination) {
-            if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
-                this.rowsPerPageUpdating = true;
-            }
-            this.getTransactions().finally(() => {
-                this.rowsPerPageUpdating = false;
-            });
+        pagination: {
+            handler(newPagination, oldPagination) {
+                if (newPagination.rowsPerPage !== oldPagination.rowsPerPage) {
+                    this.rowsPerPageUpdating = true;
+                }
+
+                const { rowsPerPage, page } = newPagination;
+
+                this.$router.replace({
+                    name: 'evm-wallet',
+                    query: {
+                        ...this.$route.query,
+                        rowsPerPage,
+                        page,
+                    },
+                });
+            },
+            deep: true,
         },
         totalRows: {
             immediate: true,
             handler(newValue) {
-                this.pagination.rowsNumber = newValue;
+                if (this.pagination.rowsNumber === 0) {
+                    // this means we just arrived the page, so we got to take the page and rowsPerPage from the url
+                    const page = +(this.$route.query.page ?? 1);
+                    const rowsPerPage = +(this.$route.query.rowsPerPage ?? 5);
+                    const rowsNumber = newValue;
+                    this.pagination = {
+                        page,
+                        rowsPerPage,
+                        rowsCurrentPage: rowsPerPage,
+                        rowsNumber,
+                    };
+                } else {
+                    this.pagination.rowsNumber = newValue;
+                }
             },
+        },
+        $route(newRoute) {
+            if (newRoute.name !== 'evm-wallet' || newRoute.query.tab !== 'transactions') {
+                return;
+            }
+
+            this.pagination = {
+                page: +(newRoute.query.page ?? 1),
+                rowsPerPage: +(newRoute.query.rowsPerPage ?? 5),
+                rowsCurrentPage: this.pagination.rowsPerPage,
+                rowsNumber: this.pagination.rowsNumber,
+            };
+
+            this.getTransactions().finally(() => {
+                this.rowsPerPageUpdating = false;
+            });
         },
     },
     created() {
         if (this.shapedTransactions.length) {
             this.initialLoadComplete = true;
         }
+
+        this.getTransactions();
 
         this.fetchTransactionsInterval = setInterval(() => {
             if (this.doLiveUpdate) {
@@ -109,6 +148,8 @@ export default defineComponent({
     },
     methods: {
         async getTransactions() {
+
+
             const offset = (this.pagination.page - 1) * this.pagination.rowsPerPage;
             let limit = this.pagination.rowsPerPage;
 
@@ -120,6 +161,7 @@ export default defineComponent({
             } else {
                 this.pagination.rowsCurrentPage = this.pagination.rowsPerPage;
             }
+
 
             if (this.address) {
                 historyStore.setEVMTransactionsFilter({

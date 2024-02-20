@@ -187,7 +187,7 @@ export const useChainStore = defineStore(store_name, {
             const stkToken = chain_settings.getStakedSystemToken();
 
             const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
-            const provider = await getAntelope().wallets.getWeb3Provider();
+            const provider = await getAntelope().wallets.getWeb3Provider(label);
             const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
             // Now we preview a deposit of 1 SYS to get the ratio
             const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
