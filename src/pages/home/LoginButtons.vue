@@ -25,6 +25,7 @@ import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import { words } from 'src/pages/home/words';
 import { Subscription } from 'rxjs';
 
+
 export default defineComponent({
     name: 'LoginButtons',
     components: {
@@ -46,9 +47,51 @@ export default defineComponent({
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
+        // Redirect -----------------------------------------------------------
+        // If we receive a redirect parameter in the URL, we redirect to the corresponding page after the user has completed the login process
+        // The first thing we do is to check if the URL has a redirect parameter to set a local variable
+        const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+        const redirect = ref<{url:string, hostname:string} | null>(null);
+        const redirectShow = ref(false);
+        if (redirectParam) {
+            const isValid = new RegExp('^(http|https)://', 'i').test(redirectParam);
+            if (isValid) {
+                redirect.value = {
+                    url: redirectParam,
+                    hostname: new URL(redirectParam).hostname,
+                };
+                redirectShow.value = true;
+            }
+        }
+
+        const subscription = ant.events.onLoggedIn.subscribe({
+            next: () => {
+                subscription.unsubscribe();
+                // if the redirect parameter is present, show a confirm notification to the user
+                if (redirect.value) {
+                    const hostname = redirect.value.hostname;
+                    const message = globalProps.$t('home.redirect_notification_message', { hostname });
+                    globalProps.$notifyWarningWithAction(message, {
+                        label: ant.config.localizationHandler('home.redirect_me'),
+                        handler: () => {
+                            // we redirect the user to the url
+                            if (redirect.value) {
+                                // we need to generate a new url based on redirect.value?.url adding the accountStore.loggedNativeAccount?.account
+                                const url = new URL(redirect.value.url);
+                                url.searchParams.set('account', accountStore.loggedNativeAccount?.account || '');
+                                window.location.href = url.toString();
+                            }
+                        },
+                    });
+                }
+            },
+        });
+
+
         const showEVMButtons = computed(() =>
             props.chain === 'evm');
         const showZeroButtons = computed(() =>
+            redirect.value === null && // then we hide everything else
             props.chain === 'zero' &&
             !requestNameSelection.value  &&
             !requestAccountSelection.value &&
@@ -146,6 +189,7 @@ export default defineComponent({
 
         // Telos Zero Login ----------------------------------------------------
         const ualAuthenticators = ant.config.authenticatorsGetter();
+
         const loginTelosZero = (idx:number, justViewer:boolean = false) => {
             if (justViewer) {
                 localStorage.setItem('justViewer', 'true');
@@ -154,6 +198,7 @@ export default defineComponent({
             }
             const network = chainStore.currentChain.settings.getNetwork();
             const authenticator = ualAuthenticators[idx];
+
             accountStore.loginZero({ authenticator, network });
         };
         const getZeroAuthenticator = (name: string) => {
@@ -423,6 +468,8 @@ export default defineComponent({
             accountNameErrorMessage,
             requestAccountSelection,
             requestNameSelection,
+            redirectShow,
+            redirect,
         };
     },
     unmounted() {
@@ -524,9 +571,11 @@ export default defineComponent({
         </div>
     </div>
 
-    <template v-if="requestNameSelection || requestAccountSelection">
+    <template v-if="requestNameSelection || requestAccountSelection || redirectShow">
         <div v-if="requestNameSelection" class="c-login-buttons__zero-accounts-title"> {{ $t('home.name_selection_text') }}</div>
         <div v-if="requestAccountSelection" class="c-login-buttons__zero-accounts-title"> {{ $t('home.account_selection_text') }}</div>
+        <div v-if="redirectShow" class="c-login-buttons__zero-accounts-title"> {{ $t('home.redirect_warning') }}</div>
+        <div v-if="redirectShow" class="c-login-buttons__zero-accounts-title"><b> {{ redirect?.hostname }}</b></div>
     </template>
 
     <template v-if="showEVMButtons">
@@ -663,6 +712,7 @@ export default defineComponent({
             {{ $t('home.create_new_account') }}
         </div>
     </template>
+
 </div>
 </template>
 

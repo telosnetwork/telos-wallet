@@ -41,7 +41,14 @@ function setTab(login: TabReference): void {
 }
 
 onMounted(() => {
-    if (walletOption.value && walletOption.value !== 'unset') {
+    // -- Redirect --
+    // If we receive a redirect parameter in the URL, we redirect to the corresponding page after the user has completed the login process
+    // The first thing we do is to check if the URL has a redirect parameter to set a local variable
+    const redirect = new URLSearchParams(window.location.search).get('redirect');
+    // if the redirect parameter is present, need to force the Google One Tap button to be shown on Zero tab
+    if (redirect) {
+        setTab('zero');
+    } else if (walletOption.value && walletOption.value !== 'unset') {
         setTab(walletOption.value as TabReference);
     } else {
         // set evm as default

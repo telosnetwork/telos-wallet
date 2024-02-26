@@ -65,6 +65,9 @@ export default {
         account_name: 'Account Name',
         name_selection_text: 'Account name needs to be twelve characters long and can only consist of lowercase letters and numerical characters from 1 to 5.',
         account_selection_text: 'Choose one of your accounts to log in',
+        redirect_me: 'Redirect me',
+        redirect_warning: 'After you log in, you will be redirected to the following site:',
+        redirect_notification_message: 'Do you approve to be redirected to<br/><b>{hostname}</b>?<br/><br/>only proceed if you trust the site.',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
