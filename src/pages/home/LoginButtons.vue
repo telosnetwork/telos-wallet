@@ -77,8 +77,14 @@ export default defineComponent({
                             // we redirect the user to the url
                             if (redirect.value) {
                                 // we need to generate a new url based on redirect.value?.url adding the accountStore.loggedNativeAccount?.account
+                                // and the email of the user if it's a metakeep authenticator
                                 const url = new URL(redirect.value.url);
                                 url.searchParams.set('account', accountStore.loggedNativeAccount?.account || '');
+                                const authenticator = accountStore.loggedNativeAccount.authenticator;
+                                if (authenticator && authenticator.getName() === 'metakeep.ual') {
+                                    const auth = authenticator as never as MetakeepAuthenticator;
+                                    url.searchParams.set('email', auth.getEmail());
+                                }
                                 window.location.href = url.toString();
                             }
                         },
