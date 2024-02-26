@@ -85,6 +85,7 @@ export default defineComponent({
                                     const auth = authenticator as never as MetakeepAuthenticator;
                                     url.searchParams.set('email', auth.getEmail());
                                 }
+                                console.log('redirecting to', url.toString());
                                 window.location.href = url.toString();
                             }
                         },
