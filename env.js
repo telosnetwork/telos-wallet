@@ -9,7 +9,7 @@ const sharedEnv = {
     IMGUR_CLIENT_ID: 'b6f46df9d1da9d9',
     EVM_CONTRACT: 'eosio.evm',
     PROJECT_ID: '2392473d6d98499c7138cd2d705a791f',
-    GOOGLE_APP_ID: '56634824599-ff3iu788c32c3s7ec65cs4bieop9gpgv.apps.googleusercontent.com', // official App id
+    GOOGLE_APP_ID: '639241197544-kcubenhmti6u7ef3uj360n2lcl5cmn8c.apps.googleusercontent.com', // Viter's client id
 };
 
 const TESTNET = {
