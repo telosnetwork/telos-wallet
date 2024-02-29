@@ -92,6 +92,10 @@ export class MetakeepAuthenticator extends Authenticator {
         };
     }
 
+    getEmail() {
+        return this.userCredentials.email;
+    }
+
     resetAccountSelector() {
         this.accountSelector = metakeepDefaultAccountSelector;
     }
