@@ -81,10 +81,11 @@ export default defineComponent({
                                 const url = new URL(redirect.value.url);
                                 url.searchParams.set('account', accountStore.loggedNativeAccount?.account || '');
                                 const authenticator = accountStore.loggedNativeAccount.authenticator;
-                                if (authenticator && authenticator.getName() === 'metakeep.ual') {
-                                    const auth = authenticator as never as MetakeepAuthenticator;
-                                    url.searchParams.set('email', auth.getEmail());
-                                }
+                                // if (authenticator && authenticator.getName() === 'metakeep.ual') {
+                                console.log('adding the email...');
+                                const auth = authenticator as never as MetakeepAuthenticator;
+                                url.searchParams.set('email', auth.getEmail());
+                                //}
                                 console.log('redirecting to', url.toString());
                                 window.location.href = url.toString();
                             }
