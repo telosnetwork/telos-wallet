@@ -351,8 +351,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
                     const priceIsCurrent =
-                        !!contractData.calldata.marketdata_updated &&
-                        dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
+                        !!contractData.calldata?.marketdata_updated &&
+                        dateIsWithinXMinutes(+contractData.calldata?.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
                     if (typeof contractData.calldata === 'object' && priceIsCurrent) {
