@@ -332,13 +332,11 @@ export default {
 
             this.coins.forEach(async (coin) => {
                 if (coin.network === 'tevm') {
-                    debugger;
                     coin.amount = this.evmBalance;
                 }
             });
 
             const sortCoin = function (suggestTokens) {
-                debugger;
                 return function (a, b) {
                     const aSymbol = a.symbol.toLowerCase();
                     const bSymbol = b.symbol.toLowerCase();
