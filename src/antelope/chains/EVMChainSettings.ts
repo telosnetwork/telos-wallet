@@ -331,7 +331,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             for (const result of balances.results) {
                 const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
                 const contractData = balances.contracts[result.contract] ?? {};
-                const callDataStr = contractData.calldata as string | object;
+
+                console.log('contractData: ', contractData);
+
+                const callDataStr = contractData.calldata as string | object ?? '{}';
 
                 try {
                     if (typeof callDataStr === 'string') {
