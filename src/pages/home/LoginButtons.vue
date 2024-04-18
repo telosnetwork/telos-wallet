@@ -47,12 +47,16 @@ export default defineComponent({
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
-        // Redirect -----------------------------------------------------------
+        // Redirect or iFrame -----------------------------------------------------------
         // If we receive a redirect parameter in the URL, we redirect to the corresponding page after the user has completed the login process
         // The first thing we do is to check if the URL has a redirect parameter to set a local variable
+        // in case of iframe, we will not redirect the user to the corresponding page,
+        // instead we send the credentials (accountname, email) to the parent window
         const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+        const iframeParam = new URLSearchParams(window.location.search).get('iframe');
         const redirect = ref<{url:string, hostname:string} | null>(null);
         const redirectShow = ref(false);
+        const iframeShow = ref(false);
         if (redirectParam) {
             const isValid = new RegExp('^(http|https)://', 'i').test(redirectParam);
             if (isValid) {
@@ -64,11 +68,23 @@ export default defineComponent({
             }
         }
 
+        if (iframeParam) {
+            const isValid = new RegExp('^(http|https)://', 'i').test(iframeParam);
+            if (isValid) {
+                redirect.value = {
+                    url: iframeParam,
+                    hostname: new URL(iframeParam).hostname,
+                };
+                iframeShow.value = true;
+            }
+        }
+
         const subscription = ant.events.onLoggedIn.subscribe({
             next: () => {
                 subscription.unsubscribe();
                 // if the redirect parameter is present, show a confirm notification to the user
-                if (redirect.value) {
+
+                if (redirectShow.value && redirect.value) {
                     const hostname = redirect.value.hostname;
                     const message = globalProps.$t('home.redirect_notification_message', { hostname });
                     globalProps.$notifyWarningWithAction(message, {
@@ -81,16 +97,26 @@ export default defineComponent({
                                 const url = new URL(redirect.value.url);
                                 url.searchParams.set('account', accountStore.loggedNativeAccount?.account || '');
                                 const authenticator = accountStore.loggedNativeAccount.authenticator;
-                                // if (authenticator && authenticator.getName() === 'metakeep.ual') {
-                                console.log('adding the email...');
+                                console.log('adding the email...'); // FIXME: remove this line
                                 const auth = authenticator as never as MetakeepAuthenticator;
                                 url.searchParams.set('email', auth.getEmail());
-                                //}
-                                console.log('redirecting to', url.toString());
+                                console.log('redirecting to', url.toString()); // FIXME: remove this line
                                 window.location.href = url.toString();
                             }
                         },
                     });
+                } else if (iframeShow.value) {
+                    const authenticator = accountStore.loggedNativeAccount.authenticator;
+                    const auth = authenticator as never as MetakeepAuthenticator;
+                    const credentials: {account: string, email: string, keys: string[] } = {
+                        account: accountStore.loggedNativeAccount?.account || '',
+                        email: auth.getEmail(),
+                        keys: auth.getKeys() ?? [],
+                    };
+                    const str = JSON.stringify(credentials);
+                    console.log('credentials', credentials, str); // FIXME: remove this line
+                    accountStore.logout();
+                    window.parent.postMessage(str, '*');
                 }
             },
         });

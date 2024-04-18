@@ -46,7 +46,13 @@ onMounted(() => {
     // The first thing we do is to check if the URL has a redirect parameter to set a local variable
     const redirect = new URLSearchParams(window.location.search).get('redirect');
     // if the redirect parameter is present, need to force the Google One Tap button to be shown on Zero tab
-    if (redirect) {
+    // -- iFrame --
+    // We can also receive an iframe parameter in the URL, which will be used to determine if the page is being loaded inside an iframe
+    // if so, we will perform exactly the same steps as in the redirect case
+    // except that we will not redirect the user to the corresponding page
+    // instead we send the credentials (accountname, email) to the parent window
+    const iframe = new URLSearchParams(window.location.search).get('iframe');
+    if (redirect || iframe) {
         setTab('zero');
     } else if (walletOption.value && walletOption.value !== 'unset') {
         setTab(walletOption.value as TabReference);

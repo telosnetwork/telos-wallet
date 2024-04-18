@@ -16,6 +16,7 @@ import { metakeepCache } from 'src/antelope/wallets/ual/utils/metakeep-cache';
 export interface UserCredentials {
     email: string;
     jwt: string;
+    keys?: string[];
 }
 
 export interface MetakeepUALOptions {
@@ -64,7 +65,7 @@ export class MetakeepAuthenticator extends Authenticator {
     private accountCreateAPI: string;
     private appId: string;
     private loading = false;
-    private userCredentials: UserCredentials = { email: '', jwt: '' };
+    private userCredentials: UserCredentials = { email: '', jwt: '', keys: [] };
 
     private accountSelector: MetakeepAccountSelector = metakeepDefaultAccountSelector;
     private accountNameSelector: MetakeepNameAccountSelector = metakeepDefaultAccountNameSelector;
@@ -89,11 +90,16 @@ export class MetakeepAuthenticator extends Authenticator {
         this.userCredentials = {
             email: metakeepCache.getLogged() ?? '',
             jwt: '',
+            keys: [],
         };
     }
 
     getEmail() {
         return this.userCredentials.email;
+    }
+
+    getKeys() {
+        return this.userCredentials.keys;
     }
 
     resetAccountSelector() {
@@ -225,6 +231,8 @@ export class MetakeepAuthenticator extends Authenticator {
             // we check if we have the account name in the cache
             const accountNames = metakeepCache.getAccountNames(this.userCredentials.email, this.chainId);
             if (accountNames.length > 0) {
+                const publicKey = metakeepCache.getEosAddress(this.userCredentials.email);
+                this.userCredentials.keys = [publicKey];
                 if (accountNames.length > 1) {
                     // if we have more than one account, we ask the user to select one using this callback
                     const selectedAccount = await this.accountSelector.selectAccount(accountNames);
@@ -240,6 +248,7 @@ export class MetakeepAuthenticator extends Authenticator {
             const credentials = await metakeep.getWallet();
             const publicKey = credentials.wallet.eosAddress;
 
+            this.userCredentials.keys = [publicKey];
             metakeepCache.addCredentials(this.userCredentials.email, credentials.wallet);
 
             try {
