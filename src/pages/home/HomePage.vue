@@ -5,6 +5,7 @@ import LoginButtons from 'pages/home/LoginButtons.vue';
 import { Menu } from 'src/pages/home/MenuType';
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { iframeParam, redirectParam } from 'src/boot/telosCloudJs';
 
 type TabReference = 'evm' | 'zero' | 'unset';
 
@@ -14,6 +15,7 @@ const chainStore = useChainStore();
 
 const tab = ref<TabReference>('unset');
 const walletOption = computed(() => route.query.login as LocationQueryValue);
+const showTabs = ref(true);
 
 function setChainForTab(tab: TabReference): void {
     // set chain
@@ -40,20 +42,17 @@ function setTab(login: TabReference): void {
     }
 }
 
+function hideTabs(): void {
+    showTabs.value = false;
+}
+
 onMounted(() => {
-    // -- Redirect --
-    // If we receive a redirect parameter in the URL, we redirect to the corresponding page after the user has completed the login process
-    // The first thing we do is to check if the URL has a redirect parameter to set a local variable
-    const redirect = new URLSearchParams(window.location.search).get('redirect');
-    // if the redirect parameter is present, need to force the Google One Tap button to be shown on Zero tab
-    // -- iFrame --
-    // We can also receive an iframe parameter in the URL, which will be used to determine if the page is being loaded inside an iframe
-    // if so, we will perform exactly the same steps as in the redirect case
-    // except that we will not redirect the user to the corresponding page
-    // instead we send the credentials (accountname, email) to the parent window
-    const iframe = new URLSearchParams(window.location.search).get('iframe');
-    if (redirect || iframe) {
+    // Redirect or iFrame -----------------------------------------------------------
+    // if redirect or iframe is set, it means the user is coming from an external source
+    // and wants to use the wallet to login and come back to the external source
+    if (redirectParam || iframeParam) {
         setTab('zero');
+        hideTabs();
     } else if (walletOption.value && walletOption.value !== 'unset') {
         setTab(walletOption.value as TabReference);
     } else {
@@ -75,7 +74,7 @@ onMounted(() => {
                     class="c-home__logo"
                 ></div>
                 <div class="c-home__button-container">
-                    <div class="c-home__network-toggle-container" role="tablist">
+                    <div v-if="showTabs" class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
