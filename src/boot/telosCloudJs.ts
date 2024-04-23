@@ -113,3 +113,5 @@ export default boot(async ({ app }) => {
 
 
 });
+
+console.log('telosCloudJs-0.9.19 support');
