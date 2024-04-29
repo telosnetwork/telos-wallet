@@ -72,6 +72,7 @@ export default {
         login: 'Connect Wallet',
         teloscan: 'Teloscan',
         ecosystem: 'Ecosystem',
+        bridge: 'Bridge',
         nfts: 'Digital Collectibles',
         allowances: 'Approvals',
     },

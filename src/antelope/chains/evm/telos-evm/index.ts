@@ -55,6 +55,7 @@ const API_ENDPOINT = 'https://api.telos.net/v1';
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://teloscan.io';
 const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
+const BRIDGE_URL = 'https://explorer.telos.net';
 const NETWORK_EVM_ENDPOINT = 'https://mainnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts.s3.amazonaws.com';
@@ -138,6 +139,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getEcosystemUrl(): string {
         return ECOSYSTEM_URL;
+    }
+
+    getBridgeUrl(): string {
+        return BRIDGE_URL;
     }
 
     getTrustedContractsBucket(): string {
