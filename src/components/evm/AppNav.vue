@@ -151,6 +151,10 @@ export default defineComponent({
             const network = this.loggedAccount.network;
             window.open(chainStore.getExplorerUrl(network), '_blank');
         },
+        goToTelosBridge() {
+            const network = this.loggedAccount.network;
+            window.open(chainStore.getBridgeUrl(network), '_blank');
+        },
     },
 });
 </script>
@@ -389,6 +393,16 @@ export default defineComponent({
                 {{ $t('nav.teloscan') }}
                 <q-icon size="16px" name="launch" />
             </li>
+            <li
+                class="c-app-nav__menu-link"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goToTelosBridge()"
+                @keypress.space.enter="goToTelosBridge()"
+            >
+                {{ $t('nav.bridge') }}
+                <q-icon size="16px" name="launch" />
+            </li>
         </ul>
 
         <div v-if="!isProduction" class="c-app-nav__demos-link">
@@ -573,7 +587,7 @@ export default defineComponent({
     }
 
     &__menu-link {
-        @include text--small-bold;
+        @include text--paragraph-bold;
 
         cursor: pointer;
         display: flex;
