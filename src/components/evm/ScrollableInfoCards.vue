@@ -90,7 +90,7 @@ const props = defineProps<{
 
 
     &__card {
-        background-color: var(--bg-color);
+        background-color: var(--card-background-color);
         padding: 12px;
         border-radius: 4px;
         border: 2px solid var(--header-item-outline-color);
