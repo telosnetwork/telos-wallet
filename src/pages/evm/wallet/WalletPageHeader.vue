@@ -138,7 +138,7 @@ const goToBuy = () => {
 
     &__link-text {
         @include text--header-4;
-        color: var(--text-high-contrast);
+        color: var(--header-link-color);
         text-align: center;
         width: max-content;
     }

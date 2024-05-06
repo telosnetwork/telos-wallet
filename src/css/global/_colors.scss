@@ -157,7 +157,8 @@ body.body--dark {
     --border-over-header-color: transparent;
     --accent-color: var(--q-primary);
     --accent-color-3: var(--border-color);
-    --header-icon-color: #FFF9;
+    --header-icon-color: var(--text-high-contrast);
+    --header-link-color: #FFF9;
     --text-low-contrast: #FFF9;
 
     // From Teloscan -------------
