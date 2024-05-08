@@ -121,11 +121,11 @@ const goToBuy = () => {
 
         // svg overrides
         path {
-            fill: $primary;
+            fill: var(--header-icon-color);
         }
 
         rect {
-            stroke: $primary;
+            stroke: var(--header-icon-color);
         }
 
         &--rotated {
@@ -138,7 +138,7 @@ const goToBuy = () => {
 
     &__link-text {
         @include text--header-4;
-        color: var(--text-high-contrast);
+        color: var(--header-link-color);
         text-align: center;
         width: max-content;
     }
