@@ -127,4 +127,8 @@ export default boot(({ app }) => {
         ant.stores.chain.setChain(CURRENT_CONTEXT, defaultNetwork);
     }
 
+    // We can simulate the indexer being down for testing purposes by uncommenting the following line
+    // (ant.stores.chain.currentChain.settings as EVMChainSettings).simulateIndexerDown(true);
+
+
 });

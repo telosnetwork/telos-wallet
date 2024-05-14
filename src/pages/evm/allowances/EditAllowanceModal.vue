@@ -18,6 +18,7 @@ import {
     isErc721SingleAllowanceRow,
 } from 'src/antelope/types/Allowances';
 import {
+    CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
     useAllowancesStore,
@@ -168,6 +169,10 @@ async function handleSubmit() {
     let tx: TransactionResponse;
     let neutralMessageText: string;
 
+    if (!await useAccountStore().assertNetworkConnection(CURRENT_CONTEXT)) {
+        return;
+    }
+
     if (rowIsErc20Row.value) {
         tx = await useAllowancesStore().updateErc20Allowance(
             userAddress.value,
@@ -238,7 +243,7 @@ async function handleSubmit() {
 
 <template>
 <q-dialog :model-value="showDialog" @update:model-value="() => emit('close')">
-    <q-card class="q-pa-md">
+    <q-card class="c-edit-allowance-modal__card q-pa-md shadow-3">
         <q-card-section>
             {{ $t('evm_allowances.edit_modal_description') }}
             <ExternalLink :text="row.spenderName || row.spenderAddress" :url="spenderUrl" />
@@ -326,8 +331,13 @@ async function handleSubmit() {
 
 <style lang="scss">
 .c-edit-allowance-modal {
+    &__card {
+        color: var(--text-color);
+        background-color: var(--bg-color) !important;
+    }
+
     &__options-container {
-        background-color: var(--accent-color-5);
+        background-color: var(--header-background-color);
         padding: 16px;
         border-radius: 4px;
         margin-bottom: 24px;

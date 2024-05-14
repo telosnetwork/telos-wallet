@@ -2,7 +2,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
 
-const GETTING_STARTED_URL = 'https://www.telos.net/#getting-started';
+const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
 export default {
     components: {

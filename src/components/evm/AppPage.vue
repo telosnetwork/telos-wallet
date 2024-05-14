@@ -43,6 +43,12 @@ export default defineComponent({
 <template>
 <q-page class="c-app-page">
     <div class="c-app-page__header">
+
+        <div class="c-app-page__header-background-top">
+            <div class="c-app-page__header-background-circle c-app-page__header-background-circle--1"></div>
+            <div class="c-app-page__header-background-circle c-app-page__header-background-circle--2"></div>
+        </div>
+
         <div class="c-app-page__header-content">
             <slot name="header"></slot>
         </div>
@@ -99,19 +105,107 @@ export default defineComponent({
     flex-direction: column;
 
     &__tab-panels {
+        background: var(--bg-color);
+        color: var(--text-high-contrast);
         margin-top: 24px;
         flex-grow: 1;
     }
 
     &__header {
-        color: var(--header-text-color);
-        background: var(--accent-color-5);
+        color: var(--text-color);
+        background: var(--header-background-color);
 
         padding-top: 24px;
         position: relative;
+
+        &-background-top {
+            display: var(--display-telos-branding-bg);
+            z-index: 0;
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-position: center center;
+            background-size: 100% auto;
+            background-repeat: no-repeat;
+        }
+
+        &-background-top {
+            overflow: hidden;
+            background-image:
+            radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
+                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
+                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
+                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%);
+
+            @media screen and (min-width: $breakpoint-sm-min) {
+                background-image:
+                radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
+                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
+                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
+                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%)
+            }
+
+            @media screen and (min-width: $breakpoint-md-min) {
+                background-image:
+                radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
+                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
+                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
+                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%)
+            }
+
+            @media screen and (min-width: $breakpoint-lg-min) {
+                background-image:
+                    radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 40%),
+                    radial-gradient(circle at 100% 140%, var(--q-secondary), transparent 20%),
+                    radial-gradient(circle at 100% 0%, var(--q-primary), transparent 20%),
+                    radial-gradient(circle at 50% 20%, var(--q-accent), transparent 90%)
+            }
+        }
+
+        &-background-circle {
+            position: absolute;
+            content: "";
+            border-radius: 100%;
+            border: 32px solid var(--faint-circle-color);
+
+            &--1 {
+                top: -11vh;
+                right: -26vh;
+                width: 45vh;
+                height: 45vh;
+
+                @media screen and (min-width: $breakpoint-lg-min) {
+                    top: -12vh;
+                    right: -16vh;
+                    width: 45vh;
+                    height: 45vh;
+                }
+
+            }
+
+            &--2 {
+                display: none;
+
+                @media screen and (min-width: $breakpoint-lg-min) {
+                    display: block;
+                    top: -75%;
+                    right: 0;
+                    left: 0;
+                    width: 45vh;
+                    height: 45vh;
+                    margin: 0 auto;
+                }
+            }
+        }
+
     }
 
     &__header-content {
+        z-index: 1;
+        position: relative;
         display: flex;
         justify-content: center;
         padding: 0 24px 24px;
@@ -122,6 +216,8 @@ export default defineComponent({
     }
 
     &__tabs {
+        z-index: 1;
+        position: relative;
         flex-grow: 1;
         color: var(--header-text-color);
 

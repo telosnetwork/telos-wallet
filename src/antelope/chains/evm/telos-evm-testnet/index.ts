@@ -55,6 +55,8 @@ const API_ENDPOINT = 'https://api-dev.telos.net/v1';
 const WEI_PRECISION = 18;
 const EXPLORER_URL = 'https://testnet.teloscan.io';
 const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
+const BRIDGE_URL = 'https://telos-bridge-testnet.netlify.app/bridge';
+
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
@@ -144,12 +146,16 @@ export default class TelosEVMTestnet extends EVMChainSettings {
         return ECOSYSTEM_URL;
     }
 
+    getBridgeUrl(): string {
+        return BRIDGE_URL;
+    }
+
     getTrustedContractsBucket(): string {
         return CONTRACTS_BUCKET;
     }
 
     getBuyMoreOfTokenLink(): string {
-        return 'https://telos.net/ecosystem?category=Exchanges';
+        return 'https://app.telos.net/testnet/evm-faucet';
     }
 
     getSystemTokens(): TokenClass[] {

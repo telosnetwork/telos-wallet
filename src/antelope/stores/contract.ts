@@ -45,9 +45,9 @@ import {
 
 const LOCAL_SORAGE_CONTRACTS_KEY = 'antelope.contracts';
 
-const createManager = (signer?: ethers.Signer):EvmContractManagerI => ({
+const createManager = (label: string, signer?: ethers.Signer):EvmContractManagerI => ({
     getSigner: async () => signer ?? null,
-    getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(),
+    getWeb3Provider: () => getAntelope().wallets.getWeb3Provider(label),
     getFunctionIface: (hash:string) => toRaw(useEVMStore().getFunctionIface(hash)),
     getEventIface: (hash:string) => toRaw(useEVMStore().getEventIface(hash)),
 });
@@ -61,9 +61,13 @@ export interface ContractStoreState {
             processing: Record<string, Promise<EvmContract | null>>
         },
     }
-    // addresses which have been checked and are known not to be contract addresses
     __accounts: {
-        [network: string]: string[],
+        [network: string]: {
+            // addresses which are being checked to see if they are account (non-contract) addresses
+            processing: Record<string, Promise<boolean>>,
+            // addresses which have been checked and are known not to be contract addresses
+            addresses: string[],
+        },
     },
 }
 
@@ -183,7 +187,7 @@ export const useContractStore = defineStore(store_name, {
                 return this.__contracts[network].cached[addressLower];
             }
 
-            const isContract = await this.addressIsContract(network, address);
+            const isContract = await this.addressIsContract(label, address);
 
             if (!isContract) {
                 // address is an account, not a contract
@@ -538,7 +542,7 @@ export const useContractStore = defineStore(store_name, {
                 throw new AntelopeError('antelope.contracts.error_label_required');
             }
 
-            const isContract = await this.addressIsContract(network, address);
+            const isContract = await this.addressIsContract(label, address);
 
             if (!isContract) {
                 // address is an account, not a contract
@@ -557,7 +561,7 @@ export const useContractStore = defineStore(store_name, {
                 || (metadata.abi ?? []).length > 0 && (metadata.abi ?? []).length > (this.__contracts[network].cached[index]?.abi?.length ?? 0)
             ) {
                 // This manager provides the signer and the web3 provider
-                metadata.manager = createManager(signer);
+                metadata.manager = createManager(label, signer);
 
                 // we create the contract using the factory
                 const contract = this.__factory.buildContract(metadata);
@@ -581,26 +585,44 @@ export const useContractStore = defineStore(store_name, {
             this.__contracts[network].cached[index] = null;
         },
 
-        async addressIsContract(network: string, address: string) {
+        async addressIsContract(label: string, address: string) {
+            const network = useChainStore().getChain(label).settings.getNetwork();
             const addressLower = address.toLowerCase();
-            if (!this.__accounts[network]) {
-                this.__accounts[network] = [];
+
+            if (this.__contracts[network]?.cached[addressLower] || this.__contracts[network]?.metadata[addressLower]) {
+                return true;
             }
 
-            if (this.__accounts[network].includes(addressLower)) {
+            if (!this.__accounts[network]) {
+                this.__accounts[network] = {
+                    processing: {},
+                    addresses: [],
+                };
+            }
+
+            if (this.__accounts[network].addresses.includes(addressLower)) {
                 return false;
             }
 
-            const provider = await getAntelope().wallets.getWeb3Provider();
-            const code = await provider.getCode(address);
-
-            const isContract = code !== '0x';
-
-            if (!isContract && !this.__accounts[network].includes(addressLower)) {
-                this.__accounts[network].push(addressLower);
+            if (!!this.__accounts[network].processing[addressLower]) {
+                return this.__accounts[network].processing[addressLower];
             }
 
-            return isContract;
+            this.__accounts[network].processing[addressLower] = new Promise(async (resolve) => {
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const isContract = (await indexer.get(`/v1/contract/${addressLower}`)).data.results.length > 0;
+
+                if (!isContract && !this.__accounts[network].addresses.includes(addressLower)) {
+                    this.__accounts[network].addresses.push(addressLower);
+                }
+
+                resolve(isContract);
+            });
+
+            return this.__accounts[network].processing[addressLower].then((isContract) => {
+                delete this.__accounts[network].processing[addressLower];
+                return isContract;
+            });
         },
     },
 });

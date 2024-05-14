@@ -5,6 +5,7 @@ const props = defineProps<{
     header: string;
     content: { text: string; bold?: boolean; }[];
     alwaysOpen?: boolean, // if true, the expansion item will always be open with no toggle
+    centerOnDesktop?: boolean, // if true, the aside will be centered on large screens (default is off to the side)
 }>();
 
 // data
@@ -25,6 +26,7 @@ function handleExpansionItemUpdate() {
     :class="{
         'c-collapsible-aside': true,
         'c-collapsible-aside--always-open': alwaysOpen,
+        'c-collapsible-aside--centered': centerOnDesktop,
     }"
 >
     <q-expansion-item
@@ -58,9 +60,16 @@ function handleExpansionItemUpdate() {
         }
     }
 
+    &--centered {
+        @include md-and-up {
+            display: flex;
+            justify-content: center;
+        }
+    }
+
     &__expansion-item {
         border-radius: 4px;
-        border: 2px solid var(--accent-color-5);
+        border: 2px solid var(--border-color);
         margin-bottom: 8px;
         height: fit-content;
 

@@ -16,7 +16,7 @@ import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 import { getAntelope } from 'src/antelope';
 
-const GETTING_STARTED_URL = 'https://telos.net/ecosystem?category=Exchanges';
+const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
 export default {
     props: ['loadedCoins', 'loadedNftTokens', 'balanceTab'],

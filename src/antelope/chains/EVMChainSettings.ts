@@ -47,6 +47,7 @@ import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 import { CURRENT_CONTEXT, getAntelope, useContractStore, useNftsStore } from 'src/antelope';
 import { WEI_PRECISION, PRICE_UPDATE_INTERVAL_IN_MIN } from 'src/antelope/stores/utils';
 import { BehaviorSubject, filter } from 'rxjs';
+import { createTraceFunction } from 'src/antelope/config';
 
 
 export default abstract class EVMChainSettings implements ChainSettings {
@@ -96,6 +97,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // This observable is used to check if the indexer health state was already checked
     indexerChecked$ = new BehaviorSubject(false);
+
+    // This function is used to trace the execution of the code
+    trace = createTraceFunction('EVMChainSettings');
 
     simulateIndexerDown(isBad: boolean) {
         this.indexerBadHealthSimulated = isBad;
@@ -152,6 +156,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async init(): Promise<void> {
+        this.trace('init');
         // this is called only when this chain is needed to avoid initialization of all chains
         if (this.ready) {
             return this.initPromise;
@@ -290,6 +295,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getWeiPrecision(): number;
     abstract getExplorerUrl(): string;
     abstract getEcosystemUrl(): string;
+    abstract getBridgeUrl(): string;
     abstract getTrustedContractsBucket(): string;
     abstract getSystemTokens(): TokenClass[];
     abstract getIndexerApiEndpoint(): string;
@@ -302,6 +308,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
     }
 
     async getBalances(account: string): Promise<TokenBalance[]> {
+        this.trace('getBalances', account);
         if (!this.hasIndexerSupport()) {
             console.error('Indexer API not supported for this chain:', this.getNetwork());
             return [];
@@ -325,7 +332,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
             for (const result of balances.results) {
                 const token = tokenList.find(t => t.address.toLowerCase() === result.contract.toLowerCase());
                 const contractData = balances.contracts[result.contract] ?? {};
-                const callDataStr = contractData.calldata as string | object;
+                // fixing calldata
+                const callDataStr = contractData.calldata as string | object ?? '{}';
 
                 try {
                     if (typeof callDataStr === 'string') {
@@ -345,8 +353,8 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     const tokenBalance = new TokenBalance(token, balance);
                     tokens.push(tokenBalance);
                     const priceIsCurrent =
-                        !!contractData.calldata.marketdata_updated &&
-                        dateIsWithinXMinutes(+contractData.calldata.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
+                        !!contractData.calldata?.marketdata_updated &&
+                        dateIsWithinXMinutes(+contractData.calldata?.marketdata_updated, PRICE_UPDATE_INTERVAL_IN_MIN);
 
                     // If we have market data we use it, as long as the price was updated within the last 10 minutes
                     if (typeof contractData.calldata === 'object' && priceIsCurrent) {
@@ -366,6 +374,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // get the NFTs belonging to a particular contract (collection)
     async getNftsForCollection(collection: string, params: IndexerCollectionNftsFilter): Promise<Collectible[]> {
+        this.trace('getNftsForCollection', collection, params);
         if (!this.hasIndexerSupport()) {
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
@@ -384,6 +393,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
             supply: nftResponse.supply,
             owner: nftResponse.owner,
         }));
+        this.trace('getNftsForCollection', { shapedIndexerNftData, response });
 
         // we fix the supportedInterfaces property if it is undefined in the response but present in the request
         Object.values(response.contracts).forEach((contract) => {
@@ -392,7 +402,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         this.processNftContractsCalldata(response.contracts);
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
-        return this.processNftRawData(shapedNftData);
+        this.trace('getNftsForCollection', { shapedNftData });
+        const finalNftData =  this.processNftRawData(shapedNftData);
+        this.trace('getNftsForCollection', { finalNftData });
+        return finalNftData;
     }
 
     // get the NFTs belonging to a particular account
@@ -471,6 +484,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // process the shaped raw data into NFTs
     async processNftRawData(shapedRawNfts: NftRawData[]): Promise<Collectible[]> {
+        this.trace('processNftRawData', shapedRawNfts);
         const contractStore = useContractStore();
         const nftsStore = useNftsStore();
 
@@ -502,6 +516,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
                 return nft;
             });
+        this.trace('processNftRawData', 'erc1155Nfts', erc1155Nfts);
 
         const erc721RawData = shapedRawNfts.filter(({ contract }) => contract.supportedInterfaces.includes('erc721'));
         const erc721Nfts = erc721RawData.map(async ({ data, contract }) => {
@@ -519,6 +534,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
             return nft;
         });
+        this.trace('processNftRawData', 'erc721Nfts', erc721Nfts);
 
         const settledPromises = await Promise.allSettled([...erc1155Nfts, ...erc721Nfts]);
 
@@ -529,7 +545,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error('Error constructing NFT', reason);
         });
 
-        return fulfilledPromises.map(result => result.value as Collectible);
+        const nfts = fulfilledPromises.map(result => result.value as Collectible);
+        this.trace('processNftRawData', 'nfts', nfts);
+
+        return nfts;
     }
 
     constructTokenId(token: TokenSourceInfo): string {

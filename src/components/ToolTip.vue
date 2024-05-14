@@ -90,7 +90,7 @@ function setTooltipVisibility(enable: boolean) {
         height: 14px;
 
         path {
-            fill: var(--accent-color);
+            fill: var(--q-accent);
         }
 
         &--warning {
@@ -122,6 +122,6 @@ function setTooltipVisibility(enable: boolean) {
 .q-tooltip {
     // equivalent to --site-gradient (with some alpha), defined here because the quasar tooltip component
     // moves the tooltip element to be a sibling of <body>, where our CSS vars are defined
-    background: linear-gradient(0.4turn, rgba(#071033, 0.85), rgba(#6039A4, 0.85));
+    background: var(--toolbar-background-color);
 }
 </style>

@@ -46,14 +46,7 @@ const handleWithdrawClick = async () => {
         return;
     }
     const label = CURRENT_CONTEXT;
-    if (!accountStore.isConnectedToCorrectNetwork(label)) {
-        const networkName = chainStore.loggedChain.settings.getDisplay();
-        const errorMessage = ant.config.localizationHandler('evm_wallet.incorrect_network', { networkName });
-
-        ant.config.notifyFailureWithAction(errorMessage, {
-            label: ant.config.localizationHandler('evm_wallet.switch'),
-        });
-
+    if (!await useAccountStore().assertNetworkConnection(label)) {
         return;
     }
 

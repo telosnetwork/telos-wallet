@@ -501,7 +501,7 @@ export default defineComponent({
         margin-top: 4px;
 
         path {
-            fill: var(--accent-color);
+            fill: var(--q-accent);
         }
 
         &--rotated {

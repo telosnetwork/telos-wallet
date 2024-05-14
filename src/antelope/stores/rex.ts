@@ -64,6 +64,10 @@ export const useRexStore = defineStore(store_name, {
                 state.__rexData[label]?.period ?? null,
                 // translation function only takes the key name, without the path and adds the prefix
                 (key:string) => getAntelope().config.localizationHandler(`antelope.words.${key}`),
+                // force to show days instead of being dynamic,
+                'days',
+                // force to round the number
+                true,
             ),
 
     },
@@ -74,7 +78,7 @@ export const useRexStore = defineStore(store_name, {
                 filter(({ label, account }) => !!label && !!account),
             ).subscribe({
                 next: async ({ label, account }) => {
-                    if (label === 'current') {
+                    if (label === CURRENT_CONTEXT) {
                         await useRexStore().updateRexDataForAccount(label, toRaw(account));
                     }
                 },

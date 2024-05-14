@@ -70,6 +70,7 @@ const numberOfAllowancesToBatchRevoke = ref(0);
 
 // computed
 const userAddress = computed(() => useAccountStore().currentAccount.account);
+const showEmptyState = computed(() => !loading.value && shapedAllowanceRows.value.length === 0);
 const shapedAllowanceRows = computed(() => {
     const {
         asset,
@@ -256,10 +257,12 @@ function handleRevokeSelectedClicked() {
         <CollapsibleAside
             :header="asideHeader"
             :content="asideContent"
+            :center-on-desktop="showEmptyState"
             class="q-mb-lg"
         />
 
         <AllowancesPageControls
+            v-if="!showEmptyState"
             :enable-revoke-button="enableRevokeButton"
             @search-updated="handleSearchUpdated"
             @include-cancelled-updated="handleIncludeCancelledUpdated"
@@ -273,6 +276,11 @@ function handleRevokeSelectedClicked() {
                 class="c-allowances-page__skeleton-row"
                 type="rect"
             />
+        </div>
+        <div v-else-if="showEmptyState">
+            <h2 class="c-allowances-page__empty-title">
+                {{ $t('evm_allowances.no_allowances') }}
+            </h2>
         </div>
         <AllowancesTable
             v-else
@@ -318,6 +326,11 @@ function handleRevokeSelectedClicked() {
 
 <style lang="scss">
 .c-allowances-page {
+    &__empty-title {
+        text-align: center;
+        margin-top: 32px;
+    }
+
     &__body {
         max-width: 1000px;
         margin: auto;

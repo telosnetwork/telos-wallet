@@ -129,6 +129,7 @@ export const useChainStore = defineStore(store_name, {
         // https://github.com/telosnetwork/telos-wallet/issues/246
         getExplorerUrl: () => (network: string) => (settings[network] as EVMChainSettings).getExplorerUrl(),
         getEcosystemUrl: () => (network: string) => (settings[network] as EVMChainSettings).getEcosystemUrl(),
+        getBridgeUrl: () => (network: string) => (settings[network] as EVMChainSettings).getBridgeUrl(),
         getNetworkSettings: () => (network: string) => settings[network],
         getStakedRatio: state => (label: string) => (state.__chains[label] as EvmChainModel).stakeRatio ?? ethers.constants.Zero,
         getUnstakedRatio: state => (label: string) => (state.__chains[label] as EvmChainModel).unstakeRatio ?? ethers.constants.Zero,

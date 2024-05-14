@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { filter } from 'rxjs';
 import { formatUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'ethers';
 
@@ -36,6 +35,7 @@ import {
     CURRENT_CONTEXT,
     getAntelope,
     useAccountStore,
+    useBalancesStore,
     useChainStore,
     useContractStore,
     useFeedbackStore,
@@ -217,15 +217,6 @@ export const useAllowancesStore = defineStore(store_name, {
         init: () => {
             const allowancesStore = useAllowancesStore();
             const ant = getAntelope();
-            ant.events.onAccountChanged.pipe(
-                filter(({ label, account }) => !!label && !!account),
-            ).subscribe({
-                next: ({ label, account }) => {
-                    if (label === CURRENT_CONTEXT && account?.account) {
-                        allowancesStore.fetchAllowancesForAccount(account?.account);
-                    }
-                },
-            });
 
             ant.events.onClear.subscribe(({ label }) => {
                 allowancesStore.clearAllowances(label);
@@ -559,9 +550,20 @@ export const useAllowancesStore = defineStore(store_name, {
                 const tokenInfo = useTokensStore().__tokens[CURRENT_CONTEXT].find(token => token.address.toLowerCase() === data.contract.toLowerCase());
 
                 const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-                const tokenContractInstance = await tokenContract?.getContractInstance();
-                const maxSupply = await tokenContractInstance?.totalSupply() as BigNumber | undefined;
-                const balance = await tokenContractInstance?.balanceOf(data.owner) as BigNumber | undefined;
+
+                const maxSupply = tokenContract?.maxSupply;
+
+                const balancesStore = useBalancesStore();
+                let balance = balancesStore.__balances[CURRENT_CONTEXT]?.find(
+                    balance => balance.token.address.toLowerCase() === data.contract.toLowerCase(),
+                )?.amount;
+
+                if (!balance) {
+                    const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                    const balanceString = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results[0].balance;
+
+                    balance = BigNumber.from(balanceString);
+                }
 
                 if (!balance || !tokenInfo || !maxSupply) {
                     return null;
@@ -617,7 +619,10 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
 
                 const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-                const balance = await (await collectionInfo?.getContractInstance())?.balanceOf(data.owner);
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const balanceString = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results[0].balance;
+
+                const balance = BigNumber.from(balanceString);
 
                 return collectionInfo ? {
                     ...commonAttributes,
@@ -646,14 +651,9 @@ export const useAllowancesStore = defineStore(store_name, {
                     return null;
                 }
 
-                const balancePromises = collectionNftIds.map(async (tokenId) => {
-                    const contractInstance = await collectionInfo?.getContractInstance();
-                    return contractInstance?.balanceOf(data.owner, tokenId) as BigNumber;
-                });
-
-
-                const balancesOfAllIdsInCollection = await Promise.all(balancePromises);
-                const balance = balancesOfAllIdsInCollection.reduce((acc, balance) => acc.add(balance ?? 0), BigNumber.from(0));
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const holderInfoForOwner = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}&limit=${ALLOWANCES_LIMIT}`)).data.results as { balance: string }[];
+                const totalNftsOwned = holderInfoForOwner.reduce((acc, holderInfo) => acc.add(holderInfo.balance), BigNumber.from(0));
 
                 return collectionInfo ? {
                     lastUpdated: data.updated,
@@ -662,7 +662,7 @@ export const useAllowancesStore = defineStore(store_name, {
                     allowed: data.approved,
                     collectionAddress: collectionInfo.address,
                     collectionName: collectionInfo.name,
-                    balance,
+                    balance: totalNftsOwned,
                 } : null;
             } catch(e) {
                 console.error('Error shaping ERC1155 allowance row', e);
