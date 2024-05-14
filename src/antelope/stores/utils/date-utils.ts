@@ -43,7 +43,7 @@ export function dateIsWithinXMinutes(epochMs: number, minutes: number) {
  * @param {function} $t translation function. Should accept a string (just the keyname without a path) and return a translated string
  * @returns {string} plain english time period
  */
-export function prettyTimePeriod(seconds: number|null, $t: (key: string) => string, round = false) {
+export function prettyTimePeriod(seconds: number|null, $t: (key: string) => string, units = '', round = false) {
     if (seconds === null) {
         return '--';
     }
@@ -51,19 +51,19 @@ export function prettyTimePeriod(seconds: number|null, $t: (key: string) => stri
     let quantity;
     let unit;
 
-    if (seconds < HOUR_SECONDS) {
+    if (seconds < HOUR_SECONDS || units === 'minutes') {
         quantity = seconds / MINUTE_SECONDS;
         unit = $t('minutes');
-    } else if (seconds < DAY_SECONDS) {
+    } else if (seconds < DAY_SECONDS || units === 'hours') {
         quantity = seconds / HOUR_SECONDS;
         unit = $t('hours');
-    } else if (seconds < WEEK_SECONDS) {
+    } else if (seconds < WEEK_SECONDS || units === 'days') {
         quantity = seconds / DAY_SECONDS;
         unit = $t('days');
-    } else if (seconds < MONTH_SECONDS) {
+    } else if (seconds < MONTH_SECONDS || units === 'weeks') {
         quantity = seconds / WEEK_SECONDS;
         unit = $t('weeks');
-    } else if (seconds < YEAR_SECONDS) {
+    } else if (seconds < YEAR_SECONDS || units === 'months') {
         quantity = seconds / MONTH_SECONDS;
         unit = $t('months');
     } else {

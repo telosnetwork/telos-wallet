@@ -88,6 +88,16 @@ export default defineComponent({
             }
         },
     },
+    beforeMount() {
+        const storedDarkMode = localStorage.getItem('darkModeEnabled');
+        if (storedDarkMode !== null) {
+            this.$q.dark.set(storedDarkMode === 'true');
+        } else {
+            // Use system preferences if there is no preference saved
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.$q.dark.set(prefersDark);
+        }
+    },
     methods: {
         openMenu() {
             this.menuIsOpen = true;
@@ -109,6 +119,7 @@ export default defineComponent({
             this.menuIsOpen = false;
 
             if (accountStore.loggedAccount) {
+                this.$q.dark.set(false);
                 accountStore.logout();
             } else {
                 this.showWalletOptions = true;
@@ -155,6 +166,10 @@ export default defineComponent({
             const network = this.loggedAccount.network;
             window.open(chainStore.getBridgeUrl(network), '_blank');
         },
+        toggleDarkMode() {
+            this.$q.dark.toggle();
+            localStorage.setItem('darkModeEnabled', this.$q.dark.isActive.toString());
+        },
     },
 });
 </script>
@@ -180,7 +195,6 @@ export default defineComponent({
             round
             dense
             icon="menu"
-            color="black"
             aria-haspopup="menu"
             :aria-label="$t('nav.open_menu')"
             :tabindex="menuIsOpen ? '-1' : '0'"
@@ -204,6 +218,16 @@ export default defineComponent({
             v-if="showUserInfo"
             :account="loggedAccount"
         />
+
+        <q-btn
+            v-if="showUserInfo"
+            class="c-app-nav__theme-toggle"
+            flat
+            dense
+            :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+            @click="toggleDarkMode"
+        />
+
     </div>
 
     <div
@@ -475,6 +499,10 @@ export default defineComponent({
         }
     }
 
+    &__theme-toggle {
+        color: var(--text-default-contrast);
+    }
+
     &__menu-container {
         position: fixed;
         top: 0;
@@ -504,9 +532,10 @@ export default defineComponent({
         left: 0;
         display: flex;
         justify-content: space-between;
-        color: var(--header-text-color);
         padding: 16px 24px;
-        background-color: var(--accent-color-5);
+        color: var(--text-color);
+        background: var(--header-background-color);
+        // border-bottom: 1px solid var(--border-color);
         z-index: $z-index--header-toolbar;
 
         @include md-and-up {
@@ -559,7 +588,7 @@ export default defineComponent({
     &__apy-box {
         @include text--small;
         background-color: rgba(255, 255, 255, 0.1);
-        color: var(--bg-color);
+        color: $white;
         padding: 4px 8px;
         border-radius: 4px;
         display: inline-block;

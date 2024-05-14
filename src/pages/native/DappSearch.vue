@@ -30,7 +30,7 @@ export default {
                 {
                     method: 'get',
                     headers: new Headers({
-                        Authorization: 'Bearer keyNqmiYA23tKoaYg',
+                        Authorization: 'Bearer patz11dDKRINCR9Zx.089980dbdb33422392f08c7a1f4938aa8f5a40be43fd88adf64784aa180f46bf',
                         'Content-Type': 'application/x-www-form-urlencoded',
                     }),
                 },

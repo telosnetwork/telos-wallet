@@ -258,6 +258,12 @@ export default defineComponent({
         }
     }
 
+    &__icon {
+        path {
+            fill: var(--q-primary);
+        }
+    }
+
     &__left-container {
         grid-area: a;
     }
