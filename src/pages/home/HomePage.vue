@@ -1,24 +1,74 @@
 <script setup lang="ts">
-import { computed,  onMounted,  ref } from 'vue';
+import { computed,  onMounted,  ref, watch } from 'vue';
 
-import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
-import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
-import { Menu } from 'src/pages/home/MenuType';
+import LoginButtons from 'pages/home/LoginButtons.vue';
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { useI18n } from 'vue-i18n';
+import { ChainSettings } from 'src/antelope/types';
+import { settings } from 'src/antelope/stores/chain';
 
-type TabReference = 'evm' | 'zero';
+type TabReference = 'evm' | 'zero' | 'unset';
 
+const { t: $t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const chainStore = useChainStore();
 
-const tab = ref<TabReference>('evm');
-const currentMenu = ref<Menu>(Menu.MAIN);
-
-const showLoginBtns = computed((): boolean => currentMenu.value === Menu.MAIN);
+const tab = ref<TabReference>('unset');
 const walletOption = computed(() => route.query.login as LocationQueryValue);
 
-function goBack(): void {
-    currentMenu.value = Menu.MAIN;
+interface Network {
+    value: string;
+    label: string;
+    tab: string;
+    chain: ChainSettings;
+}
+
+const networks = [
+    {
+        value: 'telos-evm',
+        label: 'Telos EVM',
+        tab: 'evm',
+        chain: settings['telos-evm'],
+    },
+    {
+        value: 'telos',
+        label: 'Telos',
+        tab: 'zero',
+        chain: settings['telos'],
+    },
+    {
+        value: 'telos-evm-testnet',
+        label: 'Telos EVM Testnet',
+        tab: 'evm',
+        chain: settings['telos-evm-testnet'],
+    },
+    {
+        value: 'telos-testnet',
+        label: 'Telos Testnet',
+        tab: 'zero',
+        chain: settings['telos-testnet'],
+    },
+] as Network[];
+
+const selectedNetwork = ref<Network | undefined>(undefined);
+
+function setChainForTab(tab: TabReference): void {
+    // set chain
+    if (!process.env.CHAIN_NAME) {
+        console.error('No chain name specified in environment config; the application will not run correctly');
+    } else {
+        const chainNetworkNames: Record<string, string> = (tab === 'zero') ? {
+            'telos': 'telos',
+            'telos-testnet': 'telos-testnet',
+        } : {
+            'telos': 'telos-evm',
+            'telos-testnet': 'telos-evm-testnet',
+        };
+        const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+        chainStore.setChain(CURRENT_CONTEXT, network);
+    }
 }
 
 function setTab(login: TabReference): void {
@@ -29,10 +79,25 @@ function setTab(login: TabReference): void {
 }
 
 onMounted(() => {
-    if (walletOption.value){
-        tab.value = walletOption.value as TabReference;
+    selectedNetwork.value = networks.find(n => n.value === 'telos-evm');
+    /*
+    if (walletOption.value && walletOption.value !== 'unset') {
+        setTab(walletOption.value as TabReference);
+    } else {
+        // set evm as default
+        setTab('evm');
+    }
+    */
+});
+
+watch(selectedNetwork, () => {
+    if (selectedNetwork.value) {
+        chainStore.setChain(CURRENT_CONTEXT, selectedNetwork.value.value);
+        setTab(selectedNetwork.value.tab as TabReference);
     }
 });
+
+
 
 </script>
 
@@ -47,53 +112,38 @@ onMounted(() => {
                     class="c-home__logo"
                 ></div>
                 <div class="c-home__button-container">
-                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'evm',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'evm'"
-                            @keydown.enter="setTab('evm')"
-                            @click="setTab('evm')"
-                        >
+                    <div class="c-home__network-selector-container" role="tablist">
 
-                            {{ $t('global.telos_evm') }}
-                        </button>
-                        <button
-                            :class="{
-                                'c-home__network-toggle-button': true,
-                                'c-home__network-toggle-button--activated': tab === 'zero',
-                            }"
-                            role="tab"
-                            :aria-selected="tab === 'zero'"
-                            @keydown.enter.space="setTab('zero')"
-                            @click="setTab('zero')"
+                        <q-select
+                            v-model="selectedNetwork"
+                            outlined
+                            :label="$t('global.network')"
+                            :options="networks"
+                            class="c-home__network-selector"
+                            :showPopup="true"
+                            color="accent"
+                            label-color="grey"
                         >
+                            <template v-slot:selected>
+                                <span>{{ selectedNetwork?.chain.getDisplay() }}</span>
+                            </template>
 
-                            {{ $t('global.native') }}
-                        </button>
-                    </div>
-                    <div v-else>
-                        <q-btn
-                            class="c-home__menu-back-button"
-                            flat
-                            dense
-                            icon="arrow_back_ios"
-                            @click="goBack"
-                        >
+                            <template v-slot:option="scope">
+                                <q-item class="c-home__network-selector-op" v-bind="scope.itemProps">
+                                    <q-avatar :size="'32px'" :src="scope.opt.chain.getSmallLogoPath()" class="c-home__network-selector-op-icon">
+                                        <img class="c-home__network-selector-op-icon" :src="scope.opt.chain.getSmallLogoPath()">
+                                    </q-avatar>
+                                    <q-item-label class="c-home__network-selector-op-name">{{ scope.opt.chain.getDisplay() }}</q-item-label>
+                                </q-item>
+                            </template>
+                        </q-select>
 
-                            {{ $t('global.back') }}
-                        </q-btn>
                     </div>
 
-                    <NativeLoginButton v-if="tab === 'zero'" />
-
-                    <EVMLoginButtons
-                        v-else-if="tab === 'evm'"
-                        v-model="currentMenu"
+                    <LoginButtons
+                        :chain="tab"
                     />
+
                 </div>
                 <div class="c-home__external-link">
                     <a
@@ -178,33 +228,42 @@ onMounted(() => {
         margin: 0 auto 48px;
     }
 
-    &__network-toggle-container {
+    &__network-selector-container {
         display: flex;
+        flex-direction: column;
         justify-content: center;
-        margin-bottom: 48px;
+        margin-bottom: 25px;
+        padding: 7px;
     }
 
-    &__network-toggle-button {
-        text-transform: uppercase;
-        text-align: center;
-        padding: 8px 24px;
-        background-color: rgba(white, 0.2);
-        border: unset;
-        color: white;
-        cursor: pointer;
-
-        &:first-of-type {
-            border-radius: 4px 0 0 4px;
+    &__network-selector {
+        .q-field__native, .q-field__marginal {
+            color: white;
         }
 
-        &:last-of-type {
-            border-radius: 0 4px 4px 0;
-        }
+        &-op {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            &-name {
+                margin-top: 2px;
+            }
+            &-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                overflow: hidden;
+            }
 
-        &--activated {
-            background-color: white;
-            color: var(--link-color);
+            &-icon {
+                width: 32px;
+                height: 32px;
+            }
         }
+    }
+
+    .q-field--outlined .q-field__control:before {
+        border-color: white;
     }
 
     &__menu-back-button {
@@ -248,4 +307,5 @@ onMounted(() => {
         }
     }
 }
+
 </style>
