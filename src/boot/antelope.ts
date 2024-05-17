@@ -2,7 +2,8 @@ import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
 import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
-import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
+import { installAntelope } from 'src/antelope';
+import { AccountModel } from 'src/antelope/stores/account';
 import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
@@ -13,7 +14,7 @@ import {
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
 import { App } from 'vue';
 import { Router } from 'vue-router';
-
+import { resetNativeApi } from 'src/boot/api';
 
 const getRouter = async (app: App) => new Promise<Router>((resolve) => {
     const intervalId = setInterval(() => {
@@ -27,6 +28,15 @@ const getRouter = async (app: App) => new Promise<Router>((resolve) => {
 
 export default boot(({ app }) => {
     const ant = installAntelope(app);
+
+    // if the user changes the network, we need to reset the native api
+    ant.events.onNetworkChanged.subscribe({
+        next: async ({ chain }) => {
+
+            resetNativeApi(chain);
+            chain.settings.getRPCEndpoint();
+        },
+    });
 
     // settting notification handlers --
     ant.config.setNotifySuccessfulTrxHandler(app.config.globalProperties.$notifySuccessTransaction);
@@ -43,10 +53,19 @@ export default boot(({ app }) => {
 
     // we need to wait 1000 milisec to ensure app.config.globalProperties?.$router is not null
     ant.events.onLoggedIn.subscribe({
-        next: async () => {
-            if (window.location.pathname === '/') {
-                (await getRouter(app)).push({ path: '/evm/wallet?tab=balance' });
+        next: async (account: AccountModel) => {
+            if (account.isNative) {
+                if (!window.location.pathname.startsWith('/zero')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/zero/balance' });
+                }
+            } else {
+                if (!window.location.pathname.startsWith('/evm')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/evm/wallet?tab=balance' });
+                }
             }
+
         },
     });
     ant.events.onLoggedOut.subscribe({
@@ -102,13 +121,6 @@ export default boot(({ app }) => {
     const weAreInLocalhost = document.location.hostname === 'localhost';
     const weAreInNetlify = document.location.hostname.includes('netlify');
     ant.config.debug.allowDebugMode(weAreNotInProduction || weAreInLocalhost || weAreInNetlify);
-
-    // Finally, we check if the url has the network parameter and if so, we connect to that network
-    // Otherwise we just let the store decide which network to connect to
-    const network = new URLSearchParams(window.location.search).get('network');
-    if (network) {
-        ant.stores.chain.setChain(CURRENT_CONTEXT, network);
-    }
 
     // We can simulate the indexer being down for testing purposes by uncommenting the following line
     // (ant.stores.chain.currentChain.settings as EVMChainSettings).simulateIndexerDown(true);

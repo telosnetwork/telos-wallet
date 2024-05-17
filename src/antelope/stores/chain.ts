@@ -53,7 +53,7 @@ import {
 } from 'src/antelope';
 
 
-export const settings: { [key: string]: ChainSettings } = {
+export const settings: { [network: string]: ChainSettings } = {
     // Native chains
     'eos': new EOS('eos'),
     'telos': new Telos('telos'),
@@ -66,13 +66,17 @@ export const settings: { [key: string]: ChainSettings } = {
     'telos-evm-testnet': new TelosEVMTestnet('telos-evm-testnet'),
 };
 
+export const chains: { [network: string]: ChainModel } = {};
+
 export interface ChainModel {
+    lastUpdate: number;
     apy: string;
     settings: ChainSettings;
     tokens: TokenClass[];
 }
 
 export interface EvmChainModel {
+    lastUpdate: number;
     apy: string;
     stakeRatio: ethers.BigNumber;
     unstakeRatio: ethers.BigNumber;
@@ -82,6 +86,7 @@ export interface EvmChainModel {
 }
 
 export interface NativeChainModel {
+    lastUpdate: number;
     apy: string;
     settings: NativeChainSettings;
     tokens: TokenClass[];
@@ -89,6 +94,7 @@ export interface NativeChainModel {
 
 const newChainModel = (network: string, isNative: boolean): ChainModel => {
     const model = {
+        lastUpdate: 0,
         apy: '',
         stakeRatio: ethers.constants.Zero,
         unstakeRatio: ethers.constants.Zero,
@@ -116,7 +122,7 @@ export const useChainStore = defineStore(store_name, {
         loggedChain: state => state.__chains[CURRENT_CONTEXT],
         currentChain: state => state.__chains[CURRENT_CONTEXT],
         loggedEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
-        currentEvmChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
+        currentEvmChain: state => state.__chains[CURRENT_CONTEXT]?.settings.isNative() ? undefined : state.__chains[CURRENT_CONTEXT] as EvmChainModel,
         loggedNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         currentNativeChain: state => state.__chains[CURRENT_CONTEXT].settings.isNative() ? state.__chains[CURRENT_CONTEXT] as NativeChainModel : undefined,
         getChain: state => (label: string) => state.__chains[label],
@@ -137,12 +143,24 @@ export const useChainStore = defineStore(store_name, {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
-                await Promise.all([
-                    this.updateSettings(label),
-                    this.updateApy(label),
-                    this.updateGasPrice(label),
-                    this.updateStakedRatio(label),
-                ]);
+                const chain = useChainStore().getChain(label);
+                const now = Date.now();
+                const tolerance = 10 * 60 * 1000; // 10 minutes
+                const lastUpdate = chain.lastUpdate;
+                const isUpToDate = now - lastUpdate < tolerance;
+                this.trace('updateChainData', { isUpToDate, now, lastUpdate, tolerance });
+                if (isUpToDate) {
+                    // This avoid to update the chain data if the user switches from one chain to another and back
+                    this.trace('updateChainData', label, '-> already up to date');
+                } else {
+                    this.setChainLastUpdate(label, Date.now());
+                    await Promise.all([
+                        this.updateSettings(label),
+                        this.updateApy(label),
+                        this.updateGasPrice(label),
+                        this.updateStakedRatio(label),
+                    ]);
+                }
             } catch (error) {
                 console.error(error);
                 throw new Error('antelope.chain.error_update_data');
@@ -153,7 +171,7 @@ export const useChainStore = defineStore(store_name, {
         async updateSettings(label: string): Promise<void> {
             this.trace('updateSettings', label);
             try {
-                const settings = this.getChain(label).settings as EVMChainSettings;
+                const settings = useChainStore().getChain(label).settings as EVMChainSettings;
                 settings.init().then(() => {
                     this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
                     getAntelope().events.onChainIndexerReady.next({ label, ready: true });
@@ -169,7 +187,7 @@ export const useChainStore = defineStore(store_name, {
         async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
             this.trace('updateApy', label);
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 chain.apy = await chain.settings.getApy();
             } catch (error) {
@@ -181,32 +199,42 @@ export const useChainStore = defineStore(store_name, {
         },
         async updateStakedRatio(label: string): Promise<void> {
             // first we need the contract instance to be able to execute queries
-            this.trace('actualUpdateStakedRatio', label);
-            useFeedbackStore().setLoading('actualUpdateStakedRatio');
-            const chain_settings = useChainStore().getChain(label).settings as EVMChainSettings;
-            const sysToken = chain_settings.getSystemToken();
-            const stkToken = chain_settings.getStakedSystemToken();
+            this.trace('updateStakedRatio', label);
+            const chain = useChainStore().getChain(label);
+            try {
+                useFeedbackStore().setLoading('updateStakedRatio');
+                if (!chain.settings.isNative()) {
+                    const chain_settings = chain.settings as EVMChainSettings;
+                    const sysToken = chain_settings.getSystemToken();
+                    const stkToken = chain_settings.getStakedSystemToken();
 
-            const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
-            const provider = await getAntelope().wallets.getWeb3Provider(label);
-            const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
-            // Now we preview a deposit of 1 SYS to get the ratio
-            const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
-            const stakedRatio = await contractInstance.previewDeposit(oneSys.toString());
-            const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
-            // Finally we update the store
-            this.setStakedRatio(label, stakedRatio);
-            this.setUnstakedRatio(label, unstakedRatio);
-            useFeedbackStore().unsetLoading('actualUpdateStakedRatio');
+                    const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
+                    const provider = await getAntelope().wallets.getWeb3Provider(label);
+                    const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
+                    // Now we preview a deposit of 1 SYS to get the ratio
+                    const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
+                    const stakedRatio = await contractInstance.previewDeposit(oneSys.toString());
+                    const unstakedRatio:ethers.BigNumber = await contractInstance.previewRedeem(oneSys);
+                    // Finally we update the store
+                    this.setStakedRatio(label, stakedRatio);
+                    this.setUnstakedRatio(label, unstakedRatio);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                useFeedbackStore().unsetLoading('updateStakedRatio');
+            }
         },
         async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
             this.trace('updateGasPrice');
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 if (!chain.settings.isNative()) {
                     const wei = await (chain.settings as EVMChainSettings).getGasPrice();
                     (chain as EvmChainModel).gasPrice = wei;
+                } else {
+                    this.trace('updateGasPrice', label, 'Native chain has no gas costs');
                 }
             } catch (error) {
                 console.error(error);
@@ -217,7 +245,7 @@ export const useChainStore = defineStore(store_name, {
         async updateTokenList(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 if (chain.settings.isNative()) {
                     chain.tokens = await (chain.settings as NativeChainSettings).getTokenList();
@@ -235,9 +263,15 @@ export const useChainStore = defineStore(store_name, {
         setChain(label: string, network: string) {
             this.trace('setChain', label, network);
             if (network in settings) {
+
+                // create the chain model if it doesn't exist
+                if (!chains[network]) {
+                    chains[network] = newChainModel(network, settings[network].isNative());
+                }
+
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
-                    this.__chains[label] = newChainModel(network, settings[network].isNative());
+                    this.__chains[label] = chains[network];
                     this.trace('setChain', label, network, '--> void this.updateChainData(label);');
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(
@@ -249,16 +283,47 @@ export const useChainStore = defineStore(store_name, {
             }
         },
         setStakedRatio(label: string, ratio: ethers.BigNumber) {
-            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
-            this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
-            (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
+            this.trace('setStakedRatio', label, ratio.toString());
+            const chain = useChainStore().getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const decimals = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
+                    this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
+                    (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
+                } else {
+                    this.trace('setStakedRatio', label, 'Native chain has no staked ratio');
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_token_list');
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokenList');
+            }
+
         },
         setUnstakedRatio(label: string, ratio: ethers.BigNumber) {
-            const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
-            const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
-            this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
-            (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
+            this.trace('setUnstakedRatio', label, ratio.toString());
+            const chain = useChainStore().getChain(label);
+            try {
+                if (!chain.settings.isNative()) {
+                    const decimals = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
+                    this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
+                    (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;
+                } else {
+                    this.trace('setUnstakedRatio', label, 'Native chain has no unstaked ratio');
+                }
+            } catch (error) {
+                console.error(error);
+                throw new Error('antelope.chain.error_token_list');
+            } finally {
+                useFeedbackStore().unsetLoading('updateTokenList');
+            }
+        },
+        setChainLastUpdate(label: string, timestamp: number) {
+            this.trace('setChainLastUpdate', label, timestamp);
+            this.__chains[label].lastUpdate = timestamp;
         },
     },
 });

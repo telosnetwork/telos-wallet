@@ -51,7 +51,7 @@ export default boot(async ({ app, store }) => {
             }).catch((e) => {
                 throw e;
             });
-            if (store.state.account.justViewer) {
+            if (store.state.account.justViewer || localStorage.getItem('justViewer')) {
                 permission = 'active';
             } else {
                 await new Promise((resolve) => {

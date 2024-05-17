@@ -19,7 +19,7 @@ import { QSpinnerFacebook } from 'quasar';
 import { OreIdAuth } from 'src/antelope/wallets';
 import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
-import { isTodayBeforeTelosCloudDown } from 'src/App.vue';
+
 
 export default defineComponent({
     name: 'EVMLoginButtons',
@@ -164,7 +164,6 @@ export default defineComponent({
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
-            isTodayBeforeTelosCloudDown,
             // menu navigation
             showMainMenu,
             showTelosCloudMenu,

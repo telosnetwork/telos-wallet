@@ -3,7 +3,7 @@ import { computed,  onMounted,  ref, watch } from 'vue';
 
 import LoginButtons from 'pages/home/LoginButtons.vue';
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
-import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
+import { CURRENT_CONTEXT, getAntelope, useChainStore } from 'src/antelope';
 import { useI18n } from 'vue-i18n';
 import { ChainSettings } from 'src/antelope/types';
 import { settings } from 'src/antelope/stores/chain';
@@ -20,7 +20,6 @@ const walletOption = computed(() => route.query.login as LocationQueryValue);
 
 interface Network {
     value: string;
-    label: string;
     tab: string;
     chain: ChainSettings;
 }
@@ -28,48 +27,27 @@ interface Network {
 const networks = [
     {
         value: 'telos-evm',
-        label: 'Telos EVM',
         tab: 'evm',
         chain: settings['telos-evm'],
     },
     {
         value: 'telos',
-        label: 'Telos',
         tab: 'zero',
         chain: settings['telos'],
     },
     {
         value: 'telos-evm-testnet',
-        label: 'Telos EVM Testnet',
         tab: 'evm',
         chain: settings['telos-evm-testnet'],
     },
     {
         value: 'telos-testnet',
-        label: 'Telos Testnet',
         tab: 'zero',
         chain: settings['telos-testnet'],
     },
 ] as Network[];
 
 const selectedNetwork = ref<Network | undefined>(undefined);
-
-function setChainForTab(tab: TabReference): void {
-    // set chain
-    if (!process.env.CHAIN_NAME) {
-        console.error('No chain name specified in environment config; the application will not run correctly');
-    } else {
-        const chainNetworkNames: Record<string, string> = (tab === 'zero') ? {
-            'telos': 'telos',
-            'telos-testnet': 'telos-testnet',
-        } : {
-            'telos': 'telos-evm',
-            'telos-testnet': 'telos-evm-testnet',
-        };
-        const network: string = chainNetworkNames[process.env.CHAIN_NAME];
-        chainStore.setChain(CURRENT_CONTEXT, network);
-    }
-}
 
 function setTab(login: TabReference): void {
     if (route.path !== login){
@@ -79,21 +57,26 @@ function setTab(login: TabReference): void {
 }
 
 onMounted(() => {
-    selectedNetwork.value = networks.find(n => n.value === 'telos-evm');
-    /*
-    if (walletOption.value && walletOption.value !== 'unset') {
-        setTab(walletOption.value as TabReference);
-    } else {
-        // set evm as default
-        setTab('evm');
+    // we check if the url has the network parameter and if so, we connect to that network
+    // Otherwise we just let the store decide which network to connect to
+    const network = new URLSearchParams(window.location.search).get('network');
+    if (network) {
+        // only if the network is in the list of networks we set it as the selected network
+        selectedNetwork.value = networks.find(n => n.value === network);
     }
-    */
+
+    if (!selectedNetwork.value) {
+        // set the default network
+        selectedNetwork.value = networks.find(n => n.value === 'telos-evm');
+    }
 });
 
 watch(selectedNetwork, () => {
     if (selectedNetwork.value) {
         chainStore.setChain(CURRENT_CONTEXT, selectedNetwork.value.value);
         setTab(selectedNetwork.value.tab as TabReference);
+        // change the url to reflect the network
+        router.replace({ query: { network: selectedNetwork.value.value } });
     }
 });
 
