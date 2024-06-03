@@ -27,6 +27,9 @@
         <li>
             <router-link :to="{ name: 'demos.indexer' }">Simulate Indexer Down</router-link>
         </li>
+        <li>
+            <router-link :to="{ name: 'demos.ramp-demo' }">Ramp Demo</router-link>
+        </li>
     </ul>
 
     <router-view />
