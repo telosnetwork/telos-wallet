@@ -198,11 +198,14 @@ export const useHistoryStore = defineStore(store_name, {
             const contractStore = useContractStore();
 
             this.trace('fetchEvmNftTransfersForAccount', label);
-
-            feedbackStore.setLoading('history.fetchEvmNftTransfersForAccount');
-
             const chainSettings = useChainStore().getChain(label).settings as EVMChainSettings;
 
+            if (chainSettings.isNative()) {
+                this.trace('fetchEvmNftTransfersForAccount', 'Native networks not supported yet');
+                return;
+            }
+
+            feedbackStore.setLoading('history.fetchEvmNftTransfersForAccount');
             try {
                 // get all erc721 and erc1155 transfers for the given account
                 const [
