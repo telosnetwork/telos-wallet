@@ -10,11 +10,6 @@ export interface ComplexMessage {
     text: string,
 }
 
-export const chainNetworkNames: Record<string, string> = {
-    telos: 'telos-evm',
-    'telos-testnet': 'telos-evm-testnet',
-};
-
 export const errorToString = (error: unknown) =>
     getAntelope().config.errorToStringHandler(error);
 

@@ -1,16 +1,18 @@
 import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
-import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
 import { CURRENT_CONTEXT, installAntelope } from 'src/antelope';
+import { AccountModel } from 'src/antelope/stores/account';
 import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
     WalletConnectAuth,
-    OreIdAuth,
     SafePalAuth,
+    MetaKeepAuth,
+    MetakeepOptions,
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
+import { googleCtrl } from 'src/pages/home/GoogleOneTap';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 
@@ -43,10 +45,19 @@ export default boot(({ app }) => {
 
     // we need to wait 1000 milisec to ensure app.config.globalProperties?.$router is not null
     ant.events.onLoggedIn.subscribe({
-        next: async () => {
-            if (window.location.pathname === '/') {
-                (await getRouter(app)).push({ path: '/evm/wallet?tab=balance' });
+        next: async (account: AccountModel) => {
+            if (account.isNative) {
+                if (!window.location.pathname.startsWith('/zero')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/zero/balance' });
+                }
+            } else {
+                if (!window.location.pathname.startsWith('/evm')) {
+                    const router = await getRouter(app);
+                    router.push({ path: '/evm/wallet?tab=balance' });
+                }
             }
+
         },
     });
     ant.events.onLoggedOut.subscribe({
@@ -54,6 +65,8 @@ export default boot(({ app }) => {
             if (window.location.pathname !== '/') {
                 (await getRouter(app)).push({ path: '/' });
             }
+            // we also need to clear Google One Tap Controller
+            googleCtrl.logout();
         },
     });
 
@@ -84,11 +97,11 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
     ant.wallets.addEVMAuthenticator(new BraveAuth());
-    const oreIdOptions: OreIdOptions = {
-        appName: process.env.APP_NAME,
-        appId: process.env.OREID_APP_ID as string,
+    const metakeepOptions: MetakeepOptions = {
+        appName: process.env.APP_NAME as string,
+        appId: process.env.METAKEEP_APP_ID_EVM as string,
     };
-    ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
+    ant.wallets.addEVMAuthenticator(new MetaKeepAuth(metakeepOptions));
 
     // autologin --
     ant.stores.account.autoLogin();
@@ -108,6 +121,10 @@ export default boot(({ app }) => {
     const network = new URLSearchParams(window.location.search).get('network');
     if (network) {
         ant.stores.chain.setChain(CURRENT_CONTEXT, network);
+    } else if (typeof process.env.DEFAULT_NETWORK === 'string') {
+        // if we have a default network, we connect to it (this can be changed dynamically later on)
+        const defaultNetwork = process.env.DEFAULT_NETWORK;
+        ant.stores.chain.setChain(CURRENT_CONTEXT, defaultNetwork);
     }
 
     // We can simulate the indexer being down for testing purposes by uncommenting the following line

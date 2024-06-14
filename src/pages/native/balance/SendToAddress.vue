@@ -2,6 +2,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import SendConfirm from '~/pages/native/balance/SendConfirm';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
+import { getAntelope } from 'src/antelope';
 
 export default {
     props: ['showSendToAddressDlg', 'selectedCoin', 'sendAmount'],

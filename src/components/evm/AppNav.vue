@@ -4,7 +4,7 @@ import InlineSvg from 'vue-inline-svg';
 
 import UserInfo from 'components/evm/UserInfo.vue';
 import { getAntelope, useChainStore } from 'src/antelope';
-import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
+import LoginButtons from 'pages/home/LoginButtons.vue';
 import { getShortenedHash } from 'src/antelope/stores/utils';
 
 const ant = getAntelope();
@@ -14,7 +14,7 @@ const chainStore = useChainStore();
 export default defineComponent({
     name: 'AppNav',
     components: {
-        EVMLoginButtons,
+        LoginButtons,
         UserInfo,
         InlineSvg,
     },
@@ -451,7 +451,7 @@ export default defineComponent({
                 @click="closeLoginMenu()"
             />
         </div>
-        <EVMLoginButtons/>
+        <LoginButtons v-if="showWalletOptions" chain="evm"/>
     </div>
 </q-dialog>
 

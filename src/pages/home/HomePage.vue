@@ -1,36 +1,51 @@
 <script setup lang="ts">
 import { computed,  onMounted,  ref } from 'vue';
 
-import NativeLoginButton from 'pages/home/NativeLoginButton.vue';
-import EVMLoginButtons from 'pages/home/EVMLoginButtons.vue';
+import LoginButtons from 'pages/home/LoginButtons.vue';
 import { Menu } from 'src/pages/home/MenuType';
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router';
+import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
 
-type TabReference = 'evm' | 'zero';
+type TabReference = 'evm' | 'zero' | 'unset';
 
 const route = useRoute();
 const router = useRouter();
+const chainStore = useChainStore();
 
-const tab = ref<TabReference>('evm');
-const currentMenu = ref<Menu>(Menu.MAIN);
-
-const showLoginBtns = computed((): boolean => currentMenu.value === Menu.MAIN);
+const tab = ref<TabReference>('unset');
 const walletOption = computed(() => route.query.login as LocationQueryValue);
 
-function goBack(): void {
-    currentMenu.value = Menu.MAIN;
+function setChainForTab(tab: TabReference): void {
+    // set chain
+    if (!process.env.CHAIN_NAME) {
+        console.error('No chain name specified in environment config; the application will not run correctly');
+    } else {
+        const chainNetworkNames: Record<string, string> = (tab === 'zero') ? {
+            'telos': 'telos',
+            'telos-testnet': 'telos-testnet',
+        } : {
+            'telos': 'telos-evm',
+            'telos-testnet': 'telos-evm-testnet',
+        };
+        const network: string = chainNetworkNames[process.env.CHAIN_NAME];
+        chainStore.setChain(CURRENT_CONTEXT, network);
+    }
 }
 
 function setTab(login: TabReference): void {
     if (route.path !== login){
         router.replace({ path: route.path, query:{ login } });
         tab.value = login;
+        setChainForTab(login);
     }
 }
 
 onMounted(() => {
-    if (walletOption.value){
-        tab.value = walletOption.value as TabReference;
+    if (walletOption.value && walletOption.value !== 'unset') {
+        setTab(walletOption.value as TabReference);
+    } else {
+        // set evm as default
+        setTab('evm');
     }
 });
 
@@ -47,7 +62,7 @@ onMounted(() => {
                     class="c-home__logo"
                 ></div>
                 <div class="c-home__button-container">
-                    <div v-if="showLoginBtns" class="c-home__network-toggle-container" role="tablist">
+                    <div class="c-home__network-toggle-container" role="tablist">
                         <button
                             :class="{
                                 'c-home__network-toggle-button': true,
@@ -75,25 +90,12 @@ onMounted(() => {
                             {{ $t('global.native') }}
                         </button>
                     </div>
-                    <div v-else>
-                        <q-btn
-                            class="c-home__menu-back-button"
-                            flat
-                            dense
-                            icon="arrow_back_ios"
-                            @click="goBack"
-                        >
 
-                            {{ $t('global.back') }}
-                        </q-btn>
-                    </div>
-
-                    <NativeLoginButton v-if="tab === 'zero'" />
-
-                    <EVMLoginButtons
-                        v-else-if="tab === 'evm'"
-                        v-model="currentMenu"
+                    <LoginButtons
+                        :chain="tab"
                     />
+
+
                 </div>
                 <div class="c-home__external-link">
                     <a

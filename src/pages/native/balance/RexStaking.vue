@@ -31,7 +31,7 @@ export default {
             return Number(
                 (
                     await this.rpc.get_currency_balance('eosio.token', this.accountName, 'TLOS')
-                )[0].split(' ')[0],
+                )[0]?.split(' ')[0] ?? '0',
             );
         },
 

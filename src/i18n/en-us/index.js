@@ -30,12 +30,14 @@ export default {
         wallet_logo_alt: 'Telos Wallet logo',
         view_any_account: 'View Any Account',
         connect_with_wallet: 'Connect Your Wallet',
-        login_with_social_media: 'Telos Cloud Wallet',
+        telos_cloud_wallet: 'Telos Cloud Wallet',
+        telos_cloud_login: 'Telos Cloud Login',
+        available_accounts: 'Available Accounts',
         sign_with_google: 'Sign with Google',
         sign_with_facebook: 'Sign with Facebook',
         sign_with_x: 'Sign with X',
         sign_with_email: 'Sign in with Email',
-        coming_soon: 'Coming soon',
+        login_with_social_media: 'Login with Social Media',
         create_new_account: 'Create a New Account',
         logged_as: 'Connected as {account}',
         view_wallet: 'View Wallet',
@@ -58,6 +60,11 @@ export default {
         oauth_facebook: 'Facebook',
         oauth_twitter: 'Twitter',
         oauth_email: 'Email',
+        random: 'Random',
+        continue: 'Continue',
+        account_name: 'Account Name',
+        name_selection_text: 'Account name needs to be twelve characters long and can only consist of lowercase letters and numerical characters from 1 to 5.',
+        account_selection_text: 'Choose one of your accounts to log in',
     },
     nav: {
         copy_address: 'Copy address to clipboard',
@@ -366,6 +373,10 @@ export default {
         resources_low: 'Your resources are low',
         recommend_bying: 'We recommend you buy more for 1 TLOS',
         proceed_q: 'Proceed?',
+        account_name_feedback_no_dots: 'Account name cannot contain dots',
+        account_name_feedback_invalid_character: 'invalid character  \'{char}\'',
+        account_name_feedback_invalid_length: '{length} of 12 characters',
+        account_name_feedback_taken: 'Account name is taken',
     },
     streaming: {
         title: 'Live Streaming Example',
@@ -595,7 +606,7 @@ export default {
         },
         evm: {
             error_support_provider_request: 'Provider does not support request method',
-            error_login: 'Error in login proccess',
+            error_login: 'Error in login process',
             error_add_chain_rejected: 'User has rejected the request to add the chain',
             error_connect_rejected: 'User has rejected the request to connect to the chain',
             error_add_chain: 'Error in adding chain',
@@ -628,6 +639,8 @@ export default {
             error_withdraw_failed: 'An unknown error occurred when withdrawing tokens',
             error_fetching_token_price: 'An unknown error occurred when fetching token price data',
             error_transfer_nft: 'An error occurred while transferring collectible',
+            error_metakeep_web3_provider: 'An error occurred while initializing Metakeep Web3 provider',
+            error_metakeep_app_id: 'App ID not provided for Metakeep',
             error_updating_allowance: 'An error occurred while updating allowance',
         },
         history: {
@@ -648,6 +661,7 @@ export default {
             error_login_native: 'An error has occurred trying to login to the native chain',
             error_login_evm: 'An error has occurred trying to login to the EVM chain',
             error_auto_login: 'An error has occurred trying to auto login the user',
+            logging_in_as: 'Logging in as <b>{account}</b>',
         },
         utils: {
             error_parsing_transaction: 'Failed to parse transaction data',
@@ -664,7 +678,6 @@ export default {
         wallets: {
             error_system_token_transfer_config: 'Error getting Wagmi system token transfer config',
             error_token_transfer_config: 'Error getting Wagmi token transfer config',
-            error_oreid_no_chain_account: 'The app {appName} does not have a chain account for the chain {networkName}',
             network_switch_success: 'Network switched successfully',
         },
         wrap: {
@@ -686,10 +699,5 @@ export default {
             months: 'months',
             years: 'years',
         },
-    },
-    temporal: {
-        telos_cloud_discontinued_title: 'Important',
-        telos_cloud_discontinued_message_title: 'Attention Users: Telos Cloud Wallet account option will be discontinued.',
-        telos_cloud_discontinued_message_body:'The Telos Cloud Wallet (ORE ID via Google) account option to connect and sign transactions will be discontinued after December 31st. If you use the Telos Cloud Wallet to access your account, please transfer your assets to another wallet before this deadline. <strong> This change does <i>not</i> impact users accessing their accounts via Metamask, WalletConnect, Anchor, or other sign-in methods.</strong>',
     },
 };

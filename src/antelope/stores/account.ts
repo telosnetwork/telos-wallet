@@ -20,7 +20,6 @@ import { initFuelUserWrapper } from 'src/api/fuel';
 import { createTraceFunction, errorToString } from 'src/antelope/config';
 import NativeChainSettings from 'src/antelope/chains/NativeChainSettings';
 import {
-    Action,
     Label,
     NativeTransactionResponse,
     addressString,
@@ -29,7 +28,6 @@ import { EVMAuthenticator } from 'src/antelope/wallets';
 import { truncateAddress } from 'src/antelope/stores/utils/text-utils';
 import { toRaw } from 'vue';
 import { getAddress } from 'ethers/lib/utils';
-import { OreIdAuthenticator } from 'ual-oreid';
 
 // dependencies --
 import {
@@ -40,7 +38,7 @@ import {
 } from 'src/antelope';
 
 
-export interface LoginNativeActionData {
+export interface loginZeroActionData {
     authenticator: Authenticator,
     network: string,
 }
@@ -113,15 +111,17 @@ export const useAccountStore = defineStore(store_name, {
     },
     actions: {
         trace: createTraceFunction(store_name),
-        async loginNative({ authenticator, network }: LoginNativeActionData): Promise<boolean> {
-            this.trace('loginNative', authenticator, network);
+        async loginZero({ authenticator, network }: loginZeroActionData): Promise<boolean> {
+            this.trace('loginZero', authenticator, network);
             let success = false;
             try {
+                this.trace('loginZero', 'authenticator.init()...');
                 await authenticator.init();
+                this.trace('loginZero', 'authenticator.login()...');
                 const ualUsers = await authenticator.login();
                 if (ualUsers?.length) {
-                    // OreId has it's own authorization service, only init fuel service for other ual users
-                    const ualUser = ualUsers[0] instanceof OreIdAuthenticator ? ualUsers[0] : await initFuelUserWrapper(ualUsers[0]);
+                    this.trace('loginZero', 'authenticator.login() OK! ualUsers:', ualUsers);
+                    const ualUser = await initFuelUserWrapper(ualUsers[0]);
                     const permission = (ualUser as unknown as { requestPermission: string })
                         .requestPermission ?? 'active';
                     const account = await ualUser.getAccountName();
@@ -246,8 +246,10 @@ export const useAccountStore = defineStore(store_name, {
                 const rawAddress = localStorage.getItem('rawAddress');
                 const isNative = localStorage.getItem('isNative') === 'true';
                 const autoLogin = localStorage.getItem('autoLogin');
-                this.trace('autoLogin', account, isNative, autoLogin);
+                this.trace('autoLogin', account, network, autoLogin, isNative, this.__accounts[label]);
                 if (account && network && autoLogin && !this.__accounts[label]) {
+                    // Ensure we are working with the correct network
+                    useChainStore().setChain(label, network);
                     if (isNative) {
                         const authenticators = getAntelope().config.authenticatorsGetter();
                         const authenticator = authenticators.find(
@@ -257,7 +259,7 @@ export const useAccountStore = defineStore(store_name, {
                             console.error(authenticators.map(a => a.getName()).join(', '));
                             throw new Error('antelope.account.error_auto_login');
                         }
-                        this.loginNative({
+                        this.loginZero({
                             authenticator,
                             network,
                         });
@@ -274,6 +276,8 @@ export const useAccountStore = defineStore(store_name, {
                             autoLogAccount,
                         });
                     }
+                } else {
+                    this.trace('autoLogin', 'canceled!', account, network, autoLogin, !this.__accounts[label]);
                 }
             } catch (error) {
                 console.error('Error: ', errorToString(error));
@@ -326,23 +330,12 @@ export const useAccountStore = defineStore(store_name, {
             this.trace('sendAction', account, data, name, actor, permission);
             try {
                 useFeedbackStore().setLoading('account.sendAction');
-                console.error('Account.sendAction() not implemented', account, data, name, actor, permission);
                 return Promise.resolve({ hash: '0x0' } as NativeTransactionResponse);
             } catch (error) {
                 console.error('Error: ', errorToString(error));
                 throw error;
             } finally {
                 useFeedbackStore().unsetLoading('account.sendAction');
-            }
-        },
-
-        async sendTransaction(actions: Action[]) {
-            this.trace('sendTransaction', actions);
-            try {
-                useFeedbackStore().setLoading('account.sendTransaction');
-                console.error('Account.sendTransaction() not implemented', actions);
-            } catch (error) {
-                console.error('Error: ', errorToString(error));
             }
         },
 

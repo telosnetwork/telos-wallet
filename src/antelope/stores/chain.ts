@@ -262,7 +262,6 @@ export const useChainStore = defineStore(store_name, {
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
                     this.__chains[label] = newChainModel(network, settings[network].isNative());
-                    this.trace('setChain', label, network, '--> void this.updateChainData(label);');
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },
