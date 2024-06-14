@@ -143,12 +143,10 @@ export const useChainStore = defineStore(store_name, {
             this.trace('updateChainData');
             useFeedbackStore().setLoading('updateChainData');
             try {
-                const chain = useChainStore().getChain(label);
+                const chain = this.getChain(label);
                 const now = Date.now();
-                const tolerance = 10 * 60 * 1000; // 10 minutes
-                const lastUpdate = chain.lastUpdate;
-                const isUpToDate = now - lastUpdate < tolerance;
-                this.trace('updateChainData', { isUpToDate, now, lastUpdate, tolerance });
+                const tolerance = 1000 * 10; // 10 seconds
+                const isUpToDate = now - chain.lastUpdate < tolerance;
                 if (isUpToDate) {
                     // This avoid to update the chain data if the user switches from one chain to another and back
                     this.trace('updateChainData', label, '-> already up to date');
@@ -200,7 +198,7 @@ export const useChainStore = defineStore(store_name, {
         async updateStakedRatio(label: string): Promise<void> {
             // first we need the contract instance to be able to execute queries
             this.trace('updateStakedRatio', label);
-            const chain = useChainStore().getChain(label);
+            const chain = this.getChain(label);
             try {
                 useFeedbackStore().setLoading('updateStakedRatio');
                 if (!chain.settings.isNative()) {
@@ -284,10 +282,10 @@ export const useChainStore = defineStore(store_name, {
         },
         setStakedRatio(label: string, ratio: ethers.BigNumber) {
             this.trace('setStakedRatio', label, ratio.toString());
-            const chain = useChainStore().getChain(label);
+            const chain = this.getChain(label);
             try {
                 if (!chain.settings.isNative()) {
-                    const decimals = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
                     const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
                     this.trace('setStakedRatio', label, ratio.toString(), ratioNumber);
                     (this.__chains[label] as EvmChainModel).stakeRatio = ratio;
@@ -304,10 +302,10 @@ export const useChainStore = defineStore(store_name, {
         },
         setUnstakedRatio(label: string, ratio: ethers.BigNumber) {
             this.trace('setUnstakedRatio', label, ratio.toString());
-            const chain = useChainStore().getChain(label);
+            const chain = this.getChain(label);
             try {
                 if (!chain.settings.isNative()) {
-                    const decimals = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
+                    const decimals = (this.getChain(label).settings as EVMChainSettings).getStakedSystemToken().decimals;
                     const ratioNumber = parseFloat(ethers.utils.formatUnits(ratio, decimals));
                     this.trace('setUnstakedRatio', label, ratio.toString(), ratioNumber);
                     (this.__chains[label] as EvmChainModel).unstakeRatio = ratio;

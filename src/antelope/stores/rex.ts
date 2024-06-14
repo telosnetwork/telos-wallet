@@ -201,15 +201,10 @@ export const useRexStore = defineStore(store_name, {
         async updateWithdrawable(label: string) {
             this.trace('updateWithdrawable', label);
             if (this.isNetworkEVM(label)) {
-                try {
-                    const contract = await this.getEscrowContractInstance(label);
-                    const address = useAccountStore().getAccount(label).account;
-                    const withdrawable = await contract.maxWithdraw(address);
-                    this.setWithdrawable(label, withdrawable);
-                } catch (error) {
-                    console.error('updateWithdrawable', label, error);
-                    throw error;
-                }
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const withdrawable = await contract.maxWithdraw(address);
+                this.setWithdrawable(label, withdrawable);
             } else {
                 this.trace('updateWithdrawable', label, 'not supported for native chains yet');
             }
@@ -223,15 +218,10 @@ export const useRexStore = defineStore(store_name, {
         async updateDeposits(label: string) {
             this.trace('updateDeposits', label);
             if (this.isNetworkEVM(label)) {
-                try {
-                    const contract = await this.getEscrowContractInstance(label);
-                    const address = useAccountStore().getAccount(label).account;
-                    const deposits = await contract.depositsOf(address);
-                    this.setDeposits(label, deposits);
-                } catch (error) {
-                    console.error('updateDeposits', label, error);
-                    throw error;
-                }
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const deposits = await contract.depositsOf(address);
+                this.setDeposits(label, deposits);
             } else {
                 console.error('updateDeposits', label, 'not supported for native chains yet');
             }
@@ -244,15 +234,10 @@ export const useRexStore = defineStore(store_name, {
         async updateBalance(label: string) {
             this.trace('updateBalance', label);
             if (this.isNetworkEVM(label)) {
-                try {
-                    const contract = await this.getStakedSystemContractInstance(label);
-                    const address = useAccountStore().getAccount(label).account;
-                    const balance = await contract.balanceOf(address);
-                    this.setBalance(label, balance);
-                } catch (error) {
-                    console.error('updateBalance', label, error);
-                    throw error;
-                }
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const balance = await contract.balanceOf(address);
+                this.setBalance(label, balance);
             } else {
                 console.error('updateBalance', label, 'not supported for native chains yet');
             }
