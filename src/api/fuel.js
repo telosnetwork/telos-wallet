@@ -137,15 +137,6 @@ class FuelUserWrapper extends User {
 
                 const fee/*: string | null*/ = data.fee;
 
-                // Ensure the modified transaction is what the application expects
-                // These validation methods will throw an exception if invalid data exists
-                validateTransaction(
-                    signer,
-                    modifiedTransaction,
-                    transaction,
-                    data.costs,
-                );
-
                 // validate with the user whether to use the service at all
                 try {
                     await confirmWithUser(this.user, fee);
