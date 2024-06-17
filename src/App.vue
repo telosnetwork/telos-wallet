@@ -5,8 +5,6 @@ import { TELOS_CHAIN_IDS } from 'src/antelope/chains/chain-constants';
 import packageInfo from '../package.json';
 import { defineComponent } from 'vue';
 
-export const isTodayBeforeTelosCloudDown = new Date().getTime() < new Date('2023-12-31').getTime();
-
 export default defineComponent({
     name: 'App',
     created() {
@@ -44,16 +42,15 @@ export default defineComponent({
         }
     },
     mounted() {
-        const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
-        // if the organization using this application is Telos, import Fathom analytics
-        if (TELOS_CHAIN_IDS.includes(chainSettings.getChainId())) {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.usefathom.com/script.js';
-            script.dataset.site = 'ISPYEAKT';
-            script.dataset.spa = 'auto';
-            script.defer = true;
-            document.body.appendChild(script);
-        }
+
+        // Telos Wallet allows users to switch between Telos Zero and Telos EVM.
+        // The loading of this script should be independent of the chain the user is on.
+        const script = document.createElement('script');
+        script.src = 'https://cdn.usefathom.com/script.js';
+        script.dataset.site = 'ISPYEAKT';
+        script.dataset.spa = 'auto';
+        script.defer = true;
+        document.body.appendChild(script);
     },
 });
 </script>

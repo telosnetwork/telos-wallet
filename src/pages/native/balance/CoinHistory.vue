@@ -1,6 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import tokenAvatar from 'components/native/TokenAvatar.vue';
+import { getHyperion } from 'src/boot/api';
 
 const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
@@ -54,12 +55,12 @@ export default {
             if (this.loadedAll) {
                 return;
             }
-            const actionHistory = await this.$hyperion.get(
+            const actionHistory = await getHyperion().get(
                 `/v2/history/get_actions?limit=${this.pageLimit}&skip=${this.page}&account=${this.accountName}&filter=${this.selectedCoin.account}:*`,
             );
             this.accountHistory.push(...(actionHistory.data.actions.
                 filter(a => 'quantity' in a.act.data &&
-           a.act.data.quantity.split(' ')[1] ===this.selectedCoin.symbol) || []));
+                    a.act.data.quantity.split(' ')[1] ===this.selectedCoin.symbol) || []));
             this.page += this.pageLimit;
             if (actionHistory.data.actions.length === 0) {
                 this.loadedAll = true;

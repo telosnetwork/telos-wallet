@@ -3,10 +3,11 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { TokenClass, TokenSourceInfo, PriceChartData, Theme } from 'src/antelope/types';
 
+const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png';
 const CHAIN_ID =
   '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11';
 const NETWORK = 'telos';
-const DISPLAY = 'Telos';
+const DISPLAY = 'Telos Zero';
 const TOKEN = new TokenClass({
     symbol: 'TLOS',
     precision: 4,
@@ -98,11 +99,11 @@ export default class Telos extends NativeChainSettings {
     }
 
     getLargeLogoPath(): string {
-        return 'chains/telos/telos_logo.svg';
+        return LOGO;
     }
 
     getSmallLogoPath(): string {
-        return 'chains/telos/tlos.png';
+        return LOGO;
     }
 
     getMapDisplay(): boolean {

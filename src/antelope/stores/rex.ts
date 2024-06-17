@@ -108,6 +108,7 @@ export const useRexStore = defineStore(store_name, {
         async getStakedSystemContractInstance(label: string) {
             this.trace('getStakedSystemContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().address;
+            this.trace('getStakedSystemContractInstance', label, address);
             return this.getContractInstance(label, address);
         },
         /**
@@ -118,7 +119,16 @@ export const useRexStore = defineStore(store_name, {
         async getEscrowContractInstance(label: string) {
             this.trace('getEscrowContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getEscrowContractAddress();
+            this.trace('getEscrowContractInstance', label, address);
             return this.getContractInstance(label, address);
+        },
+        /**
+         * This method should be called to check if the REX system is available for a given context.
+         * @param label identifies the context (network on this case) for the data
+         * @returns true if the REX system is available for the given context
+         */
+        isNetworkEVM(label: string) {
+            return !useChainStore().getChain(label).settings.isNative();
         },
         /**
          * This method queries the total amount of staked tokens in the system and maintains it in the store.
@@ -126,9 +136,13 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateTotalStaking(label: string) {
             this.trace('updateTotalStaking', label);
-            const contract = await this.getStakedSystemContractInstance(label);
-            const totalStaking = await contract.totalAssets();
-            this.setTotalStaking(label, totalStaking);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getStakedSystemContractInstance(label);
+                const totalStaking = await contract.totalAssets();
+                this.setTotalStaking(label, totalStaking);
+            } else {
+                this.trace('updateTotalStaking', label, 'not supported for native chains yet');
+            }
         },
 
         /**
@@ -137,9 +151,13 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateUnstakingPeriod(label: string) {
             this.trace('updateUnstakingPeriod', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const period = await contract.lockDuration();
-            this.setUnstakingPeriod(label, period.toNumber());
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const period = await contract.lockDuration();
+                this.setUnstakingPeriod(label, period.toNumber());
+            } else {
+                this.trace('updateUnstakingPeriod', label, 'not supported for native chains yet');
+            }
         },
 
         /**
@@ -182,10 +200,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateWithdrawable(label: string) {
             this.trace('updateWithdrawable', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const withdrawable = await contract.maxWithdraw(address);
-            this.setWithdrawable(label, withdrawable);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const withdrawable = await contract.maxWithdraw(address);
+                this.setWithdrawable(label, withdrawable);
+            } else {
+                this.trace('updateWithdrawable', label, 'not supported for native chains yet');
+            }
         },
         /**
          * This method queries the deposits for a given account and maintains it in the store.
@@ -195,10 +217,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateDeposits(label: string) {
             this.trace('updateDeposits', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const deposits = await contract.depositsOf(address);
-            this.setDeposits(label, deposits);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const deposits = await contract.depositsOf(address);
+                this.setDeposits(label, deposits);
+            } else {
+                console.error('updateDeposits', label, 'not supported for native chains yet');
+            }
         },
         /**
          * This method queries the balance for a given account and maintains it in the store.
@@ -207,10 +233,14 @@ export const useRexStore = defineStore(store_name, {
          */
         async updateBalance(label: string) {
             this.trace('updateBalance', label);
-            const contract = await this.getEscrowContractInstance(label);
-            const address = useAccountStore().getAccount(label).account;
-            const balance = await contract.balanceOf(address);
-            this.setBalance(label, balance);
+            if (this.isNetworkEVM(label)) {
+                const contract = await this.getEscrowContractInstance(label);
+                const address = useAccountStore().getAccount(label).account;
+                const balance = await contract.balanceOf(address);
+                this.setBalance(label, balance);
+            } else {
+                console.error('updateBalance', label, 'not supported for native chains yet');
+            }
         },
         /**
          * utility function to get the number of decimals for the staked system token

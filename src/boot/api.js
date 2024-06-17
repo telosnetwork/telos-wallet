@@ -1,4 +1,5 @@
 import { boot } from 'quasar/wrappers';
+import axios from 'axios';
 import { Api, JsonRpc } from 'eosjs';
 import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 
@@ -61,35 +62,54 @@ const getAccount = async function (accountName) {
     return await rpc.get_account(accountName);
 };
 
-export default boot(async ({ store }) => {
-    const rpc = new JsonRpc(
-        `${process.env.NETWORK_PROTOCOL}://${process.env.NETWORK_HOST}:${process.env.NETWORK_PORT}`,
-    );
+const holder = {};
+export default boot(async ({ store, app }) => {
+    holder.store = store;
+    holder.app = app;
+});
 
-    store['$account'] = {};
+export const resetNativeApi = async function (chain) {
+    if (!chain.settings.isNative()) {
+        return;
+    }
+    const p = chain.settings.getRPCEndpoint();
+    const url = `${p.protocol}://${p.host}:${p.port}${p.path ?? ''}`;
+    const rpc = new JsonRpc(url);
 
-    store['$defaultApi'] = new Api({
+    holder.store['$account'] = {};
+
+    holder.store['$defaultApi'] = new Api({
         rpc,
         textDecoder: new TextDecoder(),
         textEncoder: new TextEncoder(),
     });
 
-    store['$evmApi'] = new TelosEvmApi({
-        endpoint: process.env.HYPERION_ENDPOINT,
-        chainId: process.env.CHAIN_NAME === 'telos' ? 40 : 41,
+    holder.store['$evmApi'] = new TelosEvmApi({
+        endpoint: chain.settings.getHyperionEndpoint(),
+        chainId: chain.settings.getNetwork() === 'telos' ? 40 : 41,
         ethPrivateKeys: [],
         telosContract: process.env.EVM_CONTRACT,
         telosPrivateKeys: [],
     });
 
-    store['$api'] = {
-        getInfo: getInfo.bind(store),
-        getAbi: getAbi.bind(store),
-        signTransaction: signTransaction.bind(store),
-        getTableRows: getTableRows.bind(store),
-        getAccount: getAccount.bind(store),
-        getRpc: getRpc.bind(store),
+    holder.store['$api'] = {
+        getInfo: getInfo.bind(holder.store),
+        getAbi: getAbi.bind(holder.store),
+        signTransaction: signTransaction.bind(holder.store),
+        getTableRows: getTableRows.bind(holder.store),
+        getAccount: getAccount.bind(holder.store),
+        getRpc: getRpc.bind(holder.store),
     };
 
-    window.$api = store['$api'];
-});
+    window.$api = holder.store['$api'];
+
+    holder.hyperion = axios.create({
+        baseURL: chain.settings.getHyperionEndpoint(),
+    });
+};
+
+export const getHyperion = function () {
+    return holder.hyperion;
+};
+
+

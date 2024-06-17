@@ -64,6 +64,13 @@ export class Antelope {
         this.config.init(app);
         this.wallets.init();
 
+        // each time the user changes the network,
+        // we need to reset the current web3 provider instance
+        events.onNetworkChanged.subscribe(() => {
+            this.wallets.resetWeb3Provider();
+        });
+
+
         // call for the first time useXStore for all X stores in Antelope library
         const stores = this.stores;
 
