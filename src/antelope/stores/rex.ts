@@ -108,6 +108,7 @@ export const useRexStore = defineStore(store_name, {
         async getStakedSystemContractInstance(label: string) {
             this.trace('getStakedSystemContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getStakedSystemToken().address;
+            this.trace('getStakedSystemContractInstance', label, address);
             return this.getContractInstance(label, address);
         },
         /**
@@ -118,6 +119,7 @@ export const useRexStore = defineStore(store_name, {
         async getEscrowContractInstance(label: string) {
             this.trace('getEscrowContractInstance', label);
             const address = (useChainStore().getChain(label).settings as EVMChainSettings).getEscrowContractAddress();
+            this.trace('getEscrowContractInstance', label, address);
             return this.getContractInstance(label, address);
         },
         /**

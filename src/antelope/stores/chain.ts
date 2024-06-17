@@ -53,7 +53,7 @@ import {
 } from 'src/antelope';
 
 
-export const settings: { [key: string]: ChainSettings } = {
+export const settings: { [network: string]: ChainSettings } = {
     // Native chains
     'eos': new EOS('eos'),
     'telos': new Telos('telos'),
@@ -65,6 +65,8 @@ export const settings: { [key: string]: ChainSettings } = {
     'telos-evm': new TelosEVM('telos-evm'),
     'telos-evm-testnet': new TelosEVMTestnet('telos-evm-testnet'),
 };
+
+export const chains: { [network: string]: ChainModel } = {};
 
 export interface ChainModel {
     lastUpdate: number;
@@ -167,7 +169,7 @@ export const useChainStore = defineStore(store_name, {
         async updateSettings(label: string): Promise<void> {
             this.trace('updateSettings', label);
             try {
-                const settings = this.getChain(label).settings as EVMChainSettings;
+                const settings = useChainStore().getChain(label).settings as EVMChainSettings;
                 settings.init().then(() => {
                     this.trace('updateSettings', label, '-> onChainIndexerReady.next()');
                     getAntelope().events.onChainIndexerReady.next({ label, ready: true });
@@ -183,7 +185,7 @@ export const useChainStore = defineStore(store_name, {
         async updateApy(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateApy');
             this.trace('updateApy', label);
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 chain.apy = await chain.settings.getApy();
             } catch (error) {
@@ -205,7 +207,7 @@ export const useChainStore = defineStore(store_name, {
                     const stkToken = chain_settings.getStakedSystemToken();
 
                     const abi = [stlosAbiPreviewDeposit[0], stlosAbiPreviewRedeem[0]];
-                    const provider = await getAntelope().wallets.getWeb3Provider();
+                    const provider = await getAntelope().wallets.getWeb3Provider(label);
                     const contractInstance = new ethers.Contract(stkToken.address, abi, provider);
                     // Now we preview a deposit of 1 SYS to get the ratio
                     const oneSys = ethers.utils.parseUnits('1.0', sysToken.decimals);
@@ -224,7 +226,7 @@ export const useChainStore = defineStore(store_name, {
         async updateGasPrice(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateGasPrice');
             this.trace('updateGasPrice');
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 if (!chain.settings.isNative()) {
                     const wei = await (chain.settings as EVMChainSettings).getGasPrice();
@@ -241,7 +243,7 @@ export const useChainStore = defineStore(store_name, {
         async updateTokenList(label: string): Promise<void> {
             useFeedbackStore().setLoading('updateTokenList');
             this.trace('updateTokenList');
-            const chain = this.getChain(label);
+            const chain = useChainStore().getChain(label);
             try {
                 if (chain.settings.isNative()) {
                     chain.tokens = await (chain.settings as NativeChainSettings).getTokenList();
@@ -259,9 +261,15 @@ export const useChainStore = defineStore(store_name, {
         setChain(label: string, network: string) {
             this.trace('setChain', label, network);
             if (network in settings) {
+
+                // create the chain model if it doesn't exist
+                if (!chains[network]) {
+                    chains[network] = newChainModel(network, settings[network].isNative());
+                }
+
                 // make the change only if they are different
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
-                    this.__chains[label] = newChainModel(network, settings[network].isNative());
+                    this.__chains[label] = chains[network];
                     this.trace('setChain', label, network, '--> void this.updateChainData(label);');
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(

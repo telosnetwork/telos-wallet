@@ -128,6 +128,7 @@ export default {
         table_controls_change_rows_per_page_label: 'Change rows per page to {num}',
     },
     global: {
+        network: 'Network',
         address: 'Address',
         allowance: 'Allowance',
         allowed: 'Allowed',

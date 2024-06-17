@@ -14,6 +14,8 @@ import DepositEVM from '~/pages/native/balance/DepositEVM';
 import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
+import { getHyperion } from 'src/boot/api';
+
 
 const GETTING_STARTED_URL = 'https://www.telos.net/buy';
 
@@ -262,7 +264,8 @@ export default {
             });
         },
         async loadUserTokens() {
-            const userCoins = await this.$hyperion.get(
+            const hyperion = getHyperion();
+            const userCoins = await hyperion.get(
                 `/v2/state/get_tokens?account=${this.accountName}&limit=1000`,
             );
             if (userCoins.status === 200) {

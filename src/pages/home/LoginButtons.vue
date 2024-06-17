@@ -9,42 +9,46 @@ import {
 } from 'src/antelope';
 import {
     ComponentInternalInstance,
-    PropType,
     computed,
     defineComponent,
     getCurrentInstance,
     ref,
+    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
-import { OreIdAuth } from 'src/antelope/wallets';
-import { Menu } from 'src/pages/home/MenuType';
 import InlineSvg from 'vue-inline-svg';
 
-
 export default defineComponent({
-    name: 'EVMLoginButtons',
+    name: 'LoginButtons',
     components: {
         QSpinnerFacebook,
         InlineSvg,
     },
-    emits: [
-        'update:modelValue',
-    ],
     props: {
-        modelValue: {
-            type: String as PropType<Menu>,
-            default: Menu.MAIN,
+        chain: {
+            type: String,
         },
     },
     setup(props, { emit }) {
         const ant = getAntelope();
+        const accountStore = useAccountStore();
+        const chainStore = useChainStore();
+
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
 
+        const showEVMButtons = computed(() =>
+            props.chain === 'evm');
+        const showZeroButtons = computed(() =>
+            props.chain === 'zero' &&
+            !requestAccountSelection.value &&
+            selectedZeroAccount.value === '');
+
+        // EVM Login -----------------------------------------------------------
         const supportsMetamask = computed(() => {
             const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value; //
+            return e && e.isMetaMask && !supportsSafePal.value && !unsupportedExtensions.value;
         });
 
         const supportsSafePal = computed(() => {
@@ -68,8 +72,6 @@ export default defineComponent({
             return e && (e.isBraveWallet || e.isCoinbaseWallet); // replace this with a regex to check for unknown/unsupported extensions see https://github.com/telosnetwork/telos-wallet/issues/500
         });
 
-        const selectedOAuthProvider = ref('');
-
         const redirectToMetamaskDownload = () => {
             window.open('https://metamask.io/download/', '_blank');
         };
@@ -78,29 +80,20 @@ export default defineComponent({
             window.open('https://www.safepal.com/en/download', '_blank');
         };
 
-        const setOreIdAuthenticator = async (provider: string) => {
-            const name = 'OreId';
-            const auth = ant.wallets.getAuthenticator(name);
-            if (auth) {
-                (auth as OreIdAuth).setProvider(provider);
-                selectedOAuthProvider.value = provider;
-            }
-            setAuthenticator(name, CURRENT_CONTEXT);
+        const setMetamaskEVM = async () => {
+            setEVMAuthenticator('Metamask', CURRENT_CONTEXT);
         };
-        const setMetamaskAuthenticator = async () => {
-            setAuthenticator('Metamask', CURRENT_CONTEXT);
+        const setBraveEVM = async () => {
+            setEVMAuthenticator('Brave', CURRENT_CONTEXT);
         };
-        const setBraveAuthenticator = async () => {
-            setAuthenticator('Brave', CURRENT_CONTEXT);
+        const setSafePalEVM = async () => {
+            setEVMAuthenticator('SafePal', CURRENT_CONTEXT);
         };
-        const setSafePalAuthenticator = async () => {
-            setAuthenticator('SafePal', CURRENT_CONTEXT);
-        };
-        const setWalletConnectAuthenticator = async () => {
-            setAuthenticator('WalletConnect', CURRENT_CONTEXT);
+        const setWalletConnectEVM = async () => {
+            setEVMAuthenticator('WalletConnect', CURRENT_CONTEXT);
         };
 
-        const setAuthenticator = async(name: string, label: string) => {
+        const setEVMAuthenticator = async(name: string, label: string) => {
             const auth = ant.wallets.getAuthenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
@@ -109,6 +102,7 @@ export default defineComponent({
             const authenticator = auth.newInstance(label);
             const accountStore = useAccountStore();
             const chainStore = useChainStore();
+
             const network = chainStore.currentChain.settings.getNetwork();
             const correctChainId = useChainStore().currentChain.settings.getChainId();
             accountStore.loginEVM({ authenticator, network }).then(async () => {
@@ -132,22 +126,42 @@ export default defineComponent({
         };
 
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
-        const isLoadingOreId = (provider: string) =>
-            selectedOAuthProvider.value === provider &&
-            useFeedbackStore().isLoading('OreId.login');
 
-        // menu navitgaion
-        const showMainMenu = computed(() => props.modelValue === Menu.MAIN);
-        const showTelosCloudMenu = computed(() => props.modelValue === Menu.CLOUD);
-
-        const setCloudMenu = () => {
-            emit('update:modelValue', Menu.CLOUD);
+        // Telos Zero Login ----------------------------------------------------
+        const ualAuthenticators = ant.config.authenticatorsGetter();
+        const loginTelosZero = (idx:number, justViewer:boolean = false) => {
+            if (justViewer) {
+                localStorage.setItem('justViewer', 'true');
+            } else {
+                localStorage.removeItem('justViewer');
+            }
+            const network = chainStore.currentChain.settings.getNetwork();
+            const authenticator = ualAuthenticators[idx];
+            accountStore.loginZero({ authenticator, network });
         };
-
+        const getZeroAuthenticator = (name: string) => {
+            const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
+            return ualAuthenticators[idx];
+        };
+        // Intermediate interactive steps to select or create name account for Telos Zero.
+        const selectedZeroAccount = ref('');
+        const availableZeroAccounts = ref([] as string[]);
+        const setSelectedName = ref<(name: string) => void>((name: string) => {});
+        const requestAccountSelection = computed(() =>
+            // there are available accounts and no account is selected
+            availableZeroAccounts.value.length > 0 &&
+            selectedZeroAccount.value === '',
+        );
+        const setCleosViewerZero = () => {
+            const idx = ant.config.authenticatorsGetter().map(a => a.getName()).indexOf('cleos');
+            loginTelosZero(idx, true);
+        };
+        const redirectToNewAccountWebsite = () => {
+            window.open('https://app.telos.net/accounts/add');
+        };
 
         return {
             isLoading,
-            isLoadingOreId,
             supportsMetamask,
             supportsBrave,
             supportsSafePal,
@@ -155,41 +169,69 @@ export default defineComponent({
             showBraveButton,
             showSafePalButton,
             showWalletConnectButton,
-            setOreIdAuthenticator,
-            setMetamaskAuthenticator,
-            setBraveAuthenticator,
-            setSafePalAuthenticator,
-            setWalletConnectAuthenticator,
+            setMetamaskEVM,
+            setBraveEVM,
+            setSafePalEVM,
+            setWalletConnectEVM,
             notifyNoProvider,
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
-            // menu navigation
-            showMainMenu,
-            showTelosCloudMenu,
-            setCloudMenu,
+            showEVMButtons,
+            showZeroButtons,
+            ualAuthenticators,
+            loginTelosZero,
+            setCleosViewerZero,
+            redirectToNewAccountWebsite,
+            availableZeroAccounts,
+            selectedZeroAccount,
+            setSelectedName,
+            requestAccountSelection,
         };
+    },
+    unmounted() {
     },
 });
 </script>
 
 <template>
-<div class="c-evm-login-buttons">
-    <!-- main menu -->
-    <template v-if="showMainMenu">
+<div class="c-login-buttons">
+
+    <template v-if="showEVMButtons">
+        <!-- Brave Authenticator button -->
+        <div
+            v-if="showBraveButton"
+            class="c-login-buttons__option"
+            @click="supportsBrave ? setBraveEVM() : notifyEnableBrave()"
+        >
+            <template v-if="isLoading('Brave.login')">
+                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <InlineSvg
+                    :src="require('src/assets/evm/brave_lion.svg')"
+                    class="c-login-buttons__icon c-login-buttons__icon--brave"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
+            </template>
+        </div>
+
         <!-- Metamask Authenticator button -->
         <div
             v-if="showMetamaskButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsMetamask ?  setMetamaskAuthenticator() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()"
+            class="c-login-buttons__option"
+            @click="supportsMetamask ?  setMetamaskEVM() : supportsSafePal ? notifyNoProvider('Metamask') : redirectToMetamaskDownload()"
         >
             <template v-if="isLoading('Metamask.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <InlineSvg
                     :src="require('src/assets/evm/metamask_fox.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--metamask"
+                    class="c-login-buttons__icon c-login-buttons__icon--metamask"
                     height="24"
                     width="24"
                     aria-hidden="true"
@@ -201,16 +243,16 @@ export default defineComponent({
         <!-- WalletConnect Authenticator button -->
         <div
             v-if="showWalletConnectButton"
-            class="c-evm-login-buttons__option"
-            @click="setWalletConnectAuthenticator()"
+            class="c-login-buttons__option"
+            @click="setWalletConnectEVM()"
         >
             <template v-if="isLoading('WalletConnect.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <InlineSvg
                     :src="require('src/assets/evm/wallet_connect.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--wallet-connect"
+                    class="c-login-buttons__icon c-login-buttons__icon--wallet-connect"
                     height="24"
                     width="24"
                     aria-hidden="true"
@@ -222,16 +264,16 @@ export default defineComponent({
         <!-- Safepal Authenticator button -->
         <div
             v-if="showSafePalButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsSafePal ? setSafePalAuthenticator() : redirectToSafepalDownload()"
+            class="c-login-buttons__option"
+            @click="supportsSafePal ? setSafePalEVM() : redirectToSafepalDownload()"
         >
             <template v-if="isLoading('SafePal.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
+                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
             </template>
             <template v-else>
                 <InlineSvg
                     :src="require('src/assets/evm/safepal.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--safepal"
+                    class="c-login-buttons__icon c-login-buttons__icon--safepal"
                     height="24"
                     width="24"
                     aria-hidden="true"
@@ -240,90 +282,69 @@ export default defineComponent({
             </template>
         </div>
 
-        <!-- Brave Authenticator button -->
-        <div
-            v-if="showBraveButton"
-            class="c-evm-login-buttons__option"
-            @click="supportsBrave ? setBraveAuthenticator() : notifyEnableBrave()"
-        >
-            <template v-if="isLoading('Brave.login')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <InlineSvg
-                    :src="require('src/assets/evm/brave_lion.svg')"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--brave"
-                    height="24"
-                    width="24"
-                    aria-hidden="true"
-                />
-                {{ supportsBrave ? $t('home.brave') : $t('home.brave') }}
-            </template>
-        </div>
     </template>
 
-    <!-- telos cloud menu -->
-    <template v-if="showTelosCloudMenu">
+    <template v-if="showZeroButtons">
+        <!-- Authenticator buttons -->
+        <template
+            v-for="(wallet, idx) in ualAuthenticators"
+            :key="idx"
+        >
+            <div
+                v-if="wallet.getName() !== 'metakeep.ual'"
+                class="c-login-buttons__option"
+                @click="loginTelosZero(idx)"
+            >
+                <template v-if="isLoading(wallet.getStyle().text)">
+                    <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+                </template>
+                <template v-else>
+                    <img
+                        :src="wallet.getStyle().icon"
+                        width="24"
+                        class="c-login-buttons__ual-logo"
+                    >
+                    {{ wallet.getStyle().text }}
+                </template>
+            </div>
+        </template>
 
-        <!-- Google OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2" @click="setOreIdAuthenticator('google')">
-            <template v-if="isLoadingOreId('google')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon"
-                    src="~assets/icon--google.svg"
-                >
-                {{ $t('home.sign_with_google') }}
-            </template>
+        <hr class="c-login-buttons__hr">
+
+        <div
+            class="c-login-buttons__option c-login-buttons__option--centered"
+            tabindex="0"
+            aria-role="button"
+            @keyup.enter="setCleosViewerZero"
+            @click="setCleosViewerZero"
+        >
+            {{ $t('home.view_any_account') }}
         </div>
 
-        <div class="c-evm-login-buttons__sub-title">{{ $t('home.coming_soon') }}</div>
-
-        <!-- Facebook OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--facebook.svg"
-                >
-                {{ $t('home.sign_with_facebook') }}
-            </template>
+        <div
+            class="c-login-buttons__option c-login-buttons__option--centered"
+            tabindex="0"
+            aria-role="button"
+            @keyup.enter="redirectToNewAccountWebsite"
+            @click="redirectToNewAccountWebsite"
+        >
+            {{ $t('home.create_new_account') }}
         </div>
-
-        <!-- X OAuth Provider -->
-        <div class="c-evm-login-buttons__option c-evm-login-buttons__option--web2 c-evm-login-buttons__option--disabled">
-            <template v-if="isLoadingOreId('facebook')">
-                <div class="c-evm-login-buttons__loading"><QSpinnerFacebook /></div>
-            </template>
-            <template v-else>
-                <img
-                    width="24"
-                    class="c-evm-login-buttons__icon c-evm-login-buttons__icon--disabled"
-                    src="~assets/icon--twitter.svg"
-                >
-                {{ $t('home.sign_with_x') }}
-            </template>
-        </div>
-
     </template>
 </div>
 </template>
 
 <style lang="scss">
-.c-evm-login-buttons {
+.c-login-buttons {
+    $width: 255px;
+    $gap: 15px;
+    color: $white;
     $self: &;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 14px;
+    gap: $gap;
 
     &__loading{
         width: 100%;
@@ -368,20 +389,40 @@ export default defineComponent({
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
-        gap: 8px;
+        gap: $gap;
     }
 
-    &__sub-title {
-        color: $white;
+    &__title {
+        @include text--header-4;
+        text-align: center;
+    }
+
+    &__zero-accounts-title {
+        padding: 5px;
+        @include text--small;
+        text-align: center;
+    }
+
+    &__zero-account-loading {
+        margin-right: 1px;
+        margin-top: -3px;
+    }
+
+    &__zero-accounts {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
     }
 
     &__option {
         display: flex;
-        gap: 8px;
+        gap: $gap;
 
-        width: 224px;
+        width: $width;
         height: 54px;
-        color: $white;
         outline-color: $white;
         outline-width: 1px;
         outline-style: solid;
@@ -392,13 +433,12 @@ export default defineComponent({
         cursor: pointer;
 
         &:hover:not(&--disabled) {
-            color: $white;
             outline-color: $white;
             outline-width: 2px;
         }
 
         &:not(:hover) #{$self}__icon {
-            &--oreid, &--metamask, &--safepal, &--wallet-connect {
+            &--metamask, &--safepal, &--wallet-connect {
                 opacity: 0.8;
 
                 @include mobile-only {
@@ -413,6 +453,10 @@ export default defineComponent({
                 outline-width: 0;
                 @include gradient_border();
             }
+            &--gradient:hover {
+                outline-width: 0px !important;
+                @include gradient_border();
+            }
         }
 
         &--disabled {
@@ -420,6 +464,45 @@ export default defineComponent({
             outline-color: #9289b1;
             cursor: not-allowed;
         }
+
+        &--zero-account {
+            height: 32px;
+            width: calc(100% - 16px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    &__hr {
+        width: $width;
+    }
+
+    &__account-name-input-container {
+        background-color: rgba(255, 255, 255, 1);
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    &__account-name-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__account-name-button {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ffffff;
+        color: #ffffff;
+        background-color: transparent;
+        cursor: pointer;
     }
 }
 </style>
