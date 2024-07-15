@@ -11,32 +11,13 @@ import {
     Transaction,
 } from '@greymass/eosio';
 import { Dialog } from 'quasar';
-
-// this simulates the getChain function from OBE
-const getChain = () => ({
-    getHyperionEndpoint: () => (process.env.HYPERION_ENDPOINT),
-    getFuelRPCEndpoint: () => {
-        if (typeof process.env.FUEL_RPC === 'string') {
-            return process.env.FUEL_RPC;
-        } else {
-            return '';
-        }
-    },
-});
+import { useChainStore } from 'src/antelope';
 
 // The maximum fee per transaction this script is willing to accept
 const maxFee = 0.05;
 
 // expire time in millisec
 const expireSeconds = 3600;
-
-const chain = getChain();
-const client = new APIClient({
-    url: chain.getHyperionEndpoint(),
-});
-
-const fuelrpc = chain.getFuelRPCEndpoint();
-const resourceProviderEndpoint = `${fuelrpc}/v1/resource_provider/request_transaction`;
 
 // Wrapper for the user to intersect the signTransaction call
 // Use initFuelUserWrapper() method to initialize an instance of the class
@@ -51,10 +32,14 @@ class FuelUserWrapper extends User {
 
   // called immediately after class instantiation in initFuelUserWrapper()
   async setAvailability() {
-      if (!fuelrpc){
-          return;
-      };
       try {
+          const currentChain = useChainStore().currentNativeChain;
+          const getChain = () => ({
+              getHyperionEndpoint: () => (currentChain.settings.getHyperionEndpoint()),
+              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || '',
+          });
+          const chain = getChain();
+          const fuelrpc = chain.getFuelRPCEndpoint();
           // verify fuel service is available
           this.fuelServiceEnabled = (await fetch(fuelrpc)).status === 200;
       } catch(e) {
@@ -67,6 +52,20 @@ class FuelUserWrapper extends User {
       originalconfig, /*: SignTransactionConfig*/
   )/*: Promise<SignTransactionResponse>*/ {
       try {
+
+          const currentChain = useChainStore().currentNativeChain;
+          const getChain = () => ({
+              getHyperionEndpoint: () => (currentChain.settings.getHyperionEndpoint()),
+              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || '',
+          });
+          const chain = getChain();
+          const fuelrpc = chain.getFuelRPCEndpoint();
+          const resourceProviderEndpoint = `${fuelrpc}/v1/resource_provider/request_transaction`;
+          const client = new APIClient({
+              url: chain.getHyperionEndpoint(),
+          });
+
+
           // if fuel service disabled, send tx using generic ual user method
           if (!this.fuelServiceEnabled) {
               return this.user.signTransaction(originalTransaction, originalconfig);

@@ -137,7 +137,7 @@ export const useAccountStore = defineStore(store_name, {
                         authenticator,
                     } as NativeAccountModel;
                     this.setAccount(nativeAccount);
-
+                    console.log('----------------------- nativeAccount', nativeAccount); // FIXME: remove
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
                     localStorage.setItem('isNative', 'true');
