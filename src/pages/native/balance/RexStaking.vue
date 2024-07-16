@@ -1,4 +1,5 @@
 <script>
+import { useChainStore } from 'src/antelope';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
@@ -105,6 +106,9 @@ export default {
 
         async setApy() {
             try{
+                const telosApi = axios.create({
+                    baseURL: useChainStore().currentChain.settings.getApiEndpoint(),
+                });
                 const apy = (await this.$telosApi.get('apy/native')).data;
                 const earn = this.$t('components.earn');
                 this.apyString = `${earn} ${apy}% APY`;

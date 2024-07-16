@@ -137,7 +137,6 @@ export const useAccountStore = defineStore(store_name, {
                         authenticator,
                     } as NativeAccountModel;
                     this.setAccount(nativeAccount);
-                    console.log('----------------------- nativeAccount', nativeAccount); // FIXME: remove
                     localStorage.setItem('network', network);
                     localStorage.setItem('account', account);
                     localStorage.setItem('isNative', 'true');
@@ -264,7 +263,7 @@ export const useAccountStore = defineStore(store_name, {
                             network,
                         });
                     } else {
-                        const authenticator = getAntelope().wallets.getAuthenticator(autoLogin)?.newInstance(label);
+                        const authenticator = getAntelope().wallets.getEVMAuthenticator(autoLogin)?.newInstance(label);
                         if (!authenticator) {
                             console.error(getAntelope().wallets);
                             throw new Error('antelope.account.error_auto_login');

@@ -76,8 +76,19 @@ export default boot(({ app }) => {
         },
     });
 
-    // setting authenticators getter --
-    ant.config.setAuthenticatorsGetter(() => app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators);
+    ant.events.onNetworkChanged.subscribe({
+        next: async () => {
+            // first recreate the authenticators based on the new network
+            const zeroAuthenticators = app.config.globalProperties.recreateAuthenticator();
+            console.log('zeroAuthenticators', zeroAuthenticators);
+            // set the new authenticators list
+            ant.config.setAuthenticatorsGetter(() => zeroAuthenticators);
+            for (const authenticator of zeroAuthenticators) {
+                ant.wallets.addZeroAuthenticator(authenticator);
+            }
+        },
+    });
+
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string, payload?: Record<string, unknown>) => app.config.globalProperties.$t(key, payload ? payload : {}));
@@ -124,6 +135,8 @@ export default boot(({ app }) => {
 
     // We can simulate the indexer being down for testing purposes by uncommenting the following line
     // (ant.stores.chain.currentChain.settings as EVMChainSettings).simulateIndexerDown(true);
+
+
 
 
 });

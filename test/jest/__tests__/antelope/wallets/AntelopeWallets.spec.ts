@@ -58,8 +58,8 @@ describe('AntelopeWallets', () => {
             expect(typeof wallets['trace']).toBe('function');
 
             // authenticators should be an empty Map
-            expect(wallets['authenticators']).toBeInstanceOf(Map);
-            expect(wallets['authenticators'].size).toBe(0);
+            expect(wallets['evmAuthenticators']).toBeInstanceOf(Map);
+            expect(wallets['evmAuthenticators'].size).toBe(0);
         });
     });
 
@@ -89,8 +89,8 @@ describe('AntelopeWallets', () => {
             };
             wallets.addEVMAuthenticator(authenticator as any);
             expect(traceSpy).toHaveBeenCalledWith('addEVMAuthenticator', 'mockedName', authenticator);
-            expect(wallets['authenticators'].size).toBe(1);
-            expect(wallets['authenticators'].get('mockedName')).toBe(authenticator);
+            expect(wallets['evmAuthenticators'].size).toBe(1);
+            expect(wallets['evmAuthenticators'].get('mockedName')).toBe(authenticator);
         });
     });
 
@@ -100,8 +100,8 @@ describe('AntelopeWallets', () => {
             const authenticator = {
                 getName: () => 'mockedName',
             };
-            wallets['authenticators'].set('mockedName', authenticator as any);
-            expect(wallets.getAuthenticator('mockedName')).toBe(authenticator);
+            wallets['evmAuthenticators'].set('mockedName', authenticator as any);
+            expect(wallets.getEVMAuthenticator('mockedName')).toBe(authenticator);
             expect(traceSpy).toHaveBeenCalledWith('getAuthenticator', 'mockedName');
         });
     });
