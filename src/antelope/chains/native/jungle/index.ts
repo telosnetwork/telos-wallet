@@ -22,6 +22,7 @@ const RPC_ENDPOINT = {
     host: 'jungle.eosusa.news',
     port: 443,
 };
+const NFT_ACCOUNTS = [] as string[];
 const API_ENDPOINT = 'https://example.com';
 const DISPLAY_MAP = true;
 const THEME = {};
@@ -33,6 +34,10 @@ export default class TelosTestnet extends NativeChainSettings {
 
     getNetwork(): string {
         return NETWORK;
+    }
+
+    getNftAccounts(): string[] {
+        return NFT_ACCOUNTS;
     }
 
     getChainId(): string {

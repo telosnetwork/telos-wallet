@@ -109,7 +109,7 @@ export default {
                 const telosApi = axios.create({
                     baseURL: useChainStore().currentChain.settings.getApiEndpoint(),
                 });
-                const apy = (await this.$telosApi.get('apy/native')).data;
+                const apy = (await telosApi.get('apy/native')).data;
                 const earn = this.$t('components.earn');
                 this.apyString = `${earn} ${apy}% APY`;
             }catch(e) {

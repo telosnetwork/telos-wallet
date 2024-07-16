@@ -63,24 +63,6 @@ describe('AntelopeWallets', () => {
         });
     });
 
-    /*
-    // Code to test:
-
-    /*
-    // Code to test: 
-    export class AntelopeWallets {
-        addEVMAuthenticator(authenticator: EVMAuthenticator) {
-            this.trace('addEVMAuthenticator', authenticator.getName(), authenticator);
-            this.authenticators.set(authenticator.getName(), authenticator);
-        }
-
-        getAuthenticator(name: string) {
-            this.trace('getAuthenticator', name);
-            return this.authenticators.get(name);
-        }
-    }
-    */
-
     describe('addEVMAuthenticator function', () => {
         it('should add an authenticator to the authenticators Map', () => {
             const traceSpy = jest.spyOn(wallets as any, 'trace');
@@ -102,7 +84,7 @@ describe('AntelopeWallets', () => {
             };
             wallets['evmAuthenticators'].set('mockedName', authenticator as any);
             expect(wallets.getEVMAuthenticator('mockedName')).toBe(authenticator);
-            expect(traceSpy).toHaveBeenCalledWith('getAuthenticator', 'mockedName');
+            expect(traceSpy).toHaveBeenCalledWith('getEVMAuthenticator', 'mockedName');
         });
     });
 

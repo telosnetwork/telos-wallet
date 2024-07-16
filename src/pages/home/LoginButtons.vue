@@ -13,7 +13,6 @@ import {
     defineComponent,
     getCurrentInstance,
     ref,
-    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import InlineSvg from 'vue-inline-svg';
@@ -139,11 +138,6 @@ export default defineComponent({
             const authenticator = ualAuthenticators.value[idx];
             accountStore.loginZero({ authenticator, network });
         };
-        // FIXME: remove this comment
-        // const getZeroAuthenticator = (name: string) => {
-        //     const idx = ualAuthenticators.value.map(a => a.getName()).indexOf(name);
-        //     return ualAuthenticators.value[idx];
-        // };
         // Intermediate interactive steps to select or create name account for Telos Zero.
         const selectedZeroAccount = ref('');
         const availableZeroAccounts = ref([] as string[]);

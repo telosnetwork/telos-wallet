@@ -23,6 +23,7 @@ const RPC_ENDPOINT = {
     host: 'testnet.telos.net',
     port: 443,
 };
+const NFT_ACCOUNTS = ['marbletessst'];
 const API_ENDPOINT = 'https://api-dev.telos.net/v1';
 const DISPLAY_MAP = false;
 const THEME = {
@@ -53,6 +54,10 @@ export default class TelosTestnet extends NativeChainSettings {
 
     getNetwork(): string {
         return NETWORK;
+    }
+
+    getNftAccounts(): string[] {
+        return NFT_ACCOUNTS;
     }
 
     getChainId(): string {

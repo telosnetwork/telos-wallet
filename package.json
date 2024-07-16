@@ -37,8 +37,6 @@
     "mitt": "^3.0.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "numeral": "^2.0.6",
-    "oreid-js": "^4.7.1",
-    "oreid-webpopup": "^2.4.0",
     "pinia": "^2.0.33",
     "ptokens": "^0.14.0",
     "qrcanvas-vue": "^3.0.0",

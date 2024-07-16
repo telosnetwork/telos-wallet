@@ -81,7 +81,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
             const interval = setInterval(() => {
                 if (pendingRequests < MAX_REQUESTS_COUNT) {
                     pendingRequests++;
-                    clearInterval(interval);
+                    clearInterval(interval as unknown as number);
                     resolve(value);
                 }
             }, INTERVAL_MS);
@@ -150,6 +150,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
     abstract getTheme(): Theme;
     abstract getFiltersSupported(prop: string): boolean;
     abstract trackAnalyticsEvent(eventName: string): void;
+    abstract getNftAccounts(): string[];
 
     /**
      * Retrieves the list of IDs for the important tokens.
