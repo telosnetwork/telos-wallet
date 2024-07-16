@@ -36,12 +36,13 @@ class FuelUserWrapper extends User {
           const currentChain = useChainStore().currentNativeChain;
           const getChain = () => ({
               getHyperionEndpoint: () => (currentChain.settings.getHyperionEndpoint()),
-              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || '',
+              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || null,
           });
           const chain = getChain();
           const fuelrpc = chain.getFuelRPCEndpoint();
+          const fuelrpcString = fuelrpc ? `${fuelrpc.protocol}://${fuelrpc.host}:${fuelrpc.port}${fuelrpc.path?'/'+fuelrpc.path:''}` : null;
           // verify fuel service is available
-          this.fuelServiceEnabled = (await fetch(fuelrpc)).status === 200;
+          this.fuelServiceEnabled = fuelrpcString && (await fetch(fuelrpcString)).status === 200;
       } catch(e) {
           console.error(e);
       }
@@ -52,24 +53,23 @@ class FuelUserWrapper extends User {
       originalconfig, /*: SignTransactionConfig*/
   )/*: Promise<SignTransactionResponse>*/ {
       try {
-
-          const currentChain = useChainStore().currentNativeChain;
-          const getChain = () => ({
-              getHyperionEndpoint: () => (currentChain.settings.getHyperionEndpoint()),
-              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || '',
-          });
-          const chain = getChain();
-          const fuelrpc = chain.getFuelRPCEndpoint();
-          const resourceProviderEndpoint = `${fuelrpc}/v1/resource_provider/request_transaction`;
-          const client = new APIClient({
-              url: chain.getHyperionEndpoint(),
-          });
-
-
           // if fuel service disabled, send tx using generic ual user method
           if (!this.fuelServiceEnabled) {
               return this.user.signTransaction(originalTransaction, originalconfig);
           }
+
+          const currentChain = useChainStore().currentNativeChain;
+          const getChain = () => ({
+              getHyperionEndpoint: () => (currentChain.settings.getHyperionEndpoint()),
+              getFuelRPCEndpoint: () => currentChain.settings.getFuelRPCEndpoint() || null,
+          });
+          const chain = getChain();
+          const fuelrpc = chain.getFuelRPCEndpoint();
+          const fuelrpcString = `${fuelrpc.protocol}://${fuelrpc.host}:${fuelrpc.port}`;
+          const resourceProviderEndpoint = `${fuelrpcString}/v1/resource_provider/request_transaction`;
+          const client = new APIClient({
+              url: chain.getHyperionEndpoint(),
+          });
 
           // Retrieve transaction headers
           const info = await client.v1.chain.get_info();

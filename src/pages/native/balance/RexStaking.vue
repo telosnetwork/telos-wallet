@@ -1,6 +1,7 @@
 <script>
 import { useChainStore } from 'src/antelope';
 import { mapGetters, mapActions } from 'vuex';
+import axios from 'axios';
 
 export default {
     props: ['showRexStakeDlg', 'haveEVMAccount', 'selectedCoin'],

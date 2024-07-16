@@ -229,7 +229,7 @@ export default abstract class NativeChainSettings implements ChainSettings {
             if (amount > 0 && tk) {
                 balance = ethers.utils.parseUnits(toStringNumber(amount), tk.decimals);
             }
-            const tokenBalance = new TokenBalance(tk, balance);
+            const tokenBalance = new TokenBalance(tk ? tk : { symbol:'', decimals:0 } as TokenClass, balance);
             return tokenBalance;
         },
         // filtering by positive balances
