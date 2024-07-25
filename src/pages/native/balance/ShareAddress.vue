@@ -4,6 +4,7 @@ import { QRCanvas } from 'qrcanvas-vue';
 import pTokens from 'ptokens';
 import { copyToClipboard } from 'quasar';
 import BigNumber from 'bignumber.js';
+import { useChainStore } from 'src/antelope';
 
 export default {
     props: ['showShareAddressDlg', 'selectedCoin'],
@@ -103,7 +104,7 @@ export default {
             return Object.keys(this.coinpTokenNetworks).length > 1;
         },
         chainName() {
-            return process.env.CHAIN_NAME;
+            return useChainStore().currentChain.settings.getNetwork();
         },
         coinpTokenNetworks() {
             if (this.selectedCoin.network) {

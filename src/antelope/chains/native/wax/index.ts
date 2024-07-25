@@ -21,6 +21,7 @@ const RPC_ENDPOINT = {
     host: 'wax.eosusa.io',
     port: 443,
 };
+const NFT_ACCOUNTS = [] as string[];
 const API_ENDPOINT = 'https://example.com';
 const S3_PRODUCER_BUCKET = 'https://telos-producer-validation.s3.amazonaws.com';
 const DISPLAY_MAP = true;
@@ -29,6 +30,10 @@ const THEME = {};
 export default class EOS extends NativeChainSettings {
     getNetwork(): string {
         return NETWORK;
+    }
+
+    getNftAccounts(): string[] {
+        return NFT_ACCOUNTS;
     }
 
     getChainId(): string {

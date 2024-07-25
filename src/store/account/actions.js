@@ -26,10 +26,7 @@ export const login = async function(
             this.$type = 'ual';
             this.$idx = idx;
             commit('setAccountName', accountName);
-            localStorage.setItem('autoLogin', authenticator.getName());
-            localStorage.setItem('account', accountName);
-            localStorage.setItem('isNative', true);
-            localStorage.setItem('network', network);
+            // all localhost data is set src/antelope/stores/account.ts on loginZero function
             if (this.$router.currentRoute.path === '/') {
                 await this.$router.push({ path: '/zero/balance' });
             }

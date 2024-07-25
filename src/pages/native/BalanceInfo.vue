@@ -15,6 +15,7 @@ import WithdrawEVM from '~/pages/native/balance/WithdrawEVM';
 import RexStaking from '~/pages/native/balance/RexStaking';
 import { copyToClipboard } from 'quasar';
 import { getHyperion } from 'src/boot/api';
+import { useChainStore } from 'src/antelope';
 
 
 const GETTING_STARTED_URL = 'https://www.telos.net/buy';
@@ -130,18 +131,10 @@ export default {
             return 1 - Math.max(0, (this.balanceTextSize - 15) * 0.1);
         },
         chainName() {
-            if (process.env.CHAIN_NAME === undefined) {
-                return 'telos';
-            } else {
-                return process.env.CHAIN_NAME;
-            }
+            return useChainStore().currentChain.settings.getNetwork();
         },
         nftAccounts() {
-            if (this.chainName !== 'telos') {
-                return ['marbletessst'];
-            } else {
-                return ['tlos.tbond', 'marble.code'];
-            }
+            return useChainStore().currentChain.settings.getNftAccounts();
         },
         shortenedEvmAddress() {
             const address = this.evmAddress;

@@ -29,6 +29,7 @@ const FUEL_RPC_ENDPOINT = {
     host: 'telos.greymass.com',
     port: 443,
 };
+const NFT_ACCOUNTS = ['tlos.tbond', 'marble.code'];
 const API_ENDPOINT = 'https://api.telos.net/v1';
 const S3_PRODUCER_BUCKET = 'https://telos-producer-validation.s3.amazonaws.com';
 const DISPLAY_MAP = true;
@@ -56,6 +57,10 @@ const THEME = {
 export default class Telos extends NativeChainSettings {
     getNetwork(): string {
         return NETWORK;
+    }
+
+    getNftAccounts(): string[] {
+        return NFT_ACCOUNTS;
     }
 
     getChainId(): string {

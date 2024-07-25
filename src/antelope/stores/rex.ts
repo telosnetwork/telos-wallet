@@ -223,7 +223,7 @@ export const useRexStore = defineStore(store_name, {
                 const deposits = await contract.depositsOf(address);
                 this.setDeposits(label, deposits);
             } else {
-                console.error('updateDeposits', label, 'not supported for native chains yet');
+                this.trace('updateDeposits', label, 'not supported for native chains yet');
             }
         },
         /**
@@ -239,7 +239,7 @@ export const useRexStore = defineStore(store_name, {
                 const balance = await contract.balanceOf(address);
                 this.setBalance(label, balance);
             } else {
-                console.error('updateBalance', label, 'not supported for native chains yet');
+                this.trace('updateBalance', label, 'not supported for native chains yet');
             }
         },
         /**

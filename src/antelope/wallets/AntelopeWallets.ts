@@ -1,6 +1,6 @@
 import { EVMAuthenticator } from 'src/antelope/wallets/authenticators/EVMAuthenticator';
 import { CURRENT_CONTEXT, useChainStore } from 'src/antelope';
-import { RpcEndpoint } from 'universal-authenticator-library';
+import { Authenticator, RpcEndpoint } from 'universal-authenticator-library';
 import { ethers } from 'ethers';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
 import { AntelopeError } from 'src/antelope/types';
@@ -11,7 +11,8 @@ const name = 'AntelopeWallets';
 export class AntelopeWallets {
 
     private trace: AntelopeDebugTraceType;
-    private authenticators: Map<string, EVMAuthenticator> = new Map();
+    private evmAuthenticators: Map<string, EVMAuthenticator> = new Map();
+    private zeroAuthenticators: Map<string, Authenticator> = new Map();
     private web3Provider: ethers.providers.Web3Provider | null = null;
     private web3ProviderInitializationPromise: Promise<ethers.providers.Web3Provider> | null = null;
 
@@ -21,18 +22,36 @@ export class AntelopeWallets {
 
     init() {
         this.trace('init');
-
-
     }
 
     addEVMAuthenticator(authenticator: EVMAuthenticator) {
         this.trace('addEVMAuthenticator', authenticator.getName(), authenticator);
-        this.authenticators.set(authenticator.getName(), authenticator);
+        this.evmAuthenticators.set(authenticator.getName(), authenticator);
     }
 
-    getAuthenticator(name: string) {
-        this.trace('getAuthenticator', name);
-        return this.authenticators.get(name);
+    addZeroAuthenticator(authenticator: Authenticator) {
+        this.trace('addZeroAuthenticator', authenticator.getName(), authenticator);
+        this.zeroAuthenticators.set(authenticator.getName(), authenticator);
+    }
+
+    getEVMAuthenticator(name: string) {
+        this.trace('getEVMAuthenticator', name);
+        return this.evmAuthenticators.get(name);
+    }
+
+    getZeroAuthenticator(name: string) {
+        this.trace('getZeroAuthenticator', name);
+        return this.zeroAuthenticators.get(name);
+    }
+
+    getEVMAuthenticators() {
+        this.trace('getEVMAuthenticators');
+        return Array.from(this.evmAuthenticators.values());
+    }
+
+    getZeroAuthenticators() {
+        this.trace('getZeroAuthenticators');
+        return Array.from(this.zeroAuthenticators.values());
     }
 
     getChainSettings(label: string) {
