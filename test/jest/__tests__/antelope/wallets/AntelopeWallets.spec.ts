@@ -58,28 +58,10 @@ describe('AntelopeWallets', () => {
             expect(typeof wallets['trace']).toBe('function');
 
             // authenticators should be an empty Map
-            expect(wallets['authenticators']).toBeInstanceOf(Map);
-            expect(wallets['authenticators'].size).toBe(0);
+            expect(wallets['evmAuthenticators']).toBeInstanceOf(Map);
+            expect(wallets['evmAuthenticators'].size).toBe(0);
         });
     });
-
-    /*
-    // Code to test:
-
-    /*
-    // Code to test: 
-    export class AntelopeWallets {
-        addEVMAuthenticator(authenticator: EVMAuthenticator) {
-            this.trace('addEVMAuthenticator', authenticator.getName(), authenticator);
-            this.authenticators.set(authenticator.getName(), authenticator);
-        }
-
-        getAuthenticator(name: string) {
-            this.trace('getAuthenticator', name);
-            return this.authenticators.get(name);
-        }
-    }
-    */
 
     describe('addEVMAuthenticator function', () => {
         it('should add an authenticator to the authenticators Map', () => {
@@ -89,8 +71,8 @@ describe('AntelopeWallets', () => {
             };
             wallets.addEVMAuthenticator(authenticator as any);
             expect(traceSpy).toHaveBeenCalledWith('addEVMAuthenticator', 'mockedName', authenticator);
-            expect(wallets['authenticators'].size).toBe(1);
-            expect(wallets['authenticators'].get('mockedName')).toBe(authenticator);
+            expect(wallets['evmAuthenticators'].size).toBe(1);
+            expect(wallets['evmAuthenticators'].get('mockedName')).toBe(authenticator);
         });
     });
 
@@ -100,9 +82,9 @@ describe('AntelopeWallets', () => {
             const authenticator = {
                 getName: () => 'mockedName',
             };
-            wallets['authenticators'].set('mockedName', authenticator as any);
-            expect(wallets.getAuthenticator('mockedName')).toBe(authenticator);
-            expect(traceSpy).toHaveBeenCalledWith('getAuthenticator', 'mockedName');
+            wallets['evmAuthenticators'].set('mockedName', authenticator as any);
+            expect(wallets.getEVMAuthenticator('mockedName')).toBe(authenticator);
+            expect(traceSpy).toHaveBeenCalledWith('getEVMAuthenticator', 'mockedName');
         });
     });
 

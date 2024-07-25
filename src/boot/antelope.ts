@@ -1,6 +1,5 @@
 import { EthereumClient } from '@web3modal/ethereum';
 import { Web3ModalConfig } from '@web3modal/html';
-import { OreIdOptions } from 'oreid-js';
 import { boot } from 'quasar/wrappers';
 import { installAntelope } from 'src/antelope';
 import { AccountModel } from 'src/antelope/stores/account';
@@ -8,7 +7,6 @@ import { AntelopeError } from 'src/antelope/types';
 import {
     MetamaskAuth,
     WalletConnectAuth,
-    OreIdAuth,
     SafePalAuth,
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
@@ -76,8 +74,19 @@ export default boot(({ app }) => {
         },
     });
 
-    // setting authenticators getter --
-    ant.config.setAuthenticatorsGetter(() => app.config.globalProperties.$ual.getAuthenticators().availableAuthenticators);
+    ant.events.onNetworkChanged.subscribe({
+        next: async () => {
+            // first recreate the authenticators based on the new network
+            const zeroAuthenticators = app.config.globalProperties.recreateAuthenticator();
+            console.log('zeroAuthenticators', zeroAuthenticators);
+            // set the new authenticators list
+            ant.config.setAuthenticatorsGetter(() => zeroAuthenticators);
+            for (const authenticator of zeroAuthenticators) {
+                ant.wallets.addZeroAuthenticator(authenticator);
+            }
+        },
+    });
+
 
     // setting translation handler --
     ant.config.setLocalizationHandler((key:string, payload?: Record<string, unknown>) => app.config.globalProperties.$t(key, payload ? payload : {}));
@@ -103,11 +112,6 @@ export default boot(({ app }) => {
     ant.wallets.addEVMAuthenticator(new MetamaskAuth());
     ant.wallets.addEVMAuthenticator(new SafePalAuth());
     ant.wallets.addEVMAuthenticator(new BraveAuth());
-    const oreIdOptions: OreIdOptions = {
-        appName: process.env.APP_NAME,
-        appId: process.env.OREID_APP_ID as string,
-    };
-    ant.wallets.addEVMAuthenticator(new OreIdAuth(oreIdOptions));
 
     // autologin --
     ant.stores.account.autoLogin();
@@ -124,6 +128,8 @@ export default boot(({ app }) => {
 
     // We can simulate the indexer being down for testing purposes by uncommenting the following line
     // (ant.stores.chain.currentChain.settings as EVMChainSettings).simulateIndexerDown(true);
+
+
 
 
 });

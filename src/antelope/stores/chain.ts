@@ -271,6 +271,7 @@ export const useChainStore = defineStore(store_name, {
                 if (network !== this.__chains[label]?.settings.getNetwork()) {
                     this.__chains[label] = chains[network];
                     this.trace('setChain', label, network, '--> void this.updateChainData(label);');
+                    getAntelope().wallets.resetWeb3Provider();
                     void this.updateChainData(label);
                     getAntelope().events.onNetworkChanged.next(
                         { label, chain: this.__chains[label] },

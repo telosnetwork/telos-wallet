@@ -13,7 +13,6 @@ import {
     defineComponent,
     getCurrentInstance,
     ref,
-    watch,
 } from 'vue';
 import { QSpinnerFacebook } from 'quasar';
 import InlineSvg from 'vue-inline-svg';
@@ -94,7 +93,7 @@ export default defineComponent({
         };
 
         const setEVMAuthenticator = async(name: string, label: string) => {
-            const auth = ant.wallets.getAuthenticator(name);
+            const auth = ant.wallets.getEVMAuthenticator(name);
             if (!auth) {
                 console.error(`${name} authenticator not found`);
                 return;
@@ -128,7 +127,7 @@ export default defineComponent({
         const isLoading = (loginName: string) => useFeedbackStore().isLoading(loginName);
 
         // Telos Zero Login ----------------------------------------------------
-        const ualAuthenticators = ant.config.authenticatorsGetter();
+        const ualAuthenticators = computed(() => ant.wallets.getZeroAuthenticators());
         const loginTelosZero = (idx:number, justViewer:boolean = false) => {
             if (justViewer) {
                 localStorage.setItem('justViewer', 'true');
@@ -136,12 +135,8 @@ export default defineComponent({
                 localStorage.removeItem('justViewer');
             }
             const network = chainStore.currentChain.settings.getNetwork();
-            const authenticator = ualAuthenticators[idx];
+            const authenticator = ualAuthenticators.value[idx];
             accountStore.loginZero({ authenticator, network });
-        };
-        const getZeroAuthenticator = (name: string) => {
-            const idx = ualAuthenticators.map(a => a.getName()).indexOf(name);
-            return ualAuthenticators[idx];
         };
         // Intermediate interactive steps to select or create name account for Telos Zero.
         const selectedZeroAccount = ref('');

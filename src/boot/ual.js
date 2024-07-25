@@ -6,19 +6,10 @@ import { CleosAuthenticator } from '@telosnetwork/ual-cleos';
 import { WebPopup } from 'oreid-webpopup';
 import { OreIdAuthenticator, AuthProvider } from 'ual-oreid';
 import { Dialog, Notify, copyToClipboard } from 'quasar';
+import { useChainStore } from 'src/antelope';
 
 
 export default boot(async ({ app, store }) => {
-    const chain = {
-        chainId: process.env.NETWORK_CHAIN_ID,
-        rpcEndpoints: [
-            {
-                protocol: process.env.NETWORK_PROTOCOL,
-                host: process.env.NETWORK_HOST,
-                port: process.env.NETWORK_PORT,
-            },
-        ],
-    };
 
     async function loginHandler() {
         let accountName = 'eosio';
@@ -102,10 +93,11 @@ export default boot(async ({ app, store }) => {
             4,
         );
         await new Promise((resolve) => {
+            const network_host = useChainStore().currentChain.settings.getRPCEndpoint().host;
             Dialog.create({
                 class: 'cleos-auth-dialog',
                 color: 'primary',
-                message: `<pre>cleos -u https://${process.env.NETWORK_HOST} push transaction '${trxJSON}'</pre>`,
+                message: `<pre>cleos -u https://${network_host} push transaction '${trxJSON}'</pre>`,
                 html: true,
                 cancel: true,
                 fullWidth: true,
@@ -115,7 +107,7 @@ export default boot(async ({ app, store }) => {
             })
                 .onOk(() => {
                     copyToClipboard(
-                        `cleos -u https://${process.env.NETWORK_HOST} push transaction '${trxJSON}'`,
+                        `cleos -u https://${network_host} push transaction '${trxJSON}'`,
                     )
                         .then(() => {
                             Notify.create({
@@ -143,17 +135,39 @@ export default boot(async ({ app, store }) => {
         });
     }
 
-    const authenticators = [
-        new Anchor([chain], { appName: process.env.APP_NAME }),
-        new Wombat([chain], { appName: process.env.APP_NAME }),
-        new CleosAuthenticator([chain], {
-            appName: process.env.APP_NAME,
-            loginHandler,
-            signHandler,
-        }),
-    ];
 
-    const ual = new UAL([chain], 'ual', authenticators);
-    store['$ual'] = ual;
-    app.config.globalProperties.$ual = ual;
+    app.config.globalProperties.recreateAuthenticator = function() {
+        console.log('UAL.recreateAuthenticator()');
+
+        if (useChainStore().currentChain.settings.isNative()) {
+            const settings = useChainStore().currentNativeChain.settings;
+            console.log('UAL.recreateAuthenticator()', { settings });
+
+            const ual_chain = {
+                chainId: settings.getChainId(),
+                rpcEndpoints: [settings.getRPCEndpoint()],
+            };
+
+            const authenticators = [
+                new Anchor([ual_chain], { appName: process.env.APP_NAME }),
+                new Wombat([ual_chain], { appName: process.env.APP_NAME }),
+                new CleosAuthenticator([ual_chain], {
+                    appName: process.env.APP_NAME,
+                    loginHandler,
+                    signHandler,
+                }),
+            ];
+
+            const ual = new UAL([ual_chain], 'ual', authenticators);
+            store['$ual'] = ual;
+            app.config.globalProperties.$ual = ual;
+
+            return authenticators;
+        } else {
+            console.log('UAL.recreateAuthenticator() - not native chain');
+            return [];
+        }
+    };
+
+
 });

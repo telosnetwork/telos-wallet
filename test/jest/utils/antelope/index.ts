@@ -36,7 +36,7 @@ const AntelopeMock = {
         },
     },
     wallets: {
-        getAuthenticator: () => ({
+        getEVMAuthenticator: () => ({
             newInstance: (label: string) => ({
                 label,
                 isConnectedTo: () => Promise.resolve(true),

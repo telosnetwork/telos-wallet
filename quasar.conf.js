@@ -30,7 +30,7 @@ module.exports = function(/* ctx */) {
         // app boot file (/src/boot)
         // --> boot files are part of "main.js"
         // https://quasar.dev/quasar-cli/boot-files
-        boot: ['ual', 'i18n', 'fuel', 'api', 'errorHandling', 'helpers', 'mixin', 'emitter', 'telosApi', 'wagmi', 'antelope'],
+        boot: ['ual', 'i18n', 'fuel', 'api', 'errorHandling', 'helpers', 'mixin', 'emitter', 'wagmi', 'antelope'],
 
         // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
         css: ['index.scss'],

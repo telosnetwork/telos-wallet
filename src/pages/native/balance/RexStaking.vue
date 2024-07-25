@@ -1,5 +1,7 @@
 <script>
+import { useChainStore } from 'src/antelope';
 import { mapGetters, mapActions } from 'vuex';
+import axios from 'axios';
 
 export default {
     props: ['showRexStakeDlg', 'haveEVMAccount', 'selectedCoin'],
@@ -105,7 +107,10 @@ export default {
 
         async setApy() {
             try{
-                const apy = (await this.$telosApi.get('apy/native')).data;
+                const telosApi = axios.create({
+                    baseURL: useChainStore().currentChain.settings.getApiEndpoint(),
+                });
+                const apy = (await telosApi.get('apy/native')).data;
                 const earn = this.$t('components.earn');
                 this.apyString = `${earn} ${apy}% APY`;
             }catch(e) {

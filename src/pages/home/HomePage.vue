@@ -74,9 +74,10 @@ onMounted(() => {
 watch(selectedNetwork, () => {
     if (selectedNetwork.value) {
         chainStore.setChain(CURRENT_CONTEXT, selectedNetwork.value.value);
-        setTab(selectedNetwork.value.tab as TabReference);
-        // change the url to reflect the network
-        router.replace({ query: { network: selectedNetwork.value.value } });
+        const login = selectedNetwork.value.tab;
+        const network = selectedNetwork.value.value;
+        router.replace({ query:{ ...route.query, login, network } });
+        tab.value = login as TabReference;
     }
 });
 
