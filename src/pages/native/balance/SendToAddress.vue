@@ -53,14 +53,14 @@ export default {
         coinpTokenNetworks() {
             if (this.selectedCoin.network) {
                 return {
-                    [this.selectedCoin.network]:
-            this.pTokenNetworks[this.tSymbol][this.selectedCoin.network],
+                    [this.selectedCoin.network]: this.pTokenNetworks[this.tSymbol][this.selectedCoin.network],
                 };
             }
             const networks = {};
             for (const key in this.pTokenNetworks[this.tSymbol]) {
                 networks[key] = this.pTokenNetworks[this.tSymbol][key];
             }
+
             return networks;
         },
     },
