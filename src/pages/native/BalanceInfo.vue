@@ -755,19 +755,19 @@ export default {
                 </div>
             </div>
 
-            <div v-if="showEVMBridgeWarning" class="q-pa-md q-gutter-sm">
-                <q-banner rounded class="bg-purple-8 text-white">
+            <div v-if="showEVMBridgeWarning" class="q-pa-sm">
+                <q-banner inline-actions rounded class="bg-purple-8 text-white">
 
                     <span>
-                        If you want to move your TLOS tokens to another blockchain, you first need to send them to the
-                        <span class="to_evm">&gt;&gt;&gt; EVM</span>
-                        and then use the bridge at
+                        To transfer your TLOS tokens across blockchains, first send them to the Telos EVM network
+                        <span class="to_evm">(click on >>> EVM),</span> then connect to
+                        <a
+                            href="https://bridge.telos.net/bridge"
+                            target="_blank"
+                            class="text-white"
+                        >bridge.telos.net</a>
+                        to complete your transfer.
                     </span>
-                    <a
-                        href="https://bridge.telos.net/bridge"
-                        target="_blank"
-                        class="text-white"
-                    >bridge.telos.net</a>
 
                     <template v-slot:action>
                         <q-btn
