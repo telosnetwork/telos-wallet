@@ -103,8 +103,7 @@ export default {
             return this.coins
                 .map(
                     coin =>
-                        (coin?.totalAmount === undefined ? coin.amount : coin.totalAmount) *
-            coin.price,
+                        (coin?.totalAmount === undefined ? coin.amount : coin.totalAmount) * coin.price,
                 )
                 .reduce((a, b) => a + b, 0);
         },
@@ -198,7 +197,12 @@ export default {
                 table: 'tokens',
             });
 
-            coins.rows.forEach((token) => {
+            // removing all instances of any pTokens
+            const filtered = coins.rows.filter(
+                token => !token.contract_account.includes('.ptokens'),
+            );
+
+            filtered.forEach((token) => {
                 const [precision, symbol] = token.token_symbol.split(',');
                 const account = token.contract_account;
                 if (account === 'eosio.token' && symbol === 'TLOS') {
