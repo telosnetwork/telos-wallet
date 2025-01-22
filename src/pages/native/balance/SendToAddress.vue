@@ -315,8 +315,8 @@ export default {
                             </q-item-section>
                         </q-item>
                         <q-item
+                            v-if="networkType === 'telos'"
                             class="list-item listItemNotes"
-                            :disable="networkType === 'ptoken'"
                         >
                             <q-item-section
                                 text-white
