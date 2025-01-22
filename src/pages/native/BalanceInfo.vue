@@ -766,6 +766,14 @@ export default {
                     class="bg-purple-8 text-white"
                 >
 
+                    <template v-slot:avatar>
+                        <q-icon
+                            name="info"
+                            color="white"
+                            size="sm"
+                            class="avatar-icon"
+                        />
+                    </template>
                     <span
                         v-if="showEVMBridgeWarningTitle"
                         class="text-h6"
@@ -939,6 +947,9 @@ export default {
 </template>
 
 <style lang="scss">
+.avatar-icon {
+    margin-top: 10px;
+}
 .to_evm {
     font-weight: bold;
     white-space: nowrap;
