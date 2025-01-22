@@ -83,6 +83,7 @@ export default {
             showWithdrawEVMDlg: false,
             showEVMWarning: false,
             showEVMBridgeWarning: true,
+            showEVMBridgeWarningTitle: true,
             showEVMAddress: false,
             showRexStakeDlg: false,
             tEVMWithdrawing: false,
@@ -635,6 +636,9 @@ export default {
             this.updateBalances();
             window.time = Date.now() / 1000;
         }, 5000);
+
+
+        this.showEVMBridgeWarningTitle = this.$q.screen.lt.md;
     },
     beforeMount() {
         this.coinViewHeight =
@@ -756,9 +760,20 @@ export default {
             </div>
 
             <div v-if="showEVMBridgeWarning" class="q-pa-sm">
-                <q-banner inline-actions rounded class="bg-purple-8 text-white">
+                <q-banner
+                    rounded
+                    :inline-actions="!$q.screen.lt.md || showEVMBridgeWarningTitle"
+                    class="bg-purple-8 text-white"
+                >
 
-                    <span>
+                    <span
+                        v-if="showEVMBridgeWarningTitle"
+                        class="text-h6"
+                        @click="showEVMBridgeWarningTitle = false"
+                    >
+                        Bridging your TLOS
+                    </span>
+                    <span v-else class="text-subtitle1">
                         To transfer your TLOS tokens across blockchains, first send them to the Telos EVM network
                         <span class="to_evm">(click on >>> EVM),</span> then connect to
                         <a
