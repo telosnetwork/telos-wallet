@@ -124,26 +124,7 @@ export default {
                     return;
                 }
             } else if (this.networkType === 'ethereum') {
-                actions.push({
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    data: {
-                        from: this.accountName.toLowerCase(),
-                        to: 'xeth.ptokens',
-                        quantity: quantityStr,
-                        memo: this.toAddress,
-                    },
-                });
-            } else if (this.networkType === 'ptoken') {
-                actions.push({
-                    account: this.selectedCoin.account,
-                    name: 'redeem',
-                    data: {
-                        sender: this.accountName.toLowerCase(),
-                        memo: this.toAddress,
-                        quantity: quantityStr,
-                    },
-                });
+                console.error('Unkown network type:', this.networkType);
             }
             try {
                 const transaction = await this.$store.$api.signTransaction(

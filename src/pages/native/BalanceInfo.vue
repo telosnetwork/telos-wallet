@@ -82,6 +82,8 @@ export default {
             showDepositEVMDlg: false,
             showWithdrawEVMDlg: false,
             showEVMWarning: false,
+            showEVMBridgeWarning: true,
+            showEVMBridgeWarningTitle: true,
             showEVMAddress: false,
             showRexStakeDlg: false,
             tEVMWithdrawing: false,
@@ -102,8 +104,7 @@ export default {
             return this.coins
                 .map(
                     coin =>
-                        (coin?.totalAmount === undefined ? coin.amount : coin.totalAmount) *
-            coin.price,
+                        (coin?.totalAmount === undefined ? coin.amount : coin.totalAmount) * coin.price,
                 )
                 .reduce((a, b) => a + b, 0);
         },
@@ -197,7 +198,12 @@ export default {
                 table: 'tokens',
             });
 
-            coins.rows.forEach((token) => {
+            // removing all instances of any pTokens
+            const filtered = coins.rows.filter(
+                token => !token.contract_account.includes('.ptokens'),
+            );
+
+            filtered.forEach((token) => {
                 const [precision, symbol] = token.token_symbol.split(',');
                 const account = token.contract_account;
                 if (account === 'eosio.token' && symbol === 'TLOS') {
@@ -630,6 +636,9 @@ export default {
             this.updateBalances();
             window.time = Date.now() / 1000;
         }, 5000);
+
+
+        this.showEVMBridgeWarningTitle = this.$q.screen.lt.md;
     },
     beforeMount() {
         this.coinViewHeight =
@@ -748,6 +757,50 @@ export default {
                         <img src="~assets/coin/Purchase.svg" class="q-ml-xs" >
                     </div>
                 </div>
+            </div>
+
+            <div v-if="showEVMBridgeWarning" class="q-pa-sm">
+                <q-banner
+                    rounded
+                    :inline-actions="!$q.screen.lt.md || showEVMBridgeWarningTitle"
+                    class="bg-purple-8 text-white"
+                >
+
+                    <template v-slot:avatar>
+                        <q-icon
+                            name="info"
+                            color="white"
+                            size="sm"
+                            class="avatar-icon"
+                        />
+                    </template>
+                    <span
+                        v-if="showEVMBridgeWarningTitle"
+                        class="text-h6"
+                        @click="showEVMBridgeWarningTitle = false"
+                    >
+                        Bridging your TLOS
+                    </span>
+                    <span v-else class="text-subtitle1">
+                        To transfer your TLOS tokens across blockchains, first send them to the Telos EVM network
+                        <span class="to_evm">(click on >>> EVM),</span> then connect to
+                        <a
+                            href="https://bridge.telos.net/bridge"
+                            target="_blank"
+                            class="text-white"
+                        >bridge.telos.net</a>
+                        to complete your transfer.
+                    </span>
+
+                    <template v-slot:action>
+                        <q-btn
+                            flat
+                            round
+                            icon="close"
+                            @click="showEVMBridgeWarning = false"
+                        />
+                    </template>
+                </q-banner>
             </div>
 
             <q-tabs
@@ -894,6 +947,13 @@ export default {
 </template>
 
 <style lang="scss">
+.avatar-icon {
+    margin-top: 10px;
+}
+.to_evm {
+    font-weight: bold;
+    white-space: nowrap;
+}
 .balance-info-page-container {
     width: 600px;
 }

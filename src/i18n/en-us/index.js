@@ -480,7 +480,7 @@ export default {
         to_moonpay_text: 'By Clicking \'Next\' you will be taken to Moonpay to purchase Telos (TLOS) with card. ' +
         'Do not alter the \'TO\' or \'MEMO\' field or risk losing your ' +
         'funds.',
-        evm_deposit: 'EVM Deposit',
+        evm_deposit: 'Telos EVM Deposit',
         deposit_1: 'Deposit your TLOS into the EVM,',
         deposit_2: 'fast, free and instant.',
         withdraw: 'Withdraw',
@@ -548,7 +548,7 @@ export default {
         new_address_created: 'A new address is successfully created',
         address_is_generated: 'New Deposit Address is generated successfully',
         deposit_confirmed: 'New Deposit is confirmed successfully',
-        evm_withdraw: 'EVM Withdraw',
+        evm_withdraw: 'Telos EVM Withdraw',
         cannot_withdraw: 'Cannot withdraw more than EVM TLOS balance: {balance}',
         deposit_to_evm: 'Deposit {quantity} to the EVM',
         is_withdrawn_from_evm: '{quantity} is withdrawn from the EVM',
