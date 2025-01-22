@@ -82,6 +82,7 @@ export default {
             showDepositEVMDlg: false,
             showWithdrawEVMDlg: false,
             showEVMWarning: false,
+            showEVMBridgeWarning: true,
             showEVMAddress: false,
             showRexStakeDlg: false,
             tEVMWithdrawing: false,
@@ -750,6 +751,31 @@ export default {
                 </div>
             </div>
 
+            <div v-if="showEVMBridgeWarning" class="q-pa-md q-gutter-sm">
+                <q-banner rounded class="bg-purple-8 text-white">
+
+                    <span>
+                        If you want to move your TLOS tokens to another blockchain, you first need to send them to the
+                        <span class="to_evm">&gt;&gt;&gt; EVM</span>
+                        and then use the bridge at
+                    </span>
+                    <a
+                        href="https://bridge.telos.net/bridge"
+                        target="_blank"
+                        class="text-white"
+                    >bridge.telos.net</a>
+
+                    <template v-slot:action>
+                        <q-btn
+                            flat
+                            round
+                            icon="close"
+                            @click="showEVMBridgeWarning = false"
+                        />
+                    </template>
+                </q-banner>
+            </div>
+
             <q-tabs
                 v-model="tab"
                 :value="balanceTab"
@@ -894,6 +920,10 @@ export default {
 </template>
 
 <style lang="scss">
+.to_evm {
+    font-weight: bold;
+    white-space: nowrap;
+}
 .balance-info-page-container {
     width: 600px;
 }
