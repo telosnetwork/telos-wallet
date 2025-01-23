@@ -21,7 +21,8 @@ import {
     TransactionResponse,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
-    isNftCollectionAllowanceRow, EvmContractFactoryData,
+    isNftCollectionAllowanceRow,
+    EvmContractFactoryData,
 } from 'src/antelope/types';
 import { createTraceFunction } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -226,101 +227,107 @@ export const useAllowancesStore = defineStore(store_name, {
         // actions
         async fetchAllowancesForAccount(account: string): Promise<void> {
             this.trace('fetchAllowancesForAccount', account);
-            useFeedbackStore().setLoading('fetchAllowancesForAccount');
-
-            const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
-
-            if (chainSettings.isNative()) {
-                this.trace('fetchAllowancesForAccount', 'Native chain does not have allowances');
-                return;
-            }
-
-            const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
-            const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
-            const erc1155AllowancesPromise = chainSettings.fetchErc1155Allowances(account, { limit: ALLOWANCES_LIMIT });
-
-            let allowancesResults: IndexerAllowanceResponse[];
-
             try {
-                allowancesResults = await Promise.all([erc20AllowancesPromise, erc721AllowancesPromise, erc1155AllowancesPromise]);
-            } catch (e) {
-                console.error('Error fetching allowances', e);
+                useFeedbackStore().setLoading('fetchAllowancesForAccount');
+
+                const chainSettings = useChainStore().currentChain.settings as EVMChainSettings;
+
+                if (chainSettings.isNative()) {
+                    this.trace('fetchAllowancesForAccount', 'Native chain does not have allowances');
+                    return;
+                }
+
+                const erc20AllowancesPromise   = chainSettings.fetchErc20Allowances(account, { limit: ALLOWANCES_LIMIT });
+                const erc721AllowancesPromise  = chainSettings.fetchErc721Allowances(account, { limit: ALLOWANCES_LIMIT });
+                const erc1155AllowancesPromise = chainSettings.fetchErc1155Allowances(account, { limit: ALLOWANCES_LIMIT });
+
+                let allowancesResults: IndexerAllowanceResponse[];
+
+                try {
+                    allowancesResults = await Promise.all([erc20AllowancesPromise, erc721AllowancesPromise, erc1155AllowancesPromise]);
+                } catch (e) {
+                    console.error('Error fetching allowances', e);
+                    useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
+                    throw new AntelopeError('antelope.allowances.error_fetching_allowances');
+                }
+
+                const erc20AllowancesData   = (allowancesResults[0] as IndexerAllowanceResponseErc20)?.results ?? [];
+                const erc721AllowancesData  = (allowancesResults[1] as IndexerAllowanceResponseErc721)?.results ?? [];
+                const erc1155AllowancesData = (allowancesResults[2] as IndexerAllowanceResponseErc1155)?.results ?? [];
+
+                // Load these in the cache so they're available later and we don't abuse the indexer API
+                allowancesResults.map((result) => {
+                    for (const [address, contract] of Object.entries(result.contracts)) {
+                        useContractStore().createAndStoreContract(CURRENT_CONTEXT, address, contract as EvmContractFactoryData);
+                    }
+                });
+
+                const shapedErc20AllowanceRowPromises   = Promise.allSettled(erc20AllowancesData.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData)));
+                const shapedErc721AllowanceRowPromises  = Promise.allSettled(erc721AllowancesData.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData)));
+                const shapedErc1155AllowanceRowPromises = Promise.allSettled(erc1155AllowancesData.map(allowanceData => this.shapeErc1155AllowanceRow(allowanceData)));
+
+                const [settledErc20Results, settledErc721Results, settledErc1155Results] = await Promise.allSettled([
+                    shapedErc20AllowanceRowPromises,
+                    shapedErc721AllowanceRowPromises,
+                    shapedErc1155AllowanceRowPromises,
+                ]);
+
+                if (settledErc20Results.status === 'fulfilled') {
+                    const shapedErc20Rows: ShapedAllowanceRowERC20[] = [];
+
+                    settledErc20Results.value.forEach((result) => {
+                        if (result.status === 'fulfilled') {
+                            result.value && shapedErc20Rows.push(result.value);
+                        } else {
+                            console.error('Error shaping ERC20 allowance row', result.reason);
+                        }
+                    });
+
+                    this.setErc20Allowances(CURRENT_CONTEXT, shapedErc20Rows);
+                } else {
+                    console.error('Error shaping ERC20 allowance rows', settledErc20Results.reason);
+                }
+
+                if (settledErc721Results.status === 'fulfilled') {
+                    const shapedErc721Rows: (ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection)[] = [];
+
+                    settledErc721Results.value.forEach((result) => {
+                        if (result.status === 'fulfilled') {
+                            result.value && shapedErc721Rows.push(result.value);
+                        } else {
+                            console.error('Error shaping ERC721 allowance row', result.reason);
+                        }
+                    });
+
+                    this.setErc721Allowances(CURRENT_CONTEXT, shapedErc721Rows);
+                } else {
+                    console.error('Error shaping ERC721 allowance rows', settledErc721Results.reason);
+                }
+
+                if (settledErc1155Results.status === 'fulfilled') {
+                    const shapedErc1155Rows: ShapedAllowanceRowNftCollection[] = [];
+
+                    settledErc1155Results.value.forEach((result) => {
+                        if (result.status === 'fulfilled') {
+                            result.value && shapedErc1155Rows.push(result.value);
+                        } else {
+                            console.error('Error shaping ERC1155 allowance row', result.reason);
+                        }
+                    });
+
+                    this.setErc1155Allowances(CURRENT_CONTEXT, shapedErc1155Rows);
+                } else {
+                    console.error('Error shaping ERC1155 allowance rows', settledErc1155Results.reason);
+                }
+
                 useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
+
+                return Promise.resolve();
+            } catch (e) {
+                useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
+                console.error('Error fetching allowances', e);
                 throw new AntelopeError('antelope.allowances.error_fetching_allowances');
             }
-
-            const erc20AllowancesData   = (allowancesResults[0] as IndexerAllowanceResponseErc20)?.results ?? [];
-            const erc721AllowancesData  = (allowancesResults[1] as IndexerAllowanceResponseErc721)?.results ?? [];
-            const erc1155AllowancesData = (allowancesResults[2] as IndexerAllowanceResponseErc1155)?.results ?? [];
-
-            // Load these in the cache so they're available later and we don't abuse the indexer API
-            allowancesResults.map((result) => {
-                for (const [address, contract] of Object.entries(result.contracts)) {
-                    useContractStore().createAndStoreContract(CURRENT_CONTEXT, address, contract as EvmContractFactoryData);
-                }
-            });
-
-            const shapedErc20AllowanceRowPromises   = Promise.allSettled(erc20AllowancesData.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData)));
-            const shapedErc721AllowanceRowPromises  = Promise.allSettled(erc721AllowancesData.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData)));
-            const shapedErc1155AllowanceRowPromises = Promise.allSettled(erc1155AllowancesData.map(allowanceData => this.shapeErc1155AllowanceRow(allowanceData)));
-
-            const [settledErc20Results, settledErc721Results, settledErc1155Results] = await Promise.allSettled([
-                shapedErc20AllowanceRowPromises,
-                shapedErc721AllowanceRowPromises,
-                shapedErc1155AllowanceRowPromises,
-            ]);
-
-            if (settledErc20Results.status === 'fulfilled') {
-                const shapedErc20Rows: ShapedAllowanceRowERC20[] = [];
-
-                settledErc20Results.value.forEach((result) => {
-                    if (result.status === 'fulfilled') {
-                        result.value && shapedErc20Rows.push(result.value);
-                    } else {
-                        console.error('Error shaping ERC20 allowance row', result.reason);
-                    }
-                });
-
-                this.setErc20Allowances(CURRENT_CONTEXT, shapedErc20Rows);
-            } else {
-                console.error('Error shaping ERC20 allowance rows', settledErc20Results.reason);
-            }
-
-            if (settledErc721Results.status === 'fulfilled') {
-                const shapedErc721Rows: (ShapedAllowanceRowSingleERC721 | ShapedAllowanceRowNftCollection)[] = [];
-
-                settledErc721Results.value.forEach((result) => {
-                    if (result.status === 'fulfilled') {
-                        result.value && shapedErc721Rows.push(result.value);
-                    } else {
-                        console.error('Error shaping ERC721 allowance row', result.reason);
-                    }
-                });
-
-                this.setErc721Allowances(CURRENT_CONTEXT, shapedErc721Rows);
-            } else {
-                console.error('Error shaping ERC721 allowance rows', settledErc721Results.reason);
-            }
-
-            if (settledErc1155Results.status === 'fulfilled') {
-                const shapedErc1155Rows: ShapedAllowanceRowNftCollection[] = [];
-
-                settledErc1155Results.value.forEach((result) => {
-                    if (result.status === 'fulfilled') {
-                        result.value && shapedErc1155Rows.push(result.value);
-                    } else {
-                        console.error('Error shaping ERC1155 allowance row', result.reason);
-                    }
-                });
-
-                this.setErc1155Allowances(CURRENT_CONTEXT, shapedErc1155Rows);
-            } else {
-                console.error('Error shaping ERC1155 allowance rows', settledErc1155Results.reason);
-            }
-
-            useFeedbackStore().unsetLoading('fetchAllowancesForAccount');
-
-            return Promise.resolve();
         },
         async updateErc20Allowance(
             owner: string,
@@ -551,6 +558,16 @@ export const useAllowancesStore = defineStore(store_name, {
             this.__erc_721_allowances[label] = [];
             this.__erc_1155_allowances[label] = [];
         },
+        async fetchBalanceString(data: IndexerErc20AllowanceResult): Promise<string> {
+            const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+            const results = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results;
+            if (results.length === 0) {
+                return '0';
+            } else {
+                const balanceString = results[0].balance;
+                return balanceString;
+            }
+        },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
             try {
                 const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
@@ -566,9 +583,7 @@ export const useAllowancesStore = defineStore(store_name, {
                 )?.amount;
 
                 if (!balance) {
-                    const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                    const balanceString = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results[0].balance;
-
+                    const balanceString = await this.fetchBalanceString(data);
                     balance = BigNumber.from(balanceString);
                 }
 

@@ -301,6 +301,7 @@ export default {
         aside_content_fragment_4_bold: 'approvals ',
         aside_content_fragment_5: 'enable app functionality and enhance your user experience. However, it\'s prudent to review and manage these permissions to deter unauthorized transactions, adding a layer of security to your wallet.',
         revoke_selected: 'Revoke selected',
+        refresh: 'Refresh',
         search_label: 'Filter by token, allowance, spender, or contract address',
         includes_cancelled_allowances: 'Includes cancelled allowances',
         excludes_cancelled_allowances: 'Does not include cancelled allowances',
