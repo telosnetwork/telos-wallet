@@ -46,9 +46,9 @@ const W_TOKEN = new TokenClass({
 
 const RPC_ENDPOINT = {
     protocol: 'https',
-    host: 'testnet.telos.net',
+    host: 'rpc.testnet.telos.net',
     port: 443,
-    path: '/evm',
+    path: '/',
 };
 const ESCROW_CONTRACT_ADDRESS = '0x7E9cF9fBc881652B05BB8F26298fFAB538163b6f';
 const API_ENDPOINT = 'https://api-dev.telos.net/v1';

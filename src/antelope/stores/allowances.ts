@@ -21,7 +21,7 @@ import {
     TransactionResponse,
     isErc20AllowanceRow,
     isErc721SingleAllowanceRow,
-    isNftCollectionAllowanceRow,
+    isNftCollectionAllowanceRow, EvmContractFactoryData,
 } from 'src/antelope/types';
 import { createTraceFunction } from 'src/antelope/config';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
@@ -252,6 +252,13 @@ export const useAllowancesStore = defineStore(store_name, {
             const erc20AllowancesData   = (allowancesResults[0] as IndexerAllowanceResponseErc20)?.results ?? [];
             const erc721AllowancesData  = (allowancesResults[1] as IndexerAllowanceResponseErc721)?.results ?? [];
             const erc1155AllowancesData = (allowancesResults[2] as IndexerAllowanceResponseErc1155)?.results ?? [];
+
+            // Load these in the cache so they're available later and we don't abuse the indexer API
+            allowancesResults.map((result) => {
+                for (const [address, contract] of Object.entries(result.contracts)) {
+                    useContractStore().createAndStoreContract(CURRENT_CONTEXT, address, contract as EvmContractFactoryData);
+                }
+            });
 
             const shapedErc20AllowanceRowPromises   = Promise.allSettled(erc20AllowancesData.map(allowanceData => this.shapeErc20AllowanceRow(allowanceData)));
             const shapedErc721AllowanceRowPromises  = Promise.allSettled(erc721AllowancesData.map(allowanceData => this.shapeErc721AllowanceRow(allowanceData)));
