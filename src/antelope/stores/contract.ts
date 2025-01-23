@@ -585,6 +585,24 @@ export const useContractStore = defineStore(store_name, {
             this.__contracts[network].cached[index] = null;
         },
 
+        async fetchIsContract(addressLower: string): Promise<boolean> {
+            // We use a try/catch in case the request returns a 404 or similar
+            try {
+                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
+                const response = await indexer.get('/v1/contract/' + addressLower);
+
+                // If we have a valid data.results array and it has at least one element, return true
+                if (response.data?.results?.length > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                // If an error is thrown (e.g. 404), we assume it's not a contract
+                return false;
+            }
+        },
+
         async addressIsContract(label: string, address: string) {
             const network = useChainStore().getChain(label).settings.getNetwork();
             const addressLower = address.toLowerCase();
@@ -609,13 +627,10 @@ export const useContractStore = defineStore(store_name, {
             }
 
             this.__accounts[network].processing[addressLower] = new Promise(async (resolve) => {
-                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                const isContract = (await indexer.get(`/v1/contract/${addressLower}`)).data.results.length > 0;
-
+                const isContract = await this.fetchIsContract(addressLower);
                 if (!isContract && !this.__accounts[network].addresses.includes(addressLower)) {
                     this.__accounts[network].addresses.push(addressLower);
                 }
-
                 resolve(isContract);
             });
 

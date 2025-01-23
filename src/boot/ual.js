@@ -137,11 +137,9 @@ export default boot(async ({ app, store }) => {
 
 
     app.config.globalProperties.recreateAuthenticator = function() {
-        console.log('UAL.recreateAuthenticator()');
 
         if (useChainStore().currentChain.settings.isNative()) {
             const settings = useChainStore().currentNativeChain.settings;
-            console.log('UAL.recreateAuthenticator()', { settings });
 
             const ual_chain = {
                 chainId: settings.getChainId(),
@@ -164,7 +162,6 @@ export default boot(async ({ app, store }) => {
 
             return authenticators;
         } else {
-            console.log('UAL.recreateAuthenticator() - not native chain');
             return [];
         }
     };
