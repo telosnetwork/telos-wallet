@@ -198,11 +198,6 @@ export default {
                 table: 'tokens',
             });
 
-            // removing all instances of any pTokens
-            const filtered = coins.rows.filter(
-                token => !token.contract_account.includes('.ptokens'),
-            );
-
             filtered.forEach((token) => {
                 const [precision, symbol] = token.token_symbol.split(',');
                 const account = token.contract_account;
