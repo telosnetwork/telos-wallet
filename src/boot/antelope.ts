@@ -78,7 +78,6 @@ export default boot(({ app }) => {
         next: async () => {
             // first recreate the authenticators based on the new network
             const zeroAuthenticators = app.config.globalProperties.recreateAuthenticator();
-            console.log('zeroAuthenticators', zeroAuthenticators);
             // set the new authenticators list
             ant.config.setAuthenticatorsGetter(() => zeroAuthenticators);
             for (const authenticator of zeroAuthenticators) {

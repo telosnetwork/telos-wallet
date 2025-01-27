@@ -149,23 +149,21 @@ const shapedAllowanceRows = computed(() => {
 
 const enableRevokeButton = computed(() => selectedRows.value.length > 0);
 
+const updateAllowances = () => {
+    loading.value = true;
+    return useAllowancesStore().fetchAllowancesForAccount(userAddress.value).then(() => {
+        loading.value = false;
+    });
+};
+
 // watchers
 watch(userAddress, (address) => {
     if (address) {
-        loading.value = true;
-        useAllowancesStore().fetchAllowancesForAccount(address).then(() => {
-            loading.value = false;
-        });
+        updateAllowances();
     }
 
 }, { immediate: true });
 
-// methods
-onMounted(() => {
-    timeout.value = setTimeout(() => {
-        useAllowancesStore().fetchAllowancesForAccount(userAddress.value);
-    }, 13000);
-});
 
 onBeforeUnmount(() => {
     if (timeout.value) {
@@ -230,7 +228,7 @@ function handleRevokeSelectedClicked() {
         cancelBatchRevokeButtonLoading.value = true;
 
         setTimeout(() => {
-            useAllowancesStore().fetchAllowancesForAccount(userAddress.value).finally(() => {
+            updateAllowances().finally(() => {
                 cancelBatchRevokeButtonLoading.value = false;
                 showRevokeInProgressModal.value = false;
 
@@ -264,9 +262,11 @@ function handleRevokeSelectedClicked() {
         <AllowancesPageControls
             v-if="!showEmptyState"
             :enable-revoke-button="enableRevokeButton"
+            :loading="loading"
             @search-updated="handleSearchUpdated"
             @include-cancelled-updated="handleIncludeCancelledUpdated"
             @revoke-selected="handleRevokeSelectedClicked"
+            @refresh="updateAllowances"
         />
 
         <div v-if="loading" class="q-mt-lg">

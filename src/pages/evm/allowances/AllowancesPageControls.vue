@@ -5,11 +5,17 @@ import { useI18n } from 'vue-i18n';
 
 const { t: $t } = useI18n();
 
-const props = defineProps<{
+defineProps<{
     enableRevokeButton: boolean;
+    loading: boolean;
 }>();
 
-const emit = defineEmits(['revoke-selected', 'search-updated', 'include-cancelled-updated']);
+const emit = defineEmits([
+    'refresh',
+    'revoke-selected',
+    'search-updated',
+    'include-cancelled-updated',
+]);
 
 // data
 const searchText = ref('');
@@ -24,6 +30,11 @@ const includeCancelledLabel = computed(
 function handleRevokeSelected() {
     emit('revoke-selected');
 }
+
+function handleRefresh() {
+    emit('refresh');
+}
+
 </script>
 
 <template>
@@ -41,14 +52,33 @@ function handleRevokeSelected() {
         </template>
     </q-input>
 
-    <q-btn
-        :disable="!enableRevokeButton"
-        color="primary"
-        class="c-allowances-page-controls__revoke-button"
-        @click="handleRevokeSelected"
+    <div
+        class="c-allowances-page-controls__buttons"
     >
-        {{ $t('evm_allowances.revoke_selected') }}
-    </q-btn>
+        <!-- revoke button -->
+        <q-btn
+            :disable="!enableRevokeButton"
+            color="primary"
+            class="c-allowances-page-controls__buttons-btn"
+            @click="handleRevokeSelected"
+        >
+            {{ $t('evm_allowances.revoke_selected') }}
+        </q-btn>
+
+        <!-- refresh button -->
+        <q-btn
+            color="primary"
+            class="c-allowances-page-controls__buttons-btn"
+            icon="refresh"
+            :disable="loading"
+            :loading="loading"
+            @click="handleRefresh"
+        >
+            {{ $t('evm_allowances.refresh') }}
+        </q-btn>
+
+    </div>
+
 </div>
 
 <!-- https://github.com/telosnetwork/telos-wallet/issues/719 -->
@@ -80,7 +110,7 @@ function handleRevokeSelected() {
                 order: 2;
             }
 
-            #{$this}__revoke-button {
+            #{$this}__buttons {
                 order: 1;
             }
         }
@@ -92,9 +122,10 @@ function handleRevokeSelected() {
         max-width: 580px;
     }
 
-    &__revoke-button {
-        width: max-content;
+    &__buttons {
         flex-shrink: 0;
+        display: flex;
+        gap: 16px;
     }
 }
 </style>
