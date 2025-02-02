@@ -191,35 +191,39 @@ export default {
             }
         },
         async loadCoinList() {
-            const coins = await this.$store.$api.getTableRows({
-                code: 'tokenmanager',
-                limit: '1000',
-                scope: 'tokenmanager',
-                table: 'tokens',
-            });
-
-            filtered.forEach((token) => {
-                const [precision, symbol] = token.token_symbol.split(',');
-                const account = token.contract_account;
-                if (account === 'eosio.token' && symbol === 'TLOS') {
-                    return;
-                }
-
-                const name = token.token_name;
-                const icon = token.logo_sm;
-                const amount = 0;
-                const price = 0;
-
-                this.coins.push({
-                    account,
-                    name,
-                    symbol,
-                    amount,
-                    price,
-                    icon,
-                    precision,
+            try {
+                const coins = await this.$store.$api.getTableRows({
+                    code: 'tokenmanager',
+                    limit: '1000',
+                    scope: 'tokenmanager',
+                    table: 'tokens',
                 });
-            });
+
+                coins.rows.forEach((token) => {
+                    const [precision, symbol] = token.token_symbol.split(',');
+                    const account = token.contract_account;
+                    if (account === 'eosio.token' && symbol === 'TLOS') {
+                        return;
+                    }
+
+                    const name = token.token_name;
+                    const icon = token.logo_sm;
+                    const amount = 0;
+                    const price = 0;
+
+                    this.coins.push({
+                        account,
+                        name,
+                        symbol,
+                        amount,
+                        price,
+                        icon,
+                        precision,
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading coins:', error);
+            }
         },
         async loadPrices() {
             const tlosUsdDataPoints = await this.$store.$api.getTableRows({
