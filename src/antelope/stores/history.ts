@@ -102,6 +102,7 @@ export const useHistoryStore = defineStore(store_name, {
             const ant = getAntelope();
             self.clearEvmNftTransfers(CURRENT_CONTEXT);
             self.clearEvmTransactions(CURRENT_CONTEXT);
+            self.clearEVMTransactionsFilter();
             ant.events.onAccountChanged.subscribe({
                 next: ({ account }) => {
                     if (account) {
@@ -112,6 +113,7 @@ export const useHistoryStore = defineStore(store_name, {
             ant.events.onClear.subscribe(({ label }) => {
                 self.clearEvmTransactions(label);
                 self.clearEvmNftTransfers(label);
+                self.clearEVMTransactionsFilter();
             });
         },
         // actions ---
@@ -451,6 +453,13 @@ export const useHistoryStore = defineStore(store_name, {
         setEVMTransactionsFilter(filter: IndexerTransactionsFilter) {
             this.trace('setEVMFilter', filter);
             useHistoryStore().__evm_filter = filter;
+        },
+        clearEVMTransactionsFilter() {
+            this.trace('clearEVMFilter');
+            this.__evm_last_filter_used = null;
+            this.__evm_filter = {
+                address: '',
+            };
         },
         setEVMTransactions(label: Label, transactions: EvmTransaction[]) {
             this.trace('setTransactions', label, transactions);
