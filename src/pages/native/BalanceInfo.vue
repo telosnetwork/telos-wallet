@@ -771,6 +771,7 @@ export default {
                     rounded
                     :inline-actions="!$q.screen.lt.md || showEVMBridgeWarningTitle"
                     class="bg-purple-8 text-white"
+                    @click="showEVMBridgeWarningTitle = false"
                 >
 
                     <template v-slot:avatar>
@@ -784,7 +785,6 @@ export default {
                     <span
                         v-if="showEVMBridgeWarningTitle"
                         class="text-h6"
-                        @click="showEVMBridgeWarningTitle = false"
                     >
                         Bridging your TLOS
                     </span>
