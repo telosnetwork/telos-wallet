@@ -158,8 +158,7 @@ export default {
             ) {
                 await this.getUserProfile(this.accountName);
             }
-            const accountProfile =
-        this.$store.state.account.profiles[this.accountName];
+            const accountProfile = this.$store.state.account.profiles[this.accountName];
             if (!accountProfile) {
                 return;
             }
@@ -588,6 +587,11 @@ export default {
             await this.loadNftTokenItems();
             this.loadNftTokenTags();
         },
+        setShowEVMBridgeWarning(value) {
+            this.showEVMBridgeWarning = value;
+            this.showEVMBridgeWarningTitle = value;
+            localStorage.setItem('showEVMBridgeWarning', value);
+        },
     },
     created: async function () {
         this.interval = setInterval(() => {
@@ -640,10 +644,14 @@ export default {
         this.showEVMBridgeWarningTitle = this.$q.screen.lt.md;
     },
     beforeMount() {
-        this.coinViewHeight =
-      window.innerHeight - this.footerHeight - this.maxSpace;
+        this.coinViewHeight = window.innerHeight - this.footerHeight - this.maxSpace;
     },
     async mounted() {
+        const showEVMBridgeWarning = localStorage.getItem('showEVMBridgeWarning');
+        if (showEVMBridgeWarning === 'false') {
+            this.showEVMBridgeWarning = false;
+            this.showEVMBridgeWarningTitle = false;
+        }
         this.loadUserProfile();
         this.$emitter.on('successfully_sent', (sendAmount, toAddress) => {
             this.showSendAmountDlg = false;
@@ -796,7 +804,7 @@ export default {
                             flat
                             round
                             icon="close"
-                            @click="showEVMBridgeWarning = false"
+                            @click="setShowEVMBridgeWarning(false)"
                         />
                     </template>
                 </q-banner>
