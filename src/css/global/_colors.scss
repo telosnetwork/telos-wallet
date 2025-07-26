@@ -27,7 +27,7 @@ body.body--light {
     $accent-3: #DDD1FF;
     $accent-4: #A5A6F6;
     $accent-5: #F7F5FF;
-    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
+    $site-gradient: linear-gradient(0.4turn, rgba(0, 242, 254, 0.4), rgba(196, 113, 245, 0.5));
     $tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8));
     $high-contrast-text-color: #282828;
     $default-contrast-text-color: #4D4D4D;
@@ -58,9 +58,10 @@ body.body--light {
 
     --bg-color: #{$canvas};
     --site-gradient: #{$site-gradient};
+    --menu-gradient: linear-gradient(0.4turn, #0891b2, #8b5cf6);
 
     --card-background-color: #{$canvas};
-    --header-background-color: #{$accent-5};
+    --header-background-color: #{$site-gradient};
     --display-telos-branding-bg: none;
 
     --q-primary: #{$primary} !important;
@@ -112,7 +113,7 @@ body.body--dark {
     $menu-text: #fff;
     $canvas: #111;
 
-    $site-gradient: linear-gradient(0.7turn, #1d1d1d, #1e2931);
+    $site-gradient: linear-gradient(0.7turn, #0a0a0b, #1a1625);
     $tooltip-gradient: linear-gradient(0.2turn, rgba(#232a30, 0.8), rgba(#173246, 0.8));
 
 
@@ -137,6 +138,7 @@ body.body--dark {
 
     --bg-color: #{$canvas};
     --site-gradient: #{$site-gradient};
+    --menu-gradient: #{$site-gradient};
 
     --card-background-color: #{$dark};
     --header-background-color: var(--card-background-color);
