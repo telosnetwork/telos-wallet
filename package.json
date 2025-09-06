@@ -37,6 +37,7 @@
     "mitt": "^3.0.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "numeral": "^2.0.6",
+    "permissionless": "^0.2.56",
     "pinia": "^2.0.33",
     "ptokens": "^0.14.0",
     "qrcanvas-vue": "^3.0.0",
@@ -47,6 +48,7 @@
     "ual-oreid": "^1.0.0",
     "ual-wombat": "^0.3.3",
     "universal-authenticator-library": "^0.3.0",
+    "viem": "^2.37.3",
     "vue": "3",
     "vue-i18n": "^9.0.0",
     "vue-inline-svg": "^3.1.2",
@@ -91,5 +93,6 @@
     "node": ">= 16.10.0",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
