@@ -376,6 +376,26 @@ export default defineComponent({
             </li>
 
             <li
+                class="c-app-nav__menu-item"
+                role="menuitem"
+                :tabindex="menuItemTabIndex"
+                @click="goTo('evm-smart-accounts')"
+                @keypress.space.enter="goTo('evm-smart-accounts')"
+            >
+                <InlineSvg
+                    :src="require('src/assets/icon--contract.svg')"
+                    :class="{
+                        'c-app-nav__icon': true,
+                        'c-app-nav__icon--current-route': $route.name === 'evm-smart-accounts',
+                    }"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                />
+                {{ $t('nav.smart_accounts') }}
+            </li>
+
+            <li
                 ref="last-link"
                 class="c-app-nav__menu-item"
                 role="menuitem"

@@ -75,6 +75,7 @@ export default {
         bridge: 'Bridge',
         nfts: 'Digital Collectibles',
         allowances: 'Approvals',
+        smart_accounts: 'Smart Accounts',
     },
     evm_wallet: {
         send_icon_alt: 'Send icon',
