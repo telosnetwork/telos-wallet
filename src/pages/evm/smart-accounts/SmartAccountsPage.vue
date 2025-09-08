@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import EVMSidebarPage from 'layouts/EVMSidebarPage.vue';
 
 import { createSmartAccountClient } from 'permissionless';
@@ -7,7 +7,7 @@ import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { http, type Address, createPublicClient, EIP1193Provider, createWalletClient, custom } from 'viem';
 import { telos, telosTestnet } from 'viem/chains';
 import { entryPoint07Address, getUserOperationHash } from 'viem/account-abstraction';
-import { useAccountStore } from 'src/antelope';
+import { useAccountStore, useChainStore } from 'src/antelope';
 
 //constants
 const SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 = '0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985';
@@ -45,9 +45,31 @@ const sidebarContent = ref({
 
 // stores
 const accountStore = useAccountStore();
+const chainStore = useChainStore();
 
 // data
 const smartAccountAddress = ref('');
+const salt = ref(0);
+
+// computed
+const currentChain = computed(() => {
+    const network = chainStore.loggedChain.settings.getNetwork();
+    console.log('connected network: ', network);
+    switch (network) {
+    case 'telos-evm':
+        return telos;
+    case 'telos-evm-testnet':
+        return telosTestnet;
+    default:
+        return telosTestnet; // fallback to testnet
+    }
+});
+
+// Create public client on page load
+const publicClient = createPublicClient({
+    chain: currentChain.value,
+    transport: http(),
+});
 
 // methods
 async function createSmartAccount() {
@@ -64,21 +86,15 @@ async function createSmartAccount() {
     // Define required variables
     const factoryAddress = SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address;
     const ownerAddress = connectedAddress as Address; // Use connected wallet address
-    const salt = 0; // Placeholder - should be generated or user-provided
+    const saltValue = salt.value; // Use salt from input field
 
     try {
-        //create public client
-        const publicClient = createPublicClient({
-            chain: telosTestnet,
-            transport: http(),
-        });
-
         //call getAddress view function on contract
         const result = await publicClient.readContract({
             address: factoryAddress,
             abi: SIMPLE_ACCOUNT_FACTORY_ABI,
             functionName: 'getAddress',
-            args: [ownerAddress, BigInt(salt)],
+            args: [ownerAddress, BigInt(saltValue)],
         });
 
         console.log('Smart account address:', result);
@@ -90,6 +106,13 @@ async function createSmartAccount() {
 function connectSmartAccount() {
     // TODO: Implement smart account connection logic
     console.log('Connecting smart account:', smartAccountAddress.value);
+}
+
+function randomizeSalt() {
+    // Generate a random salt value between 0 and 2^32 - 1
+    const randomSalt = Math.floor(Math.random() * Math.pow(2, 32));
+    salt.value = randomSalt;
+    console.log('Randomized salt to:', randomSalt);
 }
 </script>
 
@@ -118,6 +141,29 @@ function connectSmartAccount() {
             </div>
 
             <div class="c-smart-accounts-page__divider"></div>
+
+            <div class="c-smart-accounts-page__salt-section">
+                <q-input
+                    v-model.number="salt"
+                    class="c-smart-accounts-page__salt-input"
+                    placeholder="Enter salt value (number)"
+                    label="Salt"
+                    outlined
+                    dense
+                    type="number"
+                    min="0"
+                />
+                <q-btn
+                    class="c-smart-accounts-page__randomize-btn"
+                    color="secondary"
+                    round
+                    dense
+                    @click="randomizeSalt"
+                >
+                    🎲
+                    <q-tooltip>Randomize Salt</q-tooltip>
+                </q-btn>
+            </div>
 
             <div class="c-smart-accounts-page__actions">
                 <q-btn
@@ -178,6 +224,25 @@ function connectSmartAccount() {
         background-color: var(--border-color);
         margin: 24px 0;
         opacity: 0.5;
+    }
+
+    &__salt-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    &__salt-input {
+        max-width: 300px;
+        width: 100%;
+    }
+
+    &__randomize-btn {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
     }
 
     &__actions {
