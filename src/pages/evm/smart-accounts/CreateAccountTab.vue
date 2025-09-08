@@ -3,12 +3,12 @@ import { ref, computed, onMounted } from 'vue';
 import { createSmartAccountClient } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom } from 'viem';
+import { entryPoint07Address, getUserOperationHash } from 'viem/account-abstraction';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
 
 //constants
 const BUNDLER_RPC_BASE_URL = 'https://bundler.vorpalengineering.com/';
-const ENTRYPOINT_ADDRESS_V07 = '0x0000000071727De22E5E9d8BAf0edAc6f37da032';
 const SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 = '0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985';
 const SIMPLE_ACCOUNT_FACTORY_ABI = [
     {
@@ -140,17 +140,70 @@ async function createSmartAccount() {
         factoryAddress: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
         index: BigInt(salt.value),
         entryPoint: {
-            address: ENTRYPOINT_ADDRESS_V07 as Address,
+            address: entryPoint07Address,
             version: '0.7',
         },
     });
 
     // Create smart account client with proper bundler transport
+    console.log('>>> bundler url: ', currentBundler.value);
     const smartAccountClient = createSmartAccountClient({
         account: simpleAccount,
         chain: currentChain.value,
-        bundlerTransport: http(currentBundler),
+        bundlerTransport: http(currentBundler.value),
     });
+
+    // Get current gas prices for EIP-1559
+    const [baseFeePerGas, maxPriorityFeePerGas] = await Promise.all([
+        publicClient.getBlock().then(block => block.baseFeePerGas || 0n),
+        publicClient.estimateMaxPriorityFeePerGas(),
+    ]);
+    const maxFeePerGas = (baseFeePerGas * 2n) + maxPriorityFeePerGas;
+
+    // For chains that don't support EIP-1559, maxPriorityFeePerGas must equal maxFeePerGas
+    const adjustedMaxPriorityFeePerGas = maxFeePerGas;
+
+    // Step 1: Prepare the user operation
+    const userOperation = await smartAccountClient.prepareUserOperation({
+        callData: '0x',
+        maxFeePerGas,
+        maxPriorityFeePerGas: adjustedMaxPriorityFeePerGas,
+        callGasLimit: 500000n,
+        preVerificationGas: 500000n,
+        verificationGasLimit: 500000n,
+    });
+
+    // Step 2: Get the user operation hash and sign it manually
+    const userOperationHash = getUserOperationHash({
+        userOperation,
+        entryPointAddress: entryPoint07Address,
+        entryPointVersion: '0.7',
+        chainId: currentChain.value.id,
+    });
+
+    // Sign the user operation hash with MetaMask
+    const userOpSignature = await walletClient.signMessage({
+        account: ownerAddress as Address,
+        message: { raw: userOperationHash },
+    });
+    console.log('>>> userOpSignature: ', userOpSignature);
+
+    // Update the user operation with the real signature
+    const signedUserOperation = {
+        ...userOperation,
+        signature: userOpSignature,
+    };
+    console.log(signedUserOperation);
+
+    // Step 3: Send the signed user operation
+    const userOperationHashResult = await smartAccountClient.sendUserOperation(signedUserOperation);
+    console.log('>>> result: ', userOperationHashResult);
+
+    // Step 4: Wait for the user operation receipt
+    const receipt = await smartAccountClient.waitForUserOperationReceipt({
+        hash: userOperationHashResult,
+    });
+    console.log('>>> receipt: ', receipt);
 }
 
 function randomizeSalt() {
