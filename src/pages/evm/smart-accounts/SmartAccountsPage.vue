@@ -2,6 +2,38 @@
 import { ref } from 'vue';
 import EVMSidebarPage from 'layouts/EVMSidebarPage.vue';
 
+import { createSmartAccountClient } from 'permissionless';
+import { toSimpleSmartAccount } from 'permissionless/accounts';
+import { http, type Address, createPublicClient, EIP1193Provider, createWalletClient, custom } from 'viem';
+import { telos, telosTestnet } from 'viem/chains';
+import { entryPoint07Address, getUserOperationHash } from 'viem/account-abstraction';
+import { useAccountStore } from 'src/antelope';
+
+//constants
+const SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 = '0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985';
+const SIMPLE_ACCOUNT_FACTORY_ABI = [
+    {
+        inputs: [
+            { name: 'owner', type: 'address' },
+            { name: 'salt', type: 'uint256' },
+        ],
+        name: 'getAddress',
+        outputs: [{ name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            { name: 'owner', type: 'address' },
+            { name: 'salt', type: 'uint256' },
+        ],
+        name: 'createAccount',
+        outputs: [{ name: '', type: 'address' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+];
+
 // data
 const sidebarContent = ref({
     header: 'Smart Accounts',
@@ -11,13 +43,48 @@ const sidebarContent = ref({
     ],
 });
 
+// stores
+const accountStore = useAccountStore();
+
 // data
 const smartAccountAddress = ref('');
 
 // methods
-function createSmartAccount() {
+async function createSmartAccount() {
     // TODO: Implement smart account creation logic
     console.log('Creating smart account...');
+
+    // Check if wallet is connected
+    const connectedAddress = accountStore.loggedEvmAccount?.address;
+    if (!connectedAddress) {
+        console.error('No wallet connected. Please connect your wallet first.');
+        return;
+    }
+
+    // Define required variables
+    const factoryAddress = SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address;
+    const ownerAddress = connectedAddress as Address; // Use connected wallet address
+    const salt = 0; // Placeholder - should be generated or user-provided
+
+    try {
+        //create public client
+        const publicClient = createPublicClient({
+            chain: telosTestnet,
+            transport: http(),
+        });
+
+        //call getAddress view function on contract
+        const result = await publicClient.readContract({
+            address: factoryAddress,
+            abi: SIMPLE_ACCOUNT_FACTORY_ABI,
+            functionName: 'getAddress',
+            args: [ownerAddress, BigInt(salt)],
+        });
+
+        console.log('Smart account address:', result);
+    } catch(err) {
+        console.error('Error calculating address:', err);
+    }
 }
 
 function connectSmartAccount() {
