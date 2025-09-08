@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { createPublicClient, http, type Address } from 'viem';
+import { createSmartAccountClient } from 'permissionless';
+import { toSimpleSmartAccount } from 'permissionless/accounts';
+import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom } from 'viem';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
 
 //constants
+const BUNDLER_RPC_BASE_URL = 'https://bundler.vorpalengineering.com/';
+const ENTRYPOINT_ADDRESS_V07 = '0x0000000071727De22E5E9d8BAf0edAc6f37da032';
 const SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 = '0x91E60e0613810449d098b0b5Ec8b51A0FE8c8985';
 const SIMPLE_ACCOUNT_FACTORY_ABI = [
     {
@@ -36,6 +40,7 @@ const chainStore = useChainStore();
 // data
 const salt = ref(0);
 const calculatedSmartAccountAddress = ref('');
+const smartAccountType = ref('SimpleAccount v0.7');
 
 // computed
 const currentChain = computed(() => {
@@ -50,6 +55,17 @@ const currentChain = computed(() => {
         return telosTestnet; // fallback to testnet
     }
 });
+const currentBundler = computed(() => {
+    const network = chainStore.loggedChain.settings.getNetwork();
+    switch (network) {
+    case 'telos-evm':
+        return BUNDLER_RPC_BASE_URL + '40/';
+    case 'telos-evm-testnet':
+        return BUNDLER_RPC_BASE_URL + '41/';
+    default:
+        return BUNDLER_RPC_BASE_URL + '41/'; // fallback to testnet
+    }
+});
 
 // Create public client on page load
 const publicClient = createPublicClient({
@@ -60,10 +76,8 @@ const publicClient = createPublicClient({
 // methods
 async function calculateSmartAccountAddress(ownerAddress: Address, saltValue: number): Promise<string | null> {
     try {
-        const factoryAddress = SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address;
-
         const result = await publicClient.readContract({
-            address: factoryAddress,
+            address: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
             abi: SIMPLE_ACCOUNT_FACTORY_ABI,
             functionName: 'getAddress',
             args: [ownerAddress, BigInt(saltValue)],
@@ -73,6 +87,17 @@ async function calculateSmartAccountAddress(ownerAddress: Address, saltValue: nu
     } catch (err) {
         console.error('Error calculating smart account address:', err);
         return null;
+    }
+}
+
+async function checkAccountExists(address: Address): Promise<boolean> {
+    try {
+        const bytecode = await publicClient.getCode({ address });
+        console.log('bytecode: ', bytecode);
+        return bytecode !== undefined && bytecode !== '0x';
+    } catch (err) {
+        console.error('Error checking account:', err);
+        return false;
     }
 }
 
@@ -97,6 +122,35 @@ async function createSmartAccount() {
         calculatedSmartAccountAddress.value = result;
         console.log('Smart account address:', result);
     }
+
+    // Check if the account already has code deployed
+    const accountExists = await checkAccountExists(result as Address);
+    console.log('Account exists:', accountExists);
+
+    // Create wallet client for signing
+    const walletClient = createWalletClient({
+        chain: currentChain.value,
+        transport: custom(window.ethereum),
+    });
+
+    // Create the simple account client
+    const simpleAccount = await toSimpleSmartAccount({
+        client: publicClient,
+        owner: window.ethereum as EIP1193Provider,
+        factoryAddress: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
+        index: BigInt(salt.value),
+        entryPoint: {
+            address: ENTRYPOINT_ADDRESS_V07 as Address,
+            version: '0.7',
+        },
+    });
+
+    // Create smart account client with proper bundler transport
+    const smartAccountClient = createSmartAccountClient({
+        account: simpleAccount,
+        chain: currentChain.value,
+        bundlerTransport: http(currentBundler),
+    });
 }
 
 function randomizeSalt() {
@@ -136,6 +190,18 @@ onMounted(() => {
 <template>
 <div class="c-create-account-tab">
     <div class="c-create-account-tab__content">
+        <div class="c-create-account-tab__type-section">
+            <q-select
+                v-model="smartAccountType"
+                class="c-create-account-tab__type-select"
+                label="Smart Account Type"
+                outlined
+                dense
+                :options="['SimpleAccount v0.7']"
+                readonly
+            />
+        </div>
+
         <div class="c-create-account-tab__salt-section">
             <q-input
                 v-model.number="salt"
@@ -190,6 +256,17 @@ onMounted(() => {
     &__content {
         text-align: center;
         max-width: 600px;
+    }
+
+    &__type-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    &__type-select {
+        max-width: 300px;
+        width: 100%;
     }
 
     &__salt-section {
