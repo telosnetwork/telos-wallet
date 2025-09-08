@@ -620,6 +620,11 @@ export default defineComponent({
     }
 
     &__icon {
+        // Default icon color
+        &:not(#{$this}__icon--acorn) path {
+            fill: var(--text-default-contrast);
+        }
+
         // svg color overrides
         &--current-route:not(#{$this}__icon--acorn) path {
             fill: var(--link-color);
