@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import EVMSidebarPage from 'layouts/EVMSidebarPage.vue';
 
 import { createSmartAccountClient } from 'permissionless';
@@ -50,6 +50,7 @@ const chainStore = useChainStore();
 // data
 const smartAccountAddress = ref('');
 const salt = ref(0);
+const calculatedSmartAccountAddress = ref('');
 
 // computed
 const currentChain = computed(() => {
@@ -72,6 +73,24 @@ const publicClient = createPublicClient({
 });
 
 // methods
+async function calculateSmartAccountAddress(ownerAddress: Address, saltValue: number): Promise<string | null> {
+    try {
+        const factoryAddress = SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address;
+
+        const result = await publicClient.readContract({
+            address: factoryAddress,
+            abi: SIMPLE_ACCOUNT_FACTORY_ABI,
+            functionName: 'getAddress',
+            args: [ownerAddress, BigInt(saltValue)],
+        });
+
+        return result as string;
+    } catch (err) {
+        console.error('Error calculating smart account address:', err);
+        return null;
+    }
+}
+
 async function createSmartAccount() {
     // TODO: Implement smart account creation logic
     console.log('Creating smart account...');
@@ -84,22 +103,14 @@ async function createSmartAccount() {
     }
 
     // Define required variables
-    const factoryAddress = SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address;
     const ownerAddress = connectedAddress as Address; // Use connected wallet address
     const saltValue = salt.value; // Use salt from input field
 
-    try {
-        //call getAddress view function on contract
-        const result = await publicClient.readContract({
-            address: factoryAddress,
-            abi: SIMPLE_ACCOUNT_FACTORY_ABI,
-            functionName: 'getAddress',
-            args: [ownerAddress, BigInt(saltValue)],
-        });
-
+    // Calculate and store the smart account address
+    const result = await calculateSmartAccountAddress(ownerAddress, saltValue);
+    if (result) {
+        calculatedSmartAccountAddress.value = result;
         console.log('Smart account address:', result);
-    } catch(err) {
-        console.error('Error calculating address:', err);
     }
 }
 
@@ -113,7 +124,33 @@ function randomizeSalt() {
     const randomSalt = Math.floor(Math.random() * Math.pow(2, 32));
     salt.value = randomSalt;
     console.log('Randomized salt to:', randomSalt);
+
+    // Automatically calculate the smart account address when salt changes
+    updateSmartAccountAddress();
 }
+
+async function updateSmartAccountAddress() {
+    const connectedAddress = accountStore.loggedEvmAccount?.address;
+    if (!connectedAddress) {
+        calculatedSmartAccountAddress.value = '';
+        return;
+    }
+
+    const ownerAddress = connectedAddress as Address;
+    const saltValue = salt.value;
+
+    const result = await calculateSmartAccountAddress(ownerAddress, saltValue);
+    if (result) {
+        calculatedSmartAccountAddress.value = result;
+    } else {
+        calculatedSmartAccountAddress.value = '';
+    }
+}
+
+// Calculate address on page load
+onMounted(() => {
+    updateSmartAccountAddress();
+});
 </script>
 
 <template>
@@ -152,6 +189,7 @@ function randomizeSalt() {
                     dense
                     type="number"
                     min="0"
+                    @update:model-value="updateSmartAccountAddress"
                 />
                 <q-btn
                     class="c-smart-accounts-page__randomize-btn"
@@ -163,6 +201,11 @@ function randomizeSalt() {
                     🎲
                     <q-tooltip>Randomize Salt</q-tooltip>
                 </q-btn>
+            </div>
+
+            <div class="c-smart-accounts-page__address-display">
+                <div class="c-smart-accounts-page__address-label">Expected Address:</div>
+                <div class="c-smart-accounts-page__address-value">{{ calculatedSmartAccountAddress || 'Calculating...' }}</div>
             </div>
 
             <div class="c-smart-accounts-page__actions">
@@ -243,6 +286,26 @@ function randomizeSalt() {
         flex-shrink: 0;
         width: 40px;
         height: 40px;
+    }
+
+    &__address-display {
+        margin-top: 16px;
+        text-align: center;
+    }
+
+    &__address-label {
+        @include text--small;
+        color: var(--text-default-contrast);
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    &__address-value {
+        @include text--paragraph;
+        color: var(--text-high-contrast);
+        font-family: monospace;
+        word-break: break-all;
+        padding: 8px 0;
     }
 
     &__actions {
