@@ -127,6 +127,55 @@ async function fetchAccountBalance(address: Address): Promise<bigint> {
     }
 }
 
+async function fundAccount() {
+    try {
+        // Check if wallet is connected
+        const connectedAddress = accountStore.loggedEvmAccount?.address;
+        if (!connectedAddress) {
+            console.error('No wallet connected. Please connect your wallet first.');
+            return;
+        }
+
+        // Check if we have a calculated address
+        if (!calculatedSmartAccountAddress.value) {
+            console.error('No calculated address available.');
+            return;
+        }
+
+        // Create wallet client for transactions
+        const walletClient = createWalletClient({
+            chain: currentChain.value,
+            transport: custom(window.ethereum),
+        });
+
+        // Convert 3.5 TLOS to wei (assuming 18 decimals)
+        const amountInWei = BigInt(Math.floor(3.5 * Math.pow(10, 18)));
+
+        console.log('Funding account with 3.5 TLOS...');
+        console.log('From:', connectedAddress);
+        console.log('To:', calculatedSmartAccountAddress.value);
+        console.log('Amount:', amountInWei.toString());
+
+        // Send transaction
+        const hash = await walletClient.sendTransaction({
+            account: connectedAddress as Address,
+            to: calculatedSmartAccountAddress.value as Address,
+            value: amountInWei,
+        });
+
+        console.log('Transaction hash:', hash);
+
+        // Wait for transaction confirmation
+        const receipt = await publicClient.waitForTransactionReceipt({ hash });
+        console.log('Transaction confirmed:', receipt);
+
+        // Refresh the balance after successful funding
+        await updateSmartAccountAddress();
+    } catch (err) {
+        console.error('Error funding account:', err);
+    }
+}
+
 async function estimateCreateSmartAccount(): Promise<{
     gasEstimates: any;
     gasPrice: bigint;
@@ -406,7 +455,17 @@ onMounted(() => {
                 <div class="c-create-account-tab__balance-content">
                     <div class="c-create-account-tab__address-label">Expected Address:</div>
                     <div class="c-create-account-tab__address-value">{{ calculatedSmartAccountAddress }}</div>
-                    <div class="c-create-account-tab__balance-value">{{ formattedBalance }}</div>
+                    <div class="c-create-account-tab__balance-row">
+                        <div class="c-create-account-tab__balance-value">{{ formattedBalance }}</div>
+                        <q-btn
+                            class="c-create-account-tab__fund-btn"
+                            color="primary"
+                            size="sm"
+                            label="Fund"
+                            dense
+                            @click="fundAccount"
+                        />
+                    </div>
                 </div>
             </q-banner>
         </div>
@@ -533,12 +592,27 @@ onMounted(() => {
         gap: 4px;
     }
 
+    &__balance-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
     &__balance-value {
         @include text--paragraph;
         font-family: monospace;
         font-weight: 600;
         font-size: 1.1em;
         color: white;
+        flex: 1;
+    }
+
+    &__fund-btn {
+        flex-shrink: 0;
+        font-size: 12px;
+        padding: 4px 12px;
+        min-height: 28px;
     }
 
     &__actions {
