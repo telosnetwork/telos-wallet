@@ -41,6 +41,7 @@ const chainStore = useChainStore();
 const salt = ref(0);
 const calculatedSmartAccountAddress = ref('');
 const smartAccountType = ref('SimpleAccount v0.7');
+const accountExists = ref(false);
 
 // computed
 const currentChain = computed(() => {
@@ -158,8 +159,6 @@ async function createSmartAccount() {
         bundlerTransport: http(currentBundler.value),
     });
 
-    // Estimate gas using bundler client for account creation
-    console.log('>>> Estimating gas for account creation...');
     // Encode the factory data for createAccount function
     const factoryData = encodeFunctionData({
         abi: SIMPLE_ACCOUNT_FACTORY_ABI,
@@ -168,6 +167,7 @@ async function createSmartAccount() {
     });
     console.log('>>> Factory data:', factoryData);
 
+    // Estimate gas using bundler client for account creation
     const gasEstimates = await bundlerClient.estimateUserOperationGas({
         account: simpleAccount,
         callData: '0x',
@@ -242,6 +242,7 @@ async function updateSmartAccountAddress() {
     const connectedAddress = accountStore.loggedEvmAccount?.address;
     if (!connectedAddress) {
         calculatedSmartAccountAddress.value = '';
+        accountExists.value = false;
         return;
     }
 
@@ -251,8 +252,11 @@ async function updateSmartAccountAddress() {
     const result = await calculateSmartAccountAddress(ownerAddress, saltValue);
     if (result) {
         calculatedSmartAccountAddress.value = result;
+        // Check if the account already exists
+        accountExists.value = await checkAccountExists(result as Address);
     } else {
         calculatedSmartAccountAddress.value = '';
+        accountExists.value = false;
     }
 }
 
@@ -306,6 +310,15 @@ onMounted(() => {
             <div class="c-create-account-tab__address-value">{{ calculatedSmartAccountAddress || 'Calculating...' }}</div>
         </div>
 
+        <div v-if="accountExists" class="c-create-account-tab__warning-box">
+            <q-banner class="bg-warning text-dark" rounded>
+                <template v-slot:avatar>
+                    <q-icon name="warning" color="dark" />
+                </template>
+                This smart account has already been created.
+            </q-banner>
+        </div>
+
         <div class="c-create-account-tab__actions">
             <q-btn
                 class="c-create-account-tab__create-btn"
@@ -313,6 +326,7 @@ onMounted(() => {
                 size="lg"
                 label="Create Smart Account"
                 icon-right="add"
+                :disable="accountExists"
                 @click="createSmartAccount"
             />
         </div>
@@ -382,6 +396,13 @@ onMounted(() => {
         font-family: monospace;
         word-break: break-all;
         padding: 8px 0;
+    }
+
+    &__warning-box {
+        margin: 16px 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     &__actions {
