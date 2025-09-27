@@ -127,7 +127,7 @@ async function estimateTransferUserOp(amount: bigint, recipient: Address): Promi
             chain: currentChain.value,
         });
 
-        // Prepare user operation with calls array format
+        // Prepare user operation with calls array format for native transfer
         const userOperation = await bundlerClient.prepareUserOperation({
             account: simpleAccount,
             calls: [{
@@ -239,19 +239,23 @@ async function transferUserOp() {
             },
         });
 
-        // Create bundler client for user operation
-        const bundlerClient = createBundlerClient({
-            transport: http(currentBundler.value),
+        // Create smart account client with proper bundler transport
+        const smartAccountClient = createSmartAccountClient({
+            account: simpleAccount,
             chain: currentChain.value,
+            bundlerTransport: http(currentBundler.value),
         });
 
-        // Step 1: Prepare the user operation with calls array format
-        const userOperation = await bundlerClient.prepareUserOperation({
-            account: simpleAccount,
-            calls: [{
-                to: recipientAddress.value as Address,
-                value: amountInWei,
-            }],
+        // Step 1: Prepare the user operation with proper gas estimates
+        const userOperation = await smartAccountClient.prepareUserOperation({
+            callData: '0x',
+            to: recipientAddress.value as Address,
+            value: amountInWei,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            callGasLimit: gasEstimates.callGasLimit,
+            preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
+            verificationGasLimit: gasEstimates.verificationGasLimit,
         });
 
         // Step 2: Get the user operation hash and sign it manually
@@ -277,11 +281,11 @@ async function transferUserOp() {
         console.log('>>>> signed UserOp', signedUserOperation);
 
         // Step 3: Send the signed user operation
-        const userOperationHashResult = await bundlerClient.sendUserOperation(signedUserOperation);
+        const userOperationHashResult = await smartAccountClient.sendUserOperation(signedUserOperation);
         console.log('>>> result: ', userOperationHashResult);
 
         // Step 4: Wait for the user operation receipt
-        const receipt = await bundlerClient.waitForUserOperationReceipt({
+        const receipt = await smartAccountClient.waitForUserOperationReceipt({
             hash: userOperationHashResult,
         });
         console.log('>>> receipt: ', receipt);
