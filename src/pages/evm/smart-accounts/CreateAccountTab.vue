@@ -6,6 +6,7 @@ import { createPublicClient, createWalletClient, EIP1193Provider, http, type Add
 import { entryPoint07Address, getUserOperationHash, createBundlerClient } from 'viem/account-abstraction';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
+import { useQuasar } from 'quasar';
 
 //constants
 const BUNDLER_RPC_BASE_URL = 'https://bundler.vorpalengineering.com/';
@@ -36,6 +37,7 @@ const SIMPLE_ACCOUNT_FACTORY_ABI = [
 // stores
 const accountStore = useAccountStore();
 const chainStore = useChainStore();
+const $q = useQuasar();
 
 // data
 const salt = ref(0);
@@ -44,6 +46,8 @@ const smartAccountType = ref('SimpleAccount v0.7');
 const accountExists = ref(false);
 const accountBalance = ref(0n);
 const balanceLoading = ref(false);
+const fundingInProgress = ref(false);
+const creatingInProgress = ref(false);
 
 // computed
 const currentChain = computed(() => {
@@ -129,6 +133,9 @@ async function fetchAccountBalance(address: Address): Promise<bigint> {
 
 async function fundAccount() {
     try {
+        // Set loading state
+        fundingInProgress.value = true;
+
         // Check if wallet is connected
         const connectedAddress = accountStore.loggedEvmAccount?.address;
         if (!connectedAddress) {
@@ -171,8 +178,19 @@ async function fundAccount() {
 
         // Refresh the balance after successful funding
         await updateSmartAccountAddress();
+
+        // Show success notification
+        $q.notify({
+            type: 'positive',
+            message: 'Smart Account Funding Successful',
+            position: 'top',
+            timeout: 5000,
+        });
     } catch (err) {
         console.error('Error funding account:', err);
+    } finally {
+        // Clear loading state
+        fundingInProgress.value = false;
     }
 }
 
@@ -254,116 +272,134 @@ async function estimateCreateSmartAccount(): Promise<{
 }
 
 async function createSmartAccount() {
-    console.log('Creating smart account...');
+    try {
+        // Set loading state
+        creatingInProgress.value = true;
 
-    // Check if wallet is connected
-    const connectedAddress = accountStore.loggedEvmAccount?.address;
-    if (!connectedAddress) {
-        console.error('No wallet connected. Please connect your wallet first.');
-        return;
+        console.log('Creating smart account...');
+
+        // Check if wallet is connected
+        const connectedAddress = accountStore.loggedEvmAccount?.address;
+        if (!connectedAddress) {
+            console.error('No wallet connected. Please connect your wallet first.');
+            return;
+        }
+
+        // Define required variables
+        const ownerAddress = connectedAddress as Address; // Use connected wallet address
+        const saltValue = salt.value; // Use salt from input field
+
+        // Calculate and store the smart account address
+        const result = await calculateSmartAccountAddress(ownerAddress, saltValue);
+        if (result) {
+            calculatedSmartAccountAddress.value = result;
+            console.log('Smart account address:', result);
+        }
+
+        // Check if the account already has code deployed
+        const accountExists = await checkAccountExists(result as Address);
+        console.log('Account exists:', accountExists);
+
+        // Get gas estimates using the dedicated function
+        const gasEstimationResult = await estimateCreateSmartAccount();
+        if (!gasEstimationResult) {
+            console.error('Failed to estimate gas for smart account creation');
+            return;
+        }
+
+        const {
+            gasEstimates,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            preVerificationGasMultiplier,
+        } = gasEstimationResult;
+
+        // Create wallet client for signing
+        const walletClient = createWalletClient({
+            chain: currentChain.value,
+            transport: custom(window.ethereum),
+        });
+
+        // Create the simple account client
+        const simpleAccount = await toSimpleSmartAccount({
+            client: publicClient,
+            owner: window.ethereum as EIP1193Provider,
+            factoryAddress: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
+            index: BigInt(salt.value),
+            entryPoint: {
+                address: entryPoint07Address,
+                version: '0.7',
+            },
+        });
+
+        // Create smart account client with proper bundler transport
+        const smartAccountClient = createSmartAccountClient({
+            account: simpleAccount,
+            chain: currentChain.value,
+            bundlerTransport: http(currentBundler.value),
+        });
+
+        // Step 1: Prepare the user operation with proper gas estimates
+        const userOperation = await smartAccountClient.prepareUserOperation({
+            callData: '0x',
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            callGasLimit: gasEstimates.callGasLimit,
+            preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
+            verificationGasLimit: gasEstimates.verificationGasLimit,
+        });
+
+        // Step 2: Get the user operation hash and sign it manually
+        const userOperationHash = getUserOperationHash({
+            userOperation,
+            entryPointAddress: entryPoint07Address,
+            entryPointVersion: '0.7',
+            chainId: currentChain.value.id,
+        });
+
+        // Sign the user operation hash with MetaMask
+        const userOpSignature = await walletClient.signMessage({
+            account: ownerAddress as Address,
+            message: { raw: userOperationHash },
+        });
+        console.log('>>> userOpSignature: ', userOpSignature);
+
+        // Update the user operation with the real signature
+        const signedUserOperation = {
+            ...userOperation,
+            signature: userOpSignature,
+        };
+        console.log('>>>> signed UserOp', signedUserOperation);
+
+        // Step 3: Send the signed user operation
+        const userOperationHashResult = await smartAccountClient.sendUserOperation(signedUserOperation);
+        console.log('>>> result: ', userOperationHashResult);
+
+        // Step 4: Wait for the user operation receipt
+        const receipt = await smartAccountClient.waitForUserOperationReceipt({
+            hash: userOperationHashResult,
+        });
+        console.log('>>> receipt: ', receipt);
+
+        // Save smart account data to browser storage
+        saveSmartAccountToStorage();
+
+        // Refresh the account balance after successful creation
+        await updateSmartAccountAddress();
+
+        // Show success notification
+        $q.notify({
+            type: 'positive',
+            message: 'Smart Account Created Successfully',
+            position: 'top',
+            timeout: 5000,
+        });
+    } catch (err) {
+        console.error('Error creating smart account:', err);
+    } finally {
+        // Clear loading state
+        creatingInProgress.value = false;
     }
-
-    // Define required variables
-    const ownerAddress = connectedAddress as Address; // Use connected wallet address
-    const saltValue = salt.value; // Use salt from input field
-
-    // Calculate and store the smart account address
-    const result = await calculateSmartAccountAddress(ownerAddress, saltValue);
-    if (result) {
-        calculatedSmartAccountAddress.value = result;
-        console.log('Smart account address:', result);
-    }
-
-    // Check if the account already has code deployed
-    const accountExists = await checkAccountExists(result as Address);
-    console.log('Account exists:', accountExists);
-
-    // Get gas estimates using the dedicated function
-    const gasEstimationResult = await estimateCreateSmartAccount();
-    if (!gasEstimationResult) {
-        console.error('Failed to estimate gas for smart account creation');
-        return;
-    }
-
-    const {
-        gasEstimates,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        preVerificationGasMultiplier,
-    } = gasEstimationResult;
-
-    // Create wallet client for signing
-    const walletClient = createWalletClient({
-        chain: currentChain.value,
-        transport: custom(window.ethereum),
-    });
-
-    // Create the simple account client
-    const simpleAccount = await toSimpleSmartAccount({
-        client: publicClient,
-        owner: window.ethereum as EIP1193Provider,
-        factoryAddress: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
-        index: BigInt(salt.value),
-        entryPoint: {
-            address: entryPoint07Address,
-            version: '0.7',
-        },
-    });
-
-    // Create smart account client with proper bundler transport
-    const smartAccountClient = createSmartAccountClient({
-        account: simpleAccount,
-        chain: currentChain.value,
-        bundlerTransport: http(currentBundler.value),
-    });
-
-    // Step 1: Prepare the user operation with proper gas estimates
-    const userOperation = await smartAccountClient.prepareUserOperation({
-        callData: '0x',
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        callGasLimit: gasEstimates.callGasLimit,
-        preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
-        verificationGasLimit: gasEstimates.verificationGasLimit,
-    });
-
-    // Step 2: Get the user operation hash and sign it manually
-    const userOperationHash = getUserOperationHash({
-        userOperation,
-        entryPointAddress: entryPoint07Address,
-        entryPointVersion: '0.7',
-        chainId: currentChain.value.id,
-    });
-
-    // Sign the user operation hash with MetaMask
-    const userOpSignature = await walletClient.signMessage({
-        account: ownerAddress as Address,
-        message: { raw: userOperationHash },
-    });
-    console.log('>>> userOpSignature: ', userOpSignature);
-
-    // Update the user operation with the real signature
-    const signedUserOperation = {
-        ...userOperation,
-        signature: userOpSignature,
-    };
-    console.log('>>>> signed UserOp', signedUserOperation);
-
-    // Step 3: Send the signed user operation
-    const userOperationHashResult = await smartAccountClient.sendUserOperation(signedUserOperation);
-    console.log('>>> result: ', userOperationHashResult);
-
-    // Step 4: Wait for the user operation receipt
-    const receipt = await smartAccountClient.waitForUserOperationReceipt({
-        hash: userOperationHashResult,
-    });
-    console.log('>>> receipt: ', receipt);
-
-    // Save smart account data to browser storage
-    saveSmartAccountToStorage();
-
-    // Refresh the account balance after successful creation
-    await updateSmartAccountAddress();
 }
 
 function randomizeSalt() {
@@ -492,7 +528,9 @@ onMounted(() => {
                             class="c-create-account-tab__fund-btn"
                             color="primary"
                             size="sm"
-                            label="Fund 3.5 TLOS"
+                            :label="fundingInProgress ? 'Funding...' : 'Fund 3.5 TLOS'"
+                            :loading="fundingInProgress"
+                            :disable="fundingInProgress"
                             dense
                             @click="fundAccount"
                         />
@@ -515,8 +553,9 @@ onMounted(() => {
                 class="c-create-account-tab__create-btn"
                 color="primary"
                 size="lg"
-                label="Create Smart Account"
-                :disable="accountExists"
+                :label="creatingInProgress ? 'Creating Account...' : 'Create Smart Account'"
+                :loading="creatingInProgress"
+                :disable="accountExists || fundingInProgress || creatingInProgress"
                 @click="createSmartAccount"
             />
         </div>
