@@ -358,6 +358,12 @@ async function createSmartAccount() {
         hash: userOperationHashResult,
     });
     console.log('>>> receipt: ', receipt);
+
+    // Save smart account data to browser storage
+    saveSmartAccountToStorage();
+
+    // Refresh the account balance after successful creation
+    await updateSmartAccountAddress();
 }
 
 function randomizeSalt() {
@@ -368,6 +374,31 @@ function randomizeSalt() {
 
     // Automatically calculate the smart account address when salt changes
     updateSmartAccountAddress();
+}
+
+function saveSmartAccountToStorage() {
+    try {
+        // Get existing smart accounts from localStorage
+        const existingAccounts = JSON.parse(localStorage.getItem('smartAccounts') || '[]');
+
+        // Create new smart account data
+        const newAccount = {
+            smartAccountAddress: calculatedSmartAccountAddress.value,
+            smartAccountType: smartAccountType.value,
+            salt: salt.value.toString(), // Convert BigInt to string for JSON storage
+        };
+
+        // Add the new account to the array
+        existingAccounts.push(newAccount);
+
+        // Save back to localStorage
+        localStorage.setItem('smartAccounts', JSON.stringify(existingAccounts));
+
+        console.log('Smart account saved to storage:', newAccount);
+        console.log('All stored smart accounts:', existingAccounts);
+    } catch (err) {
+        console.error('Error saving smart account to storage:', err);
+    }
 }
 
 async function updateSmartAccountAddress() {
@@ -461,7 +492,7 @@ onMounted(() => {
                             class="c-create-account-tab__fund-btn"
                             color="primary"
                             size="sm"
-                            label="Fund"
+                            label="Fund 3.5 TLOS"
                             dense
                             @click="fundAccount"
                         />
@@ -485,7 +516,6 @@ onMounted(() => {
                 color="primary"
                 size="lg"
                 label="Create Smart Account"
-                icon-right="add"
                 :disable="accountExists"
                 @click="createSmartAccount"
             />
