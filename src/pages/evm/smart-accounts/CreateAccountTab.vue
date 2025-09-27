@@ -2,8 +2,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { createSmartAccountClient } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
-import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom } from 'viem';
-import { entryPoint07Address, getUserOperationHash } from 'viem/account-abstraction';
+import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom, encodeFunctionData } from 'viem';
+import { entryPoint07Address, getUserOperationHash, createBundlerClient } from 'viem/account-abstraction';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
 
@@ -102,7 +102,6 @@ async function checkAccountExists(address: Address): Promise<boolean> {
 }
 
 async function createSmartAccount() {
-    // TODO: Implement smart account creation logic
     console.log('Creating smart account...');
 
     // Check if wallet is connected
@@ -145,32 +144,55 @@ async function createSmartAccount() {
         },
     });
 
-    // Create smart account client with proper bundler transport
+    // Create bundler client for gas estimation
     console.log('>>> bundler url: ', currentBundler.value);
+    const bundlerClient = createBundlerClient({
+        transport: http(currentBundler.value),
+        chain: currentChain.value,
+    });
+
+    // Create smart account client with proper bundler transport
     const smartAccountClient = createSmartAccountClient({
         account: simpleAccount,
         chain: currentChain.value,
         bundlerTransport: http(currentBundler.value),
     });
 
-    // Get current gas prices for EIP-1559
-    const [baseFeePerGas, maxPriorityFeePerGas] = await Promise.all([
-        publicClient.getBlock().then(block => block.baseFeePerGas || 0n),
-        publicClient.estimateMaxPriorityFeePerGas(),
-    ]);
-    const maxFeePerGas = (baseFeePerGas * 2n) + maxPriorityFeePerGas;
+    // Estimate gas using bundler client for account creation
+    console.log('>>> Estimating gas for account creation...');
+    // Encode the factory data for createAccount function
+    const factoryData = encodeFunctionData({
+        abi: SIMPLE_ACCOUNT_FACTORY_ABI,
+        functionName: 'createAccount',
+        args: [ownerAddress, BigInt(saltValue)],
+    });
+    console.log('>>> Factory data:', factoryData);
 
-    // For chains that don't support EIP-1559, maxPriorityFeePerGas must equal maxFeePerGas
-    const adjustedMaxPriorityFeePerGas = maxFeePerGas;
+    const gasEstimates = await bundlerClient.estimateUserOperationGas({
+        account: simpleAccount,
+        callData: '0x',
+        factory: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
+        factoryData,
+    });
+    console.log('>>> Gas estimates:', gasEstimates);
 
-    // Step 1: Prepare the user operation
+    // For Telos (legacy transactions), we need to get gas price instead of EIP-1559 fees
+    const gasPrice = await publicClient.getGasPrice();
+    console.log('>>> Gas price:', gasPrice);
+
+    // For legacy transactions, maxFeePerGas and maxPriorityFeePerGas should be the same as gasPrice
+    const maxFeePerGas = gasPrice;
+    const maxPriorityFeePerGas = gasPrice;
+    const preVerificationGasMultiplier = 5n;
+
+    // Step 1: Prepare the user operation with proper gas estimates
     const userOperation = await smartAccountClient.prepareUserOperation({
         callData: '0x',
         maxFeePerGas,
-        maxPriorityFeePerGas: adjustedMaxPriorityFeePerGas,
-        callGasLimit: 500000n,
-        preVerificationGas: 500000n,
-        verificationGasLimit: 500000n,
+        maxPriorityFeePerGas,
+        callGasLimit: gasEstimates.callGasLimit,
+        preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
+        verificationGasLimit: gasEstimates.verificationGasLimit,
     });
 
     // Step 2: Get the user operation hash and sign it manually
@@ -193,7 +215,7 @@ async function createSmartAccount() {
         ...userOperation,
         signature: userOpSignature,
     };
-    console.log(signedUserOperation);
+    console.log('>>>> signed UserOp', signedUserOperation);
 
     // Step 3: Send the signed user operation
     const userOperationHashResult = await smartAccountClient.sendUserOperation(signedUserOperation);
