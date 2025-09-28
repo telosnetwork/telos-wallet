@@ -29,36 +29,25 @@ const publicClient = createPublicClient({
 });
 
 // data
+const selectedAccount = ref('');
 const smartAccountAddress = ref('');
 const storedSmartAccounts = ref<Array<{
     smartAccountAddress: string;
     smartAccountType: string;
     salt: string;
 }>>([]);
+const accountBalance = ref(0n);
+const balanceLoading = ref(false);
 
-const tableColumns = ref([
-    {
-        name: 'smartAccountAddress',
-        label: 'Smart Account Address',
-        field: 'smartAccountAddress',
-        align: 'left' as const,
-        sortable: true,
-    },
-    {
-        name: 'smartAccountType',
-        label: 'Account Type',
-        field: 'smartAccountType',
-        align: 'left' as const,
-        sortable: true,
-    },
-    {
-        name: 'actions',
-        label: 'Actions',
-        field: 'actions',
-        align: 'center' as const,
-        sortable: false,
-    },
-]);
+// computed
+const formattedBalance = computed(() => {
+    if (balanceLoading.value) {
+        return 'Loading...';
+    }
+    // Convert wei to TLOS (assuming 18 decimals)
+    const balanceInTlos = Number(accountBalance.value) / Math.pow(10, 18);
+    return `${balanceInTlos.toFixed(6)} TLOS`;
+});
 
 // methods
 async function connectSmartAccount() {
@@ -128,10 +117,19 @@ function saveAccountToStorage() {
             localStorage.setItem('smartAccounts', JSON.stringify(existingAccounts));
             console.log('Smart account saved to storage:', newAccount);
 
-            // Refresh the table
+            // Clear the input field
+            smartAccountAddress.value = '';
+
+            // Refresh the accounts list
             loadStoredSmartAccounts();
         } else {
             console.log('Account already exists in storage');
+            $q.notify({
+                type: 'warning',
+                message: 'This account is already in your watchlist.',
+                position: 'top',
+                timeout: 3000,
+            });
         }
     } catch (err) {
         console.error('Error saving smart account to storage:', err);
@@ -143,39 +141,50 @@ function loadStoredSmartAccounts() {
         const accounts = JSON.parse(localStorage.getItem('smartAccounts') || '[]');
         storedSmartAccounts.value = accounts;
         console.log('Loaded smart accounts from storage:', accounts);
-        console.log('Table columns:', tableColumns);
     } catch (err) {
         console.error('Error loading smart accounts from storage:', err);
         storedSmartAccounts.value = [];
     }
 }
 
-function deleteAccount(address: string) {
+async function fetchAccountBalance(address: Address): Promise<bigint> {
     try {
-        // Get existing smart accounts from localStorage
-        const existingAccounts = JSON.parse(localStorage.getItem('smartAccounts') || '[]');
-
-        // Filter out the account with the matching address
-        const updatedAccounts = existingAccounts.filter(
-            (account: any) => account.smartAccountAddress.toLowerCase() !== address.toLowerCase(),
-        );
-
-        // Save the updated array back to localStorage
-        localStorage.setItem('smartAccounts', JSON.stringify(updatedAccounts));
-
-        console.log('Account deleted from storage:', address);
-
-        // Refresh the table
-        loadStoredSmartAccounts();
-
+        balanceLoading.value = true;
+        const balance = await publicClient.getBalance({ address });
+        console.log('Account balance:', balance);
+        return balance;
     } catch (err) {
-        console.error('Error deleting smart account from storage:', err);
+        console.error('Error fetching account balance:', err);
+        return 0n;
+    } finally {
+        balanceLoading.value = false;
     }
 }
 
-function fundAccount(address: string) {
-    // TODO: Implement funding logic
-    console.log('Funding account:', address);
+async function onAccountSelected(address: string) {
+    if (address) {
+        accountBalance.value = await fetchAccountBalance(address as Address);
+    } else {
+        accountBalance.value = 0n;
+    }
+}
+
+function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+        $q.notify({
+            type: 'positive',
+            message: 'Address copied to clipboard',
+            position: 'top',
+            timeout: 2000,
+        });
+    }).catch(() => {
+        $q.notify({
+            type: 'negative',
+            message: 'Failed to copy address',
+            position: 'top',
+            timeout: 2000,
+        });
+    });
 }
 
 // Load accounts on component mount
@@ -187,78 +196,64 @@ onMounted(() => {
 <template>
 <div class="c-view-account-tab">
     <div class="c-view-account-tab__content">
-        <div class="c-view-account-tab__connect-section">
-            <q-input
-                v-model="smartAccountAddress"
-                class="c-view-account-tab__address-input"
-                placeholder="Enter Smart Account address"
+        <div class="c-view-account-tab__accounts-section">
+            <h3 class="c-view-account-tab__section-title">Select a Smart Account</h3>
+            <q-select
+                v-model="selectedAccount"
+                class="c-view-account-tab__account-select"
+                label="Smart Account"
                 outlined
                 dense
+                :options="storedSmartAccounts.map(account => account.smartAccountAddress)"
+                :disable="storedSmartAccounts.length === 0"
+                @update:model-value="onAccountSelected"
             />
-            <q-btn
-                class="c-view-account-tab__connect-btn"
-                color="secondary"
-                icon="🔍"
-                @click="connectSmartAccount"
-            />
+
+            <div v-if="!selectedAccount" class="c-view-account-tab__add-section">
+                <h4 class="c-view-account-tab__add-label">Or Add to Watchlist</h4>
+                <div class="c-view-account-tab__add-controls">
+                    <q-input
+                        v-model="smartAccountAddress"
+                        class="c-view-account-tab__address-input"
+                        placeholder="Enter Smart Account address"
+                        outlined
+                        dense
+                    />
+                    <q-btn
+                        class="c-view-account-tab__add-btn"
+                        color="secondary"
+                        icon="🔍"
+                        @click="connectSmartAccount"
+                    />
+                </div>
+            </div>
         </div>
 
-        <div v-if="storedSmartAccounts.length > 0" class="c-view-account-tab__accounts-table">
-            <h3 class="c-view-account-tab__table-title">Watchlist</h3>
-            <q-table
-                :rows="storedSmartAccounts"
-                :columns="tableColumns"
-                row-key="smartAccountAddress"
-                flat
-                bordered
-                class="c-view-account-tab__table"
-            >
-                <template v-slot:body-cell-smartAccountAddress="props">
-                    <q-td :props="props">
-                        <div class="c-view-account-tab__address-cell">
-                            {{ props.value }}
+        <div v-if="selectedAccount" class="c-view-account-tab__account-summary">
+            <q-banner class="c-view-account-tab__summary-banner" rounded>
+                <div class="c-view-account-tab__summary-content">
+                    <div class="c-view-account-tab__address-section">
+                        <div class="c-view-account-tab__address-label">Smart Account Address</div>
+                        <div class="c-view-account-tab__address-row">
+                            <div class="c-view-account-tab__address-value">{{ selectedAccount }}</div>
+                            <q-btn
+                                flat
+                                round
+                                dense
+                                icon="content_copy"
+                                class="c-view-account-tab__copy-btn"
+                                @click="copyToClipboard(selectedAccount)"
+                            />
                         </div>
-                    </q-td>
-                </template>
-
-                <template v-slot:body-cell-smartAccountType="props">
-                    <q-td :props="props">
-                        {{ props.value }}
-                    </q-td>
-                </template>
-
-                <template v-slot:body-cell-actions="props">
-                    <q-td :props="props">
-                        <q-btn-dropdown
-                            flat
-                            round
-                            dense
-                            icon="more_vert"
-                            class="c-view-account-tab__actions-btn"
-                        >
-                            <q-list>
-                                <q-item v-close-popup clickable @click="fundAccount(props.row.smartAccountAddress)">
-                                    <q-item-section avatar>
-                                        <q-icon name="account_balance_wallet" />
-                                    </q-item-section>
-                                    <q-item-section>Fund</q-item-section>
-                                </q-item>
-                                <q-item v-close-popup clickable @click="deleteAccount(props.row.smartAccountAddress)">
-                                    <q-item-section avatar>
-                                        <q-icon name="delete" color="negative" />
-                                    </q-item-section>
-                                    <q-item-section>Delete</q-item-section>
-                                </q-item>
-                            </q-list>
-                        </q-btn-dropdown>
-                    </q-td>
-                </template>
-            </q-table>
+                    </div>
+                    <div class="c-view-account-tab__balance-section">
+                        <div class="c-view-account-tab__balance-label">Balance</div>
+                        <div class="c-view-account-tab__balance-value">{{ formattedBalance }}</div>
+                    </div>
+                </div>
+            </q-banner>
         </div>
 
-        <div v-else class="c-view-account-tab__no-accounts">
-            <p>No smart accounts found in storage.</p>
-        </div>
     </div>
 </div>
 </template>
@@ -277,20 +272,50 @@ onMounted(() => {
         width: 100%;
     }
 
-    &__connect-section {
+
+    &__accounts-section {
+        margin-top: 32px;
+        width: 100%;
+    }
+
+    &__section-title {
+        margin-bottom: 16px;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-high-contrast);
+    }
+
+    &__account-select {
+        max-width: 500px;
+        width: 100%;
+        margin: 0 auto 24px;
+    }
+
+    &__add-label {
+        margin-bottom: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-high-contrast);
+        text-align: center;
+    }
+
+    &__add-section {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    &__add-controls {
         display: flex;
         flex-direction: row;
         gap: 12px;
-        margin-bottom: 24px;
         align-items: center;
     }
 
     &__address-input {
         flex: 1;
-        max-width: 400px;
     }
 
-    &__connect-btn {
+    &__add-btn {
         padding: 8px 16px;
         border-radius: 6px;
         font-weight: 500;
@@ -298,40 +323,77 @@ onMounted(() => {
         white-space: nowrap;
     }
 
-    &__accounts-table {
-        margin-top: 32px;
+    &__account-summary {
+        margin-top: 24px;
         width: 100%;
     }
 
-    &__table-title {
-        margin-bottom: 16px;
-        font-size: 18px;
-        font-weight: 600;
+    &__summary-banner {
+        background-color: transparent !important;
+        color: white !important;
+        border: 1px solid white !important;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    &__summary-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    &__address-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__address-label {
+        font-size: 14px;
+        font-weight: 500;
         color: var(--text-high-contrast);
     }
 
-    &__table {
-        width: 100%;
+    &__address-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
-    &__address-cell {
+    &__address-value {
         font-family: monospace;
         font-size: 12px;
         word-break: break-all;
+        flex: 1;
+        color: var(--text-high-contrast);
     }
 
-    &__no-accounts {
-        margin-top: 32px;
-        text-align: center;
-        color: var(--text-default-contrast);
-    }
-
-    &__actions-btn {
-        color: var(--text-default-contrast);
+    &__copy-btn {
+        color: var(--q-primary);
+        flex-shrink: 0;
 
         &:hover {
             background-color: var(--bg-hover);
         }
     }
+
+    &__balance-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__balance-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-high-contrast);
+    }
+
+    &__balance-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--q-primary);
+    }
+
 }
 </style>
