@@ -207,6 +207,7 @@ async function transferUserOp() {
         }
 
         const amountInWei = BigInt(Math.floor(transferAmount.value * Math.pow(10, 18)));
+        console.log('>>> amountInWei: ', amountInWei);
 
         // Get gas estimates using the dedicated function
         const gasEstimationResult = await estimateTransferUserOp(amountInWei, recipientAddress.value as Address);

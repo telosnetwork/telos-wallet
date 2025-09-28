@@ -38,6 +38,11 @@ const storedSmartAccounts = ref<Array<{
 }>>([]);
 const accountBalance = ref(0n);
 const balanceLoading = ref(false);
+const accountOwner = ref('');
+const ownerLoading = ref(false);
+const accountType = ref('');
+const entryPointDeposit = ref(0n);
+const depositLoading = ref(false);
 
 // computed
 const formattedBalance = computed(() => {
@@ -47,6 +52,15 @@ const formattedBalance = computed(() => {
     // Convert wei to TLOS (assuming 18 decimals)
     const balanceInTlos = Number(accountBalance.value) / Math.pow(10, 18);
     return `${balanceInTlos.toFixed(6)} TLOS`;
+});
+
+const formattedDeposit = computed(() => {
+    if (depositLoading.value) {
+        return 'Loading...';
+    }
+    // Convert wei to TLOS (assuming 18 decimals)
+    const depositInTlos = Number(entryPointDeposit.value) / Math.pow(10, 18);
+    return `${depositInTlos.toFixed(6)} TLOS`;
 });
 
 // methods
@@ -161,11 +175,74 @@ async function fetchAccountBalance(address: Address): Promise<bigint> {
     }
 }
 
+async function fetchAccountOwner(address: Address): Promise<string> {
+    try {
+        ownerLoading.value = true;
+        const owner = await publicClient.readContract({
+            address: address,
+            abi: [
+                {
+                    inputs: [],
+                    name: 'owner',
+                    outputs: [{ name: '', type: 'address' }],
+                    stateMutability: 'view',
+                    type: 'function',
+                },
+            ],
+            functionName: 'owner',
+        });
+        console.log('Account owner:', owner);
+        return owner as string;
+    } catch (err) {
+        console.error('Error fetching account owner:', err);
+        return '';
+    } finally {
+        ownerLoading.value = false;
+    }
+}
+
+async function fetchEntryPointDeposit(address: Address): Promise<bigint> {
+    try {
+        depositLoading.value = true;
+        const deposit = await publicClient.readContract({
+            address: address,
+            abi: [
+                {
+                    inputs: [],
+                    name: 'getDeposit',
+                    outputs: [{ name: '', type: 'uint256' }],
+                    stateMutability: 'view',
+                    type: 'function',
+                },
+            ],
+            functionName: 'getDeposit',
+        });
+        console.log('Entry point deposit:', deposit);
+        return deposit as bigint;
+    } catch (err) {
+        console.error('Error fetching entry point deposit:', err);
+        return 0n;
+    } finally {
+        depositLoading.value = false;
+    }
+}
+
 async function onAccountSelected(address: string) {
     if (address) {
         accountBalance.value = await fetchAccountBalance(address as Address);
+        accountOwner.value = await fetchAccountOwner(address as Address);
+        entryPointDeposit.value = await fetchEntryPointDeposit(address as Address);
+
+        // Find the account type from stored accounts
+        const storedAccount = storedSmartAccounts.value.find(
+            account => account.smartAccountAddress.toLowerCase() === address.toLowerCase(),
+        );
+        accountType.value = storedAccount?.smartAccountType || 'Unknown';
     } else {
         accountBalance.value = 0n;
+        accountOwner.value = '';
+        accountType.value = '';
+        entryPointDeposit.value = 0n;
     }
 }
 
@@ -232,23 +309,47 @@ onMounted(() => {
         <div v-if="selectedAccount" class="c-view-account-tab__account-summary">
             <q-banner class="c-view-account-tab__summary-banner" rounded>
                 <div class="c-view-account-tab__summary-content">
-                    <div class="c-view-account-tab__address-section">
-                        <div class="c-view-account-tab__address-label">Smart Account Address</div>
-                        <div class="c-view-account-tab__address-row">
-                            <div class="c-view-account-tab__address-value">{{ selectedAccount }}</div>
-                            <q-btn
-                                flat
-                                round
-                                dense
-                                icon="content_copy"
-                                class="c-view-account-tab__copy-btn"
-                                @click="copyToClipboard(selectedAccount)"
-                            />
+                    <div class="c-view-account-tab__address-box">
+                        <div class="c-view-account-tab__address-section">
+                            <div class="c-view-account-tab__address-label">Smart Account Address</div>
+                            <div class="c-view-account-tab__address-row">
+                                <div class="c-view-account-tab__address-value">{{ selectedAccount }}</div>
+                                <q-btn
+                                    flat
+                                    round
+                                    dense
+                                    icon="content_copy"
+                                    class="c-view-account-tab__copy-btn"
+                                    @click="copyToClipboard(selectedAccount)"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div class="c-view-account-tab__balance-section">
-                        <div class="c-view-account-tab__balance-label">Balance</div>
-                        <div class="c-view-account-tab__balance-value">{{ formattedBalance }}</div>
+                    <div class="c-view-account-tab__balance-box">
+                        <div class="c-view-account-tab__balance-section">
+                            <div class="c-view-account-tab__balance-label">Balance</div>
+                            <div class="c-view-account-tab__balance-value">{{ formattedBalance }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="c-view-account-tab__owner-box">
+                    <div class="c-view-account-tab__owner-section">
+                        <div class="c-view-account-tab__owner-label">Smart Account Owner</div>
+                        <div class="c-view-account-tab__owner-value">
+                            {{ ownerLoading ? 'Loading...' : accountOwner || 'Unknown' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="c-view-account-tab__type-box">
+                    <div class="c-view-account-tab__type-section">
+                        <div class="c-view-account-tab__type-label">Account Type</div>
+                        <div class="c-view-account-tab__type-value">{{ accountType || 'Unknown' }}</div>
+                    </div>
+                </div>
+                <div class="c-view-account-tab__deposit-box">
+                    <div class="c-view-account-tab__deposit-section">
+                        <div class="c-view-account-tab__deposit-label">Entry Point Deposit</div>
+                        <div class="c-view-account-tab__deposit-value">{{ formattedDeposit }}</div>
                     </div>
                 </div>
             </q-banner>
@@ -338,14 +439,71 @@ onMounted(() => {
 
     &__summary-content {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         gap: 20px;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+
+    &__address-box {
+        flex: 1;
+        padding: 16px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+    }
+
+    &__balance-box {
+        flex: 0 0 auto;
+        padding: 16px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+    }
+
+    &__owner-box {
+        flex: 1;
+        padding: 16px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+    }
+
+    &__type-box {
+        flex: 0 0 auto;
+        padding: 16px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+
+    &__deposit-box {
+        flex: 0 0 auto;
+        padding: 16px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        min-width: 150px;
+        display: flex;
+        align-items: center;
     }
 
     &__address-section {
         display: flex;
         flex-direction: column;
         gap: 8px;
+        justify-content: flex-start;
     }
 
     &__address-label {
@@ -381,6 +539,7 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         gap: 8px;
+        text-align: center;
     }
 
     &__balance-label {
@@ -393,6 +552,66 @@ onMounted(() => {
         font-size: 16px;
         font-weight: 600;
         color: var(--q-primary);
+    }
+
+    &__owner-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    &__owner-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-high-contrast);
+    }
+
+    &__owner-value {
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+        color: var(--text-high-contrast);
+    }
+
+    &__type-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        text-align: center;
+    }
+
+    &__type-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-high-contrast);
+    }
+
+    &__type-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--q-primary);
+    }
+
+    &__deposit-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        text-align: center;
+    }
+
+    &__deposit-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-high-contrast);
+    }
+
+    &__deposit-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--q-secondary);
     }
 
 }
