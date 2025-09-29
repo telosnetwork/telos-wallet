@@ -4,9 +4,9 @@ import SmartAccountsPageHeader from 'pages/evm/smart-accounts/SmartAccountsPageH
 import ViewAccountTab from 'pages/evm/smart-accounts/ViewAccountTab.vue';
 import TransactAccountTab from 'pages/evm/smart-accounts/TransactAccountTab.vue';
 import CreateAccountTab from 'pages/evm/smart-accounts/CreateAccountTab.vue';
-import UserOpsTab from 'pages/evm/smart-accounts/UserOpsTab.vue';
+import ReceiptsTab from 'pages/evm/smart-accounts/ReceiptsTab.vue';
 
-const tabs = ['view', 'transact', 'create', 'userops'];
+const tabs = ['view', 'transact', 'create', 'receipts'];
 </script>
 
 <template>
@@ -27,8 +27,8 @@ const tabs = ['view', 'transact', 'create', 'userops'];
         <CreateAccountTab />
     </template>
 
-    <template v-slot:userops>
-        <UserOpsTab />
+    <template v-slot:receipts>
+        <ReceiptsTab />
     </template>
 </AppPage>
 </template>

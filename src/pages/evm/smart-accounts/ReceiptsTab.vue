@@ -11,14 +11,14 @@ const chainStore = useChainStore();
 const $q = useQuasar();
 
 // data
-const userOpHash = ref('');
+const transactionHash = ref('');
 
 // methods
-async function searchUserOperation() {
-    if (!userOpHash.value || userOpHash.value.trim() === '') {
+async function searchReceipt() {
+    if (!transactionHash.value || transactionHash.value.trim() === '') {
         $q.notify({
             type: 'warning',
-            message: 'Please enter a UserOperation hash',
+            message: 'Please enter a transaction hash',
             position: 'top',
             timeout: 3000,
         });
@@ -26,25 +26,25 @@ async function searchUserOperation() {
     }
 
     try {
-        const hash = userOpHash.value.trim();
-        console.log('Searching for UserOperation hash:', hash);
+        const hash = transactionHash.value.trim();
+        console.log('Searching for transaction receipt:', hash);
 
-        await getUserOpByHash(hash);
+        await getReceiptByHash(hash);
 
         // Clear the input field after successful search
-        userOpHash.value = '';
+        transactionHash.value = '';
     } catch (err) {
-        console.error('Error searching UserOperation:', err);
+        console.error('Error searching receipt:', err);
         $q.notify({
             type: 'negative',
-            message: 'Failed to search UserOperation. Please check the hash and try again.',
+            message: 'Failed to search receipt. Please check the hash and try again.',
             position: 'top',
             timeout: 5000,
         });
     }
 }
 
-async function getUserOpByHash(userOpHash: string) {
+async function getReceiptByHash(hash: string) {
     try {
         // Get the current chain network
         const network = chainStore.loggedChain.settings.getNetwork();
@@ -74,7 +74,7 @@ async function getUserOpByHash(userOpHash: string) {
             body: JSON.stringify({
                 jsonrpc: '2.0',
                 method: 'eth_getUserOperationByHash',
-                params: [userOpHash],
+                params: [hash],
                 id: 1,
             }),
         });
@@ -84,24 +84,24 @@ async function getUserOpByHash(userOpHash: string) {
         }
 
         const data = await response.json();
-        console.log('UserOperation response:', data);
+        console.log('Receipt response:', data);
 
         // Log the full response to console as requested
-        console.log('=== UserOperation Search Result ===');
-        console.log('Hash:', userOpHash);
+        console.log('=== Transaction Receipt Search Result ===');
+        console.log('Hash:', hash);
         console.log('Full Response:', JSON.stringify(data, null, 2));
-        console.log('===================================');
+        console.log('=========================================');
 
         // Optional: Show success notification
         $q.notify({
             type: 'positive',
-            message: 'UserOperation found! Check console for details.',
+            message: 'Receipt found! Check console for details.',
             position: 'top',
             timeout: 3000,
         });
 
     } catch (err) {
-        console.error('Error fetching UserOperation:', err);
+        console.error('Error fetching receipt:', err);
         throw err;
     }
 }
@@ -126,46 +126,46 @@ function copyToClipboard(text: string) {
 </script>
 
 <template>
-<div class="c-userops-tab">
-    <div class="c-userops-tab__content">
-        <div class="c-userops-tab__search-section">
-            <h3 class="c-userops-tab__section-title">Search UserOperation</h3>
-            <p class="c-userops-tab__section-description">
-                Enter a UserOperation hash to retrieve information about a specific smart account transaction.
+<div class="c-receipts-tab">
+    <div class="c-receipts-tab__content">
+        <div class="c-receipts-tab__search-section">
+            <h3 class="c-receipts-tab__section-title">Search Transaction Receipt</h3>
+            <p class="c-receipts-tab__section-description">
+                Enter a transaction hash to retrieve information about a smart account transaction receipt.
             </p>
 
-            <div class="c-userops-tab__search-controls">
+            <div class="c-receipts-tab__search-controls">
                 <q-input
-                    v-model="userOpHash"
-                    class="c-userops-tab__hash-input"
-                    placeholder="Enter UserOperation hash (0x...)"
+                    v-model="transactionHash"
+                    class="c-receipts-tab__hash-input"
+                    placeholder="Enter transaction hash (0x...)"
                     outlined
                     dense
                 />
                 <q-btn
-                    class="c-userops-tab__search-btn"
+                    class="c-receipts-tab__search-btn"
                     color="primary"
                     icon="search"
                     label="Search"
-                    @click="searchUserOperation"
+                    @click="searchReceipt"
                 />
             </div>
         </div>
 
-        <div class="c-userops-tab__info-section">
-            <h4 class="c-userops-tab__info-title">About UserOperations</h4>
-            <div class="c-userops-tab__info-content">
+        <div class="c-receipts-tab__info-section">
+            <h4 class="c-receipts-tab__info-title">About Transaction Receipts</h4>
+            <div class="c-receipts-tab__info-content">
                 <p>
-                    UserOperations are the transactions that smart accounts submit to bundlers for execution.
-                    Each UserOperation has a unique hash that can be used to look up its details, including:
+                    Transaction receipts contain detailed information about smart account transactions,
+                    including execution status, gas usage, and block-level data. Each receipt contains:
                 </p>
-                <ul class="c-userops-tab__info-list">
-                    <li>Transaction details and parameters</li>
-                    <li>Execution status and results</li>
-                    <li>Gas usage and fees</li>
-                    <li>Block information and confirmations</li>
+                <ul class="c-receipts-tab__info-list">
+                    <li>Transaction execution status and result</li>
+                    <li>Gas usage and transaction fees</li>
+                    <li>Block number and transaction index</li>
+                    <li>Logs and events emitted by smart contracts</li>
                 </ul>
-                <p class="c-userops-tab__info-note">
+                <p class="c-receipts-tab__info-note">
                     <strong>Note:</strong> Search results will be displayed in the browser console for detailed inspection.
                 </p>
             </div>
@@ -175,7 +175,7 @@ function copyToClipboard(text: string) {
 </template>
 
 <style lang="scss" scoped>
-.c-userops-tab {
+.c-receipts-tab {
     display: flex;
     justify-content: center;
     align-items: flex-start;

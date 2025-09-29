@@ -22,7 +22,7 @@ export default defineComponent({
         getTabLabel(tab: string): string {
             // Custom labels for specific tabs
             const customLabels: Record<string, string> = {
-                'userops': 'User Ops',
+                'receipts': 'Receipts',
             };
 
             return customLabels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
