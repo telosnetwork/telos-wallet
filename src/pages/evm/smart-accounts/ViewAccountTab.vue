@@ -309,47 +309,53 @@ onMounted(() => {
         <div v-if="selectedAccount" class="c-view-account-tab__account-summary">
             <q-banner class="c-view-account-tab__summary-banner" rounded>
                 <div class="c-view-account-tab__summary-content">
-                    <div class="c-view-account-tab__address-box">
-                        <div class="c-view-account-tab__address-section">
-                            <div class="c-view-account-tab__address-label">Smart Account Address</div>
-                            <div class="c-view-account-tab__address-row">
-                                <div class="c-view-account-tab__address-value">{{ selectedAccount }}</div>
-                                <q-btn
-                                    flat
-                                    round
-                                    dense
-                                    icon="content_copy"
-                                    class="c-view-account-tab__copy-btn"
-                                    @click="copyToClipboard(selectedAccount)"
-                                />
+                    <div class="c-view-account-tab__top-row">
+                        <div class="c-view-account-tab__address-box">
+                            <div class="c-view-account-tab__address-section">
+                                <div class="c-view-account-tab__address-label">Smart Account Address</div>
+                                <div class="c-view-account-tab__address-row">
+                                    <div class="c-view-account-tab__address-value">{{ selectedAccount }}</div>
+                                    <q-btn
+                                        flat
+                                        round
+                                        dense
+                                        icon="content_copy"
+                                        class="c-view-account-tab__copy-btn"
+                                        @click="copyToClipboard(selectedAccount)"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="c-view-account-tab__balance-box">
+                            <div class="c-view-account-tab__balance-section">
+                                <div class="c-view-account-tab__balance-label">Balance</div>
+                                <div class="c-view-account-tab__balance-value">{{ formattedBalance }}</div>
                             </div>
                         </div>
                     </div>
-                    <div class="c-view-account-tab__balance-box">
-                        <div class="c-view-account-tab__balance-section">
-                            <div class="c-view-account-tab__balance-label">Balance</div>
-                            <div class="c-view-account-tab__balance-value">{{ formattedBalance }}</div>
+                    <div class="c-view-account-tab__middle-row">
+                        <div class="c-view-account-tab__owner-box">
+                            <div class="c-view-account-tab__owner-section">
+                                <div class="c-view-account-tab__owner-label">Smart Account Owner</div>
+                                <div class="c-view-account-tab__owner-value">
+                                    {{ ownerLoading ? 'Loading...' : accountOwner || 'Unknown' }}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="c-view-account-tab__owner-box">
-                    <div class="c-view-account-tab__owner-section">
-                        <div class="c-view-account-tab__owner-label">Smart Account Owner</div>
-                        <div class="c-view-account-tab__owner-value">
-                            {{ ownerLoading ? 'Loading...' : accountOwner || 'Unknown' }}
+                    <div class="c-view-account-tab__bottom-row">
+                        <div class="c-view-account-tab__type-box">
+                            <div class="c-view-account-tab__type-section">
+                                <div class="c-view-account-tab__type-label">Account Type</div>
+                                <div class="c-view-account-tab__type-value">{{ accountType || 'Unknown' }}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="c-view-account-tab__type-box">
-                    <div class="c-view-account-tab__type-section">
-                        <div class="c-view-account-tab__type-label">Account Type</div>
-                        <div class="c-view-account-tab__type-value">{{ accountType || 'Unknown' }}</div>
-                    </div>
-                </div>
-                <div class="c-view-account-tab__deposit-box">
-                    <div class="c-view-account-tab__deposit-section">
-                        <div class="c-view-account-tab__deposit-label">Entry Point Deposit</div>
-                        <div class="c-view-account-tab__deposit-value">{{ formattedDeposit }}</div>
+                        <div class="c-view-account-tab__deposit-box">
+                            <div class="c-view-account-tab__deposit-section">
+                                <div class="c-view-account-tab__deposit-label">Entry Point Deposit</div>
+                                <div class="c-view-account-tab__deposit-value">{{ formattedDeposit }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </q-banner>
@@ -435,14 +441,34 @@ onMounted(() => {
         border: 1px solid white !important;
         max-width: 600px;
         margin: 0 auto;
+        padding: 20px;
     }
 
     &__summary-content {
         display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    &__top-row {
+        display: flex;
         flex-direction: row;
         gap: 20px;
         align-items: stretch;
-        margin-bottom: 20px;
+    }
+
+    &__middle-row {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    &__bottom-row {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: stretch;
     }
 
     &__address-box {
@@ -477,24 +503,21 @@ onMounted(() => {
     }
 
     &__type-box {
-        flex: 0 0 auto;
+        flex: 1;
         padding: 16px;
         background-color: var(--bg-secondary);
         border-radius: 8px;
         border: 1px solid var(--border-color);
-        min-width: 150px;
         display: flex;
         align-items: center;
-        margin-right: 20px;
     }
 
     &__deposit-box {
-        flex: 0 0 auto;
+        flex: 1;
         padding: 16px;
         background-color: var(--bg-secondary);
         border-radius: 8px;
         border: 1px solid var(--border-color);
-        min-width: 150px;
         display: flex;
         align-items: center;
     }
