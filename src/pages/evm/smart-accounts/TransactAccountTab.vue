@@ -124,7 +124,6 @@ async function estimateTransferUserOp(amount: bigint, recipient: Address): Promi
     gasPrice: bigint;
     maxFeePerGas: bigint;
     maxPriorityFeePerGas: bigint;
-    preVerificationGasMultiplier: bigint;
 } | null> {
     try {
         // Check if wallet is connected
@@ -169,14 +168,11 @@ async function estimateTransferUserOp(amount: bigint, recipient: Address): Promi
         // For legacy transactions, maxFeePerGas and maxPriorityFeePerGas should be the same as gasPrice
         const maxFeePerGas = gasPrice;
         const maxPriorityFeePerGas = gasPrice;
-        const preVerificationGasMultiplier = 5n;
-
         return {
             gasEstimates: userOperation,
             gasPrice,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            preVerificationGasMultiplier,
         };
     } catch (err) {
         console.error('Error estimating transfer user operation:', err);
@@ -311,7 +307,6 @@ async function transferUserOp() {
             gasEstimates,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            preVerificationGasMultiplier,
         } = gasEstimationResult;
 
         // Create wallet client for signing
@@ -356,7 +351,7 @@ async function transferUserOp() {
             maxFeePerGas,
             maxPriorityFeePerGas,
             callGasLimit: gasEstimates.callGasLimit,
-            preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
+            preVerificationGas: gasEstimates.preVerificationGas,
             verificationGasLimit: gasEstimates.verificationGasLimit,
         });
 
