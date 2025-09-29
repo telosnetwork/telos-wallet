@@ -336,6 +336,15 @@ onMounted(() => {
         <div v-if="selectedAccount" class="c-transact-account-tab__transfer-section">
             <q-banner class="c-transact-account-tab__transfer-banner" rounded>
                 <div class="c-transact-account-tab__transfer-content">
+                    <div class="c-transact-account-tab__from-label">From Address</div>
+                    <q-input
+                        :model-value="selectedAccount"
+                        class="c-transact-account-tab__from-input"
+                        outlined
+                        dense
+                        readonly
+                        disable
+                    />
                     <div class="c-transact-account-tab__recipient-label">To Address</div>
                     <q-input
                         v-model="recipientAddress"
@@ -421,6 +430,18 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         gap: 16px;
+    }
+
+    &__from-label {
+        @include text--small;
+        color: white;
+        font-weight: 500;
+    }
+
+    &__from-input {
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
     }
 
     &__recipient-label {
