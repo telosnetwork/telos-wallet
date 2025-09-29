@@ -65,7 +65,7 @@ async function getReceiptByHash(hash: string) {
 
         console.log('Bundler RPC URL:', bundlerRpcUrl);
 
-        // Make the RPC call to get the UserOperation by hash
+        // Make the RPC call to get the UserOperation receipt
         const response = await fetch(bundlerRpcUrl, {
             method: 'POST',
             headers: {
@@ -73,7 +73,7 @@ async function getReceiptByHash(hash: string) {
             },
             body: JSON.stringify({
                 jsonrpc: '2.0',
-                method: 'eth_getUserOperationByHash',
+                method: 'eth_getUserOperationReceipt',
                 params: [hash],
                 id: 1,
             }),
@@ -87,10 +87,22 @@ async function getReceiptByHash(hash: string) {
         console.log('Receipt response:', data);
 
         // Log the full response to console as requested
-        console.log('=== Transaction Receipt Search Result ===');
+        console.log('=== UserOperation Receipt Search Result ===');
         console.log('Hash:', hash);
         console.log('Full Response:', JSON.stringify(data, null, 2));
-        console.log('=========================================');
+
+        // Log key receipt details if available
+        if (data.result) {
+            console.log('Receipt Details:');
+            console.log('- Entry Point:', data.result.entryPoint);
+            console.log('- Sender:', data.result.sender);
+            console.log('- Success:', data.result.success);
+            console.log('- Gas Used:', data.result.actualGasUsed);
+            console.log('- Gas Cost:', data.result.actualGasCost);
+            console.log('- Transaction Hash:', data.result.receipt?.transactionHash);
+            console.log('- Block Number:', data.result.receipt?.blockNumber);
+        }
+        console.log('===========================================');
 
         // Optional: Show success notification
         $q.notify({
@@ -129,16 +141,16 @@ function copyToClipboard(text: string) {
 <div class="c-receipts-tab">
     <div class="c-receipts-tab__content">
         <div class="c-receipts-tab__search-section">
-            <h3 class="c-receipts-tab__section-title">Search Transaction Receipt</h3>
+            <h3 class="c-receipts-tab__section-title">Search UserOperation Receipt</h3>
             <p class="c-receipts-tab__section-description">
-                Enter a transaction hash to retrieve information about a smart account transaction receipt.
+                Enter a UserOperation hash to retrieve the transaction receipt for a smart account execution.
             </p>
 
             <div class="c-receipts-tab__search-controls">
                 <q-input
                     v-model="transactionHash"
                     class="c-receipts-tab__hash-input"
-                    placeholder="Enter transaction hash (0x...)"
+                    placeholder="Enter UserOperation hash (0x...)"
                     outlined
                     dense
                 />
@@ -153,17 +165,18 @@ function copyToClipboard(text: string) {
         </div>
 
         <div class="c-receipts-tab__info-section">
-            <h4 class="c-receipts-tab__info-title">About Transaction Receipts</h4>
+            <h4 class="c-receipts-tab__info-title">About UserOperation Receipts</h4>
             <div class="c-receipts-tab__info-content">
                 <p>
-                    Transaction receipts contain detailed information about smart account transactions,
-                    including execution status, gas usage, and block-level data. Each receipt contains:
+                    UserOperation receipts contain detailed information about smart account executions,
+                    including the actual transaction receipt, gas consumption, and execution results. Each receipt includes:
                 </p>
                 <ul class="c-receipts-tab__info-list">
-                    <li>Transaction execution status and result</li>
-                    <li>Gas usage and transaction fees</li>
-                    <li>Block number and transaction index</li>
-                    <li>Logs and events emitted by smart contracts</li>
+                    <li>Smart account sender address and entry point details</li>
+                    <li>Execution success status and gas usage information</li>
+                    <li>Block number, transaction hash, and transaction index</li>
+                    <li>Event logs and contract interactions</li>
+                    <li>Actual gas costs and effective gas price</li>
                 </ul>
                 <p class="c-receipts-tab__info-note">
                     <strong>Note:</strong> Search results will be displayed in the browser console for detailed inspection.
