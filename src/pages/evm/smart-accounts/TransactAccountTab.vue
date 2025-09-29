@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { createSmartAccountClient } from 'permissionless';
+import { getRequiredPrefund } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
-import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom, encodeFunctionData, parseEther } from 'viem';
+import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom, encodeFunctionData, formatEther } from 'viem';
 import { entryPoint07Address, getUserOperationHash, createBundlerClient } from 'viem/account-abstraction';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
@@ -62,6 +63,17 @@ const storedSmartAccounts = ref<Array<{
     salt: string;
 }>>([]);
 const transferInProgress = ref(false);
+
+// prefund state
+const requiredPrefundWei = ref<bigint | null>(null);
+const requiredPrefundLoading = ref(false);
+const requiredPrefundError = ref<string | null>(null);
+let prefundDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+// balance state
+const accountBalanceWei = ref<bigint | null>(null);
+const accountBalanceLoading = ref(false);
+const accountBalanceError = ref<string | null>(null);
 
 // computed
 const currentChain = computed(() => {
@@ -169,6 +181,72 @@ async function estimateTransferUserOp(amount: bigint, recipient: Address): Promi
     } catch (err) {
         console.error('Error estimating transfer user operation:', err);
         return null;
+    }
+}
+
+async function computeRequiredPrefund() {
+    try {
+        requiredPrefundError.value = null;
+        requiredPrefundLoading.value = true;
+        requiredPrefundWei.value = null;
+
+        // Validate inputs
+        if (!selectedAccount.value || !recipientAddress.value?.trim() || transferAmount.value <= 0) {
+            requiredPrefundLoading.value = false;
+            return;
+        }
+
+        const amountInWei = BigInt(Math.floor(transferAmount.value * Math.pow(10, 18)));
+        const estimation = await estimateTransferUserOp(amountInWei, recipientAddress.value as Address);
+        if (!estimation) {
+            throw new Error('Failed to estimate user operation');
+        }
+
+        const userOpForPrefund = {
+            ...estimation.gasEstimates,
+            maxFeePerGas: estimation.maxFeePerGas,
+            maxPriorityFeePerGas: estimation.maxPriorityFeePerGas,
+        } as typeof estimation.gasEstimates;
+        const prefund = getRequiredPrefund({ userOperation: userOpForPrefund });
+        requiredPrefundWei.value = prefund;
+    } catch (e: any) {
+        console.error('Error computing required prefund:', e);
+        requiredPrefundError.value = e?.message || 'Failed to compute prefund.';
+    } finally {
+        requiredPrefundLoading.value = false;
+    }
+}
+
+function schedulePrefundComputation() {
+    if (prefundDebounceTimer) {
+        clearTimeout(prefundDebounceTimer);
+    }
+    prefundDebounceTimer = setTimeout(() => {
+        computeRequiredPrefund();
+    }, 400);
+}
+
+async function fetchSelectedAccountBalance() {
+    try {
+        accountBalanceError.value = null;
+        accountBalanceLoading.value = true;
+        accountBalanceWei.value = null;
+
+        if (!selectedAccount.value) {
+            accountBalanceLoading.value = false;
+            return;
+        }
+
+        const balance = await publicClient.getBalance({
+            address: selectedAccount.value as Address,
+        });
+
+        accountBalanceWei.value = balance;
+    } catch (e: any) {
+        console.error('Error fetching account balance:', e);
+        accountBalanceError.value = e?.message || 'Failed to fetch balance.';
+    } finally {
+        accountBalanceLoading.value = false;
     }
 }
 
@@ -386,6 +464,23 @@ onMounted(() => {
         }
     }
 });
+
+// react to input changes to compute prefund
+watch([selectedAccount, recipientAddress, transferAmount], () => {
+    schedulePrefundComputation();
+});
+
+// watch selected account to fetch balance
+watch(selectedAccount, () => {
+    fetchSelectedAccountBalance();
+});
+
+// initial balance fetch if preselected
+onMounted(() => {
+    if (selectedAccount.value) {
+        fetchSelectedAccountBalance();
+    }
+});
 </script>
 
 <template>
@@ -435,6 +530,23 @@ onMounted(() => {
                         min="0"
                         step="0.001"
                     />
+                    <div v-if="selectedAccount" class="c-transact-account-tab__balance">
+                        <div v-if="accountBalanceLoading">Fetching balance…</div>
+                        <div v-else-if="accountBalanceError">{{ accountBalanceError }}</div>
+                        <div v-else-if="accountBalanceWei !== null">
+                            Balance: <strong>{{ Number(formatEther(accountBalanceWei)).toLocaleString(undefined, { maximumFractionDigits: 6 }) }} TLOS</strong>
+                        </div>
+                    </div>
+                    <div v-if="recipientAddress && transferAmount > 0" class="c-transact-account-tab__prefund">
+                        <q-banner rounded class="c-transact-account-tab__prefund-banner">
+                            <div v-if="requiredPrefundLoading">Calculating required prefund…</div>
+                            <div v-else-if="requiredPrefundError">{{ requiredPrefundError }}</div>
+                            <div v-else-if="requiredPrefundWei !== null">
+                                Required Prefund: <strong>{{ Number(formatEther(requiredPrefundWei)).toLocaleString(undefined, { maximumFractionDigits: 6 }) }} TLOS</strong>
+                                <div class="c-transact-account-tab__prefund-help">This is the estimated cost to execute the user operation.</div>
+                            </div>
+                        </q-banner>
+                    </div>
                     <q-btn
                         class="c-transact-account-tab__send-btn"
                         color="primary"
