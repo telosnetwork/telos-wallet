@@ -232,6 +232,9 @@ async function fetchEntryPointDeposit(address: Address): Promise<bigint> {
 
 async function onAccountSelected(address: string) {
     if (address) {
+        // Save the selection to localStorage
+        saveSelectedAccount(address);
+
         accountBalance.value = await fetchAccountBalance(address as Address);
         accountOwner.value = await fetchAccountOwner(address as Address);
         entryPointDeposit.value = await fetchEntryPointDeposit(address as Address);
@@ -242,10 +245,33 @@ async function onAccountSelected(address: string) {
         );
         accountType.value = storedAccount?.smartAccountType || 'Unknown';
     } else {
+        // Clear localStorage when no account is selected
+        localStorage.removeItem('selectedSmartAccount');
+
         accountBalance.value = 0n;
         accountOwner.value = '';
         accountType.value = '';
         entryPointDeposit.value = 0n;
+    }
+}
+
+function saveSelectedAccount(address: string) {
+    try {
+        localStorage.setItem('selectedSmartAccount', address);
+        console.log('Saved selected smart account to localStorage:', address);
+    } catch (err) {
+        console.error('Error saving selected smart account:', err);
+    }
+}
+
+function loadSelectedAccount(): string | null {
+    try {
+        const selectedAddress = localStorage.getItem('selectedSmartAccount');
+        console.log('Loaded selected smart account from localStorage:', selectedAddress);
+        return selectedAddress;
+    } catch (err) {
+        console.error('Error loading selected smart account:', err);
+        return null;
     }
 }
 
@@ -270,6 +296,23 @@ function copyToClipboard(text: string) {
 // Load accounts on component mount
 onMounted(() => {
     loadStoredSmartAccounts();
+
+    // Auto-select account from localStorage after accounts are loaded
+    const savedSelection = loadSelectedAccount();
+    if (savedSelection) {
+        // Check if the saved selection exists in our stored accounts
+        const accountExists = storedSmartAccounts.value.some(
+            account => account.smartAccountAddress.toLowerCase() === savedSelection.toLowerCase(),
+        );
+
+        if (accountExists) {
+            selectedAccount.value = savedSelection;
+            onAccountSelected(savedSelection);
+        } else {
+            // Clear localStorage if the saved account no longer exists
+            localStorage.removeItem('selectedSmartAccount');
+        }
+    }
 });
 </script>
 
