@@ -337,8 +337,19 @@ onMounted(() => {
                         <div class="c-view-account-tab__owner-box">
                             <div class="c-view-account-tab__owner-section">
                                 <div class="c-view-account-tab__owner-label">Smart Account Owner</div>
-                                <div class="c-view-account-tab__owner-value">
-                                    {{ ownerLoading ? 'Loading...' : accountOwner || 'Unknown' }}
+                                <div class="c-view-account-tab__owner-value-row">
+                                    <div class="c-view-account-tab__owner-value">
+                                        {{ ownerLoading ? 'Loading...' : accountOwner || 'Unknown' }}
+                                    </div>
+                                    <q-btn
+                                        v-if="accountOwner && !ownerLoading"
+                                        flat
+                                        round
+                                        dense
+                                        icon="content_copy"
+                                        class="c-view-account-tab__owner-copy-btn"
+                                        @click="copyToClipboard(accountOwner)"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -590,11 +601,27 @@ onMounted(() => {
         color: var(--text-high-contrast);
     }
 
+    &__owner-value-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     &__owner-value {
         font-family: monospace;
         font-size: 12px;
         word-break: break-all;
         color: var(--text-high-contrast);
+        flex: 1;
+    }
+
+    &__owner-copy-btn {
+        color: var(--q-primary);
+        flex-shrink: 0;
+
+        &:hover {
+            background-color: var(--bg-hover);
+        }
     }
 
     &__type-section {
