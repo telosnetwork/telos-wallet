@@ -150,6 +150,9 @@ function saveAccountToStorage() {
     }
 }
 
+
+
+
 function loadStoredSmartAccounts() {
     try {
         const accounts = JSON.parse(localStorage.getItem('smartAccounts') || '[]');
@@ -296,7 +299,7 @@ onMounted(() => {
                         outlined
                         dense
                     />
-                    <q-btn
+                        <q-btn
                         class="c-view-account-tab__add-btn"
                         color="secondary"
                         icon="🔍"
