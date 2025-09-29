@@ -18,6 +18,16 @@ export default defineComponent({
             return (this.$route.query.tab ?? '') as string;
         },
     },
+    methods: {
+        getTabLabel(tab: string): string {
+            // Custom labels for specific tabs
+            const customLabels: Record<string, string> = {
+                'receipts': 'Receipts',
+            };
+
+            return customLabels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
+        },
+    },
     watch: {
         $route: {
             immediate: true,
@@ -65,7 +75,7 @@ export default defineComponent({
                 v-for="tab in (tabs ?? [])"
                 :key="tab"
                 :name="tab"
-                :label="tab.charAt(0).toUpperCase() + tab.slice(1)"
+                :label="getTabLabel(tab)"
                 :to="{ query: { ...$route.query, tab: tab.toLowerCase() } }"
                 replace
             />

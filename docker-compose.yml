@@ -1,0 +1,12 @@
+services:
+  telos-wallet:
+    build: .
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true

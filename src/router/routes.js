@@ -93,6 +93,14 @@ const routes = [
                 },
                 component: () => import('pages/evm/allowances/AllowancesPage.vue'),
             },
+            {
+                path: 'smart-accounts',
+                name: 'evm-smart-accounts',
+                meta: {
+                    requiresAuth: true,
+                },
+                component: () => import('pages/evm/smart-accounts/SmartAccountsPage.vue'),
+            },
         ],
     },
 
