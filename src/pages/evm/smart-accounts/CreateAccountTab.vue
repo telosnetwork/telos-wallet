@@ -585,7 +585,7 @@ onMounted(() => {
     }
 
     &__type-select {
-        max-width: 300px;
+        max-width: 600px;
         width: 100%;
     }
 
@@ -610,7 +610,7 @@ onMounted(() => {
     }
 
     &__salt-input {
-        max-width: 300px;
+        max-width: 600px;
         width: 100%;
     }
 
