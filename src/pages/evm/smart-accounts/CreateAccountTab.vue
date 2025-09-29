@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { createSmartAccountClient } from 'permissionless';
+import { getRequiredPrefund } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
-import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom, encodeFunctionData } from 'viem';
+import { createPublicClient, createWalletClient, EIP1193Provider, http, type Address, custom, encodeFunctionData, formatEther, parseEther } from 'viem';
 import { entryPoint07Address, getUserOperationHash, createBundlerClient } from 'viem/account-abstraction';
 import { telos, telosTestnet } from 'viem/chains';
 import { useAccountStore, useChainStore } from 'src/antelope';
@@ -48,6 +49,12 @@ const accountBalance = ref(0n);
 const balanceLoading = ref(false);
 const fundingInProgress = ref(false);
 const creatingInProgress = ref(false);
+
+// prefund state
+const requiredPrefundWei = ref<bigint | null>(null);
+const requiredPrefundLoading = ref(false);
+const requiredPrefundError = ref<string | null>(null);
+let prefundDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // computed
 const currentChain = computed(() => {
@@ -199,7 +206,6 @@ async function estimateCreateSmartAccount(): Promise<{
     gasPrice: bigint;
     maxFeePerGas: bigint;
     maxPriorityFeePerGas: bigint;
-    preVerificationGasMultiplier: bigint;
 } | null> {
     try {
         // Check if wallet is connected
@@ -256,19 +262,107 @@ async function estimateCreateSmartAccount(): Promise<{
         // For legacy transactions, maxFeePerGas and maxPriorityFeePerGas should be the same as gasPrice
         const maxFeePerGas = gasPrice;
         const maxPriorityFeePerGas = gasPrice;
-        const preVerificationGasMultiplier = 5n;
 
         return {
             gasEstimates,
             gasPrice,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            preVerificationGasMultiplier,
         };
     } catch (err) {
         console.error('Error estimating smart account creation:', err);
         return null;
     }
+}
+
+async function computeRequiredPrefund() {
+    try {
+        requiredPrefundError.value = null;
+        requiredPrefundLoading.value = true;
+        requiredPrefundWei.value = null;
+
+        // Check if wallet is connected
+        const connectedAddress = accountStore.loggedEvmAccount?.address;
+        if (!connectedAddress) {
+            requiredPrefundLoading.value = false;
+            return;
+        }
+
+        // Define required variables
+        const ownerAddress = connectedAddress as Address;
+        const saltValue = salt.value;
+
+        // Create the simple account client
+        const simpleAccount = await toSimpleSmartAccount({
+            client: publicClient,
+            owner: window.ethereum as EIP1193Provider,
+            factoryAddress: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
+            index: BigInt(saltValue),
+            entryPoint: {
+                address: entryPoint07Address,
+                version: '0.7',
+            },
+        });
+
+        // Create bundler client for gas estimation
+        const bundlerClient = createBundlerClient({
+            transport: http(currentBundler.value),
+            chain: currentChain.value,
+        });
+
+        // Encode the factory data for createAccount function
+        const factoryData = encodeFunctionData({
+            abi: SIMPLE_ACCOUNT_FACTORY_ABI,
+            functionName: 'createAccount',
+            args: [ownerAddress, BigInt(saltValue)],
+        });
+
+        // Estimate gas using bundler client with state override for balance
+        const gasEstimates = await bundlerClient.estimateUserOperationGas({
+            account: simpleAccount,
+            callData: '0x',
+            factory: SIMPLE_ACCOUNT_FACTORY_ADDRESS_V07 as Address,
+            factoryData,
+            stateOverride: [
+                {
+                    address: calculatedSmartAccountAddress.value as Address,
+                    balance: parseEther('1'),
+                },
+            ],
+        });
+
+        // For Telos (legacy transactions), we need to get gas price instead of EIP-1559 fees
+        const gasPrice = await publicClient.getGasPrice();
+
+        // For legacy transactions, maxFeePerGas and maxPriorityFeePerGas should be the same as gasPrice
+        const maxFeePerGas = gasPrice;
+        const maxPriorityFeePerGas = gasPrice;
+
+        // Create user operation for prefund calculation
+        const userOpForPrefund = {
+            ...gasEstimates,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+        };
+
+        // Calculate required prefund
+        const prefund = getRequiredPrefund({ userOperation: userOpForPrefund });
+        requiredPrefundWei.value = prefund;
+    } catch (e: any) {
+        console.error('Error computing required prefund:', e);
+        requiredPrefundError.value = e?.message || 'Failed to compute prefund.';
+    } finally {
+        requiredPrefundLoading.value = false;
+    }
+}
+
+function schedulePrefundComputation() {
+    if (prefundDebounceTimer) {
+        clearTimeout(prefundDebounceTimer);
+    }
+    prefundDebounceTimer = setTimeout(() => {
+        computeRequiredPrefund();
+    }, 400);
 }
 
 async function createSmartAccount() {
@@ -311,7 +405,6 @@ async function createSmartAccount() {
             gasEstimates,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            preVerificationGasMultiplier,
         } = gasEstimationResult;
 
         // Create wallet client for signing
@@ -345,7 +438,7 @@ async function createSmartAccount() {
             maxFeePerGas,
             maxPriorityFeePerGas,
             callGasLimit: gasEstimates.callGasLimit,
-            preVerificationGas: gasEstimates.preVerificationGas * preVerificationGasMultiplier,
+            preVerificationGas: gasEstimates.preVerificationGas,
             verificationGasLimit: gasEstimates.verificationGasLimit,
         });
 
@@ -467,6 +560,25 @@ async function updateSmartAccountAddress() {
 onMounted(() => {
     updateSmartAccountAddress();
 });
+
+// Watch for changes that should trigger prefund calculation
+watch([salt, calculatedSmartAccountAddress], () => {
+    if (calculatedSmartAccountAddress.value && !accountExists.value) {
+        schedulePrefundComputation();
+    }
+});
+
+// Watch for account existence changes
+watch(accountExists, (newValue) => {
+    if (newValue) {
+        // Clear prefund calculation if account already exists
+        requiredPrefundWei.value = null;
+        requiredPrefundError.value = null;
+    } else if (calculatedSmartAccountAddress.value) {
+        // Recalculate prefund if account doesn't exist
+        schedulePrefundComputation();
+    }
+});
 </script>
 
 <template>
@@ -535,6 +647,17 @@ onMounted(() => {
                             @click="fundAccount"
                         />
                     </div>
+                </div>
+            </q-banner>
+        </div>
+
+        <div v-if="calculatedSmartAccountAddress && !accountExists" class="c-create-account-tab__prefund">
+            <q-banner class="c-create-account-tab__prefund-banner" rounded>
+                <div v-if="requiredPrefundLoading">Calculating required prefund…</div>
+                <div v-else-if="requiredPrefundError">{{ requiredPrefundError }}</div>
+                <div v-else-if="requiredPrefundWei !== null">
+                    Required Prefund: <strong>{{ Number(formatEther(requiredPrefundWei)).toLocaleString(undefined, { maximumFractionDigits: 6 }) }} TLOS</strong>
+                    <div class="c-create-account-tab__prefund-help">This is the estimated cost to create the smart account.</div>
                 </div>
             </q-banner>
         </div>
@@ -682,6 +805,26 @@ onMounted(() => {
         font-size: 12px;
         padding: 4px 12px;
         min-height: 28px;
+    }
+
+    &__prefund {
+        margin: 16px 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &__prefund-banner {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    &__prefund-help {
+        @include text--small;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 4px;
+        font-style: italic;
     }
 
     &__actions {
