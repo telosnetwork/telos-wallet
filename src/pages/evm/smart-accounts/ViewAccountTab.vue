@@ -299,7 +299,7 @@ onMounted(() => {
                         outlined
                         dense
                     />
-                        <q-btn
+                    <q-btn
                         class="c-view-account-tab__add-btn"
                         color="secondary"
                         icon="🔍"

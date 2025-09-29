@@ -33,6 +33,19 @@ const SIMPLE_ACCOUNT_FACTORY_ABI = [
         type: 'function',
     },
 ];
+const SIMPLE_ACCOUNT_ABI = [
+    {
+        inputs: [
+            { name: 'dest', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'func', type: 'bytes' },
+        ],
+        name: 'execute',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+];
 
 // stores
 const accountStore = useAccountStore();
@@ -247,11 +260,21 @@ async function transferUserOp() {
             bundlerTransport: http(currentBundler.value),
         });
 
-        // Step 1: Prepare the user operation with proper gas estimates
+        // Step 1: Encode the execute function calldata for native transfer
+        const executeCallData = encodeFunctionData({
+            abi: SIMPLE_ACCOUNT_ABI,
+            functionName: 'execute',
+            args: [
+                recipientAddress.value as Address, // dest: destination address
+                amountInWei,                        // value: amount to transfer
+                '0x',                              // func: empty calldata for native transfer
+            ],
+        });
+
+        // Step 2: Prepare the user operation with proper gas estimates
         const userOperation = await smartAccountClient.prepareUserOperation({
-            callData: '0x',
-            to: recipientAddress.value as Address,
-            value: amountInWei,
+            callData: executeCallData,
+            to: selectedAccount.value as Address,
             maxFeePerGas,
             maxPriorityFeePerGas,
             callGasLimit: gasEstimates.callGasLimit,
@@ -259,7 +282,7 @@ async function transferUserOp() {
             verificationGasLimit: gasEstimates.verificationGasLimit,
         });
 
-        // Step 2: Get the user operation hash and sign it manually
+        // Step 3: Get the user operation hash and sign it manually
         const userOperationHash = getUserOperationHash({
             userOperation,
             entryPointAddress: entryPoint07Address,
