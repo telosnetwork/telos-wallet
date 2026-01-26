@@ -170,7 +170,7 @@ watch(selectedNetwork, () => {
 <style lang="scss">
 .c-home {
     position: relative;
-    background: var(--site-gradient);
+    background: var(--sidebar-gradient);  // Use darker gradient for better text readability
     width: 100%;
     padding-top: 64px;
 

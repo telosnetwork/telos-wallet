@@ -28,7 +28,7 @@ const S_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xa9991E4daA44922D00a78B6D986cDf628d46C4DD',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/stlos.png',
+    logo: '/branding/stlos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
@@ -39,7 +39,7 @@ const W_TOKEN = new TokenClass({
     network: NETWORK,
     decimals: 18,
     address: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
-    logo: 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/wtlos.png',
+    logo: '/branding/wtlos.png',
     isNative: false,
     isSystem: false,
 } as TokenSourceInfo);
