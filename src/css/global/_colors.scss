@@ -30,6 +30,7 @@ $tab-active-dark: var(--q-primary);
 
 // Light Mode
 body.body--light {
+    // Decorative/gradient colors (not for text)
     $accent-1: #4FACFE;
     $accent-2: #00F2FE;
     $accent-3: #E6E9EC;
@@ -37,32 +38,39 @@ body.body--light {
     $accent-5: #F9F9F9;
     $site-gradient: linear-gradient(135deg, #00F2FE, #4FACFE, #C471F5);
     $tooltip-gradient: linear-gradient(135deg, rgba(#4FACFE, 0.9), rgba(#C471F5, 0.9));
-    $high-contrast-text-color: #282828;
-    $default-contrast-text-color: #4D4D4D;
-    $low-contrast-text-color: #939393;
+    
+    // WCAG 2.1 AA compliant text colors (min 4.5:1 on white)
+    $high-contrast-text-color: #282828;      // 14.74:1 ✓
+    $default-contrast-text-color: #4D4D4D;   // 8.45:1 ✓
+    $low-contrast-text-color: #767676;       // 4.54:1 ✓ (was #939393 @ 3.07:1)
     $native-contrast-text-color: #F7F5FF;
     $menu-text: #fff;
     $canvas: #fff;
+    
+    // Accessible interactive colors for light mode
+    $link-color-accessible: #008389;         // 4.56:1 ✓ (was #00F2FE @ 1.39:1)
+    $primary-accessible: #387AB4;            // 4.55:1 ✓ (was #4FACFE @ 2.42:1)
+    $positive-accessible: #1E8283;           // 4.59:1 ✓ (was #30CFD0 @ 1.92:1)
 
     --text-high-contrast: #{$high-contrast-text-color};
     --text-default-contrast: #{$default-contrast-text-color};
     --text-low-contrast: #{$low-contrast-text-color};
     --native-contrast-text-color: #{$native-contrast-text-color};
-    --link-color: #{$accent-2};
+    --link-color: #{$link-color-accessible};
     --menu-text: #{$menu-text};
 
-    --accent-color: #{$accent-1};
-    --accent-color-2: #{$accent-2};
+    --accent-color: #{$primary-accessible};
+    --accent-color-2: #{$link-color-accessible};
     --accent-color-3: #{$accent-3};
-    --accent-color-4: #{$accent-4};
+    --accent-color-4: #9B59C2;  // Accessible purple (4.56:1)
     --accent-color-5: #{$accent-5};
-    --negative-color: #{$negative};
-    --positive-color: #{$positive};
+    --negative-color: #CC3366;  // Accessible negative (accessible by default)
+    --positive-color: #{$positive-accessible};
     --warning-color-ui: #{$warning};
-    --warning-color-text: #804A00;
+    --warning-color-text: #804A00;  // 7.25:1 ✓
 
-    --negative-muted: #{rgba($negative, 0.5)};
-    --positive-muted: #{rgba($positive, 0.5)};
+    --negative-muted: #{rgba(#CC3366, 0.5)};
+    --positive-muted: #{rgba($positive-accessible, 0.5)};
 
     --bg-color: #{$canvas};
     --site-gradient: #{$site-gradient};
@@ -71,9 +79,10 @@ body.body--light {
     --header-background-color: #{$accent-5};
     --display-telos-branding-bg: none;
 
-    --q-primary: #{$primary} !important;
+    // Quasar theme colors - using accessible versions for light mode
+    --q-primary: #{$primary-accessible} !important;  // #387AB4 (4.55:1)
     --q-secondary: #{$secondary} !important;
-    --q-accent: #{$accent} !important;
+    --q-accent: #9B59C2 !important;  // Accessible purple (4.56:1)
 
     --header-icon-color: var(--q-primary);
     --toolbar-background-color: #{$tooltip-gradient};

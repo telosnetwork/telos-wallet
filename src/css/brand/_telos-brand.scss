@@ -65,6 +65,17 @@ $warning: #CFFF93;           // Lime from Space
 $info: #4FACFE;              // Blue
 
 // ---------------------------------------------
+// WCAG 2.1 ACCESSIBLE VARIANTS (Light Mode)
+// Use these for text/interactive elements on white backgrounds
+// All meet minimum 4.5:1 contrast ratio (AA compliant)
+// ---------------------------------------------
+$primary-accessible: #387AB4;      // Blue - 4.55:1 on white
+$cyan-accessible: #008389;         // Teal - 4.56:1 on white
+$purple-accessible: #9B59C2;       // Purple - 4.56:1 on white
+$positive-accessible: #1E8283;     // Teal - 4.59:1 on white
+$muted-text-accessible: #767676;   // Grey - 4.54:1 on white (WCAG minimum grey)
+
+// ---------------------------------------------
 // DARK MODE ADJUSTMENTS
 // ---------------------------------------------
 $dark-bg: $off-black;
