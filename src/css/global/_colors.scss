@@ -1,15 +1,23 @@
 /*********************
- *** Legacy Colors ***
+ *** Telos Brand Colors (2026)
  *********************/
 $gradientTransparent: linear-gradient(0deg, transparent 0%, transparent 0%);
-$gradientblue: #1AD6FF;
-$gradientPurple: #8946DF;
-$lightBlue: #31C1EE;
-$gray: #CBCAF9;
+
+// Primary Telos gradient colors
+$gradientCyan: #00F2FE;
+$gradientBlue: #4FACFE;
+$gradientPurple: #C471F5;
+
+// Legacy aliases (for backwards compatibility)
+$gradientblue: $gradientCyan;
+$lightBlue: $gradientBlue;
+$purple: $gradientPurple;
+
+// Neutrals
+$gray: #C7CCD0;
 $white: #FFFFFF;
-$blackDark: #130C3F;
-$purple: #8946DF;
-$saveBtn: #2e1f4f;
+$blackDark: #1B1B1D;
+$saveBtn: #2C2B2F;
 
 /************************
  *** Dark/Light Mode ***
@@ -22,13 +30,13 @@ $tab-active-dark: var(--q-primary);
 
 // Light Mode
 body.body--light {
-    $accent-1: #571AFF;
-    $accent-2: #505DCD;
-    $accent-3: #DDD1FF;
-    $accent-4: #A5A6F6;
-    $accent-5: #F7F5FF;
-    $site-gradient: linear-gradient(0.4turn, #071033, #6039A4);
-    $tooltip-gradient: linear-gradient(0.2turn, rgba(#071033, 0.8), rgba(#6039A4, 0.8));
+    $accent-1: #4FACFE;
+    $accent-2: #00F2FE;
+    $accent-3: #E6E9EC;
+    $accent-4: #C471F5;
+    $accent-5: #F9F9F9;
+    $site-gradient: linear-gradient(135deg, #00F2FE, #4FACFE, #C471F5);
+    $tooltip-gradient: linear-gradient(135deg, rgba(#4FACFE, 0.9), rgba(#C471F5, 0.9));
     $high-contrast-text-color: #282828;
     $default-contrast-text-color: #4D4D4D;
     $low-contrast-text-color: #939393;
@@ -97,23 +105,23 @@ body.body--light {
 
 // Dark Mode
 body.body--dark {
-    $text-header: #F7F5FF;
-    $page-header: #2b0f46;
+    $text-header: #FFFFFF;
+    $page-header: #1B1B1D;
 
-    $accent-1: #571AFF;
-    $accent-2: #505DCD;
-    $accent-3: #DDD1FF;
-    $accent-4: #A5A6F6;
-    $accent-5: #F7F5FF;
+    $accent-1: #00F2FE;
+    $accent-2: #4FACFE;
+    $accent-3: #404142;
+    $accent-4: #C471F5;
+    $accent-5: #2C2B2F;
     $high-contrast-text-color: #ffffff;
     $default-contrast-text-color: #ffffff;
-    $low-contrast-text-color: #939393;
-    $native-contrast-text-color: #282828;
+    $low-contrast-text-color: #92939A;
+    $native-contrast-text-color: #1B1B1D;
     $menu-text: #fff;
-    $canvas: #111;
+    $canvas: #1B1B1D;
 
-    $site-gradient: linear-gradient(0.7turn, #1d1d1d, #1e2931);
-    $tooltip-gradient: linear-gradient(0.2turn, rgba(#232a30, 0.8), rgba(#173246, 0.8));
+    $site-gradient: linear-gradient(135deg, #1B1B1D, #2C2B2F);
+    $tooltip-gradient: linear-gradient(135deg, rgba(#2C2B2F, 0.95), rgba(#404142, 0.95));
 
 
     --text-high-contrast: #{$high-contrast-text-color};
@@ -219,7 +227,7 @@ body.body--dark, body.body--light {
 }
 
 @mixin gradient_text() {
-    @include gradient_inline_text(linear-gradient(0.4turn, $gradientblue, $gradientPurple));
+    @include gradient_inline_text(linear-gradient(135deg, $gradientCyan, $gradientBlue, $gradientPurple));
 }
 
 /**
@@ -272,5 +280,5 @@ body.body--dark, body.body--light {
 }
 
 @mixin gradient_border() {
-    @include bordient(4px, 1px, $gradientTransparent, $gradientblue, $gradientPurple, $gradientPurple, $gradientblue);
+    @include bordient(4px, 1px, $gradientTransparent, $gradientCyan, $gradientBlue, $gradientPurple, $gradientCyan);
 }
