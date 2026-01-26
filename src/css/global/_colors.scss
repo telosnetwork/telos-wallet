@@ -74,6 +74,10 @@ body.body--light {
 
     --bg-color: #{$canvas};
     --site-gradient: #{$site-gradient};
+    
+    // Darker sidebar gradient - easier on the eyes with white text
+    // Uses deeper tones of the brand colors for better readability
+    --sidebar-gradient: linear-gradient(135deg, #0891A8 0%, #2D6B9E 50%, #7B4AAD 100%);
 
     --card-background-color: #{$canvas};
     --header-background-color: #{$accent-5};
@@ -154,6 +158,7 @@ body.body--dark {
 
     --bg-color: #{$canvas};
     --site-gradient: #{$site-gradient};
+    --sidebar-gradient: #{$site-gradient};  // Dark mode already uses a dark gradient
 
     --card-background-color: #{$dark};
     --header-background-color: var(--card-background-color);
