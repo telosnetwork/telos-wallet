@@ -12,7 +12,7 @@ export default {
             tokenAmount: 0,
             tokenRexBalance: 0,
             rpc: null,
-            apyString: 'Earn up to 13% APY',
+            apyString: '',
         };
     },
     computed: {
@@ -106,16 +106,8 @@ export default {
         },
 
         async setApy() {
-            try{
-                const telosApi = axios.create({
-                    baseURL: useChainStore().currentChain.settings.getApiEndpoint(),
-                });
-                const apy = (await telosApi.get('apy/native')).data;
-                const earn = this.$t('components.earn');
-                this.apyString = `${earn} ${apy}% APY`;
-            }catch(e) {
-                console.error(e);
-            }
+            // Zero inflation era: no staking rewards, APY is 0%
+            this.apyString = '';
         },
 
         async tryStake() {
@@ -183,9 +175,6 @@ export default {
             <div ></div>
         </div>
         <div class="text-center">
-            <div class="text-subtitle2 text-grey-4 text-center q-mb-sm">
-                {{ apyString }}
-            </div>
             <q-btn-toggle
                 v-model="staking"
                 color="dark"

@@ -160,13 +160,6 @@ const firstLineData = computed(() => [{
 }]);
 
 const secondLineData = computed(() => [{
-    label: $t('evm_stake.apy_card_label', { symbol: systemToken.symbol }),
-    tooltip: $t('evm_stake.apy_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol }),
-    secondaryText: apyPrittyPrint.value,
-    lowContrastSecondaryText: false,
-    isSecondaryLoading: apyisLoading.value,
-    useSmallBox: true,
-}, {
     label: $t('evm_stake.unstaking_period_card_label'),
     tooltip: $t('evm_stake.unstaking_period_card_tooltip', { stakedSymbol: stakedToken.symbol, systemSymbol: systemToken.symbol }),
     secondaryText: unlockPeriod.value,
