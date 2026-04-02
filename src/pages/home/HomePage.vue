@@ -22,13 +22,24 @@ interface Network {
     value: string;
     tab: string;
     chain: ChainSettings;
+    redirectUrl?: string;
+    display?: string;
 }
+
+const TELOS_PRIVACY_URL = 'https://zkwallet.telos.net';
 
 const networks = [
     {
         value: 'telos-evm',
         tab: 'evm',
         chain: settings['telos-evm'],
+    },
+    {
+        value: 'telos-privacy',
+        tab: 'zero',
+        chain: settings['telos'],
+        display: 'Telos Privacy',
+        redirectUrl: TELOS_PRIVACY_URL,
     },
     {
         value: 'telos',
@@ -73,6 +84,11 @@ onMounted(() => {
 
 watch(selectedNetwork, () => {
     if (selectedNetwork.value) {
+        if (selectedNetwork.value.redirectUrl) {
+            window.location.href = selectedNetwork.value.redirectUrl;
+            return;
+        }
+
         chainStore.setChain(CURRENT_CONTEXT, selectedNetwork.value.value);
         const login = selectedNetwork.value.tab;
         const network = selectedNetwork.value.value;
@@ -109,7 +125,7 @@ watch(selectedNetwork, () => {
                             label-color="grey"
                         >
                             <template v-slot:selected>
-                                <span>{{ selectedNetwork?.chain.getDisplay() }}</span>
+                                <span>{{ selectedNetwork?.display || selectedNetwork?.chain.getDisplay() }}</span>
                             </template>
 
                             <template v-slot:option="scope">
@@ -117,7 +133,7 @@ watch(selectedNetwork, () => {
                                     <q-avatar :size="'32px'" :src="scope.opt.chain.getSmallLogoPath()" class="c-home__network-selector-op-icon">
                                         <img class="c-home__network-selector-op-icon" :src="scope.opt.chain.getSmallLogoPath()">
                                     </q-avatar>
-                                    <q-item-label class="c-home__network-selector-op-name">{{ scope.opt.chain.getDisplay() }}</q-item-label>
+                                    <q-item-label class="c-home__network-selector-op-name">{{ scope.opt.display || scope.opt.chain.getDisplay() }}</q-item-label>
                                 </q-item>
                             </template>
                         </q-select>
