@@ -11,4 +11,4 @@
   command = "quasar build"
 
 [build.environment]
-  NODE_VERSION = "18.20.4"
+  NODE_VERSION = "20.19.0"
