@@ -26,7 +26,12 @@ const explorerRecommendedWalletIds = [
     // '0b415a746fb9ee99cce155c2ceca0c6f6061b1dbca2d722b3ba16381d0562150',
 ];
 const explorerExcludedWalletIds = 'ALL' as const; // Web3Modal option excludes all but recomended
-const wagmiOptions: Web3ModalConfig = { projectId, explorerRecommendedWalletIds, explorerExcludedWalletIds };
+const wagmiOptions: Web3ModalConfig = {
+    projectId,
+    explorerRecommendedWalletIds,
+    explorerExcludedWalletIds,
+    enableExplorer: false,
+};
 
 export default boot(async ({ app }) => {
     app.provide('$wagmi', wagmiClient);
