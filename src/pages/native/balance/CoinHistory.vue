@@ -259,7 +259,7 @@ export default {
                             class="sendActions fit row justify-center items-center content-center q-my-md"
                         >
                             <q-btn
-                                class=""
+                                class="coin-history-action"
                                 flat
                                 dense
                                 stack
@@ -267,14 +267,14 @@ export default {
                                 no-caps
                                 @click="send"
                             >
-                                <div class="column">
-                                    <img src="~assets/coin/send.svg" >
+                                <div class="column coin-history-action__content">
+                                    <img class="coin-history-action__icon" src="~assets/coin/send.svg" >
                                     {{$t('components.send')}}
                                 </div>
                             </q-btn>
 
                             <q-btn
-                                class=""
+                                class="coin-history-action"
                                 flat
                                 dense
                                 stack
@@ -282,15 +282,15 @@ export default {
                                 no-caps
                                 @click="receive"
                             >
-                                <div class="column">
-                                    <img src="~assets/coin/receive.svg" >
+                                <div class="column coin-history-action__content">
+                                    <img class="coin-history-action__icon" src="~assets/coin/receive.svg" >
                                     {{$t('components.receive')}}
                                 </div>
                             </q-btn>
 
                             <q-btn
                                 v-if="selectedCoin.symbol === 'TLOS'"
-                                class=""
+                                class="coin-history-action"
                                 flat
                                 dense
                                 stack
@@ -298,8 +298,8 @@ export default {
                                 no-caps
                                 @click="buy"
                             >
-                                <div class="column">
-                                    <img src="~assets/coin/Purchase.svg" >
+                                <div class="column coin-history-action__content">
+                                    <img class="coin-history-action__icon" src="~assets/coin/Purchase.svg" >
                                     {{$t('components.buy')}}
                                 </div>
                             </q-btn>
@@ -309,7 +309,7 @@ export default {
                                     selectedCoin.account === 'eosio.token' &&
                                         selectedCoin.symbol === 'TLOS'
                                 "
-                                class=""
+                                class="coin-history-action"
                                 flat
                                 dense
                                 stack
@@ -317,8 +317,8 @@ export default {
                                 no-caps
                                 @click="stakeRex"
                             >
-                                <div class="column">
-                                    <img src="/nav/earn_selected.svg" >
+                                <div class="column coin-history-action__content">
+                                    <img class="coin-history-action__icon" src="/nav/earn_selected.svg" >
                                     {{$t('components.stake')}}
                                 </div>
                             </q-btn>
@@ -412,15 +412,31 @@ export default {
 .sendActions {
   // color: #3fa6f5;
   opacity: 0.8;
-  button:not(.rexbtn) {
-    padding: 0.5rem;
-    background-color: #ffffff1a;
-    margin: 0.1rem;
-    border-radius: 0;
-    img {
-      padding-bottom: 5px;
-    }
-  }
+  gap: 0.2rem;
+}
+
+.coin-history-action {
+  background-color: #ffffff1a;
+  border-radius: 0;
+  height: 4.75rem;
+  min-width: 0;
+  padding: 0.5rem;
+  width: min(5rem, 22vw);
+}
+
+.coin-history-action__content {
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.coin-history-action__icon {
+  flex: 0 0 32px;
+  height: 32px;
+  object-fit: contain;
+  padding-bottom: 5px;
+  width: 32px;
 }
 
 .rexbtn {
