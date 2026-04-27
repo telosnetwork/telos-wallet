@@ -42,7 +42,7 @@ export default {
                             symbol: 'TLOS',
                             decimals: 4,
                         },
-                        rpcUrls: ['https://testnet.telos.net/evm'],
+                        rpcUrls: ['https://rpc.testnet.telos.net'],
                         blockExplorerUrls: ['https://testnet.teloscan.io'],
                     },
                 ];
@@ -56,7 +56,7 @@ export default {
                             symbol: 'TLOS',
                             decimals: 4,
                         },
-                        rpcUrls: ['https://mainnet.telos.net/evm'],
+                        rpcUrls: ['https://rpc.telos.net'],
                         blockExplorerUrls: ['https://teloscan.io'],
                     },
                 ];
