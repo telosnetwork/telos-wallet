@@ -58,6 +58,7 @@ const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const BRIDGE_URL = 'https://telos-bridge-testnet.netlify.app/bridge';
 
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
+const EVM_RPC_ENDPOINT = 'https://rpc.testnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
@@ -82,6 +83,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getHyperionEndpoint(): string {
         return NETWORK_EVM_ENDPOINT;
+    }
+
+    getEvmRpcEndpoint(): string | null {
+        return EVM_RPC_ENDPOINT;
     }
 
     getRPCEndpoint(): RpcEndpoint {
