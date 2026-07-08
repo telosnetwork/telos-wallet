@@ -35,24 +35,26 @@ const loading = computed(() => feed.isLoading('withdrawEVMSystemTokens'));
 const allWithdrawals = computed(() => rexStore.getEvmRexData(CURRENT_CONTEXT)?.deposits ?? []);
 
 // prettyPrintToken(unstakingBalanceBn.value, systemToken.symbol)
-const withdrawableBalanceBn = computed(() => useRexStore().getRexData(CURRENT_CONTEXT)?.withdrawable ?? ethers.constants.Zero);
+const withdrawableBalanceBn = computed(() => rexStore.getRexData(CURRENT_CONTEXT)?.withdrawable ?? ethers.constants.Zero);
 
 // enable only if withdrawableBalanceBn > 0 and not loading
-const withdrawEnabled = computed(() => !waitingForResult.value && withdrawableBalanceBn.value.gt(ethers.constants.Zero) && !loading.value);
+const hasWithdrawableBalance = computed(() => withdrawableBalanceBn.value.gt(ethers.constants.Zero));
+const withdrawEnabled = computed(() => hasWithdrawableBalance.value && !waitingForResult.value && !loading.value);
+const withdrawButtonLabel = computed(() => (hasWithdrawableBalance.value ? 'evm_stake.withdraw_button_enabled' : 'evm_stake.withdraw_button_disabled'));
 
 // hadle withdraw button click
 const handleWithdrawClick = async () => {
-    if (!withdrawEnabled.value || loading.value) {
+    if (!withdrawEnabled.value) {
         return;
     }
     const label = CURRENT_CONTEXT;
-    if (!await useAccountStore().assertNetworkConnection(label)) {
+    if (!await accountStore.assertNetworkConnection(label)) {
         return;
     }
 
     try {
         waitingForResult.value = true;
-        const tx = await useRexStore().withdrawEVMSystemTokens(CURRENT_CONTEXT, withdrawableBalanceBn.value);
+        const tx = await rexStore.withdrawEVMSystemTokens(CURRENT_CONTEXT, withdrawableBalanceBn.value);
         const formattedAmount = formatWei(withdrawableBalanceBn.value, systemTokenDecimals, 4);
 
         const dismiss = ant.config.notifyNeutralMessageHandler(
@@ -63,13 +65,14 @@ const handleWithdrawClick = async () => {
             ant.config.notifySuccessfulTrxHandler(
                 `${chainSettings.getExplorerUrl()}/tx/${tx.hash}`,
             );
-            waitingForResult.value = false;
         }).catch((err) => {
             console.error(err);
         }).finally(() => {
+            waitingForResult.value = false;
             dismiss();
         });
     } catch (err) {
+        waitingForResult.value = false;
         console.error(err);
     }
 };
@@ -88,7 +91,7 @@ updateRexData();
 <div class="c-withdraw-tab">
     <div class="c-withdraw-tab__withdraw-btn">
         <q-btn
-            :label="$t(withdrawEnabled ? 'evm_stake.withdraw_button_enabled' : 'evm_stake.withdraw_button_disabled', {
+            :label="$t(withdrawButtonLabel, {
                 amount: formatWei(withdrawableBalanceBn, systemTokenDecimals, uiDecimals),
                 symbol: systemTokenSymbol
             })"
