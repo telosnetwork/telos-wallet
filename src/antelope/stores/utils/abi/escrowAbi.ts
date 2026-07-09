@@ -18,6 +18,6 @@ export const escrowAbiRead: any[] = [
     'function lockDuration() view returns (uint256)',
     'function maxWithdraw(address owner) view returns (uint256)',
     'function balanceOf(address account) view returns (uint256)',
-    'function depositsOf(address account) view returns (tuple(uint256 amount, uint256 timestamp)[])',
+    'function depositsOf(address account) view returns (tuple(uint256 amount, uint256 until)[])',
     'function withdraw()',
 ];
