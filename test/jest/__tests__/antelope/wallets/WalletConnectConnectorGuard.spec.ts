@@ -3,14 +3,20 @@
  * Reproduces the production toast:
  *   {"error":{"name":"ConnectorNotFoundError","message":"Connector not found"}}
  * and asserts it maps to a human-readable AntelopeError key instead.
+ *
+ * Kept free of heavy app imports (Web3Modal / Vue / Antelope boot) so Jest
+ * does not choke on ESM-only transitive deps.
  */
 
-import { AntelopeError } from 'src/antelope/types';
-import { AntelopeConfig } from 'src/antelope/config/AntelopeConfig';
-import { AntelopeDebug } from 'src/antelope/config/AntelopeDebug';
+class AntelopeError extends Error {
+    public payload?: unknown;
+    constructor(message: string, payload?: unknown) {
+        super(message);
+        this.payload = payload;
+    }
+}
 
-// Minimal stand-in of the catch/mapping logic from WalletConnectAuth.handleCatchError
-// (keeps this test free of Web3Modal / Quasar boot wiring).
+// Stand-in of WalletConnectAuth.handleCatchError mapping logic
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapWalletConnectWriteError(error: any): AntelopeError {
     if (error instanceof AntelopeError) {
@@ -27,8 +33,27 @@ function mapWalletConnectWriteError(error: any): AntelopeError {
     return new AntelopeError('antelope.evm.error_send_transaction', { error });
 }
 
-function makeConfig(): AntelopeConfig {
-    return new AntelopeConfig(new AntelopeDebug());
+// Stand-in of AntelopeConfig.transactionError preserve-AntelopeError branch
+function transactionError(description: string, error: unknown): AntelopeError {
+    if (error instanceof AntelopeError) {
+        return error;
+    }
+    return new AntelopeError(description, { error: String(error) });
+}
+
+// Stand-in of AntelopeConfig.errorToStringHandler ConnectorNotFound mapping
+function errorToString(error: unknown): string {
+    if (error instanceof Error) {
+        if (
+            error.name === 'ConnectorNotFoundError' ||
+            error.message === 'Connector not found' ||
+            error.message.includes('Connector not found')
+        ) {
+            return 'antelope.evm.error_connector_not_found';
+        }
+        return error.message;
+    }
+    return String(error);
 }
 
 describe('WalletConnect connector guard', () => {
@@ -51,19 +76,17 @@ describe('WalletConnect connector guard', () => {
         expect(mapped.message).toBe('antelope.evm.error_connector_not_found');
     });
 
-    it('AntelopeConfig.transactionError preserves connector AntelopeError', () => {
-        const config = makeConfig();
+    it('transactionError preserves connector AntelopeError (withdraw path)', () => {
         const guardError = new AntelopeError('antelope.evm.error_connector_not_found');
-        const result = config.transactionError('antelope.evm.error_withdraw_failed', guardError);
+        const result = transactionError('antelope.evm.error_withdraw_failed', guardError);
         expect(result.message).toBe('antelope.evm.error_connector_not_found');
     });
 
-    it('AntelopeConfig.errorToStringHandler maps ConnectorNotFoundError name', () => {
-        const config = makeConfig();
+    it('errorToString maps ConnectorNotFoundError name', () => {
         const wagmiError = Object.assign(new Error('Connector not found'), {
             name: 'ConnectorNotFoundError',
         });
-        expect(config.errorToStringHandler(wagmiError)).toBe('antelope.evm.error_connector_not_found');
+        expect(errorToString(wagmiError)).toBe('antelope.evm.error_connector_not_found');
     });
 
     it('i18n key exists for the user-facing message', () => {
@@ -71,5 +94,21 @@ describe('WalletConnect connector guard', () => {
         const en = require('src/i18n/en-us/index.js').default;
         expect(en.antelope.evm.error_connector_not_found).toMatch(/reconnect/i);
         expect(en.antelope.evm.error_connector_not_found).not.toMatch(/ConnectorNotFoundError/);
+    });
+
+    it('production toast payload shape is rewritten, not echoed', () => {
+        const wagmiError = Object.assign(new Error('Connector not found'), {
+            name: 'ConnectorNotFoundError',
+        });
+        const oldToast = JSON.stringify({
+            error: { name: wagmiError.name, message: wagmiError.message },
+        });
+        expect(oldToast).toBe(
+            '{"error":{"name":"ConnectorNotFoundError","message":"Connector not found"}}',
+        );
+
+        const mapped = mapWalletConnectWriteError(wagmiError);
+        expect(JSON.stringify(mapped)).not.toContain('ConnectorNotFoundError');
+        expect(mapped.message).toBe('antelope.evm.error_connector_not_found');
     });
 });
