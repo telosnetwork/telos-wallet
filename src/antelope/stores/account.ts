@@ -217,6 +217,7 @@ export const useAccountStore = defineStore(store_name, {
 
                 localStorage.removeItem('network');
                 localStorage.removeItem('account');
+                localStorage.removeItem('rawAddress');
                 localStorage.removeItem('isNative');
                 localStorage.removeItem('autoLogin');
 

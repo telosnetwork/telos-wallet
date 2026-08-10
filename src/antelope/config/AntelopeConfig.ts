@@ -94,6 +94,14 @@ export class AntelopeConfig {
                 return error.toString();
             }
             if (error instanceof Error) {
+                // wagmi: write attempted without a live connector (common after WC mobile session drop)
+                if (
+                    error.name === 'ConnectorNotFoundError' ||
+                    error.message === 'Connector not found' ||
+                    error.message.includes('Connector not found')
+                ) {
+                    return 'antelope.evm.error_connector_not_found';
+                }
                 return error.message;
             }
             if (typeof error === 'undefined') {

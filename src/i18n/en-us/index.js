@@ -619,6 +619,7 @@ export default {
             error_unpredictable_gas_limit: 'The gas limit for this transaction couldn\'t be estimated',
             error_user_rejected: 'You rejected the transaction',
             error_transaction_canceled: 'You canceled the action',
+            error_connector_not_found: 'Wallet session expired. Please reconnect your wallet and try again.',
             error_wrap_not_supported_on_native: 'Wrap is not supported on native chain',
             error_unwrap_not_supported_on_native: 'Unwrap is not supported on native chain',
             error_wrap_failed: 'An unknown error occurred when wrapping tokens',
