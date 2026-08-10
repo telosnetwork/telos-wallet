@@ -37,6 +37,10 @@ import { toRaw } from 'vue';
 
 const name = 'WalletConnect';
 
+/** How long auto-login waits for wagmi autoConnect to restore a live connector. */
+const WAGMI_RECONNECT_WAIT_MS = 2500;
+const WAGMI_RECONNECT_POLL_MS = 100;
+
 export class WalletConnectAuth extends EVMAuthenticator {
     private static web3ModalInstance: Web3Modal | null = null;
 
@@ -79,6 +83,92 @@ export class WalletConnectAuth extends EVMAuthenticator {
     newInstance(label: string): EVMAuthenticator {
         this.trace('newInstance', label);
         return new WalletConnectAuth(this.options, this.wagmiClient, label);
+    }
+
+    /**
+     * True when wagmi has both an address and a live connector instance.
+     * App-level localStorage can still show a logged-in UI when this is false
+     * (the ConnectorNotFoundError withdraw bug).
+     */
+    hasLiveConnector(expectedAddress?: string): boolean {
+        const account = getAccount();
+        if (!account.connector || !account.address) {
+            return false;
+        }
+        if (!expectedAddress) {
+            return true;
+        }
+        return account.address.toLowerCase() === expectedAddress.toLowerCase();
+    }
+
+    private async waitForLiveConnector(expectedAddress: string, timeoutMs = WAGMI_RECONNECT_WAIT_MS): Promise<boolean> {
+        const started = Date.now();
+        while (Date.now() - started < timeoutMs) {
+            if (this.hasLiveConnector(expectedAddress)) {
+                return true;
+            }
+            await new Promise(resolve => setTimeout(resolve, WAGMI_RECONNECT_POLL_MS));
+        }
+        return this.hasLiveConnector(expectedAddress);
+    }
+
+    /**
+     * Guard every write path. Throws a human-readable AntelopeError instead of
+     * letting wagmi surface ConnectorNotFoundError as raw JSON in the toast.
+     */
+    async ensureLiveConnector(expectedAddress?: string): Promise<void> {
+        this.trace('ensureLiveConnector', expectedAddress);
+        let address = expectedAddress ?? getAccount().address;
+        if (!address) {
+            try {
+                address = this.getAccountAddress();
+            } catch {
+                address = undefined as unknown as string;
+            }
+        }
+        if (this.hasLiveConnector(address || undefined)) {
+            return;
+        }
+        // Give autoConnect a short chance if the flag says we were connected.
+        if (localStorage.getItem('wagmi.connected') && address) {
+            const recovered = await this.waitForLiveConnector(address, 1000);
+            if (recovered) {
+                return;
+            }
+        }
+        // Best-effort: surface the connect UI so the user can restore the session.
+        try {
+            if (this.web3Modal) {
+                this.web3Modal.openModal();
+            }
+        } catch (e) {
+            this.trace('ensureLiveConnector', 'openModal failed', e);
+        }
+        throw new AntelopeError('antelope.evm.error_connector_not_found');
+    }
+
+    /**
+     * WalletConnect auto-login must not restore a "ghost" session from app
+     * localStorage alone. Require a live wagmi connector matching the account.
+     */
+    async autoLogin(network: string, account: string): Promise<addressString> {
+        this.trace('autoLogin', network, account);
+
+        const ready = await this.waitForLiveConnector(account);
+        if (!ready) {
+            this.trace('autoLogin', 'no live wagmi connector — refusing ghost session');
+            // Drop stale app session keys so the user lands on the login screen
+            // instead of a connected UI that cannot sign.
+            localStorage.removeItem('wagmi.connected');
+            localStorage.removeItem('account');
+            localStorage.removeItem('rawAddress');
+            localStorage.removeItem('autoLogin');
+            localStorage.removeItem('network');
+            localStorage.removeItem('isNative');
+            throw new AntelopeError('antelope.evm.error_connector_not_found');
+        }
+
+        return super.autoLogin(network, account);
     }
 
     async walletConnectLogin(network: string): Promise<addressString | null> {
@@ -248,13 +338,11 @@ export class WalletConnectAuth extends EVMAuthenticator {
         }
     }
 
-    // having this two properties attached to the authenticator instance may bring some problems
-    // so after we use them we need to clear them to avoid that problems
+    // Reset QR flag only. Do NOT null options/wagmiClient — later reconnect and
+    // writes still need the Web3Modal instance / client references.
     clearAuthenticator(): void {
         this.trace('clearAuthenticator');
         this.usingQR = false;
-        this.options = null as unknown as Web3ModalConfig;
-        this.wagmiClient = null as unknown as EthereumClient;
     }
 
     async logout(): Promise<void> {
@@ -330,15 +418,23 @@ export class WalletConnectAuth extends EVMAuthenticator {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleCatchError(error: any): AntelopeError {
         this.trace('handleCatchError', error);
-        if (error.message.includes('User rejected the')) {
-            return new AntelopeError('antelope.evm.error_transaction_canceled');
-        } else {
-            return new AntelopeError('antelope.evm.error_send_transaction', { error });
+        if (error instanceof AntelopeError) {
+            return error;
         }
+        const message = String(error?.message ?? '');
+        const errName = String(error?.name ?? '');
+        if (errName === 'ConnectorNotFoundError' || message.includes('Connector not found')) {
+            return new AntelopeError('antelope.evm.error_connector_not_found');
+        }
+        if (message.includes('User rejected the')) {
+            return new AntelopeError('antelope.evm.error_transaction_canceled');
+        }
+        return new AntelopeError('antelope.evm.error_send_transaction', { error });
     }
 
     async sendSystemToken(to: string, amount: ethers.BigNumber): Promise<SendTransactionResult> {
         this.trace('sendSystemToken', to, amount.toString());
+        await this.ensureLiveConnector();
         return sendTransaction(this.sendConfig as PrepareSendTransactionResult).then(
             (transaction: SendTransactionResult) => transaction,
         ).catch((error) => {
@@ -348,6 +444,8 @@ export class WalletConnectAuth extends EVMAuthenticator {
 
     async signCustomTransaction(contract: string, abi: EvmABI, parameters: EvmFunctionParam[], value?: BigNumber): Promise<WriteContractResult> {
         this.trace('signCustomTransaction', contract, [abi], parameters, value?.toString());
+
+        await this.ensureLiveConnector();
 
         const method = abi[0].name;
         if (abi.length > 1) {
@@ -379,11 +477,15 @@ export class WalletConnectAuth extends EVMAuthenticator {
             config.value = BigInt(value.toString());
         }
 
-        this.trace('signCustomTransaction', 'prepareWriteContract ->', config);
-        const sendConfig = await prepareWriteContract(config);
+        try {
+            this.trace('signCustomTransaction', 'prepareWriteContract ->', config);
+            const sendConfig = await prepareWriteContract(config);
 
-        this.trace('signCustomTransaction', 'writeContract ->', sendConfig);
-        return await writeContract(sendConfig);
+            this.trace('signCustomTransaction', 'writeContract ->', sendConfig);
+            return await writeContract(sendConfig);
+        } catch (error) {
+            throw this.handleCatchError(error);
+        }
     }
 
     readyForTransfer(): boolean {
@@ -420,6 +522,7 @@ export class WalletConnectAuth extends EVMAuthenticator {
     async _prepareTokenForTransfer(token: TokenClass | null, amount: BigNumber, to: string) {
         this.trace('prepareTokenForTransfer', [token], amount, to);
         if (token) {
+            await this.ensureLiveConnector();
             if (token.isSystem) {
                 this.sendConfig = await prepareSendTransaction({
                     to,
