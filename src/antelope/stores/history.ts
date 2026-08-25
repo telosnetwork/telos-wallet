@@ -146,7 +146,8 @@ export const useHistoryStore = defineStore(store_name, {
                     this.__evm_nft_transfers[label].size === 0 ||
                     (nftTransfersUpdated && !dateIsWithinXMinutes(nftTransfersUpdated, 3))
                 ) {
-                    await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address);
+                    await this.fetchEvmNftTransfersForAccount(label, this.__evm_filter.address)
+                        .catch((e: unknown) => console.warn('NFT transfers fetch failed (non-fatal):', e));
                 }
 
                 const lastFilterUsedStr = JSON.stringify(this.__evm_last_filter_used);

@@ -6,7 +6,6 @@ import {
     IndexerContract,
     IndexerNftItemAttribute,
     IndexerNftMetadata,
-    IndexerTokenHoldersResponse,
 } from 'src/antelope/types/IndexerTypes';
 import { IPFS_GATEWAY, extractNftMetadata } from 'src/antelope/stores/utils/nft-utils';
 import { useContractStore } from 'src/antelope/stores/contract';
@@ -74,13 +73,22 @@ export async function getErc721Owner(contract: Contract, tokenId: string): Promi
 }
 
 export async function getErc1155OwnersFromIndexer(contractAddress: string, tokenId: string, indexer: AxiosInstance): Promise<{ [address: string]: number }> {
-    const holdersResponse = (await indexer.get(`/v1/token/${contractAddress}/holders?limit=10000&token_id=${tokenId}`)).data as IndexerTokenHoldersResponse;
-    const holders = holdersResponse.results;
+    // Use Blockscout API v2 format for token holders
+    try {
+        const holdersResponse = (await indexer.get(`/api/v2/tokens/${contractAddress}/holders`, {
+            params: { limit: 10000, token_id: tokenId },
+        })).data;
 
-    return holders.reduce((acc, current) => {
-        acc[current.address] = +current.balance;
-        return acc;
-    }, {} as { [address: string]: number });
+        const holders = holdersResponse.items || [];
+
+        return holders.reduce((acc: { [address: string]: number }, current: { address: { hash: string }; value: string }) => {
+            acc[current.address.hash] = +current.value;
+            return acc;
+        }, {} as { [address: string]: number });
+    } catch (error) {
+        console.error('Error fetching ERC1155 owners from Blockscout:', error);
+        return {};
+    }
 }
 
 export async function getErc1155OwnersFromContract(ownerAddress: string, tokenId: string, contract: Contract): Promise<{ [address: string]: number }> {
@@ -170,7 +178,25 @@ export async function constructNft(
     };
 
     if (isErc721) {
-        const contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address, 'erc721'))?.getContractInstance();
+        let contractInstance = await (await contractStore.getContract(CURRENT_CONTEXT, contract.address, 'erc721'))?.getContractInstance();
+
+        // Fallback: if Blockscout hasn't indexed this contract, create instance with standard ERC721 ABI
+        if (!contractInstance) {
+            try {
+                const { getAntelope } = await import('src/antelope');
+                const provider = await getAntelope().wallets.getWeb3Provider(CURRENT_CONTEXT);
+                const minimalErc721Abi = [
+                    'function ownerOf(uint256 tokenId) view returns (address)',
+                    'function balanceOf(address owner) view returns (uint256)',
+                    'function tokenURI(uint256 tokenId) view returns (string)',
+                    'function name() view returns (string)',
+                    'function symbol() view returns (string)',
+                ];
+                contractInstance = new ethers.Contract(contract.address, minimalErc721Abi, provider);
+            } catch (e) {
+                console.error('Error creating fallback ERC721 contract instance', e);
+            }
+        }
 
         if (!contractInstance) {
             console.error('Error getting contract instance');

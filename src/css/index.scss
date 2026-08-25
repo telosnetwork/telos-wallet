@@ -1,5 +1,16 @@
-@import 'legacy-styles';
+// Telos Wallet Styles
+// Main entry point
 
-// components
-@import 'components/notification';
+// Brand (load first)
+@import 'brand/telos-brand';
+@import 'brand/brand-updates';
+
+// Global styles
+@import 'global/global-index';
+
+// Components
 @import 'components/inputs';
+@import 'components/notification';
+
+// Legacy (deprecated, kept for backwards compatibility)
+@import 'legacy-styles';

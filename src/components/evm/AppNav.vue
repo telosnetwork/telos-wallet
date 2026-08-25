@@ -25,17 +25,7 @@ export default defineComponent({
         notifyOnSuccessfulLogin: false,
     }),
     computed: {
-        isLoadingApy() {
-            return this.prettyPrintApy === '';
-        },
-        prettyPrintApy() {
-            const apy = chainStore.currentEvmChain?.apy;
-            if (apy) {
-                return apy + '%';
-            } else {
-                return '';
-            }
-        },
+
         showMenuIcon() {
             return this.$q.screen.lt.md && !this.showBackButton;
         },
@@ -56,8 +46,8 @@ export default defineComponent({
             return '0';
         },
         isProduction() {
-            // only enable demo route for staging & development
-            return window.location.origin.includes('telos.net');
+            // Hide demos in production - only show on localhost
+            return !window.location.origin.includes('localhost');
         },
         accountActionText() {
             if (this.loggedAccount) {
@@ -93,9 +83,8 @@ export default defineComponent({
         if (storedDarkMode !== null) {
             this.$q.dark.set(storedDarkMode === 'true');
         } else {
-            // Use system preferences if there is no preference saved
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            this.$q.dark.set(prefersDark);
+            // Default to dark mode
+            this.$q.dark.set(true);
         }
     },
     methods: {
@@ -239,7 +228,7 @@ export default defineComponent({
         <div class="flex justify-between">
             <img
                 ref="logo-image"
-                src="branding/telos-wallet-light.png"
+                src="branding/telos-wallet-light.svg"
                 :alt="$t('home.wallet_logo_alt')"
                 tabindex="0"
                 role="link"
@@ -266,7 +255,10 @@ export default defineComponent({
 
         <ul class="c-app-nav__menu-items">
             <li
-                class="c-app-nav__menu-item"
+                :class="{
+                    'c-app-nav__menu-item': true,
+                    'c-app-nav__menu-item--active': $route.name === 'evm-wallet',
+                }"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wallet')"
@@ -286,7 +278,10 @@ export default defineComponent({
             </li>
 
             <li
-                class="c-app-nav__menu-item"
+                :class="{
+                    'c-app-nav__menu-item': true,
+                    'c-app-nav__menu-item--active': $route.name === 'evm-staking',
+                }"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-staking')"
@@ -294,7 +289,7 @@ export default defineComponent({
             >
 
                 <img
-                    src="/branding/stlos.png"
+                    src="branding/stlos-active.svg"
                     :class="{
                         'c-app-nav__icon': true,
                         'c-app-nav__icon--acorn': true,
@@ -305,18 +300,13 @@ export default defineComponent({
                     aria-hidden="true"
                 >
                 {{ $t('nav.staking') }}
-                <span class="c-app-nav__apy-box">  {{ $t('evm_stake.apy_card_label') }}
-                    <q-spinner
-                        v-if="isLoadingApy"
-                        color="white"
-                        class="c-app-nav__apy-spinner"
-                    />
-                    <b> {{ prettyPrintApy }}</b>
-                </span>
             </li>
 
             <li
-                class="c-app-nav__menu-item"
+                :class="{
+                    'c-app-nav__menu-item': true,
+                    'c-app-nav__menu-item--active': $route.name === 'evm-nft-inventory',
+                }"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-nft-inventory')"
@@ -336,7 +326,10 @@ export default defineComponent({
             </li>
 
             <li
-                class="c-app-nav__menu-item"
+                :class="{
+                    'c-app-nav__menu-item': true,
+                    'c-app-nav__menu-item--active': $route.name === 'evm-wrap',
+                }"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-wrap')"
@@ -356,7 +349,10 @@ export default defineComponent({
             </li>
 
             <li
-                class="c-app-nav__menu-item"
+                :class="{
+                    'c-app-nav__menu-item': true,
+                    'c-app-nav__menu-item--active': $route.name === 'evm-allowances',
+                }"
                 role="menuitem"
                 :tabindex="menuItemTabIndex"
                 @click="goTo('evm-allowances')"
@@ -550,6 +546,11 @@ export default defineComponent({
         margin-left: 48px;
         margin-right: 48px;
         cursor: pointer;
+
+        // Make logo white on gradient sidebar (light mode)
+        body.body--light & {
+            filter: brightness(0) invert(1);
+        }
     }
 
     &__menu-items {
@@ -562,6 +563,11 @@ export default defineComponent({
 
         cursor: pointer;
         display: flex;
+
+        // Active state - white text for visibility on gradient sidebar
+        &--active {
+            color: var(--sidebar-active-color);
+        }
         align-items: center;
         gap: 16px;
         margin-bottom: 32px;
@@ -585,24 +591,11 @@ export default defineComponent({
         }
     }
 
-    &__apy-box {
-        @include text--small;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: $white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        display: inline-block;
-    }
-
-    &__apy-spinner {
-        size: 16px;
-        margin-top: -5px;
-    }
 
     &__icon {
-        // svg color overrides
+        // svg color overrides - use sidebar-active-color for visibility on gradient bg
         &--current-route:not(#{$this}__icon--acorn) path {
-            fill: var(--link-color);
+            fill: var(--sidebar-active-color);
         }
 
         &--current-route#{$this}__icon--acorn {

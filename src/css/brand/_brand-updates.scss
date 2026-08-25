@@ -1,0 +1,277 @@
+// ==============================================
+// TELOS BRAND UPDATES 2026 - Enhanced Styling
+// ==============================================
+
+// Gradient Button Mixin
+@mixin gradient-button {
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%);
+  color: white;
+  border: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, #00E0EC 0%, #3D9AEC 50%, #B260E3 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Gradient Text Mixin
+@mixin gradient-text {
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Gradient Border Mixin
+@mixin gradient-border($width: 2px) {
+  position: relative;
+  border: none;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: $width;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+// Enhanced Card Style
+.telos-card {
+  background: var(--card-background-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+  .body--dark & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Primary Action Button
+.btn-primary-gradient,
+.q-btn.btn-primary-gradient {
+  @include gradient-button;
+  border-radius: 12px;
+  padding: 12px 24px;
+  text-transform: none;
+  font-size: 16px;
+}
+
+// Secondary Button with Gradient Border
+.btn-secondary-gradient,
+.q-btn.btn-secondary-gradient {
+  background: var(--bg-color);
+  color: var(--text-default-contrast);
+  border-radius: 12px;
+  @include gradient-border(2px);
+  
+  &:hover {
+    background: rgba(79, 172, 254, 0.1);
+  }
+}
+
+// Header Gradient Accent Line
+.header-accent {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%);
+  }
+}
+
+// Logo Glow Effect (light mode)
+.body--light .telos-logo {
+  filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.3));
+}
+
+// ==========================================
+// LIGHT MODE COMFORT - Reduce eye strain
+// ==========================================
+.body--light {
+  // Soften the page background — warm grey, easy on eyes
+  background-color: #EDEEF1 !important;
+  
+  .q-page {
+    background-color: #EDEEF1;
+  }
+
+  // Sidebar: use brand gradient instead of white
+  .q-drawer,
+  .c-app-nav {
+    background: var(--sidebar-gradient) !important;
+    color: #fff;
+    
+    // Ensure all sidebar text is white
+    .c-app-nav__menu-item,
+    .c-app-nav__menu-links a {
+      color: rgba(255, 255, 255, 0.8);
+      
+      &--active,
+      &:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+    
+    .c-app-nav__apy-box {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+  }
+
+  // Soften card backgrounds — slight warmth
+  .q-card,
+  .telos-card {
+    background: #F8F8FA;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  // Soften top header bar
+  .q-header {
+    background: #F8F8FA !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  // Transparent header on login page
+  .c-home .q-header,
+  .c-home .q-toolbar {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  // Reduce text contrast — less harsh black
+  .q-item__label,
+  .q-list .q-item {
+    color: #3A3A3C;
+  }
+
+  // Token balance rows — subtle separator
+  .q-separator {
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  // Action buttons (Send/Receive/Buy) — softer outlines
+  .q-btn--outline {
+    border-color: rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+// Gradient Badge
+.gradient-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(#00F2FE, 0.15), rgba(#C471F5, 0.15));
+  color: var(--accent-color);
+  
+  .body--dark & {
+    background: linear-gradient(135deg, rgba(#00F2FE, 0.2), rgba(#C471F5, 0.2));
+    color: #00F2FE;
+  }
+}
+
+// Stat Card with Gradient Accent
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%);
+  }
+  
+  &__value {
+    @include gradient-text;
+    font-size: 32px;
+    font-weight: 600;
+  }
+}
+
+// Input Focus with Gradient
+.q-field--focused {
+  .q-field__control {
+    @include gradient-border(2px);
+  }
+}
+
+// Loading Spinner with Gradient
+.gradient-spinner {
+  border: 3px solid transparent;
+  border-top-color: #00F2FE;
+  border-right-color: #4FACFE;
+  border-bottom-color: #C471F5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Welcome/Hero Section
+.hero-section {
+  background: linear-gradient(135deg, rgba(#00F2FE, 0.05) 0%, rgba(#C471F5, 0.05) 100%);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  
+  .body--dark & {
+    background: linear-gradient(135deg, rgba(#00F2FE, 0.1) 0%, rgba(#C471F5, 0.1) 100%);
+  }
+  
+  h1 {
+    @include gradient-text;
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+}
+
+// Tab Active State
+.q-tab--active {
+  .q-tab__indicator {
+    background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 50%, #C471F5 100%) !important;
+    height: 3px;
+  }
+}
+
+// Network Selector Enhancement
+.network-selector {
+  @include gradient-border(1px);
+  border-radius: 8px;
+  padding: 8px 16px;
+  
+  &:hover {
+    background: rgba(79, 172, 254, 0.05);
+  }
+}

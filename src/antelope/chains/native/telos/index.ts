@@ -3,7 +3,7 @@ import { RpcEndpoint } from 'universal-authenticator-library';
 import { api } from 'src/api';
 import { TokenClass, TokenSourceInfo, PriceChartData, Theme } from 'src/antelope/types';
 
-const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png';
+const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.svg';
 const CHAIN_ID =
   '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11';
 const NETWORK = 'telos';

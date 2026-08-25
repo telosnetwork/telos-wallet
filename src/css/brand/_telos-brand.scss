@@ -1,0 +1,127 @@
+// ==============================================
+// TELOS BRAND GUIDELINES - January 2026
+// ==============================================
+
+// ---------------------------------------------
+// PRIMARY GRADIENT (Telos Brand)
+// ---------------------------------------------
+$telos-gradient-start: #00F2FE;    // Cyan
+$telos-gradient-mid: #4FACFE;      // Blue  
+$telos-gradient-end: #C471F5;      // Purple
+
+$telos-gradient: linear-gradient(135deg, $telos-gradient-start 0%, $telos-gradient-mid 50%, $telos-gradient-end 100%);
+$telos-gradient-horizontal: linear-gradient(90deg, $telos-gradient-start 0%, $telos-gradient-mid 50%, $telos-gradient-end 100%);
+$telos-gradient-vertical: linear-gradient(180deg, $telos-gradient-start 0%, $telos-gradient-mid 50%, $telos-gradient-end 100%);
+
+// ---------------------------------------------
+// SECONDARY GRADIENTS
+// ---------------------------------------------
+// Moonlight (blue to purple)
+$gradient-moonlight: linear-gradient(135deg, #557FFF 0%, #C19AFF 100%);
+
+// Floral (purple to pink)
+$gradient-floral: linear-gradient(135deg, #C471F5 0%, #FA71CD 100%);
+
+// Space (green to teal) - Used for Telos Zero
+$gradient-space: linear-gradient(135deg, #CFFF93 0%, #30CFD0 100%);
+
+// Ocean (blue to cyan) - Used for Telos EVM
+$gradient-ocean: linear-gradient(135deg, #0088FF 0%, #00F2FE 100%);
+
+// Dreamtime (pink to blue)
+$gradient-dreamtime: linear-gradient(135deg, #FFA1E5 0%, #6F9AE3 100%);
+
+// ---------------------------------------------
+// GREY SCALE
+// ---------------------------------------------
+$white: #FFFFFF;
+$grey-50: #F9F9F9;
+$grey-100: #E6E9EC;
+$grey-200: #C7CCD0;
+$grey-300: #ACADB1;
+$grey-400: #92939A;
+$grey-500: #7C7D83;
+$grey-600: #63656B;
+$grey-700: #57595F;
+$grey-800: #404142;
+$grey-900: #2C2B2F;
+$off-black: #1B1B1D;
+
+// ---------------------------------------------
+// SEMANTIC COLORS (derived from brand)
+// ---------------------------------------------
+$primary: #4FACFE;           // Mid-point of gradient
+$primary-light: #00F2FE;     // Cyan
+$primary-dark: #0088FF;      // Ocean blue
+
+$accent: #C471F5;            // Purple
+$accent-light: #C19AFF;      // Moonlight purple
+$accent-dark: #6F9AE3;       // Dreamtime blue
+
+// Status colors (keeping existing, can be adjusted)
+$positive: #30CFD0;          // Teal from Space gradient
+$negative: #FA71CD;          // Pink from Floral (or keep #880000 for severity)
+$warning: #CFFF93;           // Lime from Space
+$info: #4FACFE;              // Blue
+
+// ---------------------------------------------
+// WCAG 2.1 ACCESSIBLE VARIANTS (Light Mode)
+// Use these for text/interactive elements on white backgrounds
+// All meet minimum 4.5:1 contrast ratio (AA compliant)
+// ---------------------------------------------
+$primary-accessible: #387AB4;      // Blue - 4.55:1 on white
+$cyan-accessible: #008389;         // Teal - 4.56:1 on white
+$purple-accessible: #9B59C2;       // Purple - 4.56:1 on white
+$positive-accessible: #1E8283;     // Teal - 4.59:1 on white
+$muted-text-accessible: #767676;   // Grey - 4.54:1 on white (WCAG minimum grey)
+
+// ---------------------------------------------
+// DARK MODE ADJUSTMENTS
+// ---------------------------------------------
+$dark-bg: $off-black;
+$dark-card-bg: $grey-900;
+$dark-border: $grey-800;
+$dark-text: $white;
+$dark-text-muted: $grey-400;
+
+// Light mode
+$light-bg: $white;
+$light-card-bg: $grey-50;
+$light-border: $grey-200;
+$light-text: $off-black;
+$light-text-muted: $grey-600;
+
+// ---------------------------------------------
+// TYPOGRAPHY
+// ---------------------------------------------
+// Font Family: Silka by atipo foundry
+// Fallback to system fonts if Silka not available
+$font-family-brand: 'Silka', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+
+// Font weights
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// ---------------------------------------------
+// MIXINS
+// ---------------------------------------------
+@mixin telos-gradient-text {
+  background: $telos-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin telos-gradient-bg {
+  background: $telos-gradient;
+}
+
+@mixin telos-gradient-border($width: 2px, $radius: 8px) {
+  border: $width solid transparent;
+  background: 
+    linear-gradient(var(--bg-color), var(--bg-color)) padding-box,
+    $telos-gradient border-box;
+  border-radius: $radius;
+}

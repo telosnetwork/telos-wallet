@@ -236,10 +236,16 @@ export const useContractStore = defineStore(store_name, {
 
                 let metadata = { address: address } as EvmContractFactoryData;
                 try {
-                    const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                    const response = await indexer.get(`/v1/contract/${address}?full=true&includeAbi=true`);
-                    if (response.data?.success && response.data.results.length > 0){
-                        metadata = response.data.results[0];
+                    const chainSettings = useChainStore().loggedChain.settings as EVMChainSettings;
+                    const contractData = await chainSettings.getBlockscoutAdapter().getContract(address, { full: true, includeAbi: true });
+                    if (contractData?.address) {
+                        metadata = {
+                            address: contractData.address,
+                            name: contractData.name,
+                            abi: contractData.abi,
+                            verified: contractData.verified,
+                            supportedInterfaces: contractData.supportedInterfaces,
+                        } as EvmContractFactoryData;
                     }
                 } catch (e) {
                     console.warn(`Could not retrieve contract ${address}: ${e}`);
@@ -588,11 +594,11 @@ export const useContractStore = defineStore(store_name, {
         async fetchIsContract(addressLower: string): Promise<boolean> {
             // We use a try/catch in case the request returns a 404 or similar
             try {
-                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                const response = await indexer.get('/v1/contract/' + addressLower);
+                const chainSettings = useChainStore().loggedChain.settings as EVMChainSettings;
+                const contractData = await chainSettings.getBlockscoutAdapter().getContract(addressLower);
 
-                // If we have a valid data.results array and it has at least one element, return true
-                if (response.data?.results?.length > 0) {
+                // If we have valid contract data, return true
+                if (contractData?.address) {
                     return true;
                 } else {
                     return false;

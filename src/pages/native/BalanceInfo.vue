@@ -266,16 +266,6 @@ export default {
                 `/v2/state/get_tokens?account=${this.accountName}&limit=1000`,
             );
             if (userCoins.status === 200) {
-                // discard all duplicate tokens (except for TLOS in eosio.token)
-                const tokens = userCoins.data.tokens.filter((token) => {
-                    if (
-                        userCoins.data.tokens.filter(t => t.symbol === token.symbol)
-                            .length > 1
-                    ) {
-                        return token.contract.toLowerCase() === 'eosio.token';
-                    }
-                    return true;
-                });
                 userCoins.data.tokens.forEach((token) => {
                     if (token.symbol === undefined) {
                         return;
@@ -286,8 +276,8 @@ export default {
                     this.coins.forEach(async (coin) => {
                         if (
                             !coin.network &&
-              coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
-              coin.account === token.contract
+                            coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
+                            coin.account === token.contract
                         ) {
 
                             // This patch fixes #46 (because /v2/state/get_tokens currently does not return the TLOS balance)
@@ -309,7 +299,7 @@ export default {
                         !this.coins.find(
                             coin =>
                                 coin.symbol.toLowerCase() === token.symbol.toLowerCase() &&
-                coin.account === token.contract,
+                                coin.account === token.contract,
                         )
                     ) {
                         this.coins.push({
@@ -361,17 +351,17 @@ export default {
 
                     if (
                         !suggestTokens.map(t => t.sym).includes(aSymbol) ||
-            !suggestTokens.map(t => t.sym).includes(bSymbol)
+                        !suggestTokens.map(t => t.sym).includes(bSymbol)
                     ) {
                         if (
                             suggestTokens.map(t => t.sym).includes(aSymbol) &&
-              suggestTokens.map(t => t.contract).includes(aContract)
+                            suggestTokens.map(t => t.contract).includes(aContract)
                         ) {
                             return -1;
                         }
                         if (
                             suggestTokens.map(t => t.sym).includes(bSymbol) &&
-              suggestTokens.map(t => t.contract).includes(bContract)
+                            suggestTokens.map(t => t.contract).includes(bContract)
                         ) {
                             return 1;
                         }
@@ -421,8 +411,7 @@ export default {
                     let moreNFTs = tagData.rows.filter(
                         row => row.owner === this.accountName,
                     );
-                    this.nftTokenItems[nftAccount] =
-            this.nftTokenItems[nftAccount].concat(moreNFTs);
+                    this.nftTokenItems[nftAccount] = this.nftTokenItems[nftAccount].concat(moreNFTs);
                 } else {
                     this.nftTokenItems[nftAccount] = tagData.rows.filter(
                         row => row.owner === this.accountName,
@@ -476,9 +465,8 @@ export default {
                 } else {
                     if (nftAccount === 'tlos.tbond') {
                         if (
-                            tagData.rows.find(row => row.tag_name === 'title') !==
-                undefined &&
-              tagData.rows.find(row => row.tag_name === 'image') !== undefined
+                            tagData.rows.find(row => row.tag_name === 'title') !== undefined &&
+                            tagData.rows.find(row => row.tag_name === 'image') !== undefined
                         ) {
                             const title = tagData.rows.find(
                                 row => row.tag_name === 'title',
@@ -503,8 +491,7 @@ export default {
                                 image: data.dt,
                             });
                         } else if (
-                            tagData.rows.find(row => row.tag_name === 'json.hash') !==
-              undefined
+                            tagData.rows.find(row => row.tag_name === 'json.hash') !== undefined
                         ) {
                             // Get dstor data
                             let hash = tagData.rows.find(
@@ -596,26 +583,12 @@ export default {
     created: async function () {
         this.interval = setInterval(() => {
             if (!this.panning) {
-                if (
-                    this.coinViewHeight <
-            this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
-          this.coinViewHeight > this.availableHeight - this.maxSpace
-                ) {
-                } else if (
-                    this.coinViewHeight >=
-            this.availableHeight - (this.minSpace + this.maxSpace) * 0.5 &&
-          this.coinViewHeight < this.availableHeight - this.minSpace
-                ) {
-                }
                 const approxViewHeight = Math.min(
                     this.availableHeight - this.minSpace,
                     Math.max(this.availableHeight - this.maxSpace, this.coinViewHeight),
                 );
-                if (this.coinViewHeight !== approxViewHeight) {
-                }
             }
-            this.displayAmount =
-        this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
+            this.displayAmount = this.totalAmount - (this.totalAmount - this.displayAmount) * 0.98;
             if (window.time && Date.now() / 1000 - window.time > 10 * 60) {
                 location.reload();
             }

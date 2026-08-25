@@ -1,10 +1,11 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
+import dappsData from 'src/data/dapps.json';
 
 export default {
     data() {
         return {
-            dapps:[],
+            dapps: [],
             searchDappName: '',
             page: 1,
             loadedAll: false,
@@ -15,37 +16,18 @@ export default {
         searchDapps() {
             return this.dapps.filter(dapp => (
                 (dapp.name.toLowerCase().includes(this.searchDappName.toLowerCase()) ||
-                dapp.category.toLowerCase().includes(this.searchDappName.toLowerCase())) &&
-                dapp.name !== 'AreaX NFT'
+                dapp.category.toLowerCase().includes(this.searchDappName.toLowerCase()))
             ));
         },
     },
     methods: {
         async loadMoreDapps(index, done) {
             if (this.loadedAll) {
+                done();
                 return;
             }
-            const response = await fetch(
-                'https://api.airtable.com/v0/appuqECuRiVlHcBUw/Apps?maxRecords=100&view=wallet apps',
-                {
-                    method: 'get',
-                    headers: new Headers({
-                        Authorization: 'Bearer patz11dDKRINCR9Zx.089980dbdb33422392f08c7a1f4938aa8f5a40be43fd88adf64784aa180f46bf',
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    }),
-                },
-            );
-            let json = await response.json();
-            json = json.records.map(app => ({
-                name: app.fields.Title,
-                description: app.fields.Description,
-                link: app.fields.Link,
-                icon: app.fields['App Image'][0].thumbnails.large.url,
-                category: app.fields.Category,
-                tags: app.fields.Tags,
-            }));
-            this.dapps.push(...json);
-            this.page += 1;
+            // Load from local JSON instead of Airtable
+            this.dapps = dappsData;
             this.loadedAll = true;
             done();
         },

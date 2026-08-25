@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Cloak",
+    "description": "Privacy-first communication and payments on Telos",
+    "link": "https://cloak.today",
+    "icon": "/dapps/cloak.svg",
+    "category": "Privacy",
+    "tags": ["Privacy", "Payments"]
+  },
+  {
+    "name": "Explorer",
+    "description": "Official Telos blockchain explorer",
+    "link": "https://explorer.telos.net",
+    "icon": "/dapps/explorer.svg",
+    "category": "Tools",
+    "tags": ["Explorer", "Analytics"]
+  },
+  {
+    "name": "Qudo",
+    "description": "Play-to-earn gaming platform on Telos",
+    "link": "https://qudo.games",
+    "icon": "/dapps/qudo.svg",
+    "category": "Gaming",
+    "tags": ["Gaming", "Play-to-Earn"]
+  }
+]

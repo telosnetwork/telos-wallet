@@ -131,10 +131,14 @@ export default {
                     actions,
                     `Send ${quantityStr} to ${this.toAddress}`,
                 );
-                this.$successNotification(this.$t('components.is_sent_to', {
-                    quantity: quantityStr,
-                    address: this.toAddress,
-                }));
+                if (transaction.wasBroadcast) {
+                    this.$successNotification(this.$t('components.is_sent_to', {
+                        quantity: quantityStr,
+                        address: this.toAddress,
+                    }));
+                } else {
+                    this.$successNotification(this.$t('components.execute_cleos_command'));
+                }
                 this.$emitter.emit('successfully_sent', this.sendAmount, this.toAddress);
             } catch (error) {
                 this.$errorNotification(error);

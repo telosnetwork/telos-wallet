@@ -128,7 +128,7 @@ export default {
 <template>
 <div>
     <nav class="leftNavBar">
-        <img src="/branding/telos-wallet-light.png" class="telosLogo" >
+        <img src="/branding/telos-wallet-light.svg" class="telosLogo" >
         <ul>
             <li>
                 <a @click="switchTab('coins')"> <img :src="srcWallet" >{{$t('navbar.wallet')}} </a>
@@ -222,7 +222,7 @@ a img {
 .bottomNavBar {
   position: fixed;
   z-index: 1;
-  background: linear-gradient(to top, #3a246b, #00000042 100%);
+  background: linear-gradient(to top, #1B1B1D, #00000042 100%);
   left: 0;
   bottom: 0;
   height: 65px;
@@ -255,7 +255,7 @@ a img {
   .leftNavBar {
     transform: translateX(0);
     border-radius: unset;
-    background: linear-gradient(to bottom, #291a4c, #00000000 80%);
+    background: #1B1B1D;  // Solid Telos Off-Black
     top: 0;
     height: 100vh;
     width: 250px;

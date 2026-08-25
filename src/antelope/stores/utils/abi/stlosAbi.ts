@@ -73,6 +73,15 @@ export const stlosAbiPreviewRedeem: EvmABI = [
     },
 ];
 
+// Full read ABI for STLOS contract (unverified on Blockscout)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const stlosAbiRead: any[] = [
+    'function totalAssets() view returns (uint256)',
+    'function previewDeposit(uint256 assets) view returns (uint256)',
+    'function previewRedeem(uint256 shares) view returns (uint256)',
+    'function balanceOf(address account) view returns (uint256)',
+];
+
 export const stlosAbiPreviewDeposit: EvmABI = [
     {
         inputs: [

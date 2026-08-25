@@ -425,7 +425,7 @@ export default {
 }
 
 .settingBtn {
-  background: #2e1f4f;
+  background: #1B1B1D;
   padding: 0.5rem;
 }
 

@@ -9,7 +9,6 @@ import {
     TokenPrice,
 } from 'src/antelope/types';
 import EVMChainSettings from 'src/antelope/chains/EVMChainSettings';
-import { dateIsWithinXMinutes } from 'src/antelope/stores/utils/date-utils';
 
 interface CachedPrice {
     lastFetchTime: number | null,
@@ -68,7 +67,7 @@ export async function getFiatPriceFromIndexer(
     return 0;
 }
 
-// fetch the price data for a particular token from the indexer
+// fetch the price data for a particular token from the indexer (Blockscout v2)
 export async function getTokenPriceDataFromIndexer(
     tokenSymbol: string,
     tokenAddress: string,
@@ -76,28 +75,38 @@ export async function getTokenPriceDataFromIndexer(
     indexerAxios: AxiosInstance,
     chain_settings: EVMChainSettings,
 ): Promise<TokenPrice | null> {
-    const wrappedSystemAddress = chain_settings.getWrappedSystemToken().address;
-    const actualTokenAddress = tokenAddress === NativeCurrencyAddress ? wrappedSystemAddress : tokenAddress;
-    const response = (await indexerAxios.get(`/v1/tokens/marketdata?tokens=${tokenSymbol}&vs=${fiatCode}`)).data as { results: MarketSourceInfo [] };
+    try {
+        // Blockscout v2 stats endpoint provides coin_price for the native token
+        // This only works for TLOS/native token, not for other ERC20s
+        const isNativeToken = tokenAddress === NativeCurrencyAddress ||
+            tokenAddress.toLowerCase() === chain_settings.getWrappedSystemToken().address.toLowerCase() ||
+            tokenSymbol.toUpperCase() === 'TLOS' ||
+            tokenSymbol.toUpperCase() === 'WTLOS';
 
-    const tokenMarketDataSource = response.results.find(
-        tokenData => (tokenData.address ?? '').toLowerCase() === actualTokenAddress.toLowerCase(),
-    );
+        if (isNativeToken) {
+            const response = await indexerAxios.get('/api/v2/stats');
+            const stats = response.data;
 
-    if (!tokenMarketDataSource?.updated || !tokenMarketDataSource.price) {
+            if (stats.coin_price) {
+                const price = parseFloat(stats.coin_price);
+                if (price > 0) {
+                    const marketInfo: MarketSourceInfo = {
+                        price: price.toString(),
+                        updated: Date.now().toString(),
+                    };
+                    const marketData = new TokenMarketData(marketInfo);
+                    return new TokenPrice(marketData);
+                }
+            }
+        }
+
+        // For non-native tokens or if Blockscout price failed, return null
+        // The caller will fall back to Coingecko
+        return null;
+    } catch (error) {
+        console.warn('Failed to get price from Blockscout stats, falling back to Coingecko:', error);
         return null;
     }
-
-    const lastPriceUpdated = (new Date(+tokenMarketDataSource.updated)).getTime();
-
-    // only use indexer data if it is no more than 10 minutes old
-    if (dateIsWithinXMinutes(lastPriceUpdated, 10)) {
-
-        const marketData = new TokenMarketData(tokenMarketDataSource);
-        return new TokenPrice(marketData);
-    }
-    // if indexer data is stale, return no data
-    return null;
 }
 
 export const getCoingeckoPriceChartData = async (

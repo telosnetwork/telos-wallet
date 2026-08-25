@@ -134,34 +134,31 @@ export default defineComponent({
 
         &-background-top {
             overflow: hidden;
+            // Brand gradient: Cyan -> Blue -> Purple (subtle opacity for dark mode)
             background-image:
-            radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
-                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
-                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
-                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%);
+                radial-gradient(circle at 100% 0%, rgba(#00F2FE, 0.15), transparent 40%),
+                radial-gradient(circle at 0% 100%, rgba(#4FACFE, 0.1), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(#C471F5, 0.08), transparent 60%);
 
             @media screen and (min-width: $breakpoint-sm-min) {
                 background-image:
-                radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
-                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
-                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
-                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%)
+                    radial-gradient(circle at 100% 0%, rgba(#00F2FE, 0.2), transparent 35%),
+                    radial-gradient(circle at 0% 100%, rgba(#4FACFE, 0.12), transparent 45%),
+                    radial-gradient(circle at 50% 50%, rgba(#C471F5, 0.08), transparent 55%);
             }
 
             @media screen and (min-width: $breakpoint-md-min) {
                 background-image:
-                radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 45%),
-                radial-gradient(circle at 100% 130%, var(--q-secondary), transparent 30%),
-                radial-gradient(circle at 100% 0%, var(--q-primary), transparent 30%),
-                radial-gradient(circle at 50% 20%, var(--q-accent), transparent 70%)
+                    radial-gradient(circle at 100% 0%, rgba(#00F2FE, 0.2), transparent 30%),
+                    radial-gradient(circle at 0% 100%, rgba(#4FACFE, 0.15), transparent 40%),
+                    radial-gradient(circle at 50% 50%, rgba(#C471F5, 0.1), transparent 50%);
             }
 
             @media screen and (min-width: $breakpoint-lg-min) {
                 background-image:
-                    radial-gradient(circle at 0% 170%, var(--q-secondary), transparent 40%),
-                    radial-gradient(circle at 100% 140%, var(--q-secondary), transparent 20%),
-                    radial-gradient(circle at 100% 0%, var(--q-primary), transparent 20%),
-                    radial-gradient(circle at 50% 20%, var(--q-accent), transparent 90%)
+                    radial-gradient(circle at 100% 0%, rgba(#00F2FE, 0.25), transparent 25%),
+                    radial-gradient(circle at 0% 100%, rgba(#4FACFE, 0.15), transparent 35%),
+                    radial-gradient(circle at 50% 50%, rgba(#C471F5, 0.1), transparent 45%);
             }
         }
 

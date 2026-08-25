@@ -4,4 +4,6 @@ export * from 'src/antelope/wallets/authenticators/MetamaskAuth';
 export * from 'src/antelope/wallets/authenticators/WalletConnectAuth';
 export * from 'src/antelope/wallets/authenticators/SafePalAuth';
 export * from 'src/antelope/wallets/authenticators/BraveAuth';
+export * from 'src/antelope/wallets/authenticators/RabbyAuth';
+export * from 'src/antelope/wallets/utils/injectedProviders';
 export * from 'src/antelope/wallets/AntelopeWallets';

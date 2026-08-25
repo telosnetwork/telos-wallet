@@ -6,7 +6,7 @@ import { TokenClass, TokenSourceInfo } from 'src/antelope/types';
 import { useUserStore } from 'src/antelope';
 import { getFiatPriceFromIndexer } from 'src/api/price';
 
-const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.png';
+const LOGO = 'https://raw.githubusercontent.com/telosnetwork/token-list/main/logos/telos.svg';
 const CHAIN_ID = '41';
 export const NETWORK = 'telos-evm-testnet';
 const DISPLAY = 'Telos EVM (Testnet)';
@@ -58,6 +58,7 @@ const ECOSYSTEM_URL = 'https://www.telos.net/ecosystem';
 const BRIDGE_URL = 'https://telos-bridge-testnet.netlify.app/bridge';
 
 const NETWORK_EVM_ENDPOINT = 'https://testnet.telos.net';
+const EVM_RPC_ENDPOINT = 'https://rpc.testnet.telos.net';
 const INDEXER_ENDPOINT = 'https://api.testnet.teloscan.io';
 const CONTRACTS_BUCKET = 'https://verified-evm-contracts-testnet.s3.amazonaws.com';
 
@@ -82,6 +83,10 @@ export default class TelosEVMTestnet extends EVMChainSettings {
 
     getHyperionEndpoint(): string {
         return NETWORK_EVM_ENDPOINT;
+    }
+
+    getEvmRpcEndpoint(): string | null {
+        return EVM_RPC_ENDPOINT;
     }
 
     getRPCEndpoint(): RpcEndpoint {

@@ -559,23 +559,24 @@ export const useAllowancesStore = defineStore(store_name, {
             this.__erc_1155_allowances[label] = [];
         },
         async fetchBalanceString(data: IndexerErc20AllowanceResult): Promise<string> {
-            const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-            const results = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results;
-            if (results.length === 0) {
+            const chainSettings = useChainStore().loggedChain.settings as EVMChainSettings;
+            const response = await chainSettings.getTokenHolders(data.contract, { account: data.owner });
+            if (response.results.length === 0) {
                 return '0';
             } else {
-                const balanceString = results[0].balance;
+                const balanceString = response.results[0].balance;
                 return balanceString;
             }
         },
         async shapeErc20AllowanceRow(data: IndexerErc20AllowanceResult): Promise<ShapedAllowanceRowERC20 | null> {
             try {
-                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender);
-                const tokenInfo = useTokensStore().__tokens[CURRENT_CONTEXT].find(token => token.address.toLowerCase() === data.contract.toLowerCase());
+                const spenderContract = await useContractStore().getContract(CURRENT_CONTEXT, data.spender).catch(() => null);
+                const tokenInfo = useTokensStore().__tokens[CURRENT_CONTEXT]?.find(token => token.address.toLowerCase() === data.contract.toLowerCase());
 
-                const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
+                const tokenContract = await useContractStore().getContract(CURRENT_CONTEXT, data.contract).catch(() => null);
 
-                const maxSupply = tokenContract?.maxSupply;
+                // Use maxSupply from contract, or fallback to a large default so approvals still show
+                const maxSupply = tokenContract?.maxSupply ?? BigNumber.from('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
 
                 const balancesStore = useBalancesStore();
                 let balance = balancesStore.__balances[CURRENT_CONTEXT]?.find(
@@ -583,27 +584,34 @@ export const useAllowancesStore = defineStore(store_name, {
                 )?.amount;
 
                 if (!balance) {
-                    const balanceString = await this.fetchBalanceString(data);
-                    balance = BigNumber.from(balanceString);
+                    try {
+                        const balanceString = await this.fetchBalanceString(data);
+                        balance = BigNumber.from(balanceString);
+                    } catch {
+                        balance = BigNumber.from(0);
+                    }
                 }
 
-                if (!balance || !tokenInfo || !maxSupply) {
-                    return null;
-                }
+                // Build token info from what we have, falling back to contract data
+                const tokenName = tokenInfo?.name ?? (data as unknown as { tokenName?: string }).tokenName ?? data.contract.slice(0, 10) + '...';
+                const tokenSymbol = tokenInfo?.symbol ?? '???';
+                const tokenDecimals = tokenInfo?.decimals ?? 18;
+                const tokenPrice = tokenInfo ? Number(tokenInfo.price?.str ?? 0) : 0;
+                const tokenLogo = tokenInfo?.logo ?? undefined;
 
                 return {
                     lastUpdated: data.updated,
                     spenderAddress: data.spender,
                     spenderName: spenderContract?.name,
-                    tokenName: tokenInfo.name,
+                    tokenName,
                     tokenAddress: data.contract,
                     allowance: BigNumber.from(data.amount),
                     balance,
-                    tokenDecimals: tokenInfo.decimals,
+                    tokenDecimals,
                     tokenMaxSupply: maxSupply,
-                    tokenSymbol: tokenInfo.symbol,
-                    tokenPrice: Number(tokenInfo.price.str),
-                    tokenLogo: tokenInfo.logo,
+                    tokenSymbol,
+                    tokenPrice,
+                    tokenLogo,
                 };
             } catch (e) {
                 console.error('Error shaping ERC20 allowance row', e);
@@ -641,8 +649,9 @@ export const useAllowancesStore = defineStore(store_name, {
                 }
 
                 const collectionInfo = await useContractStore().getContract(CURRENT_CONTEXT, data.contract);
-                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                const balanceString = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}`)).data.results[0].balance;
+                const chainSettings = useChainStore().loggedChain.settings as EVMChainSettings;
+                const holdersResponse = await chainSettings.getTokenHolders(data.contract, { account: data.owner });
+                const balanceString = holdersResponse.results[0]?.balance ?? '0';
 
                 const balance = BigNumber.from(balanceString);
 
@@ -673,8 +682,9 @@ export const useAllowancesStore = defineStore(store_name, {
                     return null;
                 }
 
-                const indexer = (useChainStore().loggedChain.settings as EVMChainSettings).getIndexer();
-                const holderInfoForOwner = (await indexer.get(`/v1/token/${data.contract}/holders?account=${data.owner}&limit=${ALLOWANCES_LIMIT}`)).data.results as { balance: string }[];
+                const chainSettings = useChainStore().loggedChain.settings as EVMChainSettings;
+                const holdersResponse = await chainSettings.getTokenHolders(data.contract, { account: data.owner, limit: ALLOWANCES_LIMIT });
+                const holderInfoForOwner = holdersResponse.results as { balance: string }[];
                 const totalNftsOwned = holderInfoForOwner.reduce((acc, holderInfo) => acc.add(holderInfo.balance), BigNumber.from(0));
 
                 return collectionInfo ? {

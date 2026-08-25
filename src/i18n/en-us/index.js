@@ -255,10 +255,7 @@ export default {
         'and are now available for withdrawal. Once the {unlockPeriod} has passed,\n' +
         'you can withdraw your {systemSymbol} from escrow.',
         apy_card_label: 'APY',
-        apy_card_tooltip: 'Annual Percentage Yield (APY) is the annual rate of return after taking compound interest into account.\n' +
-        'Interest is compounded approximately every 30 minutes. The percentage rate is not fixed, meaning that\n' +
-        'it will change over time with the total amount of {systemSymbol} staked across Telos EVM and Native.\n' +
-        'Rewards are disbursed from a community rewards pool into the {stakedSymbol} contract.',
+        apy_card_tooltip: 'Telos has entered the zero-inflation era. No new TLOS is being minted, so there are currently no staking rewards.',
         unstaking_period_card_label: 'Unstaking Period',
         unstaking_period_card_tooltip: 'Unstaking Period:\n\n' +
         'If you unstake some {stakedSymbol} tokens you need to wait for the Unstaking Period,\n' +
@@ -270,12 +267,12 @@ export default {
         stake_output_label: 'Staked Amount',
         stake: 'Stake',
         stake_button_label: 'Stake {systemSymbol} to {stakedSymbol}',
-        stake_sidebar_title: 'Why stake {symbol}?',
-        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS grants you access to',
-        stake_sidebar_content_fragment_2_bold: ' continuous rewards ',
-        stake_sidebar_content_fragment_3: 'and various DeFi applications, further increasing yield. As the reward pool increases, the TLOS to sTLOS conversion rate will change over time. Therefore, the amount of sTLOS received is smaller than the staked TLOS.',
-        stake_sidebar_content_fragment_4_bold: ' Rewards will be auto-compounded. ',
-        stake_sidebar_content_fragment_5: 'No further action is required.',
+        stake_sidebar_title: 'Stake {symbol}',
+        stake_sidebar_content_fragment_1: 'Staking your TLOS to sTLOS allows you to participate in',
+        stake_sidebar_content_fragment_2_bold: ' governance and DeFi applications.',
+        stake_sidebar_content_fragment_3: ' Telos has entered the zero-inflation era — no new TLOS is minted. The TLOS to sTLOS conversion rate reflects the total staked supply.',
+        stake_sidebar_content_fragment_4_bold: '',
+        stake_sidebar_content_fragment_5: '',
         unstake_input_label: 'Unstaking Amount',
         unstake_output_label: 'Unstaked Amount',
         unstake: 'Unstake',
@@ -530,6 +527,7 @@ export default {
         '0x7825e833D495F3d1c28872415a4aee339D26AC88',
         is_sent_to: '{quantity} is sent to {address}',
         failed_to_send: 'Failed to send {quantity} to {address}',
+        execute_cleos_command: 'Execute your transaction in CLEOS to proceed',
         to_network: 'To Network',
         memo: 'Memo',
         minimun_to_transfer: 'Minimum of $100 for mainnet TLOS to Ethereum Transfers',
@@ -579,7 +577,7 @@ export default {
         balance_fiat_tooltip: 'Total includes non-liquid TLOS, such as TLOS staked to resources',
     },
     dapps: {
-        title: 'Telos Native dApps',
+        title: 'Telos Zero Apps',
         placeholder: 'Search dApp',
     },
     error404: {
@@ -621,6 +619,7 @@ export default {
             error_unpredictable_gas_limit: 'The gas limit for this transaction couldn\'t be estimated',
             error_user_rejected: 'You rejected the transaction',
             error_transaction_canceled: 'You canceled the action',
+            error_connector_not_found: 'Wallet session expired. Please reconnect your wallet and try again.',
             error_wrap_not_supported_on_native: 'Wrap is not supported on native chain',
             error_unwrap_not_supported_on_native: 'Unwrap is not supported on native chain',
             error_wrap_failed: 'An unknown error occurred when wrapping tokens',

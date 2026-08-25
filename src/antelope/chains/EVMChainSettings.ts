@@ -1,5 +1,6 @@
 import { RpcEndpoint } from 'universal-authenticator-library';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, Method } from 'axios';
+import { BlockscoutAdapter } from 'src/antelope/chains/utils/BlockscoutAdapter';
 import {
     AbiSignature,
     ChainSettings,
@@ -70,6 +71,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // External indexer API support
     protected indexer: AxiosInstance = axios.create({ baseURL: this.getIndexerApiEndpoint() });
+
+    // Blockscout adapter for API translation
+    protected blockscoutAdapter: BlockscoutAdapter = new BlockscoutAdapter(this.indexer);
 
     // indexer health check promise
     protected _indexerHealthState: {
@@ -205,10 +209,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             Promise.resolve(this.hasIndexerSupport())
                 .then(hasIndexerSupport =>
                     hasIndexerSupport ?
-                        this.indexer.get('/v1/health') :
-                        Promise.resolve({ data: this.deathHealthResponse } as AxiosResponse<IndexerHealthResponse>),
+                        this.blockscoutAdapter.getHealth() :
+                        Promise.resolve(this.deathHealthResponse),
                 )
-                .then(response => response.data as unknown as IndexerHealthResponse);
+                .then(response => response as unknown as IndexerHealthResponse);
 
         // initial state
         this._indexerHealthState = {
@@ -287,6 +291,11 @@ export default abstract class EVMChainSettings implements ChainSettings {
     abstract getChainId(): string;
     abstract getDisplay(): string;
     abstract getHyperionEndpoint(): string;
+
+    // Override to use a dedicated EVM JSON-RPC endpoint instead of hyperion/evm
+    getEvmRpcEndpoint(): string | null {
+        return null;
+    }
     abstract getRPCEndpoint(): RpcEndpoint;
     abstract getApiEndpoint(): string;
     abstract getPriceData(): Promise<PriceChartData>;
@@ -314,17 +323,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
             return [];
         }
         return Promise.all([
-            this.indexer.get(`v1/account/${account}/balances`, {
-                params: {
-                    limit: 50,
-                    offset: 0,
-                    includePagination: false,
-                },
-            }),
+            this.blockscoutAdapter.getBalances(account, { limit: 50, offset: 0 }),
             this.getUsdPrice(),
-        ]).then(async ([response, systemTokenPrice]) => {
-            // parse to IndexerAccountBalances
-            const balances = response.data as IndexerAccountBalances;
+        ]).then(async ([balances, systemTokenPrice]) => {
+            // balances is already in IndexerAccountBalances format from adapter
 
             const tokenList = await this.getTokenList();
             const tokens: TokenBalance[] = [];
@@ -348,9 +350,21 @@ export default abstract class EVMChainSettings implements ChainSettings {
                     console.error('Error parsing calldata', `"${callDataStr}"`, e);
                 }
 
-                if (token) {
+                // Use token from list, or create one from Blockscout data
+                const resolvedToken = token ?? new TokenClass({
+                    name: contractData.name || 'Unknown',
+                    symbol: contractData.symbol || '???',
+                    network: this.getNetwork(),
+                    decimals: contractData.decimals || 18,
+                    address: result.contract,
+                    logoURI: (contractData as { logoURI?: string }).logoURI || undefined,
+                    isNative: false,
+                    isSystem: false,
+                } as TokenSourceInfo);
+
+                if (resolvedToken) {
                     const balance = ethers.BigNumber.from(result.balance);
-                    const tokenBalance = new TokenBalance(token, balance);
+                    const tokenBalance = new TokenBalance(resolvedToken, balance);
                     tokens.push(tokenBalance);
                     const priceIsCurrent =
                         !!contractData.calldata?.marketdata_updated &&
@@ -361,7 +375,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
                         const price = (+(contractData.calldata.price ?? 0)).toFixed(12);
                         const marketInfo = { ...contractData.calldata, price } as MarketSourceInfo;
                         const marketData = new TokenMarketData(marketInfo);
-                        token.market = marketData;
+                        resolvedToken.market = marketData;
                     }
                 }
             }
@@ -379,12 +393,12 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
-        const url = `v1/contract/${collection}/nfts`;
-        const response = (await this.indexer.get(url, { params })).data as IndexerCollectionNftsResponse;
+        // Use Blockscout adapter for NFT collection data
+        const response = await this.blockscoutAdapter.getCollectionNfts(collection, params) as unknown as IndexerCollectionNftsResponse;
 
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
-            metadata: JSON.parse(nftResponse.metadata),
+            metadata: nftResponse.metadata ? (typeof nftResponse.metadata === 'string' ? JSON.parse(nftResponse.metadata) : nftResponse.metadata) : {},
             tokenId: nftResponse.tokenId,
             contract: nftResponse.contract,
             updated: nftResponse.updated,
@@ -414,13 +428,9 @@ export default abstract class EVMChainSettings implements ChainSettings {
             console.error('Error fetching NFTs, Indexer API not supported for this chain:', this.getNetwork());
             return [];
         }
-        const url = `v1/account/${account}/nfts`;
-        const isErc1155 = params.type === 'ERC1155';
-        const paramsWithSupply = {
-            ...params,
-            includeTokenIdSupply: isErc1155, // only ERC1155 supports supply
-        };
-        const response = (await this.indexer.get(url, { params: paramsWithSupply })).data as IndexerAccountNftsResponse;
+        // Use Blockscout adapter for account NFTs
+        const response = await this.blockscoutAdapter.getAccountNfts(account, params) as unknown as IndexerAccountNftsResponse;
+        console.log('[NFT DEBUG] getAccountNfts response:', JSON.stringify({ resultCount: response.results?.length, contractKeys: Object.keys(response.contracts || {}), firstResult: response.results?.[0] }));
 
         // If the contract does not have the list of supported interfaces, we provide one
         Object.values(response.contracts).forEach((contract) => {
@@ -431,7 +441,7 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
         // the indexer NFT data which will be used to construct NFTs
         const shapedIndexerNftData: GenericIndexerNft[] = response.results.map(nftResponse => ({
-            metadata: JSON.parse(nftResponse.metadata),
+            metadata: nftResponse.metadata ? (typeof nftResponse.metadata === 'string' ? JSON.parse(nftResponse.metadata) : nftResponse.metadata) : {},
             tokenId: nftResponse.tokenId,
             contract: nftResponse.contract,
             updated: nftResponse.updated,
@@ -442,9 +452,14 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }));
 
         this.processNftContractsCalldata(response.contracts);
+        console.log('[NFT DEBUG] shapedIndexerNftData:', JSON.stringify(shapedIndexerNftData));
+        console.log('[NFT DEBUG] contracts after calldata processing:', JSON.stringify(response.contracts));
         const shapedNftData = this.shapeNftRawData(shapedIndexerNftData, response.contracts);
+        console.log('[NFT DEBUG] shapedNftData count:', shapedNftData.length);
 
-        return this.processNftRawData(shapedNftData);
+        const result = await this.processNftRawData(shapedNftData);
+        console.log('[NFT DEBUG] processNftRawData result count:', result.length);
+        return result;
     }
 
     // ensure NFT contract calldata is an object
@@ -590,13 +605,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params: AxiosRequestConfig = aux as AxiosRequestConfig;
-        const url = `v1/address/${address}/transactions`;
 
-        // The following performs a GET request to the indexer endpoint.
-        // Then it pipes the response to the IndexerAccountTransactionsResponse type.
-        // Notice that the promise is not awaited, but returned instead immediately.
-        return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerAccountTransactionsResponse);
+        // Use Blockscout adapter for transactions
+        return this.blockscoutAdapter.getTransactions(address, params as { limit?: number; offset?: number })
+            .then(response => response as unknown as IndexerAccountTransactionsResponse);
     }
 
     async getEvmNftTransfers({
@@ -638,19 +650,10 @@ export default abstract class EVMChainSettings implements ChainSettings {
         }
 
         const params = aux as AxiosRequestConfig;
-        const url = `v1/account/${account}/transfers`;
 
-        return this.indexer.get(url, { params })
-            .then(response => response.data as IndexerAccountTransfersResponse)
-            .then((data) => {
-                // set supportedInterfaces property if undefined in the response
-                Object.values(data.contracts).forEach((contract) => {
-                    if (contract.supportedInterfaces === null && type !== undefined) {
-                        contract.supportedInterfaces = [type];
-                    }
-                });
-                return data;
-            });
+        // Use Blockscout adapter for token transfers
+        return this.blockscoutAdapter.getTokenTransfers(account, { type, limit, offset })
+            .then(data => data as unknown as IndexerAccountTransfersResponse);
     }
 
     async getTokenList(): Promise<TokenClass[]> {
@@ -701,12 +704,29 @@ export default abstract class EVMChainSettings implements ChainSettings {
             method,
             params,
         };
+        const evmRpcEndpoint = this.getEvmRpcEndpoint();
+        if (evmRpcEndpoint) {
+            return axios.post(evmRpcEndpoint, rpcPayload)
+                .then(response => response.data as T);
+        }
         return this.hyperion.post('/evm', rpcPayload)
             .then(response => response.data as T);
     }
 
     getIndexer() {
         return this.indexer;
+    }
+
+    getBlockscoutAdapter() {
+        return this.blockscoutAdapter;
+    }
+
+    /**
+     * Get token holders for a specific contract/account
+     * Used by allowances store for balance lookups
+     */
+    async getTokenHolders(contractAddress: string, params?: { account?: string; limit?: number; token_id?: string }) {
+        return this.blockscoutAdapter.getTokenHolders(contractAddress, params);
     }
 
     async getGasPrice(): Promise<ethers.BigNumber> {
@@ -744,33 +764,213 @@ export default abstract class EVMChainSettings implements ChainSettings {
 
     // allowances
 
+    /**
+     * Fetch ERC-20 approvals by scanning the user's transaction history from Blockscout
+     * for approve() calls (0x095ea7b3), then verifying current on-chain allowance.
+     * This avoids eth_getLogs block range limits.
+     */
     async fetchErc20Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc20> {
-        const params = {
-            ...filter,
-            type: 'erc20',
-            all: true,
-        };
-        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
-        return response.data as IndexerAllowanceResponseErc20;
+        const trace = createTraceFunction('EVMChainSettings');
+        trace('fetchErc20Allowances', account);
+
+        const APPROVE_SELECTOR = '0x095ea7b3';
+        const ALLOWANCE_SELECTOR = '0xdd62ed3e';
+
+        try {
+            // Step 1: Get all transactions from Blockscout and find approve() calls
+            const approvalMap = new Map<string, { contract: string; spender: string }>();
+            let nextPageParams: string | null = null;
+            let pageCount = 0;
+            const maxPages = 10; // limit pagination to avoid excessive requests
+
+            do {
+                const txUrl: string = nextPageParams
+                    ? `/api/v2/addresses/${account}/transactions?${nextPageParams}`
+                    : `/api/v2/addresses/${account}/transactions`;
+
+                const txResponse: AxiosResponse = await this.indexer.get(txUrl);
+                const items: Array<{ raw_input?: string; method?: string; to?: { hash?: string } }> = txResponse.data.items || [];
+                const nextPage: Record<string, string> | null = txResponse.data.next_page_params;
+
+                for (const tx of items) {
+                    const rawInput = tx.raw_input || '';
+                    const method = tx.method || '';
+
+                    // Check for approve(address spender, uint256 amount) calls
+                    if (method === APPROVE_SELECTOR || (rawInput && rawInput.startsWith(APPROVE_SELECTOR))) {
+                        if (rawInput && rawInput.length >= 138) {
+                            const tokenContract = (tx.to?.hash || '').toLowerCase();
+                            const spender = '0x' + rawInput.substring(34, 74).toLowerCase();
+                            const key = `${tokenContract}:${spender}`;
+
+                            if (tokenContract && !approvalMap.has(key)) {
+                                approvalMap.set(key, { contract: tokenContract, spender });
+                            }
+                        }
+                    }
+                }
+
+                // Build next page query string
+                if (nextPage && typeof nextPage === 'object') {
+                    nextPageParams = Object.entries(nextPage)
+                        .map(([k, v]) => `${k}=${v}`)
+                        .join('&');
+                } else {
+                    nextPageParams = null;
+                }
+                pageCount++;
+            } while (nextPageParams && pageCount < maxPages);
+
+            trace('fetchErc20Allowances', `Found ${approvalMap.size} unique approve calls`);
+
+            // Step 2: Check current on-chain allowance for each
+            const results: IndexerAllowanceResponseErc20['results'] = [];
+            const contracts: IndexerAllowanceResponseErc20['contracts'] = {};
+            const ownerPadded = account.slice(2).toLowerCase().padStart(64, '0');
+
+            const allowanceChecks = Array.from(approvalMap.values()).map(async ({ contract, spender }) => {
+                try {
+                    const spenderPadded = spender.slice(2).toLowerCase().padStart(64, '0');
+                    const callData = ALLOWANCE_SELECTOR + ownerPadded + spenderPadded;
+
+                    const allowanceResponse = await this.doRPC<{ result: string }>({
+                        method: 'eth_call',
+                        params: [{ to: contract, data: callData }, 'latest'],
+                    });
+
+                    const amount = allowanceResponse.result || '0x0';
+                    const amountBN = ethers.BigNumber.from(amount);
+
+                    results.push({
+                        owner: account.toLowerCase(),
+                        contract: contract,
+                        spender: spender,
+                        amount: amountBN.toString(),
+                        updated: Date.now(),
+                    });
+
+                    // Enrich contract info
+                    if (!contracts[contract]) {
+                        contracts[contract] = {
+                            address: contract,
+                            name: '',
+                            symbol: '',
+                            creator: '',
+                            fromTrace: false,
+                            trace_address: '',
+                            supply: '0',
+                            decimals: 18,
+                            block: 0,
+                            transaction: '',
+                        } as IndexerContract;
+
+                        try {
+                            const tokenBalances = await this.blockscoutAdapter.getBalances(account);
+                            const tokenInfo = tokenBalances.contracts[contract];
+                            if (tokenInfo) {
+                                contracts[contract].name = tokenInfo.name || '';
+                                contracts[contract].symbol = tokenInfo.symbol || '';
+                                contracts[contract].decimals = tokenInfo.decimals || 18;
+                            }
+                        } catch {
+                            // keep defaults
+                        }
+                    }
+                } catch (err) {
+                    trace('fetchErc20Allowances', `Failed to check allowance for ${contract}:${spender}`, err);
+                }
+            });
+
+            // Run in batches of 10
+            for (let i = 0; i < allowanceChecks.length; i += 10) {
+                await Promise.all(allowanceChecks.slice(i, i + 10));
+            }
+
+            return { results, contracts };
+        } catch (err) {
+            trace('fetchErc20Allowances', 'Failed to fetch approvals', err);
+            return { results: [], contracts: {} };
+        }
     }
 
+    /**
+     * Fetch ERC-721 approvals by scanning ApprovalForAll events.
+     */
     async fetchErc721Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc721> {
-        const params = {
-            ...filter,
-            type: 'erc721',
-            all: true,
-        };
-        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
-        return response.data as IndexerAllowanceResponseErc721;
+        const trace = createTraceFunction('EVMChainSettings');
+        trace('fetchErc721Allowances', account);
+
+        // ApprovalForAll(address indexed owner, address indexed operator, bool approved)
+        const APPROVAL_FOR_ALL_TOPIC = '0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31';
+        const paddedOwner = '0x' + account.slice(2).toLowerCase().padStart(64, '0');
+
+        try {
+            const latestBlock = await this.getLatestBlock();
+            const fromBlock = latestBlock.sub(2_000_000).lt(0)
+                ? ethers.BigNumber.from(0)
+                : latestBlock.sub(2_000_000);
+
+            const logsResponse = await this.doRPC<{ result: Array<{
+                address: string;
+                topics: string[];
+                data: string;
+                blockNumber: string;
+            }> }>({
+                method: 'eth_getLogs',
+                params: [{
+                    fromBlock: fromBlock.toHexString(),
+                    toBlock: 'latest',
+                    topics: [APPROVAL_FOR_ALL_TOPIC, paddedOwner],
+                }],
+            });
+
+            const logs = logsResponse.result || [];
+
+            // Deduplicate by (contract, operator) — keep latest
+            const approvalMap = new Map<string, { contract: string; operator: string; approved: boolean; blockNumber: number }>();
+            for (const log of logs) {
+                if (!log.topics || log.topics.length < 3) {
+                    continue;
+                }
+                const contract = log.address.toLowerCase();
+                const operator = '0x' + log.topics[2].slice(26);
+                const approved = log.data !== '0x' + '0'.repeat(64); // data encodes bool
+                const key = `${contract}:${operator}`;
+                const blockNum = parseInt(log.blockNumber, 16);
+
+                const existing = approvalMap.get(key);
+                if (!existing || blockNum > existing.blockNumber) {
+                    approvalMap.set(key, { contract, operator, approved, blockNumber: blockNum });
+                }
+            }
+
+            const results = Array.from(approvalMap.values()).map(({ contract, operator, approved, blockNumber }) => ({
+                owner: account.toLowerCase(),
+                contract,
+                operator,
+                approved,
+                single: false as const,
+                updated: blockNumber * 500,
+            }));
+
+            return { results, contracts: {} };
+        } catch (err) {
+            trace('fetchErc721Allowances', 'Failed to fetch ERC-721 approvals', err);
+            return { results: [], contracts: {} };
+        }
     }
 
     async fetchErc1155Allowances(account: string, filter: IndexerAllowanceFilter): Promise<IndexerAllowanceResponseErc1155> {
-        const params = {
-            ...filter,
-            type: 'erc1155',
-            all: true,
-        };
-        const response = await this.indexer.get(`v1/account/${account}/approvals`, { params });
-        return response.data as IndexerAllowanceResponseErc1155;
+        // ERC-1155 uses the same ApprovalForAll event as ERC-721
+        // Reuse the same logic but shape results differently
+        const erc721Results = await this.fetchErc721Allowances(account, filter);
+        const results = erc721Results.results.map(r => ({
+            owner: r.owner,
+            contract: r.contract,
+            operator: r.operator,
+            approved: r.approved,
+            updated: r.updated,
+        }));
+        return { results, contracts: {} };
     }
 }

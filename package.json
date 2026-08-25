@@ -55,6 +55,15 @@
     "vue3-qrcode-reader": "^0.0.1",
     "vuex": "4"
   },
+  "resolutions": {
+    "@walletconnect/core": "2.19.4",
+    "@walletconnect/ethereum-provider": "2.19.4",
+    "@walletconnect/modal": "2.7.0",
+    "@walletconnect/sign-client": "2.19.4",
+    "@walletconnect/types": "2.19.4",
+    "@walletconnect/universal-provider": "2.19.4",
+    "@walletconnect/utils": "2.19.4"
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.0.0",
     "@quasar/app-webpack": "3",
@@ -88,7 +97,7 @@
     "last 5 Opera versions"
   ],
   "engines": {
-    "node": ">= 16.10.0",
+    "node": ">= 20.19.0",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }

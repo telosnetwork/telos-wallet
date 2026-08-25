@@ -36,7 +36,7 @@ export default defineComponent({
             <div class="c-404-page__layout-logo">
                 <img
                     class="c-404-page__logo"
-                    src="branding/telos-wallet-light.png"
+                    src="branding/telos-wallet-light.svg"
                     :alt="$t('home.wallet_logo_alt')"
                     :aria-label="$t('nav.go_home')"
                 >

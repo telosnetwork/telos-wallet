@@ -12,8 +12,11 @@ import {
     computed,
     defineComponent,
     getCurrentInstance,
+    onBeforeUnmount,
+    onMounted,
     ref,
 } from 'vue';
+import { findRabbyProvider, startInjectedProviderDiscovery } from 'src/antelope/wallets/utils/injectedProviders';
 import { QSpinnerFacebook } from 'quasar';
 import InlineSvg from 'vue-inline-svg';
 
@@ -36,6 +39,17 @@ export default defineComponent({
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
+        const injectedEpoch = ref(0);
+        let stopInjectedDiscovery: (() => void) | undefined;
+        onMounted(() => {
+            stopInjectedDiscovery = startInjectedProviderDiscovery(() => {
+                injectedEpoch.value += 1;
+            });
+            injectedEpoch.value += 1;
+        });
+        onBeforeUnmount(() => {
+            stopInjectedDiscovery?.();
+        });
 
         const showEVMButtons = computed(() =>
             props.chain === 'evm');
@@ -60,8 +74,14 @@ export default defineComponent({
             return e && e.isBraveWallet;
         });
 
+        const supportsRabby = computed(() => {
+            void injectedEpoch.value;
+            return !!findRabbyProvider();
+        });
+
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);
         const showSafePalButton = computed(() => !isMobile.value || supportsSafePal.value);
+        const showRabbyButton = computed(() => !isMobile.value || supportsRabby.value);
         const injectedProviderDetected = computed(() => !!window.ethereum);
         const showWalletConnectButton = computed(() => !isMobile.value || !injectedProviderDetected.value || (isMobile.value && isBraveBrowser.value)); // temp solution until Brave support is added https://github.com/telosnetwork/telos-wallet/issues/501
         const showBraveButton = isBraveBrowser.value && !isMobile.value;
@@ -90,6 +110,13 @@ export default defineComponent({
         };
         const setWalletConnectEVM = async () => {
             setEVMAuthenticator('WalletConnect', CURRENT_CONTEXT);
+        };
+        const setRabbyEVM = async () => {
+            setEVMAuthenticator('Rabby', CURRENT_CONTEXT);
+        };
+
+        const redirectToRabbyDownload = () => {
+            window.open('https://rabby.io/', '_blank');
         };
 
         const setEVMAuthenticator = async(name: string, label: string) => {
@@ -160,18 +187,22 @@ export default defineComponent({
             supportsMetamask,
             supportsBrave,
             supportsSafePal,
+            supportsRabby,
             showMetamaskButton,
             showBraveButton,
             showSafePalButton,
+            showRabbyButton,
             showWalletConnectButton,
             setMetamaskEVM,
             setBraveEVM,
             setSafePalEVM,
+            setRabbyEVM,
             setWalletConnectEVM,
             notifyNoProvider,
             notifyEnableBrave,
             redirectToMetamaskDownload,
             redirectToSafepalDownload,
+            redirectToRabbyDownload,
             showEVMButtons,
             showZeroButtons,
             ualAuthenticators,
@@ -193,6 +224,27 @@ export default defineComponent({
 <div class="c-login-buttons">
 
     <template v-if="showEVMButtons">
+        <!-- Rabby Authenticator button -->
+        <div
+            v-if="showRabbyButton"
+            class="c-login-buttons__option"
+            @click="supportsRabby ? setRabbyEVM() : redirectToRabbyDownload()"
+        >
+            <template v-if="isLoading('Rabby.login')">
+                <div class="c-login-buttons__loading"><QSpinnerFacebook /></div>
+            </template>
+            <template v-else>
+                <img
+                    :src="require('src/assets/evm/rabby.png')"
+                    class="c-login-buttons__icon c-login-buttons__icon--rabby"
+                    height="24"
+                    width="24"
+                    aria-hidden="true"
+                >
+                {{ supportsRabby ? 'Rabby' : 'Install Rabby' }}
+            </template>
+        </div>
+
         <!-- Brave Authenticator button -->
         <div
             v-if="showBraveButton"
