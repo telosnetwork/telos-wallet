@@ -12,8 +12,11 @@ import {
     computed,
     defineComponent,
     getCurrentInstance,
+    onBeforeUnmount,
+    onMounted,
     ref,
 } from 'vue';
+import { findRabbyProvider, startInjectedProviderDiscovery } from 'src/antelope/wallets/utils/injectedProviders';
 import { QSpinnerFacebook } from 'quasar';
 import InlineSvg from 'vue-inline-svg';
 
@@ -36,6 +39,17 @@ export default defineComponent({
         const globalProps = (getCurrentInstance() as ComponentInternalInstance).appContext.config.globalProperties;
         const isMobile = ref(usePlatformStore().isMobile);
         const isBraveBrowser = ref((navigator as any).brave && (navigator as any).brave.isBrave());
+        const injectedEpoch = ref(0);
+        let stopInjectedDiscovery: (() => void) | undefined;
+        onMounted(() => {
+            stopInjectedDiscovery = startInjectedProviderDiscovery(() => {
+                injectedEpoch.value += 1;
+            });
+            injectedEpoch.value += 1;
+        });
+        onBeforeUnmount(() => {
+            stopInjectedDiscovery?.();
+        });
 
         const showEVMButtons = computed(() =>
             props.chain === 'evm');
@@ -61,8 +75,8 @@ export default defineComponent({
         });
 
         const supportsRabby = computed(() => {
-            const e = window.ethereum as unknown as { [key:string]: boolean };
-            return e && e.isRabby;
+            void injectedEpoch.value;
+            return !!findRabbyProvider();
         });
 
         const showMetamaskButton = computed(() => !isMobile.value || supportsMetamask.value);

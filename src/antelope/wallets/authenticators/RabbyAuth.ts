@@ -1,5 +1,6 @@
 import { EthereumProvider } from 'src/antelope/types';
 import { EVMAuthenticator, InjectedProviderAuth } from 'src/antelope/wallets';
+import { findRabbyProvider } from 'src/antelope/wallets/utils/injectedProviders';
 
 const name = 'Rabby';
 export const RabbyAuthName = name;
@@ -13,12 +14,9 @@ export class RabbyAuth extends InjectedProviderAuth {
     // InjectedProviderAuth API ------------------------------------------------------
 
     getProvider(): EthereumProvider | null {
-        const eth = window.ethereum as unknown as EthereumProvider & { isRabby?: boolean };
-        // Rabby injects window.ethereum with isRabby flag
-        if (eth && eth.isRabby) {
-            return eth;
-        }
-        return null;
+        // Do not read only window.ethereum — Brave/MetaMask often occupy that
+        // slot while Rabby sits on ethereum.providers, window.rabby, or EIP-6963.
+        return findRabbyProvider() as EthereumProvider | null;
     }
 
     // EVMAuthenticator API ----------------------------------------------------------
