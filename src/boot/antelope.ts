@@ -11,6 +11,7 @@ import {
 } from 'src/antelope/wallets';
 import { BraveAuth } from 'src/antelope/wallets/authenticators/BraveAuth';
 import { RabbyAuth } from 'src/antelope/wallets/authenticators/RabbyAuth';
+import { startInjectedProviderDiscovery } from 'src/antelope/wallets/utils/injectedProviders';
 import { App } from 'vue';
 import { Router } from 'vue-router';
 import { resetNativeApi } from 'src/boot/api';
@@ -104,6 +105,9 @@ export default boot(({ app }) => {
             ant.config.notifyFailureMessage(ant.config.localizationHandler('evm_wallet.general_error'));
         }
     });
+
+    // Discover multi-injected wallets (EIP-6963 / providers[]) before authenticators init
+    startInjectedProviderDiscovery();
 
     // set evm authenticators --
     const options: Web3ModalConfig = app.config.globalProperties.$wagmiOptions as Web3ModalConfig;
