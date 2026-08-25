@@ -72,8 +72,9 @@ export function findInjectedProvider(
     if (eth) {
         queue.push(eth);
     }
-    if (Array.isArray(eth?.providers)) {
-        queue.push(...eth.providers);
+    const extraProviders = eth?.providers;
+    if (Array.isArray(extraProviders)) {
+        queue.push(...extraProviders);
     }
     const rabbyWin = (window as Window & { rabby?: InjectedWalletLike }).rabby;
     if (rabbyWin) {
