@@ -380,13 +380,13 @@ export default {
             }
         },
         async loadNftTokenItemssPerAccount(nftAccount) {
+            this.nftTokenItems[nftAccount] = [];
             let more = true;
-            let next_key = 10000;
+            let next_key = BigNumber(this.$nameToUint64(this.accountName)).times(
+                '1e16');
+            let upper_bound = next_key.plus('1e16');
             while (more === true) {
-                let lower_bound = BigNumber(this.$nameToUint64(this.accountName)).times(
-                    '1e16',
-                );
-                let upper_bound = lower_bound.plus(next_key);
+                let lower_bound = next_key;
                 const tagData = await this.$store.$api.getTableRows({
                     code: nftAccount,
                     index_position: 3,
@@ -404,19 +404,10 @@ export default {
                 if (tagData.more === false) {
                     more = false;
                 } else {
-                    next_key = tagData.next_key;
+                    next_key = BigNumber(tagData.next_key);
                 }
 
-                if (this.nftTokenItems[nftAccount]) {
-                    let moreNFTs = tagData.rows.filter(
-                        row => row.owner === this.accountName,
-                    );
-                    this.nftTokenItems[nftAccount] = this.nftTokenItems[nftAccount].concat(moreNFTs);
-                } else {
-                    this.nftTokenItems[nftAccount] = tagData.rows.filter(
-                        row => row.owner === this.accountName,
-                    );
-                }
+                this.nftTokenItems[nftAccount] = this.nftTokenItems[nftAccount].concat(tagData.rows);
             }
         },
         async loadNftTokenTags() {
@@ -497,10 +488,15 @@ export default {
                             let hash = tagData.rows.find(
                                 row => row.tag_name === 'json.hash',
                             ).content;
-                            let response = await fetch(
-                                `https://api.dStor.cloud/ipfs/${hash}`,
-                            );
-                            const data = await response.json();
+                            let data = {};
+                            // TODO: better error handling for dead links (e.g. dstor.io)
+                            try {
+                                let response = await fetch(
+                                    `https://api.dStor.cloud/ipfs/${hash}`,
+                                );
+                                data = await response.json();
+                            } catch {
+                            }
                             this.nftTokenTags.add({
                                 title: data.ti,
                                 image: data.dt,

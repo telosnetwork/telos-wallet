@@ -35,10 +35,11 @@ export default {
 
 <template>
 <div
+    class="scroll"
     :style="
         `max-width: 800px; margin: auto auto; height: ${coinViewHeight -
             footerHeight -
-            30}px;`
+            30}px; overflow: auto;`
     "
 >
     <q-infinite-scroll
