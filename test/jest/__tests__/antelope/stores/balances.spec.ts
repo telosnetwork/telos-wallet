@@ -122,6 +122,26 @@ describe('Antelope Balance Store', () => {
 
             expect((store.__balances[label] as TokenClass[]).map((x: TokenClass) => x.symbol)).toStrictEqual(expected);
         });
+
+        test('keeps the native balance when contract and indexer reads fail', async () => {
+            const settings = useChainStore().getChain('label').settings as any;
+            settings.isIndexerHealthy.mockReturnValueOnce(true);
+            settings.getBalances = jest.fn().mockRejectedValue(new Error('indexer unavailable'));
+
+            const account = {
+                ...MockData.Account,
+                authenticator: {
+                    getERC20TokenBalance: jest.fn().mockRejectedValue(new Error('contract read unavailable')),
+                },
+            };
+            const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+            await store.updateBalancesForAccount('label', account);
+
+            expect((store.__balances.label as TokenClass[]).map((x: TokenClass) => x.symbol))
+                .toContain(MockData.Token.SYSTEM_TOKEN.symbol);
+            expect(settings.getBalances).toHaveBeenCalledWith(account.account);
+            warn.mockRestore();
+        });
     });
 });
-
